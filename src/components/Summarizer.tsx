@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
 import { handleSummarize } from '@/app/summarize/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -29,7 +30,7 @@ function SubmitButton() {
 
 export default function Summarizer() {
   const initialState = {};
-  const [state, formAction] = useFormState(handleSummarize, initialState);
+  const [state, formAction] = useActionState(handleSummarize, initialState);
 
   return (
     <Card>
