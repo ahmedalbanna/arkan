@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { Menu, User, Briefcase, BrainCircuit, HomeIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -53,6 +53,7 @@ export function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-full max-w-sm">
+              <SheetTitle className="sr-only">القائمة</SheetTitle>
               <nav className="flex flex-col gap-4 pt-8">
                 {renderNavLinks(true)}
               </nav>
