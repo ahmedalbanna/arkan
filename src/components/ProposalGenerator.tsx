@@ -1,16 +1,17 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { handleGenerateProposal } from '@/app/generate-proposal/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Calendar, BadgeEuro, Briefcase, Users, CheckCircle, ShieldAlert, BarChart, Pin, Milestone } from 'lucide-react';
+import { Loader2, Sparkles, Calendar, BadgeEuro, Briefcase, Users, CheckCircle, ShieldAlert, BarChart, Pin, Milestone, Copy, Check } from 'lucide-react';
 import type { GenerateProposalOutput } from '@/ai/flows/generate-proposal';
 import { Badge } from './ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -32,11 +33,38 @@ function SubmitButton() {
 }
 
 function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!proposal) return;
+    const jsonString = JSON.stringify(proposal, null, 2);
+    navigator.clipboard.writeText(jsonString).then(() => {
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
   return (
     <Card className="mt-6">
       <CardHeader>
-        <Badge variant="secondary" className="w-fit mb-2">{proposal.category}</Badge>
-        <CardTitle className="font-headline text-3xl text-primary">{proposal.title}</CardTitle>
+        <div className="flex justify-between items-start">
+            <div>
+                <Badge variant="secondary" className="w-fit mb-2">{proposal.category}</Badge>
+                <CardTitle className="font-headline text-3xl text-primary">{proposal.title}</CardTitle>
+            </div>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="outline" size="icon" onClick={handleCopy} aria-label="Copy JSON">
+                            {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>{isCopied ? 'تم النسخ!' : 'نسخ JSON'}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
