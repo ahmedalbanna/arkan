@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileText } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileText, BookMarked } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -12,6 +12,7 @@ const navLinks = [
   { href: '/projects', label: 'المشاريع', icon: Briefcase },
   { href: '/summarize', label: 'تلخيص بالذكاء الاصطناعي', icon: BrainCircuit },
   { href: '/generate-proposal', label: 'توليد مقترح', icon: FileText },
+  { href: '/generate-introduction', label: 'توليد مقدمة', icon: BookMarked },
   { href: '/profile/user-1', label: 'الملف الشخصي', icon: User },
 ];
 

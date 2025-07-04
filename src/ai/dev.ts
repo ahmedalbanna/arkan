@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/summarize-project.ts';
 import '@/ai/flows/generate-proposal.ts';
+import '@/ai/flows/generate-introduction.ts';
