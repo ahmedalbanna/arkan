@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormStatus, useActionState } from 'react';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { handleGenerateIntroduction } from '@/app/generate-introduction/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
