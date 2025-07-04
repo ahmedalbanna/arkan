@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 
+import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
 import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
 import { generateDesignStrategy } from '@/ai/flows/generate-design-strategy';
@@ -12,6 +13,7 @@ import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
 
 export type SectionName = 
+  | 'introduction'
   | 'literatureReview'
   | 'systemAnalysis'
   | 'designStrategy'
@@ -31,6 +33,7 @@ export interface ReportState {
 const GenerateSectionSchema = z.object({
   proposalJson: z.string().min(1, 'يرجى لصق محتوى مقترح المشروع.'),
   sectionToGenerate: z.enum([
+    'introduction',
     'literatureReview',
     'systemAnalysis',
     'designStrategy',
@@ -81,6 +84,9 @@ export async function handleGenerateSection(
   try {
     let result;
     switch (sectionToGenerate) {
+      case 'introduction':
+        result = await generateIntroduction(validatedProposal.data);
+        return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
       case 'literatureReview':
         result = await generateLiteratureReview(validatedProposal.data);
         return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };

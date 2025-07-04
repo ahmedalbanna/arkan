@@ -7,10 +7,11 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType } } = {
+    introduction: { title: "المقدمة", icon: BookMarked },
     literatureReview: { title: "مراجعة الأدبيات", icon: Library },
     systemAnalysis: { title: "تحليل النظام", icon: Waypoints },
     designStrategy: { title: "استراتيجية التصميم", icon: BookText },
