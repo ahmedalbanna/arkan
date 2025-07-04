@@ -10,9 +10,11 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileDown, FileText } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
-// New imports
+// New imports for markdown and file generation
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType } from 'docx';
+import ReactMarkdown from 'react-markdown';
+import { marked } from 'marked';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType } } = {
@@ -59,8 +61,8 @@ function ReportSection({ title, content, icon: Icon }: { title: string; content?
             <AccordionTrigger className="font-headline text-xl">
                 <Icon className="ml-2 h-5 w-5 text-primary" /> {title}
             </AccordionTrigger>
-            <AccordionContent className="prose dark:prose-invert max-w-none whitespace-pre-wrap p-4 text-muted-foreground">
-                {content}
+            <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground">
+               <ReactMarkdown>{content}</ReactMarkdown>
             </AccordionContent>
         </AccordionItem>
     );
@@ -72,6 +74,41 @@ export default function ReportGenerator() {
     
     const hasContent = Object.values(state.sections).some(s => !!s);
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
+
+    const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
+        const paragraphs: Paragraph[] = [];
+        const lines = markdown.split('\n');
+
+        for (const line of lines) {
+            if (line.trim() === '') continue;
+
+            if (line.startsWith('### ')) {
+                paragraphs.push(new Paragraph({ text: line.substring(4), heading: HeadingLevel.HEADING_3, spacing: { after: 120 } }));
+                continue;
+            }
+            if (line.startsWith('## ')) {
+                paragraphs.push(new Paragraph({ text: line.substring(3), heading: HeadingLevel.HEADING_2, spacing: { after: 160 } }));
+                continue;
+            }
+            if (line.startsWith('# ')) {
+                paragraphs.push(new Paragraph({ text: line.substring(2), heading: HeadingLevel.HEADING_1, spacing: { after: 200 } }));
+                continue;
+            }
+            if (line.startsWith('* ') || line.startsWith('- ')) {
+                paragraphs.push(new Paragraph({ text: line.substring(2), bullet: { level: 0 } }));
+                continue;
+            }
+            if (line.match(/^\d+\.\s/)) {
+                paragraphs.push(new Paragraph({ text: line.replace(/^\d+\.\s/, ''), bullet: { level: 0 } }));
+                continue;
+            }
+            
+            paragraphs.push(new Paragraph({ text: line }));
+        }
+
+        return paragraphs;
+    };
+
 
     const handleExportPDF = () => {
         if (typeof window === "undefined") return;
@@ -99,7 +136,12 @@ export default function ReportGenerator() {
                         }
                         h1 { font-size: 2em; text-align: center; margin-bottom: 1.5em; color: #111; }
                         h2 { font-size: 1.5em; margin-top: 2em; margin-bottom: 1em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; color: #222; }
-                        div { white-space: pre-wrap; color: #444; }
+                        h3, h4, h5, h6 { margin-top: 1.5em; margin-bottom: 0.5em; color: #333; }
+                        p { margin-bottom: 1em; color: #444; }
+                        ul, ol { padding-right: 20px; margin-bottom: 1em; }
+                        li { margin-bottom: 0.5em; }
+                        strong { font-weight: bold; }
+                        em { font-style: italic; }
                         @media print {
                             body { margin: 1in; }
                         }
@@ -110,7 +152,7 @@ export default function ReportGenerator() {
                     ${sectionsToExport.map(({ title, content }) => `
                         <section>
                             <h2>${title}</h2>
-                            <div>${content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+                            ${marked(content)}
                         </section>
                     `).join('')}
                 </body>
@@ -154,7 +196,7 @@ export default function ReportGenerator() {
                             heading: HeadingLevel.HEADING_1,
                             spacing: { before: 400, after: 200 },
                         }),
-                        ...content.split('\n').filter(line => line.trim() !== '').map(line => new Paragraph({ text: line }))
+                        ...parseMarkdownToDocx(content)
                     ])
                 ],
             }],
