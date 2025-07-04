@@ -1,0 +1,37 @@
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+
+const userSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
+});
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const validation = userSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+    }
+
+    const { name, email } = validation.data;
+
+    // In a real application, you would hash the password and save the user to a database.
+    // For this prototype, we'll just return a success response with the new user data.
+    
+    // Don't return the password in the response for security reasons
+    const newUser = {
+      id: `user-${Date.now()}`, // simple id generation for example
+      name,
+      email,
+    };
+
+    return NextResponse.json(newUser, { status: 201 });
+
+  } catch (error) {
+    console.error('Error creating user:', error);
+    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+  }
+}
