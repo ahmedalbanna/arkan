@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const GenerateProposalInputSchema = z.object({
+const GenerateProposalInputSchema = z.object({
   projectIdea: z.string().describe('A short description of the project idea.'),
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
