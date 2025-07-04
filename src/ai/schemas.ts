@@ -1,4 +1,3 @@
-'use server';
 import {z} from 'genkit';
 
 export const ProjectProposalSchema = z.object({
