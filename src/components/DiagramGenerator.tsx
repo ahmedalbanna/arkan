@@ -7,8 +7,10 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Copy, Check, Share2 } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Share2, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import Image from 'next/image';
+import { saveAs } from 'file-saver';
 
 const diagramConfig: { [key in DiagramType]: { title: string; } } = {
     useCase: { title: "مخطط حالة الاستخدام (Use Case)" },
@@ -43,6 +45,49 @@ function GenerateButton({ diagramType }: { diagramType: DiagramType }) {
     );
 }
 
+function ImageDisplay({ imageUrl, diagramType }: { imageUrl: string, diagramType: DiagramType }) {
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            // Using a CORS proxy for the fetch request to avoid tainted canvas issues if we were to draw this.
+            // For direct download, it helps ensure the request is not blocked by browser security policies.
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            saveAs(blob, `${diagramConfig[diagramType].title.replace(/ /g, '_')}.png`);
+        } catch (error) {
+            console.error('Download failed:', error);
+            // You could show a toast notification here.
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline">المخطط المعروض</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Image 
+                    src={imageUrl} 
+                    alt={`Rendered ${diagramConfig[diagramType].title}`}
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-contain rounded-md border bg-white p-2"
+                />
+            </CardContent>
+            <CardFooter>
+                <Button onClick={handleDownload} disabled={isDownloading} className="font-headline">
+                    {isDownloading ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Download className="ml-2 h-4 w-4" />}
+                    تحميل الصورة
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+}
+
 function CodeDisplay({ code, diagramType }: { code: string, diagramType: DiagramType }) {
     const [isCopied, setIsCopied] = useState(false);
 
@@ -54,7 +99,7 @@ function CodeDisplay({ code, diagramType }: { code: string, diagramType: Diagram
     };
     
     return (
-        <Card className="mt-6">
+        <Card>
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
@@ -133,15 +178,18 @@ export default function DiagramGenerator() {
                     </Card>
                 </form>
             </div>
-            <div className="md:col-span-2">
+            <div className="md:col-span-2 space-y-6">
                  {state?.lastGenerated && !state.error && (
-                    <Alert className="mb-6">
+                    <Alert>
                         <Sparkles className="h-4 w-4" />
                         <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
                         <AlertDescription>
-                            تم توليد كود PlantUML لقسم "{diagramConfig[state.lastGenerated].title}".
+                            تم توليد كود PlantUML والصورة لقسم "{diagramConfig[state.lastGenerated].title}".
                         </AlertDescription>
                     </Alert>
+                )}
+                {state.imageUrl && state.lastGenerated && (
+                    <ImageDisplay imageUrl={state.imageUrl} diagramType={state.lastGenerated} />
                 )}
                 {state.plantUmlCode && state.lastGenerated && (
                     <CodeDisplay code={state.plantUmlCode} diagramType={state.lastGenerated} />

@@ -9,6 +9,7 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
+import { deflateSync } from 'zlib';
 
 export type DiagramType = 
   | 'useCase'
@@ -20,6 +21,7 @@ export type DiagramType =
 
 export interface DiagramState {
   plantUmlCode?: string;
+  imageUrl?: string;
   error?: string;
   lastGenerated?: DiagramType;
 }
@@ -35,6 +37,38 @@ const GenerateDiagramSchema = z.object({
     'archimate',
   ]),
 });
+
+// Encodes raw DEFLATE-compressed data using a specific Base64-like alphabet for PlantUML.
+function encode64(data: Buffer): string {
+    const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+    let r = '';
+    for (let i = 0; i < data.length; i += 3) {
+        const b1 = data[i];
+        const b2 = i + 1 < data.length ? data[i+1] : 0;
+        const b3 = i + 2 < data.length ? data[i+2] : 0;
+
+        const c1 = b1 >> 2;
+        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+        const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+        const c4 = b3 & 63;
+
+        r += B64_MAP.charAt(c1);
+        r += B64_MAP.charAt(c2);
+        if (i + 1 < data.length) {
+            r += B64_MAP.charAt(c3);
+        }
+        if (i + 2 < data.length) {
+            r += B64_MAP.charAt(c4);
+        }
+    }
+    return r;
+}
+
+async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
+    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+    const encoded = encode64(compressed);
+    return `https://www.plantuml.com/plantuml/png/${encoded}`;
+}
 
 
 export async function handleGenerateDiagram(
@@ -97,7 +131,9 @@ export async function handleGenerateDiagram(
       default:
         return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
     }
-    return { ...prevState, plantUmlCode: result.plantUmlCode, lastGenerated: diagramToGenerate, error: undefined };
+
+    const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+    return { ...prevState, plantUmlCode: result.plantUmlCode, imageUrl, lastGenerated: diagramToGenerate, error: undefined };
 
   } catch (e) {
     console.error(e);
