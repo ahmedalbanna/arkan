@@ -15,11 +15,14 @@ export function useAgents() {
       if (storedAgents) {
         const parsedAgents: Agent[] = JSON.parse(storedAgents);
         const agentMap = new Map(parsedAgents.map(a => [a.id, a]));
-        const mergedAgents = initialAgents.map(initialAgent => 
-            agentMap.has(initialAgent.id) 
-                ? { ...initialAgent, ...agentMap.get(initialAgent.id)! } 
-                : initialAgent
-        );
+        const mergedAgents = initialAgents.map(initialAgent => {
+            const storedData = agentMap.get(initialAgent.id);
+            if (storedData) {
+                // Merge stored data, but explicitly preserve the non-serializable icon from the code definition.
+                return { ...initialAgent, ...storedData, icon: initialAgent.icon };
+            }
+            return initialAgent;
+        });
         setAgents(mergedAgents);
       } else {
         setAgents(initialAgents);
