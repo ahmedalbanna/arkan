@@ -75,6 +75,24 @@ export async function handleGenerateDiagram(
   prevState: DiagramState,
   formData: FormData
 ): Promise<DiagramState> {
+  const formAction = formData.get('formAction');
+
+  if (formAction === 'render') {
+    const plantUmlCode = formData.get('plantUmlCode') as string;
+    const diagramType = formData.get('diagramType') as DiagramType;
+
+    if (!plantUmlCode) {
+      return { ...prevState, error: 'لا يوجد كود لعرضه.' };
+    }
+    try {
+      const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
+      return { plantUmlCode, imageUrl, lastGenerated: diagramType, error: undefined };
+    } catch (e) {
+      console.error(e);
+      return { ...prevState, plantUmlCode, error: `حدث خطأ أثناء عرض المخطط. تأكد من صحة الكود.` };
+    }
+  }
+
 
   const validatedFields = GenerateDiagramSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
@@ -133,7 +151,7 @@ export async function handleGenerateDiagram(
     }
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-    return { ...prevState, plantUmlCode: result.plantUmlCode, imageUrl, lastGenerated: diagramToGenerate, error: undefined };
+    return { plantUmlCode: result.plantUmlCode, imageUrl, lastGenerated: diagramToGenerate, error: undefined };
 
   } catch (e) {
     console.error(e);
