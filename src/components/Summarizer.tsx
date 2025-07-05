@@ -29,7 +29,7 @@ function SubmitButton() {
 }
 
 export default function Summarizer() {
-  const initialState = {};
+  const initialState: { summary?: string; error?: string } = {};
   const [state, formAction] = useActionState(handleSummarize, initialState);
 
   return (

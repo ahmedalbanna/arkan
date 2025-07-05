@@ -71,7 +71,7 @@ function ReportSection({ title, content, icon: Icon }: { title: string; content?
 export default function ReportGenerator() {
     const initialState: ReportState = { sections: {} };
     const [state, formAction] = useActionState(handleGenerateSection, initialState);
-    
+
     const hasContent = Object.values(state.sections).some(s => !!s);
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -102,7 +102,7 @@ export default function ReportGenerator() {
                 paragraphs.push(new Paragraph({ text: line.replace(/^\d+\.\s/, ''), bullet: { level: 0 } }));
                 continue;
             }
-            
+
             paragraphs.push(new Paragraph({ text: line }));
         }
 
@@ -127,10 +127,10 @@ export default function ReportGenerator() {
                 <head>
                     <title>Project Report</title>
                     <style>
-                        body { 
-                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-                            line-height: 1.6; 
-                            direction: rtl; 
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                            line-height: 1.6;
+                            direction: rtl;
                             text-align: right;
                             margin: 2rem;
                         }
@@ -208,12 +208,12 @@ export default function ReportGenerator() {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">
             <div className="md:col-span-1">
                 <form action={formAction}>
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">مقترح المشروع (JSON)</CardTitle>
+                            <CardTitle className="font-headline flex leading-relaxed">مقترح المشروع (JSON)</CardTitle>
                             <CardDescription>
                                 الصق هنا محتوى مقترح المشروع الكامل بصيغة JSON.
                             </CardDescription>

@@ -71,10 +71,10 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
         <head>
           <title>${title}</title>
           <style>
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-              line-height: 1.6; 
-              direction: rtl; 
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              line-height: 1.6;
+              direction: rtl;
               text-align: right;
               margin: 2rem;
             }
@@ -118,7 +118,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
 
           <h2>النتائج المتوقعة</h2>
           <ul>${expected_outcome.map(o => `<li>${o}</li>`).join('')}</ul>
-          
+
           <h2>معايير النجاح</h2>
           <ul>${success_criteria.map(sc => `<li>${sc}</li>`).join('')}</ul>
 
@@ -181,7 +181,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
 
           new Paragraph({ text: "الهدف", heading: HeadingLevel.HEADING_1 }),
           new Paragraph({ text: objective }),
-          
+
           new Paragraph({ text: "المنهجية", heading: HeadingLevel.HEADING_1 }),
           ...methodology.split('\n').map(p => new Paragraph({ text: p })),
 
@@ -321,7 +321,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
               </div>
             </AccordionContent>
           </AccordionItem>
-          
+
           <AccordionItem value="budget">
             <AccordionTrigger className="font-headline text-xl"><BadgeEuro className="ml-2 h-5 w-5 text-primary" /> الميزانية</AccordionTrigger>
             <AccordionContent>
@@ -354,7 +354,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
                 </ul>
             </AccordionContent>
           </AccordionItem>
-          
+
           <AccordionItem value="evaluation">
             <AccordionTrigger className="font-headline text-xl"><BarChart className="ml-2 h-5 w-5 text-primary" /> التقييم</AccordionTrigger>
             <AccordionContent className="text-muted-foreground">
@@ -397,7 +397,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
 
 
 export default function ProposalGenerator() {
-  const initialState = {};
+  const initialState: { error?: string; proposal?: GenerateProposalOutput } = {};
   const [state, formAction] = useActionState(handleGenerateProposal, initialState);
 
   return (

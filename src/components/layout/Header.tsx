@@ -12,7 +12,6 @@ const navLinks = [
   { href: '/projects', label: 'المشاريع', icon: Briefcase },
   { href: '/summarize', label: 'تلخيص بالذكاء الاصطناعي', icon: BrainCircuit },
   { href: '/generate-proposal', label: 'توليد مقترح', icon: FileText },
-  { href: '/generate-introduction', label: 'توليد مقدمة', icon: BookMarked },
   { href: '/generate-report', label: 'توليد تقرير', icon: FileSpreadsheet },
   { href: '/profile/user-1', label: 'الملف الشخصي', icon: User },
 ];
@@ -44,7 +43,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
           أركان
         </Link>
-        <nav className="hidden md:flex gap-4 mr-auto">
+        <nav className="hidden md:flex gap-4 mx-auto">
           {renderNavLinks()}
         </nav>
         <div className="md:hidden mr-auto">
