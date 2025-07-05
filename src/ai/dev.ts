@@ -1,3 +1,5 @@
+'use server';
+
 import { config } from 'dotenv';
 config();
 
@@ -11,3 +13,9 @@ import '@/ai/flows/generate-system-design.ts';
 import '@/ai/flows/generate-system-programming.ts';
 import '@/ai/flows/generate-system-testing.ts';
 import '@/ai/flows/generate-conclusion.ts';
+import '@/ai/flows/generate-use-case-diagram.ts';
+import '@/ai/flows/generate-class-diagram.ts';
+import '@/ai/flows/generate-sequence-diagram.ts';
+import '@/ai/flows/generate-activity-diagram.ts';
+import '@/ai/flows/generate-component-diagram.ts';
+import '@/ai/flows/generate-archimate-diagram.ts';
