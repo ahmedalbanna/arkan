@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { handleGenerateDiagram, type DiagramState } from '@/app/generate-diagrams/actions';
 import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
@@ -12,6 +12,7 @@ import { Loader2, Sparkles, Copy, Check, Share2, Download } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import Image from 'next/image';
 import { saveAs } from 'file-saver';
+import { useHistory } from '@/hooks/use-history';
 
 const diagramConfig: { [key in DiagramType]: { title: string; } } = {
     useCase: { title: "مخطط حالة الاستخدام (Use Case)" },
@@ -163,8 +164,33 @@ function DiagramEditor({ code, diagramType }: { code: string, diagramType: Diagr
 export default function DiagramGenerator() {
     const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
+    const [proposalJson, setProposalJson] = useState('');
+    const { addHistoryEntry } = useHistory();
     
     const orderedDiagrams = DiagramTypeSchema.options;
+
+    useEffect(() => {
+        if (state.lastGenerated && state.currentPlantUmlCode && state.imageUrl) {
+            let proposalTitle = 'مخطط مشروع';
+            try {
+                const parsed = JSON.parse(proposalJson);
+                if (parsed && parsed.title) {
+                    proposalTitle = parsed.title;
+                }
+            } catch (e) {
+                // Ignore parsing errors
+            }
+
+            addHistoryEntry({
+                type: 'diagram',
+                title: `مخطط: ${diagramConfig[state.lastGenerated].title}`,
+                diagramType: state.lastGenerated,
+                plantUmlCode: state.currentPlantUmlCode,
+                imageUrl: state.imageUrl,
+                proposalTitle: proposalTitle,
+            });
+        }
+    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson]);
 
     return (
         <form action={formAction}>
@@ -186,6 +212,7 @@ export default function DiagramGenerator() {
                                 placeholder='{ "title": "...", "objective": "...", ... }'
                                 rows={15}
                                 required
+                                onChange={(e) => setProposalJson(e.target.value)}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>

@@ -1,3 +1,6 @@
+import type { ProjectProposal, DiagramType } from './ai/schemas';
+import type { SectionName } from './app/generate-report/actions';
+
 export interface User {
   id: string;
   name: string;
@@ -37,3 +40,30 @@ export interface Project {
   comments: Comment[];
   createdAt: string;
 }
+
+
+export type ProposalHistoryData = {
+  type: 'proposal';
+  proposal: ProjectProposal;
+};
+
+export type ReportHistoryData = {
+  type: 'report';
+  section: SectionName;
+  content: string;
+  proposalTitle: string;
+};
+
+export type DiagramHistoryData = {
+  type: 'diagram';
+  diagramType: DiagramType;
+  plantUmlCode: string;
+  imageUrl: string;
+  proposalTitle: string;
+};
+
+export type HistoryEntry = {
+  id: string;
+  createdAt: string;
+  title: string;
+} & (ProposalHistoryData | ReportHistoryData | DiagramHistoryData);

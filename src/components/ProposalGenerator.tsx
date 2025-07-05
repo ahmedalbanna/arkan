@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { handleGenerateProposal } from '@/app/generate-proposal/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -12,6 +12,7 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Badge } from './ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { useHistory } from '@/hooks/use-history';
 
 // New imports for file generation
 import { saveAs } from 'file-saver';
@@ -399,6 +400,18 @@ function ProposalReport({ proposal }: { proposal: ProjectProposal }) {
 export default function ProposalGenerator() {
   const initialState: { error?: string; proposal?: ProjectProposal } = {};
   const [state, formAction] = useActionState(handleGenerateProposal, initialState);
+  const { addHistoryEntry } = useHistory();
+
+  useEffect(() => {
+    if (state.proposal) {
+      addHistoryEntry({
+        type: 'proposal',
+        title: `مقترح مشروع: ${state.proposal.title}`,
+        proposal: state.proposal,
+      });
+    }
+  }, [state.proposal, addHistoryEntry]);
+
 
   return (
     <>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { handleGenerateSection, type ReportState, type SectionName } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
@@ -15,6 +15,7 @@ import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import { marked } from 'marked';
+import { useHistory } from '@/hooks/use-history';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType } } = {
@@ -30,20 +31,19 @@ const sectionConfig: { [key in SectionName]: { title: string; icon: React.Elemen
 
 
 function GenerateButton({ section }: { section: SectionName }) {
-    const { pending } = useFormStatus();
-    const [lastClicked, setLastClicked] = useState<SectionName | null>(null);
+    const { pending, data } = useFormStatus();
+    const isGeneratingThis = pending && data?.get('sectionToGenerate') === section;
 
     return (
         <Button
             type="submit"
             name="sectionToGenerate"
             value={section}
-            onClick={() => setLastClicked(section)}
             disabled={pending}
             variant="secondary"
             className="w-full justify-start"
         >
-            {pending && lastClicked === section ? (
+            {isGeneratingThis ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
                 <Sparkles className="ml-2 h-4 w-4" />
@@ -71,9 +71,34 @@ function ReportSection({ title, content, icon: Icon }: { title: string; content?
 export default function ReportGenerator() {
     const initialState: ReportState = { sections: {} };
     const [state, formAction] = useActionState(handleGenerateSection, initialState);
+    const [proposalJson, setProposalJson] = useState('');
+    const { addHistoryEntry } = useHistory();
 
     const hasContent = Object.values(state.sections).some(s => !!s);
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
+
+    useEffect(() => {
+        if (state.lastGenerated && state.sections[state.lastGenerated]) {
+            let proposalTitle = 'تقرير مشروع';
+            try {
+                const parsed = JSON.parse(proposalJson);
+                if (parsed && parsed.title) {
+                    proposalTitle = parsed.title;
+                }
+            } catch (e) {
+                // Ignore parsing errors
+            }
+
+            addHistoryEntry({
+                type: 'report',
+                title: `قسم تقرير: ${sectionConfig[state.lastGenerated].title}`,
+                proposalTitle,
+                section: state.lastGenerated,
+                content: state.sections[state.lastGenerated]!,
+            });
+        }
+    }, [state.lastGenerated, state.sections, addHistoryEntry, proposalJson]);
+
 
     const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
         const paragraphs: Paragraph[] = [];
@@ -224,6 +249,7 @@ export default function ReportGenerator() {
                                 placeholder='{ "title": "...", "objective": "...", ... }'
                                 rows={15}
                                 required
+                                onChange={(e) => setProposalJson(e.target.value)}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
