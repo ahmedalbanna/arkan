@@ -7,9 +7,23 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
-export type GenerateActivityDiagramInput = ProjectProposal;
+const DiagramTypeEnum = z.enum([
+    'useCase',
+    'class',
+    'sequence',
+    'activity',
+    'component',
+    'archimate',
+]);
+
+const GenerateActivityDiagramInputSchema = z.object({
+    proposal: ProjectProposalSchema,
+    otherDiagrams: z.record(DiagramTypeEnum, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code.")
+});
+export type GenerateActivityDiagramInput = z.infer<typeof GenerateActivityDiagramInputSchema>;
+
 
 const GenerateActivityDiagramOutputSchema = z.object({
     plantUmlCode: z.string().describe("The complete PlantUML code for the Activity diagram, starting with @startuml and ending with @enduml.")
@@ -22,9 +36,20 @@ export async function generateActivityDiagram(input: GenerateActivityDiagramInpu
 
 const prompt = ai.definePrompt({
   name: 'generateActivityDiagramPrompt',
-  input: { schema: ProjectProposalSchema },
+  input: { schema: GenerateActivityDiagramInputSchema },
   output: { schema: GenerateActivityDiagramOutputSchema },
   prompt: `You are an expert process analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Activity Diagram** illustrating a key workflow.
+
+{{#if otherDiagrams}}
+To ensure consistency and accuracy, consider the information from these previously generated diagrams. This context is crucial for creating a diagram that aligns with the rest of the system design. For example, a Use Case or Sequence diagram can help define the flow of activities.
+{{#each otherDiagrams}}
+--- {{ @key }} Diagram ---
+\`\`\`plantuml
+{{{this}}}
+\`\`\`
+---
+{{/each}}
+{{/if}}
 
 The diagram should:
 1.  Define a start and end point for the process.
@@ -35,7 +60,7 @@ The diagram should:
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `,
 });
@@ -43,7 +68,7 @@ Project Proposal Data:
 const generateActivityDiagramFlow = ai.defineFlow(
   {
     name: 'generateActivityDiagramFlow',
-    inputSchema: ProjectProposalSchema,
+    inputSchema: GenerateActivityDiagramInputSchema,
     outputSchema: GenerateActivityDiagramOutputSchema,
   },
   async (input) => {

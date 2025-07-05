@@ -7,9 +7,23 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
-export type GenerateUseCaseDiagramInput = ProjectProposal;
+const DiagramTypeEnum = z.enum([
+    'useCase',
+    'class',
+    'sequence',
+    'activity',
+    'component',
+    'archimate',
+]);
+
+const GenerateUseCaseDiagramInputSchema = z.object({
+    proposal: ProjectProposalSchema,
+    otherDiagrams: z.record(DiagramTypeEnum, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code.")
+});
+export type GenerateUseCaseDiagramInput = z.infer<typeof GenerateUseCaseDiagramInputSchema>;
+
 
 const GenerateUseCaseDiagramOutputSchema = z.object({
     plantUmlCode: z.string().describe("The complete PlantUML code for the Use Case diagram, starting with @startuml and ending with @enduml.")
@@ -22,9 +36,20 @@ export async function generateUseCaseDiagram(input: GenerateUseCaseDiagramInput)
 
 const prompt = ai.definePrompt({
   name: 'generateUseCaseDiagramPrompt',
-  input: { schema: ProjectProposalSchema },
+  input: { schema: GenerateUseCaseDiagramInputSchema },
   output: { schema: GenerateUseCaseDiagramOutputSchema },
   prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Use Case Diagram**.
+
+{{#if otherDiagrams}}
+To ensure consistency and accuracy, consider the information from these previously generated diagrams. This context is crucial for creating a diagram that aligns with the rest of the system design.
+{{#each otherDiagrams}}
+--- {{ @key }} Diagram ---
+\`\`\`plantuml
+{{{this}}}
+\`\`\`
+---
+{{/each}}
+{{/if}}
 
 The diagram should:
 1.  Identify the primary actors from the 'stakeholders' section (e.g., 'Primary User', 'Sponsor').
@@ -34,7 +59,7 @@ The diagram should:
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `,
 });
@@ -42,7 +67,7 @@ Project Proposal Data:
 const generateUseCaseDiagramFlow = ai.defineFlow(
   {
     name: 'generateUseCaseDiagramFlow',
-    inputSchema: ProjectProposalSchema,
+    inputSchema: GenerateUseCaseDiagramInputSchema,
     outputSchema: GenerateUseCaseDiagramOutputSchema,
   },
   async (input) => {

@@ -11,16 +11,20 @@ import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram'
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { deflateSync } from 'zlib';
 
-export type DiagramType = 
-  | 'useCase'
-  | 'class'
-  | 'sequence'
-  | 'activity'
-  | 'component'
-  | 'archimate';
+export const DiagramTypeSchema = z.enum([
+  'useCase',
+  'class',
+  'sequence',
+  'activity',
+  'component',
+  'archimate',
+]);
+export type DiagramType = z.infer<typeof DiagramTypeSchema>;
+
 
 export interface DiagramState {
-  plantUmlCode?: string;
+  plantUmlCodes?: Partial<Record<DiagramType, string>>;
+  currentPlantUmlCode?: string;
   imageUrl?: string;
   error?: string;
   lastGenerated?: DiagramType;
@@ -28,14 +32,7 @@ export interface DiagramState {
 
 const GenerateDiagramSchema = z.object({
   proposalJson: z.string().min(1, 'يرجى لصق محتوى مقترح المشروع.'),
-  diagramToGenerate: z.enum([
-    'useCase',
-    'class',
-    'sequence',
-    'activity',
-    'component',
-    'archimate',
-  ]),
+  diagramToGenerate: DiagramTypeSchema,
 });
 
 // Encodes raw DEFLATE-compressed data using a specific Base64-like alphabet for PlantUML.
@@ -86,10 +83,19 @@ export async function handleGenerateDiagram(
     }
     try {
       const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
-      return { plantUmlCode, imageUrl, lastGenerated: diagramType, error: undefined };
+      const newPlantUmlCodes = { ...prevState.plantUmlCodes, [diagramType]: plantUmlCode };
+
+      return { 
+        plantUmlCodes: newPlantUmlCodes,
+        currentPlantUmlCode: plantUmlCode, 
+        imageUrl, 
+        lastGenerated: diagramType, 
+        error: undefined 
+      };
     } catch (e) {
       console.error(e);
-      return { ...prevState, plantUmlCode, error: `حدث خطأ أثناء عرض المخطط. تأكد من صحة الكود.` };
+      const plantUmlCodes = { ...prevState.plantUmlCodes, [diagramType]: plantUmlCode };
+      return { ...prevState, plantUmlCodes, currentPlantUmlCode: plantUmlCode, error: `حدث خطأ أثناء عرض المخطط. تأكد من صحة الكود.` };
     }
   }
 
@@ -125,33 +131,56 @@ export async function handleGenerateDiagram(
     };
   }
 
+  const otherDiagrams: Partial<Record<DiagramType, string>> = {};
+  DiagramTypeSchema.options.forEach((type) => {
+    if (type !== diagramToGenerate) {
+        const code = formData.get(`plantUmlCode_${type}`) as string | null;
+        if (code) {
+            otherDiagrams[type] = code;
+        }
+    }
+  });
+
+  const agentInput = {
+      proposal: validatedProposal.data,
+      otherDiagrams
+  };
+
   try {
     let result;
     switch (diagramToGenerate) {
       case 'useCase':
-        result = await generateUseCaseDiagram(validatedProposal.data);
+        result = await generateUseCaseDiagram(agentInput);
         break;
       case 'class':
-        result = await generateClassDiagram(validatedProposal.data);
+        result = await generateClassDiagram(agentInput);
         break;
       case 'sequence':
-        result = await generateSequenceDiagram(validatedProposal.data);
+        result = await generateSequenceDiagram(agentInput);
         break;
       case 'activity':
-        result = await generateActivityDiagram(validatedProposal.data);
+        result = await generateActivityDiagram(agentInput);
         break;
       case 'component':
-        result = await generateComponentDiagram(validatedProposal.data);
+        result = await generateComponentDiagram(agentInput);
         break;
       case 'archimate':
-        result = await generateArchimateDiagram(validatedProposal.data);
+        result = await generateArchimateDiagram(agentInput);
         break;
       default:
         return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
     }
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-    return { plantUmlCode: result.plantUmlCode, imageUrl, lastGenerated: diagramToGenerate, error: undefined };
+    const newPlantUmlCodes = { ...prevState.plantUmlCodes, [diagramToGenerate]: result.plantUmlCode };
+
+    return { 
+        plantUmlCodes: newPlantUmlCodes, 
+        currentPlantUmlCode: result.plantUmlCode, 
+        imageUrl, 
+        lastGenerated: diagramToGenerate, 
+        error: undefined 
+    };
 
   } catch (e) {
     console.error(e);

@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { handleGenerateDiagram, type DiagramState, type DiagramType } from '@/app/generate-diagrams/actions';
+import { handleGenerateDiagram, type DiagramState, DiagramTypeSchema, type DiagramType } from '@/app/generate-diagrams/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -160,13 +160,16 @@ function DiagramEditor({ code, diagramType }: { code: string, diagramType: Diagr
 
 
 export default function DiagramGenerator() {
-    const initialState: DiagramState = {};
+    const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
     
-    const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
+    const orderedDiagrams = DiagramTypeSchema.options;
 
     return (
         <form action={formAction}>
+            {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
+                code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
+            ))}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
                     <Card>
@@ -182,7 +185,6 @@ export default function DiagramGenerator() {
                                 placeholder='{ "title": "...", "objective": "...", ... }'
                                 rows={15}
                                 required
-                                defaultValue={state.error ? '' : undefined}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
@@ -208,8 +210,8 @@ export default function DiagramGenerator() {
                     {state.imageUrl && state.lastGenerated && (
                         <ImageDisplay imageUrl={state.imageUrl} diagramType={state.lastGenerated} />
                     )}
-                    {state.plantUmlCode && state.lastGenerated && (
-                        <DiagramEditor code={state.plantUmlCode} diagramType={state.lastGenerated} />
+                    {state.currentPlantUmlCode && state.lastGenerated && (
+                        <DiagramEditor code={state.currentPlantUmlCode} diagramType={state.lastGenerated} />
                     )}
                 </div>
             </div>
