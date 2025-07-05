@@ -7,20 +7,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema } from '@/ai/schemas';
-
-const DiagramTypeEnum = z.enum([
-    'useCase',
-    'class',
-    'sequence',
-    'activity',
-    'component',
-    'archimate',
-]);
+import { ProjectProposalSchema, DiagramTypeSchema } from '@/ai/schemas';
 
 const GenerateActivityDiagramInputSchema = z.object({
     proposal: ProjectProposalSchema,
-    otherDiagrams: z.record(DiagramTypeEnum, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code.")
+    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code.")
 });
 export type GenerateActivityDiagramInput = z.infer<typeof GenerateActivityDiagramInputSchema>;
 

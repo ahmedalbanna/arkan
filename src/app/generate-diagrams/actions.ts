@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
 
 import { generateUseCaseDiagram } from '@/ai/flows/generate-use-case-diagram';
 import { generateClassDiagram } from '@/ai/flows/generate-class-diagram';
@@ -10,17 +10,6 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { deflateSync } from 'zlib';
-
-export const DiagramTypeSchema = z.enum([
-  'useCase',
-  'class',
-  'sequence',
-  'activity',
-  'component',
-  'archimate',
-]);
-export type DiagramType = z.infer<typeof DiagramTypeSchema>;
-
 
 export interface DiagramState {
   plantUmlCodes?: Partial<Record<DiagramType, string>>;

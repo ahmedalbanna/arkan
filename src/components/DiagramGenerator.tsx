@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { handleGenerateDiagram, type DiagramState, DiagramTypeSchema, type DiagramType } from '@/app/generate-diagrams/actions';
+import { handleGenerateDiagram, type DiagramState } from '@/app/generate-diagrams/actions';
+import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';

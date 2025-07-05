@@ -1,5 +1,15 @@
 import {z} from 'genkit';
 
+export const DiagramTypeSchema = z.enum([
+  'useCase',
+  'class',
+  'sequence',
+  'activity',
+  'component',
+  'archimate',
+]);
+export type DiagramType = z.infer<typeof DiagramTypeSchema>;
+
 export const ProjectProposalSchema = z.object({
   category: z.string().describe("A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI')."),
   title: z.string().describe("A clear and descriptive title for the project."),
