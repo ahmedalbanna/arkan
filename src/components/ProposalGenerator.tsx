@@ -8,7 +8,7 @@ import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Calendar, BadgeEuro, Briefcase, Users, CheckCircle, ShieldAlert, BarChart, Pin, Milestone, Copy, Check, FileDown, FileText } from 'lucide-react';
-import type { GenerateProposalOutput } from '@/ai/flows/generate-proposal';
+import type { ProjectProposal } from '@/ai/schemas';
 import { Badge } from './ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
@@ -37,7 +37,7 @@ function SubmitButton() {
   );
 }
 
-function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
+function ProposalReport({ proposal }: { proposal: ProjectProposal }) {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
@@ -397,7 +397,7 @@ function ProposalReport({ proposal }: { proposal: GenerateProposalOutput }) {
 
 
 export default function ProposalGenerator() {
-  const initialState: { error?: string; proposal?: GenerateProposalOutput } = {};
+  const initialState: { error?: string; proposal?: ProjectProposal } = {};
   const [state, formAction] = useActionState(handleGenerateProposal, initialState);
 
   return (

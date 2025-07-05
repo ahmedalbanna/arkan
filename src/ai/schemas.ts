@@ -1,4 +1,4 @@
-import {z} from 'genkit';
+import {z} from 'zod';
 
 export const DiagramTypeSchema = z.enum([
   'useCase',

@@ -4,24 +4,19 @@
  * @fileOverview An AI agent for generating detailed project proposals.
  *
  * - generateProposal - A function that handles the project proposal generation.
- * - GenerateProposalInput - The input type for the generateProposal function.
- * - GenerateProposalOutput - The return type for the generateProposal function (the full proposal).
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 
 
 const GenerateProposalInputSchema = z.object({
   projectIdea: z.string().describe('A short description of the project idea.'),
 });
-export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
+type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
-
-export type GenerateProposalOutput = ProjectProposal;
-
-export async function generateProposal(input: GenerateProposalInput): Promise<GenerateProposalOutput> {
+export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
   return generateProposalFlow(input);
 }
 

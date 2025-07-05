@@ -1,6 +1,7 @@
 'use server';
 
-import { generateProposal, type GenerateProposalOutput } from '@/ai/flows/generate-proposal';
+import { generateProposal } from '@/ai/flows/generate-proposal';
+import { type ProjectProposal } from '@/ai/schemas';
 import { z } from 'zod';
 
 const GenerateSchema = z.object({
@@ -8,7 +9,7 @@ const GenerateSchema = z.object({
 });
 
 interface FormState {
-  proposal?: GenerateProposalOutput;
+  proposal?: ProjectProposal;
   error?: string;
 }
 
