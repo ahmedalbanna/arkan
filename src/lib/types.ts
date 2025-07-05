@@ -1,4 +1,4 @@
-import type { ProjectProposal, DiagramType } from './ai/schemas';
+import type { ProjectProposal, DiagramType } from '@/ai/schemas';
 import type { SectionName } from './app/generate-report/actions';
 
 export interface User {
