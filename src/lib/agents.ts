@@ -8,6 +8,7 @@ export interface Agent {
   category: 'Content Generation' | 'Diagrams';
   icon: LucideIcon;
   pageUrl: string;
+  isEnabled: boolean;
 }
 
 export const AGENTS: Agent[] = [
@@ -18,6 +19,7 @@ export const AGENTS: Agent[] = [
     category: 'Content Generation',
     icon: BrainCircuit,
     pageUrl: '/summarize',
+    isEnabled: true,
   },
   {
     id: 'generate-proposal',
@@ -26,6 +28,7 @@ export const AGENTS: Agent[] = [
     category: 'Content Generation',
     icon: FileText,
     pageUrl: '/generate-proposal',
+    isEnabled: true,
   },
   {
     id: 'generate-report',
@@ -34,6 +37,7 @@ export const AGENTS: Agent[] = [
     category: 'Content Generation',
     icon: FileSpreadsheet,
     pageUrl: '/generate-report',
+    isEnabled: true,
   },
   {
     id: 'generate-diagrams',
@@ -42,5 +46,6 @@ export const AGENTS: Agent[] = [
     category: 'Diagrams',
     icon: GitGraph,
     pageUrl: '/generate-diagrams',
+    isEnabled: true,
   },
 ];
