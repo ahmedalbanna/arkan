@@ -18,7 +18,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
   const { toast } = useToast();
   const [agent, setAgent] = useState<Agent | null>(null);
   const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [prompt, setPrompt] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
       if (foundAgent) {
         setAgent(foundAgent);
         setName(foundAgent.name);
-        setDescription(foundAgent.description);
+        setPrompt(foundAgent.prompt);
       } else {
         router.push('/manage-agents');
       }
@@ -37,7 +37,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    updateAgent(agentId, { name, description });
+    updateAgent(agentId, { name, prompt });
     
     setTimeout(() => {
         setIsSaving(false);
@@ -84,13 +84,14 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="agent-description">وصف الوكيل</Label>
+            <Label htmlFor="agent-prompt">موجه الأوامر (Prompt)</Label>
             <Textarea
-              id="agent-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              id="agent-prompt"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
               required
-              rows={5}
+              rows={20}
+              className="font-mono text-sm"
             />
           </div>
         </CardContent>

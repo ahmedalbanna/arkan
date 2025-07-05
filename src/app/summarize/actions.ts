@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 const SummarizeSchema = z.object({
   projectDescription: z.string().min(50, { message: 'يجب أن يكون وصف المشروع 50 حرفًا على الأقل.' }),
+  prompt: z.string().min(1, { message: 'Prompt is required.' }),
 });
 
 interface FormState {
@@ -19,17 +20,19 @@ export async function handleSummarize(
 ): Promise<FormState> {
   const validatedFields = SummarizeSchema.safeParse({
     projectDescription: formData.get('projectDescription'),
+    prompt: formData.get('prompt'),
   });
 
   if (!validatedFields.success) {
     return {
-      error: validatedFields.error.flatten().fieldErrors.projectDescription?.[0],
+      error: validatedFields.error.flatten().fieldErrors.projectDescription?.[0] || validatedFields.error.flatten().fieldErrors.prompt?.[0],
     };
   }
 
   try {
     const result = await summarizeProject({
       projectDescription: validatedFields.data.projectDescription,
+      prompt: validatedFields.data.prompt,
     });
     return { summary: result.summary, progress: result.progress };
   } catch (e) {

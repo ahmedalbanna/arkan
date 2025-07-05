@@ -13,17 +13,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import Image from 'next/image';
 import { saveAs } from 'file-saver';
 import { useHistory } from '@/hooks/use-history';
+import { useAgents } from '@/hooks/use-agents';
+import type { Agent } from '@/lib/agents';
 
-const diagramConfig: { [key in DiagramType]: { title: string; } } = {
-    useCase: { title: "مخطط حالة الاستخدام (Use Case)" },
-    class: { title: "مخطط الأصناف (Class)" },
-    sequence: { title: "مخطط التسلسل (Sequence)" },
-    activity: { title: "مخطط النشاط (Activity)" },
-    component: { title: "مخطط المكونات (Component)" },
-    archimate: { title: "مخطط ArchiMate" },
+const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
+    useCase: { title: "مخطط حالة الاستخدام (Use Case)", agentId: "generate-use-case-diagram" },
+    class: { title: "مخطط الأصناف (Class)", agentId: "generate-class-diagram" },
+    sequence: { title: "مخطط التسلسل (Sequence)", agentId: "generate-sequence-diagram" },
+    activity: { title: "مخطط النشاط (Activity)", agentId: "generate-activity-diagram" },
+    component: { title: "مخطط المكونات (Component)", agentId: "generate-component-diagram" },
+    archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
 };
 
-function GenerateButton({ diagramType }: { diagramType: DiagramType }) {
+function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
     const { pending, data } = useFormStatus();
     
     const isGeneratingThis = pending && data?.get('diagramToGenerate') === diagramType;
@@ -33,9 +35,10 @@ function GenerateButton({ diagramType }: { diagramType: DiagramType }) {
             type="submit"
             name="diagramToGenerate"
             value={diagramType}
-            disabled={pending}
+            disabled={pending || !agent?.isEnabled}
             variant="secondary"
             className="w-full justify-start"
+            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${diagramConfig[diagramType].title}`}
         >
             {isGeneratingThis ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -166,8 +169,10 @@ export default function DiagramGenerator() {
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
+    const { agents, isLoaded } = useAgents();
     
     const orderedDiagrams = DiagramTypeSchema.options;
+    const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
 
     useEffect(() => {
         if (state.lastGenerated && state.currentPlantUmlCode && state.imageUrl) {
@@ -197,6 +202,11 @@ export default function DiagramGenerator() {
             {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
                 code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
             ))}
+            {diagramAgents.map((agent, index) => {
+                const key = orderedDiagrams[index];
+                return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
+            })}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
                     <Card>
@@ -219,8 +229,8 @@ export default function DiagramGenerator() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2 items-start">
-                           {orderedDiagrams.map(key => (
-                               <GenerateButton key={key} diagramType={key} />
+                           {orderedDiagrams.map((key, index) => (
+                               <GenerateButton key={key} diagramType={key} agent={diagramAgents[index]} />
                            ))}
                         </CardFooter>
                     </Card>

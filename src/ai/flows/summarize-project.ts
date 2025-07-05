@@ -15,6 +15,7 @@ const SummarizeProjectInputSchema = z.object({
   projectDescription: z
     .string()
     .describe('The detailed description of the project that needs to be summarized.'),
+  prompt: z.string().describe('The prompt to use for generating the summary.')
 });
 export type SummarizeProjectInput = z.infer<typeof SummarizeProjectInputSchema>;
 
@@ -28,13 +29,6 @@ export async function summarizeProject(input: SummarizeProjectInput): Promise<Su
   return summarizeProjectFlow(input);
 }
 
-const summarizeProjectPrompt = ai.definePrompt({
-  name: 'summarizeProjectPrompt',
-  input: {schema: SummarizeProjectInputSchema},
-  output: {schema: SummarizeProjectOutputSchema},
-  prompt: `You are an AI assistant designed to provide concise summaries of software development projects, highlighting key aspects and technologies used. Please provide a brief summary of the following project description:\n\nDescription: {{{projectDescription}}}`,
-});
-
 const summarizeProjectFlow = ai.defineFlow(
   {
     name: 'summarizeProjectFlow',
@@ -42,6 +36,13 @@ const summarizeProjectFlow = ai.defineFlow(
     outputSchema: SummarizeProjectOutputSchema,
   },
   async input => {
+    const summarizeProjectPrompt = ai.definePrompt({
+        name: 'summarizeProjectPrompt',
+        input: {schema: SummarizeProjectInputSchema},
+        output: {schema: SummarizeProjectOutputSchema},
+        prompt: input.prompt,
+    });
+
     const {output} = await summarizeProjectPrompt(input);
     return {
       ...output!,

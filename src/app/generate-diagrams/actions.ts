@@ -129,10 +129,16 @@ export async function handleGenerateDiagram(
         }
     }
   });
+  
+  const prompt = formData.get(`prompt_${diagramToGenerate}`) as string | null;
+  if (!prompt) {
+    return { ...prevState, error: `لم يتم العثور على موجه للأمر لنوع المخطط '${diagramToGenerate}'.` };
+  }
 
   const agentInput = {
       proposal: validatedProposal.data,
-      otherDiagrams
+      otherDiagrams,
+      prompt
   };
 
   try {

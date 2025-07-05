@@ -11,7 +11,8 @@ import { ProjectProposalSchema, DiagramTypeSchema } from '@/ai/schemas';
 
 const GenerateSequenceDiagramInputSchema = z.object({
     proposal: ProjectProposalSchema,
-    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code.")
+    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code."),
+    prompt: z.string().describe("The prompt to use for generating the diagram.")
 });
 export type GenerateSequenceDiagramInput = z.infer<typeof GenerateSequenceDiagramInputSchema>;
 
@@ -25,37 +26,6 @@ export async function generateSequenceDiagram(input: GenerateSequenceDiagramInpu
   return generateSequenceDiagramFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'generateSequenceDiagramPrompt',
-  input: { schema: GenerateSequenceDiagramInputSchema },
-  output: { schema: GenerateSequenceDiagramOutputSchema },
-  prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Sequence Diagram** for a key user flow.
-
-{{#if otherDiagrams}}
-To ensure consistency and accuracy, consider the information from these previously generated diagrams. This context is crucial for creating a diagram that aligns with the rest of the system design. For example, a Class diagram provides the participants (classes), and a Use Case diagram defines the scenario to model.
-{{#each otherDiagrams}}
---- {{ @key }} Diagram ---
-\`\`\`plantuml
-{{{this}}}
-\`\`\`
----
-{{/each}}
-{{/if}}
-
-The diagram should:
-1.  Identify participants (actors and system components).
-2.  Illustrate the step-by-step interactions between these participants for a primary use case (e.g., 'User logs in', 'User creates a project').
-3.  Show the order of messages exchanged between participants.
-4.  Use activation boxes to represent processing time.
-5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`,
-});
-
 const generateSequenceDiagramFlow = ai.defineFlow(
   {
     name: 'generateSequenceDiagramFlow',
@@ -63,6 +33,13 @@ const generateSequenceDiagramFlow = ai.defineFlow(
     outputSchema: GenerateSequenceDiagramOutputSchema,
   },
   async (input) => {
+    const prompt = ai.definePrompt({
+        name: 'generateSequenceDiagramPrompt',
+        input: { schema: GenerateSequenceDiagramInputSchema },
+        output: { schema: GenerateSequenceDiagramOutputSchema },
+        prompt: input.prompt,
+    });
+
     const { output } = await prompt(input);
     return output!;
   }

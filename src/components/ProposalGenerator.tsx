@@ -13,16 +13,18 @@ import { Badge } from './ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useHistory } from '@/hooks/use-history';
+import { useAgents } from '@/hooks/use-agents';
+
 
 // New imports for file generation
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType } from 'docx';
 
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="font-headline">
+    <Button type="submit" disabled={pending || disabled} className="font-headline">
       {pending ? (
         <>
           <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -401,6 +403,9 @@ export default function ProposalGenerator() {
   const initialState: { error?: string; proposal?: ProjectProposal } = {};
   const [state, formAction] = useActionState(handleGenerateProposal, initialState);
   const { addHistoryEntry } = useHistory();
+  const { agents, isLoaded } = useAgents();
+
+  const agent = agents.find(a => a.id === 'generate-proposal');
 
   useEffect(() => {
     if (state.proposal) {
@@ -417,6 +422,7 @@ export default function ProposalGenerator() {
     <>
       <Card>
         <form action={formAction}>
+          {agent && <input type="hidden" name="prompt" value={agent.prompt} />}
           <CardHeader>
             <CardTitle className="font-headline">فكرة المشروع</CardTitle>
             <CardDescription>
@@ -435,7 +441,10 @@ export default function ProposalGenerator() {
             )}
           </CardContent>
           <CardFooter>
-            <SubmitButton />
+            <SubmitButton disabled={!agent?.isEnabled} />
+             {!isLoaded ? <Loader2 className="h-4 w-4 animate-spin" /> : !agent?.isEnabled && (
+                <p className="text-sm text-destructive mr-4">تم تعطيل هذا الوكيل.</p>
+            )}
           </CardFooter>
         </form>
       </Card>

@@ -6,6 +6,7 @@ import { z } from 'zod';
 
 const GenerateSchema = z.object({
   projectIdea: z.string().min(10, { message: 'يجب أن تكون فكرة المشروع 10 أحرف على الأقل.' }),
+  prompt: z.string().min(1, { message: 'Prompt is required.' }),
 });
 
 interface FormState {
@@ -19,17 +20,19 @@ export async function handleGenerateProposal(
 ): Promise<FormState> {
   const validatedFields = GenerateSchema.safeParse({
     projectIdea: formData.get('projectIdea'),
+    prompt: formData.get('prompt'),
   });
 
   if (!validatedFields.success) {
     return {
-      error: validatedFields.error.flatten().fieldErrors.projectIdea?.[0],
+      error: validatedFields.error.flatten().fieldErrors.projectIdea?.[0] || validatedFields.error.flatten().fieldErrors.prompt?.[0],
     };
   }
 
   try {
     const result = await generateProposal({
       projectIdea: validatedFields.data.projectIdea,
+      prompt: validatedFields.data.prompt,
     });
     return { proposal: result };
   } catch (e) {

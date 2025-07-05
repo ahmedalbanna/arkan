@@ -1,5 +1,5 @@
 import type { ProjectProposal, DiagramType } from '@/ai/schemas';
-import type { SectionName } from './app/generate-report/actions';
+import type { SectionName } from '@/app/generate-report/actions';
 
 export interface User {
   id: string;
@@ -67,3 +67,7 @@ export type HistoryEntry = {
   createdAt: string;
   title: string;
 } & (ProposalHistoryData | ReportHistoryData | DiagramHistoryData);
+
+// Remove the explicit import of SectionName from a server action file
+// and define it directly here if it's needed on the client.
+// However, it's only used in ReportHistoryData which is a server-side type, so we can keep it.

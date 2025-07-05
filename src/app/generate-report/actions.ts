@@ -80,33 +80,43 @@ export async function handleGenerateSection(
       error: 'بيانات المقترح غير متوافقة مع الهيكل المطلوب.',
     };
   }
+  
+  const prompt = formData.get(`prompt_${sectionToGenerate}`) as string | null;
+  if (!prompt) {
+    return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${sectionToGenerate}'.` };
+  }
+
+  const agentInput = {
+    proposal: validatedProposal.data,
+    prompt,
+  }
 
   try {
     let result;
     switch (sectionToGenerate) {
       case 'introduction':
-        result = await generateIntroduction(validatedProposal.data);
+        result = await generateIntroduction(agentInput);
         return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
       case 'literatureReview':
-        result = await generateLiteratureReview(validatedProposal.data);
+        result = await generateLiteratureReview(agentInput);
         return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
       case 'systemAnalysis':
-        result = await generateSystemAnalysis(validatedProposal.data);
+        result = await generateSystemAnalysis(agentInput);
         return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
       case 'designStrategy':
-        result = await generateDesignStrategy(validatedProposal.data);
+        result = await generateDesignStrategy(agentInput);
         return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
        case 'systemDesign':
-        result = await generateSystemDesign(validatedProposal.data);
+        result = await generateSystemDesign(agentInput);
         return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
        case 'systemProgramming':
-        result = await generateSystemProgramming(validatedProposal.data);
+        result = await generateSystemProgramming(agentInput);
         return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
        case 'systemTesting':
-        result = await generateSystemTesting(validatedProposal.data);
+        result = await generateSystemTesting(agentInput);
         return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
       case 'conclusion':
-        result = await generateConclusion(validatedProposal.data);
+        result = await generateConclusion(agentInput);
         return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
       default:
         return { ...prevState, error: 'القسم المطلوب غير معروف.' };

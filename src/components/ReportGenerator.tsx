@@ -16,21 +16,23 @@ import { Document, Packer, Paragraph, HeadingLevel, AlignmentType } from 'docx';
 import ReactMarkdown from 'react-markdown';
 import { marked } from 'marked';
 import { useHistory } from '@/hooks/use-history';
+import { useAgents } from '@/hooks/use-agents';
+import type { Agent } from '@/lib/agents';
 
 
-const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType } } = {
-    introduction: { title: "المقدمة", icon: BookMarked },
-    literatureReview: { title: "مراجعة الأدبيات", icon: Library },
-    systemAnalysis: { title: "تحليل النظام", icon: Waypoints },
-    designStrategy: { title: "استراتيجية التصميم", icon: BookText },
-    systemDesign: { title: "تصميم النظام", icon: Code },
-    systemProgramming: { title: "برمجة النظام", icon: Code },
-    systemTesting: { title: "اختبار النظام", icon: TestTube2 },
-    conclusion: { title: "الخاتمة", icon: Flag },
+const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
+    introduction: { title: "المقدمة", icon: BookMarked, agentId: "generate-introduction" },
+    literatureReview: { title: "مراجعة الأدبيات", icon: Library, agentId: "generate-literature-review" },
+    systemAnalysis: { title: "تحليل النظام", icon: Waypoints, agentId: "generate-system-analysis" },
+    designStrategy: { title: "استراتيجية التصميم", icon: BookText, agentId: "generate-design-strategy" },
+    systemDesign: { title: "تصميم النظام", icon: Code, agentId: "generate-system-design" },
+    systemProgramming: { title: "برمجة النظام", icon: Code, agentId: "generate-system-programming" },
+    systemTesting: { title: "اختبار النظام", icon: TestTube2, agentId: "generate-system-testing" },
+    conclusion: { title: "الخاتمة", icon: Flag, agentId: "generate-conclusion" },
 };
 
 
-function GenerateButton({ section }: { section: SectionName }) {
+function GenerateButton({ section, agent }: { section: SectionName, agent?: Agent }) {
     const { pending, data } = useFormStatus();
     const isGeneratingThis = pending && data?.get('sectionToGenerate') === section;
 
@@ -39,9 +41,10 @@ function GenerateButton({ section }: { section: SectionName }) {
             type="submit"
             name="sectionToGenerate"
             value={section}
-            disabled={pending}
+            disabled={pending || !agent?.isEnabled}
             variant="secondary"
             className="w-full justify-start"
+            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${sectionConfig[section].title}`}
         >
             {isGeneratingThis ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
@@ -73,9 +76,12 @@ export default function ReportGenerator() {
     const [state, formAction] = useActionState(handleGenerateSection, initialState);
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
+    const { agents } = useAgents();
 
     const hasContent = Object.values(state.sections).some(s => !!s);
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
+    const reportAgents = orderedSections.map(key => agents.find(a => a.id === sectionConfig[key].agentId));
+
 
     useEffect(() => {
         if (state.lastGenerated && state.sections[state.lastGenerated]) {
@@ -236,6 +242,10 @@ export default function ReportGenerator() {
         <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">
             <div className="md:col-span-1">
                 <form action={formAction}>
+                    {reportAgents.map((agent, index) => {
+                        const key = orderedSections[index];
+                        return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
+                    })}
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline flex leading-relaxed">مقترح المشروع (JSON)</CardTitle>
@@ -256,8 +266,8 @@ export default function ReportGenerator() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2 items-start">
-                           {orderedSections.map(key => (
-                               <GenerateButton key={key} section={key} />
+                           {orderedSections.map((key, index) => (
+                               <GenerateButton key={key} section={key} agent={reportAgents[index]} />
                            ))}
                         </CardFooter>
                     </Card>
