@@ -67,7 +67,7 @@ function encode64(data: Buffer): string {
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
     const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
     const encoded = encode64(compressed);
-    return `https://www.plantuml.com/plantuml/png/${encoded}`;
+    return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
 }
 
 
