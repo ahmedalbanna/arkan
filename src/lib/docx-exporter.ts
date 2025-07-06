@@ -3,7 +3,7 @@
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ProjectProposal, DiagramType } from './schemas';
-import type { SectionName } from '@/app/generate-report/actions';
+import type { SectionName } from '@/ai/schemas';
 import { marked } from 'marked';
 
 // Helper to recursively process inline tokens (bold, italic, etc.)
@@ -21,10 +21,18 @@ const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): Text
                 runs.push(new TextRun({ ...options, text: token.text, font: { name: 'Courier New' } }));
                 break;
             case 'text':
-                runs.push(new TextRun({ ...options, text: token.text }));
+                // Handle potential undefined tokens by defaulting to an empty array
+                if (token.tokens) {
+                    runs.push(...processInlines(token.tokens, options));
+                } else {
+                    runs.push(new TextRun({ ...options, text: token.text }));
+                }
                 break;
             default:
-                runs.push(new TextRun({ ...options, text: token.raw }));
+                if ('raw' in token) {
+                    runs.push(new TextRun({ ...options, text: token.raw }));
+                }
+                break;
         }
     }
     return runs;
@@ -47,14 +55,19 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 }));
                 break;
             case 'paragraph':
-                docxObjects.push(new Paragraph({
-                    children: processInlines(token.tokens || []),
-                    spacing: { after: 120 }
-                }));
+                 if (token.tokens) {
+                    docxObjects.push(new Paragraph({
+                        children: processInlines(token.tokens),
+                        spacing: { after: 120 }
+                    }));
+                }
                 break;
             case 'list':
                 for (const item of token.items) {
-                    const childTokens = (item.tokens[0] as marked.Tokens.Text)?.tokens || item.tokens;
+                    // Access the inner tokens of the list item correctly.
+                    const textTokens = item.tokens.filter(t => t.type === 'text') as marked.Tokens.Text[];
+                    const childTokens = textTokens.flatMap(t => t.tokens || [t]);
+                    
                     docxObjects.push(new Paragraph({
                         children: processInlines(childTokens),
                         bullet: { level: item.depth || 0 },
@@ -65,7 +78,7 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 docxObjects.push(new Paragraph(""));
                 break;
             default:
-                if ('raw' in token) {
+                if ('raw' in token && token.raw.trim()) {
                     docxObjects.push(new Paragraph(token.raw));
                 }
                 break;
@@ -81,7 +94,16 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
     const doc = new Document({
         styles,
         sections: [{
-            properties: {},
+            properties: {
+                page: {
+                    margin: {
+                        top: 1440,
+                        right: 1440,
+                        bottom: 1440,
+                        left: 1440,
+                    }
+                }
+            },
             children: [
                 new Paragraph({ text: title, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
                 new Paragraph({ text: category, heading: HeadingLevel.HEADING_5, alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
@@ -96,7 +118,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
                 ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} أسابيع)`, bullet: { level: 0 } })),
                 new Paragraph({ text: "الميزانية", heading: HeadingLevel.HEADING_1 }),
                 new Paragraph({ children: [new TextRun({ text: "المبلغ الإجمالي: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
-                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "البند", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "التكلفة", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "البند", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "التكلفة", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${b.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
                 new Paragraph({ text: "النتائج المتوقعة", heading: HeadingLevel.HEADING_1 }),
                 ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
                 new Paragraph({ text: "معايير النجاح", heading: HeadingLevel.HEADING_1 }),
@@ -193,7 +215,16 @@ export async function exportReportAsDocx(
 
     const doc = new Document({
         styles,
-        sections: [{ properties: {}, children }],
+        sections: [{ properties: {
+             page: {
+                margin: {
+                    top: 1440,
+                    right: 1440,
+                    bottom: 1440,
+                    left: 1440,
+                }
+            }
+        }, children }],
     });
     
     const blob = await Packer.toBlob(doc);

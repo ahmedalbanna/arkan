@@ -21,9 +21,10 @@ import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
 import { type Agent } from '@/lib/agents';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
-import { exportReportAsDocx } from '@/lib/docx-exporter';
+import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
 import { DiagramTypeSchema, type DiagramType, type ProjectProposal, SectionNameSchema, type SectionName, ProjectProposalSchema } from '@/ai/schemas';
 import { generateProposal } from '@/ai/flows/generate-proposal';
+import { add, format } from 'date-fns';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
@@ -113,6 +114,25 @@ const getInitialControlState = (): Record<SectionName, ControlState> => {
     return initial as Record<SectionName, ControlState>;
 };
 
+function set(obj: any, path: string, value: any) {
+  const keys = path.split('.');
+  let current = obj;
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i];
+    // If it's the last key, set the value
+    if (i === keys.length - 1) {
+      current[key] = value;
+    } else {
+      // If the path doesn't exist, create it
+      if (!current[key]) {
+        // Check if next key is a number to create an array or an object
+        current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {};
+      }
+      current = current[key];
+    }
+  }
+}
+
 export default function ReportGenerator() {
     const initialState: ReportState = { sections: {}, diagrams: {} };
     const [isPending, startTransition] = useTransition();
@@ -176,26 +196,6 @@ export default function ReportGenerator() {
         }
     }, [state, proposalJson, projectIdea, isLoaded]);
 
-    // Sync proposalJson textarea with the visual ProposalViewer
-    useEffect(() => {
-        if (proposalJson) {
-            try {
-                const parsedData = JSON.parse(proposalJson);
-                const validatedProposal = ProjectProposalSchema.safeParse(parsedData);
-                if (validatedProposal.success) {
-                    setProposal(validatedProposal.data);
-                } else {
-                    setProposal(null);
-                }
-            } catch (e) {
-                setProposal(null);
-            }
-        } else {
-            setProposal(null);
-        }
-    }, [proposalJson]);
-
-
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
         setControlState(prevState => ({
             ...prevState,
@@ -228,7 +228,6 @@ export default function ReportGenerator() {
                 title: `مقترح مشروع: ${result.title}`,
                 proposal: result,
             });
-            // Clear any previous report state when generating a new proposal
             setState({ sections: {}, diagrams: {} });
         } catch (e) {
             console.error(e);
@@ -248,6 +247,40 @@ export default function ReportGenerator() {
             setState(newState);
             setGeneratingItem(null);
         });
+    };
+    
+    const handleProposalUpdate = (path: string, value: any) => {
+        if (!proposal) return;
+    
+        const newProposal = JSON.parse(JSON.stringify(proposal));
+        
+        set(newProposal, path, value);
+    
+        if (path.startsWith('budget.breakdown') || path === 'budget.currency') {
+            const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
+            newProposal.budget.totalAmount = total;
+        }
+    
+        if (path.startsWith('timeline')) {
+            try {
+                let currentDate = new Date(newProposal.timeline.startDate);
+                if (isNaN(currentDate.getTime())) { // Check for invalid date
+                   currentDate = new Date(); // fallback to today
+                }
+
+                for (const phase of newProposal.timeline.phases) {
+                    const durationWeeks = Number(phase.durationWeeks || 0);
+                    currentDate = add(currentDate, { weeks: durationWeeks });
+                }
+                newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
+            } catch (error) {
+                console.error("Error calculating timeline:", error);
+                // Keep the old end date if calculation fails
+            }
+        }
+    
+        setProposal(newProposal);
+        setProposalJson(JSON.stringify(newProposal, null, 2));
     };
 
     const handleNewSession = () => {
@@ -295,7 +328,7 @@ export default function ReportGenerator() {
         }
     }, [state.lastGenerated, state.sections, state.diagrams, addHistoryEntry, proposalJson]);
 
-    const handleExportDOCX = async () => {
+    const handleExportReportDOCX = async () => {
         if (!hasContent) return;
         let proposalTitle = 'Project Report';
         if (proposal && proposal.title) {
@@ -305,6 +338,13 @@ export default function ReportGenerator() {
         const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
         const template = templates[templateKey] || templates.modern;
         await exportReportAsDocx(state.sections, state.diagrams || {}, proposalTitle, template.styles);
+    };
+
+    const handleExportProposalDOCX = async () => {
+        if (!proposal) return;
+        const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
+        const template = templates[templateKey] || templates.modern;
+        await exportProposalAsDocx(proposal, template.styles);
     };
 
     if (!isLoaded || !agentsLoaded) {
@@ -348,8 +388,8 @@ export default function ReportGenerator() {
                 </CardFooter>
             </Card>
 
-            <div className={`grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div className="md:col-span-1">
+            <div className={`grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
+                <div className="md:col-span-2">
                     <form action={handleSubmit}>
                         <div className="space-y-6">
                             <Card>
@@ -476,16 +516,20 @@ export default function ReportGenerator() {
                         </div>
                     </form>
                 </div>
-                <div className="md:col-span-2 space-y-6">
+                <div className="md:col-span-3 space-y-6">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">الإجراءات</CardTitle>
-                            <CardDescription>تصدير الأقسام التي تم إنشاؤها أو بدء جلسة جديدة.</CardDescription>
+                            <CardDescription>تصدير المخرجات أو بدء جلسة جديدة.</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col sm:flex-row gap-4">
-                            <Button onClick={handleExportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
+                            <Button onClick={handleExportProposalDOCX} disabled={!proposal || isPending} className="w-full sm:w-auto font-headline">
                                 <FileText className="ml-2 h-4 w-4" />
-                                تصدير كملف DOCX
+                                تصدير المقترح
+                            </Button>
+                            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
+                                <FileText className="ml-2 h-4 w-4" />
+                                تصدير التقرير
                             </Button>
                             <Button onClick={handleNewSession} variant="outline" disabled={isPending} className="w-full sm:w-auto font-headline">
                                 <Trash2 className="ml-2 h-4 w-4" />
@@ -514,8 +558,8 @@ export default function ReportGenerator() {
 
                     {proposal && (
                         <div>
-                            <CardTitle className="font-headline text-xl mb-4">تفاصيل المقترح المولدة</CardTitle>
-                            <ProposalViewer proposal={proposal} />
+                            <CardTitle className="font-headline text-xl mb-4">تفاصيل المقترح المولدة (قابل للتعديل)</CardTitle>
+                            <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
                         </div>
                     )}
                     
