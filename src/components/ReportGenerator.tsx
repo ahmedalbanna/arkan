@@ -1,13 +1,12 @@
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useTransition, useState, useEffect } from 'react';
 import { handleGenerateReportItem, type ReportState, type SectionName } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Label } from './ui/label';
@@ -44,16 +43,15 @@ const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; }
     archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
 };
 
-function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title: string; agent?: Agent }) {
-    const { pending, data } = useFormStatus();
-    const isGeneratingThis = pending && data?.get('itemToGenerate') === itemKey;
+function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }: { itemKey: string; title: string; agent?: Agent; isPending: boolean; generatingItem: string | null; }) {
+    const isGeneratingThis = isPending && generatingItem === itemKey;
 
     return (
         <Button
             type="submit"
             name="itemToGenerate"
             value={itemKey}
-            disabled={pending || !agent?.isEnabled}
+            disabled={isPending || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : title}
         >
@@ -68,12 +66,15 @@ function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title:
 }
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
+const orderedDiagrams = DiagramTypeSchema.options;
 
 type ControlState = {
   formality: number;
   tone: string;
   wordCount: string;
 };
+
+const STORAGE_KEY = 'arkan-report-generator-state';
 
 const generateInstructionText = (controls: ControlState) => {
     let instructions = [];
@@ -97,24 +98,64 @@ const generateInstructionText = (controls: ControlState) => {
     return "لا توجد تعليمات إضافية.";
 };
 
+const getInitialControlState = (): Record<SectionName, ControlState> => {
+    const initial: Partial<Record<SectionName, ControlState>> = {};
+    orderedSections.forEach(key => {
+        initial[key] = {
+            formality: 50,
+            tone: 'professional',
+            wordCount: '300',
+        };
+    });
+    return initial as Record<SectionName, ControlState>;
+};
+
 export default function ReportGenerator() {
     const initialState: ReportState = { sections: {}, diagrams: {} };
-    const [state, formAction] = useActionState(handleGenerateReportItem, initialState);
+    const [isPending, startTransition] = useTransition();
+    const [state, setState] = useState<ReportState>(initialState);
+    const [generatingItem, setGeneratingItem] = useState<string | null>(null);
+
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
-    const { agents, isLoaded } = useAgents();
+    const { agents, isLoaded: agentsLoaded } = useAgents();
 
-    const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(() => {
-        const initial: Partial<Record<SectionName, ControlState>> = {};
-        orderedSections.forEach(key => {
-            initial[key] = {
-                formality: 50,
-                tone: 'professional',
-                wordCount: '300',
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
+
+    // Load state from local storage on mount
+    useEffect(() => {
+        try {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const parsed = JSON.parse(savedState);
+                setState({
+                    sections: parsed.sections || {},
+                    diagrams: parsed.diagrams || {},
+                });
+                setProposalJson(parsed.proposalJson || '');
+            }
+        } catch (error) {
+            console.error("Failed to load state from localStorage", error);
+        }
+        setIsLoaded(true);
+    }, []);
+
+    // Save state to local storage on change
+    useEffect(() => {
+        if (!isLoaded) return;
+        try {
+            const dataToSave = {
+                sections: state.sections,
+                diagrams: state.diagrams,
+                proposalJson: proposalJson,
             };
-        });
-        return initial as Record<SectionName, ControlState>;
-    });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        } catch (error) {
+             console.error("Failed to save state to localStorage", error);
+        }
+    }, [state, proposalJson, isLoaded]);
 
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
         setControlState(prevState => ({
@@ -130,8 +171,26 @@ export default function ReportGenerator() {
     
     const reportAgents = orderedSections.map(key => agents.find(a => a.id === sectionConfig[key].agentId));
     
-    const orderedDiagrams = DiagramTypeSchema.options;
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
+    
+    const handleSubmit = (formData: FormData) => {
+        const item = formData.get('itemToGenerate') as string;
+        if (!item) return;
+
+        setGeneratingItem(item);
+        startTransition(async () => {
+            const newState = await handleGenerateReportItem(state, formData);
+            setState(newState);
+            setGeneratingItem(null);
+        });
+    };
+
+    const handleNewSession = () => {
+        localStorage.removeItem(STORAGE_KEY);
+        setState({ sections: {}, diagrams: {} });
+        setProposalJson('');
+        setControlState(getInitialControlState());
+    };
 
     useEffect(() => {
         if (!state.lastGenerated) return;
@@ -184,7 +243,7 @@ export default function ReportGenerator() {
         await exportReportAsDocx(state.sections, state.diagrams || {}, proposalTitle, template.styles);
     };
 
-    if (!isLoaded) {
+    if (!isLoaded || !agentsLoaded) {
         return (
             <div className="flex justify-center items-center p-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -195,7 +254,7 @@ export default function ReportGenerator() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">
             <div className="md:col-span-1">
-                <form action={formAction}>
+                <form action={handleSubmit}>
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline flex leading-relaxed">مقترح المشروع (JSON)</CardTitle>
@@ -207,6 +266,7 @@ export default function ReportGenerator() {
                                 placeholder='{ "title": "...", "objective": "...", ... }'
                                 rows={15}
                                 required
+                                value={proposalJson}
                                 onChange={(e) => setProposalJson(e.target.value)}
                             />
                             {state?.error && (
@@ -284,7 +344,7 @@ export default function ReportGenerator() {
                                                         </div>
                                                     </TabsContent>
                                                 </Tabs>
-                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} />
+                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
                                             </AccordionContent>
                                         </AccordionItem>
                                     );
@@ -305,7 +365,7 @@ export default function ReportGenerator() {
                                                     <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
                                                     <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
                                                 </div>
-                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} />
+                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
                                             </AccordionContent>
                                         </AccordionItem>
                                     );
@@ -318,13 +378,17 @@ export default function ReportGenerator() {
             <div className="md:col-span-2">
                  <Card className="mb-6">
                     <CardHeader>
-                        <CardTitle className="font-headline">تصدير التقرير</CardTitle>
-                        <CardDescription>تصدير الأقسام التي تم إنشاؤها إلى ملف DOCX.</CardDescription>
+                        <CardTitle className="font-headline">الإجراءات</CardTitle>
+                        <CardDescription>تصدير الأقسام التي تم إنشاؤها أو بدء جلسة جديدة.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col sm:flex-row gap-4">
-                        <Button onClick={handleExportDOCX} disabled={!hasContent} className="w-full sm:w-auto font-headline">
+                        <Button onClick={handleExportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
                             <FileText className="ml-2 h-4 w-4" />
                             تصدير كملف DOCX
+                        </Button>
+                        <Button onClick={handleNewSession} variant="outline" disabled={isPending} className="w-full sm:w-auto font-headline">
+                            <Trash2 className="ml-2 h-4 w-4" />
+                            جلسة جديدة
                         </Button>
                     </CardContent>
                 </Card>
@@ -338,7 +402,7 @@ export default function ReportGenerator() {
                         </AlertDescription>
                     </Alert>
                 )}
-                 <Accordion type="multiple" className="w-full space-y-4">
+                 <Accordion type="multiple" className="w-full space-y-4" defaultValue={orderedSections.concat(orderedDiagrams)}>
                     {orderedSections.map((key) => {
                         const content = state.sections[key];
                         if (!content) return null;
