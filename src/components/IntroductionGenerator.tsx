@@ -8,6 +8,7 @@ import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, BookMarked } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -65,7 +66,9 @@ export default function IntroductionGenerator() {
                 <BookMarked className="h-4 w-4" />
                 <AlertTitle className="font-headline">مقدمة المشروع المولدة</AlertTitle>
                 <AlertDescription>
-                  <div className="whitespace-pre-wrap">{state.introduction}</div>
+                  <div className="prose dark:prose-invert max-w-none pt-2">
+                    <ReactMarkdown>{state.introduction}</ReactMarkdown>
+                  </div>
                 </AlertDescription>
             </Alert>
         </div>

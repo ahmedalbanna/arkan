@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import { Badge } from './ui/badge';
+import ReactMarkdown from 'react-markdown';
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
@@ -71,8 +72,10 @@ export default function Summarizer() {
             <Alert>
                 <Sparkles className="h-4 w-4" />
                 <AlertTitle className="font-headline">الملخص المولد</AlertTitle>
-                <AlertDescription className="whitespace-pre-wrap mt-2">
-                    {state.summary}
+                <AlertDescription>
+                  <div className="prose dark:prose-invert max-w-none pt-2">
+                    <ReactMarkdown>{state.summary}</ReactMarkdown>
+                  </div>
                 </AlertDescription>
             </Alert>
             

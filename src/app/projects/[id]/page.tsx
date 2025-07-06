@@ -11,6 +11,7 @@ import { ArrowUpRight, Calendar, MessageCircle, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import CommentItem from '@/components/CommentItem';
 import NewCommentForm from '@/components/NewCommentForm';
+import ReactMarkdown from 'react-markdown';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -86,7 +87,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
           <article className="prose prose-lg dark:prose-invert max-w-none">
             <h2 className="font-headline">عن المشروع</h2>
-            <p>{project.description}</p>
+            <ReactMarkdown>{project.description}</ReactMarkdown>
           </article>
 
           <div className="mt-8">
@@ -113,7 +114,9 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
               <CardTitle className="font-headline">ملخص المشروع (AI)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">{project.summaryShort}</p>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                 <ReactMarkdown>{project.summaryShort || ''}</ReactMarkdown>
+              </div>
               <div>
                 <h4 className="font-semibold mb-2">التقنيات المستخدمة:</h4>
                 <div className="flex flex-wrap gap-2">
