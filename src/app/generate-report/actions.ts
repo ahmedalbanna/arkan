@@ -195,7 +195,20 @@ export async function handleGenerateReportItem(
 
     if (isDiagram) {
         const diagramToGenerate = itemToGenerate as DiagramType;
-        const agentInput = { proposal: validatedProposal.data, otherDiagrams: {}, prompt };
+        const otherDiagrams: Partial<Record<DiagramType, string>> = {};
+        if (prevState.diagrams) {
+            for (const key in prevState.diagrams) {
+                if (key !== diagramToGenerate && prevState.diagrams[key as DiagramType]) {
+                    otherDiagrams[key as DiagramType] = prevState.diagrams[key as DiagramType]!.plantUmlCode;
+                }
+            }
+        }
+
+        const agentInput = { 
+            proposal: validatedProposal.data, 
+            otherDiagrams, 
+            prompt 
+        };
         let result;
 
         switch (diagramToGenerate) {

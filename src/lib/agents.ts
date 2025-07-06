@@ -70,7 +70,7 @@ Generate the entire introduction as a single, coherent text. Use markdown newlin
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -94,7 +94,7 @@ Synthesize information from the entire proposal to create a coherent and well-su
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -118,7 +118,7 @@ Synthesize information from the entire proposal to create a comprehensive analys
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -142,7 +142,7 @@ Synthesize information from the entire proposal to create a coherent design stra
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -166,7 +166,7 @@ Synthesize information from the entire proposal to produce a logical and robust 
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -191,7 +191,7 @@ Synthesize information from the entire proposal to create a practical implementa
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -215,7 +215,7 @@ Synthesize information from the entire proposal, especially the risks and succes
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
@@ -239,7 +239,7 @@ Synthesize information from the entire proposal to create a powerful conclusion.
 
 Project Proposal Data:
 \`\`\`json
-{{{json this}}}
+{{{json proposal}}}
 \`\`\`
 `
   },
