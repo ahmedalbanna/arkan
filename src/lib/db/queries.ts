@@ -1,7 +1,7 @@
 import 'server-only';
 import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
-import { eq, desc, inArray } from 'drizzle-orm';
+import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
 
 export async function getFeaturedProjects() {
     const data = await db.query.projects.findMany({
@@ -19,9 +19,31 @@ export async function getFeaturedProjects() {
 export type ProjectForCard = Awaited<ReturnType<typeof getFeaturedProjects>>[number];
 
 
-export async function getAllProjects(category?: string) {
+export async function getAllProjects({ category, q }: { category?: string; q?: string }) {
+    const conditions = [];
+
+    if (category && category !== 'all') {
+        conditions.push(eq(projects.category, category));
+    }
+
+    if (q) {
+        const searchQuery = `%${q}%`;
+        
+        const projectsWithMatchingTags = db
+            .select({ projectId: projectTags.projectId })
+            .from(projectTags)
+            .leftJoin(tags, eq(projectTags.tagId, tags.id))
+            .where(like(tags.name, searchQuery));
+
+        conditions.push(or(
+            like(projects.title, searchQuery),
+            like(projects.description, searchQuery),
+            inArray(projects.id, projectsWithMatchingTags)
+        ));
+    }
+    
     const data = await db.query.projects.findMany({
-        where: category ? eq(projects.category, category) : undefined,
+        where: conditions.length > 0 ? and(...conditions) : undefined,
         orderBy: [desc(projects.createdAt)],
         with: {
             user: true,
