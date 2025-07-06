@@ -21,6 +21,7 @@ export type SummarizeProjectInput = z.infer<typeof SummarizeProjectInputSchema>;
 
 const SummarizeProjectOutputSchema = z.object({
   summary: z.string().describe('A concise summary of the project.'),
+  technologies: z.array(z.string()).describe('A list of technologies, frameworks, and libraries identified in the project description.'),
   progress: z.string().describe('Details on the summarization progress'),
 });
 export type SummarizeProjectOutput = z.infer<typeof SummarizeProjectOutputSchema>;
@@ -46,7 +47,7 @@ const summarizeProjectFlow = ai.defineFlow(
     const {output} = await summarizeProjectPrompt(input);
     return {
       ...output!,
-      progress: 'Generated a concise summary of the project.',
+      progress: 'Generated a concise summary of the project and extracted key technologies.',
     };
   }
 );

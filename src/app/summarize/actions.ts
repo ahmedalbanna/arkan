@@ -10,6 +10,7 @@ const SummarizeSchema = z.object({
 
 interface FormState {
   summary?: string;
+  technologies?: string[];
   progress?: string;
   error?: string;
 }
@@ -34,7 +35,7 @@ export async function handleSummarize(
       projectDescription: validatedFields.data.projectDescription,
       prompt: validatedFields.data.prompt,
     });
-    return { summary: result.summary, progress: result.progress };
+    return { summary: result.summary, technologies: result.technologies, progress: result.progress };
   } catch (e) {
     console.error(e);
     return { error: 'حدث خطأ أثناء توليد الملخص. يرجى المحاولة مرة أخرى.' };

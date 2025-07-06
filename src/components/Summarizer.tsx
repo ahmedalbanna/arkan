@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
+import { Badge } from './ui/badge';
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus();
@@ -30,7 +31,7 @@ function SubmitButton({ disabled }: { disabled?: boolean }) {
 }
 
 export default function Summarizer() {
-  const initialState: { summary?: string; error?: string } = {};
+  const initialState: { summary?: string; technologies?: string[], error?: string } = {};
   const [state, formAction] = useActionState(handleSummarize, initialState);
   const { agents, isLoaded } = useAgents();
 
@@ -66,15 +67,26 @@ export default function Summarizer() {
       </form>
 
       {state?.summary && (
-        <div className="p-6 pt-0">
+        <CardContent className="pt-6 border-t space-y-4">
             <Alert>
                 <Sparkles className="h-4 w-4" />
                 <AlertTitle className="font-headline">الملخص المولد</AlertTitle>
-                <AlertDescription className="whitespace-pre-wrap">
+                <AlertDescription className="whitespace-pre-wrap mt-2">
                     {state.summary}
                 </AlertDescription>
             </Alert>
-        </div>
+            
+            {state.technologies && state.technologies.length > 0 && (
+                <div>
+                    <h4 className="font-headline text-lg mb-3">التقنيات المكتشفة</h4>
+                    <div className="flex flex-wrap gap-2">
+                        {state.technologies.map((tech) => (
+                            <Badge key={tech} variant="secondary">{tech}</Badge>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </CardContent>
       )}
     </Card>
   );

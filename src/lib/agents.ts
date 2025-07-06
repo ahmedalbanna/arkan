@@ -21,7 +21,13 @@ export const AGENTS: Agent[] = [
     icon: BrainCircuit,
     pageUrl: '/summarize',
     isEnabled: true,
-    prompt: `You are an AI assistant designed to provide concise summaries of software development projects, highlighting key aspects and technologies used. Please provide a brief summary of the following project description:\n\nDescription: {{{projectDescription}}}`
+    prompt: `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
+1. Provide a concise summary of the project, highlighting its key aspects.
+2. Identify and extract a list of all technologies, frameworks, and libraries mentioned.
+
+Please analyze the following project description and provide the output in the required structured format.
+
+Description: {{{projectDescription}}}`
   },
   {
     id: 'generate-proposal',
