@@ -121,7 +121,7 @@ export async function handleGenerateReportItem(
     };
   }
   
-  const prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
+  let prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
   if (!prompt) {
     return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${itemToGenerate}'.` };
   }
@@ -132,6 +132,33 @@ export async function handleGenerateReportItem(
   if (!isSection && !isDiagram) {
     return { ...prevState, error: 'نوع العنصر المطلوب غير معروف.' };
   }
+  
+  // If it's a text section, check for and append control instructions
+  if (isSection) {
+      const formalityValue = formData.get(`formality_${itemToGenerate}`) as string | null;
+      const tone = formData.get(`tone_${itemToGenerate}`) as string | null;
+      const wordCount = formData.get(`wordCount_${itemToGenerate}`) as string | null;
+
+      let instructions = [];
+      if (formalityValue) {
+          const formality = parseInt(formalityValue, 10);
+          let formalityDesc = "balanced";
+          if (formality < 33) formalityDesc = "informal and casual";
+          else if (formality > 66) formalityDesc = "highly formal and professional";
+          instructions.push(`- The writing style should be ${formalityDesc}.`);
+      }
+      if (tone && tone !== "none") {
+          instructions.push(`- Adopt a ${tone} tone.`);
+      }
+      if (wordCount) {
+          instructions.push(`- The response should be approximately ${wordCount} words long.`);
+      }
+
+      if (instructions.length > 0) {
+          prompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
+      }
+  }
+
 
   try {
     if (isSection) {

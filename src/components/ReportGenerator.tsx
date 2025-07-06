@@ -11,6 +11,10 @@ import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag,
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Label } from './ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -171,10 +175,49 @@ export default function ReportGenerator() {
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent className="space-y-4 p-4">
-                                                <div className="space-y-2">
-                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
-                                                    <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
-                                                </div>
+                                                <Tabs defaultValue="prompt" className="w-full">
+                                                    <TabsList className="grid w-full grid-cols-2">
+                                                        <TabsTrigger value="prompt">تعديل الموجه</TabsTrigger>
+                                                        <TabsTrigger value="controls">التحكم بالمخرجات</TabsTrigger>
+                                                    </TabsList>
+                                                    <TabsContent value="prompt" className="pt-4">
+                                                        <div className="space-y-2">
+                                                            <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
+                                                            <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
+                                                        </div>
+                                                    </TabsContent>
+                                                    <TabsContent value="controls" className="pt-4">
+                                                        <div className="space-y-6">
+                                                            <div className="space-y-3">
+                                                                <Label htmlFor={`formality-${key}`}>الرسمية (Formality)</Label>
+                                                                <Slider id={`formality-${key}`} name={`formality_${key}`} defaultValue={[50]} max={100} step={1} />
+                                                                <div className="flex justify-between text-xs text-muted-foreground">
+                                                                    <span>غير رسمي</span>
+                                                                    <span>متوازن</span>
+                                                                    <span>رسمي جداً</span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <Label htmlFor={`tone-${key}`}>النبرة (Tone)</Label>
+                                                                <Select name={`tone_${key}`} defaultValue="professional">
+                                                                    <SelectTrigger id={`tone-${key}`}>
+                                                                        <SelectValue placeholder="اختر نبرة" />
+                                                                    </SelectTrigger>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="professional">احترافي</SelectItem>
+                                                                        <SelectItem value="academic">أكاديمي</SelectItem>
+                                                                        <SelectItem value="casual">غير رسمي</SelectItem>
+                                                                        <SelectItem value="persuasive">مقنع</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                            </div>
+                                                             <div className="space-y-2">
+                                                                <Label htmlFor={`wordCount-${key}`}>عدد الكلمات (تقريبي)</Label>
+                                                                <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="مثال: 300" />
+                                                            </div>
+                                                        </div>
+                                                    </TabsContent>
+                                                </Tabs>
                                                 <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} />
                                             </AccordionContent>
                                         </AccordionItem>
