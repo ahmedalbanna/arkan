@@ -7,10 +7,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
 const GenerateSystemAnalysisInputSchema = z.object({
     proposal: ProjectProposalSchema,
+    otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
+    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
     prompt: z.string().describe("The prompt to use for generating the system analysis.")
 });
 export type GenerateSystemAnalysisInput = z.infer<typeof GenerateSystemAnalysisInputSchema>;

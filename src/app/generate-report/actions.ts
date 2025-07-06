@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
 import { deflateSync } from 'zlib';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
@@ -18,16 +18,6 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
-
-export type SectionName = 
-  | 'introduction'
-  | 'literatureReview'
-  | 'systemAnalysis'
-  | 'designStrategy'
-  | 'systemDesign'
-  | 'systemProgramming'
-  | 'systemTesting'
-  | 'conclusion';
 
 export interface ReportState {
   sections: {
@@ -159,55 +149,74 @@ export async function handleGenerateReportItem(
       }
   }
 
+  // --- Start: Collect Context ---
+  const otherSections: Partial<Record<SectionName, string>> = {};
+  if (prevState.sections) {
+    Object.entries(prevState.sections).forEach(([key, value]) => {
+      if (key !== itemToGenerate && value) {
+        otherSections[key as SectionName] = value;
+      }
+    });
+  }
+
+  const otherDiagrams: Partial<Record<DiagramType, string>> = {};
+  if (prevState.diagrams) {
+    Object.entries(prevState.diagrams).forEach(([key, value]) => {
+      if (key !== itemToGenerate && value) {
+        otherDiagrams[key as DiagramType] = value.plantUmlCode;
+      }
+    });
+  }
+  // --- End: Collect Context ---
 
   try {
     if (isSection) {
       const sectionToGenerate = itemToGenerate as SectionName;
       let result;
+
+      const agentInput = {
+        proposal: validatedProposal.data,
+        otherSections,
+        otherDiagrams,
+        prompt: prompt!,
+      };
       
       switch (sectionToGenerate) {
         case 'introduction':
-          result = await generateIntroduction({ proposal: validatedProposal.data, prompt });
+          result = await generateIntroduction(agentInput);
           return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
         case 'literatureReview':
-          result = await generateLiteratureReview({ proposal: validatedProposal.data, prompt });
+          result = await generateLiteratureReview(agentInput);
           return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
         case 'systemAnalysis':
-          result = await generateSystemAnalysis({ proposal: validatedProposal.data, prompt });
+          result = await generateSystemAnalysis(agentInput);
           return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
         case 'designStrategy':
-          result = await generateDesignStrategy({ proposal: validatedProposal.data, prompt });
+          result = await generateDesignStrategy(agentInput);
           return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
          case 'systemDesign':
-          result = await generateSystemDesign({ proposal: validatedProposal.data, prompt });
+          result = await generateSystemDesign(agentInput);
           return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
          case 'systemProgramming':
-          result = await generateSystemProgramming({ proposal: validatedProposal.data, prompt });
+          result = await generateSystemProgramming(agentInput);
           return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
          case 'systemTesting':
-          result = await generateSystemTesting({ proposal: validatedProposal.data, prompt });
+          result = await generateSystemTesting(agentInput);
           return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
         case 'conclusion':
-          result = await generateConclusion({ proposal: validatedProposal.data, prompt });
+          result = await generateConclusion(agentInput);
           return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
       }
     }
 
     if (isDiagram) {
         const diagramToGenerate = itemToGenerate as DiagramType;
-        const otherDiagrams: Partial<Record<DiagramType, string>> = {};
-        if (prevState.diagrams) {
-            for (const key in prevState.diagrams) {
-                if (key !== diagramToGenerate && prevState.diagrams[key as DiagramType]) {
-                    otherDiagrams[key as DiagramType] = prevState.diagrams[key as DiagramType]!.plantUmlCode;
-                }
-            }
-        }
 
         const agentInput = { 
-            proposal: validatedProposal.data, 
+            proposal: validatedProposal.data,
+            otherSections,
             otherDiagrams, 
-            prompt 
+            prompt: prompt!
         };
         let result;
 

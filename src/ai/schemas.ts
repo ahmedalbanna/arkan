@@ -10,6 +10,19 @@ export const DiagramTypeSchema = z.enum([
 ]);
 export type DiagramType = z.infer<typeof DiagramTypeSchema>;
 
+export const SectionNameSchema = z.enum([
+  'introduction',
+  'literatureReview',
+  'systemAnalysis',
+  'designStrategy',
+  'systemDesign',
+  'systemProgramming',
+  'systemTesting',
+  'conclusion',
+]);
+export type SectionName = z.infer<typeof SectionNameSchema>;
+
+
 export const ProjectProposalSchema = z.object({
   category: z.string().describe("A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI')."),
   title: z.string().describe("A clear and descriptive title for the project."),
