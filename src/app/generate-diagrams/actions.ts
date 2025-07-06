@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -84,7 +85,8 @@ export async function handleGenerateDiagram(
     } catch (e) {
       console.error(e);
       const plantUmlCodes = { ...prevState.plantUmlCodes, [diagramType]: plantUmlCode };
-      return { ...prevState, plantUmlCodes, currentPlantUmlCode: plantUmlCode, error: `حدث خطأ أثناء عرض المخطط. تأكد من صحة الكود.` };
+      const imageUrl = 'https://placehold.co/800x600.png';
+      return { ...prevState, plantUmlCodes, currentPlantUmlCode: plantUmlCode, imageUrl, error: `حدث خطأ أثناء عرض المخطط. تأكد من صحة الكود.` };
     }
   }
 
@@ -166,7 +168,14 @@ export async function handleGenerateDiagram(
         return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
     }
 
-    const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+    let imageUrl: string;
+    try {
+        imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+    } catch(e) {
+        console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
+        imageUrl = 'https://placehold.co/800x600.png';
+    }
+
     const newPlantUmlCodes = { ...prevState.plantUmlCodes, [diagramToGenerate]: result.plantUmlCode };
 
     return { 

@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -230,7 +231,14 @@ export async function handleGenerateReportItem(
             default: return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
         }
 
-        const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+        let imageUrl: string;
+        try {
+            imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+        } catch (e) {
+            console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
+            imageUrl = 'https://placehold.co/800x600.png';
+        }
+
         const newDiagrams = { 
             ...prevState.diagrams, 
             [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl } 

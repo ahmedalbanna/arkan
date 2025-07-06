@@ -189,10 +189,22 @@ export async function exportReportAsDocx(
             const diagramData = diagrams[key];
             if (diagramData) {
                 try {
+                    let imageBuffer: ArrayBuffer;
                     const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(diagramData.imageUrl)}`;
                     const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error('Image fetch failed via proxy');
-                    const imageBuffer = await response.arrayBuffer();
+                    
+                    if (!response.ok) {
+                        console.warn(`Failed to fetch diagram image from ${diagramData.imageUrl}. Falling back to placeholder.`);
+                        const placeholderUrl = 'https://placehold.co/800x600.png';
+                        const placeholderProxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
+                        const placeholderResponse = await fetch(placeholderProxyUrl);
+                        if (!placeholderResponse.ok) {
+                            throw new Error(`Placeholder image fetch also failed for diagram ${key}.`);
+                        }
+                        imageBuffer = await placeholderResponse.arrayBuffer();
+                    } else {
+                        imageBuffer = await response.arrayBuffer();
+                    }
                     
                     children.push(new Paragraph({
                         text: diagramConfig[key].title,
