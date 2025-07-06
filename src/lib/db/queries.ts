@@ -133,3 +133,60 @@ export async function updateComment(id: string, content: string) {
 export async function deleteComment(id: string) {
     await db.delete(comments).where(eq(comments.id, id));
 }
+
+export async function createProject(data: {
+    userId: string;
+    title: string;
+    description: string;
+    category: string;
+    liveLink?: string;
+    tags: string[];
+    media: { url: string; alt: string; aiHint?: string; type: 'image' | 'video' }[];
+}) {
+    return await db.transaction(async (tx) => {
+        // 1. Create the project
+        const newProjectId = `proj-${randomUUID()}`;
+        await tx.insert(projects).values({
+            id: newProjectId,
+            userId: data.userId,
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            liveLink: data.liveLink,
+            createdAt: new Date().toISOString(),
+        });
+
+        // 2. Handle tags
+        if (data.tags.length > 0) {
+            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
+            const existingTagNames = new Set(existingTags.map(t => t.name));
+            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+
+            if (newTagNames.length > 0) {
+                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
+                existingTags.push(...newTags);
+            }
+            
+            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
+
+            await tx.insert(projectTags).values(data.tags.map(tagName => {
+                const tagId = tagMap.get(tagName);
+                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
+                return { projectId: newProjectId, tagId };
+            }));
+        }
+
+        // 3. Handle media
+        if (data.media.length > 0) {
+            await tx.insert(media).values(data.media.map(m => ({
+                projectId: newProjectId,
+                url: m.url,
+                alt: m.alt,
+                aiHint: m.aiHint,
+                type: m.type,
+            })));
+        }
+
+        return newProjectId;
+    });
+}

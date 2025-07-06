@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getAllProjects, getAllCategories } from '@/lib/db/queries';
-import { Search } from 'lucide-react';
+import { FilePlus2, Search } from 'lucide-react';
+import Link from 'next/link';
 
 export default async function ProjectsPage({ searchParams }: { searchParams: { category?: string; q?: string }}) {
   const { category, q } = searchParams;
@@ -43,6 +44,13 @@ export default async function ProjectsPage({ searchParams }: { searchParams: { c
           </SelectContent>
         </Select>
         <Button type="submit" className="w-full md:w-auto font-headline">بحث</Button>
+        <div className="hidden md:block h-8 border-l border-border mx-2"></div>
+        <Button asChild variant="secondary" className="w-full md:w-auto font-headline">
+            <Link href="/projects/new">
+                <FilePlus2 className="ml-2 h-4 w-4" />
+                مشروع جديد
+            </Link>
+        </Button>
       </form>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
