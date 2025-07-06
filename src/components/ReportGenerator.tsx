@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
-import { getAgent } from '@/lib/db/queries/agents';
-import { type Agent } from '@/lib/db/schema';
+import { useAgents } from '@/hooks/use-agents';
+import { type Agent } from '@/lib/agents';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
 import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
@@ -67,11 +67,12 @@ function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title:
     );
 }
 
-export default function ReportGenerator({ agents }: { agents: Agent[] }) {
+export default function ReportGenerator() {
     const initialState: ReportState = { sections: {}, diagrams: {} };
     const [state, formAction] = useActionState(handleGenerateReportItem, initialState);
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
+    const { agents, isLoaded } = useAgents();
 
     const hasContent = Object.values(state.sections).some(s => !!s) || Object.values(state.diagrams || {}).some(d => !!d);
     
@@ -131,6 +132,14 @@ export default function ReportGenerator({ agents }: { agents: Agent[] }) {
         const template = templates[templateKey] || templates.modern;
         await exportReportAsDocx(state.sections, state.diagrams || {}, proposalTitle, template.styles);
     };
+
+    if (!isLoaded) {
+        return (
+            <div className="flex justify-center items-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        )
+    }
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">

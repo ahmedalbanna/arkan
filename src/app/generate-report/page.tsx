@@ -1,8 +1,6 @@
 import ReportGenerator from "@/components/ReportGenerator";
-import { getAgents } from '@/lib/db/queries/agents';
 
-export default async function GenerateReportPage() {
-  const agents = await getAgents();
+export default function GenerateReportPage() {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <div className="text-center mb-12">
@@ -13,7 +11,7 @@ export default async function GenerateReportPage() {
           الصق مقترح مشروعك الكامل بصيغة JSON، ثم قم بتوليد كل قسم من أقسام التقرير النهائي بشكل فردي.
         </p>
       </div>
-      <ReportGenerator agents={agents} />
+      <ReportGenerator />
     </div>
   );
 }
