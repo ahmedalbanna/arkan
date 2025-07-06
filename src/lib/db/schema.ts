@@ -1,4 +1,4 @@
-import { integer, text, sqliteTable, primaryKey } from 'drizzle-orm/sqlite-core';
+import { integer, text, sqliteTable, primaryKey,index } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 // Users Table
