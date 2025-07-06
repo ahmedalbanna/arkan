@@ -1,46 +1,86 @@
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ProjectProposal } from './schemas';
 import type { SectionName } from '@/app/generate-report/actions';
 import { marked } from 'marked';
 
-// Helper to parse markdown for DOCX
+// Helper to recursively process inline tokens (bold, italic, etc.)
+const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): TextRun[] => {
+    const runs: TextRun[] = [];
+    for (const token of tokens) {
+        switch (token.type) {
+            case 'strong':
+                runs.push(...processInlines(token.tokens, { ...options, bold: true }));
+                break;
+            case 'em':
+                runs.push(...processInlines(token.tokens, { ...options, italics: true }));
+                break;
+            case 'codespan':
+                runs.push(new TextRun({ ...options, text: token.text, font: { name: 'Courier New' } }));
+                break;
+            case 'text':
+                runs.push(new TextRun({ ...options, text: token.text }));
+                break;
+            default:
+                runs.push(new TextRun({ ...options, text: token.raw }));
+        }
+    }
+    return runs;
+};
+
+// Helper to parse markdown for DOCX using the 'marked' library
 const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
-    const paragraphs: Paragraph[] = [];
-    if (!markdown) return paragraphs;
+    if (!markdown) return [];
 
-    const lines = markdown.split('\n');
+    const tokens = marked.lexer(markdown);
+    const docxObjects: Paragraph[] = [];
 
-    for (const line of lines) {
-        if (line.trim() === '') continue;
-
-        if (line.startsWith('### ')) {
-            paragraphs.push(new Paragraph({ text: line.substring(4), heading: HeadingLevel.HEADING_3, spacing: { after: 120 } }));
-            continue;
+    for (const token of tokens) {
+        switch (token.type) {
+            case 'heading':
+                docxObjects.push(new Paragraph({
+                    text: token.text,
+                    heading: `Heading${token.depth}` as HeadingLevel,
+                    spacing: { after: 200, before: 100 }
+                }));
+                break;
+            case 'paragraph':
+                docxObjects.push(new Paragraph({
+                    children: processInlines(token.tokens || []),
+                    spacing: { after: 120 }
+                }));
+                break;
+            case 'list':
+                for (const item of token.items) {
+                    const textToken = item.tokens.find(t => t.type === 'text') as marked.Tokens.Text | undefined;
+                    if (textToken) {
+                        docxObjects.push(new Paragraph({
+                            children: processInlines(textToken.tokens || []),
+                            bullet: { level: 0 },
+                        }));
+                    } else {
+                        // Fallback for list items without nested text tokens
+                        docxObjects.push(new Paragraph({
+                           text: item.text,
+                           bullet: { level: 0 },
+                        }));
+                    }
+                }
+                break;
+            case 'space':
+                docxObjects.push(new Paragraph(""));
+                break;
+            default:
+                if ('raw' in token) {
+                    docxObjects.push(new Paragraph(token.raw));
+                }
+                break;
         }
-        if (line.startsWith('## ')) {
-            paragraphs.push(new Paragraph({ text: line.substring(3), heading: HeadingLevel.HEADING_2, spacing: { after: 160 } }));
-            continue;
-        }
-        if (line.startsWith('# ')) {
-            paragraphs.push(new Paragraph({ text: line.substring(2), heading: HeadingLevel.HEADING_1, spacing: { after: 200 } }));
-            continue;
-        }
-        if (line.startsWith('* ') || line.startsWith('- ')) {
-            paragraphs.push(new Paragraph({ text: line.substring(2), bullet: { level: 0 } }));
-            continue;
-        }
-        if (line.match(/^\d+\.\s/)) {
-            paragraphs.push(new Paragraph({ text: line.replace(/^\d+\.\s/, ''), bullet: { level: 0 } }));
-            continue;
-        }
-
-        paragraphs.push(new Paragraph({ text: line }));
     }
 
-    return paragraphs;
+    return docxObjects;
 };
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
@@ -52,9 +92,9 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
             properties: {},
             children: [
                 new Paragraph({ text: title, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
-                new Paragraph({ text: category, heading: HeadingLevel.HEADING_5, alignment: AlignmentType.CENTER }),
+                new Paragraph({ text: category, heading: HeadingLevel.HEADING_5, alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
                 new Paragraph({ text: "الهدف", heading: HeadingLevel.HEADING_1 }),
-                new Paragraph({ text: objective }),
+                ...parseMarkdownToDocx(objective),
                 new Paragraph({ text: "المنهجية", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(methodology),
                 new Paragraph({ text: "الجدول الزمني", heading: HeadingLevel.HEADING_1 }),
