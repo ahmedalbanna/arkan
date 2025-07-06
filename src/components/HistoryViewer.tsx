@@ -3,22 +3,39 @@
 import { useHistory } from '@/hooks/use-history';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { History, Loader2, Trash2, FileDown, FileText, Download, Copy, Check, Share2, Sparkles, Pin, Milestone, BarChart, ShieldAlert, Users, Briefcase, BadgeEuro, Calendar } from 'lucide-react';
+import { History, Loader2, Trash2, FileText, Download, Copy, Check, Share2 } from 'lucide-react';
 import type { HistoryEntry, ProposalHistoryData, ReportHistoryData, DiagramHistoryData } from '@/lib/types';
 import { saveAs } from 'file-saver';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
-import { marked } from 'marked';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import { Textarea } from './ui/textarea';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportProposalAsDocx, exportReportAsDocx } from '@/lib/docx-exporter';
 import { useRouter } from 'next/navigation';
+
+const markdownComponents = {
+  h1: ({node, ...props}) => <h1 className="mt-6 mb-4 text-3xl font-bold text-primary font-headline" {...props} />,
+  h2: ({node, ...props}) => <h2 className="mt-5 mb-3 text-2xl font-bold text-primary font-headline" {...props} />,
+  h3: ({node, ...props}) => <h3 className="mt-4 mb-2 text-xl font-semibold font-headline" {...props} />,
+  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+  a: ({node, ...props}) => <a className="text-accent underline hover:text-accent/80" {...props} />,
+  ul: ({node, ...props}) => <ul className="mb-4 ml-6 list-disc space-y-2" {...props} />,
+  ol: ({node, ...props}) => <ol className="mb-4 ml-6 list-decimal space-y-2" {...props} />,
+  li: ({node, ...props}) => <li className="pl-2" {...props} />,
+  blockquote: ({node, ...props}) => <blockquote className="my-4 border-l-4 border-primary/20 pl-4 italic text-muted-foreground" {...props} />,
+  code: ({node, inline, className, children, ...props}) => {
+    return !inline ? (
+      <pre className="my-4 overflow-x-auto rounded-md bg-muted p-4"><code className="font-mono text-sm" {...props}>{children}</code></pre>
+    ) : (
+      <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground" {...props}>{children}</code>
+    )
+  }
+};
+
 
 function ProposalHistoryItem({ entry }: { entry: ProposalHistoryData & { title: string } }) {
     const { proposal } = entry;
@@ -57,7 +74,7 @@ function ProposalHistoryItem({ entry }: { entry: ProposalHistoryData & { title: 
         </CardHeader>
         <CardContent className="space-y-4">
             <div>
-                <h3 className="flex items-center gap-2 font-headline text-lg mb-2"><Pin className="h-5 w-5 text-primary" /> الهدف</h3>
+                <h3 className="flex items-center gap-2 font-headline text-lg mb-2">Objective</h3>
                 <p className="text-muted-foreground">{proposal.objective}</p>
             </div>
         </CardContent>
@@ -74,7 +91,7 @@ function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: stri
         const template = templates[templateKey];
         if (template) {
             const sections = { [section]: content };
-            await exportReportAsDocx(sections, proposalTitle, template.styles);
+            await exportReportAsDocx(sections, {}, proposalTitle, template.styles);
         }
     };
 
@@ -85,10 +102,10 @@ function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: stri
                     <CardTitle className="font-headline text-xl text-primary">{entry.title}</CardTitle>
                     <Button variant="outline" size="icon" onClick={handleExportDOCX}><FileText className="h-4 w-4" /></Button>
                 </div>
-                <CardDescription>عن مقترح: "{proposalTitle}"</CardDescription>
+                <CardDescription>From proposal: "{proposalTitle}"</CardDescription>
             </CardHeader>
-            <CardContent className="prose dark:prose-invert max-w-none">
-                <ReactMarkdown>{content}</ReactMarkdown>
+            <CardContent className="max-w-none">
+                <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
             </CardContent>
         </Card>
     );
@@ -115,7 +132,7 @@ function DiagramHistoryItem({ entry }: { entry: DiagramHistoryData & { title: st
                 <div className="flex justify-between items-center">
                     <CardTitle className="font-headline text-xl text-primary">{entry.title}</CardTitle>
                 </div>
-                <CardDescription>عن مقترح: "{proposalTitle}"</CardDescription>
+                <CardDescription>From proposal: "{proposalTitle}"</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <Image 
@@ -133,10 +150,10 @@ function DiagramHistoryItem({ entry }: { entry: DiagramHistoryData & { title: st
                     dir="ltr"
                 />
                  <div className="flex gap-2">
-                    <Button onClick={handleDownload}><Download className="ml-2 h-4 w-4" /> تحميل الصورة</Button>
+                    <Button onClick={handleDownload}><Download className="ml-2 h-4 w-4" /> Download Image</Button>
                     <Button variant="outline" onClick={handleCopy}>
                         {isCopied ? <Check className="ml-2 h-4 w-4 text-green-500" /> : <Copy className="ml-2 h-4 w-4" />}
-                        نسخ الكود
+                        Copy Code
                     </Button>
                 </div>
             </CardContent>
@@ -158,7 +175,7 @@ function HistoryItem({ entry }: { entry: HistoryEntry }) {
             content = <DiagramHistoryItem entry={entry} />;
             break;
         default:
-            content = <p>نوع سجل غير معروف.</p>;
+            content = <p>Unknown history type.</p>;
     }
 
     return (
@@ -166,10 +183,10 @@ function HistoryItem({ entry }: { entry: HistoryEntry }) {
             <Accordion type="single" collapsible>
                 <AccordionItem value={entry.id}>
                     <AccordionTrigger className="p-4 font-headline hover:no-underline">
-                        <div className="flex flex-col text-right items-start gap-1 w-full">
+                        <div className="flex flex-col text-left items-start gap-1 w-full">
                             <span className="text-lg">{entry.title}</span>
                             <span className="text-xs text-muted-foreground font-normal">
-                                {format(new Date(entry.createdAt), "d MMMM yyyy, h:mm a", { locale: ar })}
+                                {format(new Date(entry.createdAt), "d MMMM yyyy, h:mm a")}
                             </span>
                         </div>
                     </AccordionTrigger>
@@ -194,9 +211,9 @@ export default function HistoryViewer() {
         return (
             <div className="text-center py-16 px-6 border-dashed border-2 rounded-lg">
                 <History className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-medium">لا توجد سجلات بعد</h3>
+                <h3 className="mt-4 text-lg font-medium">No History Yet</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                    ابدأ بتوليد مقترح أو تقرير أو مخطط وسيظهر هنا.
+                    Start generating a proposal, report, or diagram and it will show up here.
                 </p>
             </div>
         );
@@ -206,8 +223,8 @@ export default function HistoryViewer() {
         <div>
             <div className="text-right mb-4">
                 <Button variant="destructive" size="sm" onClick={clearHistory}>
-                    <Trash2 className="ml-2 h-4 w-4" />
-                    مسح السجل
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Clear History
                 </Button>
             </div>
             <Card>

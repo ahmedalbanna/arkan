@@ -19,6 +19,25 @@ interface EditableFieldProps {
     className?: string;
 }
 
+const markdownComponents = {
+  h1: ({node, ...props}) => <h1 className="mt-6 mb-4 text-3xl font-bold text-primary font-headline" {...props} />,
+  h2: ({node, ...props}) => <h2 className="mt-5 mb-3 text-2xl font-bold text-primary font-headline" {...props} />,
+  h3: ({node, ...props}) => <h3 className="mt-4 mb-2 text-xl font-semibold font-headline" {...props} />,
+  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+  a: ({node, ...props}) => <a className="text-accent underline hover:text-accent/80" {...props} />,
+  ul: ({node, ...props}) => <ul className="mb-4 ml-6 list-disc space-y-2" {...props} />,
+  ol: ({node, ...props}) => <ol className="mb-4 ml-6 list-decimal space-y-2" {...props} />,
+  li: ({node, ...props}) => <li className="pl-2" {...props} />,
+  blockquote: ({node, ...props}) => <blockquote className="my-4 border-l-4 border-primary/20 pl-4 italic text-muted-foreground" {...props} />,
+  code: ({node, inline, className, children, ...props}) => {
+    return !inline ? (
+      <pre className="my-4 overflow-x-auto rounded-md bg-muted p-4"><code className="font-mono text-sm" {...props}>{children}</code></pre>
+    ) : (
+      <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground" {...props}>{children}</code>
+    )
+  }
+};
+
 const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '' }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
@@ -68,7 +87,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     
     return (
         <div onDoubleClick={() => setIsEditing(true)} className={`min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer ${className}`}>
-            {multiline ? <ReactMarkdown className="prose dark:prose-invert max-w-none text-muted-foreground">{String(value)}</ReactMarkdown> : <div className="text-muted-foreground">{String(value)}</div>}
+            {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div className="text-muted-foreground">{String(value)}</div>}
         </div>
     );
 };
@@ -115,7 +134,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" /></div>
-                        <div><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
+                        <div className="flex items-center gap-2"><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
                         <h4 className="font-semibold">Phases:</h4>
                         <ul className="space-y-2 text-muted-foreground">
                             {proposal.timeline.phases.map((phase, index) => (
@@ -135,7 +154,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                         <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> Budget</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-4 flex gap-2">
+                        <div className="mb-4 flex gap-2 items-center">
                           <strong>Total:</strong> 
                           <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
                           <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" />
@@ -196,8 +215,8 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.stakeholders.map((stakeholder, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <strong><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></strong> - 
-                            <EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} />
+                            <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></div>
+                            <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} /></div>
                             <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline />
                         </div>
                     ))}

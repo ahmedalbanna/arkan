@@ -13,6 +13,25 @@ import CommentItem from '@/components/CommentItem';
 import NewCommentForm from '@/components/NewCommentForm';
 import ReactMarkdown from 'react-markdown';
 
+const markdownComponents = {
+  h1: ({node, ...props}) => <h1 className="mt-6 mb-4 text-3xl font-bold text-primary font-headline" {...props} />,
+  h2: ({node, ...props}) => <h2 className="mt-5 mb-3 text-2xl font-bold text-primary font-headline" {...props} />,
+  h3: ({node, ...props}) => <h3 className="mt-4 mb-2 text-xl font-semibold font-headline" {...props} />,
+  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
+  a: ({node, ...props}) => <a className="text-accent underline hover:text-accent/80" {...props} />,
+  ul: ({node, ...props}) => <ul className="mb-4 ml-6 list-disc space-y-2" {...props} />,
+  ol: ({node, ...props}) => <ol className="mb-4 ml-6 list-decimal space-y-2" {...props} />,
+  li: ({node, ...props}) => <li className="pl-2" {...props} />,
+  blockquote: ({node, ...props}) => <blockquote className="my-4 border-l-4 border-primary/20 pl-4 italic text-muted-foreground" {...props} />,
+  code: ({node, inline, className, children, ...props}) => {
+    return !inline ? (
+      <pre className="my-4 overflow-x-auto rounded-md bg-muted p-4"><code className="font-mono text-sm" {...props}>{children}</code></pre>
+    ) : (
+      <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground" {...props}>{children}</code>
+    )
+  }
+};
+
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
 
@@ -53,7 +72,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                  <Button asChild variant="outline">
                     <Link href={`/projects/${project.id}/edit`}>
                       <Pencil className="ml-2 h-4 w-4" />
-                      تعديل المشروع
+                      Edit Project
                     </Link>
                   </Button>
               )}
@@ -85,13 +104,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             <CarouselNext className="-left-12" />
           </Carousel>
 
-          <article className="prose prose-lg dark:prose-invert max-w-none">
-            <h2 className="font-headline">عن المشروع</h2>
-            <ReactMarkdown>{project.description}</ReactMarkdown>
+          <article className="max-w-none">
+            <h2 className="text-2xl font-bold font-headline text-primary mt-5 mb-3">About The Project</h2>
+            <ReactMarkdown components={markdownComponents}>{project.description}</ReactMarkdown>
           </article>
 
           <div className="mt-8">
-            <h3 className="font-headline text-lg mb-2">الوسوم</h3>
+            <h3 className="font-headline text-lg mb-2">Tags</h3>
             <div className="flex flex-wrap gap-2">
               {project.projectTags.map(pt => (
                 <Badge key={pt.tag.id} variant="outline">{pt.tag.name}</Badge>
@@ -104,21 +123,21 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           {project.liveLink && (
             <Button asChild className="w-full font-headline" size="lg">
               <a href={project.liveLink} target="_blank" rel="noopener noreferrer">
-                عرض المشروع المباشر <ArrowUpRight className="mr-2 h-5 w-5" />
+                View Live Project <ArrowUpRight className="mr-2 h-5 w-5" />
               </a>
             </Button>
           )}
 
           <Card>
             <CardHeader>
-              <CardTitle className="font-headline">ملخص المشروع (AI)</CardTitle>
+              <CardTitle className="font-headline">Project Summary (AI)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                 <ReactMarkdown>{project.summaryShort || ''}</ReactMarkdown>
+              <div className="max-w-none text-muted-foreground text-sm">
+                 <ReactMarkdown components={markdownComponents}>{project.summaryShort || ''}</ReactMarkdown>
               </div>
               <div>
-                <h4 className="font-semibold mb-2">التقنيات المستخدمة:</h4>
+                <h4 className="font-semibold mb-2">Technologies Used:</h4>
                 <div className="flex flex-wrap gap-2">
                   {project.summaryTechnologies.map(st => (
                     <Badge key={st.technology.id}>{st.technology.name}</Badge>
@@ -132,7 +151,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             <CardHeader>
               <CardTitle className="font-headline flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                التعليقات ({project.comments.length})
+                Comments ({project.comments.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
