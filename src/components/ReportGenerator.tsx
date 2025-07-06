@@ -18,8 +18,8 @@ import { Input } from "@/components/ui/input";
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
-import { useAgents } from '@/hooks/use-agents';
-import type { Agent } from '@/lib/agents';
+import { getAgent } from '@/lib/db/queries/agents';
+import { type Agent } from '@/lib/db/schema';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
 import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
@@ -67,12 +67,11 @@ function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title:
     );
 }
 
-export default function ReportGenerator() {
+export default function ReportGenerator({ agents }: { agents: Agent[] }) {
     const initialState: ReportState = { sections: {}, diagrams: {} };
     const [state, formAction] = useActionState(handleGenerateReportItem, initialState);
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
-    const { agents } = useAgents();
 
     const hasContent = Object.values(state.sections).some(s => !!s) || Object.values(state.diagrams || {}).some(d => !!d);
     

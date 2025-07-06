@@ -7,7 +7,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
 const GenerateLiteratureReviewInputSchema = z.object({
     proposal: ProjectProposalSchema,
@@ -33,11 +33,11 @@ const generateLiteratureReviewFlow = ai.defineFlow(
   async (input) => {
     const prompt = ai.definePrompt({
         name: 'generateLiteratureReviewPrompt',
-        input: { schema: ProjectProposalSchema },
+        input: { schema: GenerateLiteratureReviewInputSchema },
         output: { schema: GenerateLiteratureReviewOutputSchema },
         prompt: input.prompt,
     });
-    const { output } = await prompt(input.proposal);
+    const { output } = await prompt(input);
     return output!;
   }
 );

@@ -7,7 +7,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
 const GenerateConclusionInputSchema = z.object({
     proposal: ProjectProposalSchema,
@@ -34,12 +34,12 @@ const generateConclusionFlow = ai.defineFlow(
   async (input) => {
     const prompt = ai.definePrompt({
       name: 'generateConclusionPrompt',
-      input: { schema: ProjectProposalSchema },
+      input: { schema: GenerateConclusionInputSchema },
       output: { schema: GenerateConclusionOutputSchema },
       prompt: input.prompt,
     });
 
-    const { output } = await prompt(input.proposal);
+    const { output } = await prompt(input);
     return output!;
   }
 );

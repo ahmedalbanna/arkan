@@ -163,32 +163,32 @@ export async function handleGenerateReportItem(
   try {
     if (isSection) {
       const sectionToGenerate = itemToGenerate as SectionName;
-      const agentInput = { proposal: validatedProposal.data, prompt };
       let result;
+      
       switch (sectionToGenerate) {
         case 'introduction':
-          result = await generateIntroduction(agentInput);
+          result = await generateIntroduction({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
         case 'literatureReview':
-          result = await generateLiteratureReview(agentInput);
+          result = await generateLiteratureReview({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
         case 'systemAnalysis':
-          result = await generateSystemAnalysis(agentInput);
+          result = await generateSystemAnalysis({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
         case 'designStrategy':
-          result = await generateDesignStrategy(agentInput);
+          result = await generateDesignStrategy({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
          case 'systemDesign':
-          result = await generateSystemDesign(agentInput);
+          result = await generateSystemDesign({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
          case 'systemProgramming':
-          result = await generateSystemProgramming(agentInput);
+          result = await generateSystemProgramming({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
          case 'systemTesting':
-          result = await generateSystemTesting(agentInput);
+          result = await generateSystemTesting({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
         case 'conclusion':
-          result = await generateConclusion(agentInput);
+          result = await generateConclusion({ proposal: validatedProposal.data, prompt });
           return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
       }
     }
