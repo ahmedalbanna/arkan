@@ -68,7 +68,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     
     return (
         <div onDoubleClick={() => setIsEditing(true)} className={`min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer ${className}`}>
-            {multiline ? <ReactMarkdown className="prose dark:prose-invert max-w-none text-muted-foreground">{String(value)}</ReactMarkdown> : <p className="text-muted-foreground">{String(value)}</p>}
+            {multiline ? <ReactMarkdown className="prose dark:prose-invert max-w-none text-muted-foreground">{String(value)}</ReactMarkdown> : <div className="text-muted-foreground">{String(value)}</div>}
         </div>
     );
 };
@@ -115,7 +115,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center gap-2"><strong>تاريخ البدء:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" /></div>
-                        <div><strong>تاريخ الانتهاء:</strong> <p className="text-muted-foreground inline">{proposal.timeline.endDate}</p></div>
+                        <div><strong>تاريخ الانتهاء:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
                         <h4 className="font-semibold">المراحل:</h4>
                         <ul className="space-y-2 text-muted-foreground">
                             {proposal.timeline.phases.map((phase, index) => (
@@ -196,10 +196,10 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.stakeholders.map((stakeholder, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <p>
+                            <div>
                                 <strong><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></strong> 
-                                (<EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} />)
-                            </p>
+                                {' '}(<EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} />)
+                            </div>
                             <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline />
                         </div>
                     ))}
@@ -213,8 +213,8 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.risks.map((risk, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <p><strong>الخطر:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline/></p>
-                            <p><strong>التخفيف:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline/></p>
+                            <div><strong>الخطر:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline/></div>
+                            <div><strong>التخفيف:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline/></div>
                         </div>
                     ))}
                 </CardContent>
