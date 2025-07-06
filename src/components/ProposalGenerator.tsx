@@ -14,6 +14,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
+import ReactMarkdown from 'react-markdown';
 
 
 // New imports for file generation
@@ -304,8 +305,8 @@ function ProposalReport({ proposal }: { proposal: ProjectProposal }) {
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="methodology">
             <AccordionTrigger className="font-headline text-xl"><Briefcase className="ml-2 h-5 w-5 text-primary" /> المنهجية</AccordionTrigger>
-            <AccordionContent className="text-muted-foreground whitespace-pre-line">
-              {proposal.methodology}
+            <AccordionContent className="prose dark:prose-invert max-w-none text-muted-foreground">
+              <ReactMarkdown>{proposal.methodology}</ReactMarkdown>
             </AccordionContent>
           </AccordionItem>
 
@@ -360,8 +361,8 @@ function ProposalReport({ proposal }: { proposal: ProjectProposal }) {
 
           <AccordionItem value="evaluation">
             <AccordionTrigger className="font-headline text-xl"><BarChart className="ml-2 h-5 w-5 text-primary" /> التقييم</AccordionTrigger>
-            <AccordionContent className="text-muted-foreground">
-                {proposal.evaluation}
+            <AccordionContent className="prose dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown>{proposal.evaluation}</ReactMarkdown>
             </AccordionContent>
           </AccordionItem>
 
