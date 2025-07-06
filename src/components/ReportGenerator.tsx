@@ -67,6 +67,36 @@ function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title:
     );
 }
 
+const orderedSections = Object.keys(sectionConfig) as SectionName[];
+
+type ControlState = {
+  formality: number;
+  tone: string;
+  wordCount: string;
+};
+
+const generateInstructionText = (controls: ControlState) => {
+    let instructions = [];
+    if (controls.formality !== undefined) {
+        const formality = controls.formality;
+        let formalityDesc = "balanced";
+        if (formality < 33) formalityDesc = "informal and casual";
+        else if (formality > 66) formalityDesc = "highly formal and professional";
+        instructions.push(`- The writing style should be ${formalityDesc}.`);
+    }
+    if (controls.tone && controls.tone !== "none") {
+        instructions.push(`- Adopt a ${controls.tone} tone.`);
+    }
+    if (controls.wordCount) {
+        instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
+    }
+
+    if (instructions.length > 0) {
+        return `Additionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
+    }
+    return "لا توجد تعليمات إضافية.";
+};
+
 export default function ReportGenerator() {
     const initialState: ReportState = { sections: {}, diagrams: {} };
     const [state, formAction] = useActionState(handleGenerateReportItem, initialState);
@@ -74,9 +104,30 @@ export default function ReportGenerator() {
     const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
 
+    const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(() => {
+        const initial: Partial<Record<SectionName, ControlState>> = {};
+        orderedSections.forEach(key => {
+            initial[key] = {
+                formality: 50,
+                tone: 'professional',
+                wordCount: '300',
+            };
+        });
+        return initial as Record<SectionName, ControlState>;
+    });
+
+    const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
+        setControlState(prevState => ({
+            ...prevState,
+            [section]: {
+                ...prevState[section],
+                [field]: value,
+            }
+        }));
+    };
+
     const hasContent = Object.values(state.sections).some(s => !!s) || Object.values(state.diagrams || {}).some(d => !!d);
     
-    const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const reportAgents = orderedSections.map(key => agents.find(a => a.id === sectionConfig[key].agentId));
     
     const orderedDiagrams = DiagramTypeSchema.options;
@@ -175,6 +226,7 @@ export default function ReportGenerator() {
                                     const agent = reportAgents[index];
                                     if (!agent) return null;
                                     const { title, icon: Icon } = sectionConfig[key];
+                                    const currentControls = controlState[key];
                                     return (
                                         <AccordionItem value={key} key={key}>
                                             <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
@@ -198,7 +250,7 @@ export default function ReportGenerator() {
                                                         <div className="space-y-6">
                                                             <div className="space-y-3">
                                                                 <Label htmlFor={`formality-${key}`}>الرسمية (Formality)</Label>
-                                                                <Slider id={`formality-${key}`} name={`formality_${key}`} defaultValue={[50]} max={100} step={1} />
+                                                                <Slider id={`formality-${key}`} name={`formality_${key}`} value={[currentControls.formality]} onValueChange={(val) => handleControlChange(key, 'formality', val[0])} max={100} step={1} />
                                                                 <div className="flex justify-between text-xs text-muted-foreground">
                                                                     <span>غير رسمي</span>
                                                                     <span>متوازن</span>
@@ -207,7 +259,7 @@ export default function ReportGenerator() {
                                                             </div>
                                                             <div className="space-y-2">
                                                                 <Label htmlFor={`tone-${key}`}>النبرة (Tone)</Label>
-                                                                <Select name={`tone_${key}`} defaultValue="professional">
+                                                                <Select name={`tone_${key}`} value={currentControls.tone} onValueChange={(val) => handleControlChange(key, 'tone', val)}>
                                                                     <SelectTrigger id={`tone-${key}`}>
                                                                         <SelectValue placeholder="اختر نبرة" />
                                                                     </SelectTrigger>
@@ -221,7 +273,13 @@ export default function ReportGenerator() {
                                                             </div>
                                                              <div className="space-y-2">
                                                                 <Label htmlFor={`wordCount-${key}`}>عدد الكلمات (تقريبي)</Label>
-                                                                <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="مثال: 300" />
+                                                                <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="مثال: 300" value={currentControls.wordCount} onChange={(e) => handleControlChange(key, 'wordCount', e.target.value)} />
+                                                             </div>
+                                                             <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
+                                                                <p className="font-semibold">معاينة التعليمات التي ستُضاف للموجه:</p>
+                                                                <pre className="whitespace-pre-wrap font-mono text-primary/80">
+                                                                    {generateInstructionText(currentControls)}
+                                                                </pre>
                                                             </div>
                                                         </div>
                                                     </TabsContent>
