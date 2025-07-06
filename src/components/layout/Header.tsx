@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileText, FileSpreadsheet, GitGraph, History, Bot } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileText, FileSpreadsheet, GitGraph, History, Bot, Palette } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ const navLinks = [
   { href: '/generate-proposal', label: 'توليد مقترح', icon: FileText },
   { href: '/generate-report', label: 'توليد تقرير', icon: FileSpreadsheet },
   { href: '/generate-diagrams', label: 'توليد مخططات', icon: GitGraph },
+  { href: '/templates', label: 'قوالب التصدير', icon: Palette },
   { href: '/history', label: 'سجل الأنشطة', icon: History },
   { href: '/manage-agents', label: 'إدارة الوكلاء', icon: Bot },
   { href: '/profile/user-1', label: 'الملف الشخصي', icon: User },
