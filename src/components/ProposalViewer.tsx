@@ -5,10 +5,15 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+
 
 interface EditableFieldProps {
     value: string | number;
@@ -41,6 +46,7 @@ const markdownComponents = {
 const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '' }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
+    const [ast, setAst] = useState<object | null>(null);
 
     const handleSave = () => {
         if (currentValue !== value) {
@@ -58,7 +64,12 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
             setIsEditing(false);
         }
     };
-    
+
+    const handleViewAst = () => {
+        const tree = unified().use(remarkParse).parse(String(value));
+        setAst(tree);
+    };
+
     if (isEditing) {
         if (multiline) {
             return (
@@ -86,8 +97,37 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     }
     
     return (
-        <div onDoubleClick={() => setIsEditing(true)} className={`min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer ${className}`}>
-            {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div className="text-muted-foreground">{String(value)}</div>}
+        <div 
+            onDoubleClick={() => setIsEditing(true)} 
+            className={`group min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer relative ${className}`}
+        >
+            {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
+            
+            {multiline && (
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
+                            onClick={handleViewAst}
+                            title="View Markdown AST"
+                        >
+                            <Braces className="h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                            <DialogTitle>Markdown AST (JSON)</DialogTitle>
+                        </DialogHeader>
+                        <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
+                            <code className="text-muted-foreground text-xs">
+                                {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
+                            </code>
+                        </pre>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 };
@@ -100,9 +140,9 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <Badge variant="secondary" className="w-fit mb-2">
+                    <div className="w-fit mb-2">
                         <EditableField value={proposal.category} path="category" onUpdate={onUpdate} />
-                    </Badge>
+                    </div>
                     <CardTitle className="font-headline text-2xl text-primary">
                         <EditableField value={proposal.title} path="title" onUpdate={onUpdate} />
                     </CardTitle>
