@@ -39,6 +39,29 @@ const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): Text
     return runs;
 };
 
+// Helper for lists to handle nesting and numbering
+const processList = (listToken: marked.Tokens.List): Paragraph[] => {
+    const paragraphs: Paragraph[] = [];
+    for (const item of listToken.items) {
+        // Each list item can have text and a nested list.
+        // Process all tokens inside the list item.
+        for (const itemToken of item.tokens) {
+             if (itemToken.type === 'text' && itemToken.tokens) {
+                paragraphs.push(new Paragraph({
+                    children: processInlines(itemToken.tokens),
+                    bullet: listToken.ordered ? undefined : { level: item.depth || 0 },
+                    numbering: listToken.ordered ? { reference: "default-numbering", level: item.depth || 0 } : undefined,
+                }));
+            } else if (itemToken.type === 'list') {
+                // Recursively process the nested list
+                paragraphs.push(...processList(itemToken));
+            }
+        }
+    }
+    return paragraphs;
+}
+
+
 // Helper to parse markdown for DOCX using the 'marked' library
 const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
     if (!markdown) return [];
@@ -64,16 +87,7 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 }
                 break;
             case 'list':
-                for (const item of token.items) {
-                    // Access the inner tokens of the list item correctly.
-                    const textTokens = item.tokens.filter(t => t.type === 'text') as marked.Tokens.Text[];
-                    const childTokens = textTokens.flatMap(t => t.tokens || [t]);
-                    
-                    docxObjects.push(new Paragraph({
-                        children: processInlines(childTokens),
-                        bullet: { level: item.depth || 0 },
-                    }));
-                }
+                docxObjects.push(...processList(token));
                 break;
             case 'space':
                 docxObjects.push(new Paragraph(""));
@@ -89,11 +103,25 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
     return docxObjects;
 };
 
+const defaultNumbering = {
+    config: [
+        {
+            reference: "default-numbering",
+            levels: [
+                { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 360, hanging: 360 } } } },
+                { level: 1, format: "lowerLetter", text: "%2)", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 720, hanging: 360 } } } },
+                { level: 2, format: "lowerRoman", text: "%3.", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 1080, hanging: 360 } } } },
+            ],
+        },
+    ],
+};
+
 export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
     
     const doc = new Document({
         styles,
+        numbering: defaultNumbering,
         sections: [{
             properties: {
                 page: {
@@ -108,28 +136,28 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
             children: [
                 new Paragraph({ text: title, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
                 new Paragraph({ text: category, heading: HeadingLevel.HEADING_5, alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
-                new Paragraph({ text: "الهدف", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(objective),
-                new Paragraph({ text: "المنهجية", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(methodology),
-                new Paragraph({ text: "الجدول الزمني", heading: HeadingLevel.HEADING_1 }),
-                new Paragraph({ children: [new TextRun({ text: "تاريخ البدء: ", bold: true }), new TextRun(timeline.startDate)] }),
-                new Paragraph({ children: [new TextRun({ text: "تاريخ الانتهاء: ", bold: true }), new TextRun(timeline.endDate)] }),
-                new Paragraph({ text: "المراحل:", heading: HeadingLevel.HEADING_2 }),
-                ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} أسابيع)`, bullet: { level: 0 } })),
-                new Paragraph({ text: "الميزانية", heading: HeadingLevel.HEADING_1 }),
-                new Paragraph({ children: [new TextRun({ text: "المبلغ الإجمالي: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
-                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "البند", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "التكلفة", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${b.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
-                new Paragraph({ text: "النتائج المتوقعة", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Timeline", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
+                new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
+                new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
+                ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
+                new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
+                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${b.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
                 ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
-                new Paragraph({ text: "معايير النجاح", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
                 ...success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })),
-                new Paragraph({ text: "التقييم", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(evaluation),
-                new Paragraph({ text: "أصحاب المصلحة", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
                 ...stakeholders.flatMap(s => [ new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: s.interest }), ]),
-                new Paragraph({ text: "المخاطر واستراتيجيات التخفيف", heading: HeadingLevel.HEADING_1 }),
-                ...risks.flatMap(r => [ new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), new Paragraph({ children: [new TextRun({ text: "استراتيجية التخفيف: ", bold: true }), new TextRun(r.mitigation)] }), ]),
+                new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
+                ...risks.flatMap(r => [ new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), new Paragraph({ children: [new TextRun({ text: "Mitigation Strategy: ", bold: true }), new TextRun(r.mitigation)] }), ]),
             ],
         }],
     });
@@ -145,30 +173,30 @@ export async function exportReportAsDocx(
     styles: IStylesOptions
 ) {
     const sectionConfig: { [key in SectionName]: { title: string } } = {
-        introduction: { title: "المقدمة" },
-        literatureReview: { title: "مراجعة الأدبيات" },
-        systemAnalysis: { title: "تحليل النظام" },
-        designStrategy: { title: "استراتيجية التصميم" },
-        systemDesign: { title: "تصميم النظام" },
-        systemProgramming: { title: "برمجة النظام" },
-        systemTesting: { title: "اختبار النظام" },
-        conclusion: { title: "الخاتمة" },
+        introduction: { title: "Introduction" },
+        literatureReview: { title: "Literature Review" },
+        systemAnalysis: { title: "System Analysis" },
+        designStrategy: { title: "Design Strategy" },
+        systemDesign: { title: "System Design" },
+        systemProgramming: { title: "System Programming" },
+        systemTesting: { title: "System Testing" },
+        conclusion: { title: "Conclusion" },
     };
     
     const diagramConfig: { [key in DiagramType]: { title: string } } = {
-        useCase: { title: "مخطط حالة الاستخدام (Use Case)" },
-        class: { title: "مخطط الأصناف (Class)" },
-        sequence: { title: "مخطط التسلسل (Sequence)" },
-        activity: { title: "مخطط النشاط (Activity)" },
-        component: { title: "مخطط المكونات (Component)" },
-        archimate: { title: "مخطط ArchiMate" },
+        useCase: { title: "Use Case Diagram" },
+        class: { title: "Class Diagram" },
+        sequence: { title: "Sequence Diagram" },
+        activity: { title: "Activity Diagram" },
+        component: { title: "Component Diagram" },
+        archimate: { title: "ArchiMate Diagram" },
     };
     
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
     
     const children: (Paragraph | Table)[] = [];
-    children.push(new Paragraph({ text: `تقرير مشروع: ${proposalTitle}`, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }));
+    children.push(new Paragraph({ text: `Project Report: ${proposalTitle}`, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }));
 
     for (const key of orderedSections) {
         const content = sections[key];
@@ -183,7 +211,7 @@ export async function exportReportAsDocx(
     }
 
     if (diagrams && Object.values(diagrams).some(d => !!d)) {
-        children.push(new Paragraph({ text: "المخططات الهندسية", heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 }}));
+        children.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 }}));
 
         for (const key of orderedDiagrams) {
             const diagramData = diagrams[key];
@@ -221,7 +249,7 @@ export async function exportReportAsDocx(
 
                 } catch (error) {
                     console.error(`Failed to embed image for ${key}:`, error);
-                    children.push(new Paragraph({ text: `[فشل تحميل صورة المخطط: ${diagramConfig[key].title}]` }));
+                    children.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[key].title}]` }));
                 }
             }
         }
@@ -229,6 +257,7 @@ export async function exportReportAsDocx(
 
     const doc = new Document({
         styles,
+        numbering: defaultNumbering,
         sections: [{ properties: {
              page: {
                 margin: {

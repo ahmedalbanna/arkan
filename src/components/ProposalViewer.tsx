@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import type { ProjectProposal } from '@/ai/schemas';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag } from 'lucide-react';
@@ -92,7 +92,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> الهدف</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline />
@@ -101,7 +101,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> المنهجية</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
                 </CardHeader>
                 <CardContent>
                      <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline />
@@ -111,18 +111,18 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
             <div className="grid md:grid-cols-2 gap-6">
                  <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> الجدول الزمني</CardTitle>
+                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> Timeline</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2"><strong>تاريخ البدء:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" /></div>
-                        <div><strong>تاريخ الانتهاء:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
-                        <h4 className="font-semibold">المراحل:</h4>
+                        <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" /></div>
+                        <div><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
+                        <h4 className="font-semibold">Phases:</h4>
                         <ul className="space-y-2 text-muted-foreground">
                             {proposal.timeline.phases.map((phase, index) => (
                                 <li key={index} className="flex justify-between items-center gap-2">
                                     <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} />
                                     <div className="flex items-center gap-1">
-                                      (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" /> أسابيع)
+                                      (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" /> weeks)
                                     </div>
                                 </li>
                             ))}
@@ -132,19 +132,19 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> الميزانية</CardTitle>
+                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> Budget</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="mb-4 flex gap-2">
-                          <strong>الإجمالي:</strong> 
-                          <p className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</p>
+                          <strong>Total:</strong> 
+                          <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
                           <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" />
                         </div>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>البند</TableHead>
-                                    <TableHead className="text-left">التكلفة</TableHead>
+                                    <TableHead>Item</TableHead>
+                                    <TableHead className="text-left">Cost</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -162,10 +162,10 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
             
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> النتائج المتوقعة</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> Expected Outcomes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <ul className="list-disc pr-5 space-y-2 text-muted-foreground">
+                     <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                         {proposal.expected_outcome.map((outcome, index) => (
                             <li key={index}><EditableField value={outcome} path={`expected_outcome.${index}`} onUpdate={onUpdate} multiline /></li>
                         ))}
@@ -175,23 +175,23 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> معايير النجاح والتقييم</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <h4 className="font-semibold">المعايير:</h4>
-                    <ul className="list-disc pr-5 space-y-2 text-muted-foreground">
+                    <h4 className="font-semibold">Criteria:</h4>
+                    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                         {proposal.success_criteria.map((criterion, index) => (
                             <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline /></li>
                         ))}
                     </ul>
-                     <h4 className="font-semibold pt-4 border-t">خطة التقييم:</h4>
+                     <h4 className="font-semibold pt-4 border-t">Evaluation Plan:</h4>
                      <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline />
                 </CardContent>
             </Card>
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> أصحاب المصلحة</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> Stakeholders</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {proposal.stakeholders.map((stakeholder, index) => (
@@ -206,13 +206,13 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> المخاطر والتخفيف</CardTitle>
+                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> Risks & Mitigations</CardTitle>
                 </CardHeader>
                 <CardContent>
                     {proposal.risks.map((risk, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div><strong>الخطر:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline/></div>
-                            <div><strong>التخفيف:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline/></div>
+                            <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline/></div>
+                            <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline/></div>
                         </div>
                     ))}
                 </CardContent>

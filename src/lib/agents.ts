@@ -18,8 +18,8 @@ export interface Agent extends AgentData {
 export const AGENTS: Agent[] = [
   {
     id: 'summarize-project',
-    name: 'وكيل تلخيص المشروع',
-    description: 'يولد ملخصًا موجزًا للمشروع بناءً على وصف تفصيلي، مع تسليط الضوء على الجوانب الرئيسية والتقنيات المستخدمة.',
+    name: 'Project Summarizer Agent',
+    description: 'Generates a concise project summary from a detailed description, highlighting key aspects and technologies used.',
     category: 'Content Generation',
     icon: BrainCircuit,
     pageUrl: '/summarize',
@@ -34,11 +34,11 @@ Description: {{{projectDescription}}}`
   },
   {
     id: 'generate-proposal',
-    name: 'وكيل توليد مقترح المشروع',
-    description: 'ينشئ مقترح مشروع شامل واحترافي من فكرة مشروع واحدة، مكتمل بالجداول الزمنية والميزانية والمخاطر.',
+    name: 'Project Proposal Agent',
+    description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
     category: 'Content Generation',
     icon: FileText,
-    pageUrl: '/generate-proposal',
+    pageUrl: '/generate-report', // Changed from /generate-proposal
     isEnabled: true,
     prompt: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
 
@@ -49,8 +49,8 @@ Project Idea: {{{projectIdea}}}`
   // Report Section Agents
   {
     id: 'generate-introduction',
-    name: 'وكيل توليد المقدمة',
-    description: 'يكتب مقدمة احترافية لتقرير المشروع بناءً على بيانات المقترح الكاملة.',
+    name: 'Introduction Agent',
+    description: 'Writes a professional introduction for a project report based on the full proposal data.',
     category: 'Report & Diagram Generation',
     icon: BookMarked,
     pageUrl: '/generate-report',
@@ -94,8 +94,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-literature-review',
-    name: 'وكيل مراجعة الأدبيات',
-    description: 'يولد قسم مراجعة الأدبيات الأكاديمية والتقنية لتقرير المشروع.',
+    name: 'Literature Review Agent',
+    description: 'Generates an academic and technical literature review section for the project report.',
     category: 'Report & Diagram Generation',
     icon: Library,
     pageUrl: '/generate-report',
@@ -136,8 +136,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-system-analysis',
-    name: 'وكيل تحليل النظام',
-    description: 'يولد قسم تحليل النظام، بما في ذلك المتطلبات الوظيفية وغير الوظيفية.',
+    name: 'System Analysis Agent',
+    description: 'Generates the system analysis section, including functional and non-functional requirements.',
     category: 'Report & Diagram Generation',
     icon: Waypoints,
     pageUrl: '/generate-report',
@@ -178,8 +178,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-design-strategy',
-    name: 'وكيل استراتيجية التصميم',
-    description: 'يولد قسم استراتيجية التصميم، مع التركيز على تجربة المستخدم وواجهة المستخدم.',
+    name: 'Design Strategy Agent',
+    description: 'Generates the design strategy section, focusing on user experience and user interface.',
     category: 'Report & Diagram Generation',
     icon: BookText,
     pageUrl: '/generate-report',
@@ -220,8 +220,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-system-design',
-    name: 'وكيل تصميم النظام',
-    description: 'يولد قسم تصميم النظام، ويحدد الهندسة المعمارية، ونموذج البيانات، والمكونات.',
+    name: 'System Design Agent',
+    description: 'Generates the system design section, defining the architecture, data model, and components.',
     category: 'Report & Diagram Generation',
     icon: Code,
     pageUrl: '/generate-report',
@@ -262,8 +262,8 @@ Project Proposal Data:
   },
    {
     id: 'generate-system-programming',
-    name: 'وكيل برمجة النظام',
-    description: 'يولد قسم برمجة النظام والتنفيذ، ويحدد سير العمل والمعايير.',
+    name: 'System Programming Agent',
+    description: 'Generates the system programming and implementation section, defining workflow and standards.',
     category: 'Report & Diagram Generation',
     icon: Code,
     pageUrl: '/generate-report',
@@ -305,8 +305,8 @@ Project Proposal Data:
   },
    {
     id: 'generate-system-testing',
-    name: 'وكيل اختبار النظام',
-    description: 'يولد قسم اختبار النظام، ويحدد استراتيجية الاختبار والأدوات والمقاييس.',
+    name: 'System Testing Agent',
+    description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
     category: 'Report & Diagram Generation',
     icon: TestTube2,
     pageUrl: '/generate-report',
@@ -347,8 +347,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-conclusion',
-    name: 'وكيل توليد الخاتمة',
-    description: 'يكتب خاتمة موجزة ومؤثرة لتقرير المشروع النهائي.',
+    name: 'Conclusion Agent',
+    description: 'Writes a concise and impactful conclusion for the final project report.',
     category: 'Report & Diagram Generation',
     icon: Flag,
     pageUrl: '/generate-report',
@@ -390,8 +390,8 @@ Project Proposal Data:
   // Diagram Agents
   {
     id: 'generate-use-case-diagram',
-    name: 'وكيل مخطط حالة الاستخدام',
-    description: 'ينتج مخطط حالة استخدام PlantUML لتحديد الجهات الفاعلة وحالات الاستخدام.',
+    name: 'Use Case Diagram Agent',
+    description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',
@@ -430,8 +430,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-class-diagram',
-    name: 'وكيل مخطط الأصناف',
-    description: 'ينتج مخطط أصناف PlantUML يوضح الفئات والسمات والأساليب والعلاقات.',
+    name: 'Class Diagram Agent',
+    description: 'Produces a PlantUML Class diagram showing classes, attributes, methods, and relationships.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',
@@ -470,8 +470,8 @@ Project Proposal Data:
   },
     {
     id: 'generate-sequence-diagram',
-    name: 'وكيل مخطط التسلسل',
-    description: 'ينتج مخطط تسلسل PlantUML لتوضيح تفاعلات الكائنات في سيناريو معين.',
+    name: 'Sequence Diagram Agent',
+    description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',
@@ -511,8 +511,8 @@ Project Proposal Data:
   },
     {
     id: 'generate-activity-diagram',
-    name: 'وكيل مخطط النشاط',
-    description: 'ينتج مخطط نشاط PlantUML لنمذجة سير عمل العمليات في النظام.',
+    name: 'Activity Diagram Agent',
+    description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',
@@ -552,8 +552,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-component-diagram',
-    name: 'وكيل مخطط المكونات',
-    description: 'ينتج مخطط مكونات PlantUML يصور بنية النظام من حيث المكونات.',
+    name: 'Component Diagram Agent',
+    description: 'Produces a PlantUML Component diagram depicting the system architecture in terms of components.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',
@@ -592,8 +592,8 @@ Project Proposal Data:
   },
   {
     id: 'generate-archimate-diagram',
-    name: 'وكيل مخطط ArchiMate',
-    description: 'ينتج مخطط ArchiMate PlantUML لنمذجة بنية المؤسسة عبر طبقات متعددة.',
+    name: 'ArchiMate Diagram Agent',
+    description: 'Produces a PlantUML ArchiMate diagram to model enterprise architecture across multiple layers.',
     category: 'Report & Diagram Generation',
     icon: GitGraph,
     pageUrl: '/generate-report',

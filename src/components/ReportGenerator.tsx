@@ -28,23 +28,23 @@ import { add, format } from 'date-fns';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
-    introduction: { title: "المقدمة", icon: BookMarked, agentId: "generate-introduction" },
-    literatureReview: { title: "مراجعة الأدبيات", icon: Library, agentId: "generate-literature-review" },
-    systemAnalysis: { title: "تحليل النظام", icon: Waypoints, agentId: "generate-system-analysis" },
-    designStrategy: { title: "استراتيجية التصميم", icon: BookText, agentId: "generate-design-strategy" },
-    systemDesign: { title: "تصميم النظام", icon: Code, agentId: "generate-system-design" },
-    systemProgramming: { title: "برمجة النظام", icon: Code, agentId: "generate-system-programming" },
-    systemTesting: { title: "اختبار النظام", icon: TestTube2, agentId: "generate-system-testing" },
-    conclusion: { title: "الخاتمة", icon: Flag, agentId: "generate-conclusion" },
+    introduction: { title: "Introduction", icon: BookMarked, agentId: "generate-introduction" },
+    literatureReview: { title: "Literature Review", icon: Library, agentId: "generate-literature-review" },
+    systemAnalysis: { title: "System Analysis", icon: Waypoints, agentId: "generate-system-analysis" },
+    designStrategy: { title: "Design Strategy", icon: BookText, agentId: "generate-design-strategy" },
+    systemDesign: { title: "System Design", icon: Code, agentId: "generate-system-design" },
+    systemProgramming: { title: "System Programming", icon: Code, agentId: "generate-system-programming" },
+    systemTesting: { title: "System Testing", icon: TestTube2, agentId: "generate-system-testing" },
+    conclusion: { title: "Conclusion", icon: Flag, agentId: "generate-conclusion" },
 };
 
 const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
-    useCase: { title: "مخطط حالة الاستخدام", agentId: "generate-use-case-diagram" },
-    class: { title: "مخطط الأصناف", agentId: "generate-class-diagram" },
-    sequence: { title: "مخطط التسلسل", agentId: "generate-sequence-diagram" },
-    activity: { title: "مخطط النشاط", agentId: "generate-activity-diagram" },
-    component: { title: "مخطط المكونات", agentId: "generate-component-diagram" },
-    archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
+    useCase: { title: "Use Case Diagram", agentId: "generate-use-case-diagram" },
+    class: { title: "Class Diagram", agentId: "generate-class-diagram" },
+    sequence: { title: "Sequence Diagram", agentId: "generate-sequence-diagram" },
+    activity: { title: "Activity Diagram", agentId: "generate-activity-diagram" },
+    component: { title: "Component Diagram", agentId: "generate-component-diagram" },
+    archimate: { title: "ArchiMate Diagram", agentId: "generate-archimate-diagram" },
 };
 
 function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }: { itemKey: string; title: string; agent?: Agent; isPending: boolean; generatingItem: string | null; }) {
@@ -60,9 +60,9 @@ function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }
             title={!agent?.isEnabled ? 'This agent is disabled' : title}
         >
             {isGeneratingThis ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-                <Sparkles className="ml-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-4 w-4" />
             )}
             {title}
         </Button>
@@ -99,7 +99,7 @@ const generateInstructionText = (controls: ControlState) => {
     if (instructions.length > 0) {
         return `Additionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
     }
-    return "لا توجد تعليمات إضافية.";
+    return "No additional instructions.";
 };
 
 const getInitialControlState = (): Record<SectionName, ControlState> => {
@@ -225,13 +225,13 @@ export default function ReportGenerator() {
             setProposal(result);
             addHistoryEntry({
                 type: 'proposal',
-                title: `مقترح مشروع: ${result.title}`,
+                title: `Project Proposal: ${result.title}`,
                 proposal: result,
             });
             setState({ sections: {}, diagrams: {} });
         } catch (e) {
             console.error(e);
-            setProposalError('حدث خطأ أثناء توليد المقترح. يرجى المحاولة مرة أخرى.');
+            setProposalError('An error occurred while generating the proposal. Please try again.');
         } finally {
             setIsGeneratingProposal(false);
         }
@@ -295,7 +295,7 @@ export default function ReportGenerator() {
     useEffect(() => {
         if (!state.lastGenerated) return;
 
-        let proposalTitle = 'تقرير مشروع';
+        let proposalTitle = 'Project Report';
         try {
             const parsed = JSON.parse(proposalJson);
             if (parsed && parsed.title) {
@@ -307,7 +307,7 @@ export default function ReportGenerator() {
             const section = state.lastGenerated as SectionName;
             addHistoryEntry({
                 type: 'report',
-                title: `قسم تقرير: ${sectionConfig[section].title}`,
+                title: `Report Section: ${sectionConfig[section].title}`,
                 proposalTitle,
                 section: section,
                 content: state.sections[section]!,
@@ -318,7 +318,7 @@ export default function ReportGenerator() {
             if(diagramData) {
                 addHistoryEntry({
                     type: 'diagram',
-                    title: `مخطط: ${diagramConfig[diagram].title}`,
+                    title: `Diagram: ${diagramConfig[diagram].title}`,
                     diagramType: diagram,
                     plantUmlCode: diagramData.plantUmlCode,
                     imageUrl: diagramData.imageUrl,
@@ -359,14 +359,14 @@ export default function ReportGenerator() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-xl">الخطوة 1: توليد مقترح المشروع</CardTitle>
+                    <CardTitle className="font-headline text-xl">Step 1: Generate Project Proposal</CardTitle>
                     <CardDescription>
-                        اكتب وصفًا موجزًا لفكرة مشروعك. كلما كانت الفكرة أوضح، كان المقترح أفضل.
+                        Write a brief description of your project idea. The clearer the idea, the better the proposal.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Textarea
-                        placeholder="مثال: نظام لإدارة علاقات العملاء (CRM) لتحسين كفاءة المبيعات وخدمة العملاء."
+                        placeholder="e.g., A customer relationship management (CRM) system to improve sales efficiency and customer service."
                         rows={5}
                         required
                         value={projectIdea}
@@ -379,11 +379,11 @@ export default function ReportGenerator() {
                 <CardFooter>
                     <Button onClick={handleGenerateProposalClick} disabled={isGeneratingProposal || !proposalAgent?.isEnabled}>
                         {isGeneratingProposal ? (
-                            <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : (
-                            <Sparkles className="ml-2 h-4 w-4" />
+                            <Sparkles className="mr-2 h-4 w-4" />
                         )}
-                        توليد المقترح
+                        Generate Proposal
                     </Button>
                 </CardFooter>
             </Card>
@@ -394,8 +394,8 @@ export default function ReportGenerator() {
                         <div className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="font-headline flex leading-relaxed">الخطوة 2: مراجعة المقترح (JSON)</CardTitle>
-                                    <CardDescription>هذا هو المُدخل الخام لوكلاء الذكاء الاصطناعي. يمكنك تعديله إذا لزم الأمر.</CardDescription>
+                                    <CardTitle className="font-headline flex leading-relaxed">Step 2: Review Proposal (JSON)</CardTitle>
+                                    <CardDescription>This is the raw input for the AI agents. You can modify it if needed.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Textarea
@@ -417,8 +417,8 @@ export default function ReportGenerator() {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="font-headline">الخطوة 3: أدوات التوليد</CardTitle>
-                                    <CardDescription>اختر قسمًا أو مخططًا لتوليده. يمكنك تعديل موجه الأوامر (prompt) لكل عنصر.</CardDescription>
+                                    <CardTitle className="font-headline">Step 3: Generation Tools</CardTitle>
+                                    <CardDescription>Select a section or diagram to generate. You can edit the prompt for each item.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Accordion type="multiple" className="w-full space-y-1">
@@ -437,46 +437,46 @@ export default function ReportGenerator() {
                                                     <AccordionContent className="space-y-4 p-4">
                                                         <Tabs defaultValue="prompt" className="w-full">
                                                             <TabsList className="grid w-full grid-cols-2">
-                                                                <TabsTrigger value="prompt">تعديل الموجه</TabsTrigger>
-                                                                <TabsTrigger value="controls">التحكم بالمخرجات</TabsTrigger>
+                                                                <TabsTrigger value="prompt">Edit Prompt</TabsTrigger>
+                                                                <TabsTrigger value="controls">Control Output</TabsTrigger>
                                                             </TabsList>
                                                             <TabsContent value="prompt" className="pt-4">
                                                                 <div className="space-y-2">
-                                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
+                                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">Prompt</Label>
                                                                     <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
                                                                 </div>
                                                             </TabsContent>
                                                             <TabsContent value="controls" className="pt-4">
                                                                 <div className="space-y-6">
                                                                     <div className="space-y-3">
-                                                                        <Label htmlFor={`formality-${key}`}>الرسمية (Formality)</Label>
+                                                                        <Label htmlFor={`formality-${key}`}>Formality</Label>
                                                                         <Slider id={`formality-${key}`} name={`formality_${key}`} value={[currentControls.formality]} onValueChange={(val) => handleControlChange(key, 'formality', val[0])} max={100} step={1} />
                                                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                                                            <span>غير رسمي</span>
-                                                                            <span>متوازن</span>
-                                                                            <span>رسمي جداً</span>
+                                                                            <span>Informal</span>
+                                                                            <span>Balanced</span>
+                                                                            <span>Very Formal</span>
                                                                         </div>
                                                                     </div>
                                                                     <div className="space-y-2">
-                                                                        <Label htmlFor={`tone-${key}`}>النبرة (Tone)</Label>
+                                                                        <Label htmlFor={`tone-${key}`}>Tone</Label>
                                                                         <Select name={`tone_${key}`} value={currentControls.tone} onValueChange={(val) => handleControlChange(key, 'tone', val)}>
                                                                             <SelectTrigger id={`tone-${key}`}>
-                                                                                <SelectValue placeholder="اختر نبرة" />
+                                                                                <SelectValue placeholder="Select a tone" />
                                                                             </SelectTrigger>
                                                                             <SelectContent>
-                                                                                <SelectItem value="professional">احترافي</SelectItem>
-                                                                                <SelectItem value="academic">أكاديمي</SelectItem>
-                                                                                <SelectItem value="casual">غير رسمي</SelectItem>
-                                                                                <SelectItem value="persuasive">مقنع</SelectItem>
+                                                                                <SelectItem value="professional">Professional</SelectItem>
+                                                                                <SelectItem value="academic">Academic</SelectItem>
+                                                                                <SelectItem value="casual">Casual</SelectItem>
+                                                                                <SelectItem value="persuasive">Persuasive</SelectItem>
                                                                             </SelectContent>
                                                                         </Select>
                                                                     </div>
                                                                     <div className="space-y-2">
-                                                                        <Label htmlFor={`wordCount-${key}`}>عدد الكلمات (تقريبي)</Label>
-                                                                        <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="مثال: 300" value={currentControls.wordCount} onChange={(e) => handleControlChange(key, 'wordCount', e.target.value)} />
+                                                                        <Label htmlFor={`wordCount-${key}`}>Word Count (approx.)</Label>
+                                                                        <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="e.g., 300" value={currentControls.wordCount} onChange={(e) => handleControlChange(key, 'wordCount', e.target.value)} />
                                                                     </div>
                                                                     <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                                                                        <p className="font-semibold">معاينة التعليمات التي ستُضاف للموجه:</p>
+                                                                        <p className="font-semibold">Instruction Preview:</p>
                                                                         <pre className="whitespace-pre-wrap font-mono text-primary/80">
                                                                             {generateInstructionText(currentControls)}
                                                                         </pre>
@@ -484,7 +484,7 @@ export default function ReportGenerator() {
                                                                 </div>
                                                             </TabsContent>
                                                         </Tabs>
-                                                        <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
+                                                        <GenerateItemButton itemKey={key} title={`Generate ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
                                                     </AccordionContent>
                                                 </AccordionItem>
                                             );
@@ -502,10 +502,10 @@ export default function ReportGenerator() {
                                                     </AccordionTrigger>
                                                     <AccordionContent className="space-y-4 p-4">
                                                         <div className="space-y-2">
-                                                            <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
+                                                            <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">Prompt</Label>
                                                             <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
                                                         </div>
-                                                        <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
+                                                        <GenerateItemButton itemKey={key} title={`Generate ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
                                                     </AccordionContent>
                                                 </AccordionItem>
                                             );
@@ -519,21 +519,21 @@ export default function ReportGenerator() {
                 <div className="md:col-span-3 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">الإجراءات</CardTitle>
-                            <CardDescription>تصدير المخرجات أو بدء جلسة جديدة.</CardDescription>
+                            <CardTitle className="font-headline">Actions</CardTitle>
+                            <CardDescription>Export your outputs or start a new session.</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col sm:flex-row gap-4">
                             <Button onClick={handleExportProposalDOCX} disabled={!proposal || isPending} className="w-full sm:w-auto font-headline">
-                                <FileText className="ml-2 h-4 w-4" />
-                                تصدير المقترح
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export Proposal
                             </Button>
                             <Button onClick={handleExportReportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
-                                <FileText className="ml-2 h-4 w-4" />
-                                تصدير التقرير
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export Report
                             </Button>
                             <Button onClick={handleNewSession} variant="outline" disabled={isPending} className="w-full sm:w-auto font-headline">
-                                <Trash2 className="ml-2 h-4 w-4" />
-                                جلسة جديدة
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                New Session
                             </Button>
                         </CardContent>
                     </Card>
@@ -541,9 +541,9 @@ export default function ReportGenerator() {
                     {state?.lastGenerated && !state.error && (
                         <Alert>
                             <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
+                            <AlertTitle className="font-headline">Generation Successful!</AlertTitle>
                             <AlertDescription>
-                                تم توليد "{sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title}". يمكنك عرضه أدناه.
+                                Successfully generated "{sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title}". You can view it below.
                             </AlertDescription>
                         </Alert>
                     )}
@@ -551,14 +551,14 @@ export default function ReportGenerator() {
                     {state?.error && generatingItem && (
                         <Alert variant="destructive">
                             <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">فشل التوليد!</AlertTitle>
+                            <AlertTitle className="font-headline">Generation Failed!</AlertTitle>
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
                     {proposal && (
                         <div>
-                            <CardTitle className="font-headline text-xl mb-4">تفاصيل المقترح المولدة (قابل للتعديل)</CardTitle>
+                            <CardTitle className="font-headline text-xl mb-4">Generated Proposal Details (Editable)</CardTitle>
                             <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
                         </div>
                     )}
@@ -570,7 +570,7 @@ export default function ReportGenerator() {
                             const { title, icon: Icon } = sectionConfig[key];
                             return (
                                 <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
-                                    <AccordionTrigger className="font-headline text-xl p-4"><Icon className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                                    <AccordionTrigger className="font-headline text-xl p-4"><Icon className="mr-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
                                     <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground border-t">
                                     <ReactMarkdown>{content}</ReactMarkdown>
                                     </AccordionContent>
@@ -583,7 +583,7 @@ export default function ReportGenerator() {
                             const { title } = diagramConfig[key];
                             return (
                             <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
-                                <AccordionTrigger className="font-headline text-xl p-4"><GitGraph className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                                <AccordionTrigger className="font-headline text-xl p-4"><GitGraph className="mr-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4 border-t">
                                     <Image 
                                         src={diagramData.imageUrl} 
