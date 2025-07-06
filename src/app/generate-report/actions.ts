@@ -1,7 +1,8 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
+import { deflateSync } from 'zlib';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
@@ -11,6 +12,12 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
+import { generateUseCaseDiagram } from '@/ai/flows/generate-use-case-diagram';
+import { generateClassDiagram } from '@/ai/flows/generate-class-diagram';
+import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
+import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
+import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
+import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 
 export type SectionName = 
   | 'introduction'
@@ -26,44 +33,77 @@ export interface ReportState {
   sections: {
     [key in SectionName]?: string;
   };
+  diagrams?: {
+    [key in DiagramType]?: {
+      plantUmlCode: string;
+      imageUrl: string;
+    };
+  };
   error?: string;
-  lastGenerated?: SectionName;
+  lastGenerated?: SectionName | DiagramType;
 }
 
-const GenerateSectionSchema = z.object({
+const GenerateItemSchema = z.object({
   proposalJson: z.string().min(1, 'يرجى لصق محتوى مقترح المشروع.'),
-  sectionToGenerate: z.enum([
-    'introduction',
-    'literatureReview',
-    'systemAnalysis',
-    'designStrategy',
-    'systemDesign',
-    'systemProgramming',
-    'systemTesting',
-    'conclusion',
-  ]),
+  itemToGenerate: z.string().min(1, 'يجب تحديد عنصر للتوليد.'),
 });
 
+const sectionNames: SectionName[] = [
+    'introduction', 'literatureReview', 'systemAnalysis', 'designStrategy',
+    'systemDesign', 'systemProgramming', 'systemTesting', 'conclusion'
+];
 
-export async function handleGenerateSection(
+// Helper to encode PlantUML for URL
+function encode64(data: Buffer): string {
+    const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+    let r = '';
+    for (let i = 0; i < data.length; i += 3) {
+        const b1 = data[i];
+        const b2 = i + 1 < data.length ? data[i+1] : 0;
+        const b3 = i + 2 < data.length ? data[i+2] : 0;
+
+        const c1 = b1 >> 2;
+        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+        const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+        const c4 = b3 & 63;
+
+        r += B64_MAP.charAt(c1);
+        r += B64_MAP.charAt(c2);
+        if (i + 1 < data.length) {
+            r += B64_MAP.charAt(c3);
+        }
+        if (i + 2 < data.length) {
+            r += B64_MAP.charAt(c4);
+        }
+    }
+    return r;
+}
+
+async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
+    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+    const encoded = encode64(compressed);
+    return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+}
+
+export async function handleGenerateReportItem(
   prevState: ReportState,
   formData: FormData
 ): Promise<ReportState> {
 
-  const validatedFields = GenerateSectionSchema.safeParse({
+  const validatedFields = GenerateItemSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
-    sectionToGenerate: formData.get('sectionToGenerate'),
+    itemToGenerate: formData.get('itemToGenerate'),
   });
 
   if (!validatedFields.success) {
     const errors = validatedFields.error.flatten().fieldErrors;
     return {
       ...prevState,
-      error: errors.proposalJson?.[0] || errors.sectionToGenerate?.[0],
+      error: errors.proposalJson?.[0] || errors.itemToGenerate?.[0],
     };
   }
   
-  const { proposalJson, sectionToGenerate } = validatedFields.data;
+  const { proposalJson, itemToGenerate } = validatedFields.data;
   let proposalData: ProjectProposal;
 
   try {
@@ -81,48 +121,84 @@ export async function handleGenerateSection(
     };
   }
   
-  const prompt = formData.get(`prompt_${sectionToGenerate}`) as string | null;
+  const prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
   if (!prompt) {
-    return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${sectionToGenerate}'.` };
+    return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${itemToGenerate}'.` };
   }
+  
+  const isSection = sectionNames.includes(itemToGenerate as SectionName);
+  const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
 
-  const agentInput = {
-    proposal: validatedProposal.data,
-    prompt,
+  if (!isSection && !isDiagram) {
+    return { ...prevState, error: 'نوع العنصر المطلوب غير معروف.' };
   }
 
   try {
-    let result;
-    switch (sectionToGenerate) {
-      case 'introduction':
-        result = await generateIntroduction(agentInput);
-        return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
-      case 'literatureReview':
-        result = await generateLiteratureReview(agentInput);
-        return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
-      case 'systemAnalysis':
-        result = await generateSystemAnalysis(agentInput);
-        return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
-      case 'designStrategy':
-        result = await generateDesignStrategy(agentInput);
-        return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
-       case 'systemDesign':
-        result = await generateSystemDesign(agentInput);
-        return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
-       case 'systemProgramming':
-        result = await generateSystemProgramming(agentInput);
-        return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
-       case 'systemTesting':
-        result = await generateSystemTesting(agentInput);
-        return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
-      case 'conclusion':
-        result = await generateConclusion(agentInput);
-        return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
-      default:
-        return { ...prevState, error: 'القسم المطلوب غير معروف.' };
+    if (isSection) {
+      const sectionToGenerate = itemToGenerate as SectionName;
+      const agentInput = { proposal: validatedProposal.data, prompt };
+      let result;
+      switch (sectionToGenerate) {
+        case 'introduction':
+          result = await generateIntroduction(agentInput);
+          return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
+        case 'literatureReview':
+          result = await generateLiteratureReview(agentInput);
+          return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
+        case 'systemAnalysis':
+          result = await generateSystemAnalysis(agentInput);
+          return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
+        case 'designStrategy':
+          result = await generateDesignStrategy(agentInput);
+          return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
+         case 'systemDesign':
+          result = await generateSystemDesign(agentInput);
+          return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
+         case 'systemProgramming':
+          result = await generateSystemProgramming(agentInput);
+          return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
+         case 'systemTesting':
+          result = await generateSystemTesting(agentInput);
+          return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
+        case 'conclusion':
+          result = await generateConclusion(agentInput);
+          return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
+      }
     }
+
+    if (isDiagram) {
+        const diagramToGenerate = itemToGenerate as DiagramType;
+        const agentInput = { proposal: validatedProposal.data, otherDiagrams: {}, prompt };
+        let result;
+
+        switch (diagramToGenerate) {
+            case 'useCase': result = await generateUseCaseDiagram(agentInput); break;
+            case 'class': result = await generateClassDiagram(agentInput); break;
+            case 'sequence': result = await generateSequenceDiagram(agentInput); break;
+            case 'activity': result = await generateActivityDiagram(agentInput); break;
+            case 'component': result = await generateComponentDiagram(agentInput); break;
+            case 'archimate': result = await generateArchimateDiagram(agentInput); break;
+            default: return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
+        }
+
+        const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+        const newDiagrams = { 
+            ...prevState.diagrams, 
+            [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl } 
+        };
+
+        return { 
+            ...prevState,
+            diagrams: newDiagrams, 
+            lastGenerated: diagramToGenerate, 
+            error: undefined 
+        };
+    }
+    
+    return { ...prevState, error: 'حدث خطأ غير متوقع.' };
+
   } catch (e) {
     console.error(e);
-    return { ...prevState, error: `حدث خطأ أثناء توليد قسم '${sectionToGenerate}'. يرجى المحاولة مرة أخرى.` };
+    return { ...prevState, error: `حدث خطأ أثناء توليد '${itemToGenerate}'. يرجى المحاولة مرة أخرى.` };
   }
 }

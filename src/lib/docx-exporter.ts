@@ -1,8 +1,8 @@
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun } from 'docx';
 import { saveAs } from 'file-saver';
-import type { ProjectProposal } from './schemas';
+import type { ProjectProposal, DiagramType } from './schemas';
 import type { SectionName } from '@/app/generate-report/actions';
 import { marked } from 'marked';
 
@@ -54,19 +54,11 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 break;
             case 'list':
                 for (const item of token.items) {
-                    const textToken = item.tokens.find(t => t.type === 'text') as marked.Tokens.Text | undefined;
-                    if (textToken) {
-                        docxObjects.push(new Paragraph({
-                            children: processInlines(textToken.tokens || []),
-                            bullet: { level: 0 },
-                        }));
-                    } else {
-                        // Fallback for list items without nested text tokens
-                        docxObjects.push(new Paragraph({
-                           text: item.text,
-                           bullet: { level: 0 },
-                        }));
-                    }
+                    const childTokens = (item.tokens[0] as marked.Tokens.Text)?.tokens || item.tokens;
+                    docxObjects.push(new Paragraph({
+                        children: processInlines(childTokens),
+                        bullet: { level: item.depth || 0 },
+                    }));
                 }
                 break;
             case 'space':
@@ -125,6 +117,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
 
 export async function exportReportAsDocx(
     sections: { [key in SectionName]?: string; },
+    diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
     styles: IStylesOptions
 ) {
@@ -139,32 +132,68 @@ export async function exportReportAsDocx(
         conclusion: { title: "الخاتمة" },
     };
     
+    const diagramConfig: { [key in DiagramType]: { title: string } } = {
+        useCase: { title: "مخطط حالة الاستخدام (Use Case)" },
+        class: { title: "مخطط الأصناف (Class)" },
+        sequence: { title: "مخطط التسلسل (Sequence)" },
+        activity: { title: "مخطط النشاط (Activity)" },
+        component: { title: "مخطط المكونات (Component)" },
+        archimate: { title: "مخطط ArchiMate" },
+    };
+    
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
-    const sectionsToExport = orderedSections
-        .map(key => {
-            const content = sections[key];
-            return content ? { title: sectionConfig[key].title, content } : null;
-        })
-        .filter((s): s is { title: string; content: string } => s !== null);
+    const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
+    
+    const children: (Paragraph | Table)[] = [];
+    children.push(new Paragraph({ text: `تقرير مشروع: ${proposalTitle}`, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }));
 
-    if (sectionsToExport.length === 0) return;
+    for (const key of orderedSections) {
+        const content = sections[key];
+        if (content) {
+            children.push(new Paragraph({
+                text: sectionConfig[key].title,
+                heading: HeadingLevel.HEADING_1,
+                spacing: { before: 400, after: 200 },
+            }));
+            children.push(...parseMarkdownToDocx(content));
+        }
+    }
+
+    if (diagrams && Object.values(diagrams).some(d => !!d)) {
+        children.push(new Paragraph({ text: "المخططات الهندسية", heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 }}));
+
+        for (const key of orderedDiagrams) {
+            const diagramData = diagrams[key];
+            if (diagramData) {
+                try {
+                    const response = await fetch(diagramData.imageUrl);
+                    if (!response.ok) throw new Error('Image fetch failed');
+                    const imageBuffer = await response.arrayBuffer();
+                    
+                    children.push(new Paragraph({
+                        text: diagramConfig[key].title,
+                        heading: HeadingLevel.HEADING_2,
+                        spacing: { before: 300, after: 150 },
+                    }));
+                    children.push(new Paragraph({
+                        children: [new ImageRun({
+                            data: imageBuffer,
+                            transformation: { width: 550, height: 400 },
+                        })],
+                        alignment: AlignmentType.CENTER,
+                    }));
+
+                } catch (error) {
+                    console.error(`Failed to embed image for ${key}:`, error);
+                    children.push(new Paragraph({ text: `[فشل تحميل صورة المخطط: ${diagramConfig[key].title}]` }));
+                }
+            }
+        }
+    }
 
     const doc = new Document({
         styles,
-        sections: [{
-            properties: {},
-            children: [
-                new Paragraph({ text: proposalTitle, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
-                ...sectionsToExport.flatMap(({ title, content }) => [
-                    new Paragraph({
-                        text: title,
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { before: 400, after: 200 },
-                    }),
-                    ...parseMarkdownToDocx(content)
-                ])
-            ],
-        }],
+        sections: [{ properties: {}, children }],
     });
     
     const blob = await Packer.toBlob(doc);

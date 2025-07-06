@@ -1,15 +1,18 @@
 import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-export interface Agent {
+export interface AgentData {
   id: string;
   name: string;
   description: string;
-  category: 'Content Generation' | 'Diagrams' | 'Report Sections';
-  icon: LucideIcon;
+  category: 'Content Generation' | 'Report & Diagram Generation';
   pageUrl: string;
   isEnabled: boolean;
   prompt: string;
+}
+
+export interface Agent extends AgentData {
+  icon: LucideIcon;
 }
 
 export const AGENTS: Agent[] = [
@@ -48,7 +51,7 @@ Project Idea: {{{projectIdea}}}`
     id: 'generate-introduction',
     name: 'وكيل توليد المقدمة',
     description: 'يكتب مقدمة احترافية لتقرير المشروع بناءً على بيانات المقترح الكاملة.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: BookMarked,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -75,7 +78,7 @@ Project Proposal Data:
     id: 'generate-literature-review',
     name: 'وكيل مراجعة الأدبيات',
     description: 'يولد قسم مراجعة الأدبيات الأكاديمية والتقنية لتقرير المشروع.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: Library,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -99,7 +102,7 @@ Project Proposal Data:
     id: 'generate-system-analysis',
     name: 'وكيل تحليل النظام',
     description: 'يولد قسم تحليل النظام، بما في ذلك المتطلبات الوظيفية وغير الوظيفية.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: Waypoints,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -123,7 +126,7 @@ Project Proposal Data:
     id: 'generate-design-strategy',
     name: 'وكيل استراتيجية التصميم',
     description: 'يولد قسم استراتيجية التصميم، مع التركيز على تجربة المستخدم وواجهة المستخدم.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: BookText,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -147,7 +150,7 @@ Project Proposal Data:
     id: 'generate-system-design',
     name: 'وكيل تصميم النظام',
     description: 'يولد قسم تصميم النظام، ويحدد الهندسة المعمارية، ونموذج البيانات، والمكونات.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -171,7 +174,7 @@ Project Proposal Data:
     id: 'generate-system-programming',
     name: 'وكيل برمجة النظام',
     description: 'يولد قسم برمجة النظام والتنفيذ، ويحدد سير العمل والمعايير.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -196,7 +199,7 @@ Project Proposal Data:
     id: 'generate-system-testing',
     name: 'وكيل اختبار النظام',
     description: 'يولد قسم اختبار النظام، ويحدد استراتيجية الاختبار والأدوات والمقاييس.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: TestTube2,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -220,7 +223,7 @@ Project Proposal Data:
     id: 'generate-conclusion',
     name: 'وكيل توليد الخاتمة',
     description: 'يكتب خاتمة موجزة ومؤثرة لتقرير المشروع النهائي.',
-    category: 'Report Sections',
+    category: 'Report & Diagram Generation',
     icon: Flag,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -245,9 +248,9 @@ Project Proposal Data:
     id: 'generate-use-case-diagram',
     name: 'وكيل مخطط حالة الاستخدام',
     description: 'ينتج مخطط حالة استخدام PlantUML لتحديد الجهات الفاعلة وحالات الاستخدام.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Use Case Diagram**.
 
@@ -278,9 +281,9 @@ Project Proposal Data:
     id: 'generate-class-diagram',
     name: 'وكيل مخطط الأصناف',
     description: 'ينتج مخطط أصناف PlantUML يوضح الفئات والسمات والأساليب والعلاقات.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert software architect specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Class Diagram**.
 
@@ -312,9 +315,9 @@ Project Proposal Data:
     id: 'generate-sequence-diagram',
     name: 'وكيل مخطط التسلسل',
     description: 'ينتج مخطط تسلسل PlantUML لتوضيح تفاعلات الكائنات في سيناريو معين.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Sequence Diagram** for a key user flow.
 
@@ -346,9 +349,9 @@ Project Proposal Data:
     id: 'generate-activity-diagram',
     name: 'وكيل مخطط النشاط',
     description: 'ينتج مخطط نشاط PlantUML لنمذجة سير عمل العمليات في النظام.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert process analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Activity Diagram** illustrating a key workflow.
 
@@ -380,9 +383,9 @@ Project Proposal Data:
     id: 'generate-component-diagram',
     name: 'وكيل مخطط المكونات',
     description: 'ينتج مخطط مكونات PlantUML يصور بنية النظام من حيث المكونات.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert software architect specializing in PlantUML. Based on the project proposal below, generate a high-level PlantUML **Component Diagram**.
 
@@ -413,9 +416,9 @@ Project Proposal Data:
     id: 'generate-archimate-diagram',
     name: 'وكيل مخطط ArchiMate',
     description: 'ينتج مخطط ArchiMate PlantUML لنمذجة بنية المؤسسة عبر طبقات متعددة.',
-    category: 'Diagrams',
+    category: 'Report & Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagrams',
+    pageUrl: '/generate-report',
     isEnabled: true,
     prompt: `You are an expert enterprise architect specializing in PlantUML and ArchiMate. Based on the project proposal below, generate a PlantUML **ArchiMate Diagram**.
 

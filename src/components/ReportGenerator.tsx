@@ -2,13 +2,14 @@
 
 import { useActionState, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
-import { handleGenerateSection, type ReportState, type SectionName } from '@/app/generate-report/actions';
+import { handleGenerateReportItem, type ReportState, type SectionName } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileDown, FileText } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import Image from 'next/image';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -16,7 +17,7 @@ import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
-
+import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
     introduction: { title: "المقدمة", icon: BookMarked, agentId: "generate-introduction" },
@@ -29,117 +30,115 @@ const sectionConfig: { [key in SectionName]: { title: string; icon: React.Elemen
     conclusion: { title: "الخاتمة", icon: Flag, agentId: "generate-conclusion" },
 };
 
+const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
+    useCase: { title: "مخطط حالة الاستخدام", agentId: "generate-use-case-diagram" },
+    class: { title: "مخطط الأصناف", agentId: "generate-class-diagram" },
+    sequence: { title: "مخطط التسلسل", agentId: "generate-sequence-diagram" },
+    activity: { title: "مخطط النشاط", agentId: "generate-activity-diagram" },
+    component: { title: "مخطط المكونات", agentId: "generate-component-diagram" },
+    archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
+};
 
-function GenerateButton({ section, agent }: { section: SectionName, agent?: Agent }) {
+function GenerateButton({ itemKey, title, agent, icon: Icon }: { itemKey: string; title: string; agent?: Agent, icon: React.ElementType }) {
     const { pending, data } = useFormStatus();
-    const isGeneratingThis = pending && data?.get('sectionToGenerate') === section;
+    const isGeneratingThis = pending && data?.get('itemToGenerate') === itemKey;
 
     return (
         <Button
             type="submit"
-            name="sectionToGenerate"
-            value={section}
+            name="itemToGenerate"
+            value={itemKey}
             disabled={pending || !agent?.isEnabled}
             variant="secondary"
             className="w-full justify-start"
-            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${sectionConfig[section].title}`}
+            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
         >
             {isGeneratingThis ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
-                <Sparkles className="ml-2 h-4 w-4" />
+                <Icon className="ml-2 h-4 w-4" />
             )}
-            توليد قسم: {sectionConfig[section].title}
+            {title}
         </Button>
     );
 }
 
-function ReportSection({ title, content, icon: Icon }: { title: string; content?: string; icon: React.ElementType }) {
-    if (!content) return null;
-
-    return (
-        <AccordionItem value={title}>
-            <AccordionTrigger className="font-headline text-xl">
-                <Icon className="ml-2 h-5 w-5 text-primary" /> {title}
-            </AccordionTrigger>
-            <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground">
-               <ReactMarkdown>{content}</ReactMarkdown>
-            </AccordionContent>
-        </AccordionItem>
-    );
-}
-
 export default function ReportGenerator() {
-    const initialState: ReportState = { sections: {} };
-    const [state, formAction] = useActionState(handleGenerateSection, initialState);
+    const initialState: ReportState = { sections: {}, diagrams: {} };
+    const [state, formAction] = useActionState(handleGenerateReportItem, initialState);
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
     const { agents } = useAgents();
 
-    const hasContent = Object.values(state.sections).some(s => !!s);
+    const hasContent = Object.values(state.sections).some(s => !!s) || Object.values(state.diagrams || {}).some(d => !!d);
+    
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const reportAgents = orderedSections.map(key => agents.find(a => a.id === sectionConfig[key].agentId));
-
+    
+    const orderedDiagrams = DiagramTypeSchema.options;
+    const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
 
     useEffect(() => {
-        if (state.lastGenerated && state.sections[state.lastGenerated]) {
-            let proposalTitle = 'تقرير مشروع';
-            try {
-                const parsed = JSON.parse(proposalJson);
-                if (parsed && parsed.title) {
-                    proposalTitle = parsed.title;
-                }
-            } catch (e) {
-                // Ignore parsing errors
-            }
+        if (!state.lastGenerated) return;
 
+        let proposalTitle = 'تقرير مشروع';
+        try {
+            const parsed = JSON.parse(proposalJson);
+            if (parsed && parsed.title) {
+                proposalTitle = parsed.title;
+            }
+        } catch (e) { /* ignore */ }
+
+        if (sectionConfig[state.lastGenerated as SectionName]) {
+            const section = state.lastGenerated as SectionName;
             addHistoryEntry({
                 type: 'report',
-                title: `قسم تقرير: ${sectionConfig[state.lastGenerated].title}`,
+                title: `قسم تقرير: ${sectionConfig[section].title}`,
                 proposalTitle,
-                section: state.lastGenerated,
-                content: state.sections[state.lastGenerated]!,
+                section: section,
+                content: state.sections[section]!,
             });
+        } else if (diagramConfig[state.lastGenerated as DiagramType]) {
+            const diagram = state.lastGenerated as DiagramType;
+            const diagramData = state.diagrams?.[diagram];
+            if(diagramData) {
+                addHistoryEntry({
+                    type: 'diagram',
+                    title: `مخطط: ${diagramConfig[diagram].title}`,
+                    diagramType: diagram,
+                    plantUmlCode: diagramData.plantUmlCode,
+                    imageUrl: diagramData.imageUrl,
+                    proposalTitle: proposalTitle,
+                });
+            }
         }
-    }, [state.lastGenerated, state.sections, addHistoryEntry, proposalJson]);
+    }, [state.lastGenerated, state.sections, state.diagrams, addHistoryEntry, proposalJson]);
 
     const handleExportDOCX = async () => {
         if (!hasContent) return;
-
         let proposalTitle = 'Project Report';
         try {
             const parsed = JSON.parse(proposalJson);
             if (parsed && parsed.title) {
                 proposalTitle = parsed.title;
             }
-        } catch (e) {
-            // ignore
-        }
+        } catch (e) { /* ignore */ }
         
         const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
-        const template = templates[templateKey];
-        if (template) {
-            await exportReportAsDocx(state.sections, proposalTitle, template.styles);
-        } else {
-            await exportReportAsDocx(state.sections, proposalTitle, templates.modern.styles);
-        }
+        const template = templates[templateKey] || templates.modern;
+        await exportReportAsDocx(state.sections, state.diagrams || {}, proposalTitle, template.styles);
     };
-
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">
             <div className="md:col-span-1">
                 <form action={formAction}>
-                    {reportAgents.map((agent, index) => {
-                        const key = orderedSections[index];
-                        return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
-                    })}
+                    {reportAgents.map((agent, index) => agent ? <input type="hidden" name={`prompt_${orderedSections[index]}`} value={agent.prompt} key={agent.id} /> : null)}
+                    {diagramAgents.map((agent, index) => agent ? <input type="hidden" name={`prompt_${orderedDiagrams[index]}`} value={agent.prompt} key={agent.id} /> : null)}
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline flex leading-relaxed">مقترح المشروع (JSON)</CardTitle>
-                            <CardDescription>
-                                الصق هنا محتوى مقترح المشروع الكامل بصيغة JSON.
-                            </CardDescription>
+                            <CardDescription>الصق هنا محتوى مقترح المشروع الكامل بصيغة JSON.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
@@ -154,8 +153,13 @@ export default function ReportGenerator() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2 items-start">
+                           <p className="font-headline text-muted-foreground pb-2">أقسام التقرير</p>
                            {orderedSections.map((key, index) => (
-                               <GenerateButton key={key} section={key} agent={reportAgents[index]} />
+                               <GenerateButton key={key} itemKey={key} title={sectionConfig[key].title} agent={reportAgents[index]} icon={sectionConfig[key].icon} />
+                           ))}
+                           <p className="font-headline text-muted-foreground pt-4 pb-2">المخططات الهندسية</p>
+                           {orderedDiagrams.map((key, index) => (
+                               <GenerateButton key={key} itemKey={key} title={diagramConfig[key].title} agent={diagramAgents[index]} icon={GitGraph} />
                            ))}
                         </CardFooter>
                     </Card>
@@ -165,9 +169,7 @@ export default function ReportGenerator() {
                  <Card className="mb-6">
                     <CardHeader>
                         <CardTitle className="font-headline">تصدير التقرير</CardTitle>
-                        <CardDescription>
-                            تصدير الأقسام التي تم إنشاؤها إلى ملف DOCX.
-                        </CardDescription>
+                        <CardDescription>تصدير الأقسام التي تم إنشاؤها إلى ملف DOCX.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col sm:flex-row gap-4">
                         <Button onClick={handleExportDOCX} disabled={!hasContent} className="w-full sm:w-auto font-headline">
@@ -182,20 +184,48 @@ export default function ReportGenerator() {
                         <Sparkles className="h-4 w-4" />
                         <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
                         <AlertDescription>
-                            تم توليد قسم "{sectionConfig[state.lastGenerated].title}". يمكنك عرضه أدناه.
+                           تم توليد "{sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title}". يمكنك عرضه أدناه.
                         </AlertDescription>
                     </Alert>
                 )}
-                 <Accordion type="single" collapsible className="w-full space-y-4" defaultValue={state.lastGenerated ? sectionConfig[state.lastGenerated].title : undefined}>
+                 <Accordion type="multiple" className="w-full space-y-4">
                     {orderedSections.map((key) => {
-                        const { title, icon } = sectionConfig[key];
+                        const content = state.sections[key];
+                        if (!content) return null;
+                        const { title, icon: Icon } = sectionConfig[key];
                         return (
-                            <ReportSection
-                                key={key}
-                                title={title}
-                                icon={icon}
-                                content={state.sections[key as SectionName]}
-                            />
+                            <AccordionItem value={title} key={key}>
+                                <AccordionTrigger className="font-headline text-xl"><Icon className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                                <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground">
+                                   <ReactMarkdown>{content}</ReactMarkdown>
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    })}
+                    {orderedDiagrams.map((key) => {
+                        const diagramData = state.diagrams?.[key];
+                        if (!diagramData) return null;
+                        const { title } = diagramConfig[key];
+                        return (
+                           <AccordionItem value={title} key={key}>
+                               <AccordionTrigger className="font-headline text-xl"><GitGraph className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                               <AccordionContent className="space-y-4 p-4">
+                                   <Image 
+                                       src={diagramData.imageUrl} 
+                                       alt={`Rendered ${title}`}
+                                       width={800}
+                                       height={600}
+                                       className="w-full h-auto object-contain rounded-md border bg-white p-2"
+                                   />
+                                   <Textarea
+                                       readOnly
+                                       value={diagramData.plantUmlCode}
+                                       rows={10}
+                                       className="bg-muted p-4 rounded-md text-sm text-left font-mono"
+                                       dir="ltr"
+                                   />
+                               </AccordionContent>
+                           </AccordionItem>
                         )
                     })}
                 </Accordion>
