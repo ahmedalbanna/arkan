@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun } from 'docx';
@@ -188,8 +189,9 @@ export async function exportReportAsDocx(
             const diagramData = diagrams[key];
             if (diagramData) {
                 try {
-                    const response = await fetch(diagramData.imageUrl);
-                    if (!response.ok) throw new Error('Image fetch failed');
+                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(diagramData.imageUrl)}`;
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Image fetch failed via proxy');
                     const imageBuffer = await response.arrayBuffer();
                     
                     children.push(new Paragraph({

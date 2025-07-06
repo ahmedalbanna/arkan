@@ -196,10 +196,8 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.stakeholders.map((stakeholder, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div>
-                                <strong><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></strong> 
-                                {' '}(<EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} />)
-                            </div>
+                            <strong><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></strong> - 
+                            <EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} />
                             <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline />
                         </div>
                     ))}
