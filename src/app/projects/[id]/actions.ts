@@ -5,19 +5,13 @@ import { addComment, updateComment, deleteComment } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 
 const commentSchema = z.object({
-  comment: z.string().min(1, 'التعليق لا يمكن أن يكون فارغاً.').max(500, 'التعليق طويل جداً.'),
+  comment: z.string().max(500, 'التعليق طويل جداً.').optional(),
   projectId: z.string(),
   commentId: z.string().optional(),
   intent: z.enum(['create', 'edit', 'delete']),
 });
 
 export async function handleCommentAction(prevState: { error?: string } | null, formData: FormData) {
-  // Clear the new comment field on successful submission
-  const commentTextarea = formData.get('comment');
-  if (commentTextarea instanceof HTMLInputElement) {
-      commentTextarea.value = '';
-  }
-    
   const validatedFields = commentSchema.safeParse({
     comment: formData.get('comment'),
     projectId: formData.get('projectId'),
@@ -39,6 +33,9 @@ export async function handleCommentAction(prevState: { error?: string } | null, 
   try {
     switch (intent) {
       case 'create':
+        if (!comment || comment.trim().length === 0) {
+          return { error: 'التعليق لا يمكن أن يكون فارغاً.' };
+        }
         await addComment({
           projectId,
           userId,
@@ -47,12 +44,13 @@ export async function handleCommentAction(prevState: { error?: string } | null, 
         break;
       case 'edit':
         if (!commentId) return { error: 'معرّف التعليق مطلوب للتعديل.' };
-        // In a real app, you would also verify that the current user owns this comment.
+        if (!comment || comment.trim().length === 0) {
+          return { error: 'التعليق لا يمكن أن يكون فارغاً.' };
+        }
         await updateComment(commentId, comment);
         break;
       case 'delete':
         if (!commentId) return { error: 'معرّف التعليق مطلوب للحذف.' };
-        // In a real app, you would also verify that the current user owns this comment.
         await deleteComment(commentId);
         break;
       default:
