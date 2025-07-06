@@ -3,15 +3,15 @@ import Image from 'next/image';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import type { Project, User } from '@/lib/types';
+import type { ProjectForCard } from '@/lib/db/queries';
 import { ArrowLeft } from 'lucide-react';
 
 interface ProjectCardProps {
-  project: Project;
-  user?: User;
+  project: ProjectForCard;
 }
 
-export function ProjectCard({ project, user }: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
+  const { user } = project;
   return (
     <Link href={`/projects/${project.id}`} className="group block">
       <Card className="h-full flex flex-col transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
@@ -22,7 +22,7 @@ export function ProjectCard({ project, user }: ProjectCardProps) {
               alt={project.media[0]?.alt || project.title}
               fill
               className="object-cover rounded-t-lg"
-              data-ai-hint={project.media[0]?.aiHint}
+              data-ai-hint={project.media[0]?.aiHint ?? ''}
             />
           </div>
         </CardHeader>
@@ -37,7 +37,7 @@ export function ProjectCard({ project, user }: ProjectCardProps) {
             {user && (
               <>
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatarUrl} alt={user.name} />
+                  <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
                   <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium text-muted-foreground">{user.name}</span>

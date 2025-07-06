@@ -126,5 +126,3 @@ export const MOCK_PROJECTS: Project[] = [
     createdAt: '2023-12-10T18:00:00Z',
   },
 ];
-
-export const featuredProjects = MOCK_PROJECTS.slice(0, 3);

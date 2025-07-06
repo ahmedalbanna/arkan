@@ -1,4 +1,4 @@
-import { MOCK_PROJECTS, MOCK_USERS } from '@/lib/data';
+import { getProjectById } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -11,14 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowUpRight, Calendar, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function ProjectDetailPage({ params }: { params: { id: string } }) {
-  const project = MOCK_PROJECTS.find(p => p.id === params.id);
+export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
+  const project = await getProjectById(params.id);
 
-  if (!project) {
+  if (!project || !project.user) {
     notFound();
   }
-
-  const user = MOCK_USERS.find(u => u.id === project.userId);
+  const { user } = project;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -35,7 +34,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                 {user && (
                     <Link href={`/profile/${user.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
                         <Avatar className="h-6 w-6">
-                            <AvatarImage src={user.avatarUrl} alt={user.name} />
+                            <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
                             <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <span>{user.name}</span>
@@ -55,7 +54,7 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
                       width={800}
                       height={600}
                       className="w-full h-auto object-cover rounded-lg border"
-                      data-ai-hint={item.aiHint}
+                      data-ai-hint={item.aiHint ?? ''}
                     />
                   ) : (
                     <div className="aspect-video">
@@ -77,8 +76,8 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
           <div className="mt-8">
             <h3 className="font-headline text-lg mb-2">الوسوم</h3>
             <div className="flex flex-wrap gap-2">
-              {project.tags.map(tag => (
-                <Badge key={tag} variant="outline">{tag}</Badge>
+              {project.projectTags.map(pt => (
+                <Badge key={pt.tag.id} variant="outline">{pt.tag.name}</Badge>
               ))}
             </div>
           </div>
@@ -98,12 +97,12 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
               <CardTitle className="font-headline">ملخص المشروع (AI)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-muted-foreground">{project.summary?.short}</p>
+              <p className="text-muted-foreground">{project.summaryShort}</p>
               <div>
                 <h4 className="font-semibold mb-2">التقنيات المستخدمة:</h4>
                 <div className="flex flex-wrap gap-2">
-                  {project.summary?.technologies.map(tech => (
-                    <Badge key={tech}>{tech}</Badge>
+                  {project.summaryTechnologies.map(st => (
+                    <Badge key={st.technology.id}>{st.technology.name}</Badge>
                   ))}
                 </div>
               </div>
@@ -120,11 +119,11 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             <CardContent className="space-y-6">
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                 {project.comments.map(comment => {
-                  const commentUser = MOCK_USERS.find(u => u.id === comment.userId);
+                  const commentUser = comment.user;
                   return (
                     <div key={comment.id} className="flex gap-3">
                       <Avatar className="h-10 w-10">
-                        <AvatarImage src={commentUser?.avatarUrl} alt={commentUser?.name} />
+                        <AvatarImage src={commentUser?.avatarUrl ?? ''} alt={commentUser?.name} />
                         <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div className="flex-grow">

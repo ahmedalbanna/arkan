@@ -1,11 +1,12 @@
 import { ProjectCard } from '@/components/ProjectCard';
 import { Button } from '@/components/ui/button';
-import { featuredProjects, MOCK_USERS } from '@/lib/data';
+import { getFeaturedProjects } from '@/lib/db/queries';
 import { ArrowLeft, BrainCircuit, Code, Users } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
-export default function Home() {
+export default async function Home() {
+  const featuredProjects = await getFeaturedProjects();
+
   return (
     <div className="flex flex-col">
       <section className="py-20 md:py-32 bg-card">
@@ -33,10 +34,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-headline font-bold text-center mb-12">مشاريع مميزة</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {featuredProjects.map((project) => {
-              const user = MOCK_USERS.find(u => u.id === project.userId);
-              return <ProjectCard key={project.id} project={project} user={user} />;
-            })}
+            {featuredProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
           </div>
         </div>
       </section>

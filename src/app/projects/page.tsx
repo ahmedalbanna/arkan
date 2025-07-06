@@ -2,11 +2,12 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MOCK_PROJECTS, MOCK_USERS } from '@/lib/data';
+import { getAllProjects, getAllCategories } from '@/lib/db/queries';
 import { Search } from 'lucide-react';
 
-export default function ProjectsPage() {
-  const categories = [...new Set(MOCK_PROJECTS.map(p => p.category))];
+export default async function ProjectsPage({ searchParams }: { searchParams: { category?: string; q?: string }}) {
+  const projects = await getAllProjects(searchParams.category);
+  const categories = await getAllCategories();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -39,10 +40,9 @@ export default function ProjectsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {MOCK_PROJECTS.map((project) => {
-          const user = MOCK_USERS.find(u => u.id === project.userId);
-          return <ProjectCard key={project.id} project={project} user={user} />;
-        })}
+        {projects.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
       </div>
     </div>
   );
