@@ -190,3 +190,64 @@ export async function createProject(data: {
         return newProjectId;
     });
 }
+
+export async function updateProject(projectId: string, data: {
+    title: string;
+    description: string;
+    category: string;
+    liveLink?: string;
+    tags: string[];
+    media: { url: string; alt: string; aiHint?: string; type: 'image' | 'video' }[];
+}) {
+    return await db.transaction(async (tx) => {
+        // 1. Update the project details
+        await tx.update(projects).set({
+            title: data.title,
+            description: data.description,
+            category: data.category,
+            liveLink: data.liveLink || null,
+        }).where(eq(projects.id, projectId));
+
+        // 2. Handle tags (delete old, add new)
+        await tx.delete(projectTags).where(eq(projectTags.projectId, projectId));
+        if (data.tags.length > 0) {
+            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
+            const existingTagNames = new Set(existingTags.map(t => t.name));
+            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+
+            if (newTagNames.length > 0) {
+                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
+                existingTags.push(...newTags);
+            }
+            
+            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
+
+            await tx.insert(projectTags).values(data.tags.map(tagName => {
+                const tagId = tagMap.get(tagName);
+                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
+                return { projectId, tagId };
+            }));
+        }
+
+        // 3. Handle media (delete old, add new)
+        await tx.delete(media).where(eq(media.projectId, projectId));
+        if (data.media.length > 0) {
+            await tx.insert(media).values(data.media.map(m => ({
+                projectId,
+                url: m.url,
+                alt: m.alt,
+                aiHint: m.aiHint,
+                type: m.type,
+            })));
+        }
+
+        return projectId;
+    });
+}
+
+export async function deleteProject(projectId: string) {
+    // With 'onDelete: cascade' in the schema, this will also delete related
+    // media, comments, projectTags, and summaryTechnologies.
+    await db.delete(projects).where(eq(projects.id, projectId));
+    return { success: true };
+}

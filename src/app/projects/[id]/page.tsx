@@ -7,10 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowUpRight, Calendar, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, Calendar, MessageCircle, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
-import { handleCommentAction } from './actions';
 import CommentItem from '@/components/CommentItem';
 import NewCommentForm from '@/components/NewCommentForm';
 
@@ -21,28 +19,43 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     notFound();
   }
   const { user } = project;
+  // In a real app, you'd get the current user's ID from the session
+  const currentUserId = 'user-1';
+  const isOwner = user.id === currentUserId;
 
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="grid lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2">
           <div className="mb-8">
-            <Badge variant="secondary" className="mb-2">{project.category}</Badge>
-            <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">{project.title}</h1>
-            <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{format(new Date(project.createdAt), 'd MMMM yyyy')}</span>
+            <div className="flex justify-between items-start">
+              <div>
+                <Badge variant="secondary" className="mb-2">{project.category}</Badge>
+                <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">{project.title}</h1>
+                <div className="flex items-center gap-4 text-muted-foreground text-sm">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{format(new Date(project.createdAt), 'd MMMM yyyy')}</span>
+                    </div>
+                    {user && (
+                        <Link href={`/profile/${user.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                            <Avatar className="h-6 w-6">
+                                <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
+                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <span>{user.name}</span>
+                        </Link>
+                    )}
                 </div>
-                {user && (
-                    <Link href={`/profile/${user.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                        <Avatar className="h-6 w-6">
-                            <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
-                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span>{user.name}</span>
+              </div>
+              {isOwner && (
+                 <Button asChild variant="outline">
+                    <Link href={`/projects/${project.id}/edit`}>
+                      <Pencil className="ml-2 h-4 w-4" />
+                      تعديل المشروع
                     </Link>
-                )}
+                  </Button>
+              )}
             </div>
           </div>
           
