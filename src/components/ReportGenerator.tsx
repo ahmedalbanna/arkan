@@ -10,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
+import { Label } from './ui/label';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -39,7 +40,7 @@ const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; }
     archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
 };
 
-function GenerateButton({ itemKey, title, agent, icon: Icon }: { itemKey: string; title: string; agent?: Agent, icon: React.ElementType }) {
+function GenerateItemButton({ itemKey, title, agent }: { itemKey: string; title: string; agent?: Agent }) {
     const { pending, data } = useFormStatus();
     const isGeneratingThis = pending && data?.get('itemToGenerate') === itemKey;
 
@@ -49,14 +50,13 @@ function GenerateButton({ itemKey, title, agent, icon: Icon }: { itemKey: string
             name="itemToGenerate"
             value={itemKey}
             disabled={pending || !agent?.isEnabled}
-            variant="secondary"
-            className="w-full justify-start"
-            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+            className="font-headline"
+            title={!agent?.isEnabled ? 'This agent is disabled' : title}
         >
             {isGeneratingThis ? (
                 <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
-                <Icon className="ml-2 h-4 w-4" />
+                <Sparkles className="ml-2 h-4 w-4" />
             )}
             {title}
         </Button>
@@ -133,8 +133,6 @@ export default function ReportGenerator() {
         <div className="grid grid-cols-1 md:grid-cols-3 sm:gap-2 lg:gap-4">
             <div className="md:col-span-1">
                 <form action={formAction}>
-                    {reportAgents.map((agent, index) => agent ? <input type="hidden" name={`prompt_${orderedSections[index]}`} value={agent.prompt} key={agent.id} /> : null)}
-                    {diagramAgents.map((agent, index) => agent ? <input type="hidden" name={`prompt_${orderedDiagrams[index]}`} value={agent.prompt} key={agent.id} /> : null)}
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline flex leading-relaxed">مقترح المشروع (JSON)</CardTitle>
@@ -152,16 +150,59 @@ export default function ReportGenerator() {
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
                             )}
                         </CardContent>
-                        <CardFooter className="flex flex-col gap-2 items-start">
-                           <p className="font-headline text-muted-foreground pb-2">أقسام التقرير</p>
-                           {orderedSections.map((key, index) => (
-                               <GenerateButton key={key} itemKey={key} title={sectionConfig[key].title} agent={reportAgents[index]} icon={sectionConfig[key].icon} />
-                           ))}
-                           <p className="font-headline text-muted-foreground pt-4 pb-2">المخططات الهندسية</p>
-                           {orderedDiagrams.map((key, index) => (
-                               <GenerateButton key={key} itemKey={key} title={diagramConfig[key].title} agent={diagramAgents[index]} icon={GitGraph} />
-                           ))}
-                        </CardFooter>
+                    </Card>
+
+                    <Card className="mt-6">
+                        <CardHeader>
+                            <CardTitle className="font-headline">أدوات التوليد</CardTitle>
+                            <CardDescription>اختر قسمًا أو مخططًا لتوليده. يمكنك تعديل موجه الأوامر (prompt) لكل عنصر.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Accordion type="multiple" className="w-full space-y-1">
+                                {orderedSections.map((key, index) => {
+                                    const agent = reportAgents[index];
+                                    if (!agent) return null;
+                                    const { title, icon: Icon } = sectionConfig[key];
+                                    return (
+                                        <AccordionItem value={key} key={key}>
+                                            <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                                <div className="flex items-center gap-2">
+                                                    <Icon className="h-4 w-4" /> {title}
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="space-y-4 p-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
+                                                    <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
+                                                </div>
+                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} />
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    );
+                                })}
+                                {orderedDiagrams.map((key, index) => {
+                                    const agent = diagramAgents[index];
+                                    if (!agent) return null;
+                                    const { title } = diagramConfig[key];
+                                    return (
+                                        <AccordionItem value={key} key={key}>
+                                            <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                                <div className="flex items-center gap-2">
+                                                    <GitGraph className="h-4 w-4" /> {title}
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="space-y-4 p-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">موجه الأوامر (Prompt)</Label>
+                                                    <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
+                                                </div>
+                                                <GenerateItemButton itemKey={key} title={`توليد ${title}`} agent={agent} />
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    );
+                                })}
+                            </Accordion>
+                        </CardContent>
                     </Card>
                 </form>
             </div>
