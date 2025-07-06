@@ -1,7 +1,7 @@
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
-import { handleGenerateReportItem, type ReportState, type SectionName } from '@/app/generate-report/actions';
+import { handleGenerateReportItem, type ReportState } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import ProposalViewer from './ProposalViewer';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -21,7 +22,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { type Agent } from '@/lib/agents';
 import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
-import { DiagramTypeSchema, type DiagramType, type ProjectProposal } from '@/ai/schemas';
+import { DiagramTypeSchema, type DiagramType, type ProjectProposal, SectionNameSchema, type SectionName, ProjectProposalSchema } from '@/ai/schemas';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 
 
@@ -67,7 +68,7 @@ function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }
     );
 }
 
-const orderedSections = Object.keys(sectionConfig) as SectionName[];
+const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
 
 type ControlState = {
@@ -122,6 +123,7 @@ export default function ReportGenerator() {
     const [proposalJson, setProposalJson] = useState('');
     const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
     const [proposalError, setProposalError] = useState<string | undefined>();
+    const [proposal, setProposal] = useState<ProjectProposal | null>(null);
     
     const { addHistoryEntry } = useHistory();
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -140,7 +142,16 @@ export default function ReportGenerator() {
                     sections: parsed.sections || {},
                     diagrams: parsed.diagrams || {},
                 });
-                setProposalJson(parsed.proposalJson || '');
+                const savedProposalJson = parsed.proposalJson || '';
+                setProposalJson(savedProposalJson);
+                if (savedProposalJson) {
+                    try {
+                        const parsedProposal = ProjectProposalSchema.parse(JSON.parse(savedProposalJson));
+                        setProposal(parsedProposal);
+                    } catch {
+                        setProposal(null);
+                    }
+                }
                 setProjectIdea(parsed.projectIdea || '');
             }
         } catch (error) {
@@ -164,6 +175,26 @@ export default function ReportGenerator() {
              console.error("Failed to save state to localStorage", error);
         }
     }, [state, proposalJson, projectIdea, isLoaded]);
+
+    // Sync proposalJson textarea with the visual ProposalViewer
+    useEffect(() => {
+        if (proposalJson) {
+            try {
+                const parsedData = JSON.parse(proposalJson);
+                const validatedProposal = ProjectProposalSchema.safeParse(parsedData);
+                if (validatedProposal.success) {
+                    setProposal(validatedProposal.data);
+                } else {
+                    setProposal(null);
+                }
+            } catch (e) {
+                setProposal(null);
+            }
+        } else {
+            setProposal(null);
+        }
+    }, [proposalJson]);
+
 
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
         setControlState(prevState => ({
@@ -191,6 +222,7 @@ export default function ReportGenerator() {
                 prompt: proposalAgent.prompt
             });
             setProposalJson(JSON.stringify(result, null, 2));
+            setProposal(result);
             addHistoryEntry({
                 type: 'proposal',
                 title: `مقترح مشروع: ${result.title}`,
@@ -223,6 +255,7 @@ export default function ReportGenerator() {
         setState({ sections: {}, diagrams: {} });
         setProposalJson('');
         setProjectIdea('');
+        setProposal(null);
         setControlState(getInitialControlState());
     };
 
@@ -265,12 +298,9 @@ export default function ReportGenerator() {
     const handleExportDOCX = async () => {
         if (!hasContent) return;
         let proposalTitle = 'Project Report';
-        try {
-            const parsed = JSON.parse(proposalJson);
-            if (parsed && parsed.title) {
-                proposalTitle = parsed.title;
-            }
-        } catch (e) { /* ignore */ }
+        if (proposal && proposal.title) {
+            proposalTitle = proposal.title;
+        }
         
         const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
         const template = templates[templateKey] || templates.modern;
@@ -325,7 +355,7 @@ export default function ReportGenerator() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="font-headline flex leading-relaxed">الخطوة 2: مراجعة المقترح (JSON)</CardTitle>
-                                    <CardDescription>الصق هنا محتوى مقترح المشروع الكامل بصيغة JSON.</CardDescription>
+                                    <CardDescription>هذا هو المُدخل الخام لوكلاء الذكاء الاصطناعي. يمكنك تعديله إذا لزم الأمر.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Textarea
@@ -336,6 +366,8 @@ export default function ReportGenerator() {
                                         value={proposalJson}
                                         onChange={(e) => setProposalJson(e.target.value)}
                                         disabled={!proposalJson}
+                                        className="font-mono text-xs"
+                                        dir="ltr"
                                     />
                                     {state?.error && !generatingItem && (
                                         <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
@@ -444,8 +476,8 @@ export default function ReportGenerator() {
                         </div>
                     </form>
                 </div>
-                <div className="md:col-span-2">
-                    <Card className="mb-6">
+                <div className="md:col-span-2 space-y-6">
+                    <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">الإجراءات</CardTitle>
                             <CardDescription>تصدير الأقسام التي تم إنشاؤها أو بدء جلسة جديدة.</CardDescription>
@@ -463,7 +495,7 @@ export default function ReportGenerator() {
                     </Card>
 
                     {state?.lastGenerated && !state.error && (
-                        <Alert className="mb-6">
+                        <Alert>
                             <Sparkles className="h-4 w-4" />
                             <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
                             <AlertDescription>
@@ -473,22 +505,29 @@ export default function ReportGenerator() {
                     )}
 
                     {state?.error && generatingItem && (
-                        <Alert className="mb-6" variant="destructive">
+                        <Alert variant="destructive">
                             <Sparkles className="h-4 w-4" />
                             <AlertTitle className="font-headline">فشل التوليد!</AlertTitle>
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
+                    {proposal && (
+                        <div>
+                            <CardTitle className="font-headline text-xl mb-4">تفاصيل المقترح المولدة</CardTitle>
+                            <ProposalViewer proposal={proposal} />
+                        </div>
+                    )}
+                    
                     <Accordion type="multiple" className="w-full space-y-4" defaultValue={orderedSections.concat(orderedDiagrams)}>
                         {orderedSections.map((key) => {
                             const content = state.sections[key];
                             if (!content) return null;
                             const { title, icon: Icon } = sectionConfig[key];
                             return (
-                                <AccordionItem value={title} key={key}>
-                                    <AccordionTrigger className="font-headline text-xl"><Icon className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
-                                    <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground">
+                                <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
+                                    <AccordionTrigger className="font-headline text-xl p-4"><Icon className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                                    <AccordionContent className="prose dark:prose-invert max-w-none p-4 text-muted-foreground border-t">
                                     <ReactMarkdown>{content}</ReactMarkdown>
                                     </AccordionContent>
                                 </AccordionItem>
@@ -499,9 +538,9 @@ export default function ReportGenerator() {
                             if (!diagramData) return null;
                             const { title } = diagramConfig[key];
                             return (
-                            <AccordionItem value={title} key={key}>
-                                <AccordionTrigger className="font-headline text-xl"><GitGraph className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4">
+                            <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
+                                <AccordionTrigger className="font-headline text-xl p-4"><GitGraph className="ml-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                                <AccordionContent className="space-y-4 p-4 border-t">
                                     <Image 
                                         src={diagramData.imageUrl} 
                                         alt={`Rendered ${title}`}
