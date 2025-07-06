@@ -10,7 +10,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowUpRight, Calendar, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { handlePostComment } from './actions';
+import { handleCommentAction } from './actions';
+import CommentItem from '@/components/CommentItem';
+import NewCommentForm from '@/components/NewCommentForm';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -119,30 +121,11 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-                {project.comments.map(comment => {
-                  const commentUser = comment.user;
-                  return (
-                    <div key={comment.id} className="flex gap-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={commentUser?.avatarUrl ?? ''} alt={commentUser?.name} />
-                        <AvatarFallback>{commentUser?.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-grow">
-                        <div className="flex items-center justify-between">
-                            <span className="font-semibold">{commentUser?.name}</span>
-                            <span className="text-xs text-muted-foreground">{format(new Date(comment.createdAt), 'dd/MM/yy')}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">{comment.content}</p>
-                      </div>
-                    </div>
-                  )
-                })}
+                {project.comments.map(comment => (
+                  <CommentItem key={comment.id} comment={comment} projectId={project.id} />
+                ))}
               </div>
-              <form action={handlePostComment} className="flex flex-col gap-2 pt-4 border-t">
-                  <input type="hidden" name="projectId" value={project.id} />
-                  <Textarea name="comment" placeholder="أضف تعليقاً..." required />
-                  <Button type="submit" className="self-end font-headline">إرسال</Button>
-              </form>
+              <NewCommentForm projectId={project.id} />
             </CardContent>
           </Card>
         </aside>

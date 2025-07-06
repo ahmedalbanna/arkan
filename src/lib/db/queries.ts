@@ -125,3 +125,11 @@ export async function addComment({ projectId, userId, content }: { projectId: st
     }).returning();
     return newComment[0];
 }
+
+export async function updateComment(id: string, content: string) {
+    await db.update(comments).set({ content, createdAt: new Date().toISOString() }).where(eq(comments.id, id));
+}
+
+export async function deleteComment(id: string) {
+    await db.delete(comments).where(eq(comments.id, id));
+}
