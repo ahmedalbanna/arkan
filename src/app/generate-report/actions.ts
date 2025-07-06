@@ -122,7 +122,7 @@ export async function handleGenerateReportItem(
   }
   
   let prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
-  if (!prompt) {
+  if (prompt === null) {
     return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${itemToGenerate}'.` };
   }
   
