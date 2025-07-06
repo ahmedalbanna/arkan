@@ -2,6 +2,7 @@ import 'server-only';
 import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
 import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
+import { randomUUID } from 'crypto';
 
 export async function getFeaturedProjects() {
     const data = await db.query.projects.findMany({
@@ -113,3 +114,14 @@ export async function getUserProfile(id: string) {
     return data;
 }
 export type UserProfile = Awaited<ReturnType<typeof getUserProfile>>;
+
+export async function addComment({ projectId, userId, content }: { projectId: string; userId: string; content: string; }) {
+    const newComment = await db.insert(comments).values({
+        id: `comment-${randomUUID()}`,
+        projectId,
+        userId,
+        content,
+        createdAt: new Date().toISOString(),
+    }).returning();
+    return newComment[0];
+}

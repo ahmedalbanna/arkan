@@ -10,6 +10,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowUpRight, Calendar, MessageCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { handlePostComment } from './actions';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -137,10 +138,11 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                   )
                 })}
               </div>
-              <div className="flex flex-col gap-2 pt-4 border-t">
-                  <Textarea placeholder="أضف تعليقاً..." />
-                  <Button className="self-end font-headline">إرسال</Button>
-              </div>
+              <form action={handlePostComment} className="flex flex-col gap-2 pt-4 border-t">
+                  <input type="hidden" name="projectId" value={project.id} />
+                  <Textarea name="comment" placeholder="أضف تعليقاً..." required />
+                  <Button type="submit" className="self-end font-headline">إرسال</Button>
+              </form>
             </CardContent>
           </Card>
         </aside>
