@@ -11,7 +11,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx src/lib/db/seed.ts"
+    "db:seed": "tsx src/lib/db/seed.ts",
+    "postinstall": "patch-package && npm run db:push"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",

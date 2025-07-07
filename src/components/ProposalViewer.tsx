@@ -29,9 +29,10 @@ interface EditableFieldProps {
     multiline?: boolean;
     type?: string;
     className?: string;
+    readOnly?: boolean;
 }
 
-const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '' }) => {
+const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '', readOnly = false }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
     const [ast, setAst] = useState<object | null>(null);
@@ -48,6 +49,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     }, [value, isEditing, aiSuggestion]);
 
     const handleSave = () => {
+        if (readOnly) return;
         if (currentValue !== value) {
             onUpdate(path, currentValue);
         }
@@ -55,6 +57,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (readOnly) return;
         if (e.key === 'Enter' && !multiline) {
             handleSave();
         }
@@ -70,6 +73,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
     
     const handleAiAction = async (command: string) => {
+        if (readOnly) return;
         setIsProcessingAi(true);
         setAiSuggestion(null);
         try {
@@ -92,6 +96,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
     const handleValidate = async () => {
+        if (readOnly) return;
         setIsProcessingValidation(true);
         try {
             const corrected = await validateAndFixMarkdown(String(currentValue));
@@ -118,11 +123,13 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
     const handleDelete = () => {
+        if (readOnly) return;
         onUpdate(path, '');
         toast({ title: "Content cleared" });
     };
     
     const handleAcceptSuggestion = () => {
+        if (readOnly) return;
         if (aiSuggestion !== null) {
             onUpdate(path, aiSuggestion);
         }
@@ -134,7 +141,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
 
-    if (aiSuggestion !== null) {
+    if (aiSuggestion !== null && !readOnly) {
         return (
             <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                 <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
@@ -155,7 +162,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         );
     }
 
-    if (isEditing) {
+    if (isEditing && !readOnly) {
         if (multiline) {
             return (
                 <Textarea
@@ -183,12 +190,12 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     
     return (
         <div 
-            onDoubleClick={() => setIsEditing(true)} 
-            className={`group min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer relative ${className}`}
+            onDoubleClick={() => !readOnly && setIsEditing(true)} 
+            className={`group min-h-[2.5rem] p-2 -m-2 rounded-md relative ${className} ${!readOnly ? 'hover:bg-muted/50 cursor-pointer' : ''}`}
         >
             {multiline ? <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
             
-            {multiline && (
+            {!readOnly && multiline && (
                 <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                         <PopoverTrigger asChild>
@@ -255,7 +262,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
 };
 
 
-export default function ProposalViewer({ proposal, onUpdate }: { proposal: ProjectProposal; onUpdate: (path: string, value: any) => void; }) {
+export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: ProjectProposal; onUpdate: (path: string, value: any) => void; readOnly?: boolean; }) {
     if (!proposal) return null;
 
     return (
@@ -263,10 +270,10 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
             <Card>
                 <CardHeader>
                     <div className="w-fit mb-2">
-                        <EditableField value={proposal.category} path="category" onUpdate={onUpdate} />
+                        <EditableField value={proposal.category} path="category" onUpdate={onUpdate} readOnly={readOnly} />
                     </div>
                     <CardTitle className="font-headline text-2xl text-primary">
-                        <EditableField value={proposal.title} path="title" onUpdate={onUpdate} />
+                        <EditableField value={proposal.title} path="title" onUpdate={onUpdate} readOnly={readOnly} />
                     </CardTitle>
                 </CardHeader>
             </Card>
@@ -276,7 +283,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                     <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline />
+                    <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline readOnly={readOnly} />
                 </CardContent>
             </Card>
 
@@ -285,7 +292,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                     <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
                 </CardHeader>
                 <CardContent>
-                     <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline />
+                     <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
                 </CardContent>
             </Card>
 
@@ -295,15 +302,15 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                         <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> Timeline</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" /></div>
+                        <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" readOnly={readOnly} /></div>
                         <div className="flex items-center gap-2"><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
                         <h4 className="font-semibold">Phases:</h4>
                         <ul className="space-y-2 text-muted-foreground">
                             {proposal.timeline.phases.map((phase, index) => (
                                 <li key={index} className="flex justify-between items-center gap-2">
-                                    <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} />
+                                    <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} />
                                     <div className="flex items-center gap-1">
-                                      (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" /> weeks)
+                                      (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
                                     </div>
                                 </li>
                             ))}
@@ -319,7 +326,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                         <div className="mb-4 flex gap-2 items-center">
                           <strong>Total:</strong> 
                           <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
-                          <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" />
+                          <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
                         </div>
                         <Table>
                             <TableHeader>
@@ -331,8 +338,8 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                             <TableBody>
                                 {proposal.budget.breakdown.map((item, index) => (
                                     <TableRow key={index}>
-                                        <TableCell><EditableField value={item.item} path={`budget.breakdown.${index}.item`} onUpdate={onUpdate} /></TableCell>
-                                        <TableCell className="text-left"><EditableField value={item.cost} path={`budget.breakdown.${index}.cost`} onUpdate={onUpdate} type="number" /></TableCell>
+                                        <TableCell><EditableField value={item.item} path={`budget.breakdown.${index}.item`} onUpdate={onUpdate} readOnly={readOnly} /></TableCell>
+                                        <TableCell className="text-left"><EditableField value={item.cost} path={`budget.breakdown.${index}.cost`} onUpdate={onUpdate} type="number" readOnly={readOnly} /></TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -348,7 +355,7 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                      <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                         {proposal.expected_outcome.map((outcome, index) => (
-                            <li key={index}><EditableField value={outcome} path={`expected_outcome.${index}`} onUpdate={onUpdate} multiline /></li>
+                            <li key={index}><EditableField value={outcome} path={`expected_outcome.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
                         ))}
                     </ul>
                 </CardContent>
@@ -362,11 +369,11 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                     <h4 className="font-semibold">Criteria:</h4>
                     <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                         {proposal.success_criteria.map((criterion, index) => (
-                            <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline /></li>
+                            <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
                         ))}
                     </ul>
                      <h4 className="font-semibold pt-4 border-t">Evaluation Plan:</h4>
-                     <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline />
+                     <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline readOnly={readOnly} />
                 </CardContent>
             </Card>
 
@@ -377,9 +384,9 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.stakeholders.map((stakeholder, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} /></div>
-                            <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} /></div>
-                            <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline />
+                            <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} /></div>
+                            <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} readOnly={readOnly} /></div>
+                            <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline readOnly={readOnly} />
                         </div>
                     ))}
                 </CardContent>
@@ -392,8 +399,8 @@ export default function ProposalViewer({ proposal, onUpdate }: { proposal: Proje
                 <CardContent>
                     {proposal.risks.map((risk, index) => (
                         <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline/></div>
-                            <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline/></div>
+                            <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
+                            <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
                         </div>
                     ))}
                 </CardContent>

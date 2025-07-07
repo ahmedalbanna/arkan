@@ -317,7 +317,8 @@ export async function handleCreateProjectFromProposal(
         alt: projectData.title,
         aiHint: projectData.tags.slice(0, 2).join(' '),
         type: 'image'
-      }]
+      }],
+      proposalData: validatedFields.data.proposalJson,
     });
   } catch (error) {
     console.error('Failed to create project from proposal:', error);

@@ -12,6 +12,8 @@ import NewCommentForm from '@/components/NewCommentForm';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import remarkGfm from 'remark-gfm';
+import ProposalViewer from '@/components/ProposalViewer';
+import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -23,6 +25,15 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   // In a real app, you'd get the current user's ID from the session
   const currentUserId = 'user-1';
   const isOwner = user.id === currentUserId;
+
+  let proposal: ProjectProposal | null = null;
+  if (project.proposalData) {
+    try {
+        proposal = ProjectProposalSchema.parse(JSON.parse(project.proposalData));
+    } catch(e) {
+        console.error("Failed to parse proposal data for project:", project.id, e);
+    }
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -72,17 +83,20 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           </div>
           
           {/* Report Preview */}
-          <Card>
-              <CardHeader>
-                  <CardTitle className="font-headline">Report Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                  <div className="max-w-none max-h-[60vh] overflow-y-auto p-4 border rounded-md bg-muted/30">
-                     <h2 className="text-2xl font-bold font-headline text-primary mt-5 mb-3">About The Project</h2>
-                     <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
-                  </div>
-              </CardContent>
-          </Card>
+          {proposal ? (
+            <ProposalViewer proposal={proposal} onUpdate={() => {}} readOnly={true} />
+           ) : (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">About The Project</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="max-w-none">
+                       <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
+                    </div>
+                </CardContent>
+            </Card>
+          )}
 
           <div className="mt-8">
             <h3 className="font-headline text-lg mb-2">Tags</h3>
