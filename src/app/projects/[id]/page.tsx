@@ -13,6 +13,7 @@ import CommentItem from '@/components/CommentItem';
 import NewCommentForm from '@/components/NewCommentForm';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import remarkGfm from 'remark-gfm';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -88,7 +89,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
 
           <article className="max-w-none">
             <h2 className="text-2xl font-bold font-headline text-primary mt-5 mb-3">About The Project</h2>
-            <ReactMarkdown components={markdownComponents}>{project.description}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
           </article>
 
           <div className="mt-8">
@@ -116,7 +117,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="max-w-none text-muted-foreground text-sm">
-                 <ReactMarkdown components={markdownComponents}>{project.summaryShort || ''}</ReactMarkdown>
+                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.summaryShort || ''}</ReactMarkdown>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Technologies Used:</h4>

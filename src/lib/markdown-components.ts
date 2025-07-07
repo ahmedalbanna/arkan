@@ -24,5 +24,11 @@ export const markdownComponents: { [key: string]: React.ElementType } = {
       { className: `rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground ${className || ''}`.trim(), ...props }, 
       children
     );
-  }
+  },
+  table: ({node, ...props}: any) => React.createElement('div', { className: "my-4 w-full overflow-x-auto" }, React.createElement('table', { className: "w-full border-collapse border border-border", ...props })),
+  thead: ({node, ...props}: any) => React.createElement('thead', { className: "bg-muted", ...props }),
+  tbody: ({node, ...props}: any) => React.createElement('tbody', { className: "[&_tr:last-child]:border-0", ...props }),
+  tr: ({node, ...props}: any) => React.createElement('tr', { className: "border-b border-border transition-colors hover:bg-muted/50", ...props }),
+  th: ({node, ...props}: any) => React.createElement('th', { className: "px-4 py-2 text-left align-middle font-medium text-muted-foreground border border-border", ...props }),
+  td: ({node, ...props}: any) => React.createElement('td', { className: "px-4 py-2 align-middle border border-border", ...props }),
 };

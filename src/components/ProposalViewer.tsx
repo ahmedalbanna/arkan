@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { unified } from 'unified';
@@ -149,7 +150,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
             onDoubleClick={() => setIsEditing(true)} 
             className={`group min-h-[2.5rem] p-2 -m-2 rounded-md hover:bg-muted/50 cursor-pointer relative ${className}`}
         >
-            {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
+            {multiline ? <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
             
             {multiline && (
                 <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">

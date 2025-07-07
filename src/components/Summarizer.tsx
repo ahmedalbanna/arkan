@@ -11,7 +11,9 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import { Badge } from './ui/badge';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useLocalization } from '@/context/LocalizationContext';
+import { markdownComponents } from '@/lib/markdown-components';
 
 function SubmitButton({ disabled, loadingText, buttonText }: { disabled?: boolean, loadingText: string, buttonText: string }) {
   const { pending } = useFormStatus();
@@ -80,7 +82,7 @@ export default function Summarizer() {
                 <AlertTitle className="font-headline">{t('summarizer.generatedTitle')}</AlertTitle>
                 <AlertDescription>
                   <div className="prose dark:prose-invert max-w-none pt-2">
-                    <ReactMarkdown>{state.summary}</ReactMarkdown>
+                    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{state.summary}</ReactMarkdown>
                   </div>
                 </AlertDescription>
             </Alert>

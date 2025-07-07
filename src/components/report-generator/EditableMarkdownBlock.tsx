@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { type Token, marked } from 'marked';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2 } from 'lucide-react';
@@ -77,7 +78,7 @@ export const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpd
             onDoubleClick={() => setIsEditing(true)} 
             className="group relative cursor-pointer hover:bg-muted/50 rounded-md -m-2 p-2"
         >
-            <ReactMarkdown components={markdownComponents}>{block.raw}</ReactMarkdown>
+            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{block.raw}</ReactMarkdown>
              <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                 <PopoverTrigger asChild>
                     <Button

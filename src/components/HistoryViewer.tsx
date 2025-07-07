@@ -8,6 +8,7 @@ import type { HistoryEntry, ProposalHistoryData, ReportHistoryData, DiagramHisto
 import { saveAs } from 'file-saver';
 import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -87,7 +88,7 @@ function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: stri
                 <CardDescription>From proposal: "{proposalTitle}"</CardDescription>
             </CardHeader>
             <CardContent className="max-w-none">
-                <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
             </CardContent>
         </Card>
     );
