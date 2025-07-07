@@ -1,0 +1,52 @@
+'use server';
+
+/**
+ * @fileOverview An AI agent for manipulating text based on commands.
+ * - manipulateText
+ */
+
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
+
+export const ManipulateTextInputSchema = z.object({
+  textToManipulate: z.string().describe('The original text to be modified.'),
+  command: z.string().describe('The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").'),
+});
+export type ManipulateTextInput = z.infer<typeof ManipulateTextInputSchema>;
+
+export const ManipulateTextOutputSchema = z.object({
+  rewrittenText: z.string().describe('The resulting text after applying the command.'),
+});
+export type ManipulateTextOutput = z.infer<typeof ManipulateTextOutputSchema>;
+
+
+export async function manipulateText(input: ManipulateTextInput): Promise<ManipulateTextOutput> {
+  return manipulateTextFlow(input);
+}
+
+const manipulateTextFlow = ai.defineFlow(
+  {
+    name: 'manipulateTextFlow',
+    inputSchema: ManipulateTextInputSchema,
+    outputSchema: ManipulateTextOutputSchema,
+  },
+  async ({ textToManipulate, command }) => {
+    const prompt = ai.definePrompt({
+      name: 'manipulateTextPrompt',
+      input: { schema: ManipulateTextInputSchema },
+      output: { schema: ManipulateTextOutputSchema },
+      prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return only the rewritten text.
+
+Command: {{{command}}}
+
+Original Text:
+---
+{{{textToManipulate}}}
+---
+`,
+    });
+    
+    const { output } = await prompt({ textToManipulate, command });
+    return output!;
+  }
+);

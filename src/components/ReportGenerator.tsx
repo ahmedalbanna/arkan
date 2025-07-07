@@ -1,14 +1,15 @@
 
 
+
 'use client';
 
-import { useTransition, useState, useEffect, useRef } from 'react';
+import React, { useTransition, useState, useEffect, useRef } from 'react';
 import { handleGenerateReportItem, type ReportState } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces, Wand2, Maximize, PenLine } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Label } from './ui/label';
@@ -24,9 +25,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import { marked, type Token } from 'marked';
+import { manipulateText } from '@/ai/flows/manipulate-text';
+import { useToast } from '@/hooks/use-toast';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -82,6 +86,10 @@ const markdownComponents = {
 const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (newRaw: string) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [content, setContent] = useState(block.raw);
+    const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+    const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
+    const [isProcessingAi, setIsProcessingAi] = useState(false);
+    const { toast } = useToast();
 
     const handleSave = () => {
         onUpdate(content);
@@ -89,13 +97,34 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
     };
     
     // Auto-resize textarea
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
             textAreaRef.current.style.height = "auto";
             textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
         }
     }, [isEditing, content]);
+
+    const handleAiAction = async (command: string) => {
+        setIsProcessingAi(true);
+        try {
+            const result = await manipulateText({
+                textToManipulate: block.raw,
+                command: command,
+            });
+            onUpdate(result.rewrittenText);
+        } catch (error) {
+            console.error("AI action failed:", error);
+            toast({
+                title: "AI Action Failed",
+                description: "Could not modify the text. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingAi(false);
+            setIsAiPopoverOpen(false);
+        }
+    };
+
 
     if (isEditing) {
         return (
@@ -116,6 +145,37 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
             className="group relative cursor-pointer hover:bg-muted/50 rounded-md -m-2 p-2"
         >
             <ReactMarkdown components={markdownComponents}>{block.raw}</ReactMarkdown>
+             <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
+                <PopoverTrigger asChild>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
+                        title="AI Actions"
+                    >
+                        <Wand2 className="h-4 w-4" />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-56 p-2">
+                    {isProcessingAi ? (
+                        <div className="flex items-center justify-center p-4">
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                        </div>
+                    ) : (
+                        <div className="grid gap-1">
+                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
+                                <BookText className="mr-2 h-4 w-4" /> Summarize
+                            </Button>
+                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
+                                <Maximize className="mr-2 h-4 w-4" /> Expand
+                            </Button>
+                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
+                                <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                            </Button>
+                        </div>
+                    )}
+                </PopoverContent>
+            </Popover>
         </div>
     );
 };

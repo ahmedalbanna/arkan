@@ -5,7 +5,7 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -13,6 +13,9 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { manipulateText } from '@/ai/flows/manipulate-text';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface EditableFieldProps {
@@ -47,6 +50,9 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
     const [ast, setAst] = useState<object | null>(null);
+    const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
+    const [isProcessingAi, setIsProcessingAi] = useState(false);
+    const { toast } = useToast();
 
     const handleSave = () => {
         if (currentValue !== value) {
@@ -68,6 +74,27 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const handleViewAst = () => {
         const tree = unified().use(remarkParse).parse(String(value));
         setAst(tree);
+    };
+    
+    const handleAiAction = async (command: string) => {
+        setIsProcessingAi(true);
+        try {
+            const result = await manipulateText({
+                textToManipulate: String(value),
+                command: command,
+            });
+            onUpdate(path, result.rewrittenText);
+        } catch (error) {
+            console.error("AI action failed:", error);
+            toast({
+                title: "AI Action Failed",
+                description: "Could not modify the text. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingAi(false);
+            setIsAiPopoverOpen(false);
+        }
     };
 
     if (isEditing) {
@@ -103,31 +130,66 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         >
             {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
             
-            {multiline && (
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
-                            onClick={handleViewAst}
-                            title="View Markdown AST"
-                        >
-                            <Braces className="h-4 w-4" />
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                            <DialogTitle>Markdown AST (JSON)</DialogTitle>
-                        </DialogHeader>
-                        <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
-                            <code className="text-muted-foreground text-xs">
-                                {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
-                            </code>
-                        </pre>
-                    </DialogContent>
-                </Dialog>
-            )}
+            <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                 {multiline && (
+                    <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                title="AI Actions"
+                            >
+                                <Wand2 className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-2">
+                            {isProcessingAi ? (
+                                <div className="flex items-center justify-center p-4">
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                </div>
+                            ) : (
+                                <div className="grid gap-1">
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
+                                        <BookText className="mr-2 h-4 w-4" /> Summarize
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
+                                        <Maximize className="mr-2 h-4 w-4" /> Expand
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
+                                        <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                    </Button>
+                                </div>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                )}
+                {multiline && (
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6"
+                                onClick={handleViewAst}
+                                title="View Markdown AST"
+                            >
+                                <Braces className="h-4 w-4" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                                <DialogTitle>Markdown AST (JSON)</DialogTitle>
+                            </DialogHeader>
+                            <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
+                                <code className="text-muted-foreground text-xs">
+                                    {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
+                                </code>
+                            </pre>
+                        </DialogContent>
+                    </Dialog>
+                )}
+            </div>
         </div>
     );
 };
