@@ -235,16 +235,15 @@ export async function exportReportAsDocx(
     const hasDiagrams = diagrams && Object.values(diagrams).some(d => !!d);
 
     if (hasDiagrams) {
-        reportBody.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1 }));
+        reportBody.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1, pageBreakBefore: true }));
 
         for (const key of orderedDiagrams) {
             const diagramData = diagrams[key];
             if (diagramData) {
                 try {
                     let imageBuffer: ArrayBuffer;
-                    // Use the image proxy to avoid CORS issues
-                    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(diagramData.imageUrl)}`;
-                    const response = await fetch(proxyUrl);
+                    // The imageUrl is a relative path to our own proxy, so we can fetch it directly.
+                    const response = await fetch(diagramData.imageUrl);
                     
                     if (!response.ok) {
                         console.warn(`Failed to fetch diagram image from ${diagramData.imageUrl}. Falling back to placeholder.`);
