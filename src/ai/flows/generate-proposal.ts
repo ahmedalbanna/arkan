@@ -9,6 +9,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { validateAndFixMarkdown } from './validate-markdown';
 
 
 const GenerateProposalInputSchema = z.object({
@@ -35,6 +36,25 @@ const generateProposalFlow = ai.defineFlow(
         prompt: input.prompt,
     });
     const { output } = await generateProposalPrompt(input);
-    return output!;
+    const proposal = output!;
+
+    // A helper to run validation on a field
+    const fixField = async (text: string) => validateAndFixMarkdown(text);
+    
+    // An array of promises to fix all markdown fields concurrently
+    const fixes = [
+      fixField(proposal.objective).then(res => proposal.objective = res),
+      fixField(proposal.methodology).then(res => proposal.methodology = res),
+      fixField(proposal.evaluation).then(res => proposal.evaluation = res),
+      ...proposal.stakeholders.map(s => fixField(s.interest).then(res => s.interest = res)),
+      ...proposal.risks.map(r => Promise.all([
+        fixField(r.description).then(res => r.description = res),
+        fixField(r.mitigation).then(res => r.mitigation = res)
+      ]))
+    ];
+
+    await Promise.all(fixes);
+
+    return proposal;
   }
 );
