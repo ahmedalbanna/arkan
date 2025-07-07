@@ -6,7 +6,7 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck, X, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Input } from './ui/input';
@@ -38,11 +38,14 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const [isProcessingValidation, setIsProcessingValidation] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
-        setCurrentValue(value);
-    }, [value]);
+        if (!isEditing && aiSuggestion === null) {
+            setCurrentValue(value);
+        }
+    }, [value, isEditing, aiSuggestion]);
 
     const handleSave = () => {
         if (currentValue !== value) {
@@ -68,12 +71,13 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     
     const handleAiAction = async (command: string) => {
         setIsProcessingAi(true);
+        setAiSuggestion(null);
         try {
             const result = await manipulateText({
                 textToManipulate: String(currentValue),
                 command: command,
             });
-            onUpdate(path, result.rewrittenText);
+            setAiSuggestion(result.rewrittenText);
         } catch (error) {
             console.error("AI action failed:", error);
             toast({
@@ -117,7 +121,39 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         onUpdate(path, '');
         toast({ title: "Content cleared" });
     };
+    
+    const handleAcceptSuggestion = () => {
+        if (aiSuggestion !== null) {
+            onUpdate(path, aiSuggestion);
+        }
+        setAiSuggestion(null);
+    };
 
+    const handleRejectSuggestion = () => {
+        setAiSuggestion(null);
+    };
+
+
+    if (aiSuggestion !== null) {
+        return (
+            <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
+                <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
+                <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
+                    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{aiSuggestion}</ReactMarkdown>
+                </div>
+                <div className="flex justify-end gap-2 mt-2">
+                    <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
+                        <X className="mr-2 h-4 w-4" />
+                        Reject
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={handleAcceptSuggestion}>
+                        <Check className="mr-2 h-4 w-4" />
+                        Accept
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     if (isEditing) {
         if (multiline) {
@@ -154,7 +190,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
             
             {multiline && (
                 <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                    <Popover>
+                    <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-6 w-6">
                                 <MoreVertical className="h-4 w-4" />

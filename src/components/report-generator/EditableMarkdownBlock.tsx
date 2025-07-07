@@ -1,13 +1,14 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { type Token, marked } from 'marked';
+import { type Token } from 'marked';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2 } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check } from 'lucide-react';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -18,13 +19,14 @@ export const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpd
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
+    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
 
     useEffect(() => {
-        if (!isEditing) {
+        if (!isEditing && aiSuggestion === null) {
             setContent(block.raw);
         }
-    }, [block.raw, isEditing]);
+    }, [block.raw, isEditing, aiSuggestion]);
 
     const handleSave = () => {
         onUpdate(content);
@@ -40,12 +42,13 @@ export const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpd
 
     const handleAiAction = async (command: string) => {
         setIsProcessingAi(true);
+        setAiSuggestion(null);
         try {
             const result = await manipulateText({
                 textToManipulate: content,
                 command: command,
             });
-            onUpdate(result.rewrittenText);
+            setAiSuggestion(result.rewrittenText);
         } catch (error) {
             console.error("AI action failed:", error);
             toast({
@@ -59,6 +62,38 @@ export const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpd
         }
     };
 
+    const handleAcceptSuggestion = () => {
+        if (aiSuggestion !== null) {
+            onUpdate(aiSuggestion);
+        }
+        setAiSuggestion(null);
+    };
+
+    const handleRejectSuggestion = () => {
+        setAiSuggestion(null);
+    };
+
+
+    if (aiSuggestion !== null) {
+        return (
+            <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
+                <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
+                <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
+                    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{aiSuggestion}</ReactMarkdown>
+                </div>
+                <div className="flex justify-end gap-2 mt-2">
+                    <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
+                        <X className="mr-2 h-4 w-4" />
+                        Reject
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={handleAcceptSuggestion}>
+                        <Check className="mr-2 h-4 w-4" />
+                        Accept
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     if (isEditing) {
         return (
