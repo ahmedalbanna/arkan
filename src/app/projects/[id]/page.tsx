@@ -1,10 +1,12 @@
 import { getProjectById } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowUpRight, Calendar, FileText, MessageCircle, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import CommentItem from '@/components/CommentItem';
@@ -13,7 +15,10 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import remarkGfm from 'remark-gfm';
 import ProposalViewer from '@/components/ProposalViewer';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
+import type { ReportState } from '@/app/generate-report/actions';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default async function ProjectDetailPage({ params }: { params: { id: string } }) {
   const project = await getProjectById(params.id);
@@ -34,6 +39,26 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         console.error("Failed to parse proposal data for project:", project.id, e);
     }
   }
+
+  let reportSections: ReportState['sections'] | null = null;
+    if (project.reportSections) {
+        try {
+            reportSections = JSON.parse(project.reportSections);
+        } catch (e) {
+            console.error("Failed to parse report sections for project:", project.id, e);
+        }
+    }
+
+    let reportDiagrams: ReportState['diagrams'] | null = null;
+    if (project.reportDiagrams) {
+        try {
+            reportDiagrams = JSON.parse(project.reportDiagrams);
+        } catch (e) {
+            console.error("Failed to parse report diagrams for project:", project.id, e);
+        }
+    }
+  
+  const hasFullReport = reportSections || reportDiagrams;
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -83,8 +108,71 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           </div>
           
           {/* Report Preview */}
-          {proposal ? (
-            <ProposalViewer proposal={proposal} readOnly={true} />
+           {hasFullReport ? (
+             <div className="space-y-6">
+                {proposal && (
+                    <Accordion type="single" collapsible defaultValue="proposal" className="w-full">
+                        <AccordionItem value="proposal" className="bg-background rounded-lg border">
+                            <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">Project Proposal Details</AccordionTrigger>
+                            <AccordionContent className="p-4 border-t"><ProposalViewer proposal={proposal} readOnly={true} /></AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+                )}
+
+                {reportSections && (
+                     <Accordion type="multiple" className="w-full space-y-4">
+                        {(Object.keys(reportSections) as SectionName[]).map((key) => {
+                            const content = reportSections?.[key];
+                            if (!content) return null;
+                            const config = sectionConfig[key];
+                            return (
+                                <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
+                                    <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
+                                        <div className="flex items-center">
+                                            <config.icon className="mr-2 h-5 w-5 text-primary" /> {config.title}
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="max-w-none p-4 text-muted-foreground border-t">
+                                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
+                    </Accordion>
+                )}
+                 {reportDiagrams && (
+                     <Accordion type="multiple" className="w-full space-y-4">
+                        {(Object.keys(reportDiagrams) as DiagramType[]).map((key) => {
+                            const diagramData = reportDiagrams?.[key];
+                            if (!diagramData) return null;
+                            const config = diagramConfig[key];
+                            return (
+                                <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
+                                    <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline"><config.icon className="mr-2 h-5 w-5 text-primary" /> {config.title}</AccordionTrigger>
+                                    <AccordionContent className="space-y-4 p-4 border-t">
+                                        <Image 
+                                            src={diagramData.imageUrl} 
+                                            alt={`Rendered ${config.title}`}
+                                            width={800}
+                                            height={600}
+                                            className="w-full h-auto object-contain rounded-md border bg-white p-2"
+                                        />
+                                        <Textarea
+                                            readOnly
+                                            value={diagramData.plantUmlCode}
+                                            rows={10}
+                                            className="bg-muted p-4 rounded-md text-sm text-left font-mono"
+                                            dir="ltr"
+                                        />
+                                    </AccordionContent>
+                                </AccordionItem>
+                            );
+                        })}
+                    </Accordion>
+                 )}
+            </div>
+           ) : proposal ? (
+             <ProposalViewer proposal={proposal} readOnly={true} />
            ) : (
             <Card>
                 <CardHeader>

@@ -143,6 +143,8 @@ export async function createProject(data: {
     tags: string[];
     media: { url: string; alt: string; aiHint?: string; type: 'image' | 'video' }[];
     proposalData?: string;
+    reportSections?: string;
+    reportDiagrams?: string;
 }) {
     return await db.transaction(async (tx) => {
         // 1. Create the project
@@ -156,6 +158,8 @@ export async function createProject(data: {
             liveLink: data.liveLink,
             createdAt: new Date().toISOString(),
             proposalData: data.proposalData,
+            reportSections: data.reportSections,
+            reportDiagrams: data.reportDiagrams,
         });
 
         // 2. Handle tags

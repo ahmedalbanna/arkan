@@ -275,6 +275,8 @@ export async function handleGenerateReportItem(
 
 const CreateProjectSchema = z.object({
   proposalJson: z.string().min(1, 'Project proposal is required.'),
+  sectionsJson: z.string().optional(),
+  diagramsJson: z.string().optional(),
 });
 
 export async function handleCreateProjectFromProposal(
@@ -283,6 +285,8 @@ export async function handleCreateProjectFromProposal(
 ): Promise<{ error?: string }> {
   const validatedFields = CreateProjectSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
+    sectionsJson: formData.get('sectionsJson'),
+    diagramsJson: formData.get('diagramsJson'),
   });
 
   if (!validatedFields.success) {
@@ -319,6 +323,8 @@ export async function handleCreateProjectFromProposal(
         type: 'image'
       }],
       proposalData: validatedFields.data.proposalJson,
+      reportSections: validatedFields.data.sectionsJson,
+      reportDiagrams: validatedFields.data.diagramsJson,
     });
   } catch (error) {
     console.error('Failed to create project from proposal:', error);

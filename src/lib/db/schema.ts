@@ -26,6 +26,8 @@ export const projects = sqliteTable('projects', {
   summaryShort: text('summary_short'),
   createdAt: text('created_at').notNull(),
   proposalData: text('proposal_data'),
+  reportSections: text('report_sections'),
+  reportDiagrams: text('report_diagrams'),
 });
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({

@@ -144,6 +144,10 @@ export default function ReportGenerator() {
       />
 
       <form action={handleSubmit}>
+         {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
+         {state.sections && <input type="hidden" name="sectionsJson" value={JSON.stringify(state.sections)} />}
+         {state.diagrams && <input type="hidden" name="diagramsJson" value={JSON.stringify(state.diagrams)} />}
+         
         <div className={`grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="md:col-span-2 space-y-6">
             <ProposalEditor 
