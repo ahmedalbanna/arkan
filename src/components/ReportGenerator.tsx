@@ -39,6 +39,8 @@ import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
 import { DiagramTypeSchema, type DiagramType, type ProjectProposal, SectionNameSchema, type SectionName, ProjectProposalSchema } from '@/ai/schemas';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { add, format } from 'date-fns';
+import { Checkbox } from './ui/checkbox';
+import { cn } from '@/lib/utils';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
@@ -607,11 +609,14 @@ export default function ReportGenerator() {
                                 </CardHeader>
                                 <CardContent>
                                     <Accordion type="multiple" className="w-full space-y-1">
-                                        {orderedSections.map((key, index) => {
-                                            const agent = reportAgents[index];
+                                        {[...orderedSections, ...orderedDiagrams].map((key, index) => {
+                                            const isSection = index < orderedSections.length;
+                                            const config = isSection ? sectionConfig[key as SectionName] : diagramConfig[key as DiagramType];
+                                            const agent = isSection ? reportAgents[index] : diagramAgents[index - orderedSections.length];
                                             if (!agent) return null;
-                                            const { title, icon: Icon } = sectionConfig[key];
-                                            const currentControls = controlState[key];
+                                            const { title } = config;
+                                            const Icon = isSection ? (config as typeof sectionConfig[SectionName]).icon : GitGraph;
+                                            
                                             return (
                                                 <AccordionItem value={key} key={key}>
                                                     <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
@@ -621,9 +626,10 @@ export default function ReportGenerator() {
                                                     </AccordionTrigger>
                                                     <AccordionContent className="space-y-4 p-4">
                                                         <Tabs defaultValue="prompt" className="w-full">
-                                                            <TabsList className="grid w-full grid-cols-2">
+                                                            <TabsList className="grid w-full grid-cols-3">
                                                                 <TabsTrigger value="prompt">Edit Prompt</TabsTrigger>
-                                                                <TabsTrigger value="controls">Control Output</TabsTrigger>
+                                                                {isSection && <TabsTrigger value="controls">Control Output</TabsTrigger>}
+                                                                <TabsTrigger value="context">Context</TabsTrigger>
                                                             </TabsList>
                                                             <TabsContent value="prompt" className="pt-4">
                                                                 <div className="space-y-2">
@@ -631,65 +637,68 @@ export default function ReportGenerator() {
                                                                     <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
                                                                 </div>
                                                             </TabsContent>
-                                                            <TabsContent value="controls" className="pt-4">
-                                                                <div className="space-y-6">
-                                                                    <div className="space-y-3">
-                                                                        <Label htmlFor={`formality-${key}`}>Formality</Label>
-                                                                        <Slider id={`formality-${key}`} name={`formality_${key}`} value={[currentControls.formality]} onValueChange={(val) => handleControlChange(key, 'formality', val[0])} max={100} step={1} />
-                                                                        <div className="flex justify-between text-xs text-muted-foreground">
-                                                                            <span>Informal</span>
-                                                                            <span>Balanced</span>
-                                                                            <span>Very Formal</span>
+                                                            {isSection && (
+                                                                <TabsContent value="controls" className="pt-4">
+                                                                    <div className="space-y-6">
+                                                                        <div className="space-y-3">
+                                                                            <Label htmlFor={`formality-${key}`}>Formality</Label>
+                                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
+                                                                            <div className="flex justify-between text-xs text-muted-foreground">
+                                                                                <span>Informal</span>
+                                                                                <span>Balanced</span>
+                                                                                <span>Very Formal</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="space-y-2">
+                                                                            <Label htmlFor={`tone-${key}`}>Tone</Label>
+                                                                            <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
+                                                                                <SelectTrigger id={`tone-${key}`}><SelectValue placeholder="Select a tone" /></SelectTrigger>
+                                                                                <SelectContent>
+                                                                                    <SelectItem value="professional">Professional</SelectItem>
+                                                                                    <SelectItem value="academic">Academic</SelectItem>
+                                                                                    <SelectItem value="casual">Casual</SelectItem>
+                                                                                    <SelectItem value="persuasive">Persuasive</SelectItem>
+                                                                                </SelectContent>
+                                                                            </Select>
+                                                                        </div>
+                                                                        <div className="space-y-2">
+                                                                            <Label htmlFor={`wordCount-${key}`}>Word Count (approx.)</Label>
+                                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="e.g., 300" value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                                                        </div>
+                                                                        <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
+                                                                            <p className="font-semibold">Instruction Preview:</p>
+                                                                            <pre className="whitespace-pre-wrap font-mono text-primary/80">{generateInstructionText(controlState[key as SectionName])}</pre>
                                                                         </div>
                                                                     </div>
-                                                                    <div className="space-y-2">
-                                                                        <Label htmlFor={`tone-${key}`}>Tone</Label>
-                                                                        <Select name={`tone_${key}`} value={currentControls.tone} onValueChange={(val) => handleControlChange(key, 'tone', val)}>
-                                                                            <SelectTrigger id={`tone-${key}`}>
-                                                                                <SelectValue placeholder="Select a tone" />
-                                                                            </SelectTrigger>
-                                                                            <SelectContent>
-                                                                                <SelectItem value="professional">Professional</SelectItem>
-                                                                                <SelectItem value="academic">Academic</SelectItem>
-                                                                                <SelectItem value="casual">Casual</SelectItem>
-                                                                                <SelectItem value="persuasive">Persuasive</SelectItem>
-                                                                            </SelectContent>
-                                                                        </Select>
-                                                                    </div>
-                                                                    <div className="space-y-2">
-                                                                        <Label htmlFor={`wordCount-${key}`}>Word Count (approx.)</Label>
-                                                                        <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="e.g., 300" value={currentControls.wordCount} onChange={(e) => handleControlChange(key, 'wordCount', e.target.value)} />
-                                                                    </div>
-                                                                    <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                                                                        <p className="font-semibold">Instruction Preview:</p>
-                                                                        <pre className="whitespace-pre-wrap font-mono text-primary/80">
-                                                                            {generateInstructionText(currentControls)}
-                                                                        </pre>
+                                                                </TabsContent>
+                                                            )}
+                                                            <TabsContent value="context" className="pt-4">
+                                                                <div className="space-y-3">
+                                                                    <Label className="font-semibold">Include Context from Other Items</Label>
+                                                                    <p className="text-xs text-muted-foreground">Select other generated sections or diagrams to provide as context to the AI.</p>
+                                                                    <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
+                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground">Sections</h4>
+                                                                        {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
+                                                                            <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                                <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.sections[contextKey]} />
+                                                                                <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !state.sections[contextKey] && "text-muted-foreground/50")}>
+                                                                                    {sectionConfig[contextKey].title}
+                                                                                </Label>
+                                                                            </div>
+                                                                        ))}
+                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">Diagrams</h4>
+                                                                        {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
+                                                                            <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                                <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.diagrams?.[contextKey]} />
+                                                                                <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !state.diagrams?.[contextKey] && "text-muted-foreground/50")}>
+                                                                                    {diagramConfig[contextKey].title}
+                                                                                </Label>
+                                                                            </div>
+                                                                        ))}
                                                                     </div>
                                                                 </div>
                                                             </TabsContent>
                                                         </Tabs>
-                                                        <GenerateItemButton itemKey={key} title={`Generate ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            );
-                                        })}
-                                        {orderedDiagrams.map((key, index) => {
-                                            const agent = diagramAgents[index];
-                                            if (!agent) return null;
-                                            const { title } = diagramConfig[key];
-                                            return (
-                                                <AccordionItem value={key} key={key}>
-                                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                                        <div className="flex items-center gap-2">
-                                                            <GitGraph className="h-4 w-4" /> {title}
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent className="space-y-4 p-4">
-                                                        <div className="space-y-2">
-                                                            <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">Prompt</Label>
-                                                            <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
-                                                        </div>
                                                         <GenerateItemButton itemKey={key} title={`Generate ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
                                                     </AccordionContent>
                                                 </AccordionItem>

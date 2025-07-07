@@ -71,10 +71,21 @@ function encode64(data: Buffer): string {
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
-    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
-    const encoded = encode64(compressed);
-    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
-    return proxyUrl;
+    try {
+        const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+        const encoded = encode64(compressed);
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
+        // We do a test fetch to see if the URL is valid. If not, we'll use a fallback.
+        const res = await fetch(proxyUrl.startsWith('/') ? new URL(proxyUrl, 'http://localhost:9002').toString() : proxyUrl);
+        if (!res.ok) {
+            console.warn(`PlantUML image generation failed with status ${res.status}. Falling back to placeholder.`);
+            return getFallbackImageUrl();
+        }
+        return proxyUrl;
+    } catch (e) {
+        console.error("Error generating PlantUML image URL:", e);
+        return getFallbackImageUrl();
+    }
 }
 
 async function getFallbackImageUrl(): Promise<string> {
@@ -159,35 +170,39 @@ export async function handleGenerateReportItem(
 
   // --- Start: Collect Context ---
   const otherSections: Partial<Record<SectionName, string>> = {};
-  if (prevState.sections) {
-    Object.entries(prevState.sections).forEach(([key, value]) => {
-      if (key !== itemToGenerate && value) {
-        otherSections[key as SectionName] = value;
+  const otherDiagrams: Partial<Record<DiagramType, string>> = {};
+
+  const allAvailableSections = prevState.sections || {};
+  const allAvailableDiagrams = prevState.diagrams || {};
+
+  for (const sectionKey of SectionNameSchema.options) {
+      if (sectionKey === itemToGenerate) continue;
+      const contextCheckboxName = `context_${itemToGenerate}_${sectionKey}`;
+      if (formData.get(contextCheckboxName) === 'on' && allAvailableSections[sectionKey]) {
+          otherSections[sectionKey] = allAvailableSections[sectionKey];
       }
-    });
   }
 
-  const otherDiagrams: Partial<Record<DiagramType, string>> = {};
-  if (prevState.diagrams) {
-    Object.entries(prevState.diagrams).forEach(([key, value]) => {
-      if (key !== itemToGenerate && value) {
-        otherDiagrams[key as DiagramType] = value.plantUmlCode;
+  for (const diagramKey of DiagramTypeSchema.options) {
+      if (diagramKey === itemToGenerate) continue;
+      const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
+      if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
+          otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
       }
-    });
   }
   // --- End: Collect Context ---
 
   try {
-    if (isSection) {
-      const sectionToGenerate = itemToGenerate as SectionName;
-      let result;
-
-      const agentInput = {
+    const agentInput = {
         proposal: validatedProposal.data,
         otherSections,
         otherDiagrams,
         prompt: prompt!,
-      };
+    };
+
+    if (isSection) {
+      const sectionToGenerate = itemToGenerate as SectionName;
+      let result;
       
       switch (sectionToGenerate) {
         case 'introduction':
@@ -219,13 +234,6 @@ export async function handleGenerateReportItem(
 
     if (isDiagram) {
         const diagramToGenerate = itemToGenerate as DiagramType;
-
-        const agentInput = { 
-            proposal: validatedProposal.data,
-            otherSections,
-            otherDiagrams, 
-            prompt: prompt!
-        };
         let result;
 
         switch (diagramToGenerate) {
@@ -238,14 +246,8 @@ export async function handleGenerateReportItem(
             default: return { ...prevState, error: 'Unknown diagram type requested.' };
         }
 
-        let imageUrl: string;
-        try {
-            imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-        } catch (e) {
-            console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
-            imageUrl = await getFallbackImageUrl();
-        }
-
+        const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+        
         const newDiagrams = { 
             ...prevState.diagrams, 
             [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl } 

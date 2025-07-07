@@ -55,26 +55,7 @@ Project Idea: {{{projectIdea}}}`
     icon: BookMarked,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert technical writer specializing in project proposals.
-Given the following detailed project proposal in JSON format, your task is to write a complete and professional introduction section for the formal report.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report.
 
 The introduction should be well-structured and engaging, and must include:
 1.  **Purpose of the Project**: A clear statement of why the project is being undertaken.
@@ -83,14 +64,7 @@ The introduction should be well-structured and engaging, and must include:
 4.  **Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.
 
 Synthesize the information from the entire proposal and the provided context to create this introduction. Infer the problem from the objective and risks. Infer the limitations of existing systems from the project's goals.
-
-Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.`
   },
   {
     id: 'generate-literature-review',
@@ -100,25 +74,7 @@ Project Proposal Data:
     icon: Library,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an academic and technical writer. Based on the detailed project proposal provided below, write a comprehensive 'Literature Review' section for the final report.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
 
 Your review should:
 1.  Discuss existing research, established theories, and relevant studies in the project's domain.
@@ -126,13 +82,7 @@ Your review should:
 3.  Identify the gaps in the existing literature or technology that this project aims to address.
 4.  Provide a strong justification for the project by positioning it within the context of current knowledge and practices.
 
-Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.`
   },
   {
     id: 'generate-system-analysis',
@@ -142,25 +92,7 @@ Project Proposal Data:
     icon: Waypoints,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst. Based on the detailed project proposal below, write a thorough 'System Analysis' section.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
 
 Your analysis must cover:
 1.  **Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests.
@@ -168,13 +100,7 @@ Your analysis must cover:
 3.  **Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.
 4.  **Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.
 
-Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.`
   },
   {
     id: 'generate-design-strategy',
@@ -184,25 +110,7 @@ Project Proposal Data:
     icon: BookText,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a senior design strategist and UI/UX expert. Based on the project proposal below, write a detailed 'Design Strategy' section.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
 
 This section should articulate:
 1.  **Design Methodology**: Justify the choice of design approach (e.g., User-Centered Design, Double Diamond, etc.) based on the project's methodology and objectives.
@@ -210,13 +118,7 @@ This section should articulate:
 3.  **User Experience (UX) Goals**: Describe the intended user experience, focusing on how the design will address stakeholder needs and solve the core problem.
 4.  **User Interface (UI) Direction**: Outline the visual direction, including thoughts on layout, color palette, and typography that would align with the project's category and goals.
 
-Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.`
   },
   {
     id: 'generate-system-design',
@@ -226,25 +128,7 @@ Project Proposal Data:
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a principal software architect. From the project proposal provided, create a comprehensive 'System Design' section.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
 
 This section must detail:
 1.  **High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Base the choice on the project's scale, objectives, and risks.
@@ -252,13 +136,7 @@ This section must detail:
 3.  **Component Breakdown**: Describe the major components of the system (e.g., Authentication Service, API Gateway, Frontend Application, Database) and their responsibilities.
 4.  **Technology Stack**: Propose a specific and justified technology stack for the backend, frontend, database, and deployment based on the project's requirements.
 
-Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.`
   },
    {
     id: 'generate-system-programming',
@@ -268,25 +146,7 @@ Project Proposal Data:
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a lead software engineer. Based on the project proposal below, write a 'System Programming and Implementation' section for the technical report.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
 
 This section should outline:
 1.  **Development Workflow**: Describe the development process, aligning with the project's stated methodology (e.g., Git flow for Agile).
@@ -295,13 +155,7 @@ This section should outline:
 4.  **Environment Setup**: Briefly describe the development, staging, and production environments.
 5.  **Version Control**: Specify the version control system (e.g., Git) and hosting platform (e.g., GitHub, GitLab).
 
-Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.`
   },
    {
     id: 'generate-system-testing',
@@ -311,25 +165,7 @@ Project Proposal Data:
     icon: TestTube2,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a senior QA engineer. Using the project proposal below, write a comprehensive 'System Testing' section.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
 
 This section must define the testing strategy, including:
 1.  **Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).
@@ -337,13 +173,7 @@ This section must define the testing strategy, including:
 3.  **Tools and Automation**: Recommend specific tools for test automation (e.g., Selenium, Cypress, Jest), performance testing (e.g., JMeter), and bug tracking (e.g., Jira).
 4.  **Test Metrics**: Identify key metrics for success, such as test coverage, bug detection rate, and UAT pass rate, linking them to the project's success criteria.
 
-Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.`
   },
   {
     id: 'generate-conclusion',
@@ -353,25 +183,7 @@ Project Proposal Data:
     icon: Flag,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert technical writer. Based on the detailed project proposal below, write a concise and impactful 'Conclusion' section for the final report.
-
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.
 
 The conclusion should:
 1.  **Summarize Key Points**: Briefly reiterate the problem, the proposed solution, and the project's main objective.
@@ -379,13 +191,7 @@ The conclusion should:
 3.  **Future Outlook**: Provide a forward-looking statement about the project's potential long-term impact or next steps after completion.
 4.  **Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.
 
-Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.`
   },
   // Diagram Agents
   {
@@ -396,37 +202,13 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Use Case Diagram**.
-
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. This context is crucial for creating a diagram that aligns with the rest of the system design.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Use Case Diagram**.
 
 The diagram should:
 1.  Identify the primary actors from the 'stakeholders' section (e.g., 'Primary User', 'Sponsor').
-2.  Define use cases based on the 'objective', 'expected_outcome', and 'functional requirements' (which you can infer from the objectives and system analysis section).
+2.  Define use cases based on the 'objective', 'expected_outcome', and 'functional requirements' (which you can infer from the objectives and system analysis section if provided).
 3.  Connect actors to their relevant use cases.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
   },
   {
     id: 'generate-class-diagram',
@@ -436,37 +218,13 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert software architect specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Class Diagram**.
-
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. This context is crucial for creating a diagram that aligns with the rest of the system design. The System Design and System Analysis sections are particularly important for identifying classes and their responsibilities.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert software architect specializing in PlantUML. Based on the provided project proposal and any additional context (especially the System Design section), generate a PlantUML **Class Diagram**.
 
 The diagram should:
 1.  Identify key classes (entities) from the project's 'objective', 'expected_outcome', and especially the 'System Design' section.
 2.  Define attributes and methods (operations) for each class.
 3.  Establish relationships (associations, aggregations, inheritance) between the classes.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
   },
     {
     id: 'generate-sequence-diagram',
@@ -476,38 +234,14 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Sequence Diagram** for a key user flow.
-
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. The Class Diagram provides the participants, and the Use Case diagram defines the scenario to model. The System Analysis section can also describe the flow.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Sequence Diagram** for a key user flow. Use the Class Diagram (if provided) for participants and the Use Case diagram for the scenario.
 
 The diagram should:
 1.  Identify participants (actors and system components/classes).
 2.  Illustrate the step-by-step interactions between these participants for a primary use case (e.g., 'User logs in', 'User creates a project').
 3.  Show the order of messages exchanged between participants.
 4.  Use activation boxes to represent processing time.
-5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
   },
     {
     id: 'generate-activity-diagram',
@@ -517,38 +251,14 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert process analyst specializing in PlantUML. Based on the project proposal below, generate a PlantUML **Activity Diagram** illustrating a key workflow.
-
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. A Use Case or Sequence diagram can help define the flow of activities. The System Analysis can describe the business process.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert process analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Activity Diagram** illustrating a key workflow.
 
 The diagram should:
 1.  Define a start and end point for the process.
 2.  Detail the sequence of activities based on a primary workflow described in the 'objective' or 'methodology'.
 3.  Incorporate decision points (conditionals) and forks/joins (parallel activities) where appropriate.
 4.  Optionally use partitions (swimlanes) to assign activities to different actors or system components.
-5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
   },
   {
     id: 'generate-component-diagram',
@@ -558,37 +268,13 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert software architect specializing in PlantUML. Based on the project proposal below, generate a high-level PlantUML **Component Diagram**.
-
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. The 'System Design' section is critical for identifying components. The Class Diagram can inform which classes belong to which components.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    prompt: `You are an expert software architect specializing in PlantUML. Based on the provided project proposal and any additional context (especially the 'System Design' section), generate a high-level PlantUML **Component Diagram**.
 
 The diagram should:
 1.  Identify the main software components of the system (e.g., 'Frontend App', 'API Gateway', 'User Service', 'Database').
 2.  Show the interfaces provided and required by the components.
 3.  Illustrate the dependencies and relationships between these components.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
   },
   {
     id: 'generate-archimate-diagram',
@@ -598,36 +284,12 @@ Project Proposal Data:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert enterprise architect specializing in PlantUML and ArchiMate. Based on the project proposal below, generate a PlantUML **ArchiMate Diagram**.
+    prompt: `You are an expert enterprise architect specializing in PlantUML and ArchiMate. Based on the provided project proposal and any additional context, generate a PlantUML **ArchiMate Diagram**. The diagram should focus on the Business Layer and Application Layer.
 
-To ensure consistency and accuracy, consider the information from these previously generated diagrams and text sections. This context is crucial for creating a diagram that aligns with the rest of the system design. Other diagrams can provide details on the application layer components and business processes.
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-
-The diagram should focus on the Business Layer and Application Layer:
+The diagram should:
 1.  **Business Layer**: Identify Business Actors (from stakeholders), Business Roles, and Business Functions/Processes (from objectives).
 2.  **Application Layer**: Identify Application Components (e.g., CRM System, Billing Service) and Application Functions that realize the business processes.
 3.  **Relationships**: Show how business actors interact with business functions, and how application components support those business functions. Use proper ArchiMate relationships (e.g., assignment, realization, serving).
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Ensure you use ArchiMate syntax (e.g., 'archimate "Business Actor" as BA'). Do not add any other text or explanation.
-
-Project Proposal Data:
-\`\`\`json
-{{{json proposal}}}
-\`\`\`
-`
+4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Ensure you use ArchiMate syntax (e.g., 'archimate "Business Actor" as BA'). Do not add any other text or explanation.`
   },
 ];

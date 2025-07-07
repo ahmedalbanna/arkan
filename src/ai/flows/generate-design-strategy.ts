@@ -33,11 +33,36 @@ const generateDesignStrategyFlow = ai.defineFlow(
     outputSchema: GenerateDesignStrategyOutputSchema,
   },
   async (input) => {
+    const fullPrompt = `${input.prompt}
+
+To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
+{{#if otherSections}}
+--- PREVIOUSLY GENERATED SECTIONS ---
+{{#each otherSections}}
+--- Section: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+{{#if otherDiagrams}}
+--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
+{{#each otherDiagrams}}
+--- Diagram: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+{{{json proposal}}}
+\`\`\`
+`;
     const prompt = ai.definePrompt({
       name: 'generateDesignStrategyPrompt',
       input: { schema: GenerateDesignStrategyInputSchema },
       output: { schema: GenerateDesignStrategyOutputSchema },
-      prompt: input.prompt,
+      prompt: fullPrompt,
     });
 
     const { output } = await prompt(input);
