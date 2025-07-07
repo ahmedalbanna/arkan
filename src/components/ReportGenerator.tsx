@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces, Wand2, Maximize, PenLine } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces, Wand2, Maximize, PenLine, SpellCheck } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Label } from './ui/label';
@@ -93,8 +93,10 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
     const { toast } = useToast();
 
     useEffect(() => {
-        setContent(block.raw);
-    }, [block.raw]);
+        if (!isEditing) {
+            setContent(block.raw);
+        }
+    }, [block.raw, isEditing]);
 
     const handleSave = () => {
         onUpdate(content);
@@ -176,6 +178,9 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
                             </Button>
                             <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
                                 <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                            </Button>
+                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
+                                <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
                             </Button>
                         </div>
                     )}

@@ -6,7 +6,7 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2 } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -58,8 +58,10 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const { toast } = useToast();
 
     useEffect(() => {
-        setCurrentValue(value);
-    }, [value]);
+        if (!isEditing) {
+            setCurrentValue(value);
+        }
+    }, [value, isEditing]);
 
     const handleSave = () => {
         if (currentValue !== value) {
@@ -189,6 +191,9 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                                 </Button>
                                 <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')} disabled={isProcessingAi}>
                                     <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                </Button>
+                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')} disabled={isProcessingAi}>
+                                    <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
                                 </Button>
 
                                 <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Markdown Tools</p>
