@@ -52,6 +52,7 @@ export const ProjectProposalSchema = z.object({
   })).describe("A list of key stakeholders involved in the project."),
   success_criteria: z.array(z.string()).describe("A list of measurable criteria that will define the project's success."),
   evaluation: z.string().describe("A description of how the project's success will be measured and assessed."),
+  tags: z.array(z.string()).describe("A list of 3 to 5 relevant keywords or tags for the project (e.g., 'Productivity', 'eCommerce', 'AI')."),
   risks: z.array(z.object({
     description: z.string().describe("A description of a potential risk to the project."),
     mitigation: z.string().describe("The strategy to mitigate this potential risk."),

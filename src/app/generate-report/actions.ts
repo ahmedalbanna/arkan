@@ -20,6 +20,10 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 
+import { createProject } from '@/lib/db/queries';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+
 export interface ReportState {
   sections: {
     [key in SectionName]?: string;
@@ -267,4 +271,63 @@ export async function handleGenerateReportItem(
     console.error(e);
     return { ...prevState, error: `An error occurred while generating '${itemToGenerate}'. Please try again.` };
   }
+}
+
+const CreateProjectSchema = z.object({
+  proposalJson: z.string().min(1, 'Project proposal is required.'),
+});
+
+export async function handleCreateProjectFromProposal(
+  prevState: { error?: string } | null,
+  formData: FormData
+): Promise<{ error?: string }> {
+  const validatedFields = CreateProjectSchema.safeParse({
+    proposalJson: formData.get('proposalJson'),
+  });
+
+  if (!validatedFields.success) {
+    return { error: 'Invalid proposal data.' };
+  }
+
+  let proposal: ProjectProposal;
+  try {
+    proposal = JSON.parse(validatedFields.data.proposalJson);
+  } catch (e) {
+    return { error: 'Invalid JSON format.' };
+  }
+  
+  const validatedProposal = ProjectProposalSchema.safeParse(proposal);
+  if (!validatedProposal.success) {
+      return { error: 'Proposal data does not match the required structure.' };
+  }
+
+  const projectData = validatedProposal.data;
+
+  let newProjectId;
+  try {
+    newProjectId = await createProject({
+      userId: 'user-1', // Hardcoded for prototype
+      title: projectData.title,
+      description: projectData.objective, // Using objective as description
+      category: projectData.category,
+      liveLink: undefined, // No live link in proposal
+      tags: projectData.tags,
+      media: [{
+        url: 'https://placehold.co/800x600.png',
+        alt: projectData.title,
+        aiHint: projectData.tags.slice(0, 2).join(' '),
+        type: 'image'
+      }]
+    });
+  } catch (error) {
+    console.error('Failed to create project from proposal:', error);
+    if (error instanceof Error) {
+        return { error: error.message };
+    }
+    return { error: 'An error occurred while creating the project.' };
+  }
+
+  revalidatePath('/projects');
+  revalidatePath('/profile/user-1');
+  redirect(`/projects/${newProjectId}`);
 }
