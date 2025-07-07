@@ -1,13 +1,11 @@
 import { getProjectById } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { ArrowUpRight, Calendar, MessageCircle, Pencil } from 'lucide-react';
+import { ArrowUpRight, Calendar, FileText, MessageCircle, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import CommentItem from '@/components/CommentItem';
 import NewCommentForm from '@/components/NewCommentForm';
@@ -29,7 +27,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="grid lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <div className="mb-8">
             <div className="flex justify-between items-start">
               <div>
@@ -62,35 +60,29 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             </div>
           </div>
           
-          <Carousel className="w-full mb-8">
-            <CarouselContent>
-              {project.media.map((item, index) => (
-                <CarouselItem key={index}>
-                  {item.type === 'image' ? (
-                    <Image
-                      src={item.url}
-                      alt={item.alt}
-                      width={800}
-                      height={600}
-                      className="w-full h-auto object-cover rounded-lg border"
-                      data-ai-hint={item.aiHint ?? ''}
-                    />
-                  ) : (
-                    <div className="aspect-video">
-                        <iframe className="w-full h-full rounded-lg" src={item.url} title={item.alt} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-                    </div>
-                  )}
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <CarouselPrevious className="-right-12" />
-            <CarouselNext className="-left-12" />
-          </Carousel>
-
-          <article className="max-w-none">
-            <h2 className="text-2xl font-bold font-headline text-primary mt-5 mb-3">About The Project</h2>
-            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
-          </article>
+           {/* Report Cover */}
+           <div className="bg-card border rounded-lg p-8 shadow-md aspect-[8.5/11] max-w-lg mx-auto flex flex-col justify-center items-center text-center">
+              <FileText className="w-16 h-16 text-primary/50 mb-6" />
+              <h2 className="text-3xl font-headline text-primary">{project.title}</h2>
+              <p className="text-lg text-muted-foreground mt-2">Project Report</p>
+              <div className="mt-auto pt-8">
+                <p className="text-sm text-muted-foreground">By {user.name}</p>
+                <p className="text-xs text-muted-foreground">{format(new Date(project.createdAt), 'MMMM yyyy')}</p>
+              </div>
+          </div>
+          
+          {/* Report Preview */}
+          <Card>
+              <CardHeader>
+                  <CardTitle className="font-headline">Report Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="max-w-none max-h-[60vh] overflow-y-auto p-4 border rounded-md bg-muted/30">
+                     <h2 className="text-2xl font-bold font-headline text-primary mt-5 mb-3">About The Project</h2>
+                     <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
+                  </div>
+              </CardContent>
+          </Card>
 
           <div className="mt-8">
             <h3 className="font-headline text-lg mb-2">Tags</h3>
