@@ -1,314 +1,27 @@
-
 'use client';
 
-import React, { useTransition, useState, useEffect, useRef } from 'react';
-import { handleGenerateReportItem, type ReportState } from '@/app/generate-report/actions';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces, Wand2, Maximize, PenLine, SpellCheck } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import Image from 'next/image';
-import { Label } from './ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import ProposalViewer from './ProposalViewer';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import { marked, type Token } from 'marked';
-import { manipulateText } from '@/ai/flows/manipulate-text';
-import { useToast } from '@/hooks/use-toast';
-
-import ReactMarkdown from 'react-markdown';
-import { useHistory } from '@/hooks/use-history';
-import { useAgents } from '@/hooks/use-agents';
-import { type Agent } from '@/lib/agents';
-import { type TemplateKey, templates } from '@/lib/docx-styles';
-import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
-import { DiagramTypeSchema, type DiagramType, type ProjectProposal, SectionNameSchema, type SectionName, ProjectProposalSchema } from '@/ai/schemas';
-import { generateProposal } from '@/ai/flows/generate-proposal';
+import { useState, useTransition } from 'react';
+import { handleGenerateReportItem } from '@/app/generate-report/actions';
+import { useReportBuilder } from '@/hooks/use-report-builder';
+import { ProposalGenerator } from './report-generator/ProposalGenerator';
+import { ProposalEditor } from './report-generator/ProposalEditor';
+import { GenerationTools } from './report-generator/GenerationTools';
+import { ReportActions } from './report-generator/ReportActions';
+import { ReportResults } from './report-generator/ReportResults';
 import { add, format } from 'date-fns';
-import { Checkbox } from './ui/checkbox';
-import { cn } from '@/lib/utils';
-import { useLocalization } from '@/context/LocalizationContext';
-
-
-const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
-    introduction: { title: "Introduction", icon: BookMarked, agentId: "generate-introduction" },
-    literatureReview: { title: "Literature Review", icon: Library, agentId: "generate-literature-review" },
-    systemAnalysis: { title: "System Analysis", icon: Waypoints, agentId: "generate-system-analysis" },
-    designStrategy: { title: "Design Strategy", icon: BookText, agentId: "generate-design-strategy" },
-    systemDesign: { title: "System Design", icon: Code, agentId: "generate-system-design" },
-    systemProgramming: { title: "System Programming", icon: Code, agentId: "generate-system-programming" },
-    systemTesting: { title: "System Testing", icon: TestTube2, agentId: "generate-system-testing" },
-    conclusion: { title: "Conclusion", icon: Flag, agentId: "generate-conclusion" },
-};
-
-const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
-    useCase: { title: "Use Case Diagram", agentId: "generate-use-case-diagram" },
-    class: { title: "Class Diagram", agentId: "generate-class-diagram" },
-    sequence: { title: "Sequence Diagram", agentId: "generate-sequence-diagram" },
-    activity: { title: "Activity Diagram", agentId: "generate-activity-diagram" },
-    component: { title: "Component Diagram", agentId: "generate-component-diagram" },
-    archimate: { title: "ArchiMate Diagram", agentId: "generate-archimate-diagram" },
-};
-
-const markdownComponents = {
-  h1: ({node, ...props}) => <h1 className="mt-6 mb-4 text-3xl font-bold text-primary font-headline" {...props} />,
-  h2: ({node, ...props}) => <h2 className="mt-5 mb-3 text-2xl font-bold text-primary font-headline" {...props} />,
-  h3: ({node, ...props}) => <h3 className="mt-4 mb-2 text-xl font-semibold font-headline" {...props} />,
-  p: ({node, ...props}) => <p className="mb-4 leading-relaxed" {...props} />,
-  a: ({node, ...props}) => <a className="text-accent underline hover:text-accent/80" {...props} />,
-  ul: ({node, ...props}) => <ul className="mb-4 ml-6 list-disc space-y-2" {...props} />,
-  ol: ({node, ...props}) => <ol className="mb-4 ml-6 list-decimal space-y-2" {...props} />,
-  li: ({node, ...props}) => <li className="pl-2" {...props} />,
-  blockquote: ({node, ...props}) => <blockquote className="my-4 border-l-4 border-primary/20 pl-4 italic text-muted-foreground" {...props} />,
-  code: ({node, inline, className, children, ...props}) => {
-    return !inline ? (
-      <pre className="my-4 overflow-x-auto rounded-md bg-muted p-4"><code className="font-mono text-sm" {...props}>{children}</code></pre>
-    ) : (
-      <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground" {...props}>{children}</code>
-    )
-  }
-};
-
-
-const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (newRaw: string) => void }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [content, setContent] = useState(block.raw);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
-    const [isProcessingAi, setIsProcessingAi] = useState(false);
-    const { toast } = useToast();
-
-    useEffect(() => {
-        if (!isEditing) {
-            setContent(block.raw);
-        }
-    }, [block.raw, isEditing]);
-
-    const handleSave = () => {
-        onUpdate(content);
-        setIsEditing(false);
-    };
-    
-    // Auto-resize textarea
-    useEffect(() => {
-        if (isEditing && textAreaRef.current) {
-            textAreaRef.current.style.height = "auto";
-            textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
-        }
-    }, [isEditing, content]);
-
-    const handleAiAction = async (command: string) => {
-        setIsProcessingAi(true);
-        try {
-            const result = await manipulateText({
-                textToManipulate: content,
-                command: command,
-            });
-            onUpdate(result.rewrittenText);
-        } catch (error) {
-            console.error("AI action failed:", error);
-            toast({
-                title: "AI Action Failed",
-                description: "Could not modify the text. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsProcessingAi(false);
-            setIsAiPopoverOpen(false);
-        }
-    };
-
-
-    if (isEditing) {
-        return (
-            <Textarea
-                ref={textAreaRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                onBlur={handleSave}
-                autoFocus
-                className="bg-background/80 cursor-text my-2 w-full p-2"
-            />
-        );
-    }
-
-    return (
-        <div 
-            onDoubleClick={() => setIsEditing(true)} 
-            className="group relative cursor-pointer hover:bg-muted/50 rounded-md -m-2 p-2"
-        >
-            <ReactMarkdown components={markdownComponents}>{block.raw}</ReactMarkdown>
-             <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
-                        title="AI Actions"
-                    >
-                        <Wand2 className="h-4 w-4" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-56 p-2">
-                    {isProcessingAi ? (
-                        <div className="flex items-center justify-center p-4">
-                            <Loader2 className="h-6 w-6 animate-spin" />
-                        </div>
-                    ) : (
-                        <div className="grid gap-1">
-                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                <BookText className="mr-2 h-4 w-4" /> Summarize
-                            </Button>
-                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                <Maximize className="mr-2 h-4 w-4" /> Expand
-                            </Button>
-                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                <PenLine className="mr-2 h-4 w-4" /> Rewrite
-                            </Button>
-                            <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
-                                <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
-                            </Button>
-                        </div>
-                    )}
-                </PopoverContent>
-            </Popover>
-        </div>
-    );
-};
-
-
-const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: { sectionKey: SectionName; title: string; icon: React.ElementType; content: string; onUpdate: (key: SectionName, value: string) => void; }) => {
-    const [blocks, setBlocks] = useState<Token[]>([]);
-
-    useEffect(() => {
-        setBlocks(marked.lexer(content));
-    }, [content]);
-
-    const handleUpdateBlock = (index: number, newRaw: string) => {
-        const newBlocks = [...blocks];
-        // This is a simplified update. A more robust solution might re-parse the newRaw
-        // to get an updated token, but for simple text changes this is fine.
-        const updatedToken = marked.lexer(newRaw)[0] || { type: 'space', raw: '' };
-        newBlocks[index] = updatedToken;
-        
-        // Reconstruct the full markdown string from all blocks
-        const fullMarkdown = newBlocks.map(b => b.raw).join('');
-        onUpdate(sectionKey, fullMarkdown);
-    };
-
-    return (
-        <AccordionItem value={title} key={sectionKey} className="bg-background rounded-lg border">
-            <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
-                <div className="flex items-center">
-                    <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
-                </div>
-            </AccordionTrigger>
-            <AccordionContent className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer">
-                <div className="space-y-2">
-                    {blocks.map((block, index) => {
-                        // Skip rendering empty space blocks
-                        if (block.type === 'space' && !block.raw.trim()) return null;
-                        return <EditableMarkdownBlock key={index} block={block} onUpdate={(newRaw) => handleUpdateBlock(index, newRaw)} />
-                    })}
-                </div>
-            </AccordionContent>
-        </AccordionItem>
-    );
-};
-
-function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }: { itemKey: string; title: string; agent?: Agent; isPending: boolean; generatingItem: string | null; }) {
-    const isGeneratingThis = isPending && generatingItem === itemKey;
-
-    return (
-        <Button
-            type="submit"
-            name="itemToGenerate"
-            value={itemKey}
-            disabled={isPending || !agent?.isEnabled}
-            className="font-headline"
-            title={!agent?.isEnabled ? 'This agent is disabled' : title}
-        >
-            {isGeneratingThis ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
-            )}
-            {title}
-        </Button>
-    );
-}
-
-const orderedSections = SectionNameSchema.options;
-const orderedDiagrams = DiagramTypeSchema.options;
-
-type ControlState = {
-  formality: number;
-  tone: string;
-  wordCount: string;
-};
-
-const STORAGE_KEY = 'arkan-report-generator-state';
-
-const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
-    let instructions = [];
-    if (controls.formality !== undefined) {
-        const formality = controls.formality;
-        let formalityDesc = t('reportGenerator.tool_formality_balanced');
-        if (formality < 33) formalityDesc = t('reportGenerator.tool_formality_informal');
-        else if (formality > 66) formalityDesc = t('reportGenerator.tool_formality_formal');
-        instructions.push(`- The writing style should be ${formalityDesc}.`);
-    }
-    if (controls.tone && controls.tone !== "none") {
-        instructions.push(`- Adopt a ${controls.tone} tone.`);
-    }
-    if (controls.wordCount) {
-        instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-    }
-
-    if (instructions.length > 0) {
-        return `Additionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
-    }
-    return t('reportGenerator.tool_instruction_none');
-};
-
-const getInitialControlState = (): Record<SectionName, ControlState> => {
-    const initial: Partial<Record<SectionName, ControlState>> = {};
-    orderedSections.forEach(key => {
-        initial[key] = {
-            formality: 50,
-            tone: 'professional',
-            wordCount: '300',
-        };
-    });
-    return initial as Record<SectionName, ControlState>;
-};
+import { Loader2 } from 'lucide-react';
+import { useAgents } from '@/hooks/use-agents';
+import { ProjectProposalSchema, type ProjectProposal, type SectionName } from '@/ai/schemas';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
   let current = obj;
   for (let i = 0; i < keys.length; i++) {
     const key = keys[i];
-    // If it's the last key, set the value
     if (i === keys.length - 1) {
       current[key] = value;
     } else {
-      // If the path doesn't exist, create it
       if (!current[key]) {
-        // Check if next key is a number to create an array or an object
         current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {};
       }
       current = current[key];
@@ -317,498 +30,135 @@ function set(obj: any, path: string, value: any) {
 }
 
 export default function ReportGenerator() {
-    const { t } = useLocalization();
-    const initialState: ReportState = { sections: {}, diagrams: {} };
-    const [isPending, startTransition] = useTransition();
-    const [state, setState] = useState<ReportState>(initialState);
-    const [generatingItem, setGeneratingItem] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [generatingItem, setGeneratingItem] = useState<string | null>(null);
 
-    const [projectIdea, setProjectIdea] = useState('');
-    const [proposalJson, setProposalJson] = useState('');
-    const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
-    const [proposalError, setProposalError] = useState<string | undefined>();
-    const [proposal, setProposal] = useState<ProjectProposal | null>(null);
-    
-    const { addHistoryEntry } = useHistory();
-    const { agents, isLoaded: agentsLoaded } = useAgents();
+  const {
+    isLoaded,
+    state,
+    setState,
+    projectIdea,
+    setProjectIdea,
+    proposal,
+    setProposal,
+    proposalJson,
+    setProposalJson,
+    handleNewSession,
+  } = useReportBuilder();
+  
+  const { isLoaded: agentsLoaded } = useAgents();
 
-    const [isLoaded, setIsLoaded] = useState(false);
+  const handleProposalGenerated = (newProposal: ProjectProposal) => {
+    setProposal(newProposal);
+    setProposalJson(JSON.stringify(newProposal, null, 2));
+  };
+  
+  const handleProposalJsonChange = (json: string) => {
+    setProposalJson(json);
+    try {
+        const parsed = ProjectProposalSchema.parse(JSON.parse(json));
+        setProposal(parsed);
+    } catch {
+        // Silently fail, UI will be based on last valid proposal
+    }
+  };
 
-    const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
+  const handleProposalUpdate = (path: string, value: any) => {
+    if (!proposal) return;
+    const newProposal = JSON.parse(JSON.stringify(proposal));
+    set(newProposal, path, value);
 
-    // Load state from local storage on mount
-    useEffect(() => {
-        try {
-            const savedState = localStorage.getItem(STORAGE_KEY);
-            if (savedState) {
-                const parsed = JSON.parse(savedState);
-                setState({
-                    sections: parsed.sections || {},
-                    diagrams: parsed.diagrams || {},
-                });
-                const savedProposalJson = parsed.proposalJson || '';
-                setProposalJson(savedProposalJson);
-                if (savedProposalJson) {
-                    try {
-                        const parsedProposal = ProjectProposalSchema.parse(JSON.parse(savedProposalJson));
-                        setProposal(parsedProposal);
-                    } catch {
-                        setProposal(null);
-                    }
-                }
-                setProjectIdea(parsed.projectIdea || '');
-            }
-        } catch (error) {
-            console.error("Failed to load state from localStorage", error);
-        }
-        setIsLoaded(true);
-    }, []);
-
-    // Save state to local storage on change
-    useEffect(() => {
-        if (!isLoaded) return;
-        try {
-            const dataToSave = {
-                sections: state.sections,
-                diagrams: state.diagrams,
-                proposalJson: proposalJson,
-                projectIdea: projectIdea,
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-        } catch (error) {
-             console.error("Failed to save state to localStorage", error);
-        }
-    }, [state, proposalJson, projectIdea, isLoaded]);
-
-    const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
-        setControlState(prevState => ({
-            ...prevState,
-            [section]: {
-                ...prevState[section],
-                [field]: value,
-            }
-        }));
-    };
-
-    const hasContent = Object.values(state.sections).some(s => !!s) || Object.values(state.diagrams || {}).some(d => !!d);
-    
-    const proposalAgent = agents.find(a => a.id === 'generate-proposal');
-    const reportAgents = orderedSections.map(key => agents.find(a => a.id === sectionConfig[key].agentId));
-    const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
-    
-    const handleGenerateProposalClick = async () => {
-        if (!projectIdea || !proposalAgent) return;
-        setIsGeneratingProposal(true);
-        setProposalError(undefined);
-        try {
-            const result = await generateProposal({
-                projectIdea,
-                prompt: proposalAgent.prompt
-            });
-            setProposalJson(JSON.stringify(result, null, 2));
-            setProposal(result);
-            addHistoryEntry({
-                type: 'proposal',
-                title: `Project Proposal: ${result.title}`,
-                proposal: result,
-            });
-            setState({ sections: {}, diagrams: {} });
-        } catch (e) {
-            console.error(e);
-            setProposalError(t('reportGenerator.step1Error'));
-        } finally {
-            setIsGeneratingProposal(false);
-        }
+    if (path.startsWith('budget.breakdown') || path === 'budget.currency') {
+        const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
+        newProposal.budget.totalAmount = total;
     }
 
-    const handleSubmit = (formData: FormData) => {
-        const item = formData.get('itemToGenerate') as string;
-        if (!item) return;
-
-        setGeneratingItem(item);
-        startTransition(async () => {
-            const newState = await handleGenerateReportItem(state, formData);
-            setState(newState);
-            setGeneratingItem(null);
-        });
-    };
-    
-    const handleProposalUpdate = (path: string, value: any) => {
-        if (!proposal) return;
-    
-        const newProposal = JSON.parse(JSON.stringify(proposal));
-        
-        set(newProposal, path, value);
-    
-        if (path.startsWith('budget.breakdown') || path === 'budget.currency') {
-            const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
-            newProposal.budget.totalAmount = total;
-        }
-    
-        if (path.startsWith('timeline')) {
-            try {
-                let currentDate = new Date(newProposal.timeline.startDate);
-                if (isNaN(currentDate.getTime())) { // Check for invalid date
-                   currentDate = new Date(); // fallback to today
-                }
-
-                for (const phase of newProposal.timeline.phases) {
-                    const durationWeeks = Number(phase.durationWeeks || 0);
-                    currentDate = add(currentDate, { weeks: durationWeeks });
-                }
-                newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
-            } catch (error) {
-                console.error("Error calculating timeline:", error);
-                // Keep the old end date if calculation fails
-            }
-        }
-    
-        setProposal(newProposal);
-        setProposalJson(JSON.stringify(newProposal, null, 2));
-    };
-
-    const handleNewSession = () => {
-        localStorage.removeItem(STORAGE_KEY);
-        setState({ sections: {}, diagrams: {} });
-        setProposalJson('');
-        setProjectIdea('');
-        setProposal(null);
-        setControlState(getInitialControlState());
-    };
-
-    const handleSectionUpdate = (sectionKey: SectionName, newContent: string) => {
-        setState(prevState => ({
-            ...prevState,
-            sections: {
-                ...prevState.sections,
-                [sectionKey]: newContent,
-            }
-        }));
-    };
-
-    useEffect(() => {
-        if (!state.lastGenerated) return;
-
-        let proposalTitle = 'Project Report';
+    if (path.startsWith('timeline')) {
         try {
-            const parsed = JSON.parse(proposalJson);
-            if (parsed && parsed.title) {
-                proposalTitle = parsed.title;
+            let currentDate = new Date(newProposal.timeline.startDate);
+            if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
+            for (const phase of newProposal.timeline.phases) {
+                currentDate = add(currentDate, { weeks: Number(phase.durationWeeks || 0) });
             }
-        } catch (e) { /* ignore */ }
-
-        if (sectionConfig[state.lastGenerated as SectionName]) {
-            const section = state.lastGenerated as SectionName;
-            addHistoryEntry({
-                type: 'report',
-                title: `Report Section: ${sectionConfig[section].title}`,
-                proposalTitle,
-                section: section,
-                content: state.sections[section]!,
-            });
-        } else if (diagramConfig[state.lastGenerated as DiagramType]) {
-            const diagram = state.lastGenerated as DiagramType;
-            const diagramData = state.diagrams?.[diagram];
-            if(diagramData) {
-                addHistoryEntry({
-                    type: 'diagram',
-                    title: `Diagram: ${diagramConfig[diagram].title}`,
-                    diagramType: diagram,
-                    plantUmlCode: diagramData.plantUmlCode,
-                    imageUrl: diagramData.imageUrl,
-                    proposalTitle: proposalTitle,
-                });
-            }
+            newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
+        } catch (error) {
+            console.error("Error calculating timeline:", error);
         }
-    }, [state.lastGenerated, state.sections, state.diagrams, addHistoryEntry, proposalJson]);
-
-    const handleExportReportDOCX = async () => {
-        if (!hasContent) return;
-        let proposalTitle = 'Project Report';
-        if (proposal && proposal.title) {
-            proposalTitle = proposal.title;
-        }
-        
-        const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
-        const template = templates[templateKey] || templates.modern;
-        await exportReportAsDocx(state.sections, state.diagrams || {}, proposalTitle, template.styles);
-    };
-
-    const handleExportProposalDOCX = async () => {
-        if (!proposal) return;
-        const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
-        const template = templates[templateKey] || templates.modern;
-        await exportProposalAsDocx(proposal, template.styles);
-    };
-
-    if (!isLoaded || !agentsLoaded) {
-        return (
-            <div className="flex justify-center items-center p-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        )
     }
+    
+    setProposal(newProposal);
+    setProposalJson(JSON.stringify(newProposal, null, 2));
+  };
 
-    return (
-        <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline text-xl">{t('reportGenerator.step1Title')}</CardTitle>
-                    <CardDescription>
-                        {t('reportGenerator.step1Desc')}
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Textarea
-                        placeholder={t('reportGenerator.step1Placeholder')}
-                        rows={5}
-                        required
-                        value={projectIdea}
-                        onChange={(e) => setProjectIdea(e.target.value)}
-                    />
-                    {proposalError && (
-                        <p className="text-sm font-medium text-destructive mt-2">{proposalError}</p>
-                    )}
-                </CardContent>
-                <CardFooter>
-                    <Button onClick={handleGenerateProposalClick} disabled={isGeneratingProposal || !proposalAgent?.isEnabled}>
-                        {isGeneratingProposal ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                            <Sparkles className="mr-2 h-4 w-4" />
-                        )}
-                        {isGeneratingProposal ? t('reportGenerator.step1ButtonLoading') : t('reportGenerator.step1Button')}
-                    </Button>
-                </CardFooter>
-            </Card>
+  const handleSectionUpdate = (sectionKey: SectionName, newContent: string) => {
+    setState({
+        ...state,
+        sections: { ...state.sections, [sectionKey]: newContent },
+        lastGenerated: state.lastGenerated, // Keep lastGenerated
+    });
+  };
 
-            <div className={`grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
-                <div className="md:col-span-2">
-                    <form action={handleSubmit}>
-                        <div className="space-y-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="font-headline flex leading-relaxed">{t('reportGenerator.step2Title')}</CardTitle>
-                                    <CardDescription>{t('reportGenerator.step2Desc')}</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Textarea
-                                        name="proposalJson"
-                                        placeholder='{ "title": "...", "objective": "...", ... }'
-                                        rows={15}
-                                        required
-                                        value={proposalJson}
-                                        onChange={(e) => setProposalJson(e.target.value)}
-                                        disabled={!proposalJson}
-                                        className="font-mono text-xs"
-                                        dir="ltr"
-                                    />
-                                    {state?.error && !generatingItem && (
-                                        <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
-                                    )}
-                                </CardContent>
-                            </Card>
+  const handleSubmit = (formData: FormData) => {
+    const item = formData.get('itemToGenerate') as string;
+    if (!item) return;
 
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
-                                    <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <Accordion type="multiple" className="w-full space-y-1">
-                                        {[...orderedSections, ...orderedDiagrams].map((key, index) => {
-                                            const isSection = index < orderedSections.length;
-                                            const config = isSection ? sectionConfig[key as SectionName] : diagramConfig[key as DiagramType];
-                                            const agent = isSection ? reportAgents[index] : diagramAgents[index - orderedSections.length];
-                                            if (!agent) return null;
-                                            const { title } = config;
-                                            const Icon = isSection ? (config as typeof sectionConfig[SectionName]).icon : GitGraph;
-                                            
-                                            return (
-                                                <AccordionItem value={key} key={key}>
-                                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                                        <div className="flex items-center gap-2">
-                                                            <Icon className="h-4 w-4" /> {title}
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent className="space-y-4 p-4">
-                                                        <Tabs defaultValue="prompt" className="w-full">
-                                                            <TabsList className="grid w-full grid-cols-3">
-                                                                <TabsTrigger value="prompt">{t('reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                                                {isSection && <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>}
-                                                                <TabsTrigger value="context">{t('reportGenerator.tool_tab_context')}</TabsTrigger>
-                                                            </TabsList>
-                                                            <TabsContent value="prompt" className="pt-4">
-                                                                <div className="space-y-2">
-                                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
-                                                                    <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
-                                                                </div>
-                                                            </TabsContent>
-                                                            {isSection && (
-                                                                <TabsContent value="controls" className="pt-4">
-                                                                    <div className="space-y-6">
-                                                                        <div className="space-y-3">
-                                                                            <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
-                                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
-                                                                            <div className="flex justify-between text-xs text-muted-foreground">
-                                                                                <span>{t('reportGenerator.tool_formality_informal')}</span>
-                                                                                <span>{t('reportGenerator.tool_formality_balanced')}</span>
-                                                                                <span>{t('reportGenerator.tool_formality_formal')}</span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="space-y-2">
-                                                                            <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
-                                                                            <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
-                                                                                <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                                                                                <SelectContent>
-                                                                                    <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
-                                                                                    <SelectItem value="academic">{t('reportGenerator.tool_tone_academic')}</SelectItem>
-                                                                                    <SelectItem value="casual">{t('reportGenerator.tool_tone_casual')}</SelectItem>
-                                                                                    <SelectItem value="persuasive">{t('reportGenerator.tool_tone_persuasive')}</SelectItem>
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                        </div>
-                                                                        <div className="space-y-2">
-                                                                            <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
-                                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
-                                                                        </div>
-                                                                        <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                                                                            <p className="font-semibold">{t('reportGenerator.tool_instruction_preview')}</p>
-                                                                            <pre className="whitespace-pre-wrap font-mono text-primary/80">{generateInstructionText(controlState[key as SectionName], t)}</pre>
-                                                                        </div>
-                                                                    </div>
-                                                                </TabsContent>
-                                                            )}
-                                                            <TabsContent value="context" className="pt-4">
-                                                                <div className="space-y-3">
-                                                                    <Label className="font-semibold">{t('reportGenerator.tool_context_label')}</Label>
-                                                                    <p className="text-xs text-muted-foreground">{t('reportGenerator.tool_context_desc')}</p>
-                                                                    <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
-                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground">{t('reportGenerator.tool_context_sections')}</h4>
-                                                                        {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
-                                                                            <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                                <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.sections[contextKey]} />
-                                                                                <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !state.sections[contextKey] && "text-muted-foreground/50")}>
-                                                                                    {sectionConfig[contextKey].title}
-                                                                                </Label>
-                                                                            </div>
-                                                                        ))}
-                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">{t('reportGenerator.tool_context_diagrams')}</h4>
-                                                                        {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
-                                                                            <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                                <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.diagrams?.[contextKey]} />
-                                                                                <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !state.diagrams?.[contextKey] && "text-muted-foreground/50")}>
-                                                                                    {diagramConfig[contextKey].title}
-                                                                                </Label>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
-                                                                </div>
-                                                            </TabsContent>
-                                                        </Tabs>
-                                                        <GenerateItemButton itemKey={key} title={`Generate ${title}`} agent={agent} isPending={isPending} generatingItem={generatingItem} />
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            );
-                                        })}
-                                    </Accordion>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </form>
-                </div>
-                <div className="md:col-span-3 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">{t('reportGenerator.actionsTitle')}</CardTitle>
-                            <CardDescription>{t('reportGenerator.actionsDesc')}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex flex-col sm:flex-row gap-4">
-                            <Button onClick={handleExportProposalDOCX} disabled={!proposal || isPending} className="w-full sm:w-auto font-headline">
-                                <FileText className="mr-2 h-4 w-4" />
-                                {t('reportGenerator.exportProposal')}
-                            </Button>
-                            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
-                                <FileText className="mr-2 h-4 w-4" />
-                                {t('reportGenerator.exportReport')}
-                            </Button>
-                            <Button onClick={handleNewSession} variant="outline" disabled={isPending} className="w-full sm:w-auto font-headline">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                {t('reportGenerator.newSession')}
-                            </Button>
-                        </CardContent>
-                    </Card>
+    setGeneratingItem(item);
+    startTransition(async () => {
+      const newState = await handleGenerateReportItem(state, formData);
+      setState(newState);
+      setGeneratingItem(null);
+    });
+  };
+  
+  if (!isLoaded || !agentsLoaded) {
+      return (
+          <div className="flex justify-center items-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )
+  }
 
-                    {state?.lastGenerated && !state.error && (
-                        <Alert>
-                            <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">{t('reportGenerator.generationSuccess')}</AlertTitle>
-                            <AlertDescription>
-                                {t('reportGenerator.generationSuccessDesc').replace('{item}', sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title)}
-                            </AlertDescription>
-                        </Alert>
-                    )}
+  return (
+    <div className="space-y-6">
+      <ProposalGenerator
+        projectIdea={projectIdea}
+        onProjectIdeaChange={setProjectIdea}
+        onProposalGenerated={handleProposalGenerated}
+        onReset={handleNewSession}
+      />
 
-                    {state?.error && generatingItem && (
-                        <Alert variant="destructive">
-                            <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">{t('reportGenerator.generationFailed')}</AlertTitle>
-                            <AlertDescription>{state.error}</AlertDescription>
-                        </Alert>
-                    )}
-
-                    {proposal && (
-                        <div>
-                            <CardTitle className="font-headline text-xl mb-4">{t('reportGenerator.proposalDetailsTitle')}</CardTitle>
-                            <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
-                        </div>
-                    )}
-                    
-                    <Accordion type="multiple" className="w-full space-y-4" defaultValue={orderedSections.concat(orderedDiagrams)}>
-                        {orderedSections.map((key) => {
-                            const content = state.sections[key];
-                            if (!content) return null;
-                            const { title, icon: Icon } = sectionConfig[key];
-                            return (
-                                <EditableSection
-                                    key={key}
-                                    sectionKey={key}
-                                    title={title}
-                                    icon={Icon}
-                                    content={content}
-                                    onUpdate={handleSectionUpdate}
-                                />
-                            )
-                        })}
-                        {orderedDiagrams.map((key) => {
-                            const diagramData = state.diagrams?.[key];
-                            if (!diagramData) return null;
-                            const { title } = diagramConfig[key];
-                            return (
-                            <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
-                                <AccordionTrigger className="font-headline text-xl p-4"><GitGraph className="mr-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4 border-t">
-                                    <Image 
-                                        src={diagramData.imageUrl} 
-                                        alt={`Rendered ${title}`}
-                                        width={800}
-                                        height={600}
-                                        className="w-full h-auto object-contain rounded-md border bg-white p-2"
-                                    />
-                                    <Textarea
-                                        readOnly
-                                        value={diagramData.plantUmlCode}
-                                        rows={10}
-                                        className="bg-muted p-4 rounded-md text-sm text-left font-mono"
-                                        dir="ltr"
-                                    />
-                                </AccordionContent>
-                            </AccordionItem>
-                            )
-                        })}
-                    </Accordion>
-                </div>
-            </div>
+      <form action={handleSubmit}>
+        <div className={`grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className="md:col-span-2 space-y-6">
+            <ProposalEditor 
+                proposalJson={proposalJson} 
+                onProposalJsonChange={handleProposalJsonChange}
+                isDisabled={!proposalJson}
+                error={state?.error && !generatingItem ? state.error : undefined}
+            />
+            <GenerationTools 
+                reportState={state}
+                isPending={isPending}
+                generatingItem={generatingItem}
+            />
+          </div>
+          <div className="md:col-span-3 space-y-6">
+            <ReportActions
+              proposal={proposal}
+              reportState={state}
+              onNewSession={handleNewSession}
+              isPending={isPending}
+            />
+            <ReportResults
+              reportState={state}
+              generatingItem={generatingItem}
+              proposal={proposal}
+              onProposalUpdate={handleProposalUpdate}
+              onSectionUpdate={handleSectionUpdate}
+            />
+          </div>
         </div>
-    );
+      </form>
+    </div>
+  );
 }
