@@ -1,60 +1,87 @@
+
+import { AlignmentType } from 'docx';
 import type { IStylesOptions } from 'docx';
+
+const commonParagraphStyles = [
+    {
+        id: 'Normal',
+        name: 'Normal',
+        basedOn: 'Normal',
+        next: 'Normal',
+        quickFormat: true,
+        run: { size: 22 }, // 11pt
+        paragraph: { spacing: { after: 120 } },
+    },
+    {
+        id: 'Title',
+        name: 'Title',
+        basedOn: 'Normal',
+        next: 'Normal',
+        run: { size: 52, bold: true }, // 26pt
+        paragraph: { alignment: AlignmentType.CENTER, spacing: { after: 300 } },
+    },
+    {
+        id: 'SubTitle',
+        name: 'Sub-Title',
+        basedOn: 'Normal',
+        next: 'Normal',
+        run: { size: 32, italics: true }, // 16pt
+        paragraph: { alignment: AlignmentType.CENTER, spacing: { after: 800 } },
+    },
+    {
+        id: 'ListParagraph',
+        name: 'List Paragraph',
+        basedOn: 'Normal',
+        quickFormat: true,
+        paragraph: {
+            indent: { left: 720, hanging: 360 },
+        },
+    },
+];
 
 const modernStyles: IStylesOptions = {
     default: {
-        heading1: { run: { fontFamily: 'Calibri', size: 32, bold: true, color: "2E74B5" } },
-        heading2: { run: { fontFamily: 'Calibri', size: 26, bold: true, color: "2E74B5" } },
-        heading3: { run: { fontFamily: 'Calibri', size: 24, bold: true, color: "5B9BD5" } },
-        paragraph: { run: { fontFamily: 'Calibri', size: 22 }, spacing: { after: 120 } },
+        document: { run: { fontFamily: 'Calibri', size: 22, color: '333333' } },
+        heading1: { run: { fontFamily: 'Calibri Light', size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
+        heading2: { run: { fontFamily: 'Calibri Light', size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
+        heading3: { run: { fontFamily: 'Calibri Light', size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
     },
     paragraphStyles: [
+        ...commonParagraphStyles,
         {
-            id: 'normal',
-            name: 'Normal',
+            id: 'ModernSpecific',
+            name: 'Modern Specific',
             basedOn: 'Normal',
-            next: 'Normal',
-            quickFormat: true,
-            run: { fontFamily: 'Calibri', size: 22 },
-        },
+            run: { fontFamily: 'Calibri' }
+        }
     ],
 };
 
 const classicStyles: IStylesOptions = {
     default: {
-        heading1: { run: { fontFamily: 'Times New Roman', size: 32, bold: true, color: "000000" } },
-        heading2: { run: { fontFamily: 'Times New Roman', size: 26, bold: true, color: "000000" } },
-        heading3: { run: { fontFamily: 'Times New Roman', size: 24, bold: true, color: "000000" } },
-        paragraph: { run: { fontFamily: 'Times New Roman', size: 24 }, spacing: { after: 140 } },
+        document: { run: { fontFamily: 'Times New Roman', size: 24 } },
+        heading1: { run: { fontFamily: 'Times New Roman', size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
+        heading2: { run: { fontFamily: 'Times New Roman', size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
+        heading3: { run: { fontFamily: 'Times New Roman', size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
     },
-    paragraphStyles: [
-        {
-            id: 'normal',
-            name: 'Normal',
-            basedOn: 'Normal',
-            next: 'Normal',
-            quickFormat: true,
-            run: { fontFamily: 'Times New Roman', size: 24 },
-        },
-    ],
+    paragraphStyles: commonParagraphStyles.map(p => ({
+        ...p,
+        run: { ...p.run, fontFamily: 'Times New Roman' }
+    })),
 };
 
 const academicStyles: IStylesOptions = {
     default: {
-        heading1: { run: { fontFamily: 'Garamond', size: 28, bold: true, color: "000000" } },
-        heading2: { run: { fontFamily: 'Garamond', size: 24, bold: true, color: "333333" } },
-        heading3: { run: { fontFamily: 'Garamond', size: 22, bold: true, color: "333333" } },
-        paragraph: { run: { fontFamily: 'Garamond', size: 24 }, spacing: { after: 240, line: 360 } },
+        document: { run: { fontFamily: 'Garamond', size: 24 } },
+        heading1: { run: { fontFamily: 'Garamond', size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
+        heading2: { run: { fontFamily: 'Garamond', size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
+        heading3: { run: { fontFamily: 'Garamond', size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200, line: 480 }, outlineLevel: 3 } },
     },
-    paragraphStyles: [
-        {
-            id: 'normal',
-            name: 'Normal',
-            basedOn: 'Normal',
-            next: 'Normal',
-            quickFormat: true,
-            run: { fontFamily: 'Garamond', size: 24 },
-        },
-    ],
+    paragraphStyles: commonParagraphStyles.map(p => ({
+        ...p,
+        run: { ...p.run, fontFamily: 'Garamond', size: 24 },
+        paragraph: { ...p.paragraph, spacing: { ...p.paragraph?.spacing, line: 480 }}
+    })),
 };
 
 

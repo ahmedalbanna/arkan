@@ -1,11 +1,12 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ProjectProposal, DiagramType } from './schemas';
 import type { SectionName } from '@/ai/schemas';
 import { marked } from 'marked';
+import { TableOfContents } from 'docx';
 
 // Helper to recursively process inline tokens (bold, italic, etc.)
 const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): TextRun[] => {
@@ -30,7 +31,7 @@ const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): Text
                 }
                 break;
             default:
-                if ('raw' in token) {
+                if ('raw' in token && token.raw) {
                     runs.push(new TextRun({ ...options, text: token.raw }));
                 }
                 break;
@@ -49,6 +50,7 @@ const processList = (listToken: marked.Tokens.List): Paragraph[] => {
              if (itemToken.type === 'text' && itemToken.tokens) {
                 paragraphs.push(new Paragraph({
                     children: processInlines(itemToken.tokens),
+                    style: 'ListParagraph',
                     bullet: listToken.ordered ? undefined : { level: item.depth || 0 },
                     numbering: listToken.ordered ? { reference: "default-numbering", level: item.depth || 0 } : undefined,
                 }));
@@ -60,7 +62,6 @@ const processList = (listToken: marked.Tokens.List): Paragraph[] => {
     }
     return paragraphs;
 }
-
 
 // Helper to parse markdown for DOCX using the 'marked' library
 const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
@@ -75,7 +76,6 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 docxObjects.push(new Paragraph({
                     text: token.text,
                     heading: `Heading${token.depth}` as HeadingLevel,
-                    spacing: { after: 200, before: 100 }
                 }));
                 break;
             case 'paragraph':
@@ -90,7 +90,7 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
                 docxObjects.push(...processList(token));
                 break;
             case 'space':
-                docxObjects.push(new Paragraph(""));
+                // We can ignore empty space tokens to avoid extra empty paragraphs
                 break;
             default:
                 if ('raw' in token && token.raw.trim()) {
@@ -103,14 +103,15 @@ const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
     return docxObjects;
 };
 
-const defaultNumbering = {
+const numbering = {
     config: [
         {
             reference: "default-numbering",
             levels: [
-                { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 360, hanging: 360 } } } },
-                { level: 1, format: "lowerLetter", text: "%2)", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 720, hanging: 360 } } } },
-                { level: 2, format: "lowerRoman", text: "%3.", alignment: AlignmentType.START, style: { paragraph: { indentation: { left: 1080, hanging: 360 } } } },
+                { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START },
+                { level: 1, format: "lowerLetter", text: "%2)", alignment: AlignmentType.START },
+                { level: 2, format: "lowerRoman", text: "%3.", alignment: AlignmentType.START },
+                { level: 3, format: "upperLetter", text: "%4)", alignment: AlignmentType.START },
             ],
         },
     ],
@@ -121,21 +122,36 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
     
     const doc = new Document({
         styles,
-        numbering: defaultNumbering,
-        sections: [{
-            properties: {
-                page: {
-                    margin: {
-                        top: 1440,
-                        right: 1440,
-                        bottom: 1440,
-                        left: 1440,
-                    }
-                }
+        numbering,
+        sections: [
+            // Cover Page Section
+            {
+                properties: { type: SectionType.NEXT_PAGE },
+                children: [
+                    new Paragraph({ text: "", spacing: { after: 2000 } }),
+                    new Paragraph({ text: title, style: 'Title' }),
+                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 400 } }),
+                ]
+            },
+            // Main Content Section
+            {
+            properties: { type: SectionType.NEXT_PAGE },
+            headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
+            footers: {
+                default: new Footer({
+                    children: [
+                        new Paragraph({
+                            alignment: AlignmentType.CENTER,
+                            children: [ new TextRun({ children: [PageNumber.CURRENT] }) ],
+                        }),
+                    ],
+                }),
             },
             children: [
-                new Paragraph({ text: title, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
-                new Paragraph({ text: category, heading: HeadingLevel.HEADING_5, alignment: AlignmentType.CENTER, spacing: { after: 240 } }),
+                new TableOfContents("Table of Contents", {
+                    hyperlink: true,
+                    headingStyleRange: "1-3",
+                }),
                 new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(objective),
                 new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
@@ -155,15 +171,19 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
                 new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
                 ...parseMarkdownToDocx(evaluation),
                 new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                ...stakeholders.flatMap(s => [ new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: s.interest }), ]),
+                ...stakeholders.flatMap(s => [ new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(s.interest), ]),
                 new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
-                ...risks.flatMap(r => [ new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), new Paragraph({ children: [new TextRun({ text: "Mitigation Strategy: ", bold: true }), new TextRun(r.mitigation)] }), ]),
+                ...risks.flatMap(r => [ new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(r.mitigation) ]),
             ],
         }],
     });
     
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
+    try {
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
+    } catch (error) {
+        console.error("Error generating DOCX file:", error);
+    }
 }
 
 export async function exportReportAsDocx(
@@ -195,29 +215,34 @@ export async function exportReportAsDocx(
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
     
-    const children: (Paragraph | Table)[] = [];
-    children.push(new Paragraph({ text: `Project Report: ${proposalTitle}`, heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }));
+    const reportBody: (Paragraph | Table | TableOfContents)[] = [];
+    reportBody.push(new TableOfContents("Table of Contents", {
+        hyperlink: true,
+        headingStyleRange: "1-3",
+    }));
 
     for (const key of orderedSections) {
         const content = sections[key];
         if (content) {
-            children.push(new Paragraph({
+            reportBody.push(new Paragraph({
                 text: sectionConfig[key].title,
                 heading: HeadingLevel.HEADING_1,
-                spacing: { before: 400, after: 200 },
             }));
-            children.push(...parseMarkdownToDocx(content));
+            reportBody.push(...parseMarkdownToDocx(content));
         }
     }
 
-    if (diagrams && Object.values(diagrams).some(d => !!d)) {
-        children.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1, spacing: { before: 400, after: 200 }}));
+    const hasDiagrams = diagrams && Object.values(diagrams).some(d => !!d);
+
+    if (hasDiagrams) {
+        reportBody.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1 }));
 
         for (const key of orderedDiagrams) {
             const diagramData = diagrams[key];
             if (diagramData) {
                 try {
                     let imageBuffer: ArrayBuffer;
+                    // Use the image proxy to avoid CORS issues
                     const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(diagramData.imageUrl)}`;
                     const response = await fetch(proxyUrl);
                     
@@ -226,20 +251,16 @@ export async function exportReportAsDocx(
                         const placeholderUrl = 'https://placehold.co/800x600.png';
                         const placeholderProxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
                         const placeholderResponse = await fetch(placeholderProxyUrl);
-                        if (!placeholderResponse.ok) {
-                            throw new Error(`Placeholder image fetch also failed for diagram ${key}.`);
-                        }
                         imageBuffer = await placeholderResponse.arrayBuffer();
                     } else {
                         imageBuffer = await response.arrayBuffer();
                     }
                     
-                    children.push(new Paragraph({
+                    reportBody.push(new Paragraph({
                         text: diagramConfig[key].title,
                         heading: HeadingLevel.HEADING_2,
-                        spacing: { before: 300, after: 150 },
                     }));
-                    children.push(new Paragraph({
+                    reportBody.push(new Paragraph({
                         children: [new ImageRun({
                             data: imageBuffer,
                             transformation: { width: 550, height: 400 },
@@ -249,7 +270,7 @@ export async function exportReportAsDocx(
 
                 } catch (error) {
                     console.error(`Failed to embed image for ${key}:`, error);
-                    children.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[key].title}]` }));
+                    reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[key].title}]` }));
                 }
             }
         }
@@ -257,19 +278,35 @@ export async function exportReportAsDocx(
 
     const doc = new Document({
         styles,
-        numbering: defaultNumbering,
-        sections: [{ properties: {
-             page: {
-                margin: {
-                    top: 1440,
-                    right: 1440,
-                    bottom: 1440,
-                    left: 1440,
-                }
+        numbering,
+        sections: [
+            // Cover Page
+            {
+                properties: { type: SectionType.NEXT_PAGE },
+                children: [
+                    new Paragraph({ text: "", spacing: { after: 2000 } }),
+                    new Paragraph({ text: `Project Report`, style: 'Title' }),
+                    new Paragraph({ text: proposalTitle, style: 'SubTitle', spacing: { after: 400 } }),
+                ]
+            },
+            // Main Content
+            {
+                properties: { type: SectionType.NEXT_PAGE },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
+                footers: {
+                    default: new Footer({
+                        children: [ new Paragraph({ alignment: AlignmentType.CENTER, children: [ new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] }) ] })],
+                    }),
+                },
+                children: reportBody,
             }
-        }, children }],
+        ],
     });
     
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, "project-report.docx");
+    try {
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, "project-report.docx");
+    } catch (error) {
+        console.error("Error generating DOCX file:", error);
+    }
 }
