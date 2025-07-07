@@ -25,7 +25,7 @@ import { markdownComponents } from '@/lib/markdown-components';
 interface EditableFieldProps {
     value: string | number;
     path: string;
-    onUpdate: (path: string, value: any) => void;
+    onUpdate?: (path: string, value: any) => void;
     multiline?: boolean;
     type?: string;
     className?: string;
@@ -51,7 +51,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const handleSave = () => {
         if (readOnly) return;
         if (currentValue !== value) {
-            onUpdate(path, currentValue);
+            onUpdate?.(path, currentValue);
         }
         setIsEditing(false);
     };
@@ -100,7 +100,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         setIsProcessingValidation(true);
         try {
             const corrected = await validateAndFixMarkdown(String(currentValue));
-            onUpdate(path, corrected);
+            onUpdate?.(path, corrected);
             toast({
                 title: "Markdown Validated",
                 description: "The markdown syntax has been checked and corrected.",
@@ -124,14 +124,14 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
 
     const handleDelete = () => {
         if (readOnly) return;
-        onUpdate(path, '');
+        onUpdate?.(path, '');
         toast({ title: "Content cleared" });
     };
     
     const handleAcceptSuggestion = () => {
         if (readOnly) return;
         if (aiSuggestion !== null) {
-            onUpdate(path, aiSuggestion);
+            onUpdate?.(path, aiSuggestion);
         }
         setAiSuggestion(null);
     };
@@ -262,7 +262,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
 };
 
 
-export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: ProjectProposal; onUpdate: (path: string, value: any) => void; readOnly?: boolean; }) {
+export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: ProjectProposal; onUpdate?: (path: string, value: any) => void; readOnly?: boolean; }) {
     if (!proposal) return null;
 
     return (

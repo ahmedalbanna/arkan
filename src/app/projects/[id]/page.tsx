@@ -84,7 +84,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
           
           {/* Report Preview */}
           {proposal ? (
-            <ProposalViewer proposal={proposal} onUpdate={() => {}} readOnly={true} />
+            <ProposalViewer proposal={proposal} readOnly={true} />
            ) : (
             <Card>
                 <CardHeader>
