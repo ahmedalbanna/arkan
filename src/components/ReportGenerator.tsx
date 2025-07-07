@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { handleGenerateReportItem } from '@/app/generate-report/actions';
+import { useState, useTransition, useActionState, useEffect } from 'react';
+import { handleGenerateReportItem, handleCreateProjectFromProposal } from '@/app/generate-report/actions';
 import { useReportBuilder } from '@/hooks/use-report-builder';
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
 import { ProposalEditor } from './report-generator/ProposalEditor';
@@ -12,6 +12,7 @@ import { add, format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import { ProjectProposalSchema, type ProjectProposal, type SectionName } from '@/ai/schemas';
+import { useToast } from '@/hooks/use-toast';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -30,7 +31,7 @@ function set(obj: any, path: string, value: any) {
 }
 
 export default function ReportGenerator() {
-  const [isPending, startTransition] = useTransition();
+  const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
 
   const {
@@ -49,6 +50,19 @@ export default function ReportGenerator() {
   } = useReportBuilder();
   
   const { isLoaded: agentsLoaded } = useAgents();
+
+  const { toast } = useToast();
+  const [createState, createFormAction] = useActionState(handleCreateProjectFromProposal, null);
+
+  useEffect(() => {
+    if (createState?.error) {
+      toast({
+        title: "Error Creating Project",
+        description: createState.error,
+        variant: 'destructive'
+      })
+    }
+  }, [createState, toast]);
 
   const handleProposalGenerated = (newProposal: ProjectProposal) => {
     setProposal(newProposal);
@@ -140,7 +154,7 @@ export default function ReportGenerator() {
             />
             <GenerationTools 
                 reportState={state}
-                isPending={isPending}
+                isPending={isGenerating}
                 generatingItem={generatingItem}
                 contextSelections={contextSelections}
                 onContextToggle={toggleContextSelection}
@@ -151,7 +165,8 @@ export default function ReportGenerator() {
               proposal={proposal}
               reportState={state}
               onNewSession={handleNewSession}
-              isPending={isPending}
+              isGenerating={isGenerating}
+              createFormAction={createFormAction}
             />
             <ReportResults
               reportState={state}
