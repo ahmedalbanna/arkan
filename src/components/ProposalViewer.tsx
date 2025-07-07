@@ -6,7 +6,7 @@ import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2 } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
+import { validateAndFixMarkdown } from '@/ai/flows/validate-markdown';
 
 
 interface EditableFieldProps {
@@ -53,6 +54,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [ast, setAst] = useState<object | null>(null);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
+    const [isProcessingValidation, setIsProcessingValidation] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -102,6 +104,38 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         }
     };
 
+    const handleValidate = async () => {
+        setIsProcessingValidation(true);
+        try {
+            const corrected = await validateAndFixMarkdown(String(currentValue));
+            onUpdate(path, corrected);
+            toast({
+                title: "Markdown Validated",
+                description: "The markdown syntax has been checked and corrected.",
+            });
+        } catch (error) {
+            console.error("Validation failed:", error);
+            toast({
+                title: "Validation Failed",
+                description: "Could not validate the markdown. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsProcessingValidation(false);
+        }
+    };
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(String(currentValue));
+        toast({ title: "Copied to clipboard" });
+    };
+
+    const handleDelete = () => {
+        onUpdate(path, '');
+        toast({ title: "Content cleared" });
+    };
+
+
     if (isEditing) {
         if (multiline) {
             return (
@@ -135,66 +169,65 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         >
             {multiline ? <ReactMarkdown components={markdownComponents}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
             
-            <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                 {multiline && (
-                    <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
+            {multiline && (
+                <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                    <Popover>
                         <PopoverTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                title="AI Actions"
-                            >
-                                <Wand2 className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <MoreVertical className="h-4 w-4" />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
-                            {isProcessingAi ? (
-                                <div className="flex items-center justify-center p-4">
-                                    <Loader2 className="h-6 w-6 animate-spin" />
-                                </div>
-                            ) : (
-                                <div className="grid gap-1">
-                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                        <BookText className="mr-2 h-4 w-4" /> Summarize
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                        <Maximize className="mr-2 h-4 w-4" /> Expand
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                        <PenLine className="mr-2 h-4 w-4" /> Rewrite
-                                    </Button>
-                                </div>
-                            )}
+                             <div className="grid gap-1">
+                                <p className="p-2 text-xs font-semibold text-muted-foreground">AI Actions</p>
+                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')} disabled={isProcessingAi}>
+                                    {isProcessingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookText className="mr-2 h-4 w-4" />}
+                                    Summarize
+                                </Button>
+                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')} disabled={isProcessingAi}>
+                                    <Maximize className="mr-2 h-4 w-4" /> Expand
+                                </Button>
+                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')} disabled={isProcessingAi}>
+                                    <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                </Button>
+
+                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Markdown Tools</p>
+                                
+                                <Button variant="ghost" className="justify-start" onClick={handleValidate} disabled={isProcessingValidation}>
+                                     {isProcessingValidation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckSquare className="mr-2 h-4 w-4" />}
+                                    Validate
+                                </Button>
+                                <Button variant="ghost" className="justify-start" onClick={handleCopy}>
+                                    <Copy className="mr-2 h-4 w-4" /> Copy
+                                </Button>
+
+                                 <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" className="justify-start" onClick={handleViewAst}>
+                                            <Braces className="mr-2 h-4 w-4" /> View AST
+                                        </Button>
+                                    </DialogTrigger>
+                                     <DialogContent className="max-w-2xl">
+                                        <DialogHeader>
+                                            <DialogTitle>Markdown AST (JSON)</DialogTitle>
+                                        </DialogHeader>
+                                        <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
+                                            <code className="text-muted-foreground text-xs">
+                                                {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
+                                            </code>
+                                        </pre>
+                                    </DialogContent>
+                                </Dialog>
+                                
+                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Destructive</p>
+                                <Button variant="ghost" className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDelete}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </Button>
+                            </div>
                         </PopoverContent>
                     </Popover>
-                )}
-                {multiline && (
-                    <Dialog>
-                        <DialogTrigger asChild>
-                            <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-6 w-6"
-                                onClick={handleViewAst}
-                                title="View Markdown AST"
-                            >
-                                <Braces className="h-4 w-4" />
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle>Markdown AST (JSON)</DialogTitle>
-                            </DialogHeader>
-                            <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
-                                <code className="text-muted-foreground text-xs">
-                                    {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
-                                </code>
-                            </pre>
-                        </DialogContent>
-                    </Dialog>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 };
