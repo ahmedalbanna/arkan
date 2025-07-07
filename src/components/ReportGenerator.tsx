@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useTransition, useActionState, useEffect } from 'react';
+import { useState, useTransition, useActionState, useEffect, useRef } from 'react';
 import { handleGenerateReportItem, handleCreateProjectFromProposal } from '@/app/generate-report/actions';
 import { useReportBuilder } from '@/hooks/use-report-builder';
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
@@ -13,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import { ProjectProposalSchema, type ProjectProposal, type SectionName } from '@/ai/schemas';
 import { useToast } from '@/hooks/use-toast';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -54,6 +56,9 @@ export default function ReportGenerator() {
   const { toast } = useToast();
   const [createState, createFormAction] = useActionState(handleCreateProjectFromProposal, null);
 
+  const prevLastGenerated = useRef<string | undefined>();
+  const prevError = useRef<string | undefined>();
+
   useEffect(() => {
     if (createState?.error) {
       toast({
@@ -63,6 +68,32 @@ export default function ReportGenerator() {
       })
     }
   }, [createState, toast]);
+
+  useEffect(() => {
+    // Toast for generation success
+    if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
+        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
+        const title = itemConfig?.title || state.lastGenerated;
+        toast({
+            title: "Generation Successful!",
+            description: `Successfully generated "${title}".`,
+        });
+    }
+
+    // Toast for generation error
+    if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
+        toast({
+            title: "Generation Failed",
+            description: state.error,
+            variant: "destructive",
+        });
+    }
+
+    prevLastGenerated.current = state.lastGenerated;
+    prevError.current = state.error;
+
+  }, [state.lastGenerated, state.error, toast]);
+
 
   const handleProposalGenerated = (newProposal: ProjectProposal) => {
     setProposal(newProposal);

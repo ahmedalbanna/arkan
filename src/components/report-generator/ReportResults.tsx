@@ -1,12 +1,11 @@
+
 'use client';
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import ProposalViewer from '@/components/ProposalViewer';
 import Image from 'next/image';
-import { Sparkles } from 'lucide-react';
 import { EditableSection } from './EditableSection';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
@@ -29,24 +28,6 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
 
   return (
     <div className="space-y-6">
-      {reportState?.lastGenerated && !reportState.error && (
-        <Alert>
-          <Sparkles className="h-4 w-4" />
-          <AlertTitle className="font-headline">{t('reportGenerator.generationSuccess')}</AlertTitle>
-          <AlertDescription>
-            {t('reportGenerator.generationSuccessDesc').replace('{item}', sectionConfig[reportState.lastGenerated as SectionName]?.title || diagramConfig[reportState.lastGenerated as keyof typeof diagramConfig]?.title)}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {reportState?.error && generatingItem && (
-        <Alert variant="destructive">
-          <Sparkles className="h-4 w-4" />
-          <AlertTitle className="font-headline">{t('reportGenerator.generationFailed')}</AlertTitle>
-          <AlertDescription>{reportState.error}</AlertDescription>
-        </Alert>
-      )}
-
       {proposal && (
         <div>
           <CardTitle className="font-headline text-xl mb-4">{t('reportGenerator.proposalDetailsTitle')}</CardTitle>
