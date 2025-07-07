@@ -35,8 +35,8 @@ export interface ReportState {
 }
 
 const GenerateItemSchema = z.object({
-  proposalJson: z.string().min(1, 'يرجى لصق محتوى مقترح المشروع.'),
-  itemToGenerate: z.string().min(1, 'يجب تحديد عنصر للتوليد.'),
+  proposalJson: z.string().min(1, 'Please paste the project proposal content.'),
+  itemToGenerate: z.string().min(1, 'An item to generate must be selected.'),
 });
 
 const sectionNames: SectionName[] = [
@@ -73,7 +73,14 @@ function encode64(data: Buffer): string {
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
     const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
     const encoded = encode64(compressed);
-    return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
+    return proxyUrl;
+}
+
+async function getFallbackImageUrl(): Promise<string> {
+    const placeholderUrl = 'https://placehold.co/800x600.png';
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
+    return proxyUrl;
 }
 
 export async function handleGenerateReportItem(
@@ -100,7 +107,7 @@ export async function handleGenerateReportItem(
   try {
     proposalData = JSON.parse(proposalJson);
   } catch (e) {
-    return { ...prevState, error: 'صيغة JSON غير صالحة. يرجى التحقق من المحتوى.' };
+    return { ...prevState, error: 'Invalid JSON format. Please check the content.' };
   }
 
   const validatedProposal = ProjectProposalSchema.safeParse(proposalData);
@@ -108,20 +115,20 @@ export async function handleGenerateReportItem(
   if (!validatedProposal.success) {
     return {
       ...prevState,
-      error: 'بيانات المقترح غير متوافقة مع الهيكل المطلوب.',
+      error: 'The proposal data does not match the required structure.',
     };
   }
   
   let prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
   if (prompt === null) {
-    return { ...prevState, error: `لم يتم العثور على موجه للأمر للقسم '${itemToGenerate}'.` };
+    return { ...prevState, error: `Prompt for item type '${itemToGenerate}' was not found.` };
   }
   
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
   const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
 
   if (!isSection && !isDiagram) {
-    return { ...prevState, error: 'نوع العنصر المطلوب غير معروف.' };
+    return { ...prevState, error: 'Unknown item type requested.' };
   }
   
   // If it's a text section, check for and append control instructions
@@ -228,7 +235,7 @@ export async function handleGenerateReportItem(
             case 'activity': result = await generateActivityDiagram(agentInput); break;
             case 'component': result = await generateComponentDiagram(agentInput); break;
             case 'archimate': result = await generateArchimateDiagram(agentInput); break;
-            default: return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
+            default: return { ...prevState, error: 'Unknown diagram type requested.' };
         }
 
         let imageUrl: string;
@@ -236,7 +243,7 @@ export async function handleGenerateReportItem(
             imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
         } catch (e) {
             console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
-            imageUrl = 'https://placehold.co/800x600.png';
+            imageUrl = await getFallbackImageUrl();
         }
 
         const newDiagrams = { 
@@ -252,10 +259,10 @@ export async function handleGenerateReportItem(
         };
     }
     
-    return { ...prevState, error: 'حدث خطأ غير متوقع.' };
+    return { ...prevState, error: 'An unexpected error occurred.' };
 
   } catch (e) {
     console.error(e);
-    return { ...prevState, error: `حدث خطأ أثناء توليد '${itemToGenerate}'. يرجى المحاولة مرة أخرى.` };
+    return { ...prevState, error: `An error occurred while generating '${itemToGenerate}'. Please try again.` };
   }
 }

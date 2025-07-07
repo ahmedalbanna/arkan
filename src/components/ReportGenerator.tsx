@@ -1,7 +1,4 @@
 
-
-
-
 'use client';
 
 import React, { useTransition, useState, useEffect, useRef } from 'react';
@@ -87,7 +84,7 @@ const markdownComponents = {
 const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (newRaw: string) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [content, setContent] = useState(block.raw);
-    const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const { toast } = useToast();
