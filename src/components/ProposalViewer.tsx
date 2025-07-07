@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -54,6 +55,10 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const { toast } = useToast();
 
+    useEffect(() => {
+        setCurrentValue(value);
+    }, [value]);
+
     const handleSave = () => {
         if (currentValue !== value) {
             onUpdate(path, currentValue);
@@ -72,7 +77,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
     const handleViewAst = () => {
-        const tree = unified().use(remarkParse).parse(String(value));
+        const tree = unified().use(remarkParse).parse(String(currentValue));
         setAst(tree);
     };
     
@@ -80,7 +85,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         setIsProcessingAi(true);
         try {
             const result = await manipulateText({
-                textToManipulate: String(value),
+                textToManipulate: String(currentValue),
                 command: command,
             });
             onUpdate(path, result.rewrittenText);

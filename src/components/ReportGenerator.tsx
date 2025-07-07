@@ -1,6 +1,7 @@
 
 
 
+
 'use client';
 
 import React, { useTransition, useState, useEffect, useRef } from 'react';
@@ -91,6 +92,10 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const { toast } = useToast();
 
+    useEffect(() => {
+        setContent(block.raw);
+    }, [block.raw]);
+
     const handleSave = () => {
         onUpdate(content);
         setIsEditing(false);
@@ -108,7 +113,7 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
         setIsProcessingAi(true);
         try {
             const result = await manipulateText({
-                textToManipulate: block.raw,
+                textToManipulate: content,
                 command: command,
             });
             onUpdate(result.rewrittenText);
