@@ -41,6 +41,7 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { add, format } from 'date-fns';
 import { Checkbox } from './ui/checkbox';
 import { cn } from '@/lib/utils';
+import { useLocalization } from '@/context/LocalizationContext';
 
 
 const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
@@ -257,13 +258,13 @@ type ControlState = {
 
 const STORAGE_KEY = 'arkan-report-generator-state';
 
-const generateInstructionText = (controls: ControlState) => {
+const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
     let instructions = [];
     if (controls.formality !== undefined) {
         const formality = controls.formality;
-        let formalityDesc = "balanced";
-        if (formality < 33) formalityDesc = "informal and casual";
-        else if (formality > 66) formalityDesc = "highly formal and professional";
+        let formalityDesc = t('reportGenerator.tool_formality_balanced');
+        if (formality < 33) formalityDesc = t('reportGenerator.tool_formality_informal');
+        else if (formality > 66) formalityDesc = t('reportGenerator.tool_formality_formal');
         instructions.push(`- The writing style should be ${formalityDesc}.`);
     }
     if (controls.tone && controls.tone !== "none") {
@@ -276,7 +277,7 @@ const generateInstructionText = (controls: ControlState) => {
     if (instructions.length > 0) {
         return `Additionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
     }
-    return "No additional instructions.";
+    return t('reportGenerator.tool_instruction_none');
 };
 
 const getInitialControlState = (): Record<SectionName, ControlState> => {
@@ -311,6 +312,7 @@ function set(obj: any, path: string, value: any) {
 }
 
 export default function ReportGenerator() {
+    const { t } = useLocalization();
     const initialState: ReportState = { sections: {}, diagrams: {} };
     const [isPending, startTransition] = useTransition();
     const [state, setState] = useState<ReportState>(initialState);
@@ -408,7 +410,7 @@ export default function ReportGenerator() {
             setState({ sections: {}, diagrams: {} });
         } catch (e) {
             console.error(e);
-            setProposalError('An error occurred while generating the proposal. Please try again.');
+            setProposalError(t('reportGenerator.step1Error'));
         } finally {
             setIsGeneratingProposal(false);
         }
@@ -546,14 +548,14 @@ export default function ReportGenerator() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-xl">Step 1: Generate Project Proposal</CardTitle>
+                    <CardTitle className="font-headline text-xl">{t('reportGenerator.step1Title')}</CardTitle>
                     <CardDescription>
-                        Write a brief description of your project idea. The clearer the idea, the better the proposal.
+                        {t('reportGenerator.step1Desc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Textarea
-                        placeholder="e.g., A customer relationship management (CRM) system to improve sales efficiency and customer service."
+                        placeholder={t('reportGenerator.step1Placeholder')}
                         rows={5}
                         required
                         value={projectIdea}
@@ -570,7 +572,7 @@ export default function ReportGenerator() {
                         ) : (
                             <Sparkles className="mr-2 h-4 w-4" />
                         )}
-                        Generate Proposal
+                        {isGeneratingProposal ? t('reportGenerator.step1ButtonLoading') : t('reportGenerator.step1Button')}
                     </Button>
                 </CardFooter>
             </Card>
@@ -581,8 +583,8 @@ export default function ReportGenerator() {
                         <div className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="font-headline flex leading-relaxed">Step 2: Review Proposal (JSON)</CardTitle>
-                                    <CardDescription>This is the raw input for the AI agents. You can modify it if needed.</CardDescription>
+                                    <CardTitle className="font-headline flex leading-relaxed">{t('reportGenerator.step2Title')}</CardTitle>
+                                    <CardDescription>{t('reportGenerator.step2Desc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Textarea
@@ -604,8 +606,8 @@ export default function ReportGenerator() {
 
                             <Card>
                                 <CardHeader>
-                                    <CardTitle className="font-headline">Step 3: Generation Tools</CardTitle>
-                                    <CardDescription>Select a section or diagram to generate. You can edit the prompt for each item.</CardDescription>
+                                    <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
+                                    <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Accordion type="multiple" className="w-full space-y-1">
@@ -627,13 +629,13 @@ export default function ReportGenerator() {
                                                     <AccordionContent className="space-y-4 p-4">
                                                         <Tabs defaultValue="prompt" className="w-full">
                                                             <TabsList className="grid w-full grid-cols-3">
-                                                                <TabsTrigger value="prompt">Edit Prompt</TabsTrigger>
-                                                                {isSection && <TabsTrigger value="controls">Control Output</TabsTrigger>}
-                                                                <TabsTrigger value="context">Context</TabsTrigger>
+                                                                <TabsTrigger value="prompt">{t('reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                                                {isSection && <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>}
+                                                                <TabsTrigger value="context">{t('reportGenerator.tool_tab_context')}</TabsTrigger>
                                                             </TabsList>
                                                             <TabsContent value="prompt" className="pt-4">
                                                                 <div className="space-y-2">
-                                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">Prompt</Label>
+                                                                    <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
                                                                     <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
                                                                 </div>
                                                             </TabsContent>
@@ -641,43 +643,43 @@ export default function ReportGenerator() {
                                                                 <TabsContent value="controls" className="pt-4">
                                                                     <div className="space-y-6">
                                                                         <div className="space-y-3">
-                                                                            <Label htmlFor={`formality-${key}`}>Formality</Label>
+                                                                            <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
                                                                             <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
                                                                             <div className="flex justify-between text-xs text-muted-foreground">
-                                                                                <span>Informal</span>
-                                                                                <span>Balanced</span>
-                                                                                <span>Very Formal</span>
+                                                                                <span>{t('reportGenerator.tool_formality_informal')}</span>
+                                                                                <span>{t('reportGenerator.tool_formality_balanced')}</span>
+                                                                                <span>{t('reportGenerator.tool_formality_formal')}</span>
                                                                             </div>
                                                                         </div>
                                                                         <div className="space-y-2">
-                                                                            <Label htmlFor={`tone-${key}`}>Tone</Label>
+                                                                            <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
                                                                             <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
-                                                                                <SelectTrigger id={`tone-${key}`}><SelectValue placeholder="Select a tone" /></SelectTrigger>
+                                                                                <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                                                 <SelectContent>
-                                                                                    <SelectItem value="professional">Professional</SelectItem>
-                                                                                    <SelectItem value="academic">Academic</SelectItem>
-                                                                                    <SelectItem value="casual">Casual</SelectItem>
-                                                                                    <SelectItem value="persuasive">Persuasive</SelectItem>
+                                                                                    <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
+                                                                                    <SelectItem value="academic">{t('reportGenerator.tool_tone_academic')}</SelectItem>
+                                                                                    <SelectItem value="casual">{t('reportGenerator.tool_tone_casual')}</SelectItem>
+                                                                                    <SelectItem value="persuasive">{t('reportGenerator.tool_tone_persuasive')}</SelectItem>
                                                                                 </SelectContent>
                                                                             </Select>
                                                                         </div>
                                                                         <div className="space-y-2">
-                                                                            <Label htmlFor={`wordCount-${key}`}>Word Count (approx.)</Label>
-                                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder="e.g., 300" value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                                                            <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
+                                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
                                                                         </div>
                                                                         <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                                                                            <p className="font-semibold">Instruction Preview:</p>
-                                                                            <pre className="whitespace-pre-wrap font-mono text-primary/80">{generateInstructionText(controlState[key as SectionName])}</pre>
+                                                                            <p className="font-semibold">{t('reportGenerator.tool_instruction_preview')}</p>
+                                                                            <pre className="whitespace-pre-wrap font-mono text-primary/80">{generateInstructionText(controlState[key as SectionName], t)}</pre>
                                                                         </div>
                                                                     </div>
                                                                 </TabsContent>
                                                             )}
                                                             <TabsContent value="context" className="pt-4">
                                                                 <div className="space-y-3">
-                                                                    <Label className="font-semibold">Include Context from Other Items</Label>
-                                                                    <p className="text-xs text-muted-foreground">Select other generated sections or diagrams to provide as context to the AI.</p>
+                                                                    <Label className="font-semibold">{t('reportGenerator.tool_context_label')}</Label>
+                                                                    <p className="text-xs text-muted-foreground">{t('reportGenerator.tool_context_desc')}</p>
                                                                     <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
-                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground">Sections</h4>
+                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground">{t('reportGenerator.tool_context_sections')}</h4>
                                                                         {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
                                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                                 <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.sections[contextKey]} />
@@ -686,7 +688,7 @@ export default function ReportGenerator() {
                                                                                 </Label>
                                                                             </div>
                                                                         ))}
-                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">Diagrams</h4>
+                                                                        <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">{t('reportGenerator.tool_context_diagrams')}</h4>
                                                                         {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
                                                                             <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                                 <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!state.diagrams?.[contextKey]} />
@@ -713,21 +715,21 @@ export default function ReportGenerator() {
                 <div className="md:col-span-3 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Actions</CardTitle>
-                            <CardDescription>Export your outputs or start a new session.</CardDescription>
+                            <CardTitle className="font-headline">{t('reportGenerator.actionsTitle')}</CardTitle>
+                            <CardDescription>{t('reportGenerator.actionsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col sm:flex-row gap-4">
                             <Button onClick={handleExportProposalDOCX} disabled={!proposal || isPending} className="w-full sm:w-auto font-headline">
                                 <FileText className="mr-2 h-4 w-4" />
-                                Export Proposal
+                                {t('reportGenerator.exportProposal')}
                             </Button>
                             <Button onClick={handleExportReportDOCX} disabled={!hasContent || isPending} className="w-full sm:w-auto font-headline">
                                 <FileText className="mr-2 h-4 w-4" />
-                                Export Report
+                                {t('reportGenerator.exportReport')}
                             </Button>
                             <Button onClick={handleNewSession} variant="outline" disabled={isPending} className="w-full sm:w-auto font-headline">
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                New Session
+                                {t('reportGenerator.newSession')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -735,9 +737,9 @@ export default function ReportGenerator() {
                     {state?.lastGenerated && !state.error && (
                         <Alert>
                             <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">Generation Successful!</AlertTitle>
+                            <AlertTitle className="font-headline">{t('reportGenerator.generationSuccess')}</AlertTitle>
                             <AlertDescription>
-                                Successfully generated "{sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title}". You can view it below.
+                                {t('reportGenerator.generationSuccessDesc').replace('{item}', sectionConfig[state.lastGenerated as SectionName]?.title || diagramConfig[state.lastGenerated as DiagramType]?.title)}
                             </AlertDescription>
                         </Alert>
                     )}
@@ -745,14 +747,14 @@ export default function ReportGenerator() {
                     {state?.error && generatingItem && (
                         <Alert variant="destructive">
                             <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">Generation Failed!</AlertTitle>
+                            <AlertTitle className="font-headline">{t('reportGenerator.generationFailed')}</AlertTitle>
                             <AlertDescription>{state.error}</AlertDescription>
                         </Alert>
                     )}
 
                     {proposal && (
                         <div>
-                            <CardTitle className="font-headline text-xl mb-4">Generated Proposal Details (Editable)</CardTitle>
+                            <CardTitle className="font-headline text-xl mb-4">{t('reportGenerator.proposalDetailsTitle')}</CardTitle>
                             <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
                         </div>
                     )}

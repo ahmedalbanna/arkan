@@ -3,23 +3,29 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileText, FileSpreadsheet, GitGraph, History, Bot, Palette } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-
-const navLinks = [
-  { href: '/', label: 'الرئيسية', icon: HomeIcon },
-  { href: '/projects', label: 'المشاريع', icon: Briefcase },
-  { href: '/summarize', label: 'تلخيص بالذكاء الاصطناعي', icon: BrainCircuit },
-  { href: '/generate-report', label: 'إنشاء المستندات', icon: FileSpreadsheet },
-  { href: '/templates', label: 'قوالب التصدير', icon: Palette },
-  { href: '/history', label: 'سجل الأنشطة', icon: History },
-  { href: '/manage-agents', label: 'إدارة الوكلاء', icon: Bot },
-  { href: '/profile/user-1', label: 'الملف الشخصي', icon: User },
-];
+import { useLocalization } from '@/context/LocalizationContext';
 
 export function Header() {
   const pathname = usePathname();
+  const { t, locale, setLocale } = useLocalization();
+
+  const toggleLocale = () => {
+    setLocale(locale === 'en' ? 'ar' : 'en');
+  };
+
+  const navLinks = [
+    { href: '/', label: t('header.home'), icon: HomeIcon },
+    { href: '/projects', label: t('header.projects'), icon: Briefcase },
+    { href: '/summarize', label: t('header.summarize'), icon: BrainCircuit },
+    { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
+    { href: '/templates', label: t('header.exportTemplates'), icon: Palette },
+    { href: '/history', label: t('header.activityHistory'), icon: History },
+    { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
+    { href: '/profile/user-1', label: t('header.profile'), icon: User },
+  ];
 
   const renderNavLinks = (isMobile = false) =>
     navLinks.map((link) => (
@@ -33,7 +39,7 @@ export function Header() {
         )}
       >
         <Link href={link.href}>
-          {isMobile && <link.icon className="ml-4 h-5 w-5" />}
+          {isMobile && <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />}
           {link.label}
         </Link>
       </Button>
@@ -42,27 +48,37 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4">
-        <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-          أركان
-        </Link>
-        <nav className="hidden md:flex gap-4 mx-auto">
-          {renderNavLinks()}
-        </nav>
-        <div className="md:hidden mr-auto">
+        <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">فتح القائمة</span>
+                <span className="sr-only">{t('header.openMenu')}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-sm">
-              <SheetTitle className="sr-only">القائمة</SheetTitle>
+            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm">
+              <SheetTitle className="sr-only">{t('header.openMenu')}</SheetTitle>
               <nav className="flex flex-col gap-4 pt-8">
                 {renderNavLinks(true)}
               </nav>
             </SheetContent>
           </Sheet>
+        </div>
+
+        <div className="flex-1 flex justify-center md:justify-start">
+            <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
+              {t('header.title')}
+            </Link>
+        </div>
+        
+        <nav className="hidden md:flex gap-2 mx-auto">
+          {renderNavLinks()}
+        </nav>
+
+        <div className="flex-1 flex justify-end">
+            <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
+                <Languages className="h-5 w-5" />
+            </Button>
         </div>
       </div>
     </header>
