@@ -14,6 +14,7 @@ export function useReportBuilder() {
   const [projectIdea, setProjectIdea] = useState('');
   const [proposalJson, setProposalJson] = useState('');
   const [proposal, setProposal] = useState<ProjectProposal | null>(null);
+  const [contextSelections, setContextSelections] = useState<Record<string, Record<string, boolean>>>({});
   const [isLoaded, setIsLoaded] = useState(false);
   const { addHistoryEntry } = useHistory();
 
@@ -39,6 +40,7 @@ export function useReportBuilder() {
           }
         }
         setProjectIdea(parsed.projectIdea || '');
+        setContextSelections(parsed.contextSelections || {});
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -56,12 +58,13 @@ export function useReportBuilder() {
         lastGenerated: state.lastGenerated,
         proposalJson: proposalJson,
         projectIdea: projectIdea,
+        contextSelections: contextSelections,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (error) {
        console.error("Failed to save state to localStorage", error);
     }
-  }, [state, proposalJson, projectIdea, isLoaded]);
+  }, [state, proposalJson, projectIdea, isLoaded, contextSelections]);
 
   const handleNewSession = useCallback(() => {
     localStorage.removeItem(STORAGE_KEY);
@@ -69,6 +72,7 @@ export function useReportBuilder() {
     setProposalJson('');
     setProjectIdea('');
     setProposal(null);
+    setContextSelections({});
   }, []);
   
   const processGeneratedItem = useCallback((newState: ReportState) => {
@@ -111,6 +115,17 @@ export function useReportBuilder() {
     }
   }, [addHistoryEntry, proposalJson]);
 
+  const toggleContextSelection = useCallback((parentKey: string, contextKey: string) => {
+    setContextSelections(prev => {
+        const newSelections = JSON.parse(JSON.stringify(prev));
+        if (!newSelections[parentKey]) {
+            newSelections[parentKey] = {};
+        }
+        newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
+        return newSelections;
+    });
+  }, []);
+
 
   return {
     isLoaded,
@@ -123,5 +138,7 @@ export function useReportBuilder() {
     proposalJson,
     setProposalJson,
     handleNewSession,
+    contextSelections,
+    toggleContextSelection,
   };
 }

@@ -44,6 +44,8 @@ export default function ReportGenerator() {
     proposalJson,
     setProposalJson,
     handleNewSession,
+    contextSelections,
+    toggleContextSelection,
   } = useReportBuilder();
   
   const { isLoaded: agentsLoaded } = useAgents();
@@ -140,6 +142,8 @@ export default function ReportGenerator() {
                 reportState={state}
                 isPending={isPending}
                 generatingItem={generatingItem}
+                contextSelections={contextSelections}
+                onContextToggle={toggleContextSelection}
             />
           </div>
           <div className="md:col-span-3 space-y-6">

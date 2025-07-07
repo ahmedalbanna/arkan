@@ -91,9 +91,11 @@ interface GenerationToolsProps {
     reportState: ReportState;
     isPending: boolean;
     generatingItem: string | null;
+    contextSelections: Record<string, Record<string, boolean>>;
+    onContextToggle: (parentKey: string, contextKey: string) => void;
 }
 
-export const GenerationTools = ({ reportState, isPending, generatingItem }: GenerationToolsProps) => {
+export const GenerationTools = ({ reportState, isPending, generatingItem, contextSelections, onContextToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
@@ -183,7 +185,13 @@ export const GenerationTools = ({ reportState, isPending, generatingItem }: Gene
                                                     <h4 className="text-xs font-bold uppercase text-muted-foreground">{t('reportGenerator.tool_context_sections')}</h4>
                                                     {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
                                                         <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                            <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!reportState.sections[contextKey]} />
+                                                            <Checkbox
+                                                                id={`context-${key}-${contextKey}`}
+                                                                name={`context_${key}_${contextKey}`}
+                                                                disabled={!reportState.sections[contextKey]}
+                                                                checked={contextSelections[key]?.[contextKey] ?? false}
+                                                                onCheckedChange={() => onContextToggle(key, contextKey)}
+                                                            />
                                                             <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !reportState.sections[contextKey] && "text-muted-foreground/50")}>
                                                                 {sectionConfig[contextKey].title}
                                                             </Label>
@@ -192,7 +200,13 @@ export const GenerationTools = ({ reportState, isPending, generatingItem }: Gene
                                                     <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">{t('reportGenerator.tool_context_diagrams')}</h4>
                                                     {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
                                                         <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                            <Checkbox id={`context-${key}-${contextKey}`} name={`context_${key}_${contextKey}`} disabled={!reportState.diagrams?.[contextKey]} />
+                                                            <Checkbox
+                                                                id={`context-${key}-${contextKey}`}
+                                                                name={`context_${key}_${contextKey}`}
+                                                                disabled={!reportState.diagrams?.[contextKey]}
+                                                                checked={contextSelections[key]?.[contextKey] ?? false}
+                                                                onCheckedChange={() => onContextToggle(key, contextKey)}
+                                                            />
                                                             <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !reportState.diagrams?.[contextKey] && "text-muted-foreground/50")}>
                                                                 {diagramConfig[contextKey].title}
                                                             </Label>
