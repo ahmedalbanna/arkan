@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2 } from 'lucide-react';
+import { Loader2, Sparkles, BookText, Library, TestTube2, Waypoints, Code, Flag, BookMarked, FileText, GitGraph, Trash2, Braces } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Label } from './ui/label';
@@ -15,6 +16,15 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import ProposalViewer from './ProposalViewer';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -64,6 +74,77 @@ const markdownComponents = {
       <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm text-muted-foreground" {...props}>{children}</code>
     )
   }
+};
+
+const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: { sectionKey: SectionName; title: string; icon: React.ElementType; content: string; onUpdate: (key: SectionName, value: string) => void; }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentContent, setCurrentContent] = useState(content);
+    const [ast, setAst] = useState<object | null>(null);
+
+    const handleSave = () => {
+        if (currentContent !== content) {
+            onUpdate(sectionKey, currentContent);
+        }
+        setIsEditing(false);
+    };
+
+    const handleViewAst = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent accordion from toggling
+        const tree = unified().use(remarkParse).parse(currentContent);
+        setAst(tree);
+    };
+
+    return (
+        <AccordionItem value={title} key={sectionKey} className="bg-background rounded-lg border">
+            <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
+                <div className="flex items-center">
+                    <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
+                </div>
+            </AccordionTrigger>
+            <AccordionContent 
+                onDoubleClick={() => setIsEditing(true)} 
+                className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
+            >
+                {isEditing ? (
+                    <Textarea 
+                        value={currentContent}
+                        onChange={(e) => setCurrentContent(e.target.value)}
+                        onBlur={handleSave}
+                        autoFocus
+                        rows={15}
+                        className="bg-background/80 cursor-text"
+                    />
+                ) : (
+                    <>
+                        <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
+                                    onClick={handleViewAst}
+                                    title="View Markdown AST"
+                                >
+                                    <Braces className="h-4 w-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle>Markdown AST (JSON) for {title}</DialogTitle>
+                                </DialogHeader>
+                                <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
+                                    <code className="text-muted-foreground text-xs">
+                                        {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
+                                    </code>
+                                </pre>
+                            </DialogContent>
+                        </Dialog>
+                    </>
+                )}
+            </AccordionContent>
+        </AccordionItem>
+    );
 };
 
 function GenerateItemButton({ itemKey, title, agent, isPending, generatingItem }: { itemKey: string; title: string; agent?: Agent; isPending: boolean; generatingItem: string | null; }) {
@@ -309,6 +390,16 @@ export default function ReportGenerator() {
         setProjectIdea('');
         setProposal(null);
         setControlState(getInitialControlState());
+    };
+
+    const handleSectionUpdate = (sectionKey: SectionName, newContent: string) => {
+        setState(prevState => ({
+            ...prevState,
+            sections: {
+                ...prevState.sections,
+                [sectionKey]: newContent,
+            }
+        }));
     };
 
     useEffect(() => {
@@ -588,12 +679,14 @@ export default function ReportGenerator() {
                             if (!content) return null;
                             const { title, icon: Icon } = sectionConfig[key];
                             return (
-                                <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
-                                    <AccordionTrigger className="font-headline text-xl p-4"><Icon className="mr-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
-                                    <AccordionContent className="max-w-none p-4 text-muted-foreground border-t">
-                                    <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
-                                    </AccordionContent>
-                                </AccordionItem>
+                                <EditableSection
+                                    key={key}
+                                    sectionKey={key}
+                                    title={title}
+                                    icon={Icon}
+                                    content={content}
+                                    onUpdate={handleSectionUpdate}
+                                />
                             )
                         })}
                         {orderedDiagrams.map((key) => {
@@ -628,3 +721,5 @@ export default function ReportGenerator() {
         </div>
     );
 }
+
+    
