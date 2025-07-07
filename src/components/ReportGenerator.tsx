@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useTransition, useState, useEffect } from 'react';
+import { useTransition, useState, useEffect, useRef } from 'react';
 import { handleGenerateReportItem, type ReportState } from '@/app/generate-report/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -88,7 +89,7 @@ const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (n
     };
     
     // Auto-resize textarea
-    const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
             textAreaRef.current.style.height = "auto";
