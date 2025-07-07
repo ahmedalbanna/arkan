@@ -25,6 +25,7 @@ import {
 } from './ui/dialog';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
+import { marked, type Token } from 'marked';
 
 import ReactMarkdown from 'react-markdown';
 import { useHistory } from '@/hooks/use-history';
@@ -76,22 +77,66 @@ const markdownComponents = {
   }
 };
 
-const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: { sectionKey: SectionName; title: string; icon: React.ElementType; content: string; onUpdate: (key: SectionName, value: string) => void; }) => {
+
+const EditableMarkdownBlock = ({ block, onUpdate }: { block: Token, onUpdate: (newRaw: string) => void }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [currentContent, setCurrentContent] = useState(content);
-    const [ast, setAst] = useState<object | null>(null);
+    const [content, setContent] = useState(block.raw);
 
     const handleSave = () => {
-        if (currentContent !== content) {
-            onUpdate(sectionKey, currentContent);
-        }
+        onUpdate(content);
         setIsEditing(false);
     };
+    
+    // Auto-resize textarea
+    const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+    useEffect(() => {
+        if (isEditing && textAreaRef.current) {
+            textAreaRef.current.style.height = "auto";
+            textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+        }
+    }, [isEditing, content]);
 
-    const handleViewAst = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent accordion from toggling
-        const tree = unified().use(remarkParse).parse(currentContent);
-        setAst(tree);
+    if (isEditing) {
+        return (
+            <Textarea
+                ref={textAreaRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onBlur={handleSave}
+                autoFocus
+                className="bg-background/80 cursor-text my-2 w-full p-2"
+            />
+        );
+    }
+
+    return (
+        <div 
+            onDoubleClick={() => setIsEditing(true)} 
+            className="group relative cursor-pointer hover:bg-muted/50 rounded-md -m-2 p-2"
+        >
+            <ReactMarkdown components={markdownComponents}>{block.raw}</ReactMarkdown>
+        </div>
+    );
+};
+
+
+const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: { sectionKey: SectionName; title: string; icon: React.ElementType; content: string; onUpdate: (key: SectionName, value: string) => void; }) => {
+    const [blocks, setBlocks] = useState<Token[]>([]);
+
+    useEffect(() => {
+        setBlocks(marked.lexer(content));
+    }, [content]);
+
+    const handleUpdateBlock = (index: number, newRaw: string) => {
+        const newBlocks = [...blocks];
+        // This is a simplified update. A more robust solution might re-parse the newRaw
+        // to get an updated token, but for simple text changes this is fine.
+        const updatedToken = marked.lexer(newRaw)[0] || { type: 'space', raw: '' };
+        newBlocks[index] = updatedToken;
+        
+        // Reconstruct the full markdown string from all blocks
+        const fullMarkdown = newBlocks.map(b => b.raw).join('');
+        onUpdate(sectionKey, fullMarkdown);
     };
 
     return (
@@ -101,47 +146,14 @@ const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: {
                     <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
                 </div>
             </AccordionTrigger>
-            <AccordionContent 
-                onDoubleClick={() => setIsEditing(true)} 
-                className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
-            >
-                {isEditing ? (
-                    <Textarea 
-                        value={currentContent}
-                        onChange={(e) => setCurrentContent(e.target.value)}
-                        onBlur={handleSave}
-                        autoFocus
-                        rows={15}
-                        className="bg-background/80 cursor-text"
-                    />
-                ) : (
-                    <>
-                        <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
-                                    onClick={handleViewAst}
-                                    title="View Markdown AST"
-                                >
-                                    <Braces className="h-4 w-4" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                    <DialogTitle>Markdown AST (JSON) for {title}</DialogTitle>
-                                </DialogHeader>
-                                <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
-                                    <code className="text-muted-foreground text-xs">
-                                        {ast ? JSON.stringify(ast, null, 2) : 'Loading...'}
-                                    </code>
-                                </pre>
-                            </DialogContent>
-                        </Dialog>
-                    </>
-                )}
+            <AccordionContent className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer">
+                <div className="space-y-2">
+                    {blocks.map((block, index) => {
+                        // Skip rendering empty space blocks
+                        if (block.type === 'space' && !block.raw.trim()) return null;
+                        return <EditableMarkdownBlock key={index} block={block} onUpdate={(newRaw) => handleUpdateBlock(index, newRaw)} />
+                    })}
+                </div>
             </AccordionContent>
         </AccordionItem>
     );
@@ -721,5 +733,3 @@ export default function ReportGenerator() {
         </div>
     );
 }
-
-    
