@@ -1,101 +1,116 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ProjectProposal, DiagramType } from './schemas';
 import type { SectionName } from '@/ai/schemas';
-import { marked } from 'marked';
-import { TableOfContents } from 'docx';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import type { Root, PhrasingContent, List } from 'mdast';
 
-// Helper to recursively process inline tokens (bold, italic, etc.)
-const processInlines = (tokens: marked.Token[], options: IRunOptions = {}): TextRun[] => {
+// Helper to convert mdast inline elements to docx.js TextRun objects
+function transformInlines(nodes: PhrasingContent[], options: IRunOptions = {}): TextRun[] {
     const runs: TextRun[] = [];
-    for (const token of tokens) {
-        switch (token.type) {
+    for (const node of nodes) {
+        switch (node.type) {
             case 'strong':
-                runs.push(...processInlines(token.tokens, { ...options, bold: true }));
+                runs.push(...transformInlines(node.children, { ...options, bold: true }));
                 break;
-            case 'em':
-                runs.push(...processInlines(token.tokens, { ...options, italics: true }));
+            case 'emphasis':
+                runs.push(...transformInlines(node.children, { ...options, italics: true }));
                 break;
-            case 'codespan':
-                runs.push(new TextRun({ ...options, text: token.text, font: { name: 'Courier New' } }));
+            case 'inlineCode':
+                runs.push(new TextRun({ ...options, text: node.value, font: { name: 'Courier New' } }));
+                break;
+            case 'link':
+                // For now just process children, can be enhanced to a real hyperlink
+                runs.push(...transformInlines(node.children, { ...options, style: 'Hyperlink' }));
                 break;
             case 'text':
-                // Handle potential undefined tokens by defaulting to an empty array
-                if (token.tokens) {
-                    runs.push(...processInlines(token.tokens, options));
-                } else {
-                    runs.push(new TextRun({ ...options, text: token.text }));
-                }
+                runs.push(new TextRun({ ...options, text: node.value }));
                 break;
             default:
-                if ('raw' in token && token.raw) {
-                    runs.push(new TextRun({ ...options, text: token.raw }));
-                }
                 break;
         }
     }
     return runs;
-};
-
-// Helper for lists to handle nesting and numbering
-const processList = (listToken: marked.Tokens.List): Paragraph[] => {
-    const paragraphs: Paragraph[] = [];
-    for (const item of listToken.items) {
-        // Each list item can have text and a nested list.
-        // Process all tokens inside the list item.
-        for (const itemToken of item.tokens) {
-             if (itemToken.type === 'text' && itemToken.tokens) {
-                paragraphs.push(new Paragraph({
-                    children: processInlines(itemToken.tokens),
-                    style: 'ListParagraph',
-                    bullet: listToken.ordered ? undefined : { level: item.depth || 0 },
-                    numbering: listToken.ordered ? { reference: "default-numbering", level: item.depth || 0 } : undefined,
-                }));
-            } else if (itemToken.type === 'list') {
-                // Recursively process the nested list
-                paragraphs.push(...processList(itemToken));
-            }
-        }
-    }
-    return paragraphs;
 }
 
-// Helper to parse markdown for DOCX using the 'marked' library
-const parseMarkdownToDocx = (markdown: string): Paragraph[] => {
+// Helper to parse markdown for DOCX using remark (unified)
+const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
     if (!markdown) return [];
 
-    const tokens = marked.lexer(markdown);
-    const docxObjects: Paragraph[] = [];
+    const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
+    const docxObjects: (Paragraph | Table)[] = [];
 
-    for (const token of tokens) {
-        switch (token.type) {
+    // Helper to process lists recursively
+    const processListItems = (listNode: List, level: number): Paragraph[] => {
+        let paragraphs: Paragraph[] = [];
+        for (const listItem of listNode.children) {
+            for (const itemContent of listItem.children) {
+                if (itemContent.type === 'paragraph') {
+                    paragraphs.push(new Paragraph({
+                        children: transformInlines(itemContent.children),
+                        style: 'ListParagraph',
+                        bullet: listNode.ordered ? undefined : { level },
+                        numbering: listNode.ordered ? { reference: "default-numbering", level } : undefined,
+                    }));
+                } else if (itemContent.type === 'list') {
+                    // Nested list
+                    paragraphs.push(...processListItems(itemContent, level + 1));
+                }
+            }
+        }
+        return paragraphs;
+    }
+
+    for (const node of ast.children) {
+        switch (node.type) {
             case 'heading':
                 docxObjects.push(new Paragraph({
-                    text: token.text,
-                    heading: `Heading${token.depth}` as HeadingLevel,
+                    children: transformInlines(node.children),
+                    heading: `Heading${node.depth}` as HeadingLevel,
                 }));
                 break;
             case 'paragraph':
-                 if (token.tokens) {
-                    docxObjects.push(new Paragraph({
-                        children: processInlines(token.tokens),
-                        spacing: { after: 120 }
-                    }));
-                }
+                docxObjects.push(new Paragraph({
+                    children: transformInlines(node.children),
+                    spacing: { after: 120 },
+                }));
                 break;
             case 'list':
-                docxObjects.push(...processList(token));
+                docxObjects.push(...processListItems(node, 0));
                 break;
-            case 'space':
-                // We can ignore empty space tokens to avoid extra empty paragraphs
+            case 'blockquote':
+                 for (const content of node.children) {
+                     if (content.type === 'paragraph') {
+                         docxObjects.push(new Paragraph({
+                             children: transformInlines(content.children),
+                             style: 'Quote',
+                         }));
+                     }
+                 }
+                 break;
+            case 'table': {
+                const tableRows = node.children.map((row, rowIndex) => {
+                    return new TableRow({
+                        children: row.children.map(cell => new TableCell({
+                             children: [new Paragraph({ children: transformInlines(cell.children) })],
+                        })),
+                        tableHeader: rowIndex === 0,
+                    });
+                });
+                
+                docxObjects.push(new Table({
+                    rows: tableRows,
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                }));
                 break;
-            default:
-                if ('raw' in token && token.raw.trim()) {
-                    docxObjects.push(new Paragraph(token.raw));
-                }
+            }
+            case 'thematicBreak':
+                docxObjects.push(new Paragraph({ border: { bottom: { color: "auto", style: "single", size: 6, space: 1 } } }));
                 break;
         }
     }

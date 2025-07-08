@@ -37,7 +37,38 @@ const commonParagraphStyles = [
             indent: { left: 720, hanging: 360 },
         },
     },
+    {
+        id: 'Quote',
+        name: 'Quote',
+        basedOn: 'Normal',
+        next: 'Normal',
+        run: { italics: true, color: '555555' },
+        paragraph: {
+            indent: { left: 720 },
+            spacing: { before: 120, after: 120 },
+            border: {
+                left: {
+                    color: "auto",
+                    space: 1,
+                    style: "single",
+                    size: 6,
+                },
+            },
+        },
+    },
 ];
+
+const commonCharacterStyles = [
+    {
+        id: 'Hyperlink',
+        name: 'Hyperlink',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            color: '0563C1',
+            underline: {},
+        },
+    },
+]
 
 const modernStyles: IStylesOptions = {
     default: {
@@ -55,6 +86,7 @@ const modernStyles: IStylesOptions = {
             run: { fontFamily: 'Calibri' }
         }
     ],
+    characterStyles: commonCharacterStyles,
 };
 
 const classicStyles: IStylesOptions = {
@@ -68,6 +100,7 @@ const classicStyles: IStylesOptions = {
         ...p,
         run: { ...p.run, fontFamily: 'Times New Roman' }
     })),
+    characterStyles: commonCharacterStyles,
 };
 
 const academicStyles: IStylesOptions = {
@@ -82,6 +115,7 @@ const academicStyles: IStylesOptions = {
         run: { ...p.run, fontFamily: 'Garamond', size: 24 },
         paragraph: { ...p.paragraph, spacing: { ...p.paragraph?.spacing, line: 480 }}
     })),
+    characterStyles: commonCharacterStyles,
 };
 
 
