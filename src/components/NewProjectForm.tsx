@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, Plus, Trash2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -33,15 +33,6 @@ function SubmitButton() {
 export default function NewProjectForm({ categories }: { categories: string[] }) {
   const initialState: CreateProjectState = {};
   const [state, formAction] = useActionState(handleCreateProject, initialState);
-  const [mediaItems, setMediaItems] = useState([{ id: 1 }]);
-
-  const addMediaItem = () => {
-    setMediaItems([...mediaItems, { id: Date.now() }]);
-  };
-
-  const removeMediaItem = (id: number) => {
-    setMediaItems(mediaItems.filter(item => item.id !== id));
-  };
 
   return (
     <form action={formAction}>
@@ -91,41 +82,11 @@ export default function NewProjectForm({ categories }: { categories: string[] })
             {state.errors?.liveLink && <p className="text-sm text-destructive">{state.errors.liveLink[0]}</p>}
           </div>
 
-          <div className="space-y-4">
-            <Label className="text-lg font-semibold">وسائط المشروع</Label>
-            {mediaItems.map((item, index) => (
-              <div key={item.id} className="p-4 border rounded-lg grid gap-4 relative bg-muted/20">
-                {mediaItems.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 left-2 h-7 w-7 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => removeMediaItem(item.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Remove media item</span>
-                  </Button>
-                )}
-                <div className="space-y-2">
-                  <Label htmlFor={`mediaUrl-${item.id}`}>رابط الصورة</Label>
-                  <Input id={`mediaUrl-${item.id}`} name="mediaUrl" placeholder="https://placehold.co/800x600.png" type="url" required />
-                </div>
-                 <div className="space-y-2">
-                  <Label htmlFor={`mediaAlt-${item.id}`}>نص بديل</Label>
-                  <Input id={`mediaAlt-${item.id}`} name="mediaAlt" placeholder="وصف للصورة" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`mediaAiHint-${item.id}`}>تلميح للذكاء الاصطناعي (اختياري)</Label>
-                  <Input id={`mediaAiHint-${item.id}`} name="mediaAiHint" placeholder="كلمتان مفتاحيتان (مثال: mobile app)" />
-                </div>
-              </div>
-            ))}
-            {state.errors?.mediaUrls && <p className="text-sm text-destructive">{state.errors.mediaUrls[0]}</p>}
-            <Button type="button" variant="outline" onClick={addMediaItem}>
-              <Plus className="ml-2 h-4 w-4" />
-              إضافة وسائط أخرى
-            </Button>
+          <div className="space-y-2 p-4 border-l-4 border-accent bg-accent/10 rounded-r-lg">
+            <Label className="font-semibold text-accent-foreground">صورة المشروع</Label>
+            <p className="text-sm text-accent-foreground/80">
+              سيتم توليد صورة غلاف لمشروعك تلقائيًا باستخدام الذكاء الاصطناعي بناءً على العنوان والوصف. يمكنك تغييرها لاحقًا من صفحة تعديل المشروع.
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-start gap-4 p-6 border-t">

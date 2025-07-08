@@ -12,18 +12,29 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
   const { user } = project;
+  const imageUrl = project.media[0]?.url || 'https://placehold.co/400x300.png';
+  const isDataUrl = imageUrl.startsWith('data:');
+
   return (
     <Link href={`/projects/${project.id}`} className="group block">
       <Card className="h-full flex flex-col transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1">
         <CardHeader className="p-0">
           <div className="relative h-56 w-full">
-            <Image
-              src={project.media[0]?.url || 'https://placehold.co/400x300.png'}
-              alt={project.media[0]?.alt || project.title}
-              fill
-              className="object-cover rounded-t-lg"
-              data-ai-hint={project.media[0]?.aiHint ?? ''}
-            />
+            {isDataUrl ? (
+              <img
+                src={imageUrl}
+                alt={project.media[0]?.alt || project.title}
+                className="object-cover rounded-t-lg w-full h-full"
+              />
+            ) : (
+              <Image
+                src={imageUrl}
+                alt={project.media[0]?.alt || project.title}
+                fill
+                className="object-cover rounded-t-lg"
+                data-ai-hint={project.media[0]?.aiHint ?? ''}
+              />
+            )}
           </div>
         </CardHeader>
         <CardContent className="flex-grow p-6">

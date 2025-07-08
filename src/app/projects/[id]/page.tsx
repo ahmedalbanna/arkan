@@ -1,10 +1,12 @@
 import { getProjectById } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Calendar, FileText, MessageCircle, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import CommentItem from '@/components/CommentItem';
@@ -36,6 +38,38 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
         console.error("Failed to parse proposal data for project:", project.id, e);
     }
   }
+
+  const renderMediaItem = (media: typeof project.media[0]) => {
+    const isDataUrl = media.url.startsWith('data:');
+    
+    if (media.type === 'video') {
+      return (
+        <div className="aspect-video w-full">
+          <iframe
+            className="w-full h-full"
+            src={media.url}
+            title={media.alt}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        </div>
+      );
+    }
+
+    if (isDataUrl) {
+      return <img src={media.url} alt={media.alt} className="object-cover w-full h-full" />;
+    }
+
+    return (
+        <Image
+          src={media.url}
+          alt={media.alt}
+          fill
+          className="object-cover"
+          data-ai-hint={media.aiHint ?? ''}
+        />
+    );
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -73,16 +107,25 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             </div>
           </div>
           
-           {/* Report Cover */}
-           <div className="bg-card border rounded-lg p-8 shadow-md aspect-[8.5/11] max-w-lg mx-auto flex flex-col justify-center items-center text-center">
-              <FileText className="w-16 h-16 text-primary/50 mb-6" />
-              <h2 className="text-3xl font-headline text-primary">{project.title}</h2>
-              <p className="text-lg text-muted-foreground mt-2">Project Report</p>
-              <div className="mt-auto pt-8">
-                <p className="text-sm text-muted-foreground">By {user.name}</p>
-                <p className="text-xs text-muted-foreground">{format(new Date(project.createdAt), 'MMMM yyyy')}</p>
-              </div>
-          </div>
+           {project.media.length > 0 && (
+             <Carousel className="w-full">
+                <CarouselContent>
+                    {project.media.map((mediaItem) => (
+                        <CarouselItem key={mediaItem.id}>
+                            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                                {renderMediaItem(mediaItem)}
+                            </div>
+                        </CarouselItem>
+                    ))}
+                </CarouselContent>
+                {project.media.length > 1 && (
+                    <>
+                        <CarouselPrevious className="left-4" />
+                        <CarouselNext className="right-4" />
+                    </>
+                )}
+             </Carousel>
+           )}
           
            {/* Report Preview */}
            {proposal ? (

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { generateProjectImage } from '@/ai/flows/generate-project-image';
 
 const projectSchema = z.object({
   title: z.string().min(3, 'العنوان يجب أن يكون 3 أحرف على الأقل.'),
@@ -11,9 +12,6 @@ const projectSchema = z.object({
   category: z.string().min(1, 'التصنيف مطلوب.'),
   tags: z.string().min(1, 'يجب إدخال وسم واحد على الأقل.'),
   liveLink: z.string().url('الرابط غير صالح.').optional().or(z.literal('')),
-  mediaUrls: z.array(z.string().url('رابط الوسائط غير صالح.')).min(1, 'يجب إضافة صورة واحدة على الأقل.'),
-  mediaAlts: z.array(z.string().min(1, 'النص البديل مطلوب.')).min(1, 'يجب إضافة صورة واحدة على الأقل.'),
-  mediaAiHints: z.array(z.string().optional()),
 });
 
 export interface CreateProjectState {
@@ -23,8 +21,6 @@ export interface CreateProjectState {
     category?: string[];
     tags?: string[];
     liveLink?: string[];
-    mediaUrls?: string[];
-    mediaAlts?: string[];
     _form?: string;
   };
   success?: boolean;
@@ -34,10 +30,6 @@ export async function handleCreateProject(
   prevState: CreateProjectState,
   formData: FormData
 ): Promise<CreateProjectState> {
-  // Using getAll to handle multiple fields with the same name
-  const mediaUrls = formData.getAll('mediaUrl').map(String).filter(url => url.trim() !== '');
-  const mediaAlts = formData.getAll('mediaAlt').map(String).filter(alt => alt.trim() !== '');
-  const mediaAiHints = formData.getAll('mediaAiHint').map(String);
 
   const validatedFields = projectSchema.safeParse({
     title: formData.get('title'),
@@ -45,9 +37,6 @@ export async function handleCreateProject(
     category: formData.get('category'),
     tags: formData.get('tags'),
     liveLink: formData.get('liveLink'),
-    mediaUrls,
-    mediaAlts,
-    mediaAiHints,
   });
   
   if (!validatedFields.success) {
@@ -56,13 +45,19 @@ export async function handleCreateProject(
     };
   }
 
-  const { title, description, category, tags, liveLink, mediaUrls: urls, mediaAlts: alts, mediaAiHints: hints } = validatedFields.data;
+  const { title, description, category, tags, liveLink } = validatedFields.data;
 
   // In a real app, this would come from the authenticated session.
   const userId = 'user-1'; 
   
   let newProjectId;
   try {
+    // Generate the project image using AI
+    const imageResult = await generateProjectImage({ title, description });
+    if (!imageResult.imageUrl) {
+        throw new Error('AI image generation failed.');
+    }
+
     newProjectId = await createProject({
       userId,
       title,
@@ -70,12 +65,11 @@ export async function handleCreateProject(
       category,
       liveLink: liveLink || undefined,
       tags: tags.split(',').map(t => t.trim()).filter(t => t.length > 0),
-      media: urls.map((url, i) => ({
-          url,
-          alt: alts[i],
-          aiHint: hints?.[i] || undefined,
-          type: 'image' // For now, only support images from URL
-      }))
+      media: [{
+          url: imageResult.imageUrl,
+          alt: `AI-generated image for ${title}`,
+          type: 'image'
+      }]
     });
 
     revalidatePath('/projects');
