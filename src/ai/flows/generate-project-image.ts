@@ -33,7 +33,7 @@ const generateProjectImageFlow = ai.defineFlow(
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: `Generate a visually appealing, professional cover image for a project portfolio. The image should be abstract and metaphorical, representing the project's theme. Avoid text and logos. Project Title: "${title}". Description: "${description}"`,
       config: {
-        responseModalities: ['IMAGE'],
+        responseModalities: ['IMAGE', 'TEXT'],
       },
     });
 
