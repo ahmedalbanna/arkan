@@ -20,6 +20,7 @@ import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { validateAndFixMarkdown } from '@/ai/flows/validate-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 
 interface EditableFieldProps {
@@ -265,6 +266,8 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
 export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: ProjectProposal; onUpdate?: (path: string, value: any) => void; readOnly?: boolean; }) {
     if (!proposal) return null;
 
+    const defaultOpen = ["Objective", "Methodology"];
+
     return (
         <div className="space-y-6">
             <Card>
@@ -278,133 +281,165 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 </CardHeader>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline readOnly={readOnly} />
-                </CardContent>
-            </Card>
+            <Accordion type="multiple" className="w-full space-y-6" defaultValue={defaultOpen}>
+                <AccordionItem value="Objective" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                           <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0">
+                                <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+                
+                <AccordionItem value="Methodology" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                           <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                           <div className="p-6 pt-0">
+                               <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                           </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
-                </CardHeader>
-                <CardContent>
-                     <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
-                </CardContent>
-            </Card>
+                <AccordionItem value="Timeline" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> Timeline</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0 space-y-4">
+                                <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" readOnly={readOnly} /></div>
+                                <div className="flex items-center gap-2"><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
+                                <h4 className="font-semibold">Phases:</h4>
+                                <ul className="space-y-2 text-muted-foreground">
+                                    {proposal.timeline.phases.map((phase, index) => (
+                                        <li key={index} className="flex justify-between items-center gap-2">
+                                            <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} />
+                                            <div className="flex items-center gap-1">
+                                            (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
 
-            <div className="grid md:grid-cols-2 gap-6">
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> Timeline</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" readOnly={readOnly} /></div>
-                        <div className="flex items-center gap-2"><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
-                        <h4 className="font-semibold">Phases:</h4>
-                        <ul className="space-y-2 text-muted-foreground">
-                            {proposal.timeline.phases.map((phase, index) => (
-                                <li key={index} className="flex justify-between items-center gap-2">
-                                    <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} />
-                                    <div className="flex items-center gap-1">
-                                      (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
+                <AccordionItem value="Budget" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> Budget</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0">
+                                <div className="mb-4 flex gap-2 items-center">
+                                <strong>Total:</strong> 
+                                <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
+                                <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
+                                </div>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Item</TableHead>
+                                            <TableHead className="text-left">Cost</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {proposal.budget.breakdown.map((item, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell><EditableField value={item.item} path={`budget.breakdown.${index}.item`} onUpdate={onUpdate} readOnly={readOnly} /></TableCell>
+                                                <TableCell className="text-left"><EditableField value={item.cost} path={`budget.breakdown.${index}.cost`} onUpdate={onUpdate} type="number" readOnly={readOnly} /></TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+
+                <AccordionItem value="Outcomes" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> Expected Outcomes</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0">
+                                <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                                    {proposal.expected_outcome.map((outcome, index) => (
+                                        <li key={index}><EditableField value={outcome} path={`expected_outcome.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+                
+                <AccordionItem value="Success" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                             <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0 space-y-4">
+                                <h4 className="font-semibold">Criteria:</h4>
+                                <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
+                                    {proposal.success_criteria.map((criterion, index) => (
+                                        <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
+                                    ))}
+                                </ul>
+                                <h4 className="font-semibold pt-4 border-t">Evaluation Plan:</h4>
+                                <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+                
+                <AccordionItem value="Stakeholders" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> Stakeholders</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                            <div className="p-6 pt-0">
+                                {proposal.stakeholders.map((stakeholder, index) => (
+                                    <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
+                                        <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} /></div>
+                                        <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} readOnly={readOnly} /></div>
+                                        <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline readOnly={readOnly} />
                                     </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> Budget</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="mb-4 flex gap-2 items-center">
-                          <strong>Total:</strong> 
-                          <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
-                          <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Item</TableHead>
-                                    <TableHead className="text-left">Cost</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {proposal.budget.breakdown.map((item, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell><EditableField value={item.item} path={`budget.breakdown.${index}.item`} onUpdate={onUpdate} readOnly={readOnly} /></TableCell>
-                                        <TableCell className="text-left"><EditableField value={item.cost} path={`budget.breakdown.${index}.cost`} onUpdate={onUpdate} type="number" readOnly={readOnly} /></TableCell>
-                                    </TableRow>
                                 ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-            </div>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> Expected Outcomes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                     <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                        {proposal.expected_outcome.map((outcome, index) => (
-                            <li key={index}><EditableField value={outcome} path={`expected_outcome.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
-                        ))}
-                    </ul>
-                </CardContent>
-            </Card>
+                            </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <h4 className="font-semibold">Criteria:</h4>
-                    <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
-                        {proposal.success_criteria.map((criterion, index) => (
-                            <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
-                        ))}
-                    </ul>
-                     <h4 className="font-semibold pt-4 border-t">Evaluation Plan:</h4>
-                     <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline readOnly={readOnly} />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> Stakeholders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {proposal.stakeholders.map((stakeholder, index) => (
-                        <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} /></div>
-                            <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} readOnly={readOnly} /></div>
-                            <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline readOnly={readOnly} />
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> Risks & Mitigations</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {proposal.risks.map((risk, index) => (
-                        <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                            <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
-                            <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
-                        </div>
-                    ))}
-                </CardContent>
-            </Card>
+                <AccordionItem value="Risks" className="border-b-0">
+                    <Card>
+                        <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> Risks & Mitigations</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent>
+                             <div className="p-6 pt-0">
+                                {proposal.risks.map((risk, index) => (
+                                    <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
+                                        <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
+                                        <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
+                                    </div>
+                                ))}
+                             </div>
+                        </AccordionContent>
+                    </Card>
+                </AccordionItem>
+            </Accordion>
         </div>
     );
 }
