@@ -299,8 +299,6 @@ export async function updateProject(projectId: string, data: {
             }))).run();
         }
     });
-
-    return projectId;
 }
 
 export async function deleteProject(projectId: string) {
@@ -308,4 +306,53 @@ export async function deleteProject(projectId: string) {
     // media, comments, projectTags, and summaryTechnologies.
     await db.delete(projects).where(eq(projects.id, projectId));
     return { success: true };
+}
+
+export async function getAllUsers() {
+    const data = await db.query.users.findMany();
+    return data;
+}
+
+export async function updateUser(userId: string, data: {
+    name: string;
+    avatarUrl?: string;
+    bio?: string;
+    skills: string[];
+}) {
+    const allSkillIds: number[] = [];
+    if (data.skills.length > 0) {
+        const existingSkills = await db.select().from(skills).where(inArray(skills.name, data.skills));
+        const existingSkillNames = new Set(existingSkills.map(s => s.name));
+        const newSkillNames = data.skills.filter(s => !existingSkillNames.has(s));
+        
+        if (newSkillNames.length > 0) {
+            const newSkills = await db.insert(skills).values(newSkillNames.map(name => ({ name }))).returning();
+            existingSkills.push(...newSkills);
+        }
+        
+        const skillMap = new Map(existingSkills.map(s => [s.name, s.id]));
+        for (const skillName of data.skills) {
+            const skillId = skillMap.get(skillName);
+            if (skillId) {
+                allSkillIds.push(skillId);
+            }
+        }
+    }
+
+    db.transaction((tx) => {
+        tx.update(users).set({
+            name: data.name,
+            avatarUrl: data.avatarUrl,
+            bio: data.bio
+        }).where(eq(users.id, userId)).run();
+
+        tx.delete(userSkills).where(eq(userSkills.userId, userId)).run();
+
+        if (allSkillIds.length > 0) {
+            tx.insert(userSkills).values(allSkillIds.map(skillId => ({
+                userId: userId,
+                skillId: skillId,
+            }))).run();
+        }
+    });
 }

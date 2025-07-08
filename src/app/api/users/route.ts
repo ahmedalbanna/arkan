@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { getAllUsers } from '@/lib/db/queries';
 
 const userSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -33,5 +34,15 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating user:', error);
     return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+  }
+}
+
+export async function GET(request: Request) {
+  try {
+    const users = await getAllUsers();
+    return NextResponse.json(users, { status: 200 });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    return NextResponse.json({ message: 'An unexpected error occurred while fetching users.' }, { status: 500 });
   }
 }
