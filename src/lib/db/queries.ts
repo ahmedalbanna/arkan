@@ -1,3 +1,4 @@
+
 import 'server-only';
 import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
@@ -146,10 +147,33 @@ export async function createProject(data: {
     reportSections?: string;
     reportDiagrams?: string;
 }) {
-    return await db.transaction(async (tx) => {
+    // Asynchronous part: prepare data outside the transaction
+    const tagIdsToLink: number[] = [];
+    if (data.tags.length > 0) {
+        const existingTags = await db.select({ id: tags.id, name: tags.name }).from(tags).where(inArray(tags.name, data.tags));
+        const existingTagNames = new Set(existingTags.map(t => t.name));
+        const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+        
+        let newTagsFromDb: { id: number, name: string }[] = [];
+        if (newTagNames.length > 0) {
+            newTagsFromDb = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning({ id: tags.id, name: tags.name });
+        }
+        
+        const allTags = [...existingTags, ...newTagsFromDb];
+        const tagMap = new Map(allTags.map(t => [t.name, t.id]));
+        data.tags.forEach(tagName => {
+            const tagId = tagMap.get(tagName);
+            if (tagId) {
+                tagIdsToLink.push(tagId);
+            }
+        });
+    }
+
+    // Synchronous part: execute writes inside the transaction
+    const newProjectId = `proj-${randomUUID()}`;
+    db.transaction((tx) => {
         // 1. Create the project
-        const newProjectId = `proj-${randomUUID()}`;
-        await tx.insert(projects).values({
+        tx.insert(projects).values({
             id: newProjectId,
             userId: data.userId,
             title: data.title,
@@ -160,41 +184,29 @@ export async function createProject(data: {
             proposalData: data.proposalData,
             reportSections: data.reportSections,
             reportDiagrams: data.reportDiagrams,
-        });
+        }).run();
 
         // 2. Handle tags
-        if (data.tags.length > 0) {
-            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
-            const existingTagNames = new Set(existingTags.map(t => t.name));
-            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
-
-            if (newTagNames.length > 0) {
-                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
-                existingTags.push(...newTags);
-            }
-            
-            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
-
-            await tx.insert(projectTags).values(data.tags.map(tagName => {
-                const tagId = tagMap.get(tagName);
-                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
-                return { projectId: newProjectId, tagId };
-            }));
+        if (tagIdsToLink.length > 0) {
+            tx.insert(projectTags).values(tagIdsToLink.map(tagId => ({
+                projectId: newProjectId,
+                tagId,
+            }))).run();
         }
 
         // 3. Handle media
         if (data.media.length > 0) {
-            await tx.insert(media).values(data.media.map(m => ({
+            tx.insert(media).values(data.media.map(m => ({
                 projectId: newProjectId,
                 url: m.url,
                 alt: m.alt,
                 aiHint: m.aiHint,
                 type: m.type,
-            })));
+            }))).run();
         }
-
-        return newProjectId;
     });
+
+    return newProjectId;
 }
 
 export async function updateProject(projectId: string, data: {
@@ -205,50 +217,61 @@ export async function updateProject(projectId: string, data: {
     tags: string[];
     media: { url: string; alt: string; aiHint?: string; type: 'image' | 'video' }[];
 }) {
-    return await db.transaction(async (tx) => {
+    // Asynchronous part: prepare data outside the transaction
+    const tagIdsToLink: number[] = [];
+    if (data.tags.length > 0) {
+        const existingTags = await db.select({ id: tags.id, name: tags.name }).from(tags).where(inArray(tags.name, data.tags));
+        const existingTagNames = new Set(existingTags.map(t => t.name));
+        const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+        
+        let newTagsFromDb: { id: number, name: string }[] = [];
+        if (newTagNames.length > 0) {
+            newTagsFromDb = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning({ id: tags.id, name: tags.name });
+        }
+        
+        const allTags = [...existingTags, ...newTagsFromDb];
+        const tagMap = new Map(allTags.map(t => [t.name, t.id]));
+        data.tags.forEach(tagName => {
+            const tagId = tagMap.get(tagName);
+            if (tagId) {
+                tagIdsToLink.push(tagId);
+            }
+        });
+    }
+
+    // Synchronous part: execute writes inside the transaction
+    db.transaction((tx) => {
         // 1. Update the project details
-        await tx.update(projects).set({
+        tx.update(projects).set({
             title: data.title,
             description: data.description,
             category: data.category,
             liveLink: data.liveLink || null,
-        }).where(eq(projects.id, projectId));
+        }).where(eq(projects.id, projectId)).run();
 
         // 2. Handle tags (delete old, add new)
-        await tx.delete(projectTags).where(eq(projectTags.projectId, projectId));
-        if (data.tags.length > 0) {
-            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
-            const existingTagNames = new Set(existingTags.map(t => t.name));
-            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
-
-            if (newTagNames.length > 0) {
-                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
-                existingTags.push(...newTags);
-            }
-            
-            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
-
-            await tx.insert(projectTags).values(data.tags.map(tagName => {
-                const tagId = tagMap.get(tagName);
-                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
-                return { projectId, tagId };
-            }));
+        tx.delete(projectTags).where(eq(projectTags.projectId, projectId)).run();
+        if (tagIdsToLink.length > 0) {
+            tx.insert(projectTags).values(tagIdsToLink.map(tagId => ({
+                projectId,
+                tagId,
+            }))).run();
         }
 
         // 3. Handle media (delete old, add new)
-        await tx.delete(media).where(eq(media.projectId, projectId));
+        tx.delete(media).where(eq(media.projectId, projectId)).run();
         if (data.media.length > 0) {
-            await tx.insert(media).values(data.media.map(m => ({
+            tx.insert(media).values(data.media.map(m => ({
                 projectId,
                 url: m.url,
                 alt: m.alt,
                 aiHint: m.aiHint,
                 type: m.type,
-            })));
+            }))).run();
         }
-
-        return projectId;
     });
+
+    return projectId;
 }
 
 export async function deleteProject(projectId: string) {
