@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type DiagramType } from '@/ai/schemas';
+import { AGENTS } from '@/lib/agents';
 import { generateUseCaseDiagram } from '@/ai/flows/generate-use-case-diagram';
 import { generateClassDiagram } from '@/ai/flows/generate-class-diagram';
 import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
@@ -12,6 +13,7 @@ import { deflateSync } from 'zlib';
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
   diagramToGenerate: DiagramTypeSchema,
+  otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
 });
 
@@ -47,6 +49,15 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
     return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
 }
 
+const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> = {
+    useCase: { flow: generateUseCaseDiagram, agentId: 'generate-use-case-diagram' },
+    class: { flow: generateClassDiagram, agentId: 'generate-class-diagram' },
+    sequence: { flow: generateSequenceDiagram, agentId: 'generate-sequence-diagram' },
+    activity: { flow: generateActivityDiagram, agentId: 'generate-activity-diagram' },
+    component: { flow: generateComponentDiagram, agentId: 'generate-component-diagram' },
+    archimate: { flow: generateArchimateDiagram, agentId: 'generate-archimate-diagram' },
+};
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -56,32 +67,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, diagramToGenerate, otherDiagrams } = validation.data;
-    const agentInput = { proposal, otherDiagrams: otherDiagrams || {} };
-
-    let result;
-    switch (diagramToGenerate) {
-      case 'useCase':
-        result = await generateUseCaseDiagram(agentInput);
-        break;
-      case 'class':
-        result = await generateClassDiagram(agentInput);
-        break;
-      case 'sequence':
-        result = await generateSequenceDiagram(agentInput);
-        break;
-      case 'activity':
-        result = await generateActivityDiagram(agentInput);
-        break;
-      case 'component':
-        result = await generateComponentDiagram(agentInput);
-        break;
-      case 'archimate':
-        result = await generateArchimateDiagram(agentInput);
-        break;
-      default:
+    const { proposal, diagramToGenerate, otherSections, otherDiagrams } = validation.data;
+    
+    const agentInfo = diagramAgentMap[diagramToGenerate];
+    if (!agentInfo) {
         return NextResponse.json({ message: 'Unknown diagram type requested.' }, { status: 400 });
     }
+
+    const agent = AGENTS.find(a => a.id === agentInfo.agentId);
+    if (!agent) {
+        return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
+    }
+
+    const agentInput = {
+      proposal,
+      otherSections: otherSections || {},
+      otherDiagrams: otherDiagrams || {},
+      prompt: agent.prompt
+    };
+
+    const result = await agentInfo.flow(agentInput);
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
     

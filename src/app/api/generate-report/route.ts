@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { AGENTS } from '@/lib/agents';
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
 import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
@@ -12,17 +13,21 @@ import { generateConclusion } from '@/ai/flows/generate-conclusion';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
-  sectionToGenerate: z.enum([
-    'introduction',
-    'literatureReview',
-    'systemAnalysis',
-    'designStrategy',
-    'systemDesign',
-    'systemProgramming',
-    'systemTesting',
-    'conclusion',
-  ]),
+  sectionToGenerate: SectionNameSchema,
+  otherSections: z.record(SectionNameSchema, z.string()).optional(),
+  otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
 });
+
+const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
+    introduction: { flow: generateIntroduction, agentId: 'generate-introduction' },
+    literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review' },
+    systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis' },
+    designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy' },
+    systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design' },
+    systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming' },
+    systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing' },
+    conclusion: { flow: generateConclusion, agentId: 'generate-conclusion' },
+};
 
 export async function POST(request: Request) {
   try {
@@ -33,37 +38,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, sectionToGenerate } = validation.data;
-
-    let result;
-    switch (sectionToGenerate) {
-      case 'introduction':
-        result = await generateIntroduction(proposal);
-        break;
-      case 'literatureReview':
-        result = await generateLiteratureReview(proposal);
-        break;
-      case 'systemAnalysis':
-        result = await generateSystemAnalysis(proposal);
-        break;
-      case 'designStrategy':
-        result = await generateDesignStrategy(proposal);
-        break;
-      case 'systemDesign':
-        result = await generateSystemDesign(proposal);
-        break;
-      case 'systemProgramming':
-        result = await generateSystemProgramming(proposal);
-        break;
-      case 'systemTesting':
-        result = await generateSystemTesting(proposal);
-        break;
-      case 'conclusion':
-        result = await generateConclusion(proposal);
-        break;
-      default:
+    const { proposal, sectionToGenerate, otherSections, otherDiagrams } = validation.data;
+    
+    const agentInfo = sectionAgentMap[sectionToGenerate];
+    if (!agentInfo) {
         return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
     }
+    
+    const agent = AGENTS.find(a => a.id === agentInfo.agentId);
+    if (!agent) {
+        return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
+    }
+
+    const agentInput = {
+        proposal,
+        otherSections: otherSections || {},
+        otherDiagrams: otherDiagrams || {},
+        prompt: agent.prompt
+    };
+
+    const result = await agentInfo.flow(agentInput);
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
