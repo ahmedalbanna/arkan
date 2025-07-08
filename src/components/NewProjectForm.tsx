@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useState } from 'react';
@@ -85,7 +86,7 @@ export default function NewProjectForm({ categories }: { categories: string[] })
           <div className="space-y-2 p-4 border-l-4 border-accent bg-accent/10 rounded-r-lg">
             <Label className="font-semibold text-accent-foreground">صورة المشروع</Label>
             <p className="text-sm text-accent-foreground/80">
-              سيتم توليد صورة غلاف لمشروعك تلقائيًا باستخدام الذكاء الاصطناعي بناءً على العنوان والوصف. يمكنك تغييرها لاحقًا من صفحة تعديل المشروع.
+              سيتم إضافة صورة غلاف افتراضية لمشروعك. يمكنك تغييرها لاحقًا من صفحة تعديل المشروع.
             </p>
           </div>
         </CardContent>

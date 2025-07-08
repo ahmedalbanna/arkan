@@ -1,3 +1,4 @@
+
 'use server';
 
 import { config } from 'dotenv';
@@ -19,6 +20,5 @@ import '@/ai/flows/generate-sequence-diagram.ts';
 import '@/ai/flows/generate-activity-diagram.ts';
 import '@/ai/flows/generate-component-diagram.ts';
 import '@/ai/flows/generate-archimate-diagram.ts';
-import '@/ai/flows/generate-project-image.ts';
 import '@/ai/flows/manipulate-text.ts';
 import '@/ai/flows/validate-markdown.ts';

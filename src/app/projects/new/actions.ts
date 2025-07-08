@@ -1,10 +1,10 @@
+
 'use server';
 
 import { z } from 'zod';
 import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { generateProjectImage } from '@/ai/flows/generate-project-image';
 
 const projectSchema = z.object({
   title: z.string().min(3, 'العنوان يجب أن يكون 3 أحرف على الأقل.'),
@@ -52,12 +52,6 @@ export async function handleCreateProject(
   
   let newProjectId;
   try {
-    // Generate the project image using AI
-    const imageResult = await generateProjectImage({ title, description });
-    if (!imageResult.imageUrl) {
-        throw new Error('AI image generation failed.');
-    }
-
     newProjectId = await createProject({
       userId,
       title,
@@ -66,8 +60,9 @@ export async function handleCreateProject(
       liveLink: liveLink || undefined,
       tags: tags.split(',').map(t => t.trim()).filter(t => t.length > 0),
       media: [{
-          url: imageResult.imageUrl,
-          alt: `AI-generated image for ${title}`,
+          url: 'https://placehold.co/800x600.png',
+          alt: `Cover image for ${title}`,
+          aiHint: 'report cover',
           type: 'image'
       }]
     });
