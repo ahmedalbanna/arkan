@@ -3,6 +3,7 @@ import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
 import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
+import { summarizeProject } from '@/ai/flows/summarize-project';
 
 export async function getFeaturedProjects() {
     const data = await db.query.projects.findMany({
@@ -146,7 +147,21 @@ export async function createProject(data: {
     reportSections?: string;
     reportDiagrams?: string;
 }) {
-    // 1. Handle tags (async)
+    // 1. Summarize project using AI
+    const summaryAgentPrompt = `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
+1. Provide a concise summary of the project, highlighting its key aspects.
+2. Identify and extract a list of all technologies, frameworks, and libraries mentioned.
+
+Please analyze the following project description and provide the output in the required structured format.
+
+Description: {{{projectDescription}}}`;
+
+    const summaryResult = await summarizeProject({
+        projectDescription: data.description,
+        prompt: summaryAgentPrompt
+    });
+
+    // 2. Handle tags and technologies (async)
     const allTagIds: number[] = [];
     if (data.tags.length > 0) {
         const existingTags = await db.select().from(tags).where(inArray(tags.name, data.tags));
@@ -166,8 +181,29 @@ export async function createProject(data: {
             }
         }
     }
+    
+    const allTechIds: number[] = [];
+    if (summaryResult.technologies.length > 0) {
+        const existingTechs = await db.select().from(technologies).where(inArray(technologies.name, summaryResult.technologies));
+        const existingTechNames = new Set(existingTechs.map(t => t.name));
+        const newTechNames = summaryResult.technologies.filter(t => !existingTechNames.has(t));
+        
+        if (newTechNames.length > 0) {
+            const newTechs = await db.insert(technologies).values(newTechNames.map(name => ({ name }))).returning();
+            existingTechs.push(...newTechs);
+        }
+        
+        const techMap = new Map(existingTechs.map(t => [t.name, t.id]));
+        for (const techName of summaryResult.technologies) {
+            const techId = techMap.get(techName);
+            if (techId) {
+                allTechIds.push(techId);
+            }
+        }
+    }
 
-    // 2. Run the synchronous transaction
+
+    // 3. Run the synchronous transaction
     const newProjectId = db.transaction((tx) => {
         const projectId = `proj-${randomUUID()}`;
         
@@ -182,10 +218,15 @@ export async function createProject(data: {
             proposalData: data.proposalData,
             reportSections: data.reportSections,
             reportDiagrams: data.reportDiagrams,
-        });
+            summaryShort: summaryResult.summary,
+        }).run();
 
         if (allTagIds.length > 0) {
-            tx.insert(projectTags).values(allTagIds.map(tagId => ({ projectId, tagId })));
+            tx.insert(projectTags).values(allTagIds.map(tagId => ({ projectId, tagId }))).run();
+        }
+
+        if (allTechIds.length > 0) {
+            tx.insert(summaryTechnologies).values(allTechIds.map(techId => ({ projectId, technologyId: techId }))).run();
         }
 
         if (data.media.length > 0) {
@@ -195,7 +236,7 @@ export async function createProject(data: {
                 alt: m.alt,
                 aiHint: m.aiHint,
                 type: m.type,
-            })));
+            }))).run();
         }
 
         return projectId;
@@ -240,14 +281,14 @@ export async function updateProject(projectId: string, data: {
             description: data.description,
             category: data.category,
             liveLink: data.liveLink || null,
-        }).where(eq(projects.id, projectId));
+        }).where(eq(projects.id, projectId)).run();
 
-        tx.delete(projectTags).where(eq(projectTags.projectId, projectId));
+        tx.delete(projectTags).where(eq(projectTags.projectId, projectId)).run();
         if (allTagIds.length > 0) {
-            tx.insert(projectTags).values(allTagIds.map(tagId => ({ projectId, tagId })));
+            tx.insert(projectTags).values(allTagIds.map(tagId => ({ projectId, tagId }))).run();
         }
 
-        tx.delete(media).where(eq(media.projectId, projectId));
+        tx.delete(media).where(eq(media.projectId, projectId)).run();
         if (data.media.length > 0) {
             tx.insert(media).values(data.media.map(m => ({
                 projectId,
@@ -255,7 +296,7 @@ export async function updateProject(projectId: string, data: {
                 alt: m.alt,
                 aiHint: m.aiHint,
                 type: m.type,
-            })));
+            }))).run();
         }
     });
 

@@ -19,6 +19,7 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
+import { generateProjectImage } from '@/ai/flows/generate-project-image';
 
 import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
@@ -309,6 +310,11 @@ export async function handleCreateProjectFromProposal(
 
   let newProjectId;
   try {
+    const imageResult = await generateProjectImage({
+      title: projectData.title,
+      description: projectData.objective,
+    });
+    
     newProjectId = await createProject({
       userId: 'user-1', // Hardcoded for prototype
       title: projectData.title,
@@ -317,8 +323,8 @@ export async function handleCreateProjectFromProposal(
       liveLink: undefined, // No live link in proposal
       tags: projectData.tags,
       media: [{
-        url: 'https://placehold.co/800x600.png',
-        alt: projectData.title,
+        url: imageResult.imageUrl,
+        alt: `AI-generated image for ${projectData.title}`,
         aiHint: projectData.tags.slice(0, 2).join(' '),
         type: 'image'
       }],
