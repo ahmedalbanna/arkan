@@ -84,6 +84,7 @@
     "tool_context_label": "تضمين سياق من عناصر أخرى",
     "tool_context_desc": "حدد الأقسام أو المخططات الأخرى التي تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
     "tool_context_sections": "الأقسام",
-    "tool_context_diagrams": "المخططات"
+    "tool_context_diagrams": "المخططات",
+    "generateButton": "توليد"
   }
 }

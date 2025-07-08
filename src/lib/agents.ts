@@ -15,6 +15,24 @@ export interface Agent extends AgentData {
   icon: LucideIcon;
 }
 
+const createDiagramPrompt = (diagramType: string, specificInstructions: string): string => `
+You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
+
+--- PlantUML Style Guide & Instructions ---
+- Use the '!theme spacelab' for a modern and readable look.
+- Set 'skinparam linetype ortho' for clean, right-angled connectors.
+- Your entire response MUST be only the PlantUML code.
+- The code must start with '@startuml' and end with '@enduml'.
+- Do not add any conversational text, explanations, or markdown code fences (\`\`\`) around your response.
+
+--- Diagram-Specific Task ---
+Generate a PlantUML **${diagramType} Diagram**.
+${specificInstructions}
+
+--- Context from Project ---
+You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Use this context to ensure the diagram is accurate and consistent with the overall project.
+`;
+
 export const AGENTS: Agent[] = [
   {
     id: 'summarize-project',
@@ -202,13 +220,10 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Use Case Diagram**.
-
-The diagram should:
+    prompt: createDiagramPrompt('Use Case', `The diagram should:
 1.  Identify the primary actors from the 'stakeholders' section (e.g., 'Primary User', 'Sponsor').
 2.  Define use cases based on the 'objective', 'expected_outcome', and 'functional requirements' (which you can infer from the objectives and system analysis section if provided).
-3.  Connect actors to their relevant use cases.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
+3.  Connect actors to their relevant use cases.`)
   },
   {
     id: 'generate-class-diagram',
@@ -218,13 +233,10 @@ The diagram should:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert software architect specializing in PlantUML. Based on the provided project proposal and any additional context (especially the System Design section), generate a PlantUML **Class Diagram**.
-
-The diagram should:
+    prompt: createDiagramPrompt('Class', `The diagram should:
 1.  Identify key classes (entities) from the project's 'objective', 'expected_outcome', and especially the 'System Design' section.
 2.  Define attributes and methods (operations) for each class.
-3.  Establish relationships (associations, aggregations, inheritance) between the classes.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
+3.  Establish relationships (associations, aggregations, inheritance) between the classes.`)
   },
     {
     id: 'generate-sequence-diagram',
@@ -234,14 +246,11 @@ The diagram should:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Sequence Diagram** for a key user flow. Use the Class Diagram (if provided) for participants and the Use Case diagram for the scenario.
-
-The diagram should:
-1.  Identify participants (actors and system components/classes).
+    prompt: createDiagramPrompt('Sequence', `The diagram should:
+1.  Identify participants (actors and system components/classes). Use the Class Diagram (if provided) for participants and the Use Case diagram for the scenario.
 2.  Illustrate the step-by-step interactions between these participants for a primary use case (e.g., 'User logs in', 'User creates a project').
 3.  Show the order of messages exchanged between participants.
-4.  Use activation boxes to represent processing time.
-5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
+4.  Use activation boxes to represent processing time.`)
   },
     {
     id: 'generate-activity-diagram',
@@ -251,14 +260,11 @@ The diagram should:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert process analyst specializing in PlantUML. Based on the provided project proposal and any additional context, generate a PlantUML **Activity Diagram** illustrating a key workflow.
-
-The diagram should:
+    prompt: createDiagramPrompt('Activity', `The diagram should:
 1.  Define a start and end point for the process.
 2.  Detail the sequence of activities based on a primary workflow described in the 'objective' or 'methodology'.
 3.  Incorporate decision points (conditionals) and forks/joins (parallel activities) where appropriate.
-4.  Optionally use partitions (swimlanes) to assign activities to different actors or system components.
-5.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
+4.  Optionally use partitions (swimlanes) to assign activities to different actors or system components.`)
   },
   {
     id: 'generate-component-diagram',
@@ -268,13 +274,10 @@ The diagram should:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert software architect specializing in PlantUML. Based on the provided project proposal and any additional context (especially the 'System Design' section), generate a high-level PlantUML **Component Diagram**.
-
-The diagram should:
-1.  Identify the main software components of the system (e.g., 'Frontend App', 'API Gateway', 'User Service', 'Database').
+    prompt: createDiagramPrompt('Component', `The diagram should:
+1.  Identify the main software components of the system (e.g., 'Frontend App', 'API Gateway', 'User Service', 'Database'), referencing the 'System Design' section if available.
 2.  Show the interfaces provided and required by the components.
-3.  Illustrate the dependencies and relationships between these components.
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Do not add any other text or explanation.`
+3.  Illustrate the dependencies and relationships between these components.`)
   },
   {
     id: 'generate-archimate-diagram',
@@ -284,12 +287,10 @@ The diagram should:
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert enterprise architect specializing in PlantUML and ArchiMate. Based on the provided project proposal and any additional context, generate a PlantUML **ArchiMate Diagram**. The diagram should focus on the Business Layer and Application Layer.
-
-The diagram should:
+    prompt: createDiagramPrompt('ArchiMate', `The diagram should focus on the Business Layer and Application Layer. It should:
 1.  **Business Layer**: Identify Business Actors (from stakeholders), Business Roles, and Business Functions/Processes (from objectives).
 2.  **Application Layer**: Identify Application Components (e.g., CRM System, Billing Service) and Application Functions that realize the business processes.
 3.  **Relationships**: Show how business actors interact with business functions, and how application components support those business functions. Use proper ArchiMate relationships (e.g., assignment, realization, serving).
-4.  Structure the output strictly as PlantUML code, enclosed within '@startuml' and '@enduml' tags. Ensure you use ArchiMate syntax (e.g., 'archimate "Business Actor" as BA'). Do not add any other text or explanation.`
+4.  Ensure you use ArchiMate syntax (e.g., 'archimate "Business Actor" as BA').`)
   },
 ];

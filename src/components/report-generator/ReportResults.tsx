@@ -57,7 +57,11 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
             const { title, icon: Icon } = diagramConfig[key];
             return (
               <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
-                  <AccordionTrigger className="font-headline text-xl p-4"><Icon className="mr-2 h-5 w-5 text-primary" /> {title}</AccordionTrigger>
+                  <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
+                      <div className="flex items-center">
+                          <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
+                      </div>
+                  </AccordionTrigger>
                   <AccordionContent className="space-y-4 p-4 border-t">
                       <Image 
                           src={diagramData.imageUrl} 
@@ -67,11 +71,11 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                           className="w-full h-auto object-contain rounded-md border bg-white p-2"
                       />
                       <Textarea
-                          readOnly
-                          value={diagramData.plantUmlCode}
-                          rows={10}
-                          className="bg-muted p-4 rounded-md text-sm text-left font-mono"
+                          defaultValue={diagramData.plantUmlCode}
+                          rows={15}
+                          className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
                           dir="ltr"
+                          placeholder="PlantUML code..."
                       />
                   </AccordionContent>
               </AccordionItem>

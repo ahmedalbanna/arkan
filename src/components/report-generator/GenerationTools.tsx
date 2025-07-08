@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -79,7 +80,7 @@ function GenerateItemButton({ itemKey, title, isPending, generatingItem }: Gener
             value={itemKey}
             disabled={isPending || !agent?.isEnabled}
             className="font-headline"
-            title={!agent?.isEnabled ? 'This agent is disabled' : title}
+            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
         >
             {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             {title}
@@ -216,7 +217,9 @@ export const GenerationTools = ({ reportState, isPending, generatingItem, contex
                                             </div>
                                         </TabsContent>
                                     </Tabs>
-                                    <GenerateItemButton itemKey={key} title={`Generate ${title}`} isPending={isPending} generatingItem={generatingItem} />
+                                    <div className="pt-2">
+                                        <GenerateItemButton itemKey={key} title={`${t('reportGenerator.generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
+                                    </div>
                                 </AccordionContent>
                             </AccordionItem>
                         );

@@ -84,6 +84,7 @@
     "tool_context_label": "Include Context from Other Items",
     "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
     "tool_context_sections": "Sections",
-    "tool_context_diagrams": "Diagrams"
+    "tool_context_diagrams": "Diagrams",
+    "generateButton": "Generate"
   }
 }
