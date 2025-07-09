@@ -6,8 +6,8 @@
  * - generateProposal - A function that handles the project proposal generation.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 import { validateAndFixMarkdown } from './validate-markdown';
 
@@ -30,17 +30,17 @@ const generateProposalFlow = ai.defineFlow(
   },
   async (input) => {
     const generateProposalPrompt = ai.definePrompt({
-        name: 'generateProposalPrompt',
-        input: { schema: GenerateProposalInputSchema },
-        output: { schema: ProjectProposalSchema },
-        prompt: input.prompt,
+      name: 'generateProposalPrompt',
+      input: { schema: GenerateProposalInputSchema },
+      output: { schema: ProjectProposalSchema },
+      prompt: input.prompt,
     });
     const { output } = await generateProposalPrompt(input);
     const proposal = output!;
 
     // A helper to run validation on a field
     const fixField = async (text: string) => validateAndFixMarkdown(text);
-    
+
     // An array of promises to fix all markdown fields concurrently
     const fixes = [
       fixField(proposal.objective).then(res => proposal.objective = res),

@@ -26,7 +26,7 @@ function SubmitButton({ disabled, loadingText, buttonText }: { disabled?: boolea
         </>
       ) : (
         <>
-         <Sparkles className="ml-2 h-4 w-4" />
+          <Sparkles className="ml-2 h-4 w-4" />
           {buttonText}
         </>
       )}
@@ -60,43 +60,43 @@ export default function Summarizer() {
             required
           />
           {state?.error && (
-             <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
+            <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
           )}
         </CardContent>
         <CardFooter className="justify-start items-center gap-4">
-          <SubmitButton 
-            disabled={!agent?.isEnabled} 
+          <SubmitButton
+            disabled={!agent?.isEnabled}
             buttonText={t('summarizer.submitButton')}
             loadingText={t('summarizer.submitButtonLoading')}
-            />
-           {!isLoaded ? <Loader2 className="h-4 w-4 animate-spin" /> : !agent?.isEnabled && (
-              <p className="text-sm text-destructive">{t('summarizer.errorDisabled')}</p>
-           )}
+          />
+          {!isLoaded ? <Loader2 className="h-4 w-4 animate-spin" /> : !agent?.isEnabled && (
+            <p className="text-sm text-destructive">{t('summarizer.errorDisabled')}</p>
+          )}
         </CardFooter>
       </form>
 
       {state?.summary && (
         <CardContent className="pt-6 border-t space-y-4">
-            <Alert>
-                <Sparkles className="h-4 w-4" />
-                <AlertTitle className="font-headline">{t('summarizer.generatedTitle')}</AlertTitle>
-                <AlertDescription>
-                  <div className="prose dark:prose-invert max-w-none pt-2">
-                    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{state.summary}</ReactMarkdown>
-                  </div>
-                </AlertDescription>
-            </Alert>
-            
-            {state.technologies && state.technologies.length > 0 && (
-                <div>
-                    <h4 className="font-headline text-lg mb-3">{t('summarizer.detectedTech')}</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {state.technologies.map((tech) => (
-                            <Badge key={tech} variant="secondary">{tech}</Badge>
-                        ))}
-                    </div>
-                </div>
-            )}
+          <Alert>
+            <Sparkles className="h-4 w-4" />
+            <AlertTitle className="font-headline">{t('summarizer.generatedTitle')}</AlertTitle>
+            <AlertDescription>
+              <div className="prose dark:prose-invert max-w-none pt-2">
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{state.summary}</ReactMarkdown>
+              </div>
+            </AlertDescription>
+          </Alert>
+
+          {state.technologies && state.technologies.length > 0 && (
+            <div>
+              <h4 className="font-headline text-lg mb-3">{t('summarizer.detectedTech')}</h4>
+              <div className="flex flex-wrap gap-2">
+                {state.technologies.map((tech) => (
+                  <Badge key={tech} variant="secondary">{tech}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       )}
     </Card>

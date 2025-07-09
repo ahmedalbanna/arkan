@@ -72,7 +72,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         const tree = unified().use(remarkParse).parse(String(currentValue));
         setAst(tree);
     };
-    
+
     const handleAiAction = async (command: string) => {
         if (readOnly) return;
         setIsProcessingAi(true);
@@ -128,7 +128,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         onUpdate?.(path, '');
         toast({ title: "Content cleared" });
     };
-    
+
     const handleAcceptSuggestion = () => {
         if (readOnly) return;
         if (aiSuggestion !== null) {
@@ -188,14 +188,14 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
             />
         );
     }
-    
+
     return (
-        <div 
-            onDoubleClick={() => !readOnly && setIsEditing(true)} 
+        <div
+            onDoubleClick={() => !readOnly && setIsEditing(true)}
             className={`group min-h-[2.5rem] p-2 -m-2 rounded-md relative ${className} ${!readOnly ? 'hover:bg-muted/50 cursor-pointer' : ''}`}
         >
             {multiline ? <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{String(value)}</ReactMarkdown> : <div>{String(value)}</div>}
-            
+
             {!readOnly && multiline && (
                 <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
@@ -205,7 +205,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
-                             <div className="grid gap-1">
+                            <div className="grid gap-1">
                                 <p className="p-2 text-xs font-semibold text-muted-foreground">AI Actions</p>
                                 <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')} disabled={isProcessingAi}>
                                     {isProcessingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookText className="mr-2 h-4 w-4" />}
@@ -222,22 +222,22 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                                 </Button>
 
                                 <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Markdown Tools</p>
-                                
+
                                 <Button variant="ghost" className="justify-start" onClick={handleValidate} disabled={isProcessingValidation}>
-                                     {isProcessingValidation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckSquare className="mr-2 h-4 w-4" />}
+                                    {isProcessingValidation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckSquare className="mr-2 h-4 w-4" />}
                                     Validate
                                 </Button>
                                 <Button variant="ghost" className="justify-start" onClick={handleCopy}>
                                     <Copy className="mr-2 h-4 w-4" /> Copy
                                 </Button>
 
-                                 <Dialog>
+                                <Dialog>
                                     <DialogTrigger asChild>
                                         <Button variant="ghost" className="justify-start" onClick={handleViewAst}>
                                             <Braces className="mr-2 h-4 w-4" /> View AST
                                         </Button>
                                     </DialogTrigger>
-                                     <DialogContent className="max-w-2xl">
+                                    <DialogContent className="max-w-2xl">
                                         <DialogHeader>
                                             <DialogTitle>Markdown AST (JSON)</DialogTitle>
                                         </DialogHeader>
@@ -248,7 +248,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                                         </pre>
                                     </DialogContent>
                                 </Dialog>
-                                
+
                                 <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Destructive</p>
                                 <Button variant="ghost" className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDelete}>
                                     <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -285,7 +285,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Objective" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                           <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
@@ -294,16 +294,16 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
-                
+
                 <AccordionItem value="Methodology" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                           <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
-                           <div className="p-6 pt-0">
-                               <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
-                           </div>
+                            <div className="p-6 pt-0">
+                                <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                            </div>
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
@@ -323,7 +323,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                                         <li key={index} className="flex justify-between items-center gap-2">
                                             <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} />
                                             <div className="flex items-center gap-1">
-                                            (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
+                                                (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
                                             </div>
                                         </li>
                                     ))}
@@ -341,9 +341,9 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         <AccordionContent>
                             <div className="p-6 pt-0">
                                 <div className="mb-4 flex gap-2 items-center">
-                                <strong>Total:</strong> 
-                                <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
-                                <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
+                                    <strong>Total:</strong>
+                                    <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
+                                    <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
                                 </div>
                                 <Table>
                                     <TableHeader>
@@ -382,11 +382,11 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
-                
+
                 <AccordionItem value="Success" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                             <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0 space-y-4">
@@ -402,7 +402,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         </AccordionContent>
                     </Card>
                 </AccordionItem>
-                
+
                 <AccordionItem value="Stakeholders" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
@@ -428,14 +428,14 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                             <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> Risks & Mitigations</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
-                             <div className="p-6 pt-0">
+                            <div className="p-6 pt-0">
                                 {proposal.risks.map((risk, index) => (
                                     <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                                        <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
-                                        <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly}/></div>
+                                        <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
+                                        <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
                                     </div>
                                 ))}
-                             </div>
+                            </div>
                         </AccordionContent>
                     </Card>
                 </AccordionItem>

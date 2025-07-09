@@ -38,7 +38,7 @@ export async function handleCreateProject(
     tags: formData.get('tags'),
     liveLink: formData.get('liveLink'),
   });
-  
+
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -48,8 +48,8 @@ export async function handleCreateProject(
   const { title, description, category, tags, liveLink } = validatedFields.data;
 
   // In a real app, this would come from the authenticated session.
-  const userId = 'user-1'; 
-  
+  const userId = 'user-1';
+
   let newProjectId;
   try {
     newProjectId = await createProject({
@@ -60,10 +60,10 @@ export async function handleCreateProject(
       liveLink: liveLink || undefined,
       tags: tags.split(',').map(t => t.trim()).filter(t => t.length > 0),
       media: [{
-          url: 'https://placehold.co/800x600.png',
-          alt: `Cover image for ${title}`,
-          aiHint: 'report cover',
-          type: 'image'
+        url: 'https://placehold.co/800x600.png',
+        alt: `Cover image for ${title}`,
+        aiHint: 'report cover',
+        type: 'image'
       }]
     });
 
@@ -73,9 +73,9 @@ export async function handleCreateProject(
   } catch (error) {
     console.error('Failed to create project:', error);
     if (error instanceof Error) {
-        return {
-          errors: { _form: error.message },
-        };
+      return {
+        errors: { _form: error.message },
+      };
     }
     return {
       errors: { _form: 'فشل في إنشاء المشروع. يرجى المحاولة مرة أخرى.' },

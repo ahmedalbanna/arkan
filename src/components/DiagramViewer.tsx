@@ -64,7 +64,7 @@ export default function DiagramViewer({
                     className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
                     dir="ltr"
                 />
-                 <div className="absolute top-2 right-2 flex gap-2">
+                <div className="absolute top-2 right-2 flex gap-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>

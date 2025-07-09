@@ -26,7 +26,7 @@ const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; }
 
 function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
     const { pending, data } = useFormStatus();
-    
+
     const isGeneratingThis = pending && data?.get('diagramToGenerate') === diagramType;
 
     return (
@@ -64,12 +64,12 @@ function RenderButton() {
 export default function DiagramGenerator() {
     const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
-    
+
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
     const [editedCodes, setEditedCodes] = useState<Partial<Record<DiagramType, string>>>({});
-    
+
     const orderedDiagrams = DiagramTypeSchema.options;
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
 
@@ -86,6 +86,8 @@ export default function DiagramGenerator() {
             }
 
             addHistoryEntry({
+                id: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
                 type: 'diagram',
                 title: `مخطط: ${diagramConfig[state.lastGenerated].title}`,
                 diagramType: state.lastGenerated,
@@ -93,7 +95,7 @@ export default function DiagramGenerator() {
                 imageUrl: state.imageUrl!,
                 proposalTitle: proposalTitle,
             });
-            
+
             // Sync the generated code with the editor state
             setEditedCodes(prev => ({
                 ...prev,
@@ -101,7 +103,7 @@ export default function DiagramGenerator() {
             }));
         }
     }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson]);
-    
+
     const currentDiagramType = state.lastGenerated;
     const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
     const currentEditedCode = currentDiagramType ? editedCodes[currentDiagramType] : undefined;
@@ -122,8 +124,8 @@ export default function DiagramGenerator() {
                 const key = orderedDiagrams[index];
                 return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
             })}
-             {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
-             {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
+            {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
+            {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
 
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -149,14 +151,14 @@ export default function DiagramGenerator() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-2 items-start">
-                           {orderedDiagrams.map((key, index) => (
-                               <GenerateButton key={key} diagramType={key} agent={diagramAgents[index]} />
-                           ))}
+                            {orderedDiagrams.map((key, index) => (
+                                <GenerateButton key={key} diagramType={key} agent={diagramAgents[index]} />
+                            ))}
                         </CardFooter>
                     </Card>
                 </div>
                 <div className="md:col-span-2 space-y-6">
-                     {state?.lastGenerated && !state.error && (
+                    {state?.lastGenerated && !state.error && (
                         <Alert>
                             <Sparkles className="h-4 w-4" />
                             <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
@@ -165,7 +167,7 @@ export default function DiagramGenerator() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    
+
                     {state.imageUrl && currentDiagramType && currentEditedCode !== undefined && (
                         <Card>
                             <CardHeader>
@@ -180,7 +182,7 @@ export default function DiagramGenerator() {
                                 />
                             </CardContent>
                             <CardFooter>
-                               {hasChanges && <RenderButton />}
+                                {hasChanges && <RenderButton />}
                             </CardFooter>
                         </Card>
                     )}

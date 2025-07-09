@@ -25,11 +25,11 @@ export async function handleCommentAction(prevState: { error?: string } | null, 
   }
 
   const { comment, projectId, commentId, intent } = validatedFields.data;
-  
+
   // For this prototype, we'll hardcode the user ID.
   // In a real app, this would come from the authenticated session and we'd check for ownership before editing/deleting.
-  const userId = 'user-1'; 
-    
+  const userId = 'user-1';
+
   try {
     switch (intent) {
       case 'create':

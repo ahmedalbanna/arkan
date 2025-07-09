@@ -36,7 +36,7 @@ export default function CommentItem({ comment, projectId }: { comment: Comment, 
       setIsEditing(false);
     });
   }
-  
+
   const handleDeleteSubmit = (formData: FormData) => {
     startTransition(async () => {
       await handleCommentAction(null, formData);
@@ -87,11 +87,11 @@ export default function CommentItem({ comment, projectId }: { comment: Comment, 
                   <Pencil className="h-3 w-3" />
                   <span className="sr-only">Edit comment</span>
                 </Button>
-                 <AlertDialog>
+                <AlertDialog>
                   <AlertDialogTrigger asChild>
-                     <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10">
-                        <Trash2 className="h-3 w-3" />
-                        <span className="sr-only">Delete comment</span>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 text-destructive hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="h-3 w-3" />
+                      <span className="sr-only">Delete comment</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
@@ -104,12 +104,12 @@ export default function CommentItem({ comment, projectId }: { comment: Comment, 
                     <AlertDialogFooter>
                       <AlertDialogCancel>إلغاء</AlertDialogCancel>
                       <form action={handleDeleteSubmit}>
-                          <input type="hidden" name="projectId" value={projectId} />
-                          <input type="hidden" name="commentId" value={comment.id} />
-                          <input type="hidden" name="intent" value="delete" />
-                          <AlertDialogAction type="submit" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={isPending}>
-                            {isPending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : 'حذف'}
-                          </AlertDialogAction>
+                        <input type="hidden" name="projectId" value={projectId} />
+                        <input type="hidden" name="commentId" value={comment.id} />
+                        <input type="hidden" name="intent" value="delete" />
+                        <AlertDialogAction type="submit" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground" disabled={isPending}>
+                          {isPending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : 'حذف'}
+                        </AlertDialogAction>
                       </form>
                     </AlertDialogFooter>
                   </AlertDialogContent>

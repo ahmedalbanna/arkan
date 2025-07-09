@@ -40,14 +40,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
-    
+
     const { name, avatarUrl, bio, skills } = validation.data;
 
     await updateUser(userId, {
-        name,
-        avatarUrl: avatarUrl || undefined,
-        bio: bio || undefined,
-        skills,
+      name,
+      avatarUrl: avatarUrl || undefined,
+      bio: bio || undefined,
+      skills,
     });
 
     const updatedUser = await getUserProfile(userId);
@@ -57,7 +57,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   } catch (error) {
     console.error(`Error updating user ${params.id}:`, error);
     if (error instanceof Error) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+      return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
   }

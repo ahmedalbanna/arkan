@@ -16,12 +16,12 @@ export function useAgents() {
         const parsedAgents: Agent[] = JSON.parse(storedAgents);
         const agentMap = new Map(parsedAgents.map(a => [a.id, a]));
         const mergedAgents = initialAgents.map(initialAgent => {
-            const storedData = agentMap.get(initialAgent.id);
-            if (storedData) {
-                // Merge stored data, but explicitly preserve the non-serializable icon from the code definition.
-                return { ...initialAgent, ...storedData, icon: initialAgent.icon };
-            }
-            return initialAgent;
+          const storedData = agentMap.get(initialAgent.id);
+          if (storedData) {
+            // Merge stored data, but explicitly preserve the non-serializable icon from the code definition.
+            return { ...initialAgent, ...storedData, icon: initialAgent.icon };
+          }
+          return initialAgent;
         });
         setAgents(mergedAgents);
       } else {
@@ -42,7 +42,7 @@ export function useAgents() {
       console.error('Failed to save agents to localStorage', error);
     }
   };
-  
+
   const updateAgent = useCallback((id: string, data: Partial<Omit<Agent, 'id'>>) => {
     setAgents(prevAgents => {
       const updatedAgents = prevAgents.map(agent =>

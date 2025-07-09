@@ -27,34 +27,34 @@ const GenerateDiagramSchema = z.object({
 
 // Encodes raw DEFLATE-compressed data using a specific Base64-like alphabet for PlantUML.
 function encode64(data: Buffer): string {
-    const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-    let r = '';
-    for (let i = 0; i < data.length; i += 3) {
-        const b1 = data[i];
-        const b2 = i + 1 < data.length ? data[i+1] : 0;
-        const b3 = i + 2 < data.length ? data[i+2] : 0;
+  const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+  let r = '';
+  for (let i = 0; i < data.length; i += 3) {
+    const b1 = data[i];
+    const b2 = i + 1 < data.length ? data[i + 1] : 0;
+    const b3 = i + 2 < data.length ? data[i + 2] : 0;
 
-        const c1 = b1 >> 2;
-        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        const c3 = ((b2 & 15) << 2) | (b3 >> 6);
-        const c4 = b3 & 63;
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+    const c4 = b3 & 63;
 
-        r += B64_MAP.charAt(c1);
-        r += B64_MAP.charAt(c2);
-        if (i + 1 < data.length) {
-            r += B64_MAP.charAt(c3);
-        }
-        if (i + 2 < data.length) {
-            r += B64_MAP.charAt(c4);
-        }
+    r += B64_MAP.charAt(c1);
+    r += B64_MAP.charAt(c2);
+    if (i + 1 < data.length) {
+      r += B64_MAP.charAt(c3);
     }
-    return r;
+    if (i + 2 < data.length) {
+      r += B64_MAP.charAt(c4);
+    }
+  }
+  return r;
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
-    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
-    const encoded = encode64(compressed);
-    return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+  const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+  const encoded = encode64(compressed);
+  return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
 }
 
 
@@ -75,12 +75,12 @@ export async function handleGenerateDiagram(
       const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
       const newPlantUmlCodes = { ...prevState.plantUmlCodes, [diagramType]: plantUmlCode };
 
-      return { 
+      return {
         plantUmlCodes: newPlantUmlCodes,
-        currentPlantUmlCode: plantUmlCode, 
-        imageUrl, 
-        lastGenerated: diagramType, 
-        error: undefined 
+        currentPlantUmlCode: plantUmlCode,
+        imageUrl,
+        lastGenerated: diagramType,
+        error: undefined
       };
     } catch (e) {
       console.error(e);
@@ -103,7 +103,7 @@ export async function handleGenerateDiagram(
       error: errors.proposalJson?.[0] || errors.diagramToGenerate?.[0],
     };
   }
-  
+
   const { proposalJson, diagramToGenerate } = validatedFields.data;
   let proposalData: ProjectProposal;
 
@@ -125,22 +125,22 @@ export async function handleGenerateDiagram(
   const otherDiagrams: Partial<Record<DiagramType, string>> = {};
   DiagramTypeSchema.options.forEach((type) => {
     if (type !== diagramToGenerate) {
-        const code = formData.get(`plantUmlCode_${type}`) as string | null;
-        if (code) {
-            otherDiagrams[type] = code;
-        }
+      const code = formData.get(`plantUmlCode_${type}`) as string | null;
+      if (code) {
+        otherDiagrams[type] = code;
+      }
     }
   });
-  
+
   const prompt = formData.get(`prompt_${diagramToGenerate}`) as string | null;
   if (!prompt) {
     return { ...prevState, error: `لم يتم العثور على موجه للأمر لنوع المخطط '${diagramToGenerate}'.` };
   }
 
   const agentInput = {
-      proposal: validatedProposal.data,
-      otherDiagrams,
-      prompt
+    proposal: validatedProposal.data,
+    otherDiagrams,
+    prompt
   };
 
   try {
@@ -170,20 +170,20 @@ export async function handleGenerateDiagram(
 
     let imageUrl: string;
     try {
-        imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-    } catch(e) {
-        console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
-        imageUrl = 'https://placehold.co/800x600.png';
+      imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
+    } catch (e) {
+      console.error(`Failed to generate PlantUML image for ${diagramToGenerate}:`, e);
+      imageUrl = 'https://placehold.co/800x600.png';
     }
 
     const newPlantUmlCodes = { ...prevState.plantUmlCodes, [diagramToGenerate]: result.plantUmlCode };
 
-    return { 
-        plantUmlCodes: newPlantUmlCodes, 
-        currentPlantUmlCode: result.plantUmlCode, 
-        imageUrl, 
-        lastGenerated: diagramToGenerate, 
-        error: undefined 
+    return {
+      plantUmlCodes: newPlantUmlCodes,
+      currentPlantUmlCode: result.plantUmlCode,
+      imageUrl,
+      lastGenerated: diagramToGenerate,
+      error: undefined
     };
 
   } catch (e) {

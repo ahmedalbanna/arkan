@@ -8,20 +8,20 @@
  * - GenerateIntroductionOutput - The return type for the generateIntroduction function (the introduction text).
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
 const GenerateIntroductionInputSchema = z.object({
-    proposal: ProjectProposalSchema,
-    otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
-    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-    prompt: z.string().describe("The prompt to use for generating the introduction.")
+  proposal: ProjectProposalSchema,
+  otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
+  otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
+  prompt: z.string().describe("The prompt to use for generating the introduction.")
 });
 export type GenerateIntroductionInput = z.infer<typeof GenerateIntroductionInputSchema>;
 
 const GenerateIntroductionOutputSchema = z.object({
-    introduction: z.string().describe("The complete, professionally written introduction for the project proposal document, formatted as a single string with markdown for paragraphs.")
+  introduction: z.string().describe("The complete, professionally written introduction for the project proposal document, formatted as a single string with markdown for paragraphs.")
 });
 export type GenerateIntroductionOutput = z.infer<typeof GenerateIntroductionOutputSchema>;
 
@@ -62,10 +62,10 @@ To ensure your response is consistent and well-integrated with the rest of the d
 \`\`\`
 `;
     const generateIntroductionPrompt = ai.definePrompt({
-        name: 'generateIntroductionPrompt',
-        input: { schema: GenerateIntroductionInputSchema },
-        output: { schema: GenerateIntroductionOutputSchema },
-        prompt: fullPrompt,
+      name: 'generateIntroductionPrompt',
+      input: { schema: GenerateIntroductionInputSchema },
+      output: { schema: GenerateIntroductionOutputSchema },
+      prompt: fullPrompt,
     });
 
     const { output } = await generateIntroductionPrompt(input);

@@ -1,4 +1,4 @@
-import { integer, text, sqliteTable, primaryKey,index } from 'drizzle-orm/sqlite-core';
+import { integer, text, sqliteTable, primaryKey, index } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 // Users Table
@@ -104,46 +104,46 @@ export const userSkillsRelations = relations(userSkills, ({ one }) => ({
 
 // Tags Table
 export const tags = sqliteTable('tags', {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    name: text('name').notNull().unique(),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull().unique(),
 });
 
 export const tagsRelations = relations(tags, ({ many }) => ({
-    projectTags: many(projectTags),
+  projectTags: many(projectTags),
 }));
 
 // ProjectTags (Junction Table)
 export const projectTags = sqliteTable('project_tags', {
-    projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-    tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+  projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  tagId: integer('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
 }, (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.tagId] }),
+  pk: primaryKey({ columns: [t.projectId, t.tagId] }),
 }));
 
 export const projectTagsRelations = relations(projectTags, ({ one }) => ({
-    project: one(projects, { fields: [projectTags.projectId], references: [projects.id] }),
-    tag: one(tags, { fields: [projectTags.tagId], references: [tags.id] }),
+  project: one(projects, { fields: [projectTags.projectId], references: [projects.id] }),
+  tag: one(tags, { fields: [projectTags.tagId], references: [tags.id] }),
 }));
 
 // Technologies Table
 export const technologies = sqliteTable('technologies', {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    name: text('name').notNull().unique(),
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull().unique(),
 });
 
 export const technologiesRelations = relations(technologies, ({ many }) => ({
-    summaryTechnologies: many(summaryTechnologies),
+  summaryTechnologies: many(summaryTechnologies),
 }));
 
 // SummaryTechnologies (Junction Table)
 export const summaryTechnologies = sqliteTable('summary_technologies', {
-    projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-    technologyId: integer('technology_id').notNull().references(() => technologies.id, { onDelete: 'cascade' }),
+  projectId: text('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
+  technologyId: integer('technology_id').notNull().references(() => technologies.id, { onDelete: 'cascade' }),
 }, (t) => ({
-    pk: primaryKey({ columns: [t.projectId, t.technologyId] }),
+  pk: primaryKey({ columns: [t.projectId, t.technologyId] }),
 }));
 
 export const summaryTechnologiesRelations = relations(summaryTechnologies, ({ one }) => ({
-    project: one(projects, { fields: [summaryTechnologies.projectId], references: [projects.id] }),
-    technology: one(technologies, { fields: [summaryTechnologies.technologyId], references: [technologies.id] }),
+  project: one(projects, { fields: [summaryTechnologies.projectId], references: [projects.id] }),
+  technology: one(technologies, { fields: [summaryTechnologies.technologyId], references: [technologies.id] }),
 }));

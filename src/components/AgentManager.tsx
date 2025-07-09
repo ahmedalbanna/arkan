@@ -40,16 +40,16 @@ function AgentCard({ agent, onToggle }: { agent: Agent, onToggle: (id: string, i
       </CardContent>
       <CardFooter className="justify-between">
         <Button asChild variant="ghost" className="font-headline">
-            <Link href={pageUrl}>
-                الذهاب إلى الأداة
-                <ExternalLink className="mr-2 h-4 w-4" />
-            </Link>
+          <Link href={pageUrl}>
+            الذهاب إلى الأداة
+            <ExternalLink className="mr-2 h-4 w-4" />
+          </Link>
         </Button>
         <Button asChild variant="outline" size="sm" className="font-headline">
-            <Link href={`/manage-agents/${id}/edit`}>
-                <Pencil className="ml-2 h-4 w-4" />
-                تعديل
-            </Link>
+          <Link href={`/manage-agents/${id}/edit`}>
+            <Pencil className="ml-2 h-4 w-4" />
+            تعديل
+          </Link>
         </Button>
       </CardFooter>
     </Card>
@@ -62,13 +62,13 @@ export default function AgentManager() {
   const handleToggle = (id: string, isEnabled: boolean) => {
     updateAgent(id, { isEnabled });
   };
-  
+
   if (!isLoaded) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
-            <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
+        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
+      </div>
     );
   }
 

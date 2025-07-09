@@ -38,7 +38,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             setCurrentContent(content);
         }
     }, [content, isEditing, aiSuggestion]);
-    
+
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
             textAreaRef.current.style.height = "auto";
@@ -83,10 +83,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const handleRejectSuggestion = () => {
         setAiSuggestion(null);
     };
-    
+
     const renderEditableContent = () => {
         if (aiSuggestion !== null) {
-             return (
+            return (
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                     <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
@@ -105,7 +105,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 </div>
             );
         }
-        
+
         if (isEditing) {
             return (
                 <Textarea
@@ -118,10 +118,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 />
             );
         }
-        
+
         return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
     }
-    
+
     return (
         <AccordionItem value={title} key={sectionKey} className="bg-background rounded-lg border">
             <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
@@ -129,13 +129,13 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
                 </div>
             </AccordionTrigger>
-            <AccordionContent 
+            <AccordionContent
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
                 className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
             >
                 {renderEditableContent()}
 
-                 <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
+                <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                     <PopoverTrigger asChild>
                         <Button
                             variant="ghost"

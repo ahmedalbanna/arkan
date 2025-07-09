@@ -50,6 +50,8 @@ export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposal
       });
       onReset();
       addHistoryEntry({
+        id: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         type: 'proposal',
         title: `Project Proposal: ${cachedResult.title}`,
         proposal: cachedResult,
@@ -65,10 +67,12 @@ export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposal
         projectIdea,
         prompt: proposalAgent.prompt,
       });
-      
+
       saveToCache(cacheKey, result);
 
       addHistoryEntry({
+        id: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
         type: 'proposal',
         title: `Project Proposal: ${result.title}`,
         proposal: result,

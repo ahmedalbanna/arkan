@@ -39,7 +39,7 @@ export default function NewProjectForm({ categories }: { categories: string[] })
     <form action={formAction}>
       <Card>
         <CardHeader>
-            <CardTitle className="font-headline text-2xl">تفاصيل المشروع</CardTitle>
+          <CardTitle className="font-headline text-2xl">تفاصيل المشروع</CardTitle>
         </CardHeader>
         <CardContent className="p-6 grid gap-6">
           <div className="space-y-2">
@@ -91,10 +91,10 @@ export default function NewProjectForm({ categories }: { categories: string[] })
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-start gap-4 p-6 border-t">
-            {state.errors?._form && (
-                <p className="text-sm font-medium text-destructive">{state.errors._form}</p>
-            )}
-            <SubmitButton />
+          {state.errors?._form && (
+            <p className="text-sm font-medium text-destructive">{state.errors._form}</p>
+          )}
+          <SubmitButton />
         </CardFooter>
       </Card>
     </form>

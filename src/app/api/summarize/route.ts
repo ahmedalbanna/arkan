@@ -16,7 +16,10 @@ export async function POST(request: Request) {
     }
 
     const { projectDescription } = validation.data;
-    const result = await summarizeProject({ projectDescription });
+    const result = await summarizeProject({
+      projectDescription,
+      prompt: ''
+    });
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

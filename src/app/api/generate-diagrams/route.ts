@@ -19,43 +19,43 @@ const generateDiagramSchema = z.object({
 
 // Helper function to encode PlantUML for URL
 function encode64(data: Buffer): string {
-    const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-    let r = '';
-    for (let i = 0; i < data.length; i += 3) {
-        const b1 = data[i];
-        const b2 = i + 1 < data.length ? data[i+1] : 0;
-        const b3 = i + 2 < data.length ? data[i+2] : 0;
+  const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+  let r = '';
+  for (let i = 0; i < data.length; i += 3) {
+    const b1 = data[i];
+    const b2 = i + 1 < data.length ? data[i + 1] : 0;
+    const b3 = i + 2 < data.length ? data[i + 2] : 0;
 
-        const c1 = b1 >> 2;
-        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        const c3 = ((b2 & 15) << 2) | (b3 >> 6);
-        const c4 = b3 & 63;
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+    const c4 = b3 & 63;
 
-        r += B64_MAP.charAt(c1);
-        r += B64_MAP.charAt(c2);
-        if (i + 1 < data.length) {
-            r += B64_MAP.charAt(c3);
-        }
-        if (i + 2 < data.length) {
-            r += B64_MAP.charAt(c4);
-        }
+    r += B64_MAP.charAt(c1);
+    r += B64_MAP.charAt(c2);
+    if (i + 1 < data.length) {
+      r += B64_MAP.charAt(c3);
     }
-    return r;
+    if (i + 2 < data.length) {
+      r += B64_MAP.charAt(c4);
+    }
+  }
+  return r;
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
-    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
-    const encoded = encode64(compressed);
-    return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+  const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+  const encoded = encode64(compressed);
+  return `https://www.plantuml.com/plantuml/png/~1${encoded}`;
 }
 
 const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> = {
-    useCase: { flow: generateUseCaseDiagram, agentId: 'generate-use-case-diagram' },
-    class: { flow: generateClassDiagram, agentId: 'generate-class-diagram' },
-    sequence: { flow: generateSequenceDiagram, agentId: 'generate-sequence-diagram' },
-    activity: { flow: generateActivityDiagram, agentId: 'generate-activity-diagram' },
-    component: { flow: generateComponentDiagram, agentId: 'generate-component-diagram' },
-    archimate: { flow: generateArchimateDiagram, agentId: 'generate-archimate-diagram' },
+  useCase: { flow: generateUseCaseDiagram, agentId: 'generate-use-case-diagram' },
+  class: { flow: generateClassDiagram, agentId: 'generate-class-diagram' },
+  sequence: { flow: generateSequenceDiagram, agentId: 'generate-sequence-diagram' },
+  activity: { flow: generateActivityDiagram, agentId: 'generate-activity-diagram' },
+  component: { flow: generateComponentDiagram, agentId: 'generate-component-diagram' },
+  archimate: { flow: generateArchimateDiagram, agentId: 'generate-archimate-diagram' },
 };
 
 export async function POST(request: Request) {
@@ -68,15 +68,15 @@ export async function POST(request: Request) {
     }
 
     const { proposal, diagramToGenerate, otherSections, otherDiagrams } = validation.data;
-    
+
     const agentInfo = diagramAgentMap[diagramToGenerate];
     if (!agentInfo) {
-        return NextResponse.json({ message: 'Unknown diagram type requested.' }, { status: 400 });
+      return NextResponse.json({ message: 'Unknown diagram type requested.' }, { status: 400 });
     }
 
     const agent = AGENTS.find(a => a.id === agentInfo.agentId);
     if (!agent) {
-        return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
+      return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
     }
 
     const agentInput = {
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     const result = await agentInfo.flow(agentInput);
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-    
+
     return NextResponse.json({
       plantUmlCode: result.plantUmlCode,
       imageUrl: imageUrl,

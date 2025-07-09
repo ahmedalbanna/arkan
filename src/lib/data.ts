@@ -15,7 +15,7 @@ export const MOCK_USERS: User[] = [
     bio: 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.',
     skills: ['UI/UX Design', 'Figma', 'React', 'Next.js', 'Web Design'],
   },
-   {
+  {
     id: 'user-3',
     name: 'فاطمة الزهراء',
     avatarUrl: 'https://placehold.co/100x100.png',
@@ -107,7 +107,7 @@ export const MOCK_PROJECTS: Project[] = [
     comments: [],
     createdAt: '2024-02-18T16:45:00Z',
   },
-   {
+  {
     id: 'proj-5',
     userId: 'user-1',
     title: 'تطبيق حجوزات مطاعم',

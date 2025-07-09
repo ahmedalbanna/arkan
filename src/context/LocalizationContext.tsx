@@ -33,14 +33,14 @@ export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
 
   const t = (key: string): string => {
     const keys = key.split('.');
-    
+
     const findTranslation = (localeToTry: Locale): string | undefined => {
-        let result: any = translations[localeToTry];
-        for (const k of keys) {
-            result = result?.[k];
-            if (result === undefined) return undefined;
-        }
-        return typeof result === 'string' ? result : undefined;
+      let result: any = translations[localeToTry];
+      for (const k of keys) {
+        result = result?.[k];
+        if (result === undefined) return undefined;
+      }
+      return typeof result === 'string' ? result : undefined;
     };
 
     const translated = findTranslation(locale);

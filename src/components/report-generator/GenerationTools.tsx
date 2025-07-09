@@ -24,17 +24,17 @@ const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
 
 type ControlState = {
-  formality: number;
-  tone: string;
-  wordCount: string;
+    formality: number;
+    tone: string;
+    wordCount: string;
 };
 
 const getInitialControlState = (): Record<SectionName, ControlState> => {
-  const initial: Partial<Record<SectionName, ControlState>> = {};
-  orderedSections.forEach(key => {
-    initial[key] = { formality: 50, tone: 'professional', wordCount: '300' };
-  });
-  return initial as Record<SectionName, ControlState>;
+    const initial: Partial<Record<SectionName, ControlState>> = {};
+    orderedSections.forEach(key => {
+        initial[key] = { formality: 50, tone: 'professional', wordCount: '300' };
+    });
+    return initial as Record<SectionName, ControlState>;
 };
 
 const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
@@ -122,7 +122,7 @@ export const GenerationTools = ({ reportState, isPending, generatingItem, contex
                         const agent = agents.find(a => a.id === config.agentId);
                         if (!agent) return null;
                         const { title, icon: Icon } = config;
-                        
+
                         return (
                             <AccordionItem value={key} key={key}>
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">

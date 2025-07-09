@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category') || undefined;
   const q = searchParams.get('q') || undefined;
-  
+
   try {
     const projects = await getAllProjects({ category, q });
     return NextResponse.json(projects, { status: 200 });
@@ -35,11 +35,11 @@ export async function POST(request: Request) {
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
-    
+
     // Hardcoded user for prototype. In a real app, this would come from session/auth.
-    const userId = 'user-1'; 
+    const userId = 'user-1';
     const { title, description, category, tags, liveLink } = validation.data;
-    
+
     const newProjectId = await createProject({
       userId,
       title,
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         type: 'image'
       }],
     });
-    
+
     const newProject = await getProjectById(newProjectId);
 
     return NextResponse.json(newProject, { status: 201 });
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating project:', error);
     if (error instanceof Error) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+      return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json({ message: 'An unexpected error occurred while creating the project.' }, { status: 500 });
   }

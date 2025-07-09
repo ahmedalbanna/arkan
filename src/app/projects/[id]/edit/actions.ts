@@ -51,7 +51,7 @@ export async function handleUpdateProject(
     mediaAlts,
     mediaAiHints,
   });
-  
+
   if (!validatedFields.success) {
     return {
       errors: validatedFields.error.flatten().fieldErrors,
@@ -59,7 +59,7 @@ export async function handleUpdateProject(
   }
 
   const { projectId, title, description, category, tags, liveLink, mediaUrls: urls, mediaAlts: alts, mediaAiHints: hints } = validatedFields.data;
-  
+
   try {
     await updateProject(projectId, {
       title,
@@ -68,23 +68,23 @@ export async function handleUpdateProject(
       liveLink: liveLink || undefined,
       tags: tags.split(',').map(t => t.trim()).filter(t => t.length > 0),
       media: urls.map((url, i) => ({
-          url,
-          alt: alts[i],
-          aiHint: hints?.[i] || undefined,
-          type: 'image'
+        url,
+        alt: alts[i],
+        aiHint: hints?.[i] || undefined,
+        type: 'image'
       }))
     });
 
     revalidatePath('/projects');
     revalidatePath(`/projects/${projectId}`);
     revalidatePath(`/projects/${projectId}/edit`);
-    
+
   } catch (error) {
     console.error('Failed to update project:', error);
     if (error instanceof Error) {
-        return {
-          errors: { _form: error.message },
-        };
+      return {
+        errors: { _form: error.message },
+      };
     }
     return {
       errors: { _form: 'فشل في تحديث المشروع. يرجى المحاولة مرة أخرى.' },
@@ -95,26 +95,26 @@ export async function handleUpdateProject(
 }
 
 const deleteSchema = z.object({
-    projectId: z.string(),
+  projectId: z.string(),
 });
 
 export async function handleDeleteProject(prevState: { error?: string; success?: boolean }, formData: FormData) {
-    const validatedFields = deleteSchema.safeParse({
-        projectId: formData.get('projectId'),
-    });
+  const validatedFields = deleteSchema.safeParse({
+    projectId: formData.get('projectId'),
+  });
 
-    if (!validatedFields.success) {
-        return { error: "معرّف المشروع غير صالح." };
-    }
+  if (!validatedFields.success) {
+    return { error: "معرّف المشروع غير صالح." };
+  }
 
-    try {
-        await deleteProject(validatedFields.data.projectId);
-        revalidatePath('/projects');
-    } catch (error) {
-        console.error('Failed to delete project:', error);
-        return { error: "فشل في حذف المشروع." };
-    }
+  try {
+    await deleteProject(validatedFields.data.projectId);
+    revalidatePath('/projects');
+  } catch (error) {
+    console.error('Failed to delete project:', error);
+    return { error: "فشل في حذف المشروع." };
+  }
 
-    // Redirect is handled on the client-side after this action completes
-    return { success: true };
+  // Redirect is handled on the client-side after this action completes
+  return { success: true };
 }

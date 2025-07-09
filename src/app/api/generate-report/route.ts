@@ -19,14 +19,14 @@ const generateReportSchema = z.object({
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
-    introduction: { flow: generateIntroduction, agentId: 'generate-introduction' },
-    literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review' },
-    systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis' },
-    designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy' },
-    systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design' },
-    systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming' },
-    systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing' },
-    conclusion: { flow: generateConclusion, agentId: 'generate-conclusion' },
+  introduction: { flow: generateIntroduction, agentId: 'generate-introduction' },
+  literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review' },
+  systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis' },
+  designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy' },
+  systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design' },
+  systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming' },
+  systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing' },
+  conclusion: { flow: generateConclusion, agentId: 'generate-conclusion' },
 };
 
 export async function POST(request: Request) {
@@ -39,22 +39,22 @@ export async function POST(request: Request) {
     }
 
     const { proposal, sectionToGenerate, otherSections, otherDiagrams } = validation.data;
-    
+
     const agentInfo = sectionAgentMap[sectionToGenerate];
     if (!agentInfo) {
-        return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
+      return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
     }
-    
+
     const agent = AGENTS.find(a => a.id === agentInfo.agentId);
     if (!agent) {
-        return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
+      return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
     }
 
     const agentInput = {
-        proposal,
-        otherSections: otherSections || {},
-        otherDiagrams: otherDiagrams || {},
-        prompt: agent.prompt
+      proposal,
+      otherSections: otherSections || {},
+      otherDiagrams: otherDiagrams || {},
+      prompt: agent.prompt
     };
 
     const result = await agentInfo.flow(agentInput);

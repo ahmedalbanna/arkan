@@ -43,33 +43,33 @@ function ProposalHistoryItem({ entry }: { entry: ProposalHistoryData & { title: 
     };
 
     return (
-      <Card className="mt-4">
-        <CardHeader>
-            <div className="flex justify-between items-start">
+        <Card className="mt-4">
+            <CardHeader>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <Badge variant="secondary" className="w-fit mb-2">{proposal.category}</Badge>
+                        <CardTitle className="font-headline text-2xl text-primary">{proposal.title}</CardTitle>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={handleCopyJson}><Copy className="h-4 w-4" /></Button>
+                        <Button variant="outline" size="icon" onClick={handleExportDOCX}><FileText className="h-4 w-4" /></Button>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
                 <div>
-                    <Badge variant="secondary" className="w-fit mb-2">{proposal.category}</Badge>
-                    <CardTitle className="font-headline text-2xl text-primary">{proposal.title}</CardTitle>
+                    <h3 className="flex items-center gap-2 font-headline text-lg mb-2">Objective</h3>
+                    <p className="text-muted-foreground">{proposal.objective}</p>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" size="icon" onClick={handleCopyJson}><Copy className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="icon" onClick={handleExportDOCX}><FileText className="h-4 w-4" /></Button>
-                </div>
-            </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div>
-                <h3 className="flex items-center gap-2 font-headline text-lg mb-2">Objective</h3>
-                <p className="text-muted-foreground">{proposal.objective}</p>
-            </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+        </Card>
     );
 }
 
 
 function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: string } }) {
     const { section, content, proposalTitle } = entry;
-    
+
     const handleExportDOCX = async () => {
         const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
         const template = templates[templateKey];
@@ -105,7 +105,7 @@ function DiagramHistoryItem({ entry }: { entry: DiagramHistoryData & { title: st
                 <CardDescription>From proposal: "{proposalTitle}"</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                 <DiagramViewer
+                <DiagramViewer
                     title={entry.title}
                     imageUrl={imageUrl}
                     plantUmlCode={plantUmlCode}

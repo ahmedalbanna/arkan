@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents, INumberingOptions  } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents, INumberingOptions } from 'docx';
 import { saveAs } from 'file-saver';
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 import { unified } from 'unified';
@@ -83,25 +83,25 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
                 docxObjects.push(...processListItems(node, 0));
                 break;
             case 'blockquote':
-                 for (const content of node.children) {
-                     if (content.type === 'paragraph') {
-                         docxObjects.push(new Paragraph({
-                             children: transformInlines(content.children),
-                             style: 'Quote',
-                         }));
-                     }
-                 }
-                 break;
+                for (const content of node.children) {
+                    if (content.type === 'paragraph') {
+                        docxObjects.push(new Paragraph({
+                            children: transformInlines(content.children),
+                            style: 'Quote',
+                        }));
+                    }
+                }
+                break;
             case 'table': {
                 const tableRows = node.children.map((row, rowIndex) => {
                     return new TableRow({
                         children: row.children.map(cell => new TableCell({
-                             children: [new Paragraph({ children: transformInlines(cell.children) })],
+                            children: [new Paragraph({ children: transformInlines(cell.children) })],
                         })),
                         tableHeader: rowIndex === 0,
                     });
                 });
-                
+
                 docxObjects.push(new Table({
                     rows: tableRows,
                     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -133,7 +133,7 @@ const numbering: INumberingOptions = {
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
-    
+
     const doc = new Document({
         styles,
         numbering,
@@ -149,49 +149,49 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
             },
             // Main Content Section
             {
-            properties: { type: SectionType.NEXT_PAGE },
-            headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
-            footers: {
-                default: new Footer({
-                    children: [
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            children: [ new TextRun({ children: [PageNumber.CURRENT] }) ],
-                        }),
-                    ],
-                }),
-            },
-            children: [
-                new TableOfContents("Table of Contents", {
-                    hyperlink: true,
-                    headingStyleRange: "1-3",
-                }),
-                new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
-                ...parseMarkdownToDocx(objective),
-                new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
-                ...parseMarkdownToDocx(methodology),
-                new Paragraph({ text: "Timeline", heading: HeadingLevel.HEADING_1 }),
-                new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
-                new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
-                new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
-                ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
-                new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
-                new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
-                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
-                new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
-                ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
-                new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
-                ...success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })),
-                new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
-                ...parseMarkdownToDocx(evaluation),
-                new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                ...stakeholders.flatMap(s => [ new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(s.interest), ]),
-                new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
-                ...risks.flatMap(r => [ new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(r.mitigation) ]),
-            ],
-        }],
+                properties: { type: SectionType.NEXT_PAGE },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
+                footers: {
+                    default: new Footer({
+                        children: [
+                            new Paragraph({
+                                alignment: AlignmentType.CENTER,
+                                children: [new TextRun({ children: [PageNumber.CURRENT] })],
+                            }),
+                        ],
+                    }),
+                },
+                children: [
+                    new TableOfContents("Table of Contents", {
+                        hyperlink: true,
+                        headingStyleRange: "1-3",
+                    }),
+                    new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
+                    ...parseMarkdownToDocx(objective),
+                    new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
+                    ...parseMarkdownToDocx(methodology),
+                    new Paragraph({ text: "Timeline", heading: HeadingLevel.HEADING_1 }),
+                    new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
+                    new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
+                    new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
+                    ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
+                    new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
+                    new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
+                    new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                    new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
+                    ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
+                    new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
+                    ...success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })),
+                    new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
+                    ...parseMarkdownToDocx(evaluation),
+                    new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
+                    ...stakeholders.flatMap(s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(s.interest),]),
+                    new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
+                    ...risks.flatMap(r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(r.mitigation)]),
+                ],
+            }],
     });
-    
+
     try {
         const blob = await Packer.toBlob(doc);
         saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
@@ -216,7 +216,7 @@ export async function exportReportAsDocx(
         systemTesting: { title: "System Testing" },
         conclusion: { title: "Conclusion" },
     };
-    
+
     const diagramConfig: { [key in DiagramType]: { title: string } } = {
         useCase: { title: "Use Case Diagram" },
         class: { title: "Class Diagram" },
@@ -225,10 +225,10 @@ export async function exportReportAsDocx(
         component: { title: "Component Diagram" },
         archimate: { title: "ArchiMate Diagram" },
     };
-    
+
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
-    
+
     const reportBody: (Paragraph | Table | TableOfContents)[] = [];
     reportBody.push(new TableOfContents("Table of Contents", {
         hyperlink: true,
@@ -258,7 +258,7 @@ export async function exportReportAsDocx(
                     let imageBuffer: ArrayBuffer;
                     // The imageUrl is a relative path to our own proxy, so we can fetch it directly.
                     const response = await fetch(diagramData.imageUrl);
-                    
+
                     if (!response.ok) {
                         console.warn(`Failed to fetch diagram image from ${diagramData.imageUrl}. Falling back to placeholder.`);
                         const placeholderUrl = 'https://placehold.co/800x600.png';
@@ -268,7 +268,7 @@ export async function exportReportAsDocx(
                     } else {
                         imageBuffer = await response.arrayBuffer();
                     }
-                    
+
                     reportBody.push(new Paragraph({
                         text: diagramConfig[key].title,
                         heading: HeadingLevel.HEADING_2,
@@ -308,14 +308,14 @@ export async function exportReportAsDocx(
                 headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
-                        children: [ new Paragraph({ alignment: AlignmentType.CENTER, children: [ new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] }) ] })],
+                        children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] })] })],
                     }),
                 },
                 children: reportBody,
             }
         ],
     });
-    
+
     try {
         const blob = await Packer.toBlob(doc);
         saveAs(blob, "project-report.docx");

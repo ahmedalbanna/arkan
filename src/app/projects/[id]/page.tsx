@@ -33,15 +33,15 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
   let proposal: ProjectProposal | null = null;
   if (project.proposalData) {
     try {
-        proposal = ProjectProposalSchema.parse(JSON.parse(project.proposalData));
-    } catch(e) {
-        console.error("Failed to parse proposal data for project:", project.id, e);
+      proposal = ProjectProposalSchema.parse(JSON.parse(project.proposalData));
+    } catch (e) {
+      console.error("Failed to parse proposal data for project:", project.id, e);
     }
   }
 
   const renderMediaItem = (media: typeof project.media[0]) => {
     const isDataUrl = media.url.startsWith('data:');
-    
+
     if (media.type === 'video') {
       return (
         <div className="aspect-video w-full">
@@ -61,13 +61,13 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
     }
 
     return (
-        <Image
-          src={media.url}
-          alt={media.alt}
-          fill
-          className="object-cover"
-          data-ai-hint={media.aiHint ?? ''}
-        />
+      <Image
+        src={media.url}
+        alt={media.alt}
+        fill
+        className="object-cover"
+        data-ai-hint={media.aiHint ?? ''}
+      />
     );
   };
 
@@ -81,65 +81,65 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
                 <Badge variant="secondary" className="mb-2">{project.category}</Badge>
                 <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-4">{project.title}</h1>
                 <div className="flex items-center gap-4 text-muted-foreground text-sm">
-                    <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>{format(new Date(project.createdAt), 'd MMMM yyyy')}</span>
-                    </div>
-                    {user && (
-                        <Link href={`/profile/${user.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
-                            <Avatar className="h-6 w-6">
-                                <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
-                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <span>{user.name}</span>
-                        </Link>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span>{format(new Date(project.createdAt), 'd MMMM yyyy')}</span>
+                  </div>
+                  {user && (
+                    <Link href={`/profile/${user.id}`} className="flex items-center gap-2 hover:text-primary transition-colors">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
+                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <span>{user.name}</span>
+                    </Link>
+                  )}
                 </div>
               </div>
               {isOwner && (
-                 <Button asChild variant="outline">
-                    <Link href={`/projects/${project.id}/edit`}>
-                      <Pencil className="ml-2 h-4 w-4" />
-                      Edit Project
-                    </Link>
-                  </Button>
+                <Button asChild variant="outline">
+                  <Link href={`/projects/${project.id}/edit`}>
+                    <Pencil className="ml-2 h-4 w-4" />
+                    Edit Project
+                  </Link>
+                </Button>
               )}
             </div>
           </div>
-          
-           {project.media.length > 0 && (
-             <Carousel className="w-full">
-                <CarouselContent>
-                    {project.media.map((mediaItem) => (
-                        <CarouselItem key={mediaItem.id}>
-                            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-                                {renderMediaItem(mediaItem)}
-                            </div>
-                        </CarouselItem>
-                    ))}
-                </CarouselContent>
-                {project.media.length > 1 && (
-                    <>
-                        <CarouselPrevious className="left-4" />
-                        <CarouselNext className="right-4" />
-                    </>
-                )}
-             </Carousel>
-           )}
-          
-           {/* Report Preview */}
-           {proposal ? (
-             <ProposalViewer proposal={proposal} readOnly={true} />
-           ) : (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">About The Project</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="max-w-none">
-                       <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
+
+          {project.media.length > 0 && (
+            <Carousel className="w-full">
+              <CarouselContent>
+                {project.media.map((mediaItem) => (
+                  <CarouselItem key={mediaItem.id}>
+                    <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+                      {renderMediaItem(mediaItem)}
                     </div>
-                </CardContent>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {project.media.length > 1 && (
+                <>
+                  <CarouselPrevious className="left-4" />
+                  <CarouselNext className="right-4" />
+                </>
+              )}
+            </Carousel>
+          )}
+
+          {/* Report Preview */}
+          {proposal ? (
+            <ProposalViewer proposal={proposal} readOnly={true} />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">About The Project</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-none">
+                  <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.description}</ReactMarkdown>
+                </div>
+              </CardContent>
             </Card>
           )}
 
@@ -149,7 +149,7 @@ export default async function ProjectDetailPage({ params }: { params: { id: stri
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="max-w-none text-muted-foreground text-sm">
-                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.summaryShort || ''}</ReactMarkdown>
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{project.summaryShort || ''}</ReactMarkdown>
               </div>
               <div>
                 <h4 className="font-semibold mb-2">Technologies Used:</h4>

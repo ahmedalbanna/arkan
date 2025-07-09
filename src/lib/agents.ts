@@ -156,7 +156,7 @@ This section must detail:
 
 Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.`
   },
-   {
+  {
     id: 'generate-system-programming',
     name: 'System Programming Agent',
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
@@ -175,7 +175,7 @@ This section should outline:
 
 Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.`
   },
-   {
+  {
     id: 'generate-system-testing',
     name: 'System Testing Agent',
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
@@ -238,7 +238,7 @@ Synthesize information from the entire proposal and the provided context to crea
 2.  Define attributes and methods (operations) for each class.
 3.  Establish relationships (associations, aggregations, inheritance) between the classes.`)
   },
-    {
+  {
     id: 'generate-sequence-diagram',
     name: 'Sequence Diagram Agent',
     description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
@@ -252,7 +252,7 @@ Synthesize information from the entire proposal and the provided context to crea
 3.  Show the order of messages exchanged between participants.
 4.  Use activation boxes to represent processing time.`)
   },
-    {
+  {
     id: 'generate-activity-diagram',
     name: 'Activity Diagram Agent',
     description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',

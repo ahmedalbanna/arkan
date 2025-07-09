@@ -48,12 +48,12 @@ function SubmitButton() {
 }
 
 function DeleteButton() {
-    const { pending } = useFormStatus();
-    return (
-         <Button type="submit" variant="destructive" disabled={pending}>
-            {pending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : 'نعم، قم بالحذف'}
-        </Button>
-    )
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" variant="destructive" disabled={pending}>
+      {pending ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : 'نعم، قم بالحذف'}
+    </Button>
+  )
 }
 
 export default function EditProjectForm({ categories, project }: { categories: string[], project: NonNullable<ProjectDetail> }) {
@@ -64,18 +64,18 @@ export default function EditProjectForm({ categories, project }: { categories: s
 
   const deleteInitialState: { error?: string; success?: boolean } = { error: undefined, success: undefined };
   const [deleteState, deleteFormAction] = useActionState(handleDeleteProject, deleteInitialState);
-  
+
   const [mediaItems, setMediaItems] = useState(
     project.media.map((m, i) => ({ id: i, url: m.url, alt: m.alt, aiHint: m.aiHint || '' }))
   );
 
   useEffect(() => {
     if (deleteState?.error) {
-        toast({ title: 'خطأ', description: deleteState.error, variant: 'destructive'});
+      toast({ title: 'خطأ', description: deleteState.error, variant: 'destructive' });
     }
     if (deleteState?.success) {
-        toast({ title: 'نجاح', description: 'تم حذف المشروع بنجاح.'});
-        router.push('/projects');
+      toast({ title: 'نجاح', description: 'تم حذف المشروع بنجاح.' });
+      router.push('/projects');
     }
   }, [deleteState, router, toast]);
 
@@ -86,18 +86,18 @@ export default function EditProjectForm({ categories, project }: { categories: s
   const removeMediaItem = (id: number) => {
     setMediaItems(mediaItems.filter(item => item.id !== id));
   };
-  
+
   const handleMediaChange = (id: number, field: 'url' | 'alt' | 'aiHint', value: string) => {
     setMediaItems(mediaItems.map(item => item.id === id ? { ...item, [field]: value } : item));
   }
-  
+
   return (
     <>
       <form action={updateFormAction}>
         <input type="hidden" name="projectId" value={project.id} />
         <Card>
           <CardHeader>
-              <CardTitle className="font-headline text-2xl">تفاصيل المشروع</CardTitle>
+            <CardTitle className="font-headline text-2xl">تفاصيل المشروع</CardTitle>
           </CardHeader>
           <CardContent className="p-6 grid gap-6">
             <div className="space-y-2">
@@ -161,7 +161,7 @@ export default function EditProjectForm({ categories, project }: { categories: s
                     <Label htmlFor={`mediaUrl-${item.id}`}>رابط الصورة</Label>
                     <Input id={`mediaUrl-${item.id}`} name="mediaUrl" value={item.url} onChange={(e) => handleMediaChange(item.id, 'url', e.target.value)} type="url" required />
                   </div>
-                   <div className="space-y-2">
+                  <div className="space-y-2">
                     <Label htmlFor={`mediaAlt-${item.id}`}>نص بديل</Label>
                     <Input id={`mediaAlt-${item.id}`} name="mediaAlt" value={item.alt} onChange={(e) => handleMediaChange(item.id, 'alt', e.target.value)} required />
                   </div>
@@ -179,10 +179,10 @@ export default function EditProjectForm({ categories, project }: { categories: s
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4 p-6 border-t">
-              {updateState.errors?._form && (
-                  <p className="text-sm font-medium text-destructive">{updateState.errors._form}</p>
-              )}
-              <SubmitButton />
+            {updateState.errors?._form && (
+              <p className="text-sm font-medium text-destructive">{updateState.errors._form}</p>
+            )}
+            <SubmitButton />
           </CardFooter>
         </Card>
       </form>

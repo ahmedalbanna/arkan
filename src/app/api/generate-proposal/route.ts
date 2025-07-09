@@ -20,12 +20,12 @@ export async function POST(request: Request) {
 
     const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
     if (!proposalAgent) {
-        return NextResponse.json({ message: 'Proposal generation agent not configured.' }, { status: 500 });
+      return NextResponse.json({ message: 'Proposal generation agent not configured.' }, { status: 500 });
     }
 
-    const result = await generateProposal({ 
-        projectIdea,
-        prompt: proposalAgent.prompt 
+    const result = await generateProposal({
+      projectIdea,
+      prompt: proposalAgent.prompt
     });
 
     return NextResponse.json(result, { status: 200 });

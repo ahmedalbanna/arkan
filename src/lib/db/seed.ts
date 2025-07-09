@@ -31,12 +31,12 @@ async function seed() {
 
       const userSkillRelations = MOCK_USERS.flatMap(user =>
         user.skills.map(skillName => {
-            const skillId = skillMap.get(skillName);
-            if (!skillId) throw new Error(`Skill not found: ${skillName}`);
-            return {
-              userId: user.id,
-              skillId: skillId
-            }
+          const skillId = skillMap.get(skillName);
+          if (!skillId) throw new Error(`Skill not found: ${skillName}`);
+          return {
+            userId: user.id,
+            skillId: skillId
+          }
         })
       );
       if (userSkillRelations.length > 0) {
@@ -54,14 +54,14 @@ async function seed() {
 
     const tagMap = new Map<string, number>();
     if (allTags.size > 0) {
-        const insertedTags = await tx.insert(tags).values([...allTags].map(name => ({ name }))).returning({ id: tags.id, name: tags.name }).execute();
-        insertedTags.forEach(t => tagMap.set(t.name, t.id));
+      const insertedTags = await tx.insert(tags).values([...allTags].map(name => ({ name }))).returning({ id: tags.id, name: tags.name }).execute();
+      insertedTags.forEach(t => tagMap.set(t.name, t.id));
     }
 
     const techMap = new Map<string, number>();
     if (allTechs.size > 0) {
-        const insertedTechs = await tx.insert(technologies).values([...allTechs].map(name => ({ name }))).returning({ id: technologies.id, name: technologies.name }).execute();
-        insertedTechs.forEach(t => techMap.set(t.name, t.id));
+      const insertedTechs = await tx.insert(technologies).values([...allTechs].map(name => ({ name }))).returning({ id: technologies.id, name: technologies.name }).execute();
+      insertedTechs.forEach(t => techMap.set(t.name, t.id));
     }
 
     await tx.insert(projects).values(MOCK_PROJECTS.map(p => ({
@@ -77,12 +77,12 @@ async function seed() {
 
     const projectTagRelations = MOCK_PROJECTS.flatMap(p =>
       p.tags.map(tagName => {
-          const tagId = tagMap.get(tagName);
-          if (!tagId) throw new Error(`Tag not found: ${tagName}`);
-          return {
-            projectId: p.id,
-            tagId: tagId
-          }
+        const tagId = tagMap.get(tagName);
+        if (!tagId) throw new Error(`Tag not found: ${tagName}`);
+        return {
+          projectId: p.id,
+          tagId: tagId
+        }
       })
     );
     if (projectTagRelations.length > 0) {
@@ -91,12 +91,12 @@ async function seed() {
 
     const summaryTechRelations = MOCK_PROJECTS.flatMap(p =>
       p.summary?.technologies.map(techName => {
-          const techId = techMap.get(techName);
-          if (!techId) throw new Error(`Technology not found: ${techName}`);
-          return {
-            projectId: p.id,
-            technologyId: techId
-          }
+        const techId = techMap.get(techName);
+        if (!techId) throw new Error(`Technology not found: ${techName}`);
+        return {
+          projectId: p.id,
+          technologyId: techId
+        }
       }) || []
     );
     if (summaryTechRelations.length > 0) {

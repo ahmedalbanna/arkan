@@ -16,7 +16,7 @@ export default function NewCommentForm({ projectId }: { projectId: string }) {
     startTransition(async () => {
       const result = await handleCommentAction(null, formData);
       if (result?.error) {
-         toast({
+        toast({
           title: "خطأ",
           description: result.error,
           variant: "destructive",

@@ -38,14 +38,14 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
     e.preventDefault();
     setIsSaving(true);
     updateAgent(agentId, { name, prompt });
-    
+
     setTimeout(() => {
-        setIsSaving(false);
-        toast({
-            title: "تم الحفظ بنجاح",
-            description: `تم تحديث بيانات الوكيل "${name}".`,
-        });
-        router.push('/manage-agents');
+      setIsSaving(false);
+      toast({
+        title: "تم الحفظ بنجاح",
+        description: `تم تحديث بيانات الوكيل "${name}".`,
+      });
+      router.push('/manage-agents');
     }, 500);
   };
 
@@ -66,10 +66,10 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
           <div className="flex items-center gap-4">
             <agent.icon className="w-8 h-8 text-primary" />
             <div>
-                <CardTitle className="font-headline">{agent.name}</CardTitle>
-                <CardDescription>
-                    المعرف: {agent.id} | الفئة: {agent.category}
-                </CardDescription>
+              <CardTitle className="font-headline">{agent.name}</CardTitle>
+              <CardDescription>
+                المعرف: {agent.id} | الفئة: {agent.category}
+              </CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -98,9 +98,9 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
         <CardFooter className="justify-end">
           <Button type="submit" disabled={isSaving} className="font-headline">
             {isSaving ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
-                <Save className="ml-2 h-4 w-4" />
+              <Save className="ml-2 h-4 w-4" />
             )}
             حفظ التغييرات
           </Button>

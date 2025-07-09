@@ -5,21 +5,21 @@
  * - generateSequenceDiagram
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
 const GenerateSequenceDiagramInputSchema = z.object({
-    proposal: ProjectProposalSchema,
-    otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
-    otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code."),
-    prompt: z.string().describe("The prompt to use for generating the diagram.")
+  proposal: ProjectProposalSchema,
+  otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
+  otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams (if any) to provide context. The key is the diagram type and the value is the PlantUML code."),
+  prompt: z.string().describe("The prompt to use for generating the diagram.")
 });
 export type GenerateSequenceDiagramInput = z.infer<typeof GenerateSequenceDiagramInputSchema>;
 
 
 const GenerateSequenceDiagramOutputSchema = z.object({
-    plantUmlCode: z.string().describe("The complete PlantUML code for the Sequence diagram, starting with @startuml and ending with @enduml.")
+  plantUmlCode: z.string().describe("The complete PlantUML code for the Sequence diagram, starting with @startuml and ending with @enduml.")
 });
 export type GenerateSequenceDiagramOutput = z.infer<typeof GenerateSequenceDiagramOutputSchema>;
 
@@ -60,10 +60,10 @@ To ensure your response is consistent and well-integrated with the rest of the d
 \`\`\`
 `;
     const prompt = ai.definePrompt({
-        name: 'generateSequenceDiagramPrompt',
-        input: { schema: GenerateSequenceDiagramInputSchema },
-        output: { schema: GenerateSequenceDiagramOutputSchema },
-        prompt: fullPrompt,
+      name: 'generateSequenceDiagramPrompt',
+      input: { schema: GenerateSequenceDiagramInputSchema },
+      output: { schema: GenerateSequenceDiagramOutputSchema },
+      prompt: fullPrompt,
     });
 
     const { output } = await prompt(input);

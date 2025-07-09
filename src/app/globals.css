@@ -8,19 +8,22 @@ body {
 
 @layer base {
   :root {
-    --background: 240 5.9% 94%; /* Light Gray */
+    --background: 240 5.9% 94%;
+    /* Light Gray */
     --foreground: 240 6% 10%;
     --card: 0 0% 100%;
     --card-foreground: 240 6% 10%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 6% 10%;
-    --primary: 238 53% 37%; /* Navy Blue */
+    --primary: 238 53% 37%;
+    /* Navy Blue */
     --primary-foreground: 0 0% 98%;
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 240 4.8% 95.9%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 45 65% 52%; /* Soft Gold */
+    --accent: 45 65% 52%;
+    /* Soft Gold */
     --accent-foreground: 240 5.9% 10%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -42,6 +45,7 @@ body {
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 238 53% 37%;
   }
+
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
@@ -49,13 +53,15 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 238 53% 67%; /* Lighter Navy Blue for dark mode */
+    --primary: 238 53% 67%;
+    /* Lighter Navy Blue for dark mode */
     --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 45 65% 62%; /* Lighter Soft Gold for dark mode */
+    --accent: 45 65% 62%;
+    /* Lighter Soft Gold for dark mode */
     --accent-foreground: 0 0% 9%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
@@ -82,6 +88,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }

@@ -9,11 +9,11 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 export type CacheResult =
   | { type: 'section'; key: SectionName; content: string }
   | {
-      type: 'diagram';
-      key: DiagramType;
-      plantUmlCode: string;
-      imageUrl: string;
-    };
+    type: 'diagram';
+    key: DiagramType;
+    plantUmlCode: string;
+    imageUrl: string;
+  };
 
 
 interface CacheEntry<T> {

@@ -32,7 +32,7 @@ export async function getAllProjects({ category, q }: { category?: string; q?: s
 
     if (q) {
         const searchQuery = `%${q}%`;
-        
+
         const projectsWithMatchingTags = db
             .select({ projectId: projectTags.projectId })
             .from(projectTags)
@@ -45,7 +45,7 @@ export async function getAllProjects({ category, q }: { category?: string; q?: s
             inArray(projects.id, projectsWithMatchingTags)
         ));
     }
-    
+
     const data = await db.query.projects.findMany({
         where: conditions.length > 0 ? and(...conditions) : undefined,
         orderBy: [desc(projects.createdAt)],
@@ -155,13 +155,13 @@ export async function createProject(data: {
     if (!summarizerAgent) {
         throw new Error("Summarizer agent not found.");
     }
-    
+
     // 1. Generate summary and technologies
     const summaryResult = await summarizeProject({
         projectDescription: data.description,
         prompt: summarizerAgent.prompt,
     });
-    
+
     // 2. Prepare tags
     let allTagIds: number[] = [];
     if (data.tags.length > 0) {
@@ -173,7 +173,7 @@ export async function createProject(data: {
             const newTags = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
             existingTags.push(...newTags);
         }
-        
+
         const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
         allTagIds = data.tags.map(tagName => tagMap.get(tagName)!).filter(id => id !== undefined);
     }
@@ -184,7 +184,7 @@ export async function createProject(data: {
         const existingTechs = await db.select().from(technologies).where(inArray(technologies.name, summaryResult.technologies));
         const existingTechNames = new Set(existingTechs.map(t => t.name));
         const newTechNames = summaryResult.technologies.filter(t => !existingTechNames.has(t));
-        
+
         if (newTechNames.length > 0) {
             const newTechs = await db.insert(technologies).values(newTechNames.map(name => ({ name }))).returning();
             existingTechs.push(...newTechs);
@@ -193,7 +193,7 @@ export async function createProject(data: {
         const techMap = new Map(existingTechs.map(t => [t.name, t.id]));
         allTechIds = summaryResult.technologies.map(techName => techMap.get(techName)!).filter(id => id !== undefined);
     }
-    
+
     // --- End async operations ---
 
     const newProjectId = `proj-${randomUUID()}`;
@@ -225,7 +225,7 @@ export async function createProject(data: {
 
         // Insert summary technologies
         if (allTechIds.length > 0) {
-             tx.insert(summaryTechnologies).values(allTechIds.map(technologyId => ({
+            tx.insert(summaryTechnologies).values(allTechIds.map(technologyId => ({
                 projectId: newProjectId,
                 technologyId,
             }))).run();
@@ -267,11 +267,11 @@ export async function updateProject(projectId: string, data: {
             const newTags = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
             existingTags.push(...newTags);
         }
-        
+
         const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
         allTagIds = data.tags.map(tagName => tagMap.get(tagName)!).filter(id => id !== undefined);
     }
-    
+
     // 2. Perform writes synchronously
     db.transaction((tx) => {
         // Update project details
@@ -327,12 +327,12 @@ export async function updateUser(userId: string, data: {
         const existingSkills = await db.select().from(skills).where(inArray(skills.name, data.skills));
         const existingSkillNames = new Set(existingSkills.map(s => s.name));
         const newSkillNames = data.skills.filter(s => !existingSkillNames.has(s));
-        
+
         if (newSkillNames.length > 0) {
             const newSkills = await db.insert(skills).values(newSkillNames.map(name => ({ name }))).returning();
             existingSkills.push(...newSkills);
         }
-        
+
         const skillMap = new Map(existingSkills.map(s => [s.name, s.id]));
         for (const skillName of data.skills) {
             const skillId = skillMap.get(skillName);

@@ -5,7 +5,7 @@
  * - manipulateText
  */
 
-import {ai} from '@/ai/genkit';
+import { ai } from '@/ai/genkit';
 import {
   ManipulateTextInputSchema,
   type ManipulateTextInput,
@@ -25,11 +25,11 @@ const manipulateTextFlow = ai.defineFlow(
     inputSchema: ManipulateTextInputSchema,
     outputSchema: ManipulateTextOutputSchema,
   },
-  async ({textToManipulate, command}) => {
+  async ({ textToManipulate, command }) => {
     const prompt = ai.definePrompt({
       name: 'manipulateTextPrompt',
-      input: {schema: ManipulateTextInputSchema},
-      output: {schema: ManipulateTextOutputSchema},
+      input: { schema: ManipulateTextInputSchema },
+      output: { schema: ManipulateTextOutputSchema },
       prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return only the rewritten text.
 
 Command: {{{command}}}
@@ -41,7 +41,7 @@ Original Text:
 `,
     });
 
-    const {output} = await prompt({textToManipulate, command});
+    const { output } = await prompt({ textToManipulate, command });
     return output!;
   }
 );

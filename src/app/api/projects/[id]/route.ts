@@ -40,10 +40,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
-    
+
     const projectId = params.id;
     const { title, description, category, tags, liveLink, media } = validation.data;
-    
+
     await updateProject(projectId, {
       title,
       description,
@@ -52,7 +52,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       liveLink: liveLink || undefined,
       media,
     });
-    
+
     const updatedProject = await getProjectById(projectId);
 
     return NextResponse.json(updatedProject, { status: 200 });
@@ -60,7 +60,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   } catch (error) {
     console.error(`Error updating project ${params.id}:`, error);
     if (error instanceof Error) {
-        return NextResponse.json({ message: error.message }, { status: 500 });
+      return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
   }
@@ -77,7 +77,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     await deleteProject(projectId);
-    
+
     return new NextResponse(null, { status: 204 }); // No Content
 
   } catch (error) {

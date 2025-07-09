@@ -85,7 +85,7 @@ export default function ProjectActions({ project }: ProjectActionsProps) {
           </Button>
         )}
         {hasReportContent && (
-           <Button onClick={handleDownloadReport} disabled={isDownloadingReport} className="w-full font-headline" variant="secondary">
+          <Button onClick={handleDownloadReport} disabled={isDownloadingReport} className="w-full font-headline" variant="secondary">
             {isDownloadingReport ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Download className="ml-2 h-4 w-4" />}
             Download Full Report
           </Button>

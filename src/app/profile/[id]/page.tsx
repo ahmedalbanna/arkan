@@ -4,9 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ProjectCard } from '@/components/ProjectCard';
 
-export default async function ProfilePage({ params }: { params: { id:string } }) {
+export default async function ProfilePage({ params }: { params: { id: string } }) {
   const user = await getUserProfile(params.id);
-  
+
   if (!user) {
     notFound();
   }

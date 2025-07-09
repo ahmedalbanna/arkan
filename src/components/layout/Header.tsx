@@ -66,19 +66,19 @@ export function Header() {
         </div>
 
         <div className="flex-1 flex justify-center md:justify-start">
-            <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-              {t('header.title')}
-            </Link>
+          <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
+            {t('header.title')}
+          </Link>
         </div>
-        
+
         <nav className="hidden md:flex gap-2 mx-auto">
           {renderNavLinks()}
         </nav>
 
         <div className="flex-1 flex justify-end">
-            <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
-                <Languages className="h-5 w-5" />
-            </Button>
+          <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
+            <Languages className="h-5 w-5" />
+          </Button>
         </div>
       </div>
     </header>

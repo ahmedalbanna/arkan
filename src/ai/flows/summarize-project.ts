@@ -8,8 +8,8 @@
  * - SummarizeProjectOutput - The return type for the summarizeProject function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const SummarizeProjectInputSchema = z.object({
   projectDescription: z
@@ -38,13 +38,13 @@ const summarizeProjectFlow = ai.defineFlow(
   },
   async input => {
     const summarizeProjectPrompt = ai.definePrompt({
-        name: 'summarizeProjectPrompt',
-        input: {schema: SummarizeProjectInputSchema},
-        output: {schema: SummarizeProjectOutputSchema},
-        prompt: input.prompt,
+      name: 'summarizeProjectPrompt',
+      input: { schema: SummarizeProjectInputSchema },
+      output: { schema: SummarizeProjectOutputSchema },
+      prompt: input.prompt,
     });
 
-    const {output} = await summarizeProjectPrompt(input);
+    const { output } = await summarizeProjectPrompt(input);
     return {
       ...output!,
       progress: 'Generated a concise summary of the project and extracted key technologies.',

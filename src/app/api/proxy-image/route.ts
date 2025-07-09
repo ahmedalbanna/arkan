@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   const allowedDomains = ['www.plantuml.com', 'placehold.co'];
   const requestUrl = new URL(url);
   if (!allowedDomains.includes(requestUrl.hostname)) {
-      return NextResponse.json({ error: 'Proxying from this domain is not allowed.' }, { status: 400 });
+    return NextResponse.json({ error: 'Proxying from this domain is not allowed.' }, { status: 400 });
   }
 
   try {

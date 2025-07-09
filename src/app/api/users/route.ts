@@ -21,7 +21,7 @@ export async function POST(request: Request) {
 
     // In a real application, you would hash the password and save the user to a database.
     // For this prototype, we'll just return a success response with the new user data.
-    
+
     // Don't return the password in the response for security reasons
     const newUser = {
       id: `user-${Date.now()}`, // simple id generation for example

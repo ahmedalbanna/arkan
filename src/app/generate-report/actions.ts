@@ -44,58 +44,58 @@ const GenerateItemSchema = z.object({
 });
 
 const sectionNames: SectionName[] = [
-    'introduction', 'literatureReview', 'systemAnalysis', 'designStrategy',
-    'systemDesign', 'systemProgramming', 'systemTesting', 'conclusion'
+  'introduction', 'literatureReview', 'systemAnalysis', 'designStrategy',
+  'systemDesign', 'systemProgramming', 'systemTesting', 'conclusion'
 ];
 
 // Helper to encode PlantUML for URL
 function encode64(data: Buffer): string {
-    const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
-    let r = '';
-    for (let i = 0; i < data.length; i += 3) {
-        const b1 = data[i];
-        const b2 = i + 1 < data.length ? data[i+1] : 0;
-        const b3 = i + 2 < data.length ? data[i+2] : 0;
+  const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
+  let r = '';
+  for (let i = 0; i < data.length; i += 3) {
+    const b1 = data[i];
+    const b2 = i + 1 < data.length ? data[i + 1] : 0;
+    const b3 = i + 2 < data.length ? data[i + 2] : 0;
 
-        const c1 = b1 >> 2;
-        const c2 = ((b1 & 3) << 4) | (b2 >> 4);
-        const c3 = ((b2 & 15) << 2) | (b3 >> 6);
-        const c4 = b3 & 63;
+    const c1 = b1 >> 2;
+    const c2 = ((b1 & 3) << 4) | (b2 >> 4);
+    const c3 = ((b2 & 15) << 2) | (b3 >> 6);
+    const c4 = b3 & 63;
 
-        r += B64_MAP.charAt(c1);
-        r += B64_MAP.charAt(c2);
-        if (i + 1 < data.length) {
-            r += B64_MAP.charAt(c3);
-        }
-        if (i + 2 < data.length) {
-            r += B64_MAP.charAt(c4);
-        }
+    r += B64_MAP.charAt(c1);
+    r += B64_MAP.charAt(c2);
+    if (i + 1 < data.length) {
+      r += B64_MAP.charAt(c3);
     }
-    return r;
+    if (i + 2 < data.length) {
+      r += B64_MAP.charAt(c4);
+    }
+  }
+  return r;
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
-    try {
-        const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
-        const encoded = encode64(compressed);
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
-        // We do a test fetch to see if the URL is valid. If not, we'll use a fallback.
-        const res = await fetch(proxyUrl.startsWith('/') ? new URL(proxyUrl, 'http://localhost:9002').toString() : proxyUrl);
-        if (!res.ok) {
-            console.warn(`PlantUML image generation failed with status ${res.status}. Falling back to placeholder.`);
-            return getFallbackImageUrl();
-        }
-        return proxyUrl;
-    } catch (e) {
-        console.error("Error generating PlantUML image URL:", e);
-        return getFallbackImageUrl();
+  try {
+    const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
+    const encoded = encode64(compressed);
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
+    // We do a test fetch to see if the URL is valid. If not, we'll use a fallback.
+    const res = await fetch(proxyUrl.startsWith('/') ? new URL(proxyUrl, 'http://localhost:9002').toString() : proxyUrl);
+    if (!res.ok) {
+      console.warn(`PlantUML image generation failed with status ${res.status}. Falling back to placeholder.`);
+      return getFallbackImageUrl();
     }
+    return proxyUrl;
+  } catch (e) {
+    console.error("Error generating PlantUML image URL:", e);
+    return getFallbackImageUrl();
+  }
 }
 
 async function getFallbackImageUrl(): Promise<string> {
-    const placeholderUrl = 'https://placehold.co/800x600.png';
-    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
-    return proxyUrl;
+  const placeholderUrl = 'https://placehold.co/800x600.png';
+  const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
+  return proxyUrl;
 }
 
 export async function handleGenerateReportItem(
@@ -105,27 +105,27 @@ export async function handleGenerateReportItem(
 
   const intent = formData.get('intent');
   if (intent === 'update_diagram') {
-      const diagramType = formData.get('diagramToUpdate') as DiagramType | null;
-      const plantUmlCode = formData.get('plantUmlCode') as string | null;
+    const diagramType = formData.get('diagramToUpdate') as DiagramType | null;
+    const plantUmlCode = formData.get('plantUmlCode') as string | null;
 
-      if (!diagramType || plantUmlCode === null) {
-        return { ...prevState, error: 'Missing data for diagram update.' };
-      }
+    if (!diagramType || plantUmlCode === null) {
+      return { ...prevState, error: 'Missing data for diagram update.' };
+    }
 
-      try {
-        const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
-        const newDiagrams = {
-          ...prevState.diagrams,
-          [diagramType]: {
-            plantUmlCode: plantUmlCode,
-            imageUrl: imageUrl,
-          },
-        };
-        return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramType };
-      } catch (e) {
-        console.error(e);
-        return { ...prevState, error: `An error occurred while updating diagram '${diagramType}'.` };
-      }
+    try {
+      const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
+      const newDiagrams = {
+        ...prevState.diagrams,
+        [diagramType]: {
+          plantUmlCode: plantUmlCode,
+          imageUrl: imageUrl,
+        },
+      };
+      return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramType };
+    } catch (e) {
+      console.error(e);
+      return { ...prevState, error: `An error occurred while updating diagram '${diagramType}'.` };
+    }
   }
 
 
@@ -141,7 +141,7 @@ export async function handleGenerateReportItem(
       error: errors.proposalJson?.[0] || errors.itemToGenerate?.[0],
     };
   }
-  
+
   const { proposalJson, itemToGenerate } = validatedFields.data;
   let proposalData: ProjectProposal;
 
@@ -159,43 +159,43 @@ export async function handleGenerateReportItem(
       error: 'The proposal data does not match the required structure.',
     };
   }
-  
+
   let prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
   if (prompt === null) {
     return { ...prevState, error: `Prompt for item type '${itemToGenerate}' was not found.` };
   }
-  
+
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
   const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
 
   if (!isSection && !isDiagram) {
     return { ...prevState, error: 'Unknown item type requested.' };
   }
-  
+
   // If it's a text section, check for and append control instructions
   if (isSection) {
-      const formalityValue = formData.get(`formality_${itemToGenerate}`) as string | null;
-      const tone = formData.get(`tone_${itemToGenerate}`) as string | null;
-      const wordCount = formData.get(`wordCount_${itemToGenerate}`) as string | null;
+    const formalityValue = formData.get(`formality_${itemToGenerate}`) as string | null;
+    const tone = formData.get(`tone_${itemToGenerate}`) as string | null;
+    const wordCount = formData.get(`wordCount_${itemToGenerate}`) as string | null;
 
-      let instructions = [];
-      if (formalityValue) {
-          const formality = parseInt(formalityValue, 10);
-          let formalityDesc = "balanced";
-          if (formality < 33) formalityDesc = "informal and casual";
-          else if (formality > 66) formalityDesc = "highly formal and professional";
-          instructions.push(`- The writing style should be ${formalityDesc}.`);
-      }
-      if (tone && tone !== "none") {
-          instructions.push(`- Adopt a ${tone} tone.`);
-      }
-      if (wordCount) {
-          instructions.push(`- The response should be approximately ${wordCount} words long.`);
-      }
+    let instructions = [];
+    if (formalityValue) {
+      const formality = parseInt(formalityValue, 10);
+      let formalityDesc = "balanced";
+      if (formality < 33) formalityDesc = "informal and casual";
+      else if (formality > 66) formalityDesc = "highly formal and professional";
+      instructions.push(`- The writing style should be ${formalityDesc}.`);
+    }
+    if (tone && tone !== "none") {
+      instructions.push(`- Adopt a ${tone} tone.`);
+    }
+    if (wordCount) {
+      instructions.push(`- The response should be approximately ${wordCount} words long.`);
+    }
 
-      if (instructions.length > 0) {
-          prompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
-      }
+    if (instructions.length > 0) {
+      prompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
+    }
   }
 
   // --- Start: Collect Context ---
@@ -206,91 +206,91 @@ export async function handleGenerateReportItem(
   const allAvailableDiagrams = prevState.diagrams || {};
 
   for (const sectionKey of SectionNameSchema.options) {
-      if (sectionKey === itemToGenerate) continue;
-      const contextCheckboxName = `context_${itemToGenerate}_${sectionKey}`;
-      if (formData.get(contextCheckboxName) === 'on' && allAvailableSections[sectionKey]) {
-          otherSections[sectionKey] = allAvailableSections[sectionKey];
-      }
+    if (sectionKey === itemToGenerate) continue;
+    const contextCheckboxName = `context_${itemToGenerate}_${sectionKey}`;
+    if (formData.get(contextCheckboxName) === 'on' && allAvailableSections[sectionKey]) {
+      otherSections[sectionKey] = allAvailableSections[sectionKey];
+    }
   }
 
   for (const diagramKey of DiagramTypeSchema.options) {
-      if (diagramKey === itemToGenerate) continue;
-      const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
-      if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
-          otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
-      }
+    if (diagramKey === itemToGenerate) continue;
+    const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
+    if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
+      otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
+    }
   }
   // --- End: Collect Context ---
 
   try {
     const agentInput = {
-        proposal: validatedProposal.data,
-        otherSections,
-        otherDiagrams,
-        prompt: prompt!,
+      proposal: validatedProposal.data,
+      otherSections,
+      otherDiagrams,
+      prompt: prompt!,
     };
 
     if (isSection) {
       const sectionToGenerate = itemToGenerate as SectionName;
       let result;
-      
+
       switch (sectionToGenerate) {
         case 'introduction':
           result = await generateIntroduction(agentInput);
-          return { ...prevState, sections: {...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
+          return { ...prevState, sections: { ...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
         case 'literatureReview':
           result = await generateLiteratureReview(agentInput);
-          return { ...prevState, sections: {...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
+          return { ...prevState, sections: { ...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
         case 'systemAnalysis':
           result = await generateSystemAnalysis(agentInput);
-          return { ...prevState, sections: {...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
+          return { ...prevState, sections: { ...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
         case 'designStrategy':
           result = await generateDesignStrategy(agentInput);
-          return { ...prevState, sections: {...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
-         case 'systemDesign':
+          return { ...prevState, sections: { ...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
+        case 'systemDesign':
           result = await generateSystemDesign(agentInput);
-          return { ...prevState, sections: {...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
-         case 'systemProgramming':
+          return { ...prevState, sections: { ...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
+        case 'systemProgramming':
           result = await generateSystemProgramming(agentInput);
-          return { ...prevState, sections: {...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
-         case 'systemTesting':
+          return { ...prevState, sections: { ...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
+        case 'systemTesting':
           result = await generateSystemTesting(agentInput);
-          return { ...prevState, sections: {...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
+          return { ...prevState, sections: { ...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
         case 'conclusion':
           result = await generateConclusion(agentInput);
-          return { ...prevState, sections: {...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
+          return { ...prevState, sections: { ...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
       }
     }
 
     if (isDiagram) {
-        const diagramToGenerate = itemToGenerate as DiagramType;
-        let result;
+      const diagramToGenerate = itemToGenerate as DiagramType;
+      let result;
 
-        switch (diagramToGenerate) {
-            case 'useCase': result = await generateUseCaseDiagram(agentInput); break;
-            case 'class': result = await generateClassDiagram(agentInput); break;
-            case 'sequence': result = await generateSequenceDiagram(agentInput); break;
-            case 'activity': result = await generateActivityDiagram(agentInput); break;
-            case 'component': result = await generateComponentDiagram(agentInput); break;
-            case 'archimate': result = await generateArchimateDiagram(agentInput); break;
-            default: return { ...prevState, error: 'Unknown diagram type requested.' };
-        }
+      switch (diagramToGenerate) {
+        case 'useCase': result = await generateUseCaseDiagram(agentInput); break;
+        case 'class': result = await generateClassDiagram(agentInput); break;
+        case 'sequence': result = await generateSequenceDiagram(agentInput); break;
+        case 'activity': result = await generateActivityDiagram(agentInput); break;
+        case 'component': result = await generateComponentDiagram(agentInput); break;
+        case 'archimate': result = await generateArchimateDiagram(agentInput); break;
+        default: return { ...prevState, error: 'Unknown diagram type requested.' };
+      }
 
-        const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-        
-        const newDiagrams = { 
-            ...prevState.diagrams, 
-            [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl } 
-        };
+      const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
 
-        return { 
-            ...prevState,
-            diagrams: newDiagrams, 
-            lastGenerated: diagramToGenerate, 
-            error: undefined 
-        };
+      const newDiagrams = {
+        ...prevState.diagrams,
+        [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl }
+      };
+
+      return {
+        ...prevState,
+        diagrams: newDiagrams,
+        lastGenerated: diagramToGenerate,
+        error: undefined
+      };
     }
-    
+
     return { ...prevState, error: 'An unexpected error occurred.' };
 
   } catch (e) {
@@ -325,10 +325,10 @@ export async function handleCreateProjectFromProposal(
   } catch (e) {
     return { error: 'Invalid JSON format.' };
   }
-  
+
   const validatedProposal = ProjectProposalSchema.safeParse(proposal);
   if (!validatedProposal.success) {
-      return { error: 'Proposal data does not match the required structure.' };
+    return { error: 'Proposal data does not match the required structure.' };
   }
 
   const projectData = validatedProposal.data;
@@ -355,7 +355,7 @@ export async function handleCreateProjectFromProposal(
   } catch (error) {
     console.error('Failed to create project from proposal:', error);
     if (error instanceof Error) {
-        return { error: error.message };
+      return { error: error.message };
     }
     return { error: 'An error occurred while creating the project.' };
   }
