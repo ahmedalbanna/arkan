@@ -12,7 +12,7 @@ import { ReportResults } from './ReportResults';
 import { add, format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
-import { ProjectProposalSchema, type ProjectProposal, type SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 
@@ -145,8 +145,32 @@ export default function ReportGenerator() {
     });
   };
 
+  const handleDiagramCodeUpdate = (diagramType: DiagramType, code: string) => {
+    setState(prevState => {
+        const diagrams = { ...prevState.diagrams };
+        if (diagrams[diagramType]) {
+            diagrams[diagramType]!.plantUmlCode = code;
+        }
+        return {
+            ...prevState,
+            diagrams
+        };
+    });
+  };
+
+  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
+      const formData = new FormData();
+      if (proposalJson) formData.set('proposalJson', proposalJson);
+      // Add a dummy value for itemToGenerate to pass schema validation if needed, but intent will be checked first
+      formData.set('itemToGenerate', diagramType);
+      formData.set('intent', 'update_diagram');
+      formData.set('diagramToUpdate', diagramType);
+      formData.set('plantUmlCode', code);
+      handleSubmit(formData);
+  };
+
   const handleSubmit = (formData: FormData) => {
-    const item = formData.get('itemToGenerate') as string;
+    const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
 
     setGeneratingItem(item);
@@ -209,6 +233,8 @@ export default function ReportGenerator() {
               proposal={proposal}
               onProposalUpdate={handleProposalUpdate}
               onSectionUpdate={handleSectionUpdate}
+              onDiagramCodeUpdate={handleDiagramCodeUpdate}
+              onDiagramUpdate={handleDiagramUpdate}
             />
           </div>
         </div>

@@ -103,6 +103,32 @@ export async function handleGenerateReportItem(
   formData: FormData
 ): Promise<ReportState> {
 
+  const intent = formData.get('intent');
+  if (intent === 'update_diagram') {
+      const diagramType = formData.get('diagramToUpdate') as DiagramType | null;
+      const plantUmlCode = formData.get('plantUmlCode') as string | null;
+
+      if (!diagramType || plantUmlCode === null) {
+        return { ...prevState, error: 'Missing data for diagram update.' };
+      }
+
+      try {
+        const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
+        const newDiagrams = {
+          ...prevState.diagrams,
+          [diagramType]: {
+            plantUmlCode: plantUmlCode,
+            imageUrl: imageUrl,
+          },
+        };
+        return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramType };
+      } catch (e) {
+        console.error(e);
+        return { ...prevState, error: `An error occurred while updating diagram '${diagramType}'.` };
+      }
+  }
+
+
   const validatedFields = GenerateItemSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
     itemToGenerate: formData.get('itemToGenerate'),

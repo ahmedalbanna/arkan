@@ -92,26 +92,6 @@ function ImageDisplay({ imageUrl, diagramType }: { imageUrl: string, diagramType
     );
 }
 
-
-function RenderButton() {
-    const { pending, data } = useFormStatus();
-    const isRendering = pending && data?.get('formAction') === 'render';
-
-    return (
-        <Button
-            type="submit"
-            name="formAction"
-            value="render"
-            disabled={pending}
-            className="font-headline"
-        >
-            {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Sparkles className="ml-2 h-4 w-4" />}
-            تحديث المخطط من الكود
-        </Button>
-    );
-}
-
-
 export default function DiagramGenerator() {
     const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
@@ -233,8 +213,13 @@ export default function DiagramGenerator() {
                                 <Textarea
                                     name="plantUmlCode"
                                     value={currentEditedCode}
-                                    onChange={(e) => setEditedCodes(prev => ({ ...prev, [currentDiagramType]: e.target.value }))}
-                                    rows={15}
+                                    onChange={(e) => {
+                                        if (currentDiagramType) {
+                                            setEditedCodes(prev => ({ ...prev, [currentDiagramType]: e.target.value }));
+                                            // Trigger form submission to re-render the diagram
+                                            e.currentTarget.form?.requestSubmit();
+                                    }}}
+                                    rows={10} // Reduced rows slightly as it will auto-update
                                     className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
                                     dir="ltr"
                                 />
@@ -243,7 +228,6 @@ export default function DiagramGenerator() {
                                 "flex-col items-start gap-4 sm:flex-row sm:items-center",
                                 hasChanges ? "sm:justify-between" : "sm:justify-end"
                             )}>
-                                {hasChanges && <RenderButton />}
                                 
                                 <div className="flex gap-2">
                                     <TooltipProvider>

@@ -5,9 +5,10 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/
 import { CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import ProposalViewer from '@/components/ProposalViewer';
+import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { EditableSection } from './EditableSection';
-import { useLocalization } from '@/context/LocalizationContext';
+import { useLocalization } from '../..//context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import type { ProjectProposal, SectionName, DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
@@ -21,11 +22,14 @@ interface ReportResultsProps {
   proposal: ProjectProposal | null;
   onProposalUpdate: (path: string, value: any) => void;
   onSectionUpdate: (key: SectionName, value: string) => void;
+  onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
+  onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramCodeUpdate, onDiagramUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
 
+  // Note: Managing edited diagram codes state locally here for now, but might need to lift up later
   return (
     <div className="space-y-6">
       {proposal && (
@@ -64,16 +68,24 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 p-4 border-t">
                       <Image 
-                          src={diagramData.imageUrl} 
-                          alt={`Rendered ${title}`}
-                          width={800}
-                          height={600}
-                          className="w-full h-auto object-contain rounded-md border bg-white p-2"
+ height={600} src={diagramData.imageUrl} alt={`Rendered ${title}`} width={800} className="w-full h-auto object-contain rounded-md border bg-white p-2"
                       />
                       <Textarea
-                          defaultValue={diagramData.plantUmlCode}
+ value={diagramData.plantUmlCode}
+                          onChange={(e) => onDiagramCodeUpdate(key, e.target.value)}
                           rows={15}
                           className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
+                          dir="ltr"
+                          placeholder="PlantUML code..."
+                      />
+                      <Button
+                          onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}
+                          className="font-headline"
+                          disabled={generatingItem === key}
+                      >
+ {generatingItem === key ? 'Updating...' : 'Update Diagram'}
+                      </Button>
+                      <Textarea // Placeholder/Readonly for displaying actual stored code if needed for debugging
                           dir="ltr"
                           placeholder="PlantUML code..."
                       />
