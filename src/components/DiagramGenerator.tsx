@@ -15,6 +15,7 @@ import { saveAs } from 'file-saver';
 import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
+import { cn } from '@/lib/utils';
 
 const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
     useCase: { title: "مخطط حالة الاستخدام (Use Case)", agentId: "generate-use-case-diagram" },
@@ -91,13 +92,21 @@ function ImageDisplay({ imageUrl, diagramType }: { imageUrl: string, diagramType
 }
 
 function DiagramEditor({ code, diagramType }: { code: string, diagramType: DiagramType }) {
+    const [editedCode, setEditedCode] = useState(code);
     const [isCopied, setIsCopied] = useState(false);
     const { pending, data } = useFormStatus();
+    
+    // When the `code` prop changes (e.g., a new diagram is generated),
+    // update our local state to match it.
+    useEffect(() => {
+        setEditedCode(code);
+    }, [code]);
 
+    const hasChanges = editedCode !== code;
     const isRendering = pending && data?.get('formAction') === 'render';
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(code).then(() => {
+        navigator.clipboard.writeText(editedCode).then(() => {
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
         });
@@ -117,23 +126,29 @@ function DiagramEditor({ code, diagramType }: { code: string, diagramType: Diagr
                 <input type="hidden" name="diagramType" value={diagramType} />
                 <Textarea
                     name="plantUmlCode"
-                    defaultValue={code}
+                    value={editedCode}
+                    onChange={(e) => setEditedCode(e.target.value)}
                     rows={15}
                     className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
                     dir="ltr"
                 />
             </CardContent>
-            <CardFooter className="flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <Button
-                    type="submit"
-                    name="formAction"
-                    value="render"
-                    disabled={pending}
-                    className="font-headline"
-                >
-                    {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Sparkles className="ml-2 h-4 w-4" />}
-                    تحديث المخطط من الكود
-                </Button>
+            <CardFooter className={cn(
+                "flex-col items-start gap-4 sm:flex-row sm:items-center",
+                hasChanges ? "sm:justify-between" : "sm:justify-end"
+            )}>
+                {hasChanges && (
+                    <Button
+                        type="submit"
+                        name="formAction"
+                        value="render"
+                        disabled={pending}
+                        className="font-headline"
+                    >
+                        {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Sparkles className="ml-2 h-4 w-4" />}
+                        تحديث المخطط من الكود
+                    </Button>
+                )}
                 <div className="flex gap-2">
                     <TooltipProvider>
                         <Tooltip>
