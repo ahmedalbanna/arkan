@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,8 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { useHistory } from '@/hooks/use-history';
 import type { ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProposalGeneratorProps {
   projectIdea: string;
@@ -24,6 +27,7 @@ export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposal
   const [error, setError] = useState<string | undefined>();
   const { agents } = useAgents();
   const { addHistoryEntry } = useHistory();
+  const { toast } = useToast();
 
   const proposalAgent = agents.find(a => a.id === 'generate-proposal');
 
@@ -31,12 +35,39 @@ export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposal
     if (!projectIdea || !proposalAgent) return;
     setIsGenerating(true);
     setError(undefined);
+
+    const cacheKeyPayload = {
+      projectIdea,
+      prompt: proposalAgent.prompt,
+    };
+    const cacheKey = await generateCacheKey(cacheKeyPayload);
+    const cachedResult = getFromCache<ProjectProposal>(cacheKey);
+
+    if (cachedResult) {
+      toast({
+        title: "Loaded from Cache",
+        description: `The proposal for "${cachedResult.title}" was retrieved from the local cache.`,
+      });
+      onReset();
+      addHistoryEntry({
+        type: 'proposal',
+        title: `Project Proposal: ${cachedResult.title}`,
+        proposal: cachedResult,
+      });
+      onProposalGenerated(cachedResult);
+      setIsGenerating(false);
+      return;
+    }
+
     try {
       onReset();
       const result = await generateProposal({
         projectIdea,
         prompt: proposalAgent.prompt,
       });
+      
+      saveToCache(cacheKey, result);
+
       addHistoryEntry({
         type: 'proposal',
         title: `Project Proposal: ${result.title}`,
