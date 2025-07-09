@@ -7,9 +7,9 @@ export const markdownComponents: { [key: string]: React.ElementType } = {
   h3: ({node, ...props}: any) => React.createElement('h3', { className: "mt-4 mb-2 text-xl font-semibold font-headline", ...props }),
   p: ({node, ...props}: any) => React.createElement('p', { className: "mb-4 leading-relaxed", ...props }),
   a: ({node, ...props}: any) => React.createElement('a', { className: "text-accent underline hover:text-accent/80", ...props }),
-  ul: ({node, ...props}: any) => React.createElement('ul', { className: "mb-4 ml-6 list-disc space-y-2", ...props }),
-  ol: ({node, ...props}: any) => React.createElement('ol', { className: "mb-4 ml-6 list-decimal space-y-2", ...props }),
-  li: ({node, ...props}: any) => React.createElement('li', { className: "pl-2", ...props }),
+  ul: ({node, ...props}: any) => React.createElement('ul', { className: "mb-4 ml-4 list-disc space-y-2", ...props }),
+  ol: ({node, ...props}: any) => React.createElement('ol', { className: "mb-4 ml-4 list-decimal space-y-2", ...props }),
+  li: ({node, ...props}: any) => React.createElement('li', { className: "pl-2 space-y-2", ...props }),
   blockquote: ({node, ...props}: any) => React.createElement('blockquote', { className: "my-4 border-l-4 border-primary/20 pl-4 italic text-muted-foreground", ...props }),
   code: ({node, inline, className, children, ...props}: any) => {
     if (!inline) {

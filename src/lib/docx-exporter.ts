@@ -1,10 +1,9 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents, INumberingOptions  } from 'docx';
 import { saveAs } from 'file-saver';
-import type { ProjectProposal, DiagramType } from './schemas';
-import type { SectionName } from '@/ai/schemas';
+import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -71,7 +70,7 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
             case 'heading':
                 docxObjects.push(new Paragraph({
                     children: transformInlines(node.children),
-                    heading: `Heading${node.depth}` as HeadingLevel,
+                    heading: `Heading${node.depth}`,
                 }));
                 break;
             case 'paragraph':
@@ -118,7 +117,7 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
     return docxObjects;
 };
 
-const numbering = {
+const numbering: INumberingOptions = {
     config: [
         {
             reference: "default-numbering",
@@ -178,7 +177,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IS
                 ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
                 new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
                 new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
-                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${b.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                new Table({ rows: [ new TableRow({ children: [ new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })]})] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })]})] }), ] }), ...budget.breakdown.map(b => new TableRow({ children: [ new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }), ] })) ], width: { size: 100, type: WidthType.PERCENTAGE } }),
                 new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
                 ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
                 new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),

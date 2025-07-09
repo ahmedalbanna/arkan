@@ -72,10 +72,10 @@ const commonCharacterStyles = [
 
 const modernStyles: IStylesOptions = {
     default: {
-        document: { run: { fontFamily: 'Calibri', size: 22, color: '333333' } },
-        heading1: { run: { fontFamily: 'Calibri Light', size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
-        heading2: { run: { fontFamily: 'Calibri Light', size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
-        heading3: { run: { fontFamily: 'Calibri Light', size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
+        document: { run: { font: { name: 'Calibri' }, size: 22, color: '333333' } },
+        heading1: { run: { font: { name: 'Calibri Light' }, size: 32, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
+        heading2: { run: { font: { name: 'Calibri Light' }, size: 26, bold: true, color: "2E74B5" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
+        heading3: { run: { font: { name: 'Calibri Light' }, size: 24, bold: true, color: "5B9BD5" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
     },
     paragraphStyles: [
         ...commonParagraphStyles,
@@ -83,7 +83,7 @@ const modernStyles: IStylesOptions = {
             id: 'ModernSpecific',
             name: 'Modern Specific',
             basedOn: 'Normal',
-            run: { fontFamily: 'Calibri' }
+            run: { font: { name: 'Calibri' } }
         }
     ],
     characterStyles: commonCharacterStyles,
@@ -91,28 +91,28 @@ const modernStyles: IStylesOptions = {
 
 const classicStyles: IStylesOptions = {
     default: {
-        document: { run: { fontFamily: 'Times New Roman', size: 24 } },
-        heading1: { run: { fontFamily: 'Times New Roman', size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
-        heading2: { run: { fontFamily: 'Times New Roman', size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
-        heading3: { run: { fontFamily: 'Times New Roman', size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
+        document: { run: { font: { name: 'Times New Roman' }, size: 24 } },
+        heading1: { run: { font: { name: 'Times New Roman' }, size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
+        heading2: { run: { font: { name: 'Times New Roman' }, size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
+        heading3: { run: { font: { name: 'Times New Roman' }, size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
     },
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
-        run: { ...p.run, fontFamily: 'Times New Roman' }
+        run: { ...p.run, font: { name: 'Times New Roman' } }
     })),
     characterStyles: commonCharacterStyles,
 };
 
 const academicStyles: IStylesOptions = {
     default: {
-        document: { run: { fontFamily: 'Garamond', size: 24 } },
-        heading1: { run: { fontFamily: 'Garamond', size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
-        heading2: { run: { fontFamily: 'Garamond', size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
-        heading3: { run: { fontFamily: 'Garamond', size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200, line: 480 }, outlineLevel: 3 } },
+        document: { run: { font: { name: 'Garamond' }, size: 24 } },
+        heading1: { run: { font: { name: 'Garamond' }, size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
+        heading2: { run: { font: { name: 'Garamond' }, size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
+        heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200, line: 480 }, outlineLevel: 3 } },
     },
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
-        run: { ...p.run, fontFamily: 'Garamond', size: 24 },
+        run: { ...p.run, font: { name: 'Garamond' }, size: 24 },
         paragraph: { ...p.paragraph, spacing: { ...p.paragraph?.spacing, line: 480 }}
     })),
     characterStyles: commonCharacterStyles,
