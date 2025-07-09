@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useState, useEffect } from 'react';
@@ -91,90 +92,22 @@ function ImageDisplay({ imageUrl, diagramType }: { imageUrl: string, diagramType
     );
 }
 
-function DiagramEditor({ code, diagramType }: { code: string, diagramType: DiagramType }) {
-    const [editedCode, setEditedCode] = useState(code);
-    const [isCopied, setIsCopied] = useState(false);
-    const { pending, data } = useFormStatus();
-    
-    // When the `code` prop changes (e.g., a new diagram is generated),
-    // update our local state to match it.
-    useEffect(() => {
-        setEditedCode(code);
-    }, [code]);
 
-    const hasChanges = editedCode !== code;
+function RenderButton() {
+    const { pending, data } = useFormStatus();
     const isRendering = pending && data?.get('formAction') === 'render';
 
-    const handleCopy = () => {
-        navigator.clipboard.writeText(editedCode).then(() => {
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
-        });
-    };
-    
     return (
-        <Card>
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="font-headline">PlantUML Code - {diagramConfig[diagramType].title}</CardTitle>
-                        <CardDescription>يمكنك تعديل الكود ثم تحديث المخطط.</CardDescription>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <input type="hidden" name="diagramType" value={diagramType} />
-                <Textarea
-                    name="plantUmlCode"
-                    value={editedCode}
-                    onChange={(e) => setEditedCode(e.target.value)}
-                    rows={15}
-                    className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
-                    dir="ltr"
-                />
-            </CardContent>
-            <CardFooter className={cn(
-                "flex-col items-start gap-4 sm:flex-row sm:items-center",
-                hasChanges ? "sm:justify-between" : "sm:justify-end"
-            )}>
-                {hasChanges && (
-                    <Button
-                        type="submit"
-                        name="formAction"
-                        value="render"
-                        disabled={pending}
-                        className="font-headline"
-                    >
-                        {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Sparkles className="ml-2 h-4 w-4" />}
-                        تحديث المخطط من الكود
-                    </Button>
-                )}
-                <div className="flex gap-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="outline" size="icon" onClick={handleCopy} type="button" aria-label="Copy Code">
-                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>{isCopied ? 'Copied!' : 'Copy Code'}</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                     <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="outline" size="icon" asChild type="button">
-                                    <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
-                                        <Share2 className="h-4 w-4" />
-                                    </a>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Open Online Renderer</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-            </CardFooter>
-        </Card>
+        <Button
+            type="submit"
+            name="formAction"
+            value="render"
+            disabled={pending}
+            className="font-headline"
+        >
+            {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Sparkles className="ml-2 h-4 w-4" />}
+            تحديث المخطط من الكود
+        </Button>
     );
 }
 
@@ -185,12 +118,14 @@ export default function DiagramGenerator() {
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
+    const [editedCodes, setEditedCodes] = useState<Partial<Record<DiagramType, string>>>({});
+    const [isCopied, setIsCopied] = useState(false);
     
     const orderedDiagrams = DiagramTypeSchema.options;
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
 
     useEffect(() => {
-        if (state.lastGenerated && state.currentPlantUmlCode && state.imageUrl) {
+        if (state.lastGenerated && state.currentPlantUmlCode) {
             let proposalTitle = 'مخطط مشروع';
             try {
                 const parsed = JSON.parse(proposalJson);
@@ -206,11 +141,29 @@ export default function DiagramGenerator() {
                 title: `مخطط: ${diagramConfig[state.lastGenerated].title}`,
                 diagramType: state.lastGenerated,
                 plantUmlCode: state.currentPlantUmlCode,
-                imageUrl: state.imageUrl,
+                imageUrl: state.imageUrl!,
                 proposalTitle: proposalTitle,
             });
+            
+            // Sync the generated code with the editor state
+            setEditedCodes(prev => ({
+                ...prev,
+                [state.lastGenerated!]: state.currentPlantUmlCode,
+            }));
         }
     }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson]);
+    
+    const handleCopy = (code: string) => {
+        navigator.clipboard.writeText(code).then(() => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+    };
+
+    const currentDiagramType = state.lastGenerated;
+    const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
+    const currentEditedCode = currentDiagramType ? editedCodes[currentDiagramType] : undefined;
+    const hasChanges = currentGeneratedCode !== undefined && currentEditedCode !== undefined && currentGeneratedCode !== currentEditedCode;
 
     return (
         <form action={formAction}>
@@ -237,6 +190,7 @@ export default function DiagramGenerator() {
                                 placeholder='{ "title": "...", "objective": "...", ... }'
                                 rows={15}
                                 required
+                                value={proposalJson}
                                 onChange={(e) => setProposalJson(e.target.value)}
                             />
                             {state?.error && (
@@ -260,11 +214,63 @@ export default function DiagramGenerator() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    {state.imageUrl && state.lastGenerated && (
-                        <ImageDisplay imageUrl={state.imageUrl} diagramType={state.lastGenerated} />
+                    {state.imageUrl && currentDiagramType && (
+                        <ImageDisplay imageUrl={state.imageUrl} diagramType={currentDiagramType} />
                     )}
-                    {state.currentPlantUmlCode && state.lastGenerated && (
-                        <DiagramEditor code={state.currentPlantUmlCode} diagramType={state.lastGenerated} />
+
+                    {currentDiagramType && currentEditedCode !== undefined && (
+                        <Card>
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle className="font-headline">PlantUML Code - {diagramConfig[currentDiagramType].title}</CardTitle>
+                                        <CardDescription>يمكنك تعديل الكود ثم تحديث المخطط.</CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <input type="hidden" name="diagramType" value={currentDiagramType} />
+                                <Textarea
+                                    name="plantUmlCode"
+                                    value={currentEditedCode}
+                                    onChange={(e) => setEditedCodes(prev => ({ ...prev, [currentDiagramType]: e.target.value }))}
+                                    rows={15}
+                                    className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
+                                    dir="ltr"
+                                />
+                            </CardContent>
+                            <CardFooter className={cn(
+                                "flex-col items-start gap-4 sm:flex-row sm:items-center",
+                                hasChanges ? "sm:justify-between" : "sm:justify-end"
+                            )}>
+                                {hasChanges && <RenderButton />}
+                                
+                                <div className="flex gap-2">
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="icon" onClick={() => handleCopy(currentEditedCode)} type="button" aria-label="Copy Code">
+                                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>{isCopied ? 'Copied!' : 'Copy Code'}</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                     <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="icon" asChild type="button">
+                                                    <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
+                                                        <Share2 className="h-4 w-4" />
+                                                    </a>
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>Open Online Renderer</p></TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                </div>
+                            </CardFooter>
+                        </Card>
                     )}
                 </div>
             </div>
