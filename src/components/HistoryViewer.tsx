@@ -18,6 +18,7 @@ import { type TemplateKey, templates } from '@/lib/docx-styles';
 import { exportProposalAsDocx, exportReportAsDocx } from '@/lib/docx-exporter';
 import { useRouter } from 'next/navigation';
 import { markdownComponents } from '@/lib/markdown-components';
+import DiagramViewer from './DiagramViewer';
 
 
 function ProposalHistoryItem({ entry }: { entry: ProposalHistoryData & { title: string } }) {
@@ -96,49 +97,20 @@ function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: stri
 
 function DiagramHistoryItem({ entry }: { entry: DiagramHistoryData & { title: string } }) {
     const { diagramType, plantUmlCode, imageUrl, proposalTitle } = entry;
-    const [isCopied, setIsCopied] = useState(false);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(plantUmlCode).then(() => {
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
-        });
-    };
-    
-    const handleDownload = () => {
-        saveAs(imageUrl, `${diagramType}_diagram.png`);
-    };
 
     return (
         <Card className="mt-4">
             <CardHeader>
-                <div className="flex justify-between items-center">
-                    <CardTitle className="font-headline text-xl text-primary">{entry.title}</CardTitle>
-                </div>
+                <CardTitle className="font-headline text-xl text-primary">{entry.title}</CardTitle>
                 <CardDescription>From proposal: "{proposalTitle}"</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-                <Image 
-                    src={imageUrl} 
-                    alt={`Rendered ${diagramType} diagram`}
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-contain rounded-md border bg-white p-2"
+                 <DiagramViewer
+                    title={entry.title}
+                    imageUrl={imageUrl}
+                    plantUmlCode={plantUmlCode}
+                    isReadOnly={true}
                 />
-                <Textarea
-                    readOnly
-                    value={plantUmlCode}
-                    rows={10}
-                    className="bg-muted p-4 rounded-md text-sm text-left font-mono"
-                    dir="ltr"
-                />
-                 <div className="flex gap-2">
-                    <Button onClick={handleDownload}><Download className="ml-2 h-4 w-4" /> Download Image</Button>
-                    <Button variant="outline" onClick={handleCopy}>
-                        {isCopied ? <Check className="ml-2 h-4 w-4 text-green-500" /> : <Copy className="ml-2 h-4 w-4" />}
-                        Copy Code
-                    </Button>
-                </div>
             </CardContent>
         </Card>
     );

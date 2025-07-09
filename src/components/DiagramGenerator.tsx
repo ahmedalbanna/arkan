@@ -9,14 +9,11 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Copy, Check, Share2, Download } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import Image from 'next/image';
-import { saveAs } from 'file-saver';
+import { Loader2, Sparkles, RefreshCw } from 'lucide-react';
 import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
-import { cn } from '@/lib/utils';
+import DiagramViewer from './DiagramViewer';
 
 const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
     useCase: { title: "مخطط حالة الاستخدام (Use Case)", agentId: "generate-use-case-diagram" },
@@ -52,54 +49,26 @@ function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agen
     );
 }
 
-function ImageDisplay({ imageUrl, diagramType }: { imageUrl: string, diagramType: DiagramType }) {
-    const [isDownloading, setIsDownloading] = useState(false);
-
-    const handleDownload = async () => {
-        setIsDownloading(true);
-        try {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            saveAs(blob, `${diagramConfig[diagramType].title.replace(/ /g, '_')}.png`);
-        } catch (error) {
-            console.error('Download failed:', error);
-        } finally {
-            setIsDownloading(false);
-        }
-    };
+function RenderButton() {
+    const { pending, data } = useFormStatus();
+    const isRendering = pending && data?.get('formAction') === 'render';
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline">المخطط المعروض</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Image 
-                    src={imageUrl} 
-                    alt={`Rendered ${diagramConfig[diagramType].title}`}
-                    width={800}
-                    height={600}
-                    className="w-full h-auto object-contain rounded-md border bg-white p-2"
-                />
-            </CardContent>
-            <CardFooter>
-                <Button onClick={handleDownload} disabled={isDownloading} className="font-headline">
-                    {isDownloading ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <Download className="ml-2 h-4 w-4" />}
-                    تحميل الصورة
-                </Button>
-            </CardFooter>
-        </Card>
+        <Button type="submit" name="formAction" value="render" disabled={isRendering} className="font-headline">
+            {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+            Update Diagram
+        </Button>
     );
 }
 
 export default function DiagramGenerator() {
     const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
+    
     const [proposalJson, setProposalJson] = useState('');
     const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
     const [editedCodes, setEditedCodes] = useState<Partial<Record<DiagramType, string>>>({});
-    const [isCopied, setIsCopied] = useState(false);
     
     const orderedDiagrams = DiagramTypeSchema.options;
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
@@ -133,17 +102,16 @@ export default function DiagramGenerator() {
         }
     }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson]);
     
-    const handleCopy = (code: string) => {
-        navigator.clipboard.writeText(code).then(() => {
-            setIsCopied(true);
-            setTimeout(() => setIsCopied(false), 2000);
-        });
-    };
-
     const currentDiagramType = state.lastGenerated;
     const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
     const currentEditedCode = currentDiagramType ? editedCodes[currentDiagramType] : undefined;
     const hasChanges = currentGeneratedCode !== undefined && currentEditedCode !== undefined && currentGeneratedCode !== currentEditedCode;
+
+    const handleCodeChange = (newCode: string) => {
+        if (currentDiagramType) {
+            setEditedCodes(prev => ({ ...prev, [currentDiagramType]: newCode }));
+        }
+    };
 
     return (
         <form action={formAction}>
@@ -154,6 +122,9 @@ export default function DiagramGenerator() {
                 const key = orderedDiagrams[index];
                 return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
             })}
+             {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
+             {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
+
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
@@ -194,65 +165,22 @@ export default function DiagramGenerator() {
                             </AlertDescription>
                         </Alert>
                     )}
-                    {state.imageUrl && currentDiagramType && (
-                        <ImageDisplay imageUrl={state.imageUrl} diagramType={currentDiagramType} />
-                    )}
-
-                    {currentDiagramType && currentEditedCode !== undefined && (
+                    
+                    {state.imageUrl && currentDiagramType && currentEditedCode !== undefined && (
                         <Card>
                             <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="font-headline">PlantUML Code - {diagramConfig[currentDiagramType].title}</CardTitle>
-                                        <CardDescription>يمكنك تعديل الكود ثم تحديث المخطط.</CardDescription>
-                                    </div>
-                                </div>
+                                <CardTitle className="font-headline">المخطط المعروض</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <input type="hidden" name="diagramType" value={currentDiagramType} />
-                                <Textarea
-                                    name="plantUmlCode"
-                                    value={currentEditedCode}
-                                    onChange={(e) => {
-                                        if (currentDiagramType) {
-                                            setEditedCodes(prev => ({ ...prev, [currentDiagramType]: e.target.value }));
-                                            // Trigger form submission to re-render the diagram
-                                            e.currentTarget.form?.requestSubmit();
-                                    }}}
-                                    rows={10} // Reduced rows slightly as it will auto-update
-                                    className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
-                                    dir="ltr"
+                                <DiagramViewer
+                                    title={diagramConfig[currentDiagramType].title}
+                                    imageUrl={state.imageUrl}
+                                    plantUmlCode={currentEditedCode}
+                                    onCodeChange={handleCodeChange}
                                 />
                             </CardContent>
-                            <CardFooter className={cn(
-                                "flex-col items-start gap-4 sm:flex-row sm:items-center",
-                                hasChanges ? "sm:justify-between" : "sm:justify-end"
-                            )}>
-                                
-                                <div className="flex gap-2">
-                                    <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" size="icon" onClick={() => handleCopy(currentEditedCode)} type="button" aria-label="Copy Code">
-                                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>{isCopied ? 'Copied!' : 'Copy Code'}</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                     <TooltipProvider>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" size="icon" asChild type="button">
-                                                    <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
-                                                        <Share2 className="h-4 w-4" />
-                                                    </a>
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>Open Online Renderer</p></TooltipContent>
-                                        </Tooltip>
-                                    </TooltipProvider>
-                                </div>
+                            <CardFooter>
+                               {hasChanges && <RenderButton />}
                             </CardFooter>
                         </Card>
                     )}
