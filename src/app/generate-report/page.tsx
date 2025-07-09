@@ -1,6 +1,6 @@
 'use client';
 
-import ReportGenerator from "@/components/ReportGenerator";
+import ReportGenerator from "@/components/report-generator/ReportGenerator";
 import { useLocalization } from "@/context/LocalizationContext";
 
 export default function GenerateReportPage() {
