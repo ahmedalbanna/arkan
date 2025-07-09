@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Poppins, PT_Sans, Cairo } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/Header';
@@ -12,18 +13,31 @@ export const metadata: Metadata = {
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
 };
 
+const fontBody = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-body',
+});
+
+const fontHeadline = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-headline',
+});
+
+const fontSans = Cairo({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '700'],
+  variable: '--font-sans',
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=PT+Sans:wght@400;700&family=Cairo:wght@400;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)}>
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
         <LocalizationProvider>
           <LanguageDirectionManager>

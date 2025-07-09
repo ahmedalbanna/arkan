@@ -78,11 +78,13 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
   try {
     const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
     const encoded = encode64(compressed);
-    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(`https://www.plantuml.com/plantuml/png/~1${encoded}`)}`;
+    const plantUmlUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
+    
     // We do a test fetch to see if the URL is valid. If not, we'll use a fallback.
     const res = await fetch(proxyUrl.startsWith('/') ? new URL(proxyUrl, 'http://localhost:9002').toString() : proxyUrl);
     if (!res.ok) {
-      console.warn(`PlantUML image generation failed with status ${res.status}. Falling back to placeholder.`);
+      console.warn(`PlantUML image generation failed with status ${res.status} for ${plantUmlUrl}. Falling back to placeholder.`);
       return getFallbackImageUrl();
     }
     return proxyUrl;

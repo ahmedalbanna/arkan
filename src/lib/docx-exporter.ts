@@ -131,6 +131,18 @@ const numbering: INumberingOptions = {
     ],
 };
 
+async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer> {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+        console.warn(`Failed to fetch proxied image from ${imageUrl}. Falling back to placeholder.`);
+        const placeholderUrl = 'https://placehold.co/800x600.png';
+        const placeholderProxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
+        const placeholderResponse = await fetch(placeholderProxyUrl);
+        return placeholderResponse.arrayBuffer();
+    }
+    return response.arrayBuffer();
+}
+
 export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
 
@@ -255,20 +267,7 @@ export async function exportReportAsDocx(
             const diagramData = diagrams[key];
             if (diagramData) {
                 try {
-                    let imageBuffer: ArrayBuffer;
-                    // The imageUrl is a relative path to our own proxy, so we can fetch it directly.
-                    const response = await fetch(diagramData.imageUrl);
-
-                    if (!response.ok) {
-                        console.warn(`Failed to fetch diagram image from ${diagramData.imageUrl}. Falling back to placeholder.`);
-                        const placeholderUrl = 'https://placehold.co/800x600.png';
-                        const placeholderProxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
-                        const placeholderResponse = await fetch(placeholderProxyUrl);
-                        imageBuffer = await placeholderResponse.arrayBuffer();
-                    } else {
-                        imageBuffer = await response.arrayBuffer();
-                    }
-
+                    const imageBuffer = await getProxiedImageBuffer(diagramData.imageUrl);
                     reportBody.push(new Paragraph({
                         text: diagramConfig[key].title,
                         heading: HeadingLevel.HEADING_2,
