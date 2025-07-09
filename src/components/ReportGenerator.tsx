@@ -12,7 +12,7 @@ import { ReportResults } from './report-generator/ReportResults';
 import { add, format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
-import { ProjectProposalSchema, type ProjectProposal, type SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 
@@ -50,7 +50,7 @@ export default function ReportGenerator() {
     contextSelections,
     toggleContextSelection,
   } = useReportBuilder();
-  
+
   const { isLoaded: agentsLoaded } = useAgents();
 
   const { toast } = useToast();
@@ -72,21 +72,21 @@ export default function ReportGenerator() {
   useEffect(() => {
     // Toast for generation success
     if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
-        const title = itemConfig?.title || state.lastGenerated;
-        toast({
-            title: "Generation Successful!",
-            description: `Successfully generated "${title}".`,
-        });
+      const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
+      const title = itemConfig?.title || state.lastGenerated;
+      toast({
+        title: "Generation Successful!",
+        description: `Successfully generated "${title}".`,
+      });
     }
 
     // Toast for generation error
     if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
-        toast({
-            title: "Generation Failed",
-            description: state.error,
-            variant: "destructive",
-        });
+      toast({
+        title: "Generation Failed",
+        description: state.error,
+        variant: "destructive",
+      });
     }
 
     prevLastGenerated.current = state.lastGenerated;
@@ -99,14 +99,14 @@ export default function ReportGenerator() {
     setProposal(newProposal);
     setProposalJson(JSON.stringify(newProposal, null, 2));
   };
-  
+
   const handleProposalJsonChange = (json: string) => {
     setProposalJson(json);
     try {
-        const parsed = ProjectProposalSchema.parse(JSON.parse(json));
-        setProposal(parsed);
+      const parsed = ProjectProposalSchema.parse(JSON.parse(json));
+      setProposal(parsed);
     } catch {
-        // Silently fail, UI will be based on last valid proposal
+      // Silently fail, UI will be based on last valid proposal
     }
   };
 
@@ -116,35 +116,56 @@ export default function ReportGenerator() {
     set(newProposal, path, value);
 
     if (path.startsWith('budget.breakdown') || path === 'budget.currency') {
-        const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
-        newProposal.budget.totalAmount = total;
+      const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
+      newProposal.budget.totalAmount = total;
     }
 
     if (path.startsWith('timeline')) {
-        try {
-            let currentDate = new Date(newProposal.timeline.startDate);
-            if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
-            for (const phase of newProposal.timeline.phases) {
-                currentDate = add(currentDate, { weeks: Number(phase.durationWeeks || 0) });
-            }
-            newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
-        } catch (error) {
-            console.error("Error calculating timeline:", error);
+      try {
+        let currentDate = new Date(newProposal.timeline.startDate);
+        if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
+        for (const phase of newProposal.timeline.phases) {
+          currentDate = add(currentDate, { weeks: Number(phase.durationWeeks || 0) });
         }
+        newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
+      } catch (error) {
+        console.error("Error calculating timeline:", error);
+      }
     }
-    
+
     setProposal(newProposal);
     setProposalJson(JSON.stringify(newProposal, null, 2));
   };
 
   const handleSectionUpdate = (sectionKey: SectionName, newContent: string) => {
     setState({
-        ...state,
-        sections: { ...state.sections, [sectionKey]: newContent },
-        lastGenerated: state.lastGenerated, // Keep lastGenerated
+      ...state,
+      sections: { ...state.sections, [sectionKey]: newContent },
+      lastGenerated: state.lastGenerated, // Keep lastGenerated
     });
   };
 
+  const handleDiagramCodeUpdate = (diagramType: DiagramType, code: string) => {
+    setState({
+      ...state,
+      diagrams: {
+        ...state.diagrams,
+        [diagramType]: {
+          ...state.diagrams?.[diagramType],
+          plantUmlCode: code,
+        },
+      },
+      lastGenerated: state.lastGenerated, // Keep lastGenerated
+    });
+  };
+
+  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
+    setState({
+      ...state,
+      // Logic to trigger diagram generation from code would go here
+      // For now, this function exists to match the prop type expected by ReportResults
+    });
+  };
   const handleSubmit = (formData: FormData) => {
     const item = formData.get('itemToGenerate') as string;
     if (!item) return;
@@ -156,13 +177,13 @@ export default function ReportGenerator() {
       setGeneratingItem(null);
     });
   };
-  
+
   if (!isLoaded || !agentsLoaded) {
-      return (
-          <div className="flex justify-center items-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-      )
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   return (
@@ -175,24 +196,24 @@ export default function ReportGenerator() {
       />
 
       <form action={handleSubmit}>
-         {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
-         {state.sections && <input type="hidden" name="sectionsJson" value={JSON.stringify(state.sections)} />}
-         {state.diagrams && <input type="hidden" name="diagramsJson" value={JSON.stringify(state.diagrams)} />}
-         
+        {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
+        {state.sections && <input type="hidden" name="sectionsJson" value={JSON.stringify(state.sections)} />}
+        {state.diagrams && <input type="hidden" name="diagramsJson" value={JSON.stringify(state.diagrams)} />}
+
         <div className={`grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4 ${!proposalJson ? 'opacity-50 pointer-events-none' : ''}`}>
           <div className="md:col-span-2 space-y-6">
-            <ProposalEditor 
-                proposalJson={proposalJson} 
-                onProposalJsonChange={handleProposalJsonChange}
-                isDisabled={!proposalJson}
-                error={state?.error && !generatingItem ? state.error : undefined}
+            <ProposalEditor
+              proposalJson={proposalJson}
+              onProposalJsonChange={handleProposalJsonChange}
+              isDisabled={!proposalJson}
+              error={state?.error && !generatingItem ? state.error : undefined}
             />
-            <GenerationTools 
-                reportState={state}
-                isPending={isGenerating}
-                generatingItem={generatingItem}
-                contextSelections={contextSelections}
-                onContextToggle={toggleContextSelection}
+            <GenerationTools
+              reportState={state}
+              isPending={isGenerating}
+              generatingItem={generatingItem}
+              contextSelections={contextSelections}
+              onContextToggle={toggleContextSelection}
             />
           </div>
           <div className="md:col-span-3 space-y-6">
@@ -209,6 +230,8 @@ export default function ReportGenerator() {
               proposal={proposal}
               onProposalUpdate={handleProposalUpdate}
               onSectionUpdate={handleSectionUpdate}
+              onDiagramCodeUpdate={handleDiagramCodeUpdate}
+              onDiagramUpdate={handleDiagramUpdate}
             />
           </div>
         </div>

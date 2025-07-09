@@ -113,7 +113,7 @@ const academicStyles: IStylesOptions = {
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
         run: { ...p.run, font: { name: 'Garamond' }, size: 24 },
-        paragraph: { ...p.paragraph, spacing: { ...p.paragraph?.spacing, line: 480 }}
+        paragraph: { ...p.paragraph, spacing: { ...p.paragraph?.spacing, line: 480 } }
     })),
     characterStyles: commonCharacterStyles,
 };

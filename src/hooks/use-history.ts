@@ -22,7 +22,7 @@ export function useHistory() {
     setIsLoaded(true);
   }, []);
 
-  const addHistoryEntry = useCallback((entry: Omit<HistoryEntry, 'id' | 'createdAt'>) => {
+  const addHistoryEntry = useCallback((entry: HistoryEntry) => {
     const newEntry: HistoryEntry = {
       ...entry,
       id: new Date().toISOString(),
@@ -39,13 +39,13 @@ export function useHistory() {
       return updatedHistory;
     });
   }, []);
-  
+
   const clearHistory = useCallback(() => {
     setHistory([]);
     try {
-        localStorage.removeItem(HISTORY_KEY);
+      localStorage.removeItem(HISTORY_KEY);
     } catch (error) {
-        console.error('Failed to clear history from localStorage', error);
+      console.error('Failed to clear history from localStorage', error);
     }
   }, []);
 

@@ -62,7 +62,7 @@ export function useReportBuilder() {
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (error) {
-       console.error("Failed to save state to localStorage", error);
+      console.error("Failed to save state to localStorage", error);
     }
   }, [state, proposalJson, projectIdea, isLoaded, contextSelections]);
 
@@ -74,7 +74,7 @@ export function useReportBuilder() {
     setProposal(null);
     setContextSelections({});
   }, []);
-  
+
   const processGeneratedItem = useCallback((newState: ReportState) => {
     setState(newState);
 
@@ -82,47 +82,53 @@ export function useReportBuilder() {
 
     let proposalTitle = 'Project Report';
     try {
-        const parsed = JSON.parse(proposalJson);
-        if (parsed && parsed.title) {
-            proposalTitle = parsed.title;
-        }
+      const parsed = JSON.parse(proposalJson);
+      if (parsed && parsed.title) {
+        proposalTitle = parsed.title;
+      }
     } catch (e) { /* ignore */ }
 
     const lastItemKey = newState.lastGenerated;
-    
+
     if (SectionNameSchema.options.includes(lastItemKey as SectionName)) {
-        const section = lastItemKey as SectionName;
-        addHistoryEntry({
-            type: 'report',
-            title: `Report Section: ${sectionConfig[section].title}`,
-            proposalTitle,
-            section: section,
-            content: newState.sections[section]!,
-        });
+      const section = lastItemKey as SectionName;
+      const historyEntry = {
+        id: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        type: 'report' as const, // Explicitly set type as literal 'report'
+        title: `Report Section: ${sectionConfig[section].title}`,
+        proposalTitle,
+        section: section,
+        content: newState.sections[section]!,
+      };
+      addHistoryEntry(historyEntry);
     } else if (DiagramTypeSchema.options.includes(lastItemKey as DiagramType)) {
-        const diagram = lastItemKey as DiagramType;
-        const diagramData = newState.diagrams?.[diagram];
-        if (diagramData) {
-            addHistoryEntry({
-                type: 'diagram',
-                title: `Diagram: ${diagramConfig[diagram].title}`,
-                diagramType: diagram,
-                plantUmlCode: diagramData.plantUmlCode,
-                imageUrl: diagramData.imageUrl,
-                proposalTitle: proposalTitle,
-            });
-        }
+      const diagram = lastItemKey as DiagramType;
+      const diagramData = newState.diagrams?.[diagram];
+      if (diagramData) {
+        const historyEntry = {
+          id: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          type: 'diagram' as const,
+          title: `Diagram: ${diagramConfig[diagram].title}`,
+          diagramType: diagram,
+          plantUmlCode: diagramData.plantUmlCode,
+          imageUrl: diagramData.imageUrl,
+          proposalTitle,
+        };
+        addHistoryEntry(historyEntry);
+      }
     }
   }, [addHistoryEntry, proposalJson]);
 
   const toggleContextSelection = useCallback((parentKey: string, contextKey: string) => {
     setContextSelections(prev => {
-        const newSelections = JSON.parse(JSON.stringify(prev));
-        if (!newSelections[parentKey]) {
-            newSelections[parentKey] = {};
-        }
-        newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
-        return newSelections;
+      const newSelections = JSON.parse(JSON.stringify(prev));
+      if (!newSelections[parentKey]) {
+        newSelections[parentKey] = {};
+      }
+      newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
+      return newSelections;
     });
   }, []);
 
