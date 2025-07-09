@@ -5,6 +5,7 @@ import { users, projects, comments, media, tags, projectTags, skills, userSkills
 import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { summarizeProject } from '@/ai/flows/summarize-project';
+import { AGENTS } from '../agents';
 
 export async function getFeaturedProjects() {
     const data = await db.query.projects.findMany({
@@ -148,44 +149,91 @@ export async function createProject(data: {
     reportSections?: string;
     reportDiagrams?: string;
 }) {
-    return await db.transaction(async (tx) => {
-        // 1. Create the project
-        const newProjectId = `proj-${randomUUID()}`;
-        await tx.insert(projects).values({
+    // --- Start async operations ---
+
+    const summarizerAgent = AGENTS.find(a => a.id === 'summarize-project');
+    if (!summarizerAgent) {
+        throw new Error("Summarizer agent not found.");
+    }
+    
+    // 1. Generate summary and technologies
+    const summaryResult = await summarizeProject({
+        projectDescription: data.description,
+        prompt: summarizerAgent.prompt,
+    });
+    
+    // 2. Prepare tags
+    let allTagIds: number[] = [];
+    if (data.tags.length > 0) {
+        const existingTags = await db.select().from(tags).where(inArray(tags.name, data.tags));
+        const existingTagNames = new Set(existingTags.map(t => t.name));
+        const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+
+        if (newTagNames.length > 0) {
+            const newTags = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
+            existingTags.push(...newTags);
+        }
+        
+        const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
+        allTagIds = data.tags.map(tagName => tagMap.get(tagName)!).filter(id => id !== undefined);
+    }
+
+    // 3. Prepare technologies
+    let allTechIds: number[] = [];
+    if (summaryResult.technologies.length > 0) {
+        const existingTechs = await db.select().from(technologies).where(inArray(technologies.name, summaryResult.technologies));
+        const existingTechNames = new Set(existingTechs.map(t => t.name));
+        const newTechNames = summaryResult.technologies.filter(t => !existingTechNames.has(t));
+        
+        if (newTechNames.length > 0) {
+            const newTechs = await db.insert(technologies).values(newTechNames.map(name => ({ name }))).returning();
+            existingTechs.push(...newTechs);
+        }
+
+        const techMap = new Map(existingTechs.map(t => [t.name, t.id]));
+        allTechIds = summaryResult.technologies.map(techName => techMap.get(techName)!).filter(id => id !== undefined);
+    }
+    
+    // --- End async operations ---
+
+    const newProjectId = `proj-${randomUUID()}`;
+
+    // --- Start synchronous transaction ---
+    db.transaction((tx) => {
+        // Insert project
+        tx.insert(projects).values({
             id: newProjectId,
             userId: data.userId,
             title: data.title,
             description: data.description,
             category: data.category,
             liveLink: data.liveLink,
+            summaryShort: summaryResult.summary,
             createdAt: new Date().toISOString(),
             proposalData: data.proposalData,
             reportSections: data.reportSections,
             reportDiagrams: data.reportDiagrams,
-        });
+        }).run();
 
-        // 2. Handle tags
-        if (data.tags.length > 0) {
-            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
-            const existingTagNames = new Set(existingTags.map(t => t.name));
-            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
-
-            if (newTagNames.length > 0) {
-                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
-                existingTags.push(...newTags);
-            }
-            
-            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
-
-            await tx.insert(projectTags).values(data.tags.map(tagName => {
-                const tagId = tagMap.get(tagName);
-                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
-                return { projectId: newProjectId, tagId };
-            }));
+        // Insert project tags
+        if (allTagIds.length > 0) {
+            tx.insert(projectTags).values(allTagIds.map(tagId => ({
+                projectId: newProjectId,
+                tagId,
+            }))).run();
         }
 
+        // Insert summary technologies
+        if (allTechIds.length > 0) {
+             tx.insert(summaryTechnologies).values(allTechIds.map(technologyId => ({
+                projectId: newProjectId,
+                technologyId,
+            }))).run();
+        }
+
+        // Insert media
         if (data.media.length > 0) {
-            await tx.insert(media).values(data.media.map(m => ({
+            tx.insert(media).values(data.media.map(m => ({
                 projectId: newProjectId,
                 url: m.url,
                 alt: m.alt,
@@ -193,12 +241,12 @@ export async function createProject(data: {
                 type: m.type,
             }))).run();
         }
-
-        return newProjectId;
     });
+    // --- End synchronous transaction ---
 
     return newProjectId;
 }
+
 
 export async function updateProject(projectId: string, data: {
     title: string;
@@ -208,38 +256,40 @@ export async function updateProject(projectId: string, data: {
     tags: string[];
     media: { url: string; alt: string; aiHint?: string; type: 'image' | 'video' }[];
 }) {
-    return await db.transaction(async (tx) => {
-        // 1. Update the project details
-        await tx.update(projects).set({
+    // 1. Handle tags asynchronously
+    let allTagIds: number[] = [];
+    if (data.tags.length > 0) {
+        const existingTags = await db.select().from(tags).where(inArray(tags.name, data.tags));
+        const existingTagNames = new Set(existingTags.map(t => t.name));
+        const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
+
+        if (newTagNames.length > 0) {
+            const newTags = await db.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
+            existingTags.push(...newTags);
+        }
+        
+        const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
+        allTagIds = data.tags.map(tagName => tagMap.get(tagName)!).filter(id => id !== undefined);
+    }
+    
+    // 2. Perform writes synchronously
+    db.transaction((tx) => {
+        // Update project details
+        tx.update(projects).set({
             title: data.title,
             description: data.description,
             category: data.category,
             liveLink: data.liveLink || null,
-        }).where(eq(projects.id, projectId));
+        }).where(eq(projects.id, projectId)).run();
 
-        // 2. Handle tags (delete old, add new)
-        await tx.delete(projectTags).where(eq(projectTags.projectId, projectId));
-        if (data.tags.length > 0) {
-            const existingTags = await tx.select().from(tags).where(inArray(tags.name, data.tags));
-            const existingTagNames = new Set(existingTags.map(t => t.name));
-            const newTagNames = data.tags.filter(t => !existingTagNames.has(t));
-
-            if (newTagNames.length > 0) {
-                const newTags = await tx.insert(tags).values(newTagNames.map(name => ({ name }))).returning();
-                existingTags.push(...newTags);
-            }
-            
-            const tagMap = new Map(existingTags.map(t => [t.name, t.id]));
-
-            await tx.insert(projectTags).values(data.tags.map(tagName => {
-                const tagId = tagMap.get(tagName);
-                if (!tagId) throw new Error(`Could not find or create tag: ${tagName}`);
-                return { projectId, tagId };
-            }));
+        // Handle tags
+        tx.delete(projectTags).where(eq(projectTags.projectId, projectId)).run();
+        if (allTagIds.length > 0) {
+            tx.insert(projectTags).values(allTagIds.map(tagId => ({ projectId, tagId }))).run();
         }
 
-        // 3. Handle media (delete old, add new)
-        await tx.delete(media).where(eq(media.projectId, projectId));
+        // Handle media
+        tx.delete(media).where(eq(media.projectId, projectId)).run();
         if (data.media.length > 0) {
             tx.insert(media).values(data.media.map(m => ({
                 projectId,
