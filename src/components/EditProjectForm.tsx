@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { handleUpdateProject, handleDeleteProject, type UpdateProjectState } from '@/app/projects/[id]/edit/actions';
 import type { ProjectDetail } from '@/lib/db/queries';
@@ -46,7 +47,7 @@ function SubmitButton() {
   );
 }
 
-function DeleteButton({ projectId }: { projectId: string }) {
+function DeleteButton() {
     const { pending } = useFormStatus();
     return (
          <Button type="submit" variant="destructive" disabled={pending}>
@@ -58,12 +59,25 @@ function DeleteButton({ projectId }: { projectId: string }) {
 export default function EditProjectForm({ categories, project }: { categories: string[], project: NonNullable<ProjectDetail> }) {
   const router = useRouter();
   const { toast } = useToast();
-  const initialState: UpdateProjectState = { errors: {} };
-  const [state, formAction] = useActionState(handleUpdateProject, initialState);
+  const updateInitialState: UpdateProjectState = { errors: {} };
+  const [updateState, updateFormAction] = useActionState(handleUpdateProject, updateInitialState);
+
+  const deleteInitialState: { error?: string; success?: boolean } = { error: undefined, success: undefined };
+  const [deleteState, deleteFormAction] = useActionState(handleDeleteProject, deleteInitialState);
   
   const [mediaItems, setMediaItems] = useState(
     project.media.map((m, i) => ({ id: i, url: m.url, alt: m.alt, aiHint: m.aiHint || '' }))
   );
+
+  useEffect(() => {
+    if (deleteState?.error) {
+        toast({ title: 'خطأ', description: deleteState.error, variant: 'destructive'});
+    }
+    if (deleteState?.success) {
+        toast({ title: 'نجاح', description: 'تم حذف المشروع بنجاح.'});
+        router.push('/projects');
+    }
+  }, [deleteState, router, toast]);
 
   const addMediaItem = () => {
     setMediaItems([...mediaItems, { id: Date.now(), url: '', alt: '', aiHint: '' }]);
@@ -77,19 +91,9 @@ export default function EditProjectForm({ categories, project }: { categories: s
     setMediaItems(mediaItems.map(item => item.id === id ? { ...item, [field]: value } : item));
   }
   
-  const handleDeleteAction = async (formData: FormData) => {
-    const res = await handleDeleteProject(formData);
-    if(res.error) {
-        toast({ title: 'خطأ', description: res.error, variant: 'destructive'});
-    } else {
-        toast({ title: 'نجاح', description: 'تم حذف المشروع بنجاح.'});
-        router.push('/projects');
-    }
-  }
-
   return (
     <>
-      <form action={formAction}>
+      <form action={updateFormAction}>
         <input type="hidden" name="projectId" value={project.id} />
         <Card>
           <CardHeader>
@@ -99,13 +103,13 @@ export default function EditProjectForm({ categories, project }: { categories: s
             <div className="space-y-2">
               <Label htmlFor="title">عنوان المشروع</Label>
               <Input id="title" name="title" defaultValue={project.title} required />
-              {state.errors?.title && <p className="text-sm text-destructive">{state.errors.title[0]}</p>}
+              {updateState.errors?.title && <p className="text-sm text-destructive">{updateState.errors.title[0]}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="description">وصف المشروع</Label>
               <Textarea id="description" name="description" defaultValue={project.description} rows={5} required />
-              {state.errors?.description && <p className="text-sm text-destructive">{state.errors.description[0]}</p>}
+              {updateState.errors?.description && <p className="text-sm text-destructive">{updateState.errors.description[0]}</p>}
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -121,20 +125,20 @@ export default function EditProjectForm({ categories, project }: { categories: s
                     ))}
                   </SelectContent>
                 </Select>
-                {state.errors?.category && <p className="text-sm text-destructive">{state.errors.category[0]}</p>}
+                {updateState.errors?.category && <p className="text-sm text-destructive">{updateState.errors.category[0]}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tags">الوسوم</Label>
                 <Input id="tags" name="tags" defaultValue={project.projectTags.map(pt => pt.tag.name).join(', ')} required />
                 <p className="text-xs text-muted-foreground">افصل بين الوسوم بفاصلة (,).</p>
-                {state.errors?.tags && <p className="text-sm text-destructive">{state.errors.tags[0]}</p>}
+                {updateState.errors?.tags && <p className="text-sm text-destructive">{updateState.errors.tags[0]}</p>}
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="liveLink">رابط مباشر (اختياري)</Label>
               <Input id="liveLink" name="liveLink" defaultValue={project.liveLink || ''} type="url" />
-              {state.errors?.liveLink && <p className="text-sm text-destructive">{state.errors.liveLink[0]}</p>}
+              {updateState.errors?.liveLink && <p className="text-sm text-destructive">{updateState.errors.liveLink[0]}</p>}
             </div>
 
             <div className="space-y-4">
@@ -167,7 +171,7 @@ export default function EditProjectForm({ categories, project }: { categories: s
                   </div>
                 </div>
               ))}
-              {state.errors?.mediaUrls && <p className="text-sm text-destructive">{state.errors.mediaUrls[0]}</p>}
+              {updateState.errors?.mediaUrls && <p className="text-sm text-destructive">{updateState.errors.mediaUrls[0]}</p>}
               <Button type="button" variant="outline" onClick={addMediaItem}>
                 <Plus className="ml-2 h-4 w-4" />
                 إضافة وسائط أخرى
@@ -175,8 +179,8 @@ export default function EditProjectForm({ categories, project }: { categories: s
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4 p-6 border-t">
-              {state.errors?._form && (
-                  <p className="text-sm font-medium text-destructive">{state.errors._form}</p>
+              {updateState.errors?._form && (
+                  <p className="text-sm font-medium text-destructive">{updateState.errors._form}</p>
               )}
               <SubmitButton />
           </CardFooter>
@@ -204,9 +208,9 @@ export default function EditProjectForm({ categories, project }: { categories: s
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <form action={handleDeleteAction}>
+              <form action={deleteFormAction}>
                 <input type="hidden" name="projectId" value={project.id} />
-                <DeleteButton projectId={project.id} />
+                <DeleteButton />
               </form>
             </AlertDialogFooter>
           </AlertDialogContent>

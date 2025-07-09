@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -97,7 +98,7 @@ const deleteSchema = z.object({
     projectId: z.string(),
 });
 
-export async function handleDeleteProject(formData: FormData) {
+export async function handleDeleteProject(prevState: { error?: string; success?: boolean }, formData: FormData) {
     const validatedFields = deleteSchema.safeParse({
         projectId: formData.get('projectId'),
     });
