@@ -76,23 +76,13 @@ function encode64(data: Buffer): string {
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
-  const fallbackUrl = 'https://placehold.co/800x600.png';
-  try {
     const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
     const encoded = encode64(compressed);
     const plantUmlUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-    // No need for a proxy here, as we are on the server.
-    const res = await fetch(plantUmlUrl);
-    if (!res.ok) {
-      console.warn(`PlantUML image generation failed with status ${res.status} for ${plantUmlUrl}. Falling back to placeholder.`);
-      return fallbackUrl;
-    }
-    return plantUmlUrl;
-  } catch (e) {
-    console.error("Error generating PlantUML image URL:", e);
-    return fallbackUrl;
-  }
+    // Use the local proxy to cache and optimize the image
+    return `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
 }
+
 
 export async function handleGenerateReportItem(
   prevState: ReportState,
@@ -299,7 +289,8 @@ export async function handleCreateProjectFromProposal(
   });
 
   if (!validatedFields.success) {
-    return { error: 'Invalid proposal data.' };
+    const errors = validatedFields.error.flatten().fieldErrors;
+    return { error: `Invalid data: ${Object.values(errors).flat().join(', ')}` };
   }
 
   let proposal: ProjectProposal;

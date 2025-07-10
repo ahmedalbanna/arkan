@@ -36,6 +36,7 @@ export default function DiagramViewer({
     const handleDownload = async () => {
         setIsDownloading(true);
         try {
+            // We use the proxied URL for the download to leverage caching
             const response = await fetch(imageUrl);
             const blob = await response.blob();
             saveAs(blob, `${title.replace(/ /g, '_')}.png`);

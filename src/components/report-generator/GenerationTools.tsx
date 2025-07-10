@@ -92,6 +92,7 @@ function GenerateItemButton({ itemKey, title, isPending, generatingItem }: Gener
 }
 
 interface GenerationToolsProps {
+    isDisabled: boolean;
     reportState: ReportState;
     isPending: boolean;
     generatingItem: string | null;
@@ -99,7 +100,7 @@ interface GenerationToolsProps {
     onContextToggle: (parentKey: string, contextKey: string) => void;
 }
 
-export const GenerationTools = ({ reportState, isPending, generatingItem, contextSelections, onContextToggle }: GenerationToolsProps) => {
+export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
@@ -138,7 +139,7 @@ export const GenerationTools = ({ reportState, isPending, generatingItem, contex
     }
 
     return (
-        <Card>
+        <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
                 <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
                 <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>

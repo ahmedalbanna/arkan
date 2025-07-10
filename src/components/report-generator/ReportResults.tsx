@@ -116,6 +116,7 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                   </Card>
                 )
               }
+              if(!diagramData) return null;
 
               const isUpdating = generatingItem === key;
 
@@ -129,12 +130,12 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                   <AccordionContent className="p-4 border-t space-y-4">
                     <DiagramViewer
                       title={title}
-                      imageUrl={diagramData!.imageUrl}
-                      plantUmlCode={diagramData!.plantUmlCode}
+                      imageUrl={diagramData.imageUrl}
+                      plantUmlCode={diagramData.plantUmlCode}
                       onCodeChange={(newCode) => onDiagramCodeUpdate(key, newCode)}
                     />
                     <Button
-                      onClick={() => onDiagramUpdate(key, diagramData!.plantUmlCode)}
+                      onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}
                       className="font-headline"
                       disabled={isUpdating}
                     >
