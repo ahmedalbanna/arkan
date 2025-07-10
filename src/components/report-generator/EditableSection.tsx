@@ -118,7 +118,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 />
             );
         }
-
+        
         return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
     }
 
@@ -133,7 +133,9 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
                 className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
             >
-                {renderEditableContent()}
+                <div className="prose dark:prose-invert max-w-none">
+                  {renderEditableContent()}
+                </div>
 
                 <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                     <PopoverTrigger asChild>
