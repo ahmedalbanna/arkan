@@ -4,6 +4,7 @@
 import { z } from 'zod';
 import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
 import { deflateSync } from 'zlib';
+import { AGENTS } from '@/lib/agents';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
@@ -75,29 +76,22 @@ function encode64(data: Buffer): string {
 }
 
 async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
+  const fallbackUrl = 'https://placehold.co/800x600.png';
   try {
     const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
     const encoded = encode64(compressed);
     const plantUmlUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
-    
-    // We do a test fetch to see if the URL is valid. If not, we'll use a fallback.
-    const res = await fetch(proxyUrl.startsWith('/') ? new URL(proxyUrl, 'http://localhost:9002').toString() : proxyUrl);
+    // No need for a proxy here, as we are on the server.
+    const res = await fetch(plantUmlUrl);
     if (!res.ok) {
       console.warn(`PlantUML image generation failed with status ${res.status} for ${plantUmlUrl}. Falling back to placeholder.`);
-      return getFallbackImageUrl();
+      return fallbackUrl;
     }
-    return proxyUrl;
+    return plantUmlUrl;
   } catch (e) {
     console.error("Error generating PlantUML image URL:", e);
-    return getFallbackImageUrl();
+    return fallbackUrl;
   }
-}
-
-async function getFallbackImageUrl(): Promise<string> {
-  const placeholderUrl = 'https://placehold.co/800x600.png';
-  const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
-  return proxyUrl;
 }
 
 export async function handleGenerateReportItem(
@@ -125,7 +119,7 @@ export async function handleGenerateReportItem(
       };
       return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramType };
     } catch (e) {
-      console.error(e);
+      console.error(`Error updating diagram '${diagramType}':`, e);
       return { ...prevState, error: `An error occurred while updating diagram '${diagramType}'.` };
     }
   }
@@ -138,9 +132,10 @@ export async function handleGenerateReportItem(
 
   if (!validatedFields.success) {
     const errors = validatedFields.error.flatten().fieldErrors;
+    const errorMessage = Object.values(errors).flat().join(', ');
     return {
       ...prevState,
-      error: errors.proposalJson?.[0] || errors.itemToGenerate?.[0],
+      error: `Invalid data: ${errorMessage}`,
     };
   }
 
@@ -162,10 +157,12 @@ export async function handleGenerateReportItem(
     };
   }
 
-  const prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
-  if (prompt === null) {
+  const itemToGenerateAgent = AGENTS.find(a => a.id === `generate-${itemToGenerate}`);
+  if (!itemToGenerateAgent) {
     return { ...prevState, error: `Prompt for item type '${itemToGenerate}' was not found.` };
   }
+  const prompt = itemToGenerateAgent.prompt;
+
 
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
   const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
@@ -174,7 +171,6 @@ export async function handleGenerateReportItem(
     return { ...prevState, error: 'Unknown item type requested.' };
   }
 
-  // --- Start: Collect Context ---
   const otherSections: Partial<Record<SectionName, string>> = {};
   const otherDiagrams: Partial<Record<DiagramType, string>> = {};
 
@@ -196,14 +192,13 @@ export async function handleGenerateReportItem(
       otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
     }
   }
-  // --- End: Collect Context ---
-
+  
   try {
     const agentInput = {
       proposal: validatedProposal.data,
       otherSections,
       otherDiagrams,
-      prompt: prompt!,
+      prompt: prompt,
     };
 
     if (isSection) {
@@ -270,7 +265,7 @@ export async function handleGenerateReportItem(
     return { ...prevState, error: 'An unexpected error occurred.' };
 
   } catch (e) {
-    console.error(e);
+    console.error(`Error generating item '${itemToGenerate}':`, e);
     return { ...prevState, error: `An error occurred while generating '${itemToGenerate}'. Please try again.` };
   }
 }
@@ -297,9 +292,9 @@ export async function handleCreateProjectFromProposal(
 
   let proposal: ProjectProposal;
   try {
-    proposal = JSON.parse(validatedFields.data.proposalJson);
+    proposal = JSON.parse(validatedFields.data.proposalJson || '{}');
   } catch (e) {
-    return { error: 'Invalid JSON format.' };
+    return { error: 'Invalid JSON format in proposal data.' };
   }
 
   const validatedProposal = ProjectProposalSchema.safeParse(proposal);
@@ -325,8 +320,8 @@ export async function handleCreateProjectFromProposal(
         type: 'image'
       }],
       proposalData: validatedFields.data.proposalJson,
-      reportSections: validatedFields.data.sectionsJson,
-      reportDiagrams: validatedFields.data.diagramsJson,
+      reportSections: validatedFields.data.sectionsJson || undefined,
+      reportDiagrams: validatedFields.data.diagramsJson || undefined,
     });
   } catch (error) {
     console.error('Failed to create project from proposal:', error);

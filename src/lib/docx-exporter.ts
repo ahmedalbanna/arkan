@@ -70,7 +70,7 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
             case 'heading':
                 docxObjects.push(new Paragraph({
                     children: transformInlines(node.children),
-                    heading: `Heading${node.depth}`,
+                    heading: `Heading${node.depth}` as any,
                 }));
                 break;
             case 'paragraph':
@@ -131,16 +131,18 @@ const numbering: INumberingOptions = {
     ],
 };
 
-async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer> {
-    const response = await fetch(imageUrl);
-    if (!response.ok) {
-        console.warn(`Failed to fetch proxied image from ${imageUrl}. Falling back to placeholder.`);
-        const placeholderUrl = 'https://placehold.co/800x600.png';
-        const placeholderProxyUrl = `/api/proxy-image?url=${encodeURIComponent(placeholderUrl)}`;
-        const placeholderResponse = await fetch(placeholderProxyUrl);
-        return placeholderResponse.arrayBuffer();
+async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | null> {
+    try {
+        const response = await fetch(imageUrl);
+        if (!response.ok) {
+            console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.status}`);
+            return null;
+        }
+        return response.arrayBuffer();
+    } catch (error) {
+        console.error(`Error fetching image from ${imageUrl}:`, error);
+        return null;
     }
-    return response.arrayBuffer();
 }
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
@@ -258,32 +260,40 @@ export async function exportReportAsDocx(
         }
     }
 
-    const hasDiagrams = diagrams && Object.values(diagrams).some(d => !!d);
+    const diagramEntries = orderedDiagrams.map(key => diagrams[key]).filter(Boolean) as { imageUrl: string; }[];
+    const hasDiagrams = diagramEntries.length > 0;
 
     if (hasDiagrams) {
         reportBody.push(new Paragraph({ text: "Appendices: Diagrams", heading: HeadingLevel.HEADING_1, pageBreakBefore: true }));
 
-        for (const key of orderedDiagrams) {
+        const imagePromises = orderedDiagrams.map(key => {
             const diagramData = diagrams[key];
-            if (diagramData) {
-                try {
-                    const imageBuffer = await getProxiedImageBuffer(diagramData.imageUrl);
-                    reportBody.push(new Paragraph({
-                        text: diagramConfig[key].title,
-                        heading: HeadingLevel.HEADING_2,
-                    }));
-                    reportBody.push(new Paragraph({
-                        children: [new ImageRun({
-                            data: imageBuffer,
-                            transformation: { width: 550, height: 400 },
-                        })],
-                        alignment: AlignmentType.CENTER,
-                    }));
+            if (!diagramData) return Promise.resolve(null);
+            return getProxiedImageBuffer(diagramData.imageUrl).then(buffer => ({
+                key,
+                buffer
+            }));
+        });
+        
+        const imageResults = await Promise.all(imagePromises);
 
-                } catch (error) {
-                    console.error(`Failed to embed image for ${key}:`, error);
-                    reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[key].title}]` }));
-                }
+        for (const result of imageResults) {
+            if (result && result.buffer) {
+                const { key, buffer } = result;
+                reportBody.push(new Paragraph({
+                    text: diagramConfig[key as DiagramType].title,
+                    heading: HeadingLevel.HEADING_2,
+                }));
+                reportBody.push(new Paragraph({
+                    children: [new ImageRun({
+                        data: buffer,
+                        transformation: { width: 550, height: 400 },
+                    })],
+                    alignment: AlignmentType.CENTER,
+                }));
+            } else if (result) {
+                // Handle cases where image fetching failed
+                reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[result.key as DiagramType].title}]` }));
             }
         }
     }
