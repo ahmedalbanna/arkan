@@ -2,7 +2,7 @@
 'use client';
 
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import { CardTitle, Card, CardContent } from '@/components/ui/card';
+import { CardTitle, Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import ProposalViewer from '@/components/ProposalViewer';
 import { Button } from '@/components/ui/button';
