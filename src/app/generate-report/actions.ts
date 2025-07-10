@@ -156,12 +156,12 @@ export async function handleGenerateReportItem(
       error: 'The proposal data does not match the required structure.',
     };
   }
+  const prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
+  if (prompt === null) {
 
-  const itemToGenerateAgent = AGENTS.find(a => a.id === `generate-${itemToGenerate}`);
-  if (!itemToGenerateAgent) {
     return { ...prevState, error: `Prompt for item type '${itemToGenerate}' was not found.` };
   }
-  const prompt = itemToGenerateAgent.prompt;
+
 
 
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
@@ -198,7 +198,7 @@ export async function handleGenerateReportItem(
       proposal: validatedProposal.data,
       otherSections,
       otherDiagrams,
-      prompt: prompt,
+      prompt: prompt!,
     };
 
     if (isSection) {
