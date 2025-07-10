@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -33,30 +34,30 @@ const generateActivityDiagramFlow = ai.defineFlow(
     inputSchema: GenerateActivityDiagramInputSchema,
     outputSchema: GenerateActivityDiagramOutputSchema,
   },
-  async (input) => {
-    const fullPrompt = `${input.prompt}
+  async ({ proposal, otherSections, otherDiagrams, prompt: basePrompt }) => {
 
-To ensure your response is consistent and well-integrated with the rest of the document, please consider the context from the sections and diagrams that have already been generated:
-{{#if otherSections}}
---- PREVIOUSLY GENERATED SECTIONS ---
-{{#each otherSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if otherDiagrams}}
---- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
+    const contextContent = [];
+    if (otherSections && Object.keys(otherSections).length > 0) {
+        contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
+        for (const [sectionName, content] of Object.entries(otherSections)) {
+            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+        }
+    }
+    if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
+        contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
+        for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
+            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+        }
+    }
+    const contextString = contextContent.join('\n\n');
+
+    const fullPrompt = `${basePrompt}
+    
+${contextString}
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{json proposal}}}
+${JSON.stringify(proposal, null, 2)}
 \`\`\`
 `;
     const prompt = ai.definePrompt({
@@ -65,7 +66,7 @@ To ensure your response is consistent and well-integrated with the rest of the d
       output: { schema: GenerateActivityDiagramOutputSchema },
       prompt: fullPrompt,
     });
-    const { output } = await prompt(input);
+    const { output } = await prompt({ proposal, otherSections, otherDiagrams, prompt: basePrompt });
     return output!;
   }
 );
