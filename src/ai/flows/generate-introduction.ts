@@ -17,7 +17,7 @@ const GenerateIntroductionInputSchema = z.object({
   proposal: ProjectProposalSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  prompt: z.string().describe("The prompt to use for generating the introduction.")
+  prompt: z.string().describe("The full prompt to use for generating the introduction, including context.")
 });
 export type GenerateIntroductionInput = z.infer<typeof GenerateIntroductionInputSchema>;
 
@@ -36,40 +36,15 @@ const generateIntroductionFlow = ai.defineFlow(
     inputSchema: GenerateIntroductionInputSchema,
     outputSchema: GenerateIntroductionOutputSchema,
   },
-  async ({ proposal, otherSections, otherDiagrams, prompt: basePrompt }) => {
-
-    const contextContent = [];
-    if (otherSections && Object.keys(otherSections).length > 0) {
-        contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
-        for (const [sectionName, content] of Object.entries(otherSections)) {
-            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
-        }
-    }
-    if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
-        contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
-        for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
-            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
-        }
-    }
-    const contextString = contextContent.join('\n\n');
-
-    const fullPrompt = `${basePrompt}
-    
-${contextString}
-
---- Main Input: Project Proposal ---
-\`\`\`json
-${JSON.stringify(proposal, null, 2)}
-\`\`\`
-`;
+  async (input) => {
     const generateIntroductionPrompt = ai.definePrompt({
       name: 'generateIntroductionPrompt',
       input: { schema: GenerateIntroductionInputSchema },
       output: { schema: GenerateIntroductionOutputSchema },
-      prompt: fullPrompt,
+      prompt: input.prompt, // Use the fully composed prompt passed from the API layer
     });
 
-    const { output } = await generateIntroductionPrompt({ proposal, otherSections, otherDiagrams, prompt: basePrompt });
+    const { output } = await generateIntroductionPrompt(input);
     return output!;
   }
 );

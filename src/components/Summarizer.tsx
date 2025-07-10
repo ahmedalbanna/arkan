@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFormStatus } from 'react-dom';
@@ -45,7 +46,6 @@ export default function Summarizer() {
   return (
     <Card>
       <form action={formAction}>
-        {agent && <input type="hidden" name="prompt" value={agent.prompt} />}
         <CardHeader>
           <CardTitle className="font-headline">{t('summarizer.formTitle')}</CardTitle>
           <CardDescription>

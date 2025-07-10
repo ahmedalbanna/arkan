@@ -164,21 +164,30 @@ export async function handleGenerateReportItem(
 
 
 
+  // Check if the requested item to generate is a known section name or diagram type.
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
   const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
 
+  // If it's neither, return an error.
   if (!isSection && !isDiagram) {
     return { ...prevState, error: 'Unknown item type requested.' };
   }
 
+  // Initialize objects to hold content from other sections and diagrams
+  // that should be included as context for the generation.
   const otherSections: Partial<Record<SectionName, string>> = {};
   const otherDiagrams: Partial<Record<DiagramType, string>> = {};
 
+  // Get the current state of all available sections and diagrams.
+  // Use empty objects as fallbacks if prevState.sections or prevState.diagrams are undefined.
   const allAvailableSections = prevState.sections || {};
   const allAvailableDiagrams = prevState.diagrams || {};
 
+  // Iterate through all possible section names.
   for (const sectionKey of SectionNameSchema.options) {
+    // Skip the section that is currently being generated.
     if (sectionKey === itemToGenerate) continue;
+    // Construct the name of the checkbox for this section as context.
     const contextCheckboxName = `context_${itemToGenerate}_${sectionKey}`;
     if (formData.get(contextCheckboxName) === 'on' && allAvailableSections[sectionKey]) {
       otherSections[sectionKey] = allAvailableSections[sectionKey];
@@ -186,10 +195,13 @@ export async function handleGenerateReportItem(
   }
 
   for (const diagramKey of DiagramTypeSchema.options) {
+    // Skip the diagram that is currently being generated.
     if (diagramKey === itemToGenerate) continue;
+    // Construct the name of the checkbox for this diagram as context.
     const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
     if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
       otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
+      // Include the PlantUML code of the diagram if the context checkbox is checked and the diagram exists.
     }
   }
   

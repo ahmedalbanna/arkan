@@ -50,11 +50,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
     }
 
+    const contextContent = [];
+    if (otherSections && Object.keys(otherSections).length > 0) {
+        contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
+        for (const [sectionName, content] of Object.entries(otherSections)) {
+            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+        }
+    }
+    if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
+        contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
+        for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
+            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+        }
+    }
+    const contextString = contextContent.join('\n\n');
+
+    const fullPrompt = `${agent.prompt}
+    
+${contextString}
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+${JSON.stringify(proposal, null, 2)}
+\`\`\`
+`;
+
     const agentInput = {
       proposal,
       otherSections: otherSections || {},
       otherDiagrams: otherDiagrams || {},
-      prompt: agent.prompt
+      prompt: fullPrompt,
     };
 
     const result = await agentInfo.flow(agentInput);

@@ -14,15 +14,7 @@ import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
 import DiagramViewer from './DiagramViewer';
-
-const diagramConfig: { [key in DiagramType]: { title: string; agentId: string; } } = {
-    useCase: { title: "مخطط حالة الاستخدام (Use Case)", agentId: "generate-use-case-diagram" },
-    class: { title: "مخطط الأصناف (Class)", agentId: "generate-class-diagram" },
-    sequence: { title: "مخطط التسلسل (Sequence)", agentId: "generate-sequence-diagram" },
-    activity: { title: "مخطط النشاط (Activity)", agentId: "generate-activity-diagram" },
-    component: { title: "مخطط المكونات (Component)", agentId: "generate-component-diagram" },
-    archimate: { title: "مخطط ArchiMate", agentId: "generate-archimate-diagram" },
-};
+import { diagramConfig } from '@/lib/report-config';
 
 function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
     const { pending, data } = useFormStatus();
@@ -120,10 +112,6 @@ export default function DiagramGenerator() {
             {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
                 code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
             ))}
-            {diagramAgents.map((agent, index) => {
-                const key = orderedDiagrams[index];
-                return agent ? <input type="hidden" name={`prompt_${key}`} value={agent.prompt} key={key} /> : null
-            })}
             {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
             {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
 
