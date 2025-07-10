@@ -18,7 +18,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
-import { validateAndFixMarkdown } from '@/ai/flows/validate-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -39,7 +38,6 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [ast, setAst] = useState<object | null>(null);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
-    const [isProcessingValidation, setIsProcessingValidation] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
 
@@ -93,28 +91,6 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         } finally {
             setIsProcessingAi(false);
             setIsAiPopoverOpen(false);
-        }
-    };
-
-    const handleValidate = async () => {
-        if (readOnly) return;
-        setIsProcessingValidation(true);
-        try {
-            const corrected = await validateAndFixMarkdown(String(currentValue));
-            onUpdate?.(path, corrected);
-            toast({
-                title: "Markdown Validated",
-                description: "The markdown syntax has been checked and corrected.",
-            });
-        } catch (error) {
-            console.error("Validation failed:", error);
-            toast({
-                title: "Validation Failed",
-                description: "Could not validate the markdown. Please try again.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsProcessingValidation(false);
         }
     };
 
@@ -222,11 +198,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                                 </Button>
 
                                 <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Markdown Tools</p>
-
-                                <Button variant="ghost" className="justify-start" onClick={handleValidate} disabled={isProcessingValidation}>
-                                    {isProcessingValidation ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckSquare className="mr-2 h-4 w-4" />}
-                                    Validate
-                                </Button>
+                                
                                 <Button variant="ghost" className="justify-start" onClick={handleCopy}>
                                     <Copy className="mr-2 h-4 w-4" /> Copy
                                 </Button>
