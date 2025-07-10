@@ -15,15 +15,16 @@ import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProposalGeneratorProps {
+  isGenerating: boolean;
+  setIsGenerating: (isGenerating: boolean) => void;
   projectIdea: string;
   onProjectIdeaChange: (idea: string) => void;
   onProposalGenerated: (proposal: ProjectProposal) => void;
   onReset: () => void;
 }
 
-export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposalGenerated, onReset }: ProposalGeneratorProps) => {
+export const ProposalGenerator = ({ isGenerating, setIsGenerating, projectIdea, onProjectIdeaChange, onProposalGenerated, onReset }: ProposalGeneratorProps) => {
   const { t } = useLocalization();
-  const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const { agents } = useAgents();
   const { addHistoryEntry } = useHistory();
@@ -99,6 +100,7 @@ export const ProposalGenerator = ({ projectIdea, onProjectIdeaChange, onProposal
           required
           value={projectIdea}
           onChange={(e) => onProjectIdeaChange(e.target.value)}
+          disabled={isGenerating}
         />
         {error && <p className="text-sm font-medium text-destructive mt-2">{error}</p>}
       </CardContent>

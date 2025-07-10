@@ -34,6 +34,7 @@ function set(obj: any, path: string, value: any) {
 
 export default function ReportGenerator() {
   const [isGenerating, startTransition] = useTransition();
+  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
 
   const {
@@ -189,9 +190,14 @@ export default function ReportGenerator() {
       )
   }
 
+  const isAnythingGenerating = isGenerating || isGeneratingProposal;
+  const isToolsDisabled = !proposalJson || isAnythingGenerating;
+
   return (
     <div className="space-y-6">
       <ProposalGenerator
+        isGenerating={isGeneratingProposal}
+        setIsGenerating={setIsGeneratingProposal}
         projectIdea={projectIdea}
         onProjectIdeaChange={setProjectIdea}
         onProposalGenerated={handleProposalGenerated}
@@ -203,15 +209,16 @@ export default function ReportGenerator() {
          {state.sections && <input type="hidden" name="sectionsJson" value={JSON.stringify(state.sections)} />}
          {state.diagrams && <input type="hidden" name="diagramsJson" value={JSON.stringify(state.diagrams)} />}
          
-        <div className="grid grid-cols-1 md:grid-cols-5 sm:gap-2 lg:gap-4">
-          <div className="md:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-2 space-y-6">
             <ProposalEditor 
                 proposalJson={proposalJson} 
                 onProposalJsonChange={handleProposalJsonChange}
-                isDisabled={isGenerating}
+                isDisabled={isAnythingGenerating}
                 error={state?.error && !generatingItem ? state.error : undefined}
             />
             <GenerationTools 
+                isDisabled={isToolsDisabled}
                 reportState={state}
                 isPending={isGenerating}
                 generatingItem={generatingItem}
@@ -219,12 +226,12 @@ export default function ReportGenerator() {
                 onContextToggle={toggleContextSelection}
             />
           </div>
-          <div className="md:col-span-3 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <ReportActions
               proposal={proposal}
               reportState={state}
               onNewSession={handleNewSession}
-              isGenerating={isGenerating}
+              isGenerating={isAnythingGenerating}
               createFormAction={createFormAction}
             />
             <ReportResults
