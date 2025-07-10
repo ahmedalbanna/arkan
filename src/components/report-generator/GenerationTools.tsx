@@ -59,6 +59,16 @@ const generateInstructionText = (controls: ControlState, t: (key: string) => str
     return '';
 };
 
+const buildPrompt = (basePrompt: string, controlState: ControlState, t: (key: string) => string) => {
+ return `${basePrompt}${generateInstructionText(controlState, t)}`;
+}
+
+interface PromptsState {
+    [key: string]: string;
+}
+
+type SetPromptsState = React.Dispatch<React.SetStateAction<PromptsState>>;
+
 
 interface GenerateItemButtonProps {
     itemKey: string;
@@ -102,36 +112,38 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
     const { agents } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
     const [prompts, setPrompts] = useState<Record<string, string>>({});
-
-    useEffect(() => {
-        const initialPrompts: Record<string, string> = {};
-        agents.forEach(agent => {
-            initialPrompts[agent.id] = agent.prompt;
-        });
-        const allItems = [...orderedSections, ...orderedDiagrams];
-        const promptsByItemKey: Record<string, string> = {};
-        allItems.forEach(key => {
-            const config = (sectionConfig as any)[key] || (diagramConfig as any)[key];
-            if (config && initialPrompts[config.agentId]) {
-                promptsByItemKey[key] = initialPrompts[config.agentId];
-            }
-        });
-        setPrompts(promptsByItemKey);
-    }, [agents]);
-
+    
     useEffect(() => {
         const updatedPrompts = { ...prompts };
         let changed = false;
-        orderedSections.forEach(key => {
-            const agentId = sectionConfig[key as SectionName]?.agentId;
+
+        const allKeys = [...orderedSections, ...orderedDiagrams];
+
+        allKeys.forEach(key => {
+            const isSection = orderedSections.includes(key as SectionName);
+            const config = isSection
+                ? sectionConfig[key as SectionName]
+                : diagramConfig[key as DiagramType];
+
+            const agentId = config?.agentId;
             const basePrompt = agents.find(a => a.id === agentId)?.prompt;
+
             if (basePrompt) {
-                const instructions = generateInstructionText(controlState[key as SectionName], t);
-                const newPrompt = `${basePrompt}${instructions}`;
+                let newPrompt = basePrompt;
+                if (isSection) {
+                    // For sections, append instructions based on controlState
+                    newPrompt = buildPrompt(basePrompt, controlState[key as SectionName], t);
+                }
+                // For diagrams, just use the base prompt
+
                 if (updatedPrompts[key] !== newPrompt) {
                     updatedPrompts[key] = newPrompt;
                     changed = true;
                 }
+            } else if (!basePrompt && updatedPrompts[key]) {
+                // If agent is not found or disabled, clear the prompt
+                delete updatedPrompts[key];
+                changed = true;
             }
         });
         if (changed) {
