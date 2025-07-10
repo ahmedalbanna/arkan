@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionNameSchema, DiagramTypeSchema, type SectionName } from '@/ai/schemas';
+import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import { Loader2, Sparkles } from 'lucide-react';
 
@@ -54,9 +54,9 @@ const generateInstructionText = (controls: ControlState, t: (key: string) => str
     }
 
     if (instructions.length > 0) {
-        return `Additionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
+        return `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
     }
-    return t('reportGenerator.tool_instruction_none');
+    return '';
 };
 
 
@@ -101,6 +101,44 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
     const { t } = useLocalization();
     const { agents } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
+    const [prompts, setPrompts] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const initialPrompts: Record<string, string> = {};
+        agents.forEach(agent => {
+            initialPrompts[agent.id] = agent.prompt;
+        });
+        const allItems = [...orderedSections, ...orderedDiagrams];
+        const promptsByItemKey: Record<string, string> = {};
+        allItems.forEach(key => {
+            const config = (sectionConfig as any)[key] || (diagramConfig as any)[key];
+            if (config && initialPrompts[config.agentId]) {
+                promptsByItemKey[key] = initialPrompts[config.agentId];
+            }
+        });
+        setPrompts(promptsByItemKey);
+    }, [agents]);
+
+    useEffect(() => {
+        const updatedPrompts = { ...prompts };
+        let changed = false;
+        orderedSections.forEach(key => {
+            const agentId = sectionConfig[key as SectionName]?.agentId;
+            const basePrompt = agents.find(a => a.id === agentId)?.prompt;
+            if (basePrompt) {
+                const instructions = generateInstructionText(controlState[key as SectionName], t);
+                const newPrompt = `${basePrompt}${instructions}`;
+                if (updatedPrompts[key] !== newPrompt) {
+                    updatedPrompts[key] = newPrompt;
+                    changed = true;
+                }
+            }
+        });
+        if (changed) {
+            setPrompts(updatedPrompts);
+        }
+    }, [controlState, agents, prompts, t]);
+
 
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
         setControlState(prevState => ({
@@ -108,6 +146,10 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
             [section]: { ...prevState[section], [field]: value }
         }));
     };
+
+    const handlePromptChange = (key: string, value: string) => {
+        setPrompts(prev => ({ ...prev, [key]: value }));
+    }
 
     return (
         <fieldset disabled={isDisabled}>
@@ -142,7 +184,14 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                             <TabsContent value="prompt" className="pt-4">
                                                 <div className="space-y-2">
                                                     <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
-                                                    <Textarea id={`prompt-${key}`} name={`prompt_${key}`} defaultValue={agent.prompt} rows={10} className="font-mono text-sm" />
+                                                    <Textarea
+                                                        id={`prompt-${key}`}
+                                                        name={`prompt_${key}`}
+                                                        value={prompts[key] || ''}
+                                                        onChange={(e) => handlePromptChange(key, e.target.value)}
+                                                        rows={10}
+                                                        className="font-mono text-sm"
+                                                    />
                                                 </div>
                                             </TabsContent>
                                             {isSection && (
@@ -172,10 +221,6 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
                                                             <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
-                                                        </div>
-                                                        <div className="p-3 bg-muted/50 rounded-md text-xs text-muted-foreground space-y-1">
-                                                            <p className="font-semibold">{t('reportGenerator.tool_instruction_preview')}</p>
-                                                            <pre className="whitespace-pre-wrap font-mono text-primary/80">{generateInstructionText(controlState[key as SectionName], t)}</pre>
                                                         </div>
                                                     </div>
                                                 </TabsContent>
