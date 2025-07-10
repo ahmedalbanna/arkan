@@ -7,6 +7,7 @@ import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
+import { ThemeToggle } from '../ThemeToggle';
 
 export function Header() {
   const pathname = usePathname();
@@ -75,7 +76,8 @@ export function Header() {
           {renderNavLinks()}
         </nav>
 
-        <div className="flex-1 flex justify-end">
+        <div className="flex-1 flex justify-end items-center gap-2">
+          <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
           </Button>

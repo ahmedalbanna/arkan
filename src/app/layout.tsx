@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { LocalizationProvider } from '@/context/LocalizationContext';
 import LanguageDirectionManager from '@/components/LanguageDirectionManager';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -37,16 +38,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)}>
+    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
       <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
-        <LocalizationProvider>
-          <LanguageDirectionManager>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <Toaster />
-          </LanguageDirectionManager>
-        </LocalizationProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <LocalizationProvider>
+            <LanguageDirectionManager>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster />
+            </LanguageDirectionManager>
+          </LocalizationProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
