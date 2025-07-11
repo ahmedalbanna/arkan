@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     if (!agent) {
       return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
     }
-
+    
     const contextContent = [];
     if (otherSections && Object.keys(otherSections).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');

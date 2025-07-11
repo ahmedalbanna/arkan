@@ -3,15 +3,18 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '../ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from '../ui/skeleton';
 
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
+  const { user, isLoading } = useAuth();
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
