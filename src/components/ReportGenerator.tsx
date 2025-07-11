@@ -192,8 +192,9 @@ export default function ReportGenerator() {
         projectIdea={projectIdea}
         onProjectIdeaChange={setProjectIdea}
         onProposalGenerated={handleProposalGenerated}
-        onReset={handleNewSession}
-      />
+        onReset={handleNewSession} isGenerating={false} setIsGenerating={function (isGenerating: boolean): void {
+          throw new Error('Function not implemented.');
+        } }      />
 
       <form action={handleSubmit}>
         {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
@@ -213,8 +214,7 @@ export default function ReportGenerator() {
               isPending={isGenerating}
               generatingItem={generatingItem}
               contextSelections={contextSelections}
-              onContextToggle={toggleContextSelection}
-            />
+              onContextToggle={toggleContextSelection} isDisabled={false}            />
           </div>
           <div className="md:col-span-3 space-y-6">
             <ReportActions

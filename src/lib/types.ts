@@ -1,10 +1,12 @@
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
+import { IntegerConfig } from 'drizzle-orm/sqlite-core';
 export interface User {
   id: string;
   name: string;
   avatarUrl: string;
   bio: string;
   skills: string[];
+  credits: number;
 }
 
 export interface Media {
