@@ -92,13 +92,15 @@ export async function handleGenerateReportItem(
   formData: FormData
 ): Promise<ReportState> {
 
-  const validatedFields = GenerateItemSchema.safeParse({
-    proposalJson: formData.get('proposalJson'),
-    itemToGenerate: formData.get('itemToGenerate'),
-    intent: formData.get('intent'),
-    diagramToUpdate: formData.get('diagramToUpdate'),
-    plantUmlCode: formData.get('plantUmlCode'),
-  });
+  const formValues = {
+    proposalJson: formData.get('proposalJson') ?? undefined,
+    itemToGenerate: formData.get('itemToGenerate') ?? undefined,
+    intent: formData.get('intent') ?? undefined,
+    diagramToUpdate: formData.get('diagramToUpdate') ?? undefined,
+    plantUmlCode: formData.get('plantUmlCode') ?? undefined,
+  };
+
+  const validatedFields = GenerateItemSchema.safeParse(formValues);
 
   if (!validatedFields.success) {
     const errors = validatedFields.error.flatten().fieldErrors;
