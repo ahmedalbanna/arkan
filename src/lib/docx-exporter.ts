@@ -8,6 +8,7 @@ import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import type { Root, PhrasingContent, List } from 'mdast';
+import { sectionConfig, diagramConfig } from './report-config';
 
 // Helper to convert mdast inline elements to docx.js TextRun objects
 function transformInlines(nodes: PhrasingContent[], options: IRunOptions = {}): TextRun[] {
@@ -220,25 +221,6 @@ export async function exportReportAsDocx(
     proposalTitle: string,
     styles: IStylesOptions
 ) {
-    const sectionConfig: { [key in SectionName]: { title: string } } = {
-        introduction: { title: "Introduction" },
-        literatureReview: { title: "Literature Review" },
-        systemAnalysis: { title: "System Analysis" },
-        designStrategy: { title: "Design Strategy" },
-        systemDesign: { title: "System Design" },
-        systemProgramming: { title: "System Programming" },
-        systemTesting: { title: "System Testing" },
-        conclusion: { title: "Conclusion" },
-    };
-
-    const diagramConfig: { [key in DiagramType]: { title: string } } = {
-        useCase: { title: "Use Case Diagram" },
-        class: { title: "Class Diagram" },
-        sequence: { title: "Sequence Diagram" },
-        activity: { title: "Activity Diagram" },
-        component: { title: "Component Diagram" },
-        archimate: { title: "ArchiMate Diagram" },
-    };
 
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
