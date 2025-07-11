@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -25,6 +26,7 @@ export function Header() {
     { href: '/projects', label: t('header.projects'), icon: Briefcase },
     { href: '/summarize', label: t('header.summarize'), icon: BrainCircuit },
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
+    { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/history', label: t('header.activityHistory'), icon: History },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
     { href: '/profile/user-1', label: t('header.profile'), icon: User },

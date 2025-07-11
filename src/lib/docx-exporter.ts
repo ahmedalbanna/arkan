@@ -9,6 +9,7 @@ import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import type { Root, PhrasingContent, List } from 'mdast';
 import { sectionConfig, diagramConfig } from './report-config';
+import { templates, type TemplateKey } from './docx-styles';
 
 // Helper to convert mdast inline elements to docx.js TextRun objects
 function transformInlines(nodes: PhrasingContent[], options: IRunOptions = {}): TextRun[] {
@@ -146,7 +147,25 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     }
 }
 
-export async function exportProposalAsDocx(proposal: ProjectProposal, styles: IStylesOptions) {
+function getStylesFromStorage(): Record<TemplateKey, { styles: IStylesOptions }> {
+    if (typeof window === 'undefined') {
+        return templates;
+    }
+    const stored = localStorage.getItem('arkan-docx-styles');
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            return templates;
+        }
+    }
+    return templates;
+}
+
+export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
+    const allTemplates = getStylesFromStorage();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
 
     const doc = new Document({
@@ -219,8 +238,10 @@ export async function exportReportAsDocx(
     sections: { [key in SectionName]?: string; },
     diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
-    styles: IStylesOptions
+    templateKey: TemplateKey
 ) {
+    const allTemplates = getStylesFromStorage();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];

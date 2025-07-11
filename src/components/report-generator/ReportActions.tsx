@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { FileText, Trash2, FilePlus2, Loader2 } from 'lucide-react';
 import type { ProjectProposal } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
-import { type TemplateKey, templates } from '@/lib/docx-styles';
+import { type TemplateKey } from '@/lib/docx-styles';
 import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
+import { useDocxStyles } from '@/hooks/use-docx-styles';
+
 
 interface ReportActionsProps {
   proposal: ProjectProposal | null;
@@ -47,14 +49,15 @@ function CreateProjectSubmitButton({ disabled, formAction }: { disabled: boolean
 
 export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating, createFormAction }: ReportActionsProps) => {
   const { t } = useLocalization();
+  const { templates: docxTemplates, isLoaded } = useDocxStyles();
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('modern');
 
   useEffect(() => {
     const savedTemplate = localStorage.getItem(TEMPLATE_KEY) as TemplateKey | null;
-    if (savedTemplate && templates[savedTemplate]) {
+    if (savedTemplate && docxTemplates[savedTemplate]) {
       setSelectedTemplate(savedTemplate);
     }
-  }, []);
+  }, [docxTemplates]);
 
   const handleTemplateChange = (key: TemplateKey) => {
     setSelectedTemplate(key);
@@ -69,14 +72,12 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
     if (proposal && proposal.title) {
         proposalTitle = proposal.title;
     }
-    const template = templates[selectedTemplate] || templates.modern;
-    await exportReportAsDocx(reportState.sections, reportState.diagrams || {}, proposalTitle, template.styles);
+    await exportReportAsDocx(reportState.sections, reportState.diagrams || {}, proposalTitle, selectedTemplate);
   };
 
   const handleExportProposalDOCX = async () => {
     if (!proposal) return;
-    const template = templates[selectedTemplate] || templates.modern;
-    await exportProposalAsDocx(proposal, template.styles);
+    await exportProposalAsDocx(proposal, selectedTemplate);
   };
 
   return (
@@ -88,16 +89,18 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
       <CardContent className="space-y-4">
         <div className="space-y-2">
             <Label htmlFor="template-select">Export Template</Label>
-            <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
-                <SelectTrigger id="template-select">
-                    <SelectValue placeholder="Select a template" />
-                </SelectTrigger>
-                <SelectContent>
-                    {Object.entries(templates).map(([key, template]) => (
-                        <SelectItem key={key} value={key}>{template.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+            {isLoaded ? (
+              <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
+                  <SelectTrigger id="template-select">
+                      <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {Object.entries(docxTemplates).map(([key, template]) => (
+                          <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+            ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap items-center">
             <Button onClick={handleExportProposalDOCX} disabled={!proposal || isGenerating} className="w-full sm:w-auto font-headline">

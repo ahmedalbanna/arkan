@@ -2,6 +2,14 @@
 import { AlignmentType } from 'docx';
 import type { IStylesOptions } from 'docx';
 
+export interface Template {
+    name: string;
+    description: string;
+    styles: IStylesOptions;
+    imageUrl: string;
+    dataAiHint: string;
+}
+
 const commonParagraphStyles = [
     {
         id: 'Normal',
@@ -91,7 +99,7 @@ const modernStyles: IStylesOptions = {
 
 const classicStyles: IStylesOptions = {
     default: {
-        document: { run: { font: { name: 'Times New Roman' }, size: 24 } },
+        document: { run: { font: { name: 'Times New Roman' }, size: 24, color: '000000' } },
         heading1: { run: { font: { name: 'Times New Roman' }, size: 32, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240 }, outlineLevel: 1 } },
         heading2: { run: { font: { name: 'Times New Roman' }, size: 26, bold: true, color: "000000" }, paragraph: { spacing: { after: 220, before: 220 }, outlineLevel: 2 } },
         heading3: { run: { font: { name: 'Times New Roman' }, size: 24, bold: true, color: "000000" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
@@ -105,7 +113,7 @@ const classicStyles: IStylesOptions = {
 
 const academicStyles: IStylesOptions = {
     default: {
-        document: { run: { font: { name: 'Garamond' }, size: 24 } },
+        document: { run: { font: { name: 'Garamond' }, size: 24, color: '000000' } },
         heading1: { run: { font: { name: 'Garamond' }, size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
         heading2: { run: { font: { name: 'Garamond' }, size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
         heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200, line: 480 }, outlineLevel: 3 } },
@@ -119,7 +127,7 @@ const academicStyles: IStylesOptions = {
 };
 
 
-export const templates = {
+export const templates: Record<TemplateKey, Template> = {
     modern: {
         name: 'حديث (Modern)',
         styles: modernStyles,
@@ -143,4 +151,4 @@ export const templates = {
     },
 };
 
-export type TemplateKey = keyof typeof templates;
+export type TemplateKey = 'modern' | 'classic' | 'academic';
