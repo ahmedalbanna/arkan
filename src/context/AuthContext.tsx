@@ -8,7 +8,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode, useCa
 const HARDCODED_USER_ID = 'user-1';
 
 interface AuthContextType {
-  user: UserProfile | null;
+  user: Omit<UserProfile, 'credits'> | null;
   isLoading: boolean;
   fetchUser: () => Promise<void>;
 }
@@ -16,7 +16,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<Omit<UserProfile, 'credits'> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
@@ -27,7 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to fetch user profile');
       }
       const userProfile: UserProfile = await response.json();
-      setUser(userProfile);
+      const { credits, ...userWithoutCredits } = userProfile;
+      setUser(userWithoutCredits);
     } catch (error) {
       console.error("Failed to fetch user profile", error);
       setUser(null);

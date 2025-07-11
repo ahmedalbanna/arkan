@@ -15,7 +15,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -54,7 +54,7 @@ export default function ReportGenerator() {
   } = useReportBuilder();
   
   const { isLoaded: agentsLoaded } = useAgents();
-  const { user } = useAuth();
+  const { t } = useLocalization();
 
   const { toast } = useToast();
   const [createState, createFormAction] = useActionState(handleCreateProjectFromProposal, null);
@@ -73,20 +73,18 @@ export default function ReportGenerator() {
   }, [createState, toast]);
 
   useEffect(() => {
-    // Toast for generation success
     if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
         const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
         const title = itemConfig?.title || state.lastGenerated;
         toast({
-            title: "Generation Successful!",
-            description: `Successfully generated "${title}".`,
+            title: t('reportGenerator.generationSuccess'),
+            description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
         });
     }
 
-    // Toast for generation error
     if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
         toast({
-            title: "Generation Failed",
+            title: t('reportGenerator.generationFailed'),
             description: state.error,
             variant: "destructive",
         });
@@ -95,7 +93,7 @@ export default function ReportGenerator() {
     prevLastGenerated.current = state.lastGenerated;
     prevError.current = state.error;
 
-  }, [state.lastGenerated, state.error, toast]);
+  }, [state.lastGenerated, state.error, toast, t]);
 
 
   const handleProposalGenerated = (newProposal: ProjectProposal) => {
@@ -164,7 +162,6 @@ export default function ReportGenerator() {
   const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
       const formData = new FormData();
       if (proposalJson) formData.set('proposalJson', proposalJson);
-      // Add a dummy value for itemToGenerate to pass schema validation if needed, but intent will be checked first
       formData.set('itemToGenerate', diagramType);
       formData.set('intent', 'update_diagram');
       formData.set('diagramToUpdate', diagramType);

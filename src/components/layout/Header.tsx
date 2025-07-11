@@ -8,12 +8,10 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '../ThemeToggle';
-import { useAuth } from '@/context/AuthContext';
 
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
-  const { user } = useAuth();
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');

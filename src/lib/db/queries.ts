@@ -1,6 +1,7 @@
+import 'server-only';
 import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
-import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
+import { eq, desc, inArray, or, and, like, sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { summarizeProject } from '@/ai/flows/summarize-project';
 import { AGENTS } from '../agents';

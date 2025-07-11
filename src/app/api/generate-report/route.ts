@@ -86,7 +86,7 @@ ${JSON.stringify(proposal, null, 2)}
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    const sectionToGenerate = (await request.json().catch(() => ({})))?.sectionToGenerate;
+    const sectionToGenerate = (await request.json().catch(() => ({})))?.sectionToGenerate || 'unknown section';
     console.error(`Error generating report section '${sectionToGenerate}':`, error);
     return NextResponse.json({ message: 'An unexpected error occurred while generating the report section.' }, { status: 500 });
   }

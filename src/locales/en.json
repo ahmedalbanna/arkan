@@ -10,7 +10,8 @@
     "activityHistory": "Activity History",
     "agentManager": "Manage Agents",
     "profile": "Profile",
-    "openMenu": "Open Menu"
+    "openMenu": "Open Menu",
+    "credits": "Credits"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
@@ -85,6 +86,7 @@
     "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
     "tool_context_sections": "Sections",
     "tool_context_diagrams": "Diagrams",
-    "generateButton": "Generate"
+    "generateButton": "Generate",
+    "errorInsufficientCredits": "Insufficient credits. Please top-up your account."
   }
 }

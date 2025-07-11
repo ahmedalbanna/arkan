@@ -10,7 +10,8 @@
     "activityHistory": "سجل الأنشطة",
     "agentManager": "إدارة الوكلاء",
     "profile": "الملف الشخصي",
-    "openMenu": "فتح القائمة"
+    "openMenu": "فتح القائمة",
+    "credits": "رصيد"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
@@ -85,6 +86,7 @@
     "tool_context_desc": "حدد الأقسام أو المخططات الأخرى التي تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
     "tool_context_sections": "الأقسام",
     "tool_context_diagrams": "المخططات",
-    "generateButton": "توليد"
+    "generateButton": "توليد",
+    "errorInsufficientCredits": "الرصيد غير كاف. يرجى شحن حسابك."
   }
 }
