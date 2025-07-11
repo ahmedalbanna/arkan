@@ -21,7 +21,7 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 
-import { createProject, deductUserCredits } from '@/lib/db/queries';
+import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -92,9 +92,6 @@ export async function handleGenerateReportItem(
   formData: FormData
 ): Promise<ReportState> {
 
-  // Hardcoded for prototype, in a real app this would come from session
-  const userId = 'user-1';
-
   const validatedFields = GenerateItemSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
     itemToGenerate: formData.get('itemToGenerate'),
@@ -142,12 +139,6 @@ export async function handleGenerateReportItem(
     }
   }
 
-
-  // For any AI generation, check and deduct credits first
-  const hasSufficientCredits = await deductUserCredits(userId, 1);
-  if (!hasSufficientCredits) {
-      return { ...prevState, error: 'Insufficient credits. Please top-up your account.' };
-  }
 
   let proposalData: ProjectProposal;
 

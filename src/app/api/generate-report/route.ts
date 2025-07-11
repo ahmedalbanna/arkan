@@ -10,7 +10,6 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
-import { deductUserCredits } from '@/lib/db/queries';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -32,14 +31,6 @@ const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> 
 
 export async function POST(request: Request) {
   try {
-    // In a real app, this would come from an auth session
-    const userId = 'user-1';
-
-    const hasSufficientCredits = await deductUserCredits(userId, 1);
-    if (!hasSufficientCredits) {
-      return NextResponse.json({ message: 'Insufficient credits. Please top-up your account.' }, { status: 402 }); // 402 Payment Required
-    }
-
     const body = await request.json();
     const validation = generateReportSchema.safeParse(body);
 
@@ -95,7 +86,8 @@ ${JSON.stringify(proposal, null, 2)}
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
-    console.error(`Error generating report section '${(request.json() as any)?.sectionToGenerate}':`, error);
+    const sectionToGenerate = (await request.json().catch(() => ({})))?.sectionToGenerate;
+    console.error(`Error generating report section '${sectionToGenerate}':`, error);
     return NextResponse.json({ message: 'An unexpected error occurred while generating the report section.' }, { status: 500 });
   }
 }

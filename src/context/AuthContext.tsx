@@ -1,7 +1,7 @@
 
 'use client';
 
-import { getUserProfile, type UserProfile } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/db/queries';
 import React, { createContext, useState, useContext, useEffect, ReactNode, useCallback } from 'react';
 
 // For the prototype, we'll hardcode the user ID
@@ -10,7 +10,7 @@ const HARDCODED_USER_ID = 'user-1';
 interface AuthContextType {
   user: UserProfile | null;
   isLoading: boolean;
-  deductCredits: (amount: number) => void;
+  fetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,7 +22,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchUser = useCallback(async () => {
     try {
       setIsLoading(true);
-      const userProfile = await getUserProfile(HARDCODED_USER_ID);
+      const response = await fetch(`/api/users/${HARDCODED_USER_ID}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+      const userProfile: UserProfile = await response.json();
       setUser(userProfile);
     } catch (error) {
       console.error("Failed to fetch user profile", error);
@@ -36,18 +40,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     fetchUser();
   }, [fetchUser]);
 
-  const deductCredits = (amount: number) => {
-    setUser(currentUser => {
-      if (!currentUser) return null;
-      return {
-        ...currentUser,
-        credits: Math.max(0, currentUser.credits - amount),
-      };
-    });
-  };
-
   return (
-    <AuthContext.Provider value={{ user, isLoading, deductCredits }}>
+    <AuthContext.Provider value={{ user, isLoading, fetchUser }}>
       {children}
     </AuthContext.Provider>
   );
