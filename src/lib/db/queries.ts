@@ -2,7 +2,7 @@
 import 'server-only';
 import { db } from './index';
 import { users, projects, comments, media, tags, projectTags, skills, userSkills, technologies, summaryTechnologies } from './schema';
-import { eq, desc, inArray, or, and, like } from 'drizzle-orm';
+import { eq, desc, inArray, or, and, like, sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 import { summarizeProject } from '@/ai/flows/summarize-project';
 import { AGENTS } from '../agents';
@@ -358,4 +358,25 @@ export async function updateUser(userId: string, data: {
             }))).run();
         }
     });
+}
+
+/**
+ * Deducts a specified amount of credits from a user's account.
+ * @returns true if successful, false if credits are insufficient.
+ */
+export async function deductUserCredits(userId: string, amount: number): Promise<boolean> {
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { credits: true }
+    });
+
+    if (!user || user.credits < amount) {
+        return false;
+    }
+
+    await db.update(users)
+        .set({ credits: sql`${users.credits} - ${amount}` })
+        .where(eq(users.id, userId));
+
+    return true;
 }

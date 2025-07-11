@@ -21,7 +21,7 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 
-import { createProject } from '@/lib/db/queries';
+import { createProject, deductUserCredits } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -42,6 +42,9 @@ export interface ReportState {
 const GenerateItemSchema = z.object({
   proposalJson: z.string().min(1, 'Please paste the project proposal content.'),
   itemToGenerate: z.string().min(1, 'An item to generate must be selected.'),
+  intent: z.string().optional(),
+  diagramToUpdate: DiagramTypeSchema.optional(),
+  plantUmlCode: z.string().optional(),
 });
 
 const sectionNames: SectionName[] = [
@@ -89,35 +92,15 @@ export async function handleGenerateReportItem(
   formData: FormData
 ): Promise<ReportState> {
 
-  const intent = formData.get('intent');
-  if (intent === 'update_diagram') {
-    const diagramType = formData.get('diagramToUpdate') as DiagramType | null;
-    const plantUmlCode = formData.get('plantUmlCode') as string | null;
-
-    if (!diagramType || plantUmlCode === null) {
-      return { ...prevState, error: 'Missing data for diagram update.' };
-    }
-
-    try {
-      const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
-      const newDiagrams = {
-        ...prevState.diagrams,
-        [diagramType]: {
-          plantUmlCode: plantUmlCode,
-          imageUrl: imageUrl,
-        },
-      };
-      return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramType };
-    } catch (e) {
-      console.error(`Error updating diagram '${diagramType}':`, e);
-      return { ...prevState, error: `An error occurred while updating diagram '${diagramType}'.` };
-    }
-  }
-
+  // Hardcoded for prototype, in a real app this would come from session
+  const userId = 'user-1';
 
   const validatedFields = GenerateItemSchema.safeParse({
     proposalJson: formData.get('proposalJson'),
     itemToGenerate: formData.get('itemToGenerate'),
+    intent: formData.get('intent'),
+    diagramToUpdate: formData.get('diagramToUpdate'),
+    plantUmlCode: formData.get('plantUmlCode'),
   });
 
   if (!validatedFields.success) {
@@ -129,7 +112,43 @@ export async function handleGenerateReportItem(
     };
   }
 
-  const { proposalJson, itemToGenerate } = validatedFields.data;
+  const {
+    intent,
+    diagramToUpdate,
+    plantUmlCode,
+    proposalJson,
+    itemToGenerate
+  } = validatedFields.data;
+
+
+  if (intent === 'update_diagram') {
+    if (!diagramToUpdate || plantUmlCode === null || plantUmlCode === undefined) {
+      return { ...prevState, error: 'Missing data for diagram update.' };
+    }
+
+    try {
+      const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
+      const newDiagrams = {
+        ...prevState.diagrams,
+        [diagramToUpdate]: {
+          plantUmlCode: plantUmlCode,
+          imageUrl: imageUrl,
+        },
+      };
+      return { ...prevState, diagrams: newDiagrams, error: undefined, lastGenerated: diagramToUpdate };
+    } catch (e) {
+      console.error(`Error updating diagram '${diagramToUpdate}':`, e);
+      return { ...prevState, error: `An error occurred while updating diagram '${diagramToUpdate}'.` };
+    }
+  }
+
+
+  // For any AI generation, check and deduct credits first
+  const hasSufficientCredits = await deductUserCredits(userId, 1);
+  if (!hasSufficientCredits) {
+      return { ...prevState, error: 'Insufficient credits. Please top-up your account.' };
+  }
+
   let proposalData: ProjectProposal;
 
   try {

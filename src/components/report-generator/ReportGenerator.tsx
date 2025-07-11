@@ -15,6 +15,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { useAuth } from '@/context/AuthContext';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -53,6 +54,7 @@ export default function ReportGenerator() {
   } = useReportBuilder();
   
   const { isLoaded: agentsLoaded } = useAgents();
+  const { user, deductCredits } = useAuth();
 
   const { toast } = useToast();
   const [createState, createFormAction] = useActionState(handleCreateProjectFromProposal, null);
@@ -174,9 +176,21 @@ export default function ReportGenerator() {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
 
+    if (!user || user.credits < 1) {
+        toast({
+            title: "Insufficient Credits",
+            description: "You do not have enough credits to generate a new item.",
+            variant: "destructive",
+        });
+        return;
+    }
+
     setGeneratingItem(item);
     startTransition(async () => {
       const newState = await handleGenerateReportItem(state, formData);
+      if(!newState.error) {
+        deductCredits(1);
+      }
       setState(newState);
       setGeneratingItem(null);
     });

@@ -9,6 +9,7 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { deflateSync } from 'zlib';
+import { deductUserCredits } from '@/lib/db/queries';
 
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -61,6 +62,14 @@ const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> 
 
 export async function POST(request: Request) {
   try {
+    // In a real app, this would come from an auth session
+    const userId = 'user-1';
+
+    const hasSufficientCredits = await deductUserCredits(userId, 1);
+    if (!hasSufficientCredits) {
+      return NextResponse.json({ message: 'Insufficient credits. Please top-up your account.' }, { status: 402 }); // 402 Payment Required
+    }
+
     const body = await request.json();
     const validation = generateDiagramSchema.safeParse(body);
 
@@ -122,7 +131,7 @@ ${JSON.stringify(proposal, null, 2)}
     }, { status: 200 });
 
   } catch (error) {
-    console.error('Error generating diagram:', error);
+    console.error(`Error generating diagram:`, error);
     return NextResponse.json({ message: 'An unexpected error occurred while generating the diagram.' }, { status: 500 });
   }
 }

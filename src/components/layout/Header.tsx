@@ -3,15 +3,17 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Coins } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '../ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
+  const { user } = useAuth();
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -77,6 +79,12 @@ export function Header() {
         </nav>
 
         <div className="flex-1 flex justify-end items-center gap-2">
+          {user && (
+            <div className="flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-medium">
+              <Coins className="h-4 w-4 text-accent" />
+              <span>{user.credits}</span>
+            </div>
+          )}
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
