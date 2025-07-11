@@ -180,6 +180,12 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                 />
                                             </div>
                                         </TabsContent>
+                                        {/* Hidden input to ensure prompt is included in form submission regardless of active tab */}
+                                        <input
+                                            type="hidden"
+                                            name={`prompt_${key}`}
+                                            value={prompts[key] || ''}
+                                        />
                                         {isSection && (
                                             <TabsContent value="controls" className="pt-4">
                                                 <div className="space-y-6">
