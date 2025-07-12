@@ -94,7 +94,7 @@ export default function ProjectActions({ project }: ProjectActionsProps) {
             const errorData = await response.json();
             throw new Error(errorData.message || "Failed to generate presentation");
         }
-        
+
         const result = await response.json();
         setPresentationSlides(result.slides);
         setShowPresentation(true);
