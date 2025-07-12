@@ -4,11 +4,11 @@
 import { useState } from 'react';
 import type { PresentationSlide } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Minimize, Maximize } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];
@@ -39,7 +39,12 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent>
-                <p>No slides to display.</p>
+                <DialogHeader>
+                    <DialogTitle>No Slides</DialogTitle>
+                    <DialogDescription>
+                        There are no slides to display for this presentation.
+                    </DialogDescription>
+                </DialogHeader>
             </DialogContent>
         </Dialog>
     )
@@ -47,20 +52,20 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className={`transition-all duration-300 ${isFullScreen ? 'max-w-full h-screen p-8' : 'max-w-4xl'}`}>
-        <div className="flex flex-col h-full">
-          <CardHeader>
+      <DialogContent className={`transition-all duration-300 flex flex-col ${isFullScreen ? 'max-w-full h-screen p-8' : 'max-w-4xl'}`}>
+        <DialogHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="font-headline text-2xl text-primary">{slide.title}</CardTitle>
-              <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(!isFullScreen)}>
-                {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-              </Button>
+                <DialogTitle className="font-headline text-2xl text-primary">{slide.title}</DialogTitle>
+                <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(!isFullScreen)}>
+                    {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                </Button>
             </div>
-            <CardDescription>
+            <DialogDescription>
               Slide {currentSlide + 1} of {slides.length}
-            </CardDescription>
-          </CardHeader>
-          <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6">
+            </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto p-6 -mx-6">
             <div className="md:col-span-2">
               <h3 className="font-semibold mb-2">Content</h3>
               <ul className="list-disc pl-5 space-y-2 text-lg">
@@ -77,14 +82,14 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
                 <ReactMarkdown components={markdownComponents}>{slide.speakerNotes}</ReactMarkdown>
               </div>
             </div>
-          </div>
-          <div className="flex justify-between items-center p-6 border-t">
+        </div>
+        <div className="flex justify-between items-center pt-6 border-t -mx-6 -mb-6 px-6 pb-6">
             <Button onClick={handlePrev} disabled={currentSlide === 0}>
               <ChevronLeft className="mr-2 h-4 w-4" /> Previous
             </Button>
             <div className="flex space-x-1">
                 {slides.map((_, index) => (
-                    <button 
+                    <button
                         key={index}
                         onClick={() => setCurrentSlide(index)}
                         className={`h-2 w-2 rounded-full ${currentSlide === index ? 'bg-primary' : 'bg-muted hover:bg-muted-foreground'}`}
@@ -95,7 +100,6 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
             <Button onClick={handleNext} disabled={currentSlide === slides.length - 1}>
               Next <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
-          </div>
         </div>
       </DialogContent>
     </Dialog>
