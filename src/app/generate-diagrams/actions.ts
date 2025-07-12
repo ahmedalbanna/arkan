@@ -10,6 +10,7 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
+import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 import { deflateSync } from 'zlib';
 
 export interface DiagramState {
@@ -163,6 +164,9 @@ export async function handleGenerateDiagram(
         break;
       case 'archimate':
         result = await generateArchimateDiagram(agentInput);
+        break;
+      case 'er':
+        result = await generateErDiagram(agentInput);
         break;
       default:
         return { ...prevState, error: 'نوع المخطط المطلوب غير معروف.' };
