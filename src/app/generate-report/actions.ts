@@ -15,6 +15,7 @@ import {
 } from '@/ai/schemas';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { deflateSync } from 'zlib';
+import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
