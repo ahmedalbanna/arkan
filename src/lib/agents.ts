@@ -26,8 +26,7 @@ export interface Agent extends AgentData {
   icon: LucideIcon;
 }
 
-const createDiagramPrompt = (diagramType: string, specificInstructions: string): AgentPrompt => ({
-  base: `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
+const diagramBasePrompt = `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
 
 --- PlantUML Style Guide & Instructions ---
 - Use the '!theme spacelab' for a modern and readable look.
@@ -37,13 +36,12 @@ const createDiagramPrompt = (diagramType: string, specificInstructions: string):
 - Do not add any conversational text, explanations, or markdown code fences (\`\`\`) around your response.
 
 --- Diagram-Specific Task ---
-Generate a PlantUML **${diagramType} Diagram**.
-${specificInstructions}
+Based on the guidelines below, generate the requested PlantUML diagram.
 
 --- Context from Project ---
 You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Use this context to ensure the diagram is accurate and consistent with the overall project.
-`
-});
+`;
+
 
 export const AGENTS: Agent[] = [
   {
@@ -274,10 +272,15 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('Use Case', `The diagram should:
-1.  Identify the primary actors from the 'stakeholders' section (e.g., 'Primary User', 'Sponsor').
-2.  Define use cases based on the 'objective', 'expected_outcome', and 'functional requirements' (which you can infer from the objectives and system analysis section if provided).
-3.  Connect actors to their relevant use cases.`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Identify the primary actors from the 'stakeholders' section of the proposal (e.g., 'Primary User', 'Sponsor').", isDefault: true },
+            { text: "Define use cases based on the 'objective', 'expected_outcome', and any available functional requirements.", isDefault: true },
+            { text: "Connect actors to their relevant use cases to show interactions.", isDefault: true },
+            { text: "Use rectangles to group related use cases within a system boundary.", isDefault: false },
+        ]
+    }
   },
   {
     id: 'generate-class-diagram',
@@ -287,10 +290,15 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('Class', `The diagram should:
-1.  Identify key classes (entities) from the project's 'objective', 'expected_outcome', and especially the 'System Design' section.
-2.  Define attributes and methods (operations) for each class.
-3.  Establish relationships (associations, aggregations, inheritance) between the classes.`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Identify key classes (entities) from the project's 'objective' and 'System Design' section if available.", isDefault: true },
+            { text: "For each class, define relevant attributes (fields) and methods (operations).", isDefault: true },
+            { text: "Establish relationships (associations, aggregations, inheritance) between the classes with clear cardinality (e.g., '1' -- '*' 'many').", isDefault: true },
+            { text: "Use visibility markers (+ for public, - for private, # for protected) for attributes and methods.", isDefault: false },
+        ]
+    }
   },
   {
     id: 'generate-sequence-diagram',
@@ -300,11 +308,16 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('Sequence', `The diagram should:
-1.  Identify participants (actors and system components/classes). Use the Class Diagram (if provided) for participants and the Use Case diagram for the scenario.
-2.  Illustrate the step-by-step interactions between these participants for a primary use case (e.g., 'User logs in', 'User creates a project').
-3.  Show the order of messages exchanged between participants.
-4.  Use activation boxes to represent processing time.`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Identify participants (actors and system components/classes). Refer to the Use Case and Class diagrams if available.", isDefault: true },
+            { text: "Illustrate the step-by-step interactions for a primary workflow (e.g., 'User logs in', 'User creates a project').", isDefault: true },
+            { text: "Clearly show the order of messages exchanged between participants using arrows.", isDefault: true },
+            { text: "Use activation boxes to represent processing time for each participant.", isDefault: true },
+            { text: "Include at least one 'alt/else' block to show a conditional flow.", isDefault: false },
+        ]
+    }
   },
   {
     id: 'generate-activity-diagram',
@@ -314,11 +327,16 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('Activity', `The diagram should:
-1.  Define a start and end point for the process.
-2.  Detail the sequence of activities based on a primary workflow described in the 'objective' or 'methodology'.
-3.  Incorporate decision points (conditionals) and forks/joins (parallel activities) where appropriate.
-4.  Optionally use partitions (swimlanes) to assign activities to different actors or system components.`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Define a clear start and end point for the process being modeled.", isDefault: true },
+            { text: "Detail the sequence of activities based on a primary workflow from the 'objective' or 'methodology'.", isDefault: true },
+            { text: "Incorporate at least one decision point (conditional logic) with 'if/then/else' structures.", isDefault: true },
+            { text: "Use partitions (swimlanes) to assign activities to different actors or system components.", isDefault: false },
+            { text: "Include forks and joins if there are parallel activities that can occur simultaneously.", isDefault: false },
+        ]
+    }
   },
   {
     id: 'generate-component-diagram',
@@ -328,10 +346,15 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('Component', `The diagram should:
-1.  Identify the main software components of the system (e.g., 'Frontend App', 'API Gateway', 'User Service', 'Database'), referencing the 'System Design' section if available.
-2.  Show the interfaces provided and required by the components.
-3.  Illustrate the dependencies and relationships between these components.`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Identify the main software components from the 'System Design' section (e.g., 'Frontend App', 'API Gateway', 'User Service').", isDefault: true },
+            { text: "Show the primary dependencies between these components using relationship arrows.", isDefault: true },
+            { text: "For at least one component, define a provided interface that other components use.", isDefault: true },
+            { text: "Group related components into a package if the architecture is complex.", isDefault: false },
+        ]
+    }
   },
   {
     id: 'generate-archimate-diagram',
@@ -341,10 +364,15 @@ You will be provided with the full project proposal in JSON format, as well as a
     icon: GitGraph,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: createDiagramPrompt('ArchiMate', `The diagram should focus on the Business Layer and Application Layer. It should:
-1.  **Business Layer**: Identify Business Actors (from stakeholders), Business Roles, and Business Functions/Processes (from objectives).
-2.  **Application Layer**: Identify Application Components (e.g., CRM System, Billing Service) and Application Functions that realize the business processes.
-3.  **Relationships**: Show how business actors interact with business functions, and how application components support those business functions. Use proper ArchiMate relationships (e.g., assignment, realization, serving).
-4.  Ensure you use ArchiMate syntax (e.g., 'archimate "Business Actor" as BA').`)
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Focus on the Business and Application layers.", isDefault: true },
+            { text: "Identify Business Actors and Roles from the 'stakeholders' section.", isDefault: true },
+            { text: "Define Business Functions or Processes based on the project's 'objective'.", isDefault: true },
+            { text: "Identify Application Components that realize the business processes, as described in 'System Design'.", isDefault: true },
+            { text: "Use proper ArchiMate relationships (e.g., assignment, realization, serving) to connect the elements.", isDefault: true },
+        ]
+    }
   },
 ];
