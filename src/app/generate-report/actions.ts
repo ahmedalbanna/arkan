@@ -32,6 +32,7 @@ import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
+import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 
 import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
@@ -315,6 +316,7 @@ ${JSON.stringify(proposalData, null, 2)}
         case 'activity': result = await generateActivityDiagram(agentInput); break;
         case 'component': result = await generateComponentDiagram(agentInput); break;
         case 'archimate': result = await generateArchimateDiagram(agentInput); break;
+        case 'er': result = await generateErDiagram(agentInput); break;
         default: return { ...prevState, error: 'Unknown diagram type requested.' };
       }
 
