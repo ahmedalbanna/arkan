@@ -16,6 +16,7 @@ import { ProjectProposalSchema, type ProjectProposal, type SectionName, type Dia
 import { useToast } from '@/hooks/use-toast';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { useLocalization } from '@/context/LocalizationContext';
+import PresentationViewer from '../PresentationViewer';
 
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -62,6 +63,8 @@ export default function ReportGenerator() {
   const prevLastGenerated = useRef<string | undefined>();
   const prevError = useRef<string | undefined>();
 
+  const [showPresentation, setShowPresentation] = useState(false);
+
   useEffect(() => {
     if (createState?.error) {
       toast({
@@ -76,6 +79,9 @@ export default function ReportGenerator() {
     if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
         const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
         const title = itemConfig?.title || state.lastGenerated;
+        if (state.lastGenerated === 'presentation' && state.presentation) {
+          setShowPresentation(true);
+        }
         toast({
             title: t('reportGenerator.generationSuccess'),
             description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
@@ -93,7 +99,7 @@ export default function ReportGenerator() {
     prevLastGenerated.current = state.lastGenerated;
     prevError.current = state.error;
 
-  }, [state.lastGenerated, state.error, toast, t]);
+  }, [state.lastGenerated, state.error, toast, t, state.presentation]);
 
 
   const handleProposalGenerated = (newProposal: ProjectProposal) => {
@@ -202,6 +208,13 @@ export default function ReportGenerator() {
         onProposalGenerated={handleProposalGenerated}
         onReset={handleNewSession}
       />
+      {state.presentation && (
+        <PresentationViewer
+          isOpen={showPresentation}
+          onOpenChange={setShowPresentation}
+          slides={state.presentation.slides}
+        />
+      )}
 
       <form action={handleSubmit}>
          {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
@@ -241,6 +254,7 @@ export default function ReportGenerator() {
               onSectionUpdate={handleSectionUpdate}
               onDiagramCodeUpdate={handleDiagramCodeUpdate}
               onDiagramUpdate={handleDiagramUpdate}
+              onShowPresentation={() => setShowPresentation(true)}
             />
           </div>
         </div>

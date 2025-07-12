@@ -8,13 +8,11 @@ import { Button } from '@/components/ui/button';
 import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
-import type { ProjectProposal, SectionName, DiagramType, PresentationSlide } from '@/ai/schemas';
+import type { ProjectProposal, SectionName, DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import DiagramViewer from '../DiagramViewer';
-import { Loader2, RefreshCw, Presentation } from 'lucide-react';
+import { Loader2, RefreshCw } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import PresentationViewer from '../PresentationViewer';
-import { useState, useEffect } from 'react';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
@@ -47,18 +45,11 @@ interface ReportResultsProps {
   onSectionUpdate: (key: SectionName, value: string) => void;
   onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
   onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
+  onShowPresentation: () => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramCodeUpdate, onDiagramUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramCodeUpdate, onDiagramUpdate, onShowPresentation }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const [showPresentation, setShowPresentation] = useState(false);
-
-  useEffect(() => {
-    if (reportState.lastGenerated === 'presentation' && reportState.presentation) {
-      setShowPresentation(true);
-    }
-  }, [reportState.lastGenerated, reportState.presentation]);
-
 
   return (
     <div className="space-y-6">
@@ -73,14 +64,6 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
         </Card>
       )}
 
-      {reportState.presentation && (
-        <PresentationViewer
-          isOpen={showPresentation}
-          onOpenChange={setShowPresentation}
-          slides={reportState.presentation.slides}
-        />
-       )}
-
       <Accordion type="multiple" className="w-full space-y-4" defaultValue={['Results']}>
         <AccordionItem value="Results" className="border-none">
           <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
@@ -91,7 +74,7 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                       <CardTitle className="font-headline text-lg flex items-center gap-2">
                         <presentationConfig.presentation.icon className="h-5 w-5 text-primary" /> {presentationConfig.presentation.title}
                       </CardTitle>
-                      <Button variant="secondary" size="sm" onClick={() => setShowPresentation(true)}>View Presentation</Button>
+                      <Button variant="secondary" size="sm" onClick={onShowPresentation}>View Presentation</Button>
                     </CardHeader>
                 </Card>
             )}
