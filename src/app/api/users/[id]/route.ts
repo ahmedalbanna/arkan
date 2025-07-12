@@ -6,7 +6,8 @@ import { getUserProfile, updateUser } from '@/lib/db/queries';
 // GET /api/users/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const user = await getUserProfile(params.id);
+    const userId = params.id;
+    const user = await getUserProfile(userId);
     if (!user) {
       return NextResponse.json({ message: 'User not found.' }, { status: 404 });
     }
