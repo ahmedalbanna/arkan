@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { handlePurchase } from '@/app/pricing/actions';
-import { useToast } from './hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
 
 function PurchaseButton({ plan }: { plan: PricingPlan }) {
