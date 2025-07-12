@@ -67,6 +67,7 @@ const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineStat
     return initialState;
 };
 
+// This now just generates the additional instruction text, not the whole prompt
 const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
     let instructions = [];
     if (controls.formality !== undefined) {
@@ -82,46 +83,24 @@ const generateInstructionText = (controls: ControlState, t: (key: string) => str
     if (controls.wordCount) {
         instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     }
-
-    if (instructions.length > 0) {
-        return `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructions.join('\n')}`;
-    }
-    return '';
+    return instructions.join('\n');
 };
 
-const buildPrompt = (agent: Agent | undefined, guidelineState: GuidelineState, controlState?: ControlState, t?: (key: string) => string) => {
-    if (!agent) return '';
-    const promptConfig = agent.prompt;
-
-    if (typeof promptConfig === 'string') {
-        return promptConfig;
-    }
-
-    let finalPrompt = promptConfig.base || '';
-
-    if (!guidelineState) {
-        return finalPrompt;
-    }
+const getSelectedGuidelines = (agent: Agent | undefined, guidelineState: GuidelineState | undefined): string[] => {
+    if (!agent || !guidelineState) return [];
+    
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
 
     const guidelines: string[] = [];
-    promptConfig.guidelines?.forEach((g, index) => {
+    promptConfig.guidelines.forEach((g, index) => {
         if (guidelineState.checked[index]) {
             guidelines.push(g.text);
         }
     });
-
     guidelines.push(...guidelineState.custom);
-
-    if (guidelines.length > 0) {
-        finalPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
-    }
-
-    if (controlState && t) {
-        finalPrompt += generateInstructionText(controlState, t);
-    }
-
-    return finalPrompt;
-}
+    return guidelines;
+};
 
 interface GenerateItemButtonProps {
     itemKey: string;
@@ -167,7 +146,6 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
     const [guidelineState, setGuidelineState] = useState<Record<string, GuidelineState>>({});
-    const [prompts, setPrompts] = useState<Record<string, string>>({});
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -178,23 +156,6 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
             setGuidelineState(getInitialGuidelineState(agents));
         }
     }, [agentsLoaded, agents]);
-
-    useEffect(() => {
-        const updatedPrompts: Record<string, string> = {};
-        allGenerationItems.forEach(key => {
-            const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
-            const isSection = SectionNameSchema.options.includes(key as SectionName);
-            if (!agent) return;
-            updatedPrompts[key] = buildPrompt(
-                agent,
-                guidelineState[key],
-                isSection ? controlState[key as SectionName] : undefined,
-                isSection ? t : undefined
-            );
-        });
-        setPrompts(updatedPrompts);
-    }, [controlState, guidelineState, agents, t]);
-
 
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
         setControlState(prevState => ({
@@ -291,14 +252,17 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                 <Accordion type="multiple" className="w-full space-y-1">
                     {allGenerationItems.map((key) => {
                         const isSection = orderedSections.includes(key as SectionName);
-
                         const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
                         if (!agent) return null;
 
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
-
                         const { title, icon: Icon } = (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation);
+                        
+                        // Get selected guidelines for this agent
+                        const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
+                        // Get instruction text for this agent (only if it's a section)
+                        const instructionText = isSection ? generateInstructionText(controlState[key as SectionName], t) : '';
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -366,11 +330,12 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                             </div>
                                         </TabsContent>
 
-                                        <input
-                                            type="hidden"
-                                            name={`prompt_${key}`}
-                                            value={prompts[key] || ''}
-                                        />
+                                        {/* Hidden inputs to pass data to server action */}
+                                        {selectedGuidelines.map((g, i) => (
+                                            <input key={i} type="hidden" name="guidelines[]" value={g} />
+                                        ))}
+                                        <input type="hidden" name="instructionText" value={instructionText} />
+                                        
                                         {isSection && (
                                             <TabsContent value="controls" className="pt-4">
                                                 <div className="space-y-6">

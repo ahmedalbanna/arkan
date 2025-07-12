@@ -13,6 +13,7 @@ import {
   GeneratePresentationInputSchema,
   type GeneratePresentationInput
 } from '@/ai/schemas';
+import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { deflateSync } from 'zlib';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
@@ -63,6 +64,8 @@ const GenerateItemSchema = z.object({
   diagramToUpdate: DiagramTypeSchema.optional(),
   plantUmlCode: z.string().optional(),
   externalContextContent: z.string().optional(),
+  guidelines: z.array(z.string()).optional(),
+  instructionText: z.string().optional(),
 });
 
 const sectionNames: SectionName[] = [
@@ -117,6 +120,8 @@ export async function handleGenerateReportItem(
     diagramToUpdate: formData.get('diagramToUpdate') ?? undefined,
     plantUmlCode: formData.get('plantUmlCode') ?? undefined,
     externalContextContent: formData.get('externalContextContent') ?? undefined,
+    guidelines: formData.getAll('guidelines[]').map(String),
+    instructionText: formData.get('instructionText') ?? undefined,
   };
 
   const validatedFields = GenerateItemSchema.safeParse(formValues);
@@ -136,7 +141,9 @@ export async function handleGenerateReportItem(
     plantUmlCode,
     proposalJson,
     itemToGenerate,
-    externalContextContent
+    externalContextContent,
+    guidelines,
+    instructionText,
   } = validatedFields.data;
 
 
@@ -178,13 +185,12 @@ export async function handleGenerateReportItem(
       error: 'The proposal data does not match the required structure.',
     };
   }
-  const prompt = formData.get(`prompt_${itemToGenerate}`) as string | null;
-  if (prompt === null) {
-
+  
+  const agentId = (sectionConfig[itemToGenerate as SectionName] || diagramConfig[itemToGenerate as DiagramType] || presentationConfig.presentation)?.agentId;
+  const agent = AGENTS.find(a => a.id === agentId);
+  if (!agent) {
     return { ...prevState, error: `Prompt for item type '${itemToGenerate}' was not found.` };
   }
-
-
 
   // Check if the requested item to generate is a known section name or diagram type.
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
@@ -218,10 +224,50 @@ export async function handleGenerateReportItem(
     }
   }
   
-  let fullPrompt = prompt;
-  if (formData.get(`context_${itemToGenerate}_external`) === 'on' && externalContextContent) {
-    fullPrompt += `\n\n--- ADDITIONAL EXTERNAL CONTEXT ---\n${externalContextContent}\n---`;
+  let fullPrompt = '';
+  const agentPrompt = agent.prompt as AgentPrompt;
+  if (typeof agentPrompt === 'string') {
+    fullPrompt = agentPrompt;
+  } else {
+    fullPrompt = agentPrompt.base;
+    if (guidelines && guidelines.length > 0) {
+      fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+    }
   }
+
+  if (instructionText) {
+    fullPrompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructionText}`;
+  }
+
+  const contextContent = [];
+  if (formData.get(`context_${itemToGenerate}_external`) === 'on' && externalContextContent) {
+    contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
+    contextContent.push(externalContextContent);
+  }
+
+  if (otherSections && Object.keys(otherSections).length > 0) {
+      contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
+      for (const [sectionName, content] of Object.entries(otherSections)) {
+          contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+      }
+  }
+  if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
+      contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
+      for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
+          contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+      }
+  }
+  const contextString = contextContent.join('\n\n');
+
+  fullPrompt += `
+  
+${contextString}
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+${JSON.stringify(proposalData, null, 2)}
+\`\`\`
+`;
 
   try {
     const agentInput = {

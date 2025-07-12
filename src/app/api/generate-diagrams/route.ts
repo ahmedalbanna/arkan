@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type DiagramType } from '@/ai/schemas';
-import { AGENTS } from '@/lib/agents';
+import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { generateUseCaseDiagram } from '@/ai/flows/generate-use-case-diagram';
 import { generateClassDiagram } from '@/ai/flows/generate-class-diagram';
 import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
@@ -15,6 +15,8 @@ const generateDiagramSchema = z.object({
   diagramToGenerate: DiagramTypeSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  // Client now sends selected guidelines instead of a full prompt
+  guidelines: z.array(z.string()).optional(), 
 });
 
 // Helper function to encode PlantUML for URL
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, diagramToGenerate, otherSections, otherDiagrams } = validation.data;
+    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines } = validation.data;
 
     const agentInfo = diagramAgentMap[diagramToGenerate];
     if (!agentInfo) {
@@ -78,6 +80,18 @@ export async function POST(request: Request) {
     const agent = AGENTS.find(a => a.id === agentInfo.agentId);
     if (!agent) {
       return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
+    }
+    
+    // --- Server-side prompt construction ---
+    let fullPrompt = '';
+    const agentPrompt = agent.prompt as AgentPrompt;
+    if (typeof agentPrompt === 'string') {
+        fullPrompt = agentPrompt;
+    } else {
+        fullPrompt = agentPrompt.base;
+        if (guidelines && guidelines.length > 0) {
+            fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+        }
     }
 
     const contextContent = [];
@@ -95,7 +109,7 @@ export async function POST(request: Request) {
     }
     const contextString = contextContent.join('\n\n');
 
-    const fullPrompt = `${agent.prompt}
+    fullPrompt += `
     
 ${contextString}
 
@@ -104,6 +118,7 @@ ${contextString}
 ${JSON.stringify(proposal, null, 2)}
 \`\`\`
 `;
+    // --- End of prompt construction ---
 
     const agentInput = {
       proposal,

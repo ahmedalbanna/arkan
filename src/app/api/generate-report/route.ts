@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
-import { AGENTS } from '@/lib/agents';
+import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
 import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
@@ -16,6 +16,9 @@ const generateReportSchema = z.object({
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  // Client now sends selected guidelines and control settings instead of a full prompt
+  guidelines: z.array(z.string()).optional(),
+  instructionText: z.string().optional(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, sectionToGenerate, otherSections, otherDiagrams } = validation.data;
+    const { proposal, sectionToGenerate, otherSections, otherDiagrams, guidelines, instructionText } = validation.data;
 
     const agentInfo = sectionAgentMap[sectionToGenerate];
     if (!agentInfo) {
@@ -50,6 +53,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
     }
     
+    // --- Server-side prompt construction ---
+    let fullPrompt = '';
+    const agentPrompt = agent.prompt as AgentPrompt;
+    if (typeof agentPrompt === 'string') {
+        fullPrompt = agentPrompt;
+    } else {
+        fullPrompt = agentPrompt.base;
+        if (guidelines && guidelines.length > 0) {
+            fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+        }
+    }
+    
+    if (instructionText) {
+        fullPrompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructionText}`;
+    }
+
     const contextContent = [];
     if (otherSections && Object.keys(otherSections).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
@@ -65,7 +84,7 @@ export async function POST(request: Request) {
     }
     const contextString = contextContent.join('\n\n');
 
-    const fullPrompt = `${agent.prompt}
+    fullPrompt += `
     
 ${contextString}
 
@@ -74,6 +93,7 @@ ${contextString}
 ${JSON.stringify(proposal, null, 2)}
 \`\`\`
 `;
+    // --- End of prompt construction ---
 
     const agentInput = {
       proposal,
