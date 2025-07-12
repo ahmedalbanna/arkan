@@ -124,7 +124,6 @@ export default function CodeGenerator() {
                     ref={isDialog ? null : iframeRef} // Only ref the main preview
                     srcDoc={srcDoc}
                     title="Live Preview"
-                    sandbox="allow-scripts"
                     width="100%"
                     height="100%"
                     className="border-0"
