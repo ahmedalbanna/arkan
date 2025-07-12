@@ -70,15 +70,20 @@ const MAX_HISTORY = 5;
 
 export default function CodeGenerator() {
     const initialState: CodeGenerationState = {};
-    const [state, formAction] = useActionState(handleGenerateCode, initialState);
+    const [actionState, formAction] = useActionState(handleGenerateCode, initialState);
+    
+    // We introduce a new state to hold what's currently displayed
+    const [displayState, setDisplayState] = useState<CodeGenerationState>(initialState);
+
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
     const [history, setHistory] = useState<CodeGenerationState[]>([]);
+    const [isExpanded, setIsExpanded] = useState(false);
 
+    // Load history from localStorage on initial render
     useEffect(() => {
         try {
             const storedHistory = localStorage.getItem(HISTORY_KEY);
@@ -90,41 +95,50 @@ export default function CodeGenerator() {
         }
     }, []);
 
+    // When the form action completes, update the display state and history
     useEffect(() => {
-        if (state.html || state.css || state.javascript) {
-            const timeout = setTimeout(() => {
-                setSrcDoc(`
-                    <html>
-                        <head>
-                            <style>${state.css || ''}</style>
-                            <script>${state.javascript || ''}<\/script>
-                        </head>
-                        <body>${state.html || ''}</body>
-                    </html>
-                `);
-
-                // Update history
-                if (state.prompt) {
-                     setHistory(prev => {
-                        const newHistory = [state, ...prev.filter(h => h.prompt !== state.prompt)].slice(0, MAX_HISTORY);
-                        try {
-                           localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-                        } catch (error) {
-                           console.error('Failed to save history to localStorage', error);
-                        }
-                        return newHistory;
-                    });
-                }
-            }, 300);
-            return () => clearTimeout(timeout);
+        if (actionState.html || actionState.css || actionState.javascript) {
+            setDisplayState(actionState);
+            
+            // Update history only when new code is generated via form action
+            if (actionState.prompt) {
+                 setHistory(prev => {
+                    const newHistory = [actionState, ...prev.filter(h => h.prompt !== actionState.prompt)].slice(0, MAX_HISTORY);
+                    try {
+                       localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                    } catch (error) {
+                       console.error('Failed to save history to localStorage', error);
+                    }
+                    return newHistory;
+                });
+            }
         }
-    }, [state.html, state.css, state.javascript, state.prompt]);
+    }, [actionState]);
+
+    // When the display state changes, update the iframe's srcDoc
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setSrcDoc(`
+                <html>
+                    <head>
+                        <style>${displayState.css || ''}</style>
+                        <script>${displayState.javascript || ''}<\/script>
+                    </head>
+                    <body>${displayState.html || ''}</body>
+                </html>
+            `);
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [displayState]);
+
 
     const takeScreenshot = async () => {
         if (!iframeRef.current?.contentWindow) return;
         setIsCapturing(true);
 
         try {
+            // Accessing the document directly from the iframe can be problematic
+            // The contentWindow might not be ready. We'll access the body directly.
             const canvas = await html2canvas(iframeRef.current.contentWindow.document.body, {
                 useCORS: true,
                 allowTaint: true,
@@ -150,9 +164,9 @@ export default function CodeGenerator() {
         setIsDownloading(true);
         try {
             const zip = new JSZip();
-            zip.file("index.html", state.html || "");
-            zip.file("style.css", state.css || "");
-            zip.file("script.js", state.javascript || "");
+            zip.file("index.html", displayState.html || "");
+            zip.file("style.css", displayState.css || "");
+            zip.file("script.js", displayState.javascript || "");
 
             const blob = await zip.generateAsync({ type: "blob" });
             saveAs(blob, "generated-code.zip");
@@ -170,14 +184,8 @@ export default function CodeGenerator() {
     }
     
     const restoreFromHistory = (historyItem: CodeGenerationState) => {
-        const fakeState: CodeGenerationState = { ...historyItem };
-        const fakeAction = (s: CodeGenerationState, f: FormData) => Promise.resolve(s);
-        const form = document.createElement('form');
-        const formData = new FormData(form);
-        formData.set('prompt', historyItem.prompt || '');
-        
-        // This is a way to trigger the state update logic without a real form action
-        formAction(formData);
+        // Directly update the display state instead of calling the form action
+        setDisplayState(historyItem);
     }
     
     const clearHistory = () => {
@@ -227,8 +235,8 @@ export default function CodeGenerator() {
                                 rows={8}
                                 required
                             />
-                            {state?.error && (
-                                <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
+                            {actionState?.error && (
+                                <p className="text-sm font-medium text-destructive mt-2">{actionState.error}</p>
                             )}
                         </CardContent>
                         <CardFooter>
@@ -264,7 +272,7 @@ export default function CodeGenerator() {
                     </Card>
                 )}
 
-                {(state.html || state.css || state.javascript) && (
+                {(displayState.html || displayState.css || displayState.javascript) && (
                     <Card>
                         <CardHeader>
                              <div className="flex justify-between items-center">
@@ -283,13 +291,13 @@ export default function CodeGenerator() {
                                     <TabsTrigger value="javascript">JS</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="html" className="mt-4">
-                                    <CodeDisplay code={state.html || ''} language="html" />
+                                    <CodeDisplay code={displayState.html || ''} language="html" />
                                 </TabsContent>
                                 <TabsContent value="css" className="mt-4">
-                                    <CodeDisplay code={state.css || ''} language="css" />
+                                    <CodeDisplay code={displayState.css || ''} language="css" />
                                 </TabsContent>
                                 <TabsContent value="javascript" className="mt-4">
-                                    <CodeDisplay code={state.javascript || '// No JavaScript generated'} language="javascript" />
+                                    <CodeDisplay code={displayState.javascript || '// No JavaScript generated'} language="javascript" />
                                 </TabsContent>
                             </Tabs>
                         </CardContent>
