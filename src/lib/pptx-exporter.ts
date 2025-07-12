@@ -1,7 +1,9 @@
+
 'use client';
 
 import pptxgen from "pptxgenjs";
 import type { PresentationSlide } from "@/ai/schemas";
+import { templates, type PptxTemplateKey } from "./pptx-styles";
 
 // Helper function to remove markdown characters for a cleaner text output
 function stripMarkdown(text: string): string {
@@ -12,11 +14,28 @@ function stripMarkdown(text: string): string {
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Links
 }
 
-export function exportPresentationAsPptx(slides: PresentationSlide[]) {
+function getStylesFromStorage() {
+    if (typeof window === 'undefined') {
+        return templates;
+    }
+    const stored = localStorage.getItem('arkan-pptx-styles');
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            return templates;
+        }
+    }
+    return templates;
+}
+
+export function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
     if (!slides || slides.length === 0) {
         console.error("No slides provided for PPTX export.");
         return;
     }
+    const allTemplates = getStylesFromStorage();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     let pptx = new pptxgen();
 
@@ -30,7 +49,7 @@ export function exportPresentationAsPptx(slides: PresentationSlide[]) {
     // Define a master slide for consistent layout
     pptx.defineSlideMaster({
         title: "MASTER_SLIDE",
-        background: { color: "FFFFFF" },
+        background: styles.background,
         objects: [
             {
                 text: {
@@ -40,7 +59,7 @@ export function exportPresentationAsPptx(slides: PresentationSlide[]) {
                         y: "95%",
                         w: "90%",
                         h: 0.25,
-                        color: "A9A9A9",
+                        color: styles.body.color,
                         fontSize: 10,
                         align: "center",
                     },
@@ -58,16 +77,16 @@ export function exportPresentationAsPptx(slides: PresentationSlide[]) {
             y: 0.25,
             w: "90%",
             h: 1,
-            fontSize: 28,
-            bold: true,
-            color: "363636",
+            ...styles.title
         });
 
         // Add Main Content (Bullet Points)
         const contentBullets = slideData.content.map(item => ({
             text: stripMarkdown(item),
             options: {
-                bullet: true,
+                ...styles.body,
+                bullet: styles.bullet.type === 'bullet' ? true : undefined,
+                numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined,
             },
         }));
 
@@ -76,8 +95,7 @@ export function exportPresentationAsPptx(slides: PresentationSlide[]) {
             y: 1.5,
             w: "90%",
             h: 4,
-            fontSize: 18,
-            color: "4f4f4f",
+            ...styles.body,
             lineSpacing: 36,
         });
 

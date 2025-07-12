@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation, FileImage } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -28,6 +28,7 @@ export function Header() {
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
     { href: '/pricing', label: t('header.pricing'), icon: Gem },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
+    { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
     { href: '/history', label: t('header.activityHistory'), icon: History },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
     { href: '/profile/user-1', label: t('header.profile'), icon: User },

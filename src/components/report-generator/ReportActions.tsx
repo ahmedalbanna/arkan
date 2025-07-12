@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useFormStatus } from 'react-dom';
@@ -14,7 +15,8 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-
+import { usePptxStyles } from '@/hooks/use-pptx-styles';
+import { PptxTemplateKey } from '@/lib/pptx-styles';
 
 interface ReportActionsProps {
   proposal: ProjectProposal | null;
@@ -24,7 +26,8 @@ interface ReportActionsProps {
   createFormAction: (formData: FormData) => void;
 }
 
-const TEMPLATE_KEY = 'arkan-docx-template';
+const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
+const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
 function CreateProjectSubmitButton({ disabled, formAction }: { disabled: boolean, formAction: (formData: FormData) => void }) {
   const { pending, action } = useFormStatus();
@@ -49,19 +52,33 @@ function CreateProjectSubmitButton({ disabled, formAction }: { disabled: boolean
 
 export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating, createFormAction }: ReportActionsProps) => {
   const { t } = useLocalization();
-  const { templates: docxTemplates, isLoaded } = useDocxStyles();
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateKey>('modern');
+  const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
+  const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
+  const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+  const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
 
   useEffect(() => {
-    const savedTemplate = localStorage.getItem(TEMPLATE_KEY) as TemplateKey | null;
-    if (savedTemplate && docxTemplates[savedTemplate]) {
-      setSelectedTemplate(savedTemplate);
+    const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
+    if (savedDocxTemplate && docxTemplates[savedDocxTemplate]) {
+      setSelectedDocxTemplate(savedDocxTemplate);
     }
   }, [docxTemplates]);
 
-  const handleTemplateChange = (key: TemplateKey) => {
-    setSelectedTemplate(key);
-    localStorage.setItem(TEMPLATE_KEY, key);
+  useEffect(() => {
+    const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
+    if (savedPptxTemplate && pptxTemplates[savedPptxTemplate]) {
+      setSelectedPptxTemplate(savedPptxTemplate);
+    }
+  }, [pptxTemplates]);
+
+  const handleDocxTemplateChange = (key: TemplateKey) => {
+    setSelectedDocxTemplate(key);
+    localStorage.setItem(DOCX_TEMPLATE_KEY, key);
+  }
+
+  const handlePptxTemplateChange = (key: PptxTemplateKey) => {
+    setSelectedPptxTemplate(key);
+    localStorage.setItem(PPTX_TEMPLATE_KEY, key);
   }
   
   const hasContent = Object.values(reportState.sections).some(s => !!s) || Object.values(reportState.diagrams || {}).some(d => !!d);
@@ -72,17 +89,17 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
     if (proposal && proposal.title) {
         proposalTitle = proposal.title;
     }
-    await exportReportAsDocx(reportState.sections, reportState.diagrams || {}, proposalTitle, selectedTemplate);
+    await exportReportAsDocx(reportState.sections, reportState.diagrams || {}, proposalTitle, selectedDocxTemplate);
   };
 
   const handleExportProposalDOCX = async () => {
     if (!proposal) return;
-    await exportProposalAsDocx(proposal, selectedTemplate);
+    await exportProposalAsDocx(proposal, selectedDocxTemplate);
   };
   
   const handleExportPresentation = () => {
     if (!reportState.presentation?.slides) return;
-    exportPresentationAsPptx(reportState.presentation.slides);
+    exportPresentationAsPptx(reportState.presentation.slides, selectedPptxTemplate);
   }
 
   return (
@@ -92,20 +109,37 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
         <CardDescription>{t('reportGenerator.actionsDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="template-select">Export Template</Label>
-            {isLoaded ? (
-              <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
-                  <SelectTrigger id="template-select">
-                      <SelectValue placeholder="Select a template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {Object.entries(docxTemplates).map(([key, template]) => (
-                          <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-            ) : <Loader2 className="h-5 w-5 animate-spin" /> }
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+                <Label htmlFor="docx-template-select">DOCX Template</Label>
+                {docxLoaded ? (
+                  <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange}>
+                      <SelectTrigger id="docx-template-select">
+                          <SelectValue placeholder="Select a template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {Object.entries(docxTemplates).map(([key, template]) => (
+                              <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                          ))}
+                      </SelectContent>
+                  </Select>
+                ) : <Loader2 className="h-5 w-5 animate-spin" /> }
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="pptx-template-select">PPTX Template</Label>
+                {pptxLoaded ? (
+                  <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange}>
+                      <SelectTrigger id="pptx-template-select">
+                          <SelectValue placeholder="Select a template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                          {Object.entries(pptxTemplates).map(([key, template]) => (
+                              <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                          ))}
+                      </SelectContent>
+                  </Select>
+                ) : <Loader2 className="h-5 w-5 animate-spin" /> }
+            </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 flex-wrap items-center">
             <Button onClick={handleExportProposalDOCX} disabled={!proposal || isGenerating} className="w-full sm:w-auto font-headline">
