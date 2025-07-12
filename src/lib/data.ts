@@ -15,7 +15,7 @@ export const MOCK_USERS: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.',
     skills: ['UI/UX Design', 'Figma', 'React', 'Next.js', 'Web Design'],
-    credits: 50,
+    credits: 200,
   },
   {
     id: 'user-3',

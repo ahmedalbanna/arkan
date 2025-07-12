@@ -2,18 +2,18 @@
 'use server';
 
 import { z } from 'zod';
-import { getUserProfile, updateUserCredits } from '@/lib/db/queries';
+import { updateUserCredits } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 
 const purchaseSchema = z.object({
   planId: z.string().min(1),
-  creditsToAdd: z.coerce.number().int().positive(),
+  credits: z.coerce.number().int().positive(),
 });
 
 interface PurchaseState {
   success?: boolean;
   error?: string;
-  creditsAdded?: number;
+  planId?: string;
   newBalance?: number;
 }
 
@@ -23,7 +23,7 @@ export async function handlePurchase(
 ): Promise<PurchaseState> {
   const validatedFields = purchaseSchema.safeParse({
     planId: formData.get('planId'),
-    creditsToAdd: formData.get('creditsToAdd'),
+    credits: formData.get('credits'),
   });
 
   if (!validatedFields.success) {
@@ -34,20 +34,20 @@ export async function handlePurchase(
   const userId = 'user-1';
 
   try {
-    const { creditsToAdd } = validatedFields.data;
+    const { planId, credits } = validatedFields.data;
     
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Add credits to user's account
-    const newBalance = await updateUserCredits(userId, creditsToAdd);
+    const newBalance = await updateUserCredits(userId, credits);
 
     revalidatePath('/profile');
+    revalidatePath(`/profile/${userId}`);
     revalidatePath('/'); // To update header credits
 
     return {
       success: true,
-      creditsAdded: creditsToAdd,
+      planId: planId,
       newBalance: newBalance,
     };
 

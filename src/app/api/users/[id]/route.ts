@@ -19,10 +19,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 // PUT /api/users/[id]
 const updateUserSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required").optional(),
   avatarUrl: z.string().url().optional(),
   bio: z.string().optional(),
-  skills: z.array(z.string()),
+  skills: z.array(z.string()).optional(),
+  credits: z.coerce.number().int().optional(),
 });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -43,12 +44,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const { name, avatarUrl, bio, skills } = validation.data;
 
-    await updateUser(userId, {
-      name,
-      avatarUrl: avatarUrl || undefined,
-      bio: bio || undefined,
-      skills,
-    });
+    // Handle profile update
+    if (name || avatarUrl || bio || skills) {
+        await updateUser(userId, {
+            name: name ?? user.name,
+            avatarUrl: avatarUrl ?? user.avatarUrl ?? undefined,
+            bio: bio ?? user.bio ?? undefined,
+            skills: skills ?? user.userSkills.map(s => s.skill.name),
+        });
+    }
 
     const updatedUser = await getUserProfile(userId);
 

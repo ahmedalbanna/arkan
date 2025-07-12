@@ -8,7 +8,7 @@ const plans: PricingPlan[] = [
     name: 'Starter',
     price: 5,
     credits: 50,
-    features: ['50 AI Credits', 'Basic Project Summaries', 'Standard DOCX Export'],
+    features: ['50 AI Credits', 'Basic Project Summaries', 'Standard DOCX Export', 'Renews every 30 days'],
   },
   {
     id: 'professional',
@@ -21,6 +21,7 @@ const plans: PricingPlan[] = [
       'Diagram Generation',
       'Advanced DOCX Templates',
       'Priority Support',
+      'Renews every 30 days',
     ],
     isPopular: true,
   },
@@ -35,6 +36,7 @@ const plans: PricingPlan[] = [
       'Team Collaboration (Coming Soon)',
       'Custom Agent Configuration',
       'Dedicated Support Channel',
+      'Renews every 30 days',
     ],
   },
 ];
@@ -49,7 +51,7 @@ export default function PricingPage() {
           Choose Your Plan
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Select the perfect credit package to power your AI-driven workflows.
+          Select the perfect credit package to power your AI-driven workflows. Your plan renews every 30 days.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

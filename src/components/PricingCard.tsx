@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 import { handlePurchase } from '@/app/pricing/actions';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 
 function PurchaseButton({ plan }: { plan: PricingPlan }) {
   const { pending } = useTransition();
@@ -31,14 +33,17 @@ function PurchaseButton({ plan }: { plan: PricingPlan }) {
 
 export function PricingCard({ plan }: { plan: PricingPlan }) {
   const { toast } = useToast();
+  const router = useRouter();
   const [state, formAction] = useActionState(handlePurchase, null);
 
   useEffect(() => {
     if (state?.success) {
       toast({
         title: 'Purchase Successful!',
-        description: `You've added ${state.creditsAdded} credits to your account. Your new balance is ${state.newBalance}.`,
+        description: `You are now on the ${state.planId} plan with ${state.newBalance} credits.`,
       });
+      // Redirect to profile page to see the new plan details
+      router.push('/profile/user-1');
     }
     if (state?.error) {
       toast({
@@ -47,7 +52,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
         variant: 'destructive',
       });
     }
-  }, [state, toast]);
+  }, [state, toast, router]);
 
   return (
     <Card className={cn('flex flex-col', plan.isPopular && 'border-primary shadow-lg')}>
@@ -60,7 +65,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
         <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
         <CardDescription>
           <span className="text-4xl font-bold">${plan.price}</span>
-          <span className="text-muted-foreground"> / one-time</span>
+          <span className="text-muted-foreground"> / month</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow space-y-4">
@@ -77,7 +82,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
       <CardFooter>
         <form action={formAction} className="w-full">
           <input type="hidden" name="planId" value={plan.id} />
-          <input type="hidden" name="creditsToAdd" value={plan.credits} />
+          <input type="hidden" name="credits" value={plan.credits} />
           <PurchaseButton plan={plan} />
         </form>
       </CardFooter>
