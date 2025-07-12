@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';

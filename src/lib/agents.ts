@@ -1,4 +1,4 @@
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentData {
@@ -212,6 +212,20 @@ The conclusion should:
 4.  **Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.
 
 Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.`
+  },
+  {
+    id: 'generate-presentation',
+    name: 'Presentation Agent',
+    description: 'Creates a slide deck from project proposal and report content.',
+    category: 'Report & Diagram Generation',
+    icon: Presentation,
+    pageUrl: '#', // This agent is used on the project page directly
+    isEnabled: true,
+    prompt: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
+
+Create a logical flow for the presentation, starting with an introduction and problem statement, moving through the solution and design, and ending with a conclusion. Select the most important information to display. Keep slide content concise and focused on bullet points. Use the speaker notes to add detail and elaborate on the points.
+
+You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Synthesize all this information to create the slide deck.`
   },
   // Diagram Agents
   {

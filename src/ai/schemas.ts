@@ -71,3 +71,10 @@ export const ManipulateTextOutputSchema = z.object({
   rewrittenText: z.string().describe('The resulting text after applying the command.'),
 });
 export type ManipulateTextOutput = z.infer<typeof ManipulateTextOutputSchema>;
+
+export const PresentationSlideSchema = z.object({
+  title: z.string().describe('The title for this presentation slide.'),
+  content: z.array(z.string()).describe('A list of bullet points for the main content of the slide. Each string is one bullet point.'),
+  speakerNotes: z.string().describe('Detailed speaker notes for the presenter to elaborate on the slide content.'),
+});
+export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
