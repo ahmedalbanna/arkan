@@ -20,6 +20,11 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  // When the dialog opens, reset to the first slide
+  if (isOpen && currentSlide !== 0 && slides.length > 0) {
+      setCurrentSlide(0);
+  }
+
   const handleNext = () => {
     setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
   };
@@ -28,7 +33,17 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
-  const slide = slides[currentSlide];
+  const slide = slides?.[currentSlide];
+
+  if (!slide) {
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent>
+                <p>No slides to display.</p>
+            </DialogContent>
+        </Dialog>
+    )
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

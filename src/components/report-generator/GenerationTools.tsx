@@ -15,13 +15,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import { Loader2, Sparkles } from 'lucide-react';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
+const allGenerationItems = [...orderedSections, ...orderedDiagrams, 'presentation'];
 
 type ControlState = {
     formality: number;
@@ -72,7 +73,7 @@ interface GenerateItemButtonProps {
 
 function GenerateItemButton({ itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
     const { agents } = useAgents();
-    const agentId = (sectionConfig[itemKey as SectionName] || diagramConfig[itemKey as keyof typeof diagramConfig])?.agentId;
+    const agentId = (sectionConfig[itemKey as SectionName] || diagramConfig[itemKey as keyof typeof diagramConfig] || presentationConfig[itemKey as keyof typeof presentationConfig])?.agentId;
     const agent = agents.find(a => a.id === agentId);
     const isGeneratingThis = isPending && generatingItem === itemKey;
 
@@ -108,19 +109,22 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
     
     useEffect(() => {
         const updatedPrompts: Record<string, string> = {};
-        const allKeys = [...orderedSections, ...orderedDiagrams];
-
-        allKeys.forEach(key => {
+        
+        allGenerationItems.forEach(key => {
             const isSection = orderedSections.includes(key as SectionName);
-            const config = isSection
-                ? sectionConfig[key as SectionName]
-                : diagramConfig[key as DiagramType];
+            const isDiagram = orderedDiagrams.includes(key as DiagramType);
+            
+            const config = isSection 
+                ? sectionConfig[key as SectionName] 
+                : isDiagram 
+                    ? diagramConfig[key as DiagramType]
+                    : presentationConfig.presentation;
 
             const agentId = config?.agentId;
             const basePrompt = agents.find(a => a.id === agentId)?.prompt;
 
             if (basePrompt) {
-                updatedPrompts[key] = isSection ? buildPrompt(basePrompt, controlState[key as SectionName], t) : basePrompt;
+                 updatedPrompts[key] = isSection ? buildPrompt(basePrompt, controlState[key as SectionName], t) : basePrompt;
             }
         });
         setPrompts(updatedPrompts);
@@ -146,9 +150,16 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
             </CardHeader>
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
-                    {[...orderedSections, ...orderedDiagrams].map((key, index) => {
-                        const isSection = index < orderedSections.length;
-                        const config = isSection ? sectionConfig[key as SectionName] : diagramConfig[key as keyof typeof diagramConfig];
+                    {allGenerationItems.map((key) => {
+                        const isSection = orderedSections.includes(key as SectionName);
+                        const isDiagram = orderedDiagrams.includes(key as DiagramType);
+                        
+                        const config = isSection 
+                            ? sectionConfig[key as SectionName] 
+                            : isDiagram 
+                                ? diagramConfig[key as DiagramType]
+                                : presentationConfig.presentation;
+
                         const agent = agents.find(a => a.id === config.agentId);
                         if (!agent) return null;
                         const { title, icon: Icon } = config;

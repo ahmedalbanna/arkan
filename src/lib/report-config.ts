@@ -1,4 +1,4 @@
-import { BookMarked, Library, Waypoints, BookText, Code, TestTube2, Flag, GitGraph } from 'lucide-react';
+import { BookMarked, Library, Waypoints, BookText, Code, TestTube2, Flag, GitGraph, Presentation } from 'lucide-react';
 import type { DiagramType, SectionName } from '@/ai/schemas';
 
 export const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
@@ -19,4 +19,8 @@ export const diagramConfig: { [key in DiagramType]: { title: string; icon: React
     activity: { title: "Activity Diagram", icon: GitGraph, agentId: "generate-activity-diagram" },
     component: { title: "Component Diagram", icon: GitGraph, agentId: "generate-component-diagram" },
     archimate: { title: "ArchiMate Diagram", icon: GitGraph, agentId: "generate-archimate-diagram" },
+};
+
+export const presentationConfig = {
+    presentation: { title: "Presentation", icon: Presentation, agentId: "generate-presentation" }
 };

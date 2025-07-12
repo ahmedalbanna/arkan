@@ -2,9 +2,8 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName, type PresentationSlide } from '@/ai/schemas';
 import { deflateSync } from 'zlib';
-import { AGENTS } from '@/lib/agents';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
@@ -20,6 +19,7 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
+import { generatePresentation } from '@/ai/flows/generate-presentation';
 
 import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
@@ -35,8 +35,11 @@ export interface ReportState {
       imageUrl: string;
     };
   };
+  presentation?: {
+    slides: PresentationSlide[];
+  }
   error?: string;
-  lastGenerated?: SectionName | DiagramType;
+  lastGenerated?: SectionName | DiagramType | 'presentation';
 }
 
 const GenerateItemSchema = z.object({
@@ -169,9 +172,10 @@ export async function handleGenerateReportItem(
   // Check if the requested item to generate is a known section name or diagram type.
   const isSection = sectionNames.includes(itemToGenerate as SectionName);
   const isDiagram = DiagramTypeSchema.options.includes(itemToGenerate as DiagramType);
+  const isPresentation = itemToGenerate === 'presentation';
 
   // If it's neither, return an error.
-  if (!isSection && !isDiagram) {
+  if (!isSection && !isDiagram && !isPresentation) {
     return { ...prevState, error: 'Unknown item type requested.' };
   }
 
@@ -202,7 +206,7 @@ export async function handleGenerateReportItem(
     // Construct the name of the checkbox for this diagram as context.
     const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
     if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
-      otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey].plantUmlCode;
+      otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey]!.plantUmlCode;
       // Include the PlantUML code of the diagram if the context checkbox is checked and the diagram exists.
     }
   }
@@ -275,6 +279,18 @@ export async function handleGenerateReportItem(
         error: undefined
       };
     }
+
+    if (isPresentation) {
+      const presentationInput = {
+        proposal: validatedProposal.data,
+        sections: otherSections,
+        diagrams: otherDiagrams,
+        prompt: prompt,
+      };
+      const result = await generatePresentation(presentationInput);
+      return { ...prevState, presentation: result, lastGenerated: 'presentation', error: undefined };
+    }
+
 
     return { ...prevState, error: 'An unexpected error occurred.' };
 
