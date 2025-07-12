@@ -1,13 +1,13 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import type { PresentationSlide } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { ChevronLeft, ChevronRight, Minimize, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Minimize, Maximize, FileDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];
@@ -19,7 +19,6 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // Reset to the first slide only when the dialog is opened.
   useEffect(() => {
     if (isOpen) {
       setCurrentSlide(0);
@@ -33,6 +32,10 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
   };
+
+  const handleExport = () => {
+    exportPresentationAsPptx(slides);
+  }
 
   const slide = slides?.[currentSlide];
 
@@ -57,9 +60,14 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
         <DialogHeader>
             <div className="flex justify-between items-center">
                 <DialogTitle className="font-headline text-2xl text-primary">{slide.title}</DialogTitle>
-                <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(!isFullScreen)}>
-                    {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-                </Button>
+                <div className="flex items-center gap-2">
+                   <Button variant="ghost" size="icon" onClick={handleExport} title="Export to PPTX">
+                       <FileDown className="h-5 w-5" />
+                   </Button>
+                   <Button variant="ghost" size="icon" onClick={() => setIsFullScreen(!isFullScreen)} title="Toggle Fullscreen">
+                       {isFullScreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+                   </Button>
+                </div>
             </div>
             <DialogDescription>
               Slide {currentSlide + 1} of {slides.length}

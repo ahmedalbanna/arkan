@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Trash2, FilePlus2, Loader2 } from 'lucide-react';
-import type { ProjectProposal } from '@/ai/schemas';
+import { FileText, Trash2, FilePlus2, Loader2, Presentation } from 'lucide-react';
+import type { ProjectProposal, PresentationSlide } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import { type TemplateKey } from '@/lib/docx-styles';
 import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
@@ -14,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
+import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 
 
 interface ReportActionsProps {
@@ -79,6 +79,11 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
     if (!proposal) return;
     await exportProposalAsDocx(proposal, selectedTemplate);
   };
+  
+  const handleExportPresentation = () => {
+    if (!reportState.presentation?.slides) return;
+    exportPresentationAsPptx(reportState.presentation.slides);
+  }
 
   return (
     <Card>
@@ -111,6 +116,12 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
             <FileText className="mr-2 h-4 w-4" />
             {t('reportGenerator.exportReport')}
             </Button>
+            {reportState.presentation && (
+               <Button onClick={handleExportPresentation} disabled={isGenerating} className="w-full sm:w-auto font-headline">
+                 <Presentation className="mr-2 h-4 w-4" />
+                 Export Presentation
+               </Button>
+            )}
             <CreateProjectSubmitButton disabled={!proposal || isGenerating} formAction={createFormAction} />
             <Button onClick={onNewSession} variant="outline" disabled={isGenerating} className="w-full sm:w-auto font-headline">
             <Trash2 className="mr-2 h-4 w-4" />
