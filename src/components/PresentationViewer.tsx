@@ -1,14 +1,13 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PresentationSlide } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
-import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ChevronLeft, ChevronRight, Minimize, Maximize } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];
@@ -20,10 +19,12 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // When the dialog opens, reset to the first slide
-  if (isOpen && currentSlide !== 0 && slides.length > 0) {
+  // Reset to the first slide only when the dialog is opened.
+  useEffect(() => {
+    if (isOpen) {
       setCurrentSlide(0);
-  }
+    }
+  }, [isOpen]);
 
   const handleNext = () => {
     setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
