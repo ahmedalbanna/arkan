@@ -96,6 +96,11 @@ const buildPrompt = (agent: Agent | undefined, guidelineState: GuidelineState, c
 
     let finalPrompt = promptConfig.base || '';
     
+    // Fix: Check if guidelineState is defined before accessing its properties.
+    if (!guidelineState) {
+        return finalPrompt;
+    }
+
     const guidelines: string[] = [];
     promptConfig.guidelines?.forEach((g, index) => {
         if (guidelineState.checked[index]) {
