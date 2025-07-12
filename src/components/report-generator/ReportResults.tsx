@@ -11,7 +11,7 @@ import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-c
 import type { ProjectProposal, SectionName, DiagramType, PresentationSlide } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import DiagramViewer from '../DiagramViewer';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Presentation } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import PresentationViewer from '../PresentationViewer';
 import { useState, useEffect } from 'react';
@@ -84,7 +84,17 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
       <Accordion type="multiple" className="w-full space-y-4" defaultValue={['Results']}>
         <AccordionItem value="Results" className="border-none">
           <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
-          <AccordionContent className="space-y-4 border-none">
+          <CardContent className="p-0 space-y-4">
+            {reportState.presentation && (
+                <Card>
+                    <CardHeader className="flex-row items-center justify-between p-4">
+                      <CardTitle className="font-headline text-lg flex items-center gap-2">
+                        <presentationConfig.presentation.icon className="h-5 w-5 text-primary" /> {presentationConfig.presentation.title}
+                      </CardTitle>
+                      <Button variant="secondary" size="sm" onClick={() => setShowPresentation(true)}>View Presentation</Button>
+                    </CardHeader>
+                </Card>
+            )}
             {orderedSections.map((key) => {
               const content = reportState.sections[key];
               const { title, icon: Icon } = sectionConfig[key];
@@ -175,7 +185,7 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                 </Card>
             )}
 
-          </AccordionContent>
+          </CardContent>
         </AccordionItem>
       </Accordion>
     </div>

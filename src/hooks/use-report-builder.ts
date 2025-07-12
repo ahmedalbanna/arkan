@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -27,6 +28,7 @@ export function useReportBuilder() {
         setState({
           sections: parsed.sections || {},
           diagrams: parsed.diagrams || {},
+          presentation: parsed.presentation || undefined,
           lastGenerated: parsed.lastGenerated,
         });
         const savedProposalJson = parsed.proposalJson || '';
@@ -55,6 +57,7 @@ export function useReportBuilder() {
       const dataToSave = {
         sections: state.sections,
         diagrams: state.diagrams,
+        presentation: state.presentation,
         lastGenerated: state.lastGenerated,
         proposalJson: proposalJson,
         projectIdea: projectIdea,
