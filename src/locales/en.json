@@ -14,7 +14,8 @@
     "openMenu": "Open Menu",
     "credits": "Credits",
     "pricing": "Pricing",
-    "pptxTemplates": "PPTX Templates"
+    "pptxTemplates": "PPTX Templates",
+    "pdfToMarkdown": "PDF to Markdown"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."

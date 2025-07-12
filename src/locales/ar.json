@@ -14,7 +14,8 @@
     "openMenu": "فتح القائمة",
     "credits": "رصيد",
     "pricing": "الأسعار",
-    "pptxTemplates": "قوالب العروض"
+    "pptxTemplates": "قوالب العروض",
+    "pdfToMarkdown": "تحويل PDF إلى ماركداون"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
