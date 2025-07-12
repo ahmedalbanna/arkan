@@ -18,10 +18,11 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
-import { Loader2, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { useToast } from '@/hooks/use-toast';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -95,8 +96,7 @@ const buildPrompt = (agent: Agent | undefined, guidelineState: GuidelineState, c
     }
 
     let finalPrompt = promptConfig.base || '';
-    
-    // Fix: Check if guidelineState is defined before accessing its properties.
+
     if (!guidelineState) {
         return finalPrompt;
     }
@@ -117,7 +117,7 @@ const buildPrompt = (agent: Agent | undefined, guidelineState: GuidelineState, c
     if (controlState && t) {
         finalPrompt += generateInstructionText(controlState, t);
     }
-    
+
     return finalPrompt;
 }
 
@@ -156,22 +156,27 @@ interface GenerationToolsProps {
     generatingItem: string | null;
     contextSelections: Record<string, Record<string, boolean>>;
     onContextToggle: (parentKey: string, contextKey: string) => void;
+    onExternalContextUploaded: (fileName: string, content: string) => void;
+    onExternalContextRemoved: () => void;
 }
 
-export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle }: GenerationToolsProps) => {
+export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle, onExternalContextUploaded, onExternalContextRemoved }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
     const [guidelineState, setGuidelineState] = useState<Record<string, GuidelineState>>({});
     const [prompts, setPrompts] = useState<Record<string, string>>({});
     const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (agentsLoaded) {
             setGuidelineState(getInitialGuidelineState(agents));
         }
     }, [agentsLoaded, agents]);
-    
+
     useEffect(() => {
         const updatedPrompts: Record<string, string> = {};
         allGenerationItems.forEach(key => {
@@ -218,7 +223,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                     custom: [...prev[itemKey].custom, newGuideline]
                 }
             }));
-            setCustomGuidelineInput(prev => ({...prev, [itemKey]: ''}));
+            setCustomGuidelineInput(prev => ({ ...prev, [itemKey]: '' }));
         }
     };
 
@@ -232,8 +237,45 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
         }));
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            if (file.type === 'application/pdf') {
+                setPdfFile(file);
+            } else {
+                toast({ title: "Invalid File Type", description: "Please upload a PDF file.", variant: "destructive" });
+            }
+        }
+    };
+
+    const handleFileUpload = async () => {
+        if (!pdfFile) return;
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        try {
+            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+                throw new Error(errorResult.message);
+            }
+            const result = await response.json();
+            onExternalContextUploaded(pdfFile.name, result.markdown);
+            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
+        } catch (error: any) {
+            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+    
+    const handleRemoveExternalContext = () => {
+      onExternalContextRemoved();
+      setPdfFile(null);
+    }
+
     if (!agentsLoaded) {
-      return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin"/></CardContent></Card>
+        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
     }
 
     return (
@@ -246,7 +288,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                 <Accordion type="multiple" className="w-full space-y-1">
                     {allGenerationItems.map((key) => {
                         const isSection = orderedSections.includes(key as SectionName);
-                        
+
                         const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
                         if (!agent) return null;
 
@@ -283,8 +325,8 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                     <div className="space-y-2 p-3 rounded-md border">
                                                         {promptConfig.guidelines!.map((guideline, index) => (
                                                             <div key={index} className="flex items-start gap-2">
-                                                                <Checkbox 
-                                                                    id={`guideline-${key}-${index}`} 
+                                                                <Checkbox
+                                                                    id={`guideline-${key}-${index}`}
                                                                     checked={guidelineState[key]?.checked[index] ?? false}
                                                                     onCheckedChange={(checked) => handleGuidelineToggle(key, index, !!checked)}
                                                                 />
@@ -296,7 +338,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                     </div>
                                                 </div>
                                             )}
-                                            
+
                                             <div className="space-y-2">
                                                 <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
                                                 {guidelineState[key]?.custom.map((custom, index) => (
@@ -311,7 +353,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                     <Input
                                                         placeholder="Add a custom guideline..."
                                                         value={customGuidelineInput[key] || ''}
-                                                        onChange={(e) => setCustomGuidelineInput(prev => ({...prev, [key]: e.target.value}))}
+                                                        onChange={(e) => setCustomGuidelineInput(prev => ({ ...prev, [key]: e.target.value }))}
                                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline(key))}
                                                     />
                                                     <Button type="button" variant="secondary" onClick={() => handleAddCustomGuideline(key)}>
@@ -320,7 +362,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                 </div>
                                             </div>
                                         </TabsContent>
-                                        
+
                                         <input
                                             type="hidden"
                                             name={`prompt_${key}`}
@@ -362,6 +404,22 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                 <Label className="font-semibold">{t('reportGenerator.tool_context_label')}</Label>
                                                 <p className="text-xs text-muted-foreground">{t('reportGenerator.tool_context_desc')}</p>
                                                 <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
+                                                    {reportState.externalContext && (
+                                                        <>
+                                                            <h4 className="text-xs font-bold uppercase text-muted-foreground">External Context</h4>
+                                                             <div className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`context-${key}-external`}
+                                                                    name={`context_${key}_external`}
+                                                                    checked={contextSelections[key]?.['external'] ?? false}
+                                                                    onCheckedChange={() => onContextToggle(key, 'external')}
+                                                                />
+                                                                <Label htmlFor={`context-${key}-external`} className="text-sm font-normal">
+                                                                    {reportState.externalContext.fileName}
+                                                                </Label>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                     <h4 className="text-xs font-bold uppercase text-muted-foreground">{t('reportGenerator.tool_context_sections')}</h4>
                                                     {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
                                                         <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
@@ -404,6 +462,28 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                         );
                     })}
                 </Accordion>
+                <div className="pt-4 mt-4 border-t">
+                    <h3 className="text-sm font-semibold mb-2">External Context (PDF)</h3>
+                    {reportState.externalContext ? (
+                        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
+                           <div className="flex items-center gap-2 truncate">
+                             <FileText className="h-4 w-4 shrink-0" />
+                             <span className="truncate">{reportState.externalContext.fileName}</span>
+                           </div>
+                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext}>
+                               <X className="h-4 w-4" />
+                           </Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
+                            <Button type="button" size="sm" onClick={handleFileUpload} disabled={!pdfFile || isUploading} className="w-full">
+                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                                Upload & Process PDF
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

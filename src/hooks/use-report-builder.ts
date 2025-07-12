@@ -30,6 +30,7 @@ export function useReportBuilder() {
           diagrams: parsed.diagrams || {},
           presentation: parsed.presentation || undefined,
           lastGenerated: parsed.lastGenerated,
+          externalContext: parsed.externalContext || undefined,
         });
         const savedProposalJson = parsed.proposalJson || '';
         setProposalJson(savedProposalJson);
@@ -59,6 +60,7 @@ export function useReportBuilder() {
         diagrams: state.diagrams,
         presentation: state.presentation,
         lastGenerated: state.lastGenerated,
+        externalContext: state.externalContext,
         proposalJson: proposalJson,
         projectIdea: projectIdea,
         contextSelections: contextSelections,
@@ -98,7 +100,7 @@ export function useReportBuilder() {
       const historyEntry = {
         id: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        type: 'report' as const, // Explicitly set type as literal 'report'
+        type: 'report' as const,
         title: `Report Section: ${sectionConfig[section].title}`,
         proposalTitle,
         section: section,
@@ -135,6 +137,20 @@ export function useReportBuilder() {
     });
   }, []);
 
+  const setExternalContext = useCallback((fileName: string, content: string) => {
+    setState(prev => ({
+      ...prev,
+      externalContext: { fileName, content }
+    }));
+  }, []);
+
+  const removeExternalContext = useCallback(() => {
+    setState(prev => {
+      const { externalContext, ...rest } = prev;
+      return rest;
+    });
+  }, []);
+
 
   return {
     isLoaded,
@@ -149,5 +165,7 @@ export function useReportBuilder() {
     handleNewSession,
     contextSelections,
     toggleContextSelection,
+    setExternalContext,
+    removeExternalContext,
   };
 }

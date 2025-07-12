@@ -48,6 +48,10 @@ export interface ReportState {
   presentation?: {
     slides: PresentationSlide[];
   }
+  externalContext?: {
+    fileName: string;
+    content: string;
+  }
   error?: string;
   lastGenerated?: SectionName | DiagramType | 'presentation';
 }
@@ -58,6 +62,7 @@ const GenerateItemSchema = z.object({
   intent: z.string().optional(),
   diagramToUpdate: DiagramTypeSchema.optional(),
   plantUmlCode: z.string().optional(),
+  externalContextContent: z.string().optional(),
 });
 
 const sectionNames: SectionName[] = [
@@ -111,6 +116,7 @@ export async function handleGenerateReportItem(
     intent: formData.get('intent') ?? undefined,
     diagramToUpdate: formData.get('diagramToUpdate') ?? undefined,
     plantUmlCode: formData.get('plantUmlCode') ?? undefined,
+    externalContextContent: formData.get('externalContextContent') ?? undefined,
   };
 
   const validatedFields = GenerateItemSchema.safeParse(formValues);
@@ -129,7 +135,8 @@ export async function handleGenerateReportItem(
     diagramToUpdate,
     plantUmlCode,
     proposalJson,
-    itemToGenerate
+    itemToGenerate,
+    externalContextContent
   } = validatedFields.data;
 
 
@@ -189,21 +196,14 @@ export async function handleGenerateReportItem(
     return { ...prevState, error: 'Unknown item type requested.' };
   }
 
-  // Initialize objects to hold content from other sections and diagrams
-  // that should be included as context for the generation.
   const otherSections: Partial<Record<SectionName, string>> = {};
   const otherDiagrams: Partial<Record<DiagramType, string>> = {};
 
-  // Get the current state of all available sections and diagrams.
-  // Use empty objects as fallbacks if prevState.sections or prevState.diagrams are undefined.
   const allAvailableSections = prevState.sections || {};
   const allAvailableDiagrams = prevState.diagrams || {};
 
-  // Iterate through all possible section names.
   for (const sectionKey of SectionNameSchema.options) {
-    // Skip the section that is currently being generated.
     if (sectionKey === itemToGenerate) continue;
-    // Construct the name of the checkbox for this section as context.
     const contextCheckboxName = `context_${itemToGenerate}_${sectionKey}`;
     if (formData.get(contextCheckboxName) === 'on' && allAvailableSections[sectionKey]) {
       otherSections[sectionKey] = allAvailableSections[sectionKey];
@@ -211,22 +211,24 @@ export async function handleGenerateReportItem(
   }
 
   for (const diagramKey of DiagramTypeSchema.options) {
-    // Skip the diagram that is currently being generated.
     if (diagramKey === itemToGenerate) continue;
-    // Construct the name of the checkbox for this diagram as context.
     const contextCheckboxName = `context_${itemToGenerate}_${diagramKey}`;
     if (formData.get(contextCheckboxName) === 'on' && allAvailableDiagrams[diagramKey]) {
       otherDiagrams[diagramKey] = allAvailableDiagrams[diagramKey]!.plantUmlCode;
-      // Include the PlantUML code of the diagram if the context checkbox is checked and the diagram exists.
     }
   }
   
+  let fullPrompt = prompt;
+  if (formData.get(`context_${itemToGenerate}_external`) === 'on' && externalContextContent) {
+    fullPrompt += `\n\n--- ADDITIONAL EXTERNAL CONTEXT ---\n${externalContextContent}\n---`;
+  }
+
   try {
     const agentInput = {
       proposal: validatedProposal.data,
       otherSections,
       otherDiagrams,
-      prompt: prompt!,
+      prompt: fullPrompt,
     };
 
     if (isSection) {
@@ -234,31 +236,25 @@ export async function handleGenerateReportItem(
       let result;
 
       switch (sectionToGenerate) {
-        case 'introduction':
-          result = await generateIntroduction(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, introduction: result.introduction }, lastGenerated: 'introduction', error: undefined };
-        case 'literatureReview':
-          result = await generateLiteratureReview(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, literatureReview: result.literatureReview }, lastGenerated: 'literatureReview', error: undefined };
-        case 'systemAnalysis':
-          result = await generateSystemAnalysis(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, systemAnalysis: result.systemAnalysis }, lastGenerated: 'systemAnalysis', error: undefined };
-        case 'designStrategy':
-          result = await generateDesignStrategy(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, designStrategy: result.designStrategy }, lastGenerated: 'designStrategy', error: undefined };
-        case 'systemDesign':
-          result = await generateSystemDesign(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, systemDesign: result.systemDesign }, lastGenerated: 'systemDesign', error: undefined };
-        case 'systemProgramming':
-          result = await generateSystemProgramming(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, systemProgramming: result.systemProgramming }, lastGenerated: 'systemProgramming', error: undefined };
-        case 'systemTesting':
-          result = await generateSystemTesting(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, systemTesting: result.systemTesting }, lastGenerated: 'systemTesting', error: undefined };
-        case 'conclusion':
-          result = await generateConclusion(agentInput);
-          return { ...prevState, sections: { ...prevState.sections, conclusion: result.conclusion }, lastGenerated: 'conclusion', error: undefined };
+        case 'introduction': result = await generateIntroduction(agentInput); break;
+        case 'literatureReview': result = await generateLiteratureReview(agentInput); break;
+        case 'systemAnalysis': result = await generateSystemAnalysis(agentInput); break;
+        case 'designStrategy': result = await generateDesignStrategy(agentInput); break;
+        case 'systemDesign': result = await generateSystemDesign(agentInput); break;
+        case 'systemProgramming': result = await generateSystemProgramming(agentInput); break;
+        case 'systemTesting': result = await generateSystemTesting(agentInput); break;
+        case 'conclusion': result = await generateConclusion(agentInput); break;
+        default: return { ...prevState, error: `Unknown section '${sectionToGenerate}'.` };
       }
+      
+      const newSections = { ...prevState.sections, [(Object.keys(result)[0] as SectionName)]: Object.values(result)[0] };
+
+      return {
+        ...prevState,
+        sections: newSections,
+        lastGenerated: sectionToGenerate,
+        error: undefined
+      };
     }
 
     if (isDiagram) {
@@ -295,7 +291,7 @@ export async function handleGenerateReportItem(
         proposal: validatedProposal.data,
         sections: otherSections,
         diagrams: otherDiagrams,
-        prompt: prompt,
+        prompt: fullPrompt,
       };
       const result = await generatePresentation(presentationInput);
       return { ...prevState, presentation: result, lastGenerated: 'presentation', error: undefined };

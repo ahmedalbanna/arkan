@@ -52,6 +52,8 @@ export default function ReportGenerator() {
     handleNewSession,
     contextSelections,
     toggleContextSelection,
+    setExternalContext,
+    removeExternalContext
   } = useReportBuilder();
   
   const { isLoaded: agentsLoaded } = useAgents();
@@ -178,6 +180,9 @@ export default function ReportGenerator() {
   const handleSubmit = (formData: FormData) => {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
+    if (state.externalContext) {
+      formData.set('externalContextContent', state.externalContext.content);
+    }
 
     setGeneratingItem(item);
     startTransition(async () => {
@@ -236,6 +241,8 @@ export default function ReportGenerator() {
                 generatingItem={generatingItem}
                 contextSelections={contextSelections}
                 onContextToggle={toggleContextSelection}
+                onExternalContextUploaded={setExternalContext}
+                onExternalContextRemoved={removeExternalContext}
             />
           </div>
           <div className="lg:col-span-3 space-y-6">
