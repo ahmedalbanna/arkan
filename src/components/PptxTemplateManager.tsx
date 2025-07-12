@@ -18,7 +18,8 @@ const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetic
 
 export default function PptxTemplateManager() {
   const { templates, updateStyle, isLoaded } = usePptxStyles();
-  const [savingState, setSavingState] = useState<Record<PptxTemplateKey, boolean>>({});
+  const [savingState, setSavingState] = useState<Record<PptxTemplateKey, boolean>>(() => ({} as Record<PptxTemplateKey, boolean>));
+
   const { toast } = useToast();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {

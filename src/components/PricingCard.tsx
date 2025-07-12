@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 
 
 function PurchaseButton({ plan }: { plan: PricingPlan }) {
-  const { pending } = useTransition();
+  const [pending] = useTransition();
 
   return (
     <Button type="submit" className="w-full font-headline" disabled={pending}>

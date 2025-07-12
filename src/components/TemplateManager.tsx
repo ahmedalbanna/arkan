@@ -17,7 +17,7 @@ const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetic
 
 export default function TemplateManager() {
   const { templates, updateStyle, isLoaded } = useDocxStyles();
-  const [savingState, setSavingState] = useState<Record<TemplateKey, boolean>>({});
+  const [savingState, setSavingState] = useState<Record<TemplateKey, boolean>>(() => ({} as Record<TemplateKey, boolean>));
   const { toast } = useToast();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
@@ -60,14 +60,14 @@ export default function TemplateManager() {
               <CardDescription>{template.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-               <Image
-                  src={template.imageUrl}
-                  alt={`${template.name} preview`}
-                  width={400}
-                  height={565}
-                  className="w-full h-auto rounded-md border"
-                  data-ai-hint={template.dataAiHint}
-                />
+              <Image
+                src={template.imageUrl}
+                alt={`${template.name} preview`}
+                width={400}
+                height={565}
+                className="w-full h-auto rounded-md border"
+                data-ai-hint={template.dataAiHint}
+              />
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="general">
                   <AccordionTrigger>General Styles</AccordionTrigger>
@@ -76,12 +76,13 @@ export default function TemplateManager() {
                       <div className="space-y-2">
                         <Label>Font Family</Label>
                         <select
-                          value={styles?.document?.run?.font?.name || ''}
+                          value={(styles?.document?.run?.font as any)?.name || ''}  // Type assertion and nullish coalescing
                           onChange={(e) => handleStyleChange(key, 'document.run.font.name', e.target.value)}
                           className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
                         >
                           {FONT_FACES.map(font => <option key={font} value={font}>{font}</option>)}
                         </select>
+
                       </div>
                       <div className="space-y-2">
                         <Label>Font Size (pt)</Label>
@@ -118,41 +119,44 @@ export default function TemplateManager() {
                       <div key={level} className="space-y-3 p-2 border-l-2">
                         <h4 className="font-semibold">Heading {level}</h4>
                         <div className="grid grid-cols-2 gap-4">
-                           <div className="space-y-2">
-                              <Label>Font Size (pt)</Label>
-                              <Input
-                                type="number"
-                                value={Number(styles?.[`heading${level}`]?.run?.size || 0) / 2}
-                                onChange={(e) => handleStyleChange(key, `heading${level}.run.size`, Number(e.target.value) * 2)}
-                              />
-                           </div>
-                           <div className="space-y-2">
-                              <Label>Bold</Label>
-                               <input
-                                type="checkbox"
-                                className="w-5 h-5 block"
-                                checked={!!styles?.[`heading${level}`]?.run?.bold}
-                                onChange={(e) => handleStyleChange(key, `heading${level}.run.bold`, e.target.checked)}
-                               />
-                           </div>
+                          <div className="space-y-2">
+                            <Label>Font Size (pt)</Label>
+                            <Input
+                              type="number"
+                              value={Number((styles as any)?.[`heading${level}`]?.run?.size || 0) / 2}
+                              onChange={(e) => handleStyleChange(key, `heading${level}.run.size`, Number(e.target.value) * 2)}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Bold</Label>
+                            <input
+                              type="checkbox"
+                              className="w-5 h-5 block"
+                              checked={!!(styles as any)?.[`heading${level}`]?.run?.bold}
+                              onChange={(e) => handleStyleChange(key, `heading${level}.run.bold`, e.target.checked)}
+                            />
+
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label>Font Color</Label>
                           <div className="flex items-center gap-2">
                             <Input
                               type="color"
-                              value={`#${styles?.[`heading${level}`]?.run?.color || '000000'}`}
+                              value={`#${(styles as any)?.[`heading${level}`]?.run?.color || '000000'}`}
                               onChange={(e) => handleStyleChange(key, `heading${level}.run.color`, e.target.value.substring(1))}
                               className="w-10 h-10 p-1"
                             />
-                             <Input
-                               type="text"
-                               value={styles?.[`heading${level}`]?.run?.color || ''}
-                               onChange={(e) => handleStyleChange(key, `heading${level}.run.color`, e.target.value)}
-                               placeholder="e.g., 2E74B5"
-                             />
-                           </div>
-                         </div>
+
+                            <Input
+                              type="text"
+                              value={(styles as any)?.[`heading${level}`]?.run?.color || ''}
+                              onChange={(e) => handleStyleChange(key, `heading${level}.run.color`, e.target.value)}
+                              placeholder="e.g., 2E74B5"
+                            />
+
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </AccordionContent>

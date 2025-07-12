@@ -17,7 +17,7 @@ interface ProjectActionsProps {
 export default function ProjectActions({ project }: ProjectActionsProps) {
   const [isDownloadingProposal, setIsDownloadingProposal] = useState(false);
   const [isDownloadingReport, setIsDownloadingReport] = useState(false);
-  
+
   let proposal: ProjectProposal | null = null;
   if (project.proposalData) {
     try {
@@ -50,7 +50,7 @@ export default function ProjectActions({ project }: ProjectActionsProps) {
     setIsDownloadingProposal(true);
     const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
     const template = templates[templateKey] || templates.modern;
-    await exportProposalAsDocx(proposal, template.styles);
+    await exportProposalAsDocx(proposal, templateKey);
     setIsDownloadingProposal(false);
   };
 
@@ -59,7 +59,7 @@ export default function ProjectActions({ project }: ProjectActionsProps) {
     setIsDownloadingReport(true);
     const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
     const template = templates[templateKey] || templates.modern;
-    await exportReportAsDocx(reportSections || {}, reportDiagrams || {}, project.title, template.styles);
+    await exportReportAsDocx(reportSections || {}, reportDiagrams || {}, project.title, templateKey);
     setIsDownloadingReport(false);
   };
 

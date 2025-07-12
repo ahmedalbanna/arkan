@@ -66,7 +66,7 @@ export const ProposalGenerator = ({ isGenerating, setIsGenerating, projectIdea, 
       onReset();
       const result = await generateProposal({
         projectIdea,
-        prompt: proposalAgent.prompt,
+        prompt: proposalAgent.prompt as string,
       });
 
       saveToCache(cacheKey, result);

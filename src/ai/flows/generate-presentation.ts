@@ -8,10 +8,10 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { 
-  ProjectProposalSchema, 
-  DiagramTypeSchema, 
-  SectionNameSchema, 
+import {
+  ProjectProposalSchema,
+  DiagramTypeSchema,
+  SectionNameSchema,
   GeneratePresentationInputSchema,
   type GeneratePresentationInput,
   GeneratePresentationOutputSchema,
@@ -35,8 +35,10 @@ const generatePresentationFlow = ai.defineFlow(
       output: { schema: GeneratePresentationOutputSchema },
       prompt: input.prompt,
     });
-    
+
     const { output } = await prompt(input);
     return output!;
   }
 );
+
+// export { GeneratePresentationInputSchema };

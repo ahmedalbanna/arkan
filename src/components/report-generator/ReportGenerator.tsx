@@ -55,7 +55,7 @@ export default function ReportGenerator() {
     setExternalContext,
     removeExternalContext
   } = useReportBuilder();
-  
+
   const { isLoaded: agentsLoaded } = useAgents();
   const { t } = useLocalization();
 
@@ -108,7 +108,7 @@ export default function ReportGenerator() {
     setProposal(newProposal);
     setProposalJson(JSON.stringify(newProposal, null, 2));
   };
-  
+
   const handleProposalJsonChange = (json: string) => {
     setProposalJson(json);
     try {
@@ -141,7 +141,7 @@ export default function ReportGenerator() {
             console.error("Error calculating timeline:", error);
         }
     }
-    
+
     setProposal(newProposal);
     setProposalJson(JSON.stringify(newProposal, null, 2));
   };
@@ -191,7 +191,7 @@ export default function ReportGenerator() {
       setGeneratingItem(null);
     });
   };
-  
+
   if (!isLoaded || !agentsLoaded) {
       return (
           <div className="flex justify-center items-center p-8">
@@ -225,16 +225,16 @@ export default function ReportGenerator() {
          {proposalJson && <input type="hidden" name="proposalJson" value={proposalJson} />}
          {state.sections && <input type="hidden" name="sectionsJson" value={JSON.stringify(state.sections)} />}
          {state.diagrams && <input type="hidden" name="diagramsJson" value={JSON.stringify(state.diagrams)} />}
-         
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <ProposalEditor 
-                proposalJson={proposalJson} 
+            <ProposalEditor
+                proposalJson={proposalJson}
                 onProposalJsonChange={handleProposalJsonChange}
                 isDisabled={isAnythingGenerating}
                 error={state?.error && !generatingItem ? state.error : undefined}
             />
-            <GenerationTools 
+            <GenerationTools
                 isDisabled={isToolsDisabled}
                 reportState={state}
                 isPending={isGenerating}
