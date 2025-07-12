@@ -135,7 +135,6 @@ export default function CodeGenerator() {
                             </Tabs>
                         </CardContent>
                     </Card>
-                </div>
                 )}
             </div>
 
