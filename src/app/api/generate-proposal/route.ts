@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
     const result = await generateProposal({
       projectIdea,
-      prompt: proposalAgent.prompt
+      prompt: typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base
     });
 
     return NextResponse.json(result, { status: 200 });

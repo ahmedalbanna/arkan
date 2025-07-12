@@ -39,7 +39,7 @@ export async function handleSummarize(
   try {
     const result = await summarizeProject({
       projectDescription: validatedFields.data.projectDescription,
-      prompt: agent.prompt,
+      prompt: typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base,
     });
     return { summary: result.summary, technologies: result.technologies, progress: result.progress };
   } catch (e) {

@@ -158,7 +158,7 @@ export async function createProject(data: {
     // 1. Generate summary and technologies
     const summaryResult = await summarizeProject({
         projectDescription: data.description,
-        prompt: summarizerAgent.prompt,
+        prompt: typeof summarizerAgent.prompt === 'string' ? summarizerAgent.prompt : summarizerAgent.prompt.base,
     });
 
     // 2. Prepare tags

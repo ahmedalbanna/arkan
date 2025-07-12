@@ -38,7 +38,7 @@ function ProposalHistoryItem({ entry }: { entry: ProposalHistoryData & { title: 
         const templateKey = (localStorage.getItem('arkan-docx-template') as TemplateKey) || 'modern';
         const template = templates[templateKey];
         if (template) {
-            await exportProposalAsDocx(proposal, template.styles);
+            await exportProposalAsDocx(proposal, templateKey);
         }
     };
 
@@ -75,7 +75,7 @@ function ReportHistoryItem({ entry }: { entry: ReportHistoryData & { title: stri
         const template = templates[templateKey];
         if (template) {
             const sections = { [section]: content };
-            await exportReportAsDocx(sections, {}, proposalTitle, template.styles);
+            await exportReportAsDocx(sections, {}, proposalTitle, templateKey);
         }
     };
 

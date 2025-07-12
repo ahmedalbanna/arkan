@@ -271,7 +271,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
             setIsUploading(false);
         }
     };
-    
+
     const handleRemoveExternalContext = () => {
       onExternalContextRemoved();
       setPdfFile(null);

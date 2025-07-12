@@ -34,7 +34,7 @@ export default function PresentationViewer({ slides, isOpen, onOpenChange }: Pre
   };
 
   const handleExport = () => {
-    exportPresentationAsPptx(slides);
+    exportPresentationAsPptx(slides, 'modern');
   }
 
   const slide = slides?.[currentSlide];

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       proposal,
       sections,
       diagrams,
-      prompt: presentationAgent.prompt
+      prompt: typeof presentationAgent.prompt === 'string' ? presentationAgent.prompt : presentationAgent.prompt.base
     });
 
     return NextResponse.json(result, { status: 200 });

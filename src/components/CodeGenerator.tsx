@@ -71,7 +71,7 @@ const MAX_HISTORY = 5;
 export default function CodeGenerator() {
     const initialState: CodeGenerationState = {};
     const [actionState, formAction] = useActionState(handleGenerateCode, initialState);
-    
+
     // We introduce a new state to hold what's currently displayed
     const [displayState, setDisplayState] = useState<CodeGenerationState>(initialState);
 
@@ -99,7 +99,7 @@ export default function CodeGenerator() {
     useEffect(() => {
         if (actionState.html || actionState.css || actionState.javascript) {
             setDisplayState(actionState);
-            
+
             // Update history only when new code is generated via form action
             if (actionState.prompt) {
                  setHistory(prev => {
@@ -146,7 +146,7 @@ export default function CodeGenerator() {
             });
             const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
             if(blob) {
-                saveAs(blob, 'code-preview.png');
+                saveAs(blob as Blob, 'code-preview.png');
             }
         } catch (error) {
             console.error("Screenshot failed:", error);
@@ -182,12 +182,12 @@ export default function CodeGenerator() {
             setIsDownloading(false);
         }
     }
-    
+
     const restoreFromHistory = (historyItem: CodeGenerationState) => {
         // Directly update the display state instead of calling the form action
         setDisplayState(historyItem);
     }
-    
+
     const clearHistory = () => {
         setHistory([]);
         localStorage.removeItem(HISTORY_KEY);
