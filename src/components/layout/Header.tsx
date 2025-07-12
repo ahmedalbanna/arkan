@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation, FileImage } from 'lucide-react';
+import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation, FileImage, Laptop } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -26,6 +26,7 @@ export function Header() {
     { href: '/projects', label: t('header.projects'), icon: Briefcase },
     { href: '/summarize', label: t('header.summarize'), icon: BrainCircuit },
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
+    { href: '/generate-code', label: t('header.generateCode'), icon: Laptop },
     { href: '/pricing', label: t('header.pricing'), icon: Gem },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
@@ -78,7 +79,7 @@ export function Header() {
           </Link>
         </div>
 
-        <nav className="hidden md:flex gap-2 mx-auto">
+        <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
           {renderNavLinks()}
         </nav>
 

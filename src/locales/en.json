@@ -6,6 +6,7 @@
     "projects": "Projects",
     "summarize": "AI Summarizer",
     "generateDocs": "Document Generation",
+    "generateCode": "Generate Code",
     "exportTemplates": "Export Templates",
     "activityHistory": "Activity History",
     "agentManager": "Manage Agents",

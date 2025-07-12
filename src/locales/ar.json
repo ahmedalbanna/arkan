@@ -6,6 +6,7 @@
     "projects": "المشاريع",
     "summarize": "تلخيص بالذكاء الاصطناعي",
     "generateDocs": "إنشاء المستندات",
+    "generateCode": "إنشاء كود",
     "exportTemplates": "قوالب التصدير",
     "activityHistory": "سجل الأنشطة",
     "agentManager": "إدارة الوكلاء",
