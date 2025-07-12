@@ -8,6 +8,7 @@ import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
 import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
 import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
+import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 import { deflateSync } from 'zlib';
 
 const generateDiagramSchema = z.object({
@@ -59,6 +60,7 @@ const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> 
   activity: { flow: generateActivityDiagram, agentId: 'generate-activity-diagram' },
   component: { flow: generateComponentDiagram, agentId: 'generate-component-diagram' },
   archimate: { flow: generateArchimateDiagram, agentId: 'generate-archimate-diagram' },
+  er: { flow: generateErDiagram, agentId: 'generate-er-diagram' },
 };
 
 export async function POST(request: Request) {

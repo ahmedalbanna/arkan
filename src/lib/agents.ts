@@ -1,5 +1,5 @@
 
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -372,6 +372,24 @@ You will be provided with the full project proposal in JSON format, as well as a
             { text: "Define Business Functions or Processes based on the project's 'objective'.", isDefault: true },
             { text: "Identify Application Components that realize the business processes, as described in 'System Design'.", isDefault: true },
             { text: "Use proper ArchiMate relationships (e.g., assignment, realization, serving) to connect the elements.", isDefault: true },
+        ]
+    }
+  },
+  {
+    id: 'generate-er-diagram',
+    name: 'ER Diagram Agent',
+    description: 'Produces a PlantUML Entity-Relationship (ER) diagram to model the database schema.',
+    category: 'Report & Diagram Generation',
+    icon: DatabaseZap,
+    pageUrl: '/generate-report',
+    isEnabled: true,
+    prompt: {
+        base: diagramBasePrompt,
+        guidelines: [
+            { text: "Identify key entities from the 'System Design' section's data model or from the project's main nouns (e.g., User, Project, Comment).", isDefault: true },
+            { text: "For each entity, define attributes. Clearly mark the Primary Key (PK) and any Foreign Keys (FK).", isDefault: true },
+            { text: "Establish relationships between entities using standard ERD notation (e.g., one-to-one, one-to-many, many-to-many).", isDefault: true },
+            { text: "Use PlantUML's ER diagram syntax (e.g., `entity \"Name\" { ... }`, `User }o--|| Project`).", isDefault: true },
         ]
     }
   },
