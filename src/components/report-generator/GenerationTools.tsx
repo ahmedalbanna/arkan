@@ -18,11 +18,13 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '../ui/scroll-area';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -182,6 +184,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
         allGenerationItems.forEach(key => {
             const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
             const isSection = SectionNameSchema.options.includes(key as SectionName);
+            if (!agent) return;
             updatedPrompts[key] = buildPrompt(
                 agent,
                 guidelineState[key],
@@ -470,9 +473,26 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                              <FileText className="h-4 w-4 shrink-0" />
                              <span className="truncate">{reportState.externalContext.fileName}</span>
                            </div>
-                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext}>
-                               <X className="h-4 w-4" />
-                           </Button>
+                           <div className="flex items-center">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl">
+                                        <DialogHeader>
+                                            <DialogTitle>{reportState.externalContext.fileName}</DialogTitle>
+                                        </DialogHeader>
+                                        <ScrollArea className="h-[60vh] rounded-md border p-4">
+                                            <ReactMarkdown components={markdownComponents}>{reportState.externalContext.content}</ReactMarkdown>
+                                        </ScrollArea>
+                                    </DialogContent>
+                                </Dialog>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext} title="Remove File">
+                                    <X className="h-4 w-4" />
+                                </Button>
+                           </div>
                         </div>
                     ) : (
                         <div className="space-y-2">
