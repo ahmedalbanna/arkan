@@ -78,3 +78,16 @@ export const PresentationSlideSchema = z.object({
   speakerNotes: z.string().describe('Detailed speaker notes for the presenter to elaborate on the slide content.'),
 });
 export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
+
+export const GeneratePresentationInputSchema = z.object({
+  proposal: ProjectProposalSchema,
+  sections: z.record(SectionNameSchema, z.string()).optional(),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  prompt: z.string(),
+});
+export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
+
+export const GeneratePresentationOutputSchema = z.object({
+  slides: z.array(PresentationSlideSchema),
+});
+export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;

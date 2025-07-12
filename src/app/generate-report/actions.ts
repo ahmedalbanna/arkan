@@ -2,7 +2,17 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName, type PresentationSlide } from '@/ai/schemas';
+import { 
+  ProjectProposalSchema, 
+  type ProjectProposal, 
+  DiagramTypeSchema, 
+  type DiagramType, 
+  SectionNameSchema, 
+  type SectionName, 
+  type PresentationSlide,
+  GeneratePresentationInputSchema,
+  type GeneratePresentationInput
+} from '@/ai/schemas';
 import { deflateSync } from 'zlib';
 
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
@@ -281,7 +291,7 @@ export async function handleGenerateReportItem(
     }
 
     if (isPresentation) {
-      const presentationInput = {
+      const presentationInput: GeneratePresentationInput = {
         proposal: validatedProposal.data,
         sections: otherSections,
         diagrams: otherDiagrams,

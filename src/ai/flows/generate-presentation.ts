@@ -8,20 +8,15 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from '@/ai/schemas';
-
-export const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema,
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  prompt: z.string(),
-});
-export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
-
-export const GeneratePresentationOutputSchema = z.object({
-  slides: z.array(PresentationSlideSchema),
-});
-export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;
+import { 
+  ProjectProposalSchema, 
+  DiagramTypeSchema, 
+  SectionNameSchema, 
+  GeneratePresentationInputSchema,
+  type GeneratePresentationInput,
+  GeneratePresentationOutputSchema,
+  type GeneratePresentationOutput
+} from '@/ai/schemas';
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
   return generatePresentationFlow(input);
