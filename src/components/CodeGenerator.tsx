@@ -7,15 +7,15 @@ import { handleGenerateCode, type CodeGenerationState } from '@/app/generate-cod
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand, Download, History, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
-
+import JSZip from 'jszip';
+import { useToast } from '@/hooks/use-toast';
 
 function GenerateButton() {
     const { pending } = useFormStatus();
@@ -65,6 +65,8 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
     );
 }
 
+const HISTORY_KEY = 'arkan-code-gen-history';
+const MAX_HISTORY = 5;
 
 export default function CodeGenerator() {
     const initialState: CodeGenerationState = {};
@@ -73,6 +75,20 @@ export default function CodeGenerator() {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+    const { toast } = useToast();
+    const [history, setHistory] = useState<CodeGenerationState[]>([]);
+
+    useEffect(() => {
+        try {
+            const storedHistory = localStorage.getItem(HISTORY_KEY);
+            if (storedHistory) {
+                setHistory(JSON.parse(storedHistory));
+            }
+        } catch (error) {
+            console.error('Failed to load history from localStorage', error);
+        }
+    }, []);
 
     useEffect(() => {
         if (state.html || state.css || state.javascript) {
@@ -81,16 +97,28 @@ export default function CodeGenerator() {
                     <html>
                         <head>
                             <style>${state.css || ''}</style>
+                            <script>${state.javascript || ''}<\/script>
                         </head>
                         <body>${state.html || ''}</body>
-                        <script>${state.javascript || ''}<\/script>
                     </html>
                 `);
+
+                // Update history
+                if (state.prompt) {
+                     setHistory(prev => {
+                        const newHistory = [state, ...prev.filter(h => h.prompt !== state.prompt)].slice(0, MAX_HISTORY);
+                        try {
+                           localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                        } catch (error) {
+                           console.error('Failed to save history to localStorage', error);
+                        }
+                        return newHistory;
+                    });
+                }
             }, 300);
             return () => clearTimeout(timeout);
         }
-    }, [state.html, state.css, state.javascript]);
-
+    }, [state.html, state.css, state.javascript, state.prompt]);
 
     const takeScreenshot = async () => {
         if (!iframeRef.current?.contentWindow) return;
@@ -108,9 +136,54 @@ export default function CodeGenerator() {
             }
         } catch (error) {
             console.error("Screenshot failed:", error);
+            toast({
+                title: "Screenshot Failed",
+                description: "There was an error capturing the preview.",
+                variant: "destructive"
+            })
         } finally {
             setIsCapturing(false);
         }
+    }
+
+    const downloadZip = async () => {
+        setIsDownloading(true);
+        try {
+            const zip = new JSZip();
+            zip.file("index.html", state.html || "");
+            zip.file("style.css", state.css || "");
+            zip.file("script.js", state.javascript || "");
+
+            const blob = await zip.generateAsync({ type: "blob" });
+            saveAs(blob, "generated-code.zip");
+
+        } catch (error) {
+            console.error("ZIP download failed:", error);
+            toast({
+                title: "Download Failed",
+                description: "There was an error creating the ZIP file.",
+                variant: "destructive"
+            })
+        } finally {
+            setIsDownloading(false);
+        }
+    }
+    
+    const restoreFromHistory = (historyItem: CodeGenerationState) => {
+        const fakeState: CodeGenerationState = { ...historyItem };
+        const fakeAction = (s: CodeGenerationState, f: FormData) => Promise.resolve(s);
+        const form = document.createElement('form');
+        const formData = new FormData(form);
+        formData.set('prompt', historyItem.prompt || '');
+        
+        // This is a way to trigger the state update logic without a real form action
+        formAction(formData);
+    }
+    
+    const clearHistory = () => {
+        setHistory([]);
+        localStorage.removeItem(HISTORY_KEY);
+        toast({ title: "History Cleared" });
     }
 
     const renderPreview = (isDialog: boolean) => (
@@ -137,8 +210,8 @@ export default function CodeGenerator() {
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-3 space-y-6">
                 <Card>
                     <form action={formAction}>
                         <CardHeader>
@@ -164,10 +237,43 @@ export default function CodeGenerator() {
                     </form>
                 </Card>
 
+                {history.length > 0 && (
+                     <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="font-headline flex items-center gap-2">
+                                    <History className="w-5 h-5" />
+                                    History
+                                </CardTitle>
+                                <Button variant="ghost" size="sm" onClick={clearHistory}>
+                                    <X className="mr-1 h-4 w-4" /> Clear
+                                </Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <ScrollArea className="h-48 w-full">
+                                <div className="space-y-2">
+                                    {history.map((item, index) => (
+                                        <button key={index} onClick={() => restoreFromHistory(item)} className="w-full text-left p-2 rounded-md hover:bg-muted text-sm text-muted-foreground truncate">
+                                            {item.prompt}
+                                        </button>
+                                    ))}
+                                </div>
+                            </ScrollArea>
+                        </CardContent>
+                    </Card>
+                )}
+
                 {(state.html || state.css || state.javascript) && (
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Generated Code</CardTitle>
+                             <div className="flex justify-between items-center">
+                                <CardTitle className="font-headline">Generated Code</CardTitle>
+                                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
+                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    Download ZIP
+                                </Button>
+                             </div>
                         </CardHeader>
                         <CardContent>
                             <Tabs defaultValue="html" className="w-full">
@@ -191,7 +297,7 @@ export default function CodeGenerator() {
                 )}
             </div>
 
-            <div className="lg:sticky top-24 self-start">
+            <div className="lg:col-span-2 lg:sticky top-24 self-start">
                  <Card>
                     <CardHeader>
                         <div className="flex justify-between items-center">

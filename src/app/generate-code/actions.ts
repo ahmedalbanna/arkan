@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
 
 export interface CodeGenerationState {
+  prompt?: string;
   html?: string;
   css?: string;
   javascript?: string;
@@ -30,12 +31,13 @@ export async function handleGenerateCode(
     };
   }
 
+  const prompt = validatedFields.data.prompt;
+
   try {
-    const result = await generateCode({
-      prompt: validatedFields.data.prompt,
-    });
+    const result = await generateCode({ prompt });
     
     return {
+        prompt,
         html: result.html,
         css: result.css,
         javascript: result.javascript
