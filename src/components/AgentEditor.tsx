@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAgents } from '@/hooks/use-agents';
-import type { Agent } from '@/lib/agents';
+import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,7 +28,12 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
       if (foundAgent) {
         setAgent(foundAgent);
         setName(foundAgent.name);
-        setPrompt(foundAgent.prompt);
+        const agentPrompt = foundAgent.prompt;
+        if (typeof agentPrompt === 'string') {
+          setPrompt(agentPrompt);
+        } else if (typeof agentPrompt === 'object' && agentPrompt.base) {
+          setPrompt(agentPrompt.base);
+        }
       } else {
         router.push('/manage-agents');
       }
@@ -37,6 +43,8 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    // The `updateAgent` hook now correctly handles both simple string prompts
+    // and complex prompt objects by only updating the 'base' property for the latter.
     updateAgent(agentId, { name, prompt });
 
     setTimeout(() => {
@@ -58,6 +66,8 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
       </Card>
     );
   }
+
+  const isComplexPrompt = typeof agent.prompt === 'object' && agent.prompt !== null && 'guidelines' in agent.prompt;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -84,7 +94,14 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="agent-prompt">موجه الأوامر (Prompt)</Label>
+            <Label htmlFor="agent-prompt">
+              {isComplexPrompt ? 'موجه الأوامر الأساسي (Base Prompt)' : 'موجه الأوامر (Prompt)'}
+            </Label>
+             {isComplexPrompt && (
+              <p className="text-xs text-muted-foreground">
+                أنت تقوم بتعديل الجزء الأساسي من الموجه فقط. يتم إدارة الإرشادات المحددة في أداة إنشاء التقارير.
+              </p>
+            )}
             <Textarea
               id="agent-prompt"
               value={prompt}

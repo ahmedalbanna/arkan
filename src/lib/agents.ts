@@ -1,5 +1,16 @@
+
 import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+
+export interface AgentGuideline {
+  text: string;
+  isDefault: boolean;
+}
+
+export interface AgentPrompt {
+  base: string;
+  guidelines?: AgentGuideline[];
+}
 
 export interface AgentData {
   id: string;
@@ -8,15 +19,15 @@ export interface AgentData {
   category: 'Content Generation' | 'Report & Diagram Generation';
   pageUrl: string;
   isEnabled: boolean;
-  prompt: string;
+  prompt: AgentPrompt | string; // Can be simple string or complex object
 }
 
 export interface Agent extends AgentData {
   icon: LucideIcon;
 }
 
-const createDiagramPrompt = (diagramType: string, specificInstructions: string): string => `
-You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
+const createDiagramPrompt = (diagramType: string, specificInstructions: string): AgentPrompt => ({
+  base: `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
 
 --- PlantUML Style Guide & Instructions ---
 - Use the '!theme spacelab' for a modern and readable look.
@@ -31,7 +42,8 @@ ${specificInstructions}
 
 --- Context from Project ---
 You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Use this context to ensure the diagram is accurate and consistent with the overall project.
-`;
+`
+});
 
 export const AGENTS: Agent[] = [
   {
@@ -75,16 +87,19 @@ Project Idea: {{{projectIdea}}}`
     icon: BookMarked,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report.
-
-The introduction should be well-structured and engaging, and must include:
-1.  **Purpose of the Project**: A clear statement of why the project is being undertaken.
-2.  **Problem Definition**: A detailed identification and explanation of the problem the project addresses.
-3.  **Overview of the Document**: An outline of the report structure, mentioning the main sections.
-4.  **Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.
-
+    prompt: {
+      base: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report.
 Synthesize the information from the entire proposal and the provided context to create this introduction. Infer the problem from the objective and risks. Infer the limitations of existing systems from the project's goals.
-Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.`
+Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.
+
+The introduction should be well-structured, engaging, and must include:`,
+      guidelines: [
+        { text: "**Purpose of the Project**: A clear statement of why the project is being undertaken.", isDefault: true },
+        { text: "**Problem Definition**: A detailed identification and explanation of the problem the project addresses.", isDefault: true },
+        { text: "**Overview of the Document**: An outline of the report structure, mentioning the main sections.", isDefault: true },
+        { text: "**Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.", isDefault: true },
+      ]
+    }
   },
   {
     id: 'generate-literature-review',
@@ -94,15 +109,18 @@ Generate the entire introduction as a single, coherent text. Use markdown newlin
     icon: Library,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
+    prompt: {
+        base: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
+Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.
 
-Your review should:
-1.  Discuss existing research, established theories, and relevant studies in the project's domain.
-2.  Analyze current technologies, frameworks, and methodologies that are pertinent to the project's objective.
-3.  Identify the gaps in the existing literature or technology that this project aims to address.
-4.  Provide a strong justification for the project by positioning it within the context of current knowledge and practices.
-
-Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.`
+Your review should:`,
+        guidelines: [
+            { text: "Discuss existing research, established theories, and relevant studies in the project's domain.", isDefault: true },
+            { text: "Analyze current technologies, frameworks, and methodologies that are pertinent to the project's objective.", isDefault: true },
+            { text: "Identify the gaps in the existing literature or technology that this project aims to address.", isDefault: true },
+            { text: "Provide a strong justification for the project by positioning it within the context of current knowledge and practices.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-system-analysis',
@@ -112,15 +130,18 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: Waypoints,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
+    prompt: {
+        base: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
+Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.
 
-Your analysis must cover:
-1.  **Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests.
-2.  **Non-Functional Requirements**: Describe the system's quality attributes, such as performance, security, usability, and scalability. Infer these from the project's context and risks.
-3.  **Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.
-4.  **Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.
-
-Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.`
+Your analysis must cover:`,
+        guidelines: [
+            { text: "**Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests.", isDefault: true },
+            { text: "**Non-Functional Requirements**: Describe the system's quality attributes, such as performance, security, usability, and scalability. Infer these from the project's context and risks.", isDefault: true },
+            { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.", isDefault: true },
+            { text: "**Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-design-strategy',
@@ -130,15 +151,18 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: BookText,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
+    prompt: {
+        base: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
+Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.
 
-This section should articulate:
-1.  **Design Methodology**: Justify the choice of design approach (e.g., User-Centered Design, Double Diamond, etc.) based on the project's methodology and objectives.
-2.  **Core Design Principles**: Define 3-5 key principles that will guide the design process (e.g., 'Clarity and Simplicity', 'Efficiency', 'Consistency').
-3.  **User Experience (UX) Goals**: Describe the intended user experience, focusing on how the design will address stakeholder needs and solve the core problem.
-4.  **User Interface (UI) Direction**: Outline the visual direction, including thoughts on layout, color palette, and typography that would align with the project's category and goals.
-
-Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.`
+This section should articulate:`,
+        guidelines: [
+            { text: "**Design Methodology**: Justify the choice of design approach (e.g., User-Centered Design, Double Diamond, etc.) based on the project's methodology and objectives.", isDefault: true },
+            { text: "**Core Design Principles**: Define 3-5 key principles that will guide the design process (e.g., 'Clarity and Simplicity', 'Efficiency', 'Consistency').", isDefault: true },
+            { text: "**User Experience (UX) Goals**: Describe the intended user experience, focusing on how the design will address stakeholder needs and solve the core problem.", isDefault: true },
+            { text: "**User Interface (UI) Direction**: Outline the visual direction, including thoughts on layout, color palette, and typography that would align with the project's category and goals.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-system-design',
@@ -148,15 +172,18 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
+    prompt: {
+        base: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
+Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.
 
-This section must detail:
-1.  **High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Base the choice on the project's scale, objectives, and risks.
-2.  **Data Model / Schema**: Outline the key data entities, their attributes, and relationships. Think about users, primary objects, and configurations.
-3.  **Component Breakdown**: Describe the major components of the system (e.g., Authentication Service, API Gateway, Frontend Application, Database) and their responsibilities.
-4.  **Technology Stack**: Propose a specific and justified technology stack for the backend, frontend, database, and deployment based on the project's requirements.
-
-Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.`
+This section must detail:`,
+        guidelines: [
+            { text: "**High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Base the choice on the project's scale, objectives, and risks.", isDefault: true },
+            { text: "**Data Model / Schema**: Outline the key data entities, their attributes, and relationships. Think about users, primary objects, and configurations.", isDefault: true },
+            { text: "**Component Breakdown**: Describe the major components of the system (e.g., Authentication Service, API Gateway, Frontend Application, Database) and their responsibilities.", isDefault: true },
+            { text: "**Technology Stack**: Propose a specific and justified technology stack for the backend, frontend, database, and deployment based on the project's requirements.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-system-programming',
@@ -166,16 +193,19 @@ Synthesize information from the entire proposal and the provided context to prod
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
+    prompt: {
+        base: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
+Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.
 
-This section should outline:
-1.  **Development Workflow**: Describe the development process, aligning with the project's stated methodology (e.g., Git flow for Agile).
-2.  **Coding Standards & Practices**: Mention key standards to be followed (e.g., code style guides, linting rules, commenting conventions).
-3.  **Key Libraries & Frameworks**: Based on the project type, list the essential libraries and frameworks that will be used for implementation and justify their selection.
-4.  **Environment Setup**: Briefly describe the development, staging, and production environments.
-5.  **Version Control**: Specify the version control system (e.g., Git) and hosting platform (e.g., GitHub, GitLab).
-
-Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.`
+This section should outline:`,
+        guidelines: [
+            { text: "**Development Workflow**: Describe the development process, aligning with the project's stated methodology (e.g., Git flow for Agile).", isDefault: true },
+            { text: "**Coding Standards & Practices**: Mention key standards to be followed (e.g., code style guides, linting rules, commenting conventions).", isDefault: true },
+            { text: "**Key Libraries & Frameworks**: Based on the project type, list the essential libraries and frameworks that will be used for implementation and justify their selection.", isDefault: true },
+            { text: "**Environment Setup**: Briefly describe the development, staging, and production environments.", isDefault: true },
+            { text: "**Version Control**: Specify the version control system (e.g., Git) and hosting platform (e.g., GitHub, GitLab).", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-system-testing',
@@ -185,15 +215,18 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: TestTube2,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
+    prompt: {
+        base: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
+Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.
 
-This section must define the testing strategy, including:
-1.  **Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).
-2.  **Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.
-3.  **Tools and Automation**: Recommend specific tools for test automation (e.g., Selenium, Cypress, Jest), performance testing (e.g., JMeter), and bug tracking (e.g., Jira).
-4.  **Test Metrics**: Identify key metrics for success, such as test coverage, bug detection rate, and UAT pass rate, linking them to the project's success criteria.
-
-Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.`
+This section must define the testing strategy, including:`,
+        guidelines: [
+            { text: "**Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).", isDefault: true },
+            { text: "**Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.", isDefault: true },
+            { text: "**Tools and Automation**: Recommend specific tools for test automation (e.g., Selenium, Cypress, Jest), performance testing (e.g., JMeter), and bug tracking (e.g., Jira).", isDefault: true },
+            { text: "**Test Metrics**: Identify key metrics for success, such as test coverage, bug detection rate, and UAT pass rate, linking them to the project's success criteria.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-conclusion',
@@ -203,15 +236,18 @@ Synthesize information from the entire proposal, especially the risks and succes
     icon: Flag,
     pageUrl: '/generate-report',
     isEnabled: true,
-    prompt: `You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.
+    prompt: {
+        base: `You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.
+Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.
 
-The conclusion should:
-1.  **Summarize Key Points**: Briefly reiterate the problem, the proposed solution, and the project's main objective.
-2.  **Reiterate Expected Outcomes**: Restate the most important expected outcomes and the value the project will deliver.
-3.  **Future Outlook**: Provide a forward-looking statement about the project's potential long-term impact or next steps after completion.
-4.  **Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.
-
-Synthesize information from the entire proposal and the provided context to create a powerful conclusion. Use markdown for formatting.`
+The conclusion should:`,
+        guidelines: [
+            { text: "**Summarize Key Points**: Briefly reiterate the problem, the proposed solution, and the project's main objective.", isDefault: true },
+            { text: "**Reiterate Expected Outcomes**: Restate the most important expected outcomes and the value the project will deliver.", isDefault: true },
+            { text: "**Future Outlook**: Provide a forward-looking statement about the project's potential long-term impact or next steps after completion.", isDefault: true },
+            { text: "**Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.", isDefault: true },
+        ]
+    }
   },
   {
     id: 'generate-presentation',
@@ -221,11 +257,13 @@ Synthesize information from the entire proposal and the provided context to crea
     icon: Presentation,
     pageUrl: '#', // This agent is used on the project page directly
     isEnabled: true,
-    prompt: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
+    prompt: {
+      base: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
 
 Create a logical flow for the presentation, starting with an introduction and problem statement, moving through the solution and design, and ending with a conclusion. Select the most important information to display. Keep slide content concise and focused on bullet points. Use the speaker notes to add detail and elaborate on the points.
 
 You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Synthesize all this information to create the slide deck.`
+    }
   },
   // Diagram Agents
   {

@@ -1,9 +1,14 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AGENTS as initialAgents, type Agent } from '@/lib/agents';
+import { AGENTS as initialAgents, type Agent, type AgentPrompt } from '@/lib/agents';
 
 const AGENTS_KEY = 'arkan-agents-state';
+
+function isAgentPrompt(prompt: any): prompt is AgentPrompt {
+    return typeof prompt === 'object' && prompt !== null && 'base' in prompt;
+}
 
 export function useAgents() {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -15,11 +20,16 @@ export function useAgents() {
       if (storedAgents) {
         const parsedAgents: Agent[] = JSON.parse(storedAgents);
         const agentMap = new Map(parsedAgents.map(a => [a.id, a]));
+        
         const mergedAgents = initialAgents.map(initialAgent => {
           const storedData = agentMap.get(initialAgent.id);
           if (storedData) {
-            // Merge stored data, but explicitly preserve the non-serializable icon from the code definition.
-            return { ...initialAgent, ...storedData, icon: initialAgent.icon };
+            // Merge stored data, preserving non-serializable icon and structure of prompt
+            const mergedPrompt = (isAgentPrompt(initialAgent.prompt) && isAgentPrompt(storedData.prompt))
+              ? { ...initialAgent.prompt, base: storedData.prompt.base }
+              : storedData.prompt;
+
+            return { ...initialAgent, ...storedData, icon: initialAgent.icon, prompt: mergedPrompt };
           }
           return initialAgent;
         });
@@ -37,25 +47,42 @@ export function useAgents() {
   const saveAgents = (updatedAgents: Agent[]) => {
     setAgents(updatedAgents);
     try {
-      localStorage.setItem(AGENTS_KEY, JSON.stringify(updatedAgents));
+        const agentsToStore = updatedAgents.map(agent => {
+            if (isAgentPrompt(agent.prompt)) {
+                // Only store the base part of the complex prompt object to avoid overwriting guidelines
+                return { ...agent, prompt: { base: agent.prompt.base } };
+            }
+            return agent;
+        });
+      localStorage.setItem(AGENTS_KEY, JSON.stringify(agentsToStore));
     } catch (error) {
       console.error('Failed to save agents to localStorage', error);
     }
   };
 
-  const updateAgent = useCallback((id: string, data: Partial<Omit<Agent, 'id'>>) => {
+  const updateAgent = useCallback((id: string, data: Partial<Omit<Agent, 'id' | 'prompt'>> & { prompt?: string }) => {
     setAgents(prevAgents => {
-      const updatedAgents = prevAgents.map(agent =>
-        agent.id === id ? { ...agent, ...data } : agent
-      );
-      saveAgents(updatedAgents);
-      return updatedAgents;
+        const updatedAgents = prevAgents.map(agent => {
+            if (agent.id === id) {
+                const newAgent = { ...agent, ...data };
+                // If the prompt is a string, update the base of the complex prompt object if it exists
+                if (typeof data.prompt === 'string' && isAgentPrompt(agent.prompt)) {
+                    newAgent.prompt = { ...agent.prompt, base: data.prompt };
+                } else if (typeof data.prompt === 'string') {
+                    // This case handles agents with simple string prompts
+                    newAgent.prompt = data.prompt;
+                }
+                return newAgent;
+            }
+            return agent;
+        });
+        saveAgents(updatedAgents);
+        return updatedAgents;
     });
-  }, []);
+}, []);
+
 
   const getAgent = useCallback((id: string): Agent | undefined => {
-    // This function needs to read from the state variable `agents`
-    // to ensure it gets the most up-to-date data.
     return agents.find(agent => agent.id === id);
   }, [agents]);
 

@@ -18,7 +18,11 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2 } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -30,12 +34,34 @@ type ControlState = {
     wordCount: string;
 };
 
+// State for guidelines of a single agent
+type GuidelineState = {
+    checked: Record<number, boolean>;
+    custom: string[];
+};
+
 const getInitialControlState = (): Record<SectionName, ControlState> => {
     const initial: Partial<Record<SectionName, ControlState>> = {};
     orderedSections.forEach(key => {
         initial[key] = { formality: 50, tone: 'professional', wordCount: '300' };
     });
     return initial as Record<SectionName, ControlState>;
+};
+
+const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
+    const initialState: Record<string, GuidelineState> = {};
+    allGenerationItems.forEach(key => {
+        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
+        const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
+        const checked: Record<number, boolean> = {};
+        if (defaultGuidelines) {
+            defaultGuidelines.forEach((g, index) => {
+                checked[index] = g.isDefault;
+            });
+        }
+        initialState[key] = { checked, custom: [] };
+    });
+    return initialState;
 };
 
 const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
@@ -60,8 +86,34 @@ const generateInstructionText = (controls: ControlState, t: (key: string) => str
     return '';
 };
 
-const buildPrompt = (basePrompt: string, controlState: ControlState, t: (key: string) => string) => {
- return `${basePrompt}${generateInstructionText(controlState, t)}`;
+const buildPrompt = (agent: Agent | undefined, guidelineState: GuidelineState, controlState?: ControlState, t?: (key: string) => string) => {
+    if (!agent) return '';
+    const promptConfig = agent.prompt;
+
+    if (typeof promptConfig === 'string') {
+        return promptConfig;
+    }
+
+    let finalPrompt = promptConfig.base || '';
+    
+    const guidelines: string[] = [];
+    promptConfig.guidelines?.forEach((g, index) => {
+        if (guidelineState.checked[index]) {
+            guidelines.push(g.text);
+        }
+    });
+
+    guidelines.push(...guidelineState.custom);
+
+    if (guidelines.length > 0) {
+        finalPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+    }
+
+    if (controlState && t) {
+        finalPrompt += generateInstructionText(controlState, t);
+    }
+    
+    return finalPrompt;
 }
 
 interface GenerateItemButtonProps {
@@ -103,32 +155,32 @@ interface GenerationToolsProps {
 
 export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
-    const { agents } = useAgents();
+    const { agents, isLoaded: agentsLoaded } = useAgents();
     const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
+    const [guidelineState, setGuidelineState] = useState<Record<string, GuidelineState>>({});
     const [prompts, setPrompts] = useState<Record<string, string>>({});
+    const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        if (agentsLoaded) {
+            setGuidelineState(getInitialGuidelineState(agents));
+        }
+    }, [agentsLoaded, agents]);
     
     useEffect(() => {
         const updatedPrompts: Record<string, string> = {};
-        
         allGenerationItems.forEach(key => {
-            const isSection = orderedSections.includes(key as SectionName);
-            const isDiagram = orderedDiagrams.includes(key as DiagramType);
-            
-            const config = isSection 
-                ? sectionConfig[key as SectionName] 
-                : isDiagram 
-                    ? diagramConfig[key as DiagramType]
-                    : presentationConfig.presentation;
-
-            const agentId = config?.agentId;
-            const basePrompt = agents.find(a => a.id === agentId)?.prompt;
-
-            if (basePrompt) {
-                 updatedPrompts[key] = isSection ? buildPrompt(basePrompt, controlState[key as SectionName], t) : basePrompt;
-            }
+            const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
+            const isSection = SectionNameSchema.options.includes(key as SectionName);
+            updatedPrompts[key] = buildPrompt(
+                agent,
+                guidelineState[key],
+                isSection ? controlState[key as SectionName] : undefined,
+                isSection ? t : undefined
+            );
         });
         setPrompts(updatedPrompts);
-    }, [controlState, agents, t]);
+    }, [controlState, guidelineState, agents, t]);
 
 
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
@@ -138,8 +190,45 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
         }));
     };
 
-    const handlePromptChange = (key: string, value: string) => {
-        setPrompts(prev => ({ ...prev, [key]: value }));
+    const handleGuidelineToggle = (itemKey: string, guidelineIndex: number, isChecked: boolean) => {
+        setGuidelineState(prev => ({
+            ...prev,
+            [itemKey]: {
+                ...prev[itemKey],
+                checked: {
+                    ...prev[itemKey].checked,
+                    [guidelineIndex]: isChecked
+                }
+            }
+        }));
+    };
+
+    const handleAddCustomGuideline = (itemKey: string) => {
+        const newGuideline = customGuidelineInput[itemKey]?.trim();
+        if (newGuideline) {
+            setGuidelineState(prev => ({
+                ...prev,
+                [itemKey]: {
+                    ...prev[itemKey],
+                    custom: [...prev[itemKey].custom, newGuideline]
+                }
+            }));
+            setCustomGuidelineInput(prev => ({...prev, [itemKey]: ''}));
+        }
+    };
+
+    const handleRemoveCustomGuideline = (itemKey: string, indexToRemove: number) => {
+        setGuidelineState(prev => ({
+            ...prev,
+            [itemKey]: {
+                ...prev[itemKey],
+                custom: prev[itemKey].custom.filter((_, index) => index !== indexToRemove)
+            }
+        }));
+    };
+
+    if (!agentsLoaded) {
+      return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin"/></CardContent></Card>
     }
 
     return (
@@ -152,17 +241,14 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                 <Accordion type="multiple" className="w-full space-y-1">
                     {allGenerationItems.map((key) => {
                         const isSection = orderedSections.includes(key as SectionName);
-                        const isDiagram = orderedDiagrams.includes(key as DiagramType);
                         
-                        const config = isSection 
-                            ? sectionConfig[key as SectionName] 
-                            : isDiagram 
-                                ? diagramConfig[key as DiagramType]
-                                : presentationConfig.presentation;
-
-                        const agent = agents.find(a => a.id === config.agentId);
+                        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
                         if (!agent) return null;
-                        const { title, icon: Icon } = config;
+
+                        const promptConfig = agent.prompt as AgentPrompt;
+                        const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
+
+                        const { title, icon: Icon } = (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation);
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -178,20 +264,58 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                             {isSection && <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>}
                                             <TabsTrigger value="context">{t('reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
-                                        <TabsContent value="prompt" className="pt-4">
+                                        <TabsContent value="prompt" className="pt-4 space-y-4">
                                             <div className="space-y-2">
-                                                <Label htmlFor={`prompt-${key}`} className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
-                                                <Textarea
-                                                    id={`prompt-${key}`}
-                                                    name={`prompt_${key}`}
-                                                    value={prompts[key] || ''}
-                                                    onChange={(e) => handlePromptChange(key, e.target.value)}
-                                                    rows={10}
-                                                    className="font-mono text-sm"
-                                                />
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
+                                                <div className="p-3 rounded-md border bg-muted">
+                                                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                                                </div>
+                                            </div>
+
+                                            {hasGuidelines && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                    <div className="space-y-2 p-3 rounded-md border">
+                                                        {promptConfig.guidelines!.map((guideline, index) => (
+                                                            <div key={index} className="flex items-start gap-2">
+                                                                <Checkbox 
+                                                                    id={`guideline-${key}-${index}`} 
+                                                                    checked={guidelineState[key]?.checked[index] ?? false}
+                                                                    onCheckedChange={(checked) => handleGuidelineToggle(key, index, !!checked)}
+                                                                />
+                                                                <Label htmlFor={`guideline-${key}-${index}`} className="font-normal text-sm flex-1">
+                                                                    <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
+                                                                </Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                            
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                                {guidelineState[key]?.custom.map((custom, index) => (
+                                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                                        <span>- {custom}</span>
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuideline(key, index)}>
+                                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder="Add a custom guideline..."
+                                                        value={customGuidelineInput[key] || ''}
+                                                        onChange={(e) => setCustomGuidelineInput(prev => ({...prev, [key]: e.target.value}))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline(key))}
+                                                    />
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuideline(key)}>
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </TabsContent>
-                                        {/* Hidden input to ensure prompt is included in form submission regardless of active tab */}
+                                        
                                         <input
                                             type="hidden"
                                             name={`prompt_${key}`}
