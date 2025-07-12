@@ -358,3 +358,22 @@ export async function updateUser(userId: string, data: {
         }
     });
 }
+
+export async function updateUserCredits(userId: string, creditsToAdd: number): Promise<number> {
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { credits: true }
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const newBalance = (user.credits ?? 0) + creditsToAdd;
+
+    await db.update(users)
+        .set({ credits: newBalance })
+        .where(eq(users.id, userId));
+
+    return newBalance;
+}

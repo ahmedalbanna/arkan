@@ -11,7 +11,8 @@
     "agentManager": "إدارة الوكلاء",
     "profile": "الملف الشخصي",
     "openMenu": "فتح القائمة",
-    "credits": "رصيد"
+    "credits": "رصيد",
+    "pricing": "الأسعار"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."

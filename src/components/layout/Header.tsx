@@ -26,6 +26,7 @@ export function Header() {
     { href: '/projects', label: t('header.projects'), icon: Briefcase },
     { href: '/summarize', label: t('header.summarize'), icon: BrainCircuit },
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
+    { href: '/pricing', label: t('header.pricing'), icon: Gem },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/history', label: t('header.activityHistory'), icon: History },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
@@ -84,10 +85,12 @@ export function Header() {
           {isLoading ? (
             <Skeleton className="h-8 w-20" />
           ) : user ? (
-            <div className="flex items-center gap-2 text-sm font-semibold text-primary border border-primary/20 bg-primary/10 rounded-full px-3 py-1">
-              <Gem className="h-4 w-4" />
-              <span>{user.credits} {t('header.credits')}</span>
-            </div>
+            <Button variant="outline" asChild>
+              <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Gem className="h-4 w-4" />
+                <span>{user.credits} {t('header.credits')}</span>
+              </Link>
+            </Button>
           ) : null}
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">

@@ -7,7 +7,7 @@ export const MOCK_USERS: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'مطور تطبيقات FlutterFlow متخصص في بناء تطبيقات جوال تفاعلية وعالية الأداء. شغوف بتحويل الأفكار إلى واقع ملموس.',
     skills: ['FlutterFlow', 'Firebase', 'UI/UX', 'Mobile Development'],
-    credits: 4,
+    credits: 25,
   },
   {
     id: 'user-2',
@@ -15,7 +15,7 @@ export const MOCK_USERS: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.',
     skills: ['UI/UX Design', 'Figma', 'React', 'Next.js', 'Web Design'],
-    credits: 4,
+    credits: 50,
   },
   {
     id: 'user-3',
@@ -23,7 +23,7 @@ export const MOCK_USERS: User[] = [
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'باحثة ومهندسة في مجال الذكاء الاصطناعي. أعمل على تطوير نماذج تعلم الآلة لحل المشكلات المعقدة في مختلف الصناعات.',
     skills: ['Machine Learning', 'Python', 'TensorFlow', 'Data Analysis'],
-    credits: 4,
+    credits: 10,
   },
 ];
 

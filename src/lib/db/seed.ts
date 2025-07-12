@@ -27,7 +27,7 @@ async function seed() {
       const insertedSkills = await tx.insert(skills).values([...allSkills].map(name => ({ name }))).returning({ id: skills.id, name: skills.name }).execute();
       const skillMap = new Map(insertedSkills.map(s => [s.name, s.id]));
 
-      await tx.insert(users).values(MOCK_USERS.map(({ id, name, avatarUrl, bio }) => ({ id, name, avatarUrl, bio }))).execute();
+      await tx.insert(users).values(MOCK_USERS.map(({ id, name, avatarUrl, bio, credits }) => ({ id, name, avatarUrl, bio, credits }))).execute();
 
       const userSkillRelations = MOCK_USERS.flatMap(user =>
         user.skills.map(skillName => {

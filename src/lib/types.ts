@@ -67,3 +67,12 @@ export type HistoryEntry = {
   createdAt: string;
   title: string;
 } & (ProposalHistoryData | ReportHistoryData | DiagramHistoryData);
+
+export interface PricingPlan {
+  id: string;
+  name: string;
+  price: number;
+  credits: number;
+  features: string[];
+  isPopular?: boolean;
+}

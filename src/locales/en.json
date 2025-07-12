@@ -11,7 +11,8 @@
     "agentManager": "Manage Agents",
     "profile": "Profile",
     "openMenu": "Open Menu",
-    "credits": "Credits"
+    "credits": "Credits",
+    "pricing": "Pricing"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
