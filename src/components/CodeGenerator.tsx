@@ -1,17 +1,21 @@
 
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { handleGenerateCode, type CodeGenerationState } from '@/app/generate-code/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Copy, Check, Tv } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { ScrollArea } from './ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import html2canvas from 'html2canvas';
+import { saveAs } from 'file-saver';
+
 
 function GenerateButton() {
     const { pending } = useFormStatus();
@@ -66,14 +70,19 @@ export default function CodeGenerator() {
     const initialState: CodeGenerationState = {};
     const [state, formAction] = useActionState(handleGenerateCode, initialState);
     const [srcDoc, setSrcDoc] = useState('');
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const [isCapturing, setIsCapturing] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
         if (state.html || state.css || state.javascript) {
             const timeout = setTimeout(() => {
                 setSrcDoc(`
                     <html>
+                        <head>
+                            <style>${state.css || ''}</style>
+                        </head>
                         <body>${state.html || ''}</body>
-                        <style>${state.css || ''}</style>
                         <script>${state.javascript || ''}<\/script>
                     </html>
                 `);
@@ -82,6 +91,51 @@ export default function CodeGenerator() {
         }
     }, [state.html, state.css, state.javascript]);
 
+
+    const takeScreenshot = async () => {
+        if (!iframeRef.current?.contentWindow) return;
+        setIsCapturing(true);
+
+        try {
+            const canvas = await html2canvas(iframeRef.current.contentWindow.document.body, {
+                useCORS: true,
+                allowTaint: true,
+                scale: window.devicePixelRatio,
+            });
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+            if(blob) {
+                saveAs(blob, 'code-preview.png');
+            }
+        } catch (error) {
+            console.error("Screenshot failed:", error);
+        } finally {
+            setIsCapturing(false);
+        }
+    }
+
+    const renderPreview = (isDialog: boolean) => (
+         <div className={cn(
+            "w-full rounded-md border bg-white overflow-hidden",
+            !srcDoc && "flex items-center justify-center bg-muted",
+            isDialog ? "h-[80vh]" : "aspect-video"
+        )}>
+            {srcDoc ? (
+                <iframe
+                    ref={isDialog ? null : iframeRef} // Only ref the main preview
+                    srcDoc={srcDoc}
+                    title="Live Preview"
+                    sandbox="allow-scripts"
+                    width="100%"
+                    height="100%"
+                    className="border-0"
+                />
+            ) : (
+                <div className="text-center text-muted-foreground p-8">
+                    <p>Your generated code preview will appear here.</p>
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -141,32 +195,37 @@ export default function CodeGenerator() {
             <div className="lg:sticky top-24 self-start">
                  <Card>
                     <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2">
-                            <Tv className="w-6 h-6" />
-                            Live Preview
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className={cn("aspect-video w-full rounded-md border bg-white overflow-hidden",
-                            !srcDoc && "flex items-center justify-center bg-muted"
-                        )}>
-                             {srcDoc ? (
-                                <iframe
-                                    srcDoc={srcDoc}
-                                    title="Live Preview"
-                                    sandbox="allow-scripts"
-                                    width="100%"
-                                    height="100%"
-                                    className="border-0"
-                                />
-                            ) : (
-                                <div className="text-center text-muted-foreground p-8">
-                                    <p>Your generated code preview will appear here.</p>
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="font-headline flex items-center gap-2">
+                                <Tv className="w-6 h-6" />
+                                Live Preview
+                            </CardTitle>
+                            {srcDoc && (
+                                <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
+                                        {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                                    </Button>
+                                    <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
+                                        <Expand className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             )}
                         </div>
+                    </CardHeader>
+                    <CardContent>
+                       {renderPreview(false)}
                     </CardContent>
                 </Card>
+                <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
+                    <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-4">
+                        <DialogHeader className="flex-row items-center justify-between border-b pb-2">
+                            <DialogTitle>Expanded Preview</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex-grow">
+                             {renderPreview(true)}
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
