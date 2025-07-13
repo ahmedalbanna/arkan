@@ -24,13 +24,13 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
-    { href: '/generate-code', label: t('header.generateCode'), icon: Laptop },
-    { href: '/pdf-to-markdown', label: t('header.pdfToMarkdown'), icon: FileTextIcon },
-    { href: '/pricing', label: t('header.pricing'), icon: Gem },
-    { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
-    { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
-    { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
-    { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
+    // { href: '/generate-code', label: t('header.generateCode'), icon: Laptop },
+    // { href: '/pdf-to-markdown', label: t('header.pdfToMarkdown'), icon: FileTextIcon },
+    // { href: '/pricing', label: t('header.pricing'), icon: Gem },
+    // { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
+    // { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
+    // { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
+    // { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
   ];
 
   const renderNavLinks = (isMobile = false) =>

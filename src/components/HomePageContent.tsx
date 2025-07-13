@@ -1,13 +1,11 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BrainCircuit, Code, Users } from 'lucide-react';
+import { ArrowLeft, BrainCircuit, FileSpreadsheet, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import type { ProjectForCard } from '@/lib/db/queries'; // This type is now unused but kept for potential future use
 import { useLocalization } from '@/context/LocalizationContext';
 
-// Note: ProjectForCard is no longer a valid type from queries.ts, but we keep the prop for structure.
-// In a real scenario, this would be cleaned up further.
+// The 'featuredProjects' prop is no longer used but kept to avoid breaking changes if the page is rendered from different places.
 export default function HomePageContent({ featuredProjects }: { featuredProjects: any[] }) {
     const { t, locale } = useLocalization();
 
@@ -34,12 +32,12 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                 </div>
             </section>
 
-            <section className="py-16 md:py-24 bg-card">
+            <section className="py-16 md:py-24 bg-background">
                 <div className="container mx-auto px-4">
                     <div className="grid md:grid-cols-3 gap-12 text-center">
                         <div className="flex flex-col items-center">
                             <div className="p-4 bg-primary/10 rounded-full mb-4">
-                                <Code className="w-12 h-12 text-primary" />
+                                <FileSpreadsheet className="w-12 h-12 text-primary" />
                             </div>
                             <h3 className="text-xl font-headline font-semibold mb-2">{t('home.feature1Title')}</h3>
                             <p className="text-muted-foreground">
@@ -57,7 +55,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="p-4 bg-primary/10 rounded-full mb-4">
-                                <Users className="w-12 h-12 text-primary" />
+                                <ShieldCheck className="w-12 h-12 text-primary" />
                             </div>
                             <h3 className="text-xl font-headline font-semibold mb-2">{t('home.feature3Title')}</h3>
                             <p className="text-muted-foreground">
