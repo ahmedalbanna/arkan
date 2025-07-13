@@ -29,27 +29,6 @@ interface ReportActionsProps {
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
-function CreateProjectSubmitButton({ disabled, formAction }: { disabled: boolean, formAction: (formData: FormData) => void }) {
-  const { pending, action } = useFormStatus();
-  const isThisActionPending = pending && action === formAction;
-
-  return (
-    <Button type="submit" formAction={formAction} disabled={isThisActionPending || disabled} className="w-full sm:w-auto font-headline">
-      {isThisActionPending ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Creating...
-        </>
-      ) : (
-        <>
-          <FilePlus2 className="mr-2 h-4 w-4" />
-          Create Project
-        </>
-      )}
-    </Button>
-  );
-}
-
 export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating, createFormAction }: ReportActionsProps) => {
   const { t } = useLocalization();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
@@ -156,7 +135,6 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
                  Export Presentation
                </Button>
             )}
-            <CreateProjectSubmitButton disabled={!proposal || isGenerating} formAction={createFormAction} />
             <Button onClick={onNewSession} variant="outline" disabled={isGenerating} className="w-full sm:w-auto font-headline">
             <Trash2 className="mr-2 h-4 w-4" />
             {t('reportGenerator.newSession')}

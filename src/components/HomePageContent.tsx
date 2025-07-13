@@ -1,13 +1,14 @@
 'use client';
 
-import { ProjectCard } from '@/components/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, BrainCircuit, Code, Users } from 'lucide-react';
 import Link from 'next/link';
-import type { ProjectForCard } from '@/lib/db/queries';
+import type { ProjectForCard } from '@/lib/db/queries'; // This type is now unused but kept for potential future use
 import { useLocalization } from '@/context/LocalizationContext';
 
-export default function HomePageContent({ featuredProjects }: { featuredProjects: ProjectForCard[] }) {
+// Note: ProjectForCard is no longer a valid type from queries.ts, but we keep the prop for structure.
+// In a real scenario, this would be cleaned up further.
+export default function HomePageContent({ featuredProjects }: { featuredProjects: any[] }) {
     const { t, locale } = useLocalization();
 
     return (
@@ -22,24 +23,13 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                     </p>
                     <div className="flex justify-center gap-4">
                         <Button asChild size="lg" className="font-headline">
-                            <Link href="/projects">
+                            <Link href="/generate-report">
                                 {t('home.exploreProjects')} <ArrowLeft className="mr-2 rtl:mr-0 rtl:ml-2" />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline">
-                            <Link href="/summarize">{t('home.trySummarizer')}</Link>
+                            <Link href="/generate-code">{t('home.trySummarizer')}</Link>
                         </Button>
-                    </div>
-                </div>
-            </section>
-
-            <section className="py-16 md:py-24">
-                <div className="container mx-auto px-4">
-                    <h2 className="text-3xl font-headline font-bold text-center mb-12">{t('home.featuredProjects')}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {featuredProjects.map((project) => (
-                            <ProjectCard key={project.id} project={project} />
-                        ))}
                     </div>
                 </div>
             </section>

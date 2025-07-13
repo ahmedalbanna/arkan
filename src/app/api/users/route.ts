@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getAllUsers } from '@/lib/db/queries';
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const users = await getAllUsers();
     return NextResponse.json(users, { status: 200 });

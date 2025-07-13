@@ -23,16 +23,16 @@
   },
   "home": {
     "heroTitle": "Arkan: Your Platform for Professional Creativity",
-    "heroSubtitle": "Showcase your work, discover talent, and interact with a community of professionals in app development, design, and AI.",
-    "exploreProjects": "Explore Projects",
-    "trySummarizer": "Try AI Summarizer",
+    "heroSubtitle": "Use powerful AI tools to generate documents, reports, code, and more.",
+    "exploreProjects": "Start Generating",
+    "trySummarizer": "Try Code Generator",
     "featuredProjects": "Featured Projects",
-    "feature1Title": "Comprehensive Showcase",
-    "feature1Desc": "Aggregate your projects in app development, web design, and more in one place.",
-    "feature2Title": "AI Summarization",
-    "feature2Desc": "Use our smart tool to generate concise summaries that highlight your project's strengths.",
-    "feature3Title": "Interactive Community",
-    "feature3Desc": "Share your work, get feedback, and connect with industry experts."
+    "feature1Title": "Document Generation",
+    "feature1Desc": "Generate professional proposals and full reports from a simple idea.",
+    "feature2Title": "Code Generation",
+    "feature2Desc": "Describe the component you want, and let the AI write the code for you.",
+    "feature3Title": "Powerful Management",
+    "feature3Desc": "Control users, AI agents, and export templates with ease."
   },
   "summarizer": {
     "pageTitle": "AI Project Summarizer",

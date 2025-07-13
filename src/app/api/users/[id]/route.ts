@@ -7,6 +7,9 @@ import { getUserProfile, updateUser } from '@/lib/db/queries';
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const userId = params.id;
+    if (!userId) {
+        return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+    }
     const user = await getUserProfile(userId);
     if (!user) {
       return NextResponse.json({ message: 'User not found.' }, { status: 404 });
@@ -23,13 +26,15 @@ const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   avatarUrl: z.string().url().optional(),
   bio: z.string().optional(),
-  skills: z.array(z.string()).optional(),
   credits: z.coerce.number().int().optional(),
 });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
     const userId = params.id;
+    if (!userId) {
+        return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+    }
     // Check if user exists first
     const user = await getUserProfile(userId);
     if (!user) {
@@ -43,15 +48,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { name, avatarUrl, bio, skills } = validation.data;
+    const { name, avatarUrl, bio } = validation.data;
 
     // Handle profile update
-    if (name || avatarUrl || bio || skills) {
+    if (name || avatarUrl || bio) {
         await updateUser(userId, {
             name: name ?? user.name,
             avatarUrl: avatarUrl ?? user.avatarUrl ?? undefined,
             bio: bio ?? user.bio ?? undefined,
-            skills: skills ?? user.userSkills.map(s => s.skill.name),
         });
     }
 

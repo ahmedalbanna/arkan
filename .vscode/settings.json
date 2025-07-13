@@ -6,8 +6,8 @@
         {
             "previewLimit": 50,
             "driver": "SQLite",
-            "database": "${workspaceFolder:arkan}/sqlite.db",
-            "name": "arkan"
+            "name": "arkan",
+            "database": "./sqlite.db"
         }
     ]
 }

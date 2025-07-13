@@ -1,8 +1,10 @@
+DROP Table 'skills';
+
 -- Insert data into users table
-INSERT INTO users (id, name, avatar_url, bio) VALUES
-('user-1', 'علياء سالم', 'https://placehold.co/100x100.png', 'مطور تطبيقات FlutterFlow متخصص في بناء تطبيقات جوال تفاعلية وعالية الأداء. شغوف بتحويل الأفكار إلى واقع ملموس.'),
-('user-2', 'خالد الغامدي', 'https://placehold.co/100x100.png', 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.'),
-('user-3', 'فاطمة الزهراء', 'https://placehold.co/100x100.png', 'باحثة ومهندسة في مجال الذكاء الاصطناعي. أعمل على تطوير نماذج تعلم الآلة لحل المشكلات المعقدة في مختلف الصناعات.');
+INSERT INTO users (id, name,email, avatar_url, bio,credits,created_at) VALUES
+('user-1', 'علياء سالم','alyaa.salem@example.com', 'https://placehold.co/100x100.png', 'مطور تطبيقات FlutterFlow متخصص في بناء تطبيقات جوال تفاعلية وعالية الأداء. شغوف بتحويل الأفكار إلى واقع ملموس.',25,'2023-01-15T09:00:00Z'),
+('user-2', 'خالد الغامدي','khaled.alghamdi@example.com', 'https://placehold.co/100x100.png', 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.',25,'2023-01-15T09:00:00Z'),
+('user-3', 'فاطمة الزهراء','fatima.alzahraa@example.com', 'https://placehold.co/100x100.png', 'باحثة ومهندسة في مجال الذكاء الاصطناعي. أعمل على تطوير نماذج تعلم الآلة لحل المشكلات المعقدة في مختلف الصناعات.',25,'2023-01-15T09:00:00Z');
 
 -- Insert data into projects table (Note: Dates need to be converted to a string format if your database requires it)
 INSERT INTO projects (id, user_id, title, description, category, live_link, summary_short, created_at) VALUES

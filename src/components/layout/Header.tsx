@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, Briefcase, BrainCircuit, HomeIcon, FileSpreadsheet, History, Bot, Palette, Languages, Gem, Presentation, FileImage, Laptop, FileText as FileTextIcon, Users } from 'lucide-react';
+import { Menu, User, HomeIcon, FileSpreadsheet, Bot, Palette, Languages, Gem, FileImage, Laptop, FileText as FileTextIcon, Users } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -23,8 +23,6 @@ export function Header() {
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
-    { href: '/projects', label: t('header.projects'), icon: Briefcase },
-    { href: '/summarize', label: t('header.summarize'), icon: BrainCircuit },
     { href: '/generate-report', label: t('header.generateDocs'), icon: FileSpreadsheet },
     { href: '/generate-code', label: t('header.generateCode'), icon: Laptop },
     { href: '/pdf-to-markdown', label: t('header.pdfToMarkdown'), icon: FileTextIcon },
@@ -32,9 +30,7 @@ export function Header() {
     { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
-    { href: '/history', label: t('header.activityHistory'), icon: History },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
-    { href: '/profile/user-1', label: t('header.profile'), icon: User },
   ];
 
   const renderNavLinks = (isMobile = false) =>

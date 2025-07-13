@@ -34,7 +34,6 @@ import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram'
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 
-import { createProject } from '@/lib/db/queries';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -361,63 +360,11 @@ const CreateProjectSchema = z.object({
   diagramsJson: z.string().optional(),
 });
 
+// This function is no longer used but kept to avoid breaking references.
+// It will be removed in a future cleanup.
 export async function handleCreateProjectFromProposal(
   prevState: { error?: string } | null,
   formData: FormData
 ): Promise<{ error?: string }> {
-  const validatedFields = CreateProjectSchema.safeParse({
-    proposalJson: formData.get('proposalJson'),
-    sectionsJson: formData.get('sectionsJson'),
-    diagramsJson: formData.get('diagramsJson'),
-  });
-
-  if (!validatedFields.success) {
-    const errors = validatedFields.error.flatten().fieldErrors;
-    return { error: `Invalid data: ${Object.values(errors).flat().join(', ')}` };
-  }
-
-  let proposal: ProjectProposal;
-  try {
-    proposal = JSON.parse(validatedFields.data.proposalJson || '{}');
-  } catch (e) {
-    return { error: 'Invalid JSON format in proposal data.' };
-  }
-
-  const validatedProposal = ProjectProposalSchema.safeParse(proposal);
-  if (!validatedProposal.success) {
-    return { error: 'Proposal data does not match the required structure.' };
-  }
-
-  const projectData = validatedProposal.data;
-
-  let newProjectId;
-  try {
-    newProjectId = await createProject({
-      userId: 'user-1', // Hardcoded for prototype
-      title: projectData.title,
-      description: projectData.objective, // Using objective as description
-      category: projectData.category,
-      liveLink: undefined, // No live link in proposal
-      tags: projectData.tags,
-      media: [{
-        url: 'https://placehold.co/800x600.png',
-        alt: `Cover image for ${projectData.title}`,
-        aiHint: 'report cover',
-        type: 'image'
-      }],
-      proposalData: validatedFields.data.proposalJson,
-      reportSections: validatedFields.data.sectionsJson || undefined,
-      reportDiagrams: validatedFields.data.diagramsJson || undefined,
-    });
-  } catch (error) {
-    console.error('Failed to create project from proposal:', error);
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-    return { error: 'An error occurred while creating the project.' };
-  }
-
-  revalidatePath('/projects');
-  revalidatePath('/profile/user-1');
-  redirect(`/projects/${newProjectId}`);
+    return { error: 'This feature has been temporarily disabled.'}
 }
