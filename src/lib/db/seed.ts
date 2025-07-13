@@ -1,3 +1,4 @@
+
 import { db } from './index';
 import { users, skills, userSkills, projects, media, comments, tags, projectTags, technologies, summaryTechnologies } from './schema';
 import { MOCK_USERS, MOCK_PROJECTS, MOCK_COMMENTS } from '../data';
@@ -27,7 +28,7 @@ async function seed() {
       const insertedSkills = await tx.insert(skills).values([...allSkills].map(name => ({ name }))).returning({ id: skills.id, name: skills.name }).execute();
       const skillMap = new Map(insertedSkills.map(s => [s.name, s.id]));
 
-      await tx.insert(users).values(MOCK_USERS.map(({ id, name, avatarUrl, bio, credits }) => ({ id, name, avatarUrl, bio, credits }))).execute();
+      await tx.insert(users).values(MOCK_USERS.map(({ id, name, email, avatarUrl, bio, credits, createdAt }) => ({ id, name, email, avatarUrl, bio, credits, createdAt }))).execute();
 
       const userSkillRelations = MOCK_USERS.flatMap(user =>
         user.skills.map(skillName => {

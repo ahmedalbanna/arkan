@@ -311,9 +311,13 @@ export async function deleteProject(projectId: string) {
 }
 
 export async function getAllUsers() {
-    const data = await db.query.users.findMany();
+    const data = await db.query.users.findMany({
+      orderBy: [desc(users.createdAt)]
+    });
     return data;
 }
+export type AllUsers = Awaited<ReturnType<typeof getAllUsers>>;
+
 
 export async function updateUser(userId: string, data: {
     name: string;
@@ -376,4 +380,18 @@ export async function updateUserCredits(userId: string, creditsToAdd: number): P
         .where(eq(users.id, userId));
 
     return newBalance;
+}
+
+export async function updateUserByAdmin(userId: string, data: {
+    name?: string;
+    email?: string;
+    bio?: string;
+    credits?: number;
+}) {
+  await db.update(users).set(data).where(eq(users.id, userId));
+}
+
+export async function deleteUser(userId: string) {
+    // Cascading deletes will handle related data in other tables
+    await db.delete(users).where(eq(users.id, userId));
 }

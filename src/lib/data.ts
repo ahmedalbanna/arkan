@@ -4,26 +4,32 @@ export const MOCK_USERS: User[] = [
   {
     id: 'user-1',
     name: 'علياء سالم',
+    email: "alyaa.salem@example.com",
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'مطور تطبيقات FlutterFlow متخصص في بناء تطبيقات جوال تفاعلية وعالية الأداء. شغوف بتحويل الأفكار إلى واقع ملموس.',
     skills: ['FlutterFlow', 'Firebase', 'UI/UX', 'Mobile Development'],
     credits: 25,
+    createdAt: '2023-01-15T09:00:00Z',
   },
   {
     id: 'user-2',
     name: 'خالد الغامدي',
+    email: 'khaled.alghamdi@example.com',
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'مصمم واجهات مستخدم ومطور ويب بخبرة تزيد عن 5 سنوات. أركز على إنشاء تجارب مستخدم جذابة وسهلة الاستخدام.',
     skills: ['UI/UX Design', 'Figma', 'React', 'Next.js', 'Web Design'],
     credits: 200,
+    createdAt: '2023-02-20T11:00:00Z',
   },
   {
     id: 'user-3',
     name: 'فاطمة الزهراء',
+    email: 'fatima.alzahraa@example.com',
     avatarUrl: 'https://placehold.co/100x100.png',
     bio: 'باحثة ومهندسة في مجال الذكاء الاصطناعي. أعمل على تطوير نماذج تعلم الآلة لحل المشكلات المعقدة في مختلف الصناعات.',
     skills: ['Machine Learning', 'Python', 'TensorFlow', 'Data Analysis'],
     credits: 10,
+    createdAt: '2023-03-10T14:30:00Z',
   },
 ];
 

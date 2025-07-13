@@ -15,7 +15,8 @@
     "credits": "Credits",
     "pricing": "Pricing",
     "pptxTemplates": "PPTX Templates",
-    "pdfToMarkdown": "PDF to Markdown"
+    "pdfToMarkdown": "PDF to Markdown",
+    "manageUsers": "Manage Users"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."

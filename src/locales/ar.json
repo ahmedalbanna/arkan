@@ -15,7 +15,8 @@
     "credits": "رصيد",
     "pricing": "الأسعار",
     "pptxTemplates": "قوالب العروض",
-    "pdfToMarkdown": "تحويل PDF إلى ماركداون"
+    "pdfToMarkdown": "تحويل PDF إلى ماركداون",
+    "manageUsers": "إدارة المستخدمين"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
