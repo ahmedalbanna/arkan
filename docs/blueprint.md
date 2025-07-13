@@ -2,13 +2,20 @@
 
 ## Core Features:
 
-- Profile Management: Profile Creation and Display: Allow users to create and customize their profiles, showcasing their skills, experience, and a portfolio of their work.
-- Project Showcase: Project Upload and Categorization: Enable users to upload their projects with descriptions, images, and videos, and categorize them for easy discovery.
-- Interactive Portfolio: Interactive Portfolio: Offer interactive elements such as previews, demos, or live links to enhance the viewing experience.
-- AI Summaries: AI-Powered Project Summarization: Generate concise summaries of uploaded projects, highlighting key aspects and technologies used as a tool to help potential employers rapidly understand the purpose, design considerations, and the impact of the presented work.
-- Advanced Search: Filtering and Search: Implement robust filtering and search options to allow users to easily find projects and professionals based on specific skills, categories, or keywords.
-- Community Interaction: User Feedback and Comments: Facilitate interaction by allowing users to provide comments and feedback on projects and profiles.
-- Integrated Media Display: Media Integration: Streamline display videos, images, interactive demos of the uploaded project work.
+1. **AI Document Generation Suite**: This is the most comprehensive feature. It allows users to:
+    
+    - Generate a full, structured **Project Proposal** from a simple idea.
+    - Generate individual **Report Sections** (like Introduction, System Analysis, etc.) and various **UML & ER Diagrams** based on the proposal.
+    - Use **External PDF Content** as context for generation, making the output highly relevant to existing documents.
+    - **Export** the final documents as formatted DOCX and PPTX files using customizable templates.
+2. **AI Code Generator**: A standalone tool where you can describe a UI component in plain language, and the AI will generate the corresponding **HTML, CSS, and JavaScript**, complete with a live preview.
+    
+3. **Administrator Control Panel**: A dedicated backend for administrators to:
+    
+    - **Manage Users**: View, edit details, adjust AI credit balances, and delete users.
+    - **Manage AI Agents**: Enable or disable specific AI agents and customize their core prompts.
+    - **Manage Templates**: Customize the appearance of exported DOCX and PPTX files.
+
 
 ## Style Guidelines:
 

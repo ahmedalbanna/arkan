@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Trash2, FilePlus2, Loader2, Presentation } from 'lucide-react';
-import type { ProjectProposal, PresentationSlide } from '@/ai/schemas';
+import { FileText, Trash2, Loader2, Presentation } from 'lucide-react';
+import type { ProjectProposal } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import { type TemplateKey } from '@/lib/docx-styles';
 import { exportReportAsDocx, exportProposalAsDocx } from '@/lib/docx-exporter';
@@ -23,13 +22,12 @@ interface ReportActionsProps {
   reportState: ReportState;
   onNewSession: () => void;
   isGenerating: boolean;
-  createFormAction: (formData: FormData) => void;
 }
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
-export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating, createFormAction }: ReportActionsProps) => {
+export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating }: ReportActionsProps) => {
   const { t } = useLocalization();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
@@ -88,7 +86,7 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
         <CardDescription>{t('reportGenerator.actionsDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
                 <Label htmlFor="docx-template-select">DOCX Template</Label>
                 {docxLoaded ? (
@@ -120,24 +118,24 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
                 ) : <Loader2 className="h-5 w-5 animate-spin" /> }
             </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 flex-wrap items-center">
-            <Button onClick={handleExportProposalDOCX} disabled={!proposal || isGenerating} className="w-full sm:w-auto font-headline">
-            <FileText className="mr-2 h-4 w-4" />
-            {t('reportGenerator.exportProposal')}
+        <div className="flex flex-col gap-2">
+            <Button onClick={handleExportProposalDOCX} disabled={!proposal || isGenerating} className="w-full font-headline">
+              <FileText className="mr-2 h-4 w-4" />
+              {t('reportGenerator.exportProposal')}
             </Button>
-            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isGenerating} className="w-full sm:w-auto font-headline">
-            <FileText className="mr-2 h-4 w-4" />
-            {t('reportGenerator.exportReport')}
+            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isGenerating} className="w-full font-headline">
+              <FileText className="mr-2 h-4 w-4" />
+              {t('reportGenerator.exportReport')}
             </Button>
             {reportState.presentation && (
-               <Button onClick={handleExportPresentation} disabled={isGenerating} className="w-full sm:w-auto font-headline">
+               <Button onClick={handleExportPresentation} disabled={isGenerating} className="w-full font-headline">
                  <Presentation className="mr-2 h-4 w-4" />
                  Export Presentation
                </Button>
             )}
-            <Button onClick={onNewSession} variant="outline" disabled={isGenerating} className="w-full sm:w-auto font-headline">
-            <Trash2 className="mr-2 h-4 w-4" />
-            {t('reportGenerator.newSession')}
+            <Button onClick={onNewSession} variant="outline" disabled={isGenerating} className="w-full font-headline">
+              <Trash2 className="mr-2 h-4 w-4" />
+              {t('reportGenerator.newSession')}
             </Button>
         </div>
       </CardContent>

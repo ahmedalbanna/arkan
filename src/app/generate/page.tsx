@@ -1,53 +1,35 @@
+// This file is the new main entry point for the unified builder interface.
+// It will be updated in the next step to implement the three-column layout and mode switcher.
 'use client';
 
 import { useState } from 'react';
-import ReportGenerator from "@/components/report-generator/ReportGenerator";
+import ReportGenerator from "@/components/ReportGenerator";
 import CodeGenerator from "@/components/CodeGenerator";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { FileText, Laptop } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function GeneratePage() {
-  const [showReportGenerator, setShowReportGenerator] = useState(true);
+  const [activeTab, setActiveTab] = useState("report");
 
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-12">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
-          {showReportGenerator ? (
-            <>
-              <FileText className="w-10 h-10" />
-              AI Report Generator
-            </>
-          ) : (
-            <>
-              <Laptop className="w-10 h-10" />
-              AI Code Generator
-            </>
-          )}
-        </h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          {showReportGenerator
-            ? "Generate comprehensive reports based on your project proposal."
-            : "Describe the UI component you want to build, and let the AI generate the code for you."}
-        </p>
+    <div className="container mx-auto max-w-screen-2xl px-4 py-8">
+      <div className="flex justify-center mb-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="report" className="gap-2">
+              <FileText className="h-4 w-4" /> Document Generator
+            </TabsTrigger>
+            <TabsTrigger value="code" className="gap-2">
+              <Laptop className="h-4 w-4" /> Code Generator
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      <div className="flex items-center justify-center space-x-2 mb-8">
-        <Label htmlFor="generator-switch">Code Generator</Label>
-        <Switch
-          id="generator-switch"
-          checked={showReportGenerator}
-          onCheckedChange={setShowReportGenerator}
-        />
-        <Label htmlFor="generator-switch">Report Generator</Label>
+      <div className="w-full">
+        {activeTab === 'report' && <ReportGenerator />}
+        {activeTab === 'code' && <CodeGenerator />}
       </div>
-
-      {showReportGenerator ? (
-        <ReportGenerator />
-      ) : (
-        <CodeGenerator />
-      )}
     </div>
   );
 }

@@ -353,18 +353,3 @@ ${JSON.stringify(proposalData, null, 2)}
     return { ...prevState, error: `An error occurred while generating '${itemToGenerate}'. Please try again.` };
   }
 }
-
-const CreateProjectSchema = z.object({
-  proposalJson: z.string().min(1, 'Project proposal is required.'),
-  sectionsJson: z.string().optional(),
-  diagramsJson: z.string().optional(),
-});
-
-// This function is no longer used but kept to avoid breaking references.
-// It will be removed in a future cleanup.
-export async function handleCreateProjectFromProposal(
-  prevState: { error?: string } | null,
-  formData: FormData
-): Promise<{ error?: string }> {
-    return { error: 'This feature has been temporarily disabled.'}
-}

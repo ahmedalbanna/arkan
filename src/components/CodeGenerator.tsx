@@ -71,10 +71,7 @@ const MAX_HISTORY = 5;
 export default function CodeGenerator() {
     const initialState: CodeGenerationState = {};
     const [actionState, formAction] = useActionState(handleGenerateCode, initialState);
-
-    // We introduce a new state to hold what's currently displayed
     const [displayState, setDisplayState] = useState<CodeGenerationState>(initialState);
-
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -83,7 +80,6 @@ export default function CodeGenerator() {
     const [history, setHistory] = useState<CodeGenerationState[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
 
-    // Load history from localStorage on initial render
     useEffect(() => {
         try {
             const storedHistory = localStorage.getItem(HISTORY_KEY);
@@ -95,12 +91,9 @@ export default function CodeGenerator() {
         }
     }, []);
 
-    // When the form action completes, update the display state and history
     useEffect(() => {
         if (actionState.html || actionState.css || actionState.javascript) {
             setDisplayState(actionState);
-
-            // Update history only when new code is generated via form action
             if (actionState.prompt) {
                  setHistory(prev => {
                     const newHistory = [actionState, ...prev.filter(h => h.prompt !== actionState.prompt)].slice(0, MAX_HISTORY);
@@ -115,16 +108,17 @@ export default function CodeGenerator() {
         }
     }, [actionState]);
 
-    // When the display state changes, update the iframe's srcDoc
     useEffect(() => {
         const timeout = setTimeout(() => {
             setSrcDoc(`
                 <html>
                     <head>
                         <style>${displayState.css || ''}</style>
-                        <script>${displayState.javascript || ''}<\/script>
                     </head>
-                    <body>${displayState.html || ''}</body>
+                    <body>
+                        ${displayState.html || ''}
+                        <script>${displayState.javascript || ''}<\/script>
+                    </body>
                 </html>
             `);
         }, 300);
@@ -137,8 +131,6 @@ export default function CodeGenerator() {
         setIsCapturing(true);
 
         try {
-            // Accessing the document directly from the iframe can be problematic
-            // The contentWindow might not be ready. We'll access the body directly.
             const canvas = await html2canvas(iframeRef.current.contentWindow.document.body, {
                 useCORS: true,
                 allowTaint: true,
@@ -164,7 +156,17 @@ export default function CodeGenerator() {
         setIsDownloading(true);
         try {
             const zip = new JSZip();
-            zip.file("index.html", displayState.html || "");
+            zip.file("index.html", `<!DOCTYPE html>
+<html>
+<head>
+    <title>Generated Component</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    ${displayState.html || ''}
+    <script src="script.js"></script>
+</body>
+</html>`);
             zip.file("style.css", displayState.css || "");
             zip.file("script.js", displayState.javascript || "");
 
@@ -184,7 +186,6 @@ export default function CodeGenerator() {
     }
 
     const restoreFromHistory = (historyItem: CodeGenerationState) => {
-        // Directly update the display state instead of calling the form action
         setDisplayState(historyItem);
     }
 
@@ -198,7 +199,7 @@ export default function CodeGenerator() {
          <div className={cn(
             "w-full rounded-md border bg-white overflow-hidden",
             !srcDoc && "flex items-center justify-center bg-muted",
-            isDialog ? "h-[80vh]" : "aspect-video"
+            isDialog ? "h-full" : "h-[60vh]"
         )}>
             {srcDoc ? (
                 <iframe
@@ -208,6 +209,7 @@ export default function CodeGenerator() {
                     width="100%"
                     height="100%"
                     className="border-0"
+                    sandbox="allow-scripts"
                 />
             ) : (
                 <div className="text-center text-muted-foreground p-8">
@@ -218,15 +220,13 @@ export default function CodeGenerator() {
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            <div className="lg:col-span-3 space-y-6">
-                <Card>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+            {/* Left Column */}
+            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                 <Card>
                     <form action={formAction}>
                         <CardHeader>
                             <CardTitle className="font-headline">Describe your UI</CardTitle>
-                            <CardDescription>
-                                Be descriptive for the best results. For example: "A login form with email and password fields, and a submit button".
-                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
@@ -244,12 +244,11 @@ export default function CodeGenerator() {
                         </CardFooter>
                     </form>
                 </Card>
-
                 {history.length > 0 && (
                      <Card>
                         <CardHeader>
                             <div className="flex justify-between items-center">
-                                <CardTitle className="font-headline flex items-center gap-2">
+                                <CardTitle className="font-headline flex items-center gap-2 text-base">
                                     <History className="w-5 h-5" />
                                     History
                                 </CardTitle>
@@ -271,7 +270,37 @@ export default function CodeGenerator() {
                         </CardContent>
                     </Card>
                 )}
+            </div>
 
+            {/* Center Column */}
+            <div className="lg:col-span-6 overflow-y-auto pr-2">
+                 <Card className="h-full">
+                    <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="font-headline flex items-center gap-2">
+                                <Tv className="w-6 h-6" />
+                                Live Preview
+                            </CardTitle>
+                            {srcDoc && (
+                                <div className="flex items-center gap-1">
+                                    <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
+                                        {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                                    </Button>
+                                    <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
+                                        <Expand className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                       {renderPreview(false)}
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                 {(displayState.html || displayState.css || displayState.javascript) && (
                     <Card>
                         <CardHeader>
@@ -305,41 +334,16 @@ export default function CodeGenerator() {
                 )}
             </div>
 
-            <div className="lg:col-span-2 lg:sticky top-24 self-start">
-                 <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle className="font-headline flex items-center gap-2">
-                                <Tv className="w-6 h-6" />
-                                Live Preview
-                            </CardTitle>
-                            {srcDoc && (
-                                <div className="flex items-center gap-1">
-                                    <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
-                                        {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
-                                        <Expand className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                       {renderPreview(false)}
-                    </CardContent>
-                </Card>
-                <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-                    <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-4">
-                        <DialogHeader className="flex-row items-center justify-between border-b pb-2">
-                            <DialogTitle>Expanded Preview</DialogTitle>
-                        </DialogHeader>
-                        <div className="flex-grow">
-                             {renderPreview(true)}
-                        </div>
-                    </DialogContent>
-                </Dialog>
-            </div>
+            <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
+                <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
+                    <DialogHeader className="flex-row items-center justify-between border-b pb-2">
+                        <DialogTitle>Expanded Preview</DialogTitle>
+                    </DialogHeader>
+                    <div className="flex-grow min-h-0">
+                         {renderPreview(true)}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
