@@ -3,38 +3,31 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Presentation } from 'lucide-react';
+import { Loader2, Sparkles, Presentation, FileJson, GitGraph, BookCheck } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { usePresentationState } from '@/context/PresentationStateContext';
+import { ProposalEditor } from './report-generator/ProposalEditor';
+import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
+import { ScrollArea } from './ui/scroll-area';
+import { Checkbox } from './ui/checkbox';
+import { Label } from './ui/label';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { cn } from '@/lib/utils';
 
-function GenerateButton() {
-    const { isGenerating } = usePresentationState();
-    return (
-        <Button type="submit" disabled={isGenerating} className="w-full font-headline">
-            {isGenerating ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                </>
-            ) : (
-                <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Presentation
-                </>
-            )}
-        </Button>
-    );
-}
 
 export default function PresentationGenerator() {
     const {
         state,
+        isGenerating,
         proposalJson,
         setProposalJson,
-        handleGeneratePresentation
+        reportState,
+        setReportState,
+        handleGeneratePresentation,
+        contextSelections,
+        toggleContextSelection,
     } = usePresentationState();
     
     const [showPresentation, setShowPresentation] = useState(false);
@@ -45,36 +38,43 @@ export default function PresentationGenerator() {
         }
     }, [state.slides]);
 
+    const isToolsDisabled = !proposalJson || isGenerating;
+    const hasReportContent = Object.keys(reportState.sections).length > 0 || Object.keys(reportState.diagrams).length > 0;
+
     return (
         <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(); }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-1">
+             <input type="hidden" name="proposalJson" value={proposalJson} />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                     <ProposalEditor
+                        proposalJson={proposalJson}
+                        onProposalJsonChange={setProposalJson}
+                        isDisabled={isGenerating}
+                        error={state.error}
+                    />
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Project Proposal (JSON)</CardTitle>
-                            <CardDescription>
-                                Paste the full JSON content of your project proposal to generate a presentation from it.
+                            <CardTitle className="font-headline text-base">Upload Report File</CardTitle>
+                            <CardDescription className="text-xs">
+                                Upload a saved `.json` project file to use its sections and diagrams as context.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Textarea
-                                name="proposalJson"
-                                placeholder='{ "title": "...", "objective": "...", ... }'
-                                rows={15}
-                                required
-                                value={proposalJson}
-                                onChange={(e) => setProposalJson(e.target.value)}
+                             <input
+                                type="file"
+                                accept=".json"
+                                onChange={(e) => setReportState(e.target.files?.[0])}
+                                className="text-xs w-full"
+                                disabled={isGenerating}
                             />
-                            {state?.error && (
-                                <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
-                            )}
                         </CardContent>
-                        <CardFooter>
-                            <GenerateButton />
-                        </CardFooter>
                     </Card>
                 </div>
-                <div className="md:col-span-2">
+
+                {/* Center Column */}
+                <div className="lg:col-span-6 overflow-y-auto pr-2">
                     {state?.slides && state.slides.length > 0 ? (
                         <>
                          <Alert className="mb-6">
@@ -105,14 +105,75 @@ export default function PresentationGenerator() {
                         </Card>
                     )}
                 </div>
+                 {state.slides && state.slides.length > 0 && (
+                     <PresentationViewer 
+                        isOpen={showPresentation} 
+                        onOpenChange={setShowPresentation} 
+                        slides={state.slides} 
+                     />
+                )}
+
+                {/* Right Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                     <PresentationGenerationTools
+                        isDisabled={isToolsDisabled}
+                        isGenerating={isGenerating}
+                    />
+                    <Card className={cn(!hasReportContent && "opacity-50 pointer-events-none")}>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-base">Select Context</CardTitle>
+                            <CardDescription className="text-xs">
+                                Choose which report sections and diagrams to include as context for the presentation.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <ScrollArea className="h-64 border rounded-md p-2">
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
+                                     {Object.entries(reportState.sections).length > 0 ? (
+                                        Object.entries(reportState.sections).map(([key, content]) => (
+                                            <div key={key} className="flex items-center space-x-2 pl-2">
+                                                <Checkbox
+                                                    id={`context-section-${key}`}
+                                                    name={`context_section_${key}`}
+                                                    checked={contextSelections.sections[key as keyof typeof contextSelections.sections]}
+                                                    onCheckedChange={() => toggleContextSelection('sections', key)}
+                                                    disabled={!content}
+                                                />
+                                                <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
+                                                    {sectionConfig[key as keyof typeof sectionConfig].title}
+                                                </Label>
+                                            </div>
+                                        ))
+                                     ) : (
+                                         <p className="text-xs text-muted-foreground p-2">No sections found. Upload a report file.</p>
+                                     )}
+
+                                    <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
+                                    {Object.entries(reportState.diagrams).length > 0 ? (
+                                        Object.entries(reportState.diagrams).map(([key]) => (
+                                            <div key={key} className="flex items-center space-x-2 pl-2">
+                                                <Checkbox
+                                                    id={`context-diagram-${key}`}
+                                                    name={`context_diagram_${key}`}
+                                                    checked={contextSelections.diagrams[key as keyof typeof contextSelections.diagrams]}
+                                                    onCheckedChange={() => toggleContextSelection('diagrams', key)}
+                                                />
+                                                <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
+                                                    {diagramConfig[key as keyof typeof diagramConfig].title}
+                                                </Label>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="text-xs text-muted-foreground p-2">No diagrams found. Upload a report file.</p>
+                                    )}
+                                </div>
+                             </ScrollArea>
+                        </CardContent>
+                    </Card>
+                </div>
+
             </div>
-            {state.slides && state.slides.length > 0 && (
-                 <PresentationViewer 
-                    isOpen={showPresentation} 
-                    onOpenChange={setShowPresentation} 
-                    slides={state.slides} 
-                 />
-            )}
         </form>
     );
 }
