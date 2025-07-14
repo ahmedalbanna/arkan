@@ -15,6 +15,7 @@ import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
 import DiagramViewer from './DiagramViewer';
 import { diagramConfig } from '@/lib/report-config';
+import { useAuth } from '@/context/AuthContext';
 
 function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
     const { pending, data } = useFormStatus();
@@ -54,6 +55,7 @@ function RenderButton() {
 }
 
 export default function DiagramGenerator() {
+    const { fetchUser } = useAuth();
     const initialState: DiagramState = { plantUmlCodes: {} };
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
 
@@ -66,7 +68,7 @@ export default function DiagramGenerator() {
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
 
     useEffect(() => {
-        if (state.lastGenerated && state.currentPlantUmlCode) {
+        if (state.lastGenerated && state.currentPlantUmlCode && !state.error) {
             let proposalTitle = 'مخطط مشروع';
             try {
                 const parsed = JSON.parse(proposalJson);
@@ -93,8 +95,9 @@ export default function DiagramGenerator() {
                 ...prev,
                 [state.lastGenerated!]: state.currentPlantUmlCode,
             }));
+            fetchUser();
         }
-    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson]);
+    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson, fetchUser, state.error]);
 
     const currentDiagramType = state.lastGenerated;
     const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
@@ -157,7 +160,7 @@ export default function DiagramGenerator() {
                         </Alert>
                     )}
 
-                    {state.imageUrl && currentDiagramType && currentEditedCode !== undefined && (
+                    {state.imageUrl && currentDiagramType && currentEditedCode !== undefined ? (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="font-headline">المخطط المعروض</CardTitle>
@@ -173,6 +176,13 @@ export default function DiagramGenerator() {
                             <CardFooter>
                                 {hasChanges && <RenderButton />}
                             </CardFooter>
+                        </Card>
+                    ) : (
+                         <Card className="flex items-center justify-center h-full min-h-[400px]">
+                            <div className="text-center text-muted-foreground p-8">
+                                <GitGraph className="w-16 h-16 mx-auto mb-4" />
+                                <p>Your generated diagram will appear here.</p>
+                            </div>
                         </Card>
                     )}
                 </div>

@@ -7,9 +7,11 @@ import ReportGenerator from "@/components/ReportGenerator";
 import CodeGenerator from "@/components/CodeGenerator";
 import PresentationGenerator from '@/components/PresentationGenerator';
 import { ProposalModeGenerator } from '@/components/ProposalModeGenerator';
-import { FileText, Laptop, Presentation, FilePlus2 } from 'lucide-react';
+import DiagramGenerator from '@/components/DiagramGenerator';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportStateProvider } from '@/context/ReportStateContext';
+import { HistoryProvider } from '@/hooks/use-history';
 
 export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState("report");
@@ -18,12 +20,15 @@ export default function GeneratePage() {
     <div className="container mx-auto max-w-screen-2xl px-4 py-8">
       <div className="flex justify-center mb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="proposal" className="gap-2">
               <FilePlus2 className="h-4 w-4" /> Proposal Mode
             </TabsTrigger>
             <TabsTrigger value="report" className="gap-2">
               <FileText className="h-4 w-4" /> Document Generator
+            </TabsTrigger>
+            <TabsTrigger value="diagram" className="gap-2">
+                <GitGraph className="h-4 w-4" /> Diagram Generator
             </TabsTrigger>
             <TabsTrigger value="code" className="gap-2">
               <Laptop className="h-4 w-4" /> Code Generator
@@ -36,14 +41,17 @@ export default function GeneratePage() {
       </div>
 
       <div className="w-full">
-        {activeTab === 'proposal' && <ProposalModeGenerator />}
-        {activeTab === 'report' && (
-          <ReportStateProvider>
-            <ReportGenerator />
-          </ReportStateProvider>
-        )}
-        {activeTab === 'code' && <CodeGenerator />}
-        {activeTab === 'presentation' && <PresentationGenerator />}
+        <HistoryProvider>
+            {activeTab === 'proposal' && <ProposalModeGenerator />}
+            {activeTab === 'report' && (
+            <ReportStateProvider>
+                <ReportGenerator />
+            </ReportStateProvider>
+            )}
+            {activeTab === 'diagram' && <DiagramGenerator />}
+            {activeTab === 'code' && <CodeGenerator />}
+            {activeTab === 'presentation' && <PresentationGenerator />}
+        </HistoryProvider>
       </div>
     </div>
   );
