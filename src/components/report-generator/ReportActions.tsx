@@ -52,11 +52,6 @@ export const ReportActions = ({ proposal, onNewSession, isGenerating }: ReportAc
     await exportReportAsDocx(reportState.sections, reportState.diagrams || {}, proposalTitle, selectedDocxTemplate);
   };
 
-  const handleExportProposalDOCX = async () => {
-    if (!proposal) return;
-    await exportProposalAsDocx(proposal, selectedDocxTemplate);
-  };
-  
   const handleExportProjectFile = () => {
     if (!proposal) return;
     const projectData = {
@@ -94,10 +89,6 @@ export const ReportActions = ({ proposal, onNewSession, isGenerating }: ReportAc
             </div>
         </div>
         <div className="flex flex-col gap-2">
-            <Button onClick={handleExportProposalDOCX} disabled={!proposal || isGenerating} className="w-full font-headline">
-              <FileText className="mr-2 h-4 w-4" />
-              {t('reportGenerator.exportProposal')}
-            </Button>
             <Button onClick={handleExportReportDOCX} disabled={!hasContent || isGenerating} className="w-full font-headline">
               <FileText className="mr-2 h-4 w-4" />
               {t('reportGenerator.exportReport')}
