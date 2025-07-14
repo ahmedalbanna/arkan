@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CardTitle, Card, CardContent, CardHeader } from '@/components/ui/card';
 import ProposalViewer from '@/components/ProposalViewer';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,9 @@ import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import type { ProjectProposal, SectionName, DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/app/generate-report/actions';
+import type { ReportState } from '@/hooks/use-report-state';
 import DiagramViewer from '../DiagramViewer';
-import { Loader2, RefreshCw, Eye } from 'lucide-react';
+import { Loader2, RefreshCw, Eye, FileText, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -40,6 +40,7 @@ function DiagramSkeleton() {
 interface ReportResultsProps {
   reportState: ReportState;
   generatingItem: string | null;
+  isAnythingGenerating: boolean;
   proposal: ProjectProposal | null;
   onProposalUpdate: (path: string, value: any) => void;
   onSectionUpdate: (key: SectionName, value: string) => void;
@@ -47,24 +48,37 @@ interface ReportResultsProps {
   onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate, onDiagramCodeUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, isAnythingGenerating, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate, onDiagramCodeUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
+
+  if (!proposal) {
+    return (
+        <Card className="flex items-center justify-center h-full min-h-[400px]">
+            <div className="text-center text-muted-foreground p-8">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
+                <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+            </div>
+        </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
-      {proposal && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-xl">{t('reportGenerator.proposalDetailsTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ProposalViewer proposal={proposal} onUpdate={onProposalUpdate} />
-          </CardContent>
-        </Card>
-      )}
-
-      <Accordion type="multiple" className="w-full space-y-4" defaultValue={['Results']}>
-        <AccordionItem value="Results" className="border-none">
+      <Accordion type="multiple" defaultValue={['proposal', 'report']} className="w-full space-y-6">
+        <AccordionItem value="proposal" className="border-none">
+           <Card>
+                <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline w-full">
+                  <div className="flex items-center">
+                    <FileText className="mr-2 h-5 w-5 text-primary" /> {t('reportGenerator.proposalDetailsTitle')}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="p-4 pt-0 border-t">
+                    <ProposalViewer proposal={proposal} onUpdate={onProposalUpdate} />
+                </AccordionContent>
+            </Card>
+        </AccordionItem>
+        <AccordionItem value="report" className="border-none">
           <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
           <CardContent className="p-0 space-y-4">
             {reportState.presentation && (
@@ -130,7 +144,7 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
               }
               if(!diagramData) return null;
 
-              const isUpdating = generatingItem === key;
+              const isUpdatingThis = isAnythingGenerating && generatingItem === key;
 
               return (
                 <AccordionItem value={title} key={key} className="bg-background rounded-lg border">
@@ -145,14 +159,14 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                       imageUrl={diagramData.imageUrl}
                       plantUmlCode={diagramData.plantUmlCode}
                       onCodeChange={(newCode) => onDiagramCodeUpdate(key, newCode)}
-                      isReadOnly={false}
+                      isReadOnly={isAnythingGenerating}
                     />
                     <Button
                       onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}
                       className="font-headline"
-                      disabled={isUpdating}
+                      disabled={isUpdatingThis}
                     >
-                      {isUpdating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+                      {isUpdatingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                       Update Diagram
                     </Button>
                   </AccordionContent>

@@ -178,7 +178,6 @@ export function useReportState() {
   }, [state, isLoaded]);
 
   // Action handlers
-  const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
   const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
   const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
   const handleDiagramCodeUpdate = (key: DiagramType, code: string) => dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
@@ -288,7 +287,6 @@ export function useReportState() {
     proposal: state.proposal,
     proposalJson: state.proposalJson,
     contextSelections: state.contextSelections,
-    handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,
     handleDiagramCodeUpdate,
