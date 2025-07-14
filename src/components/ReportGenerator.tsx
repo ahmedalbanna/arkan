@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
@@ -21,10 +22,11 @@ export default function ReportGenerator() {
     proposalJson,
     projectIdea,
     handleProjectIdeaChange,
-    handleProposalGenerated,
+    handleGenerateProposal,
     handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,
+    handleDiagramCodeUpdate,
     handleDiagramUpdate,
     handleNewSession,
     handleSubmit,
@@ -50,12 +52,7 @@ export default function ReportGenerator() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-          <ProposalGenerator
-            isGenerating={isGeneratingProposal}
-            projectIdea={projectIdea}
-            onProjectIdeaChange={handleProjectIdeaChange}
-            onProposalGenerated={handleProposalGenerated}
-          />
+          <ProposalGenerator />
           <ProposalEditor
             proposalJson={proposalJson}
             onProposalJsonChange={handleProposalJsonChange}
@@ -72,6 +69,7 @@ export default function ReportGenerator() {
             proposal={proposal}
             onProposalUpdate={handleProposalUpdate}
             onSectionUpdate={handleSectionUpdate}
+            onDiagramCodeUpdate={handleDiagramCodeUpdate}
             onDiagramUpdate={handleDiagramUpdate}
           />
         </div>
@@ -80,7 +78,6 @@ export default function ReportGenerator() {
         <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
           <ReportActions
             proposal={proposal}
-            reportState={state}
             onNewSession={handleNewSession}
             isGenerating={isAnythingGenerating}
           />

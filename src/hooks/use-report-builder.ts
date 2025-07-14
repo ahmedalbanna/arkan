@@ -276,11 +276,13 @@ export function useReportBuilder() {
   const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
   const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
   const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
+  const handleDiagramCodeUpdate = (key: DiagramType, code: string) => dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
   
   const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
-    dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key: diagramType, code }});
     const formData = new FormData();
     if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
+    // Even though we are just updating, we need to provide a value for itemToGenerate for the Zod schema to pass.
+    // The `intent` field is what directs the action to the correct logic path.
     formData.set('itemToGenerate', diagramType);
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
@@ -337,6 +339,7 @@ export function useReportBuilder() {
     handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,
+    handleDiagramCodeUpdate,
     handleDiagramUpdate,
     handleNewSession,
     handleSubmit,

@@ -29,7 +29,7 @@ export interface Agent extends AgentData {
 const diagramBasePrompt = `You are an expert systems analyst specializing in PlantUML. Your task is to generate a complete and valid PlantUML diagram based on the provided project proposal and other context.
 
 --- PlantUML Style Guide & Instructions ---
-- Use the '!theme spacelab' for a modern and readable look.
+- Use the '!theme plain' for a modern and readable look.
 - Set 'skinparam linetype ortho' for clean, right-angled connectors.
 - Your entire response MUST be only the PlantUML code.
 - The code must start with '@startuml' and end with '@enduml'.

@@ -9,7 +9,7 @@ import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import type { ProjectProposal, SectionName, DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/hooks/use-report-builder';
+import type { ReportState } from '@/app/generate-report/actions';
 import DiagramViewer from '../DiagramViewer';
 import { Loader2, RefreshCw, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -44,9 +44,10 @@ interface ReportResultsProps {
   onProposalUpdate: (path: string, value: any) => void;
   onSectionUpdate: (key: SectionName, value: string) => void;
   onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
+  onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate, onDiagramCodeUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
 
   return (
@@ -143,9 +144,8 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                       title={title}
                       imageUrl={diagramData.imageUrl}
                       plantUmlCode={diagramData.plantUmlCode}
-                      onCodeChange={(newCode) => {
-                        // This local update is now handled by the central state reducer
-                      }}
+                      onCodeChange={(newCode) => onDiagramCodeUpdate(key, newCode)}
+                      isReadOnly={false}
                     />
                     <Button
                       onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}

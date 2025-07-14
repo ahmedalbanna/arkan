@@ -112,8 +112,8 @@ export default function DiagramGenerator() {
             {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
                 code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
             ))}
-            {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
-            {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
+            {currentDiagramType && typeof currentDiagramType === 'string' && currentDiagramType !== '' && <input type="hidden" name="diagramType" value={currentDiagramType} />}
+            {currentEditedCode && typeof currentEditedCode === 'string' && currentEditedCode !== '' && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
 
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -167,6 +167,7 @@ export default function DiagramGenerator() {
                                     imageUrl={state.imageUrl}
                                     plantUmlCode={currentEditedCode}
                                     onCodeChange={handleCodeChange}
+                                    isReadOnly={false}
                                 />
                             </CardContent>
                             <CardFooter>
