@@ -8,6 +8,7 @@ import { LocalizationProvider } from '@/context/LocalizationContext';
 import LanguageDirectionManager from '@/components/LanguageDirectionManager';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '@/context/AuthContext';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -51,6 +52,7 @@ export default function RootLayout({
               <LanguageDirectionManager>
                 <Header />
                 <main className="flex-grow">{children}</main>
+                <Footer />
                 <Toaster />
               </LanguageDirectionManager>
             </AuthProvider>
