@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import Image from 'next/image';
-import { Loader2, Download, Copy, Check, Share2 } from 'lucide-react';
+import { Loader2, Download, Copy, Check, Share2, RefreshCw } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
@@ -14,7 +14,9 @@ interface DiagramViewerProps {
     imageUrl: string;
     plantUmlCode: string;
     isReadOnly?: boolean;
+    isUpdating?: boolean;
     onCodeChange?: (newCode: string) => void;
+    onUpdate?: () => void;
 }
 
 export default function DiagramViewer({
@@ -22,10 +24,14 @@ export default function DiagramViewer({
     imageUrl,
     plantUmlCode,
     isReadOnly = false,
+    isUpdating = false,
     onCodeChange,
+    onUpdate
 }: DiagramViewerProps) {
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const hasChanges = onCodeChange && plantUmlCode !== (localStorage.getItem(`puml-${title}`) || '');
+
 
     const handleCopy = () => {
         navigator.clipboard.writeText(plantUmlCode).then(() => {
@@ -56,6 +62,7 @@ export default function DiagramViewer({
                 width={800}
                 height={600}
                 className="w-full h-auto object-contain rounded-md border bg-white p-2"
+                unoptimized // Since the image is from an external URL and can change, don't use Next.js image optimization
             />
             <div className="relative">
                 <Textarea
@@ -101,6 +108,17 @@ export default function DiagramViewer({
                     </TooltipProvider>
                 </div>
             </div>
+             {onUpdate && (
+                <Button
+                    onClick={onUpdate}
+                    className="font-headline"
+                    disabled={isUpdating}
+                    >
+                    {isUpdating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+                    Update Diagram
+                </Button>
+            )}
         </div>
     );
 }
+

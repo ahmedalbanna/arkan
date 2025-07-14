@@ -1,0 +1,272 @@
+
+'use client';
+
+import React, { useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAgents } from '@/hooks/use-agents';
+import { cn } from '@/lib/utils';
+import { diagramConfig } from '@/lib/report-config';
+import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
+import { Loader2, Sparkles, Plus, Trash2 } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+
+const orderedDiagrams = DiagramTypeSchema.options;
+
+// State for guidelines of a single agent
+type GuidelineState = {
+    checked: Record<number, boolean>;
+    custom: string[];
+};
+
+const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
+    const initialState: Record<string, GuidelineState> = {};
+    orderedDiagrams.forEach(key => {
+        const agent = agents.find(a => a.id === diagramConfig[key].agentId);
+        const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
+        const checked: Record<number, boolean> = {};
+        if (defaultGuidelines) {
+            defaultGuidelines.forEach((g, index) => {
+                checked[index] = g.isDefault;
+            });
+        }
+        initialState[key] = { checked, custom: [] };
+    });
+    return initialState;
+};
+
+const getSelectedGuidelines = (agent: Agent | undefined, guidelineState: GuidelineState | undefined): string[] => {
+    if (!agent || !guidelineState) return [];
+    
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (guidelineState.checked[index]) {
+            guidelines.push(g.text);
+        }
+    });
+    guidelines.push(...guidelineState.custom);
+    return guidelines;
+};
+
+interface GenerateItemButtonProps {
+    itemKey: string;
+    title: string;
+    isGenerating: boolean;
+    generatingDiagram: string | null;
+}
+
+function GenerateItemButton({ itemKey, title, isGenerating, generatingDiagram }: GenerateItemButtonProps) {
+    const { agents } = useAgents();
+    const agentId = diagramConfig[itemKey as keyof typeof diagramConfig]?.agentId;
+    const agent = agents.find(a => a.id === agentId);
+    const isGeneratingThis = isGenerating && generatingDiagram === itemKey;
+
+    return (
+        <Button
+            type="submit"
+            name="itemToGenerate"
+            value={itemKey}
+            disabled={isGenerating || !agent?.isEnabled}
+            className="font-headline"
+            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+        >
+            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Generate
+        </Button>
+    );
+}
+
+interface DiagramGenerationToolsProps {
+    isDisabled: boolean;
+    diagramsState: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string }>>;
+    isGenerating: boolean;
+    generatingDiagram: string | null;
+    contextSelections: Record<string, Record<string, boolean>>;
+    onContextToggle: (parentKey: string, contextKey: string) => void;
+}
+
+export const DiagramGenerationTools = ({ isDisabled, diagramsState, isGenerating, generatingDiagram, contextSelections, onContextToggle }: DiagramGenerationToolsProps) => {
+    const { agents, isLoaded: agentsLoaded } = useAgents();
+    const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
+    const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
+
+    React.useEffect(() => {
+        if (agentsLoaded) {
+            setGuidelineState(getInitialGuidelineState(agents));
+        }
+    }, [agentsLoaded, agents]);
+
+    const handleGuidelineToggle = (itemKey: string, guidelineIndex: number, isChecked: boolean) => {
+        setGuidelineState(prev => ({
+            ...prev,
+            [itemKey]: {
+                ...prev[itemKey],
+                checked: {
+                    ...prev[itemKey].checked,
+                    [guidelineIndex]: isChecked
+                }
+            }
+        }));
+    };
+
+    const handleAddCustomGuideline = (itemKey: string) => {
+        const newGuideline = customGuidelineInput[itemKey]?.trim();
+        if (newGuideline) {
+            setGuidelineState(prev => ({
+                ...prev,
+                [itemKey]: {
+                    ...prev[itemKey],
+                    custom: [...prev[itemKey].custom, newGuideline]
+                }
+            }));
+            setCustomGuidelineInput(prev => ({ ...prev, [itemKey]: '' }));
+        }
+    };
+
+    const handleRemoveCustomGuideline = (itemKey: string, indexToRemove: number) => {
+        setGuidelineState(prev => ({
+            ...prev,
+            [itemKey]: {
+                ...prev[itemKey],
+                custom: prev[itemKey].custom.filter((_, index) => index !== indexToRemove)
+            }
+        }));
+    };
+
+    if (!agentsLoaded) {
+        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
+    }
+
+    return (
+        <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
+            <CardHeader>
+                <CardTitle className="font-headline">Generation Tools</CardTitle>
+                <CardDescription>Configure and generate diagrams.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Accordion type="multiple" className="w-full space-y-1">
+                    {orderedDiagrams.map((key) => {
+                        const agent = agents.find(a => a.id === diagramConfig[key].agentId);
+                        if (!agent) return null;
+
+                        const promptConfig = agent.prompt as AgentPrompt;
+                        const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
+                        const { title, icon: Icon } = diagramConfig[key];
+                        
+                        const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
+
+                        return (
+                            <AccordionItem value={key} key={key}>
+                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                    <div className="flex items-center gap-2">
+                                        <Icon className="h-4 w-4" /> {title}
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="space-y-4 p-4">
+                                    <Tabs defaultValue="prompt" className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2">
+                                            <TabsTrigger value="prompt">Prompt</TabsTrigger>
+                                            <TabsTrigger value="context">Context</TabsTrigger>
+                                        </TabsList>
+                                        <TabsContent value="prompt" className="pt-4 space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                                <div className="p-3 rounded-md border bg-muted text-xs">
+                                                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                                                </div>
+                                            </div>
+
+                                            {hasGuidelines && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                    <div className="space-y-2 p-3 rounded-md border">
+                                                        {promptConfig.guidelines!.map((guideline, index) => (
+                                                            <div key={index} className="flex items-start gap-2">
+                                                                <Checkbox
+                                                                    id={`guideline-${key}-${index}`}
+                                                                    checked={guidelineState[key]?.checked[index] ?? false}
+                                                                    onCheckedChange={(checked) => handleGuidelineToggle(key, index, !!checked)}
+                                                                />
+                                                                <Label htmlFor={`guideline-${key}-${index}`} className="font-normal text-sm flex-1">
+                                                                    <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
+                                                                </Label>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                                {guidelineState[key]?.custom.map((custom, index) => (
+                                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                                        <span>- {custom}</span>
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuideline(key, index)}>
+                                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder="Add a custom guideline..."
+                                                        value={customGuidelineInput[key] || ''}
+                                                        onChange={(e) => setCustomGuidelineInput(prev => ({ ...prev, [key]: e.target.value }))}
+                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline(key))}
+                                                    />
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuideline(key)}>
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+
+                                        {/* Hidden inputs to pass data to server action */}
+                                        {selectedGuidelines.map((g, i) => (
+                                            <input key={i} type="hidden" name="guidelines[]" value={g} />
+                                        ))}
+                                        
+                                        <TabsContent value="context" className="pt-4">
+                                            <div className="space-y-3">
+                                                <Label className="font-semibold">Contextual Diagrams</Label>
+                                                <p className="text-xs text-muted-foreground">Select other generated diagrams to provide as context.</p>
+                                                <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
+                                                    {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
+                                                        <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                            <Checkbox
+                                                                id={`context-${key}-${contextKey}`}
+                                                                name={`context_${key}_${contextKey}`}
+                                                                disabled={!diagramsState[contextKey]}
+                                                                checked={contextSelections[key]?.[contextKey] ?? false}
+                                                                onCheckedChange={() => onContextToggle(key, contextKey)}
+                                                            />
+                                                            <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
+                                                                {diagramConfig[contextKey].title}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+                                    </Tabs>
+                                    <div className="pt-2">
+                                        <GenerateItemButton itemKey={key} title={title} isGenerating={isGenerating} generatingDiagram={generatingDiagram} />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
+                        );
+                    })}
+                </Accordion>
+            </CardContent>
+        </Card>
+    );
+};

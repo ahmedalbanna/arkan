@@ -1,52 +1,24 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, RefreshCw, GitGraph } from 'lucide-react';
-import { useAgents } from '@/hooks/use-agents';
-import type { Agent } from '@/lib/agents';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import DiagramViewer from './DiagramViewer';
-import { diagramConfig } from '@/lib/report-config';
 import { useDiagramState } from '@/context/DiagramStateContext';
+import { diagramConfig } from '@/lib/report-config';
+import { GitGraph } from 'lucide-react';
+import { ProposalEditor } from './report-generator/ProposalEditor'; // Reusing this component
+import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
+import { Skeleton } from './ui/skeleton';
 
-function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
-    const { isGenerating, generatingDiagram } = useDiagramState();
-    const isGeneratingThis = isGenerating && generatingDiagram === diagramType;
 
-    return (
-        <Button
-            type="submit"
-            name="diagramToGenerate"
-            value={diagramType}
-            disabled={isGenerating || !agent?.isEnabled}
-            variant="secondary"
-            className="w-full justify-start"
-            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${diagramConfig[diagramType].title}`}
-        >
-            {isGeneratingThis ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-                <Sparkles className="mr-2 h-4 w-4" />
-            )}
-            {diagramConfig[diagramType].title}
-        </Button>
-    );
-}
-
-function RenderButton() {
-    const { isRendering } = useDiagramState();
-
-    return (
-        <Button type="submit" name="formAction" value="render" disabled={isRendering} className="font-headline">
-            {isRendering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-            Update Diagram
-        </Button>
-    );
+function DiagramSkeleton() {
+  return (
+    <div className="space-y-4 p-4">
+      <Skeleton className="aspect-video w-full" />
+      <Skeleton className="h-24 w-full" />
+    </div>
+  )
 }
 
 export default function DiagramGenerator() {
@@ -54,94 +26,76 @@ export default function DiagramGenerator() {
         state,
         proposalJson,
         setProposalJson,
-        editedCodes,
-        handleCodeChange,
-        handleFormSubmit
+        isAnythingGenerating,
+        generatingDiagram,
+        handleFormSubmit,
+        handleDiagramCodeUpdate,
+        handleDiagramUpdate,
+        contextSelections,
+        toggleContextSelection,
     } = useDiagramState();
 
-    const { agents, isLoaded } = useAgents();
-    
-    const orderedDiagrams = DiagramTypeSchema.options;
-    const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
-    
     const currentDiagramType = state.lastGenerated;
-    const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
-    const currentEditedCode = currentDiagramType ? editedCodes[currentDiagramType] : undefined;
-    const hasChanges = currentGeneratedCode !== undefined && currentEditedCode !== undefined && currentGeneratedCode !== currentEditedCode;
+    const currentDiagramData = currentDiagramType ? state.diagrams?.[currentDiagramType] : undefined;
 
     return (
         <form action={handleFormSubmit}>
-            {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
-                code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
-            ))}
-            {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
-            {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-1">
-                    <Card>
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    <ProposalEditor
+                        proposalJson={proposalJson}
+                        onProposalJsonChange={setProposalJson}
+                        isDisabled={isAnythingGenerating}
+                        error={state.error && !generatingDiagram ? state.error : undefined}
+                    />
+                </div>
+
+                {/* Center Column */}
+                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                     <Card className="h-full">
                         <CardHeader>
-                            <CardTitle className="font-headline">مقترح المشروع (JSON)</CardTitle>
-                            <CardDescription>
-                                الصق هنا محتوى مقترح المشروع الكامل بصيغة JSON.
-                            </CardDescription>
+                            <CardTitle className="font-headline">Diagram Preview</CardTitle>
+                             <CardDescription>
+                                {currentDiagramData ? `Showing: ${diagramConfig[currentDiagramType!].title}` : 'Your generated diagram will appear here.'}
+                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <Textarea
-                                name="proposalJson"
-                                placeholder='{ "title": "...", "objective": "...", ... }'
-                                rows={15}
-                                required
-                                value={proposalJson}
-                                onChange={(e) => setProposalJson(e.target.value)}
-                            />
-                            {state?.error && (
-                                <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
+                             {generatingDiagram && !currentDiagramData ? (
+                                <DiagramSkeleton />
+                             ) : currentDiagramData ? (
+                                <DiagramViewer
+                                    title={diagramConfig[currentDiagramType!].title}
+                                    imageUrl={currentDiagramData.imageUrl}
+                                    plantUmlCode={currentDiagramData.plantUmlCode}
+                                    onCodeChange={(code) => handleDiagramCodeUpdate(currentDiagramType!, code)}
+                                    onUpdate={() => handleDiagramUpdate(currentDiagramType!, currentDiagramData.plantUmlCode)}
+                                    isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
+                                    isReadOnly={isAnythingGenerating}
+                                />
+                             ) : (
+                                 <div className="flex items-center justify-center h-full min-h-[400px]">
+                                    <div className="text-center text-muted-foreground p-8">
+                                        <GitGraph className="w-16 h-16 mx-auto mb-4" />
+                                        <p>Generate a diagram to get started.</p>
+                                    </div>
+                                </div>
                             )}
                         </CardContent>
-                        <CardFooter className="flex flex-col gap-2 items-start">
-                            {orderedDiagrams.map((key, index) => (
-                                <GenerateButton key={key} diagramType={key} agent={diagramAgents[index]} />
-                            ))}
-                        </CardFooter>
                     </Card>
                 </div>
-                <div className="md:col-span-2 space-y-6">
-                    {state?.lastGenerated && !state.error && (
-                        <Alert>
-                            <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">تم التوليد بنجاح!</AlertTitle>
-                            <AlertDescription>
-                                تم توليد كود PlantUML والصورة لقسم "{diagramConfig[state.lastGenerated].title}".
-                            </AlertDescription>
-                        </Alert>
-                    )}
 
-                    {state.imageUrl && currentDiagramType && currentEditedCode !== undefined ? (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="font-headline">المخطط المعروض</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <DiagramViewer
-                                    title={diagramConfig[currentDiagramType].title}
-                                    imageUrl={state.imageUrl}
-                                    plantUmlCode={currentEditedCode}
-                                    onCodeChange={handleCodeChange}
-                                />
-                            </CardContent>
-                            <CardFooter>
-                                {hasChanges && <RenderButton />}
-                            </CardFooter>
-                        </Card>
-                    ) : (
-                         <Card className="flex items-center justify-center h-full min-h-[400px]">
-                            <div className="text-center text-muted-foreground p-8">
-                                <GitGraph className="w-16 h-16 mx-auto mb-4" />
-                                <p>Your generated diagram will appear here.</p>
-                            </div>
-                        </Card>
-                    )}
+                {/* Right Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    <DiagramGenerationTools
+                        isDisabled={!proposalJson || isAnythingGenerating}
+                        diagramsState={state.diagrams || {}}
+                        isGenerating={isAnythingGenerating}
+                        generatingDiagram={generatingDiagram}
+                        contextSelections={contextSelections}
+                        onContextToggle={toggleContextSelection}
+                    />
                 </div>
             </div>
         </form>
