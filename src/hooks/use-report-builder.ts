@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback, useReducer, useTransition, useRef } from 'react';
 import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
-import { useHistory } from '@/hooks/use-history';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { add, format } from 'date-fns';
 import { handleGenerateReportItem } from '@/app/generate-report/actions';
@@ -147,7 +146,6 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
 export function useReportBuilder() {
   const [state, dispatch] = useReducer(reportReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { addHistoryEntry } = useHistory();
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
   const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
@@ -193,23 +191,6 @@ export function useReportBuilder() {
             description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
         });
         
-        // Add to history
-        let historyEntryData;
-        const lastItemKey = state.lastGenerated;
-        let proposalTitle = state.proposal?.title || 'Project Report';
-
-        if (SectionNameSchema.options.includes(lastItemKey as SectionName)) {
-            historyEntryData = { type: 'report', title: `Report: ${title}`, section: lastItemKey, content: state.sections[lastItemKey as SectionName]!, proposalTitle };
-        } else if (DiagramTypeSchema.options.includes(lastItemKey as DiagramType)) {
-            const diagramData = state.diagrams![lastItemKey as DiagramType]!;
-            historyEntryData = { type: 'diagram', title: `Diagram: ${title}`, diagramType: lastItemKey, ...diagramData, proposalTitle };
-        } else if (lastItemKey === 'presentation') {
-            historyEntryData = { type: 'report', section: 'introduction', content: 'Presentation Generated', title: `Presentation: ${proposalTitle}`, proposalTitle };
-        }
-        
-        if (historyEntryData) {
-            addHistoryEntry({id: '', createdAt: '', ...historyEntryData});
-        }
     }
 
     if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
@@ -223,7 +204,7 @@ export function useReportBuilder() {
     prevLastGenerated.current = state.lastGenerated;
     prevError.current = state.error;
 
-  }, [state.lastGenerated, state.error, state.sections, state.diagrams, addHistoryEntry, toast, t, state.proposal?.title, state.presentation]);
+  }, [state.lastGenerated, state.error, state.sections, state.diagrams, toast, t, state.proposal?.title, state.presentation]);
 
 
   // Action handlers that dispatch to the reducer
@@ -250,7 +231,6 @@ export function useReportBuilder() {
             });
             dispatch({ type: 'NEW_SESSION' }); // Clear previous report data
             dispatch({ type: 'SET_PROPOSAL', payload: cachedResult });
-            addHistoryEntry({ id: '', createdAt: '', type: 'proposal', title: `Proposal: ${cachedResult.title}`, proposal: cachedResult });
             return;
         }
 
@@ -262,7 +242,6 @@ export function useReportBuilder() {
         saveToCache(cacheKey, result);
         dispatch({ type: 'NEW_SESSION' });
         dispatch({ type: 'SET_PROPOSAL', payload: result });
-        addHistoryEntry({ id: '', createdAt: '', type: 'proposal', title: `Proposal: ${result.title}`, proposal: result });
         await fetchUser();
     } catch (e: any) {
         console.error(e);

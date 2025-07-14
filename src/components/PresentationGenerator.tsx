@@ -9,7 +9,6 @@ import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Presentation } from 'lucide-react';
-import { useHistory } from '@/hooks/use-history';
 import { useAgents } from '@/hooks/use-agents';
 import PresentationViewer from './PresentationViewer';
 
@@ -37,7 +36,6 @@ export default function PresentationGenerator() {
     const [state, formAction] = useActionState(handleGeneratePresentation, initialState);
 
     const [proposalJson, setProposalJson] = useState('');
-    const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
     const [showPresentation, setShowPresentation] = useState(false);
     
@@ -45,28 +43,9 @@ export default function PresentationGenerator() {
 
     useEffect(() => {
         if (state.slides && state.slides.length > 0) {
-            let proposalTitle = 'Presentation';
-            try {
-                const parsed = JSON.parse(proposalJson);
-                if (parsed && parsed.title) {
-                    proposalTitle = parsed.title;
-                }
-            } catch (e) {
-                // Ignore parsing errors
-            }
-
-            addHistoryEntry({
-                id: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                type: 'report',
-                title: `Presentation: ${proposalTitle}`,
-                section: 'introduction', // Placeholder, history needs a section
-                content: `${state.slides.length} slides generated.`,
-                proposalTitle,
-            });
             setShowPresentation(true);
         }
-    }, [state.slides, addHistoryEntry, proposalJson]);
+    }, [state.slides]);
 
     return (
         <form action={formAction} className="space-y-6">

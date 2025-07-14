@@ -66,9 +66,6 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
     );
 }
 
-const HISTORY_KEY = 'arkan-code-gen-history';
-const MAX_HISTORY = 5;
-
 export default function CodeGenerator() {
     const { fetchUser } = useAuth();
     const initialState: CodeGenerationState = {};
@@ -79,36 +76,13 @@ export default function CodeGenerator() {
     const [isCapturing, setIsCapturing] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
-    const [history, setHistory] = useState<CodeGenerationState[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
-
-    useEffect(() => {
-        try {
-            const storedHistory = localStorage.getItem(HISTORY_KEY);
-            if (storedHistory) {
-                setHistory(JSON.parse(storedHistory));
-            }
-        } catch (error) {
-            console.error('Failed to load history from localStorage', error);
-        }
-    }, []);
 
     useEffect(() => {
         if (actionState.html || actionState.css || actionState.javascript) {
             setDisplayState(actionState);
              if(!actionState.error) {
                 fetchUser();
-                if (actionState.prompt) {
-                    setHistory(prev => {
-                        const newHistory = [actionState, ...prev.filter(h => h.prompt !== actionState.prompt)].slice(0, MAX_HISTORY);
-                        try {
-                        localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-                        } catch (error) {
-                        console.error('Failed to save history to localStorage', error);
-                        }
-                        return newHistory;
-                    });
-                }
              }
         }
     }, [actionState, fetchUser]);
@@ -190,16 +164,6 @@ export default function CodeGenerator() {
         }
     }
 
-    const restoreFromHistory = (historyItem: CodeGenerationState) => {
-        setDisplayState(historyItem);
-    }
-
-    const clearHistory = () => {
-        setHistory([]);
-        localStorage.removeItem(HISTORY_KEY);
-        toast({ title: "History Cleared" });
-    }
-
     const renderPreview = (isDialog: boolean) => (
          <div className={cn(
             "w-full rounded-md border bg-white overflow-hidden",
@@ -249,32 +213,6 @@ export default function CodeGenerator() {
                         </CardFooter>
                     </form>
                 </Card>
-                {history.length > 0 && (
-                     <Card>
-                        <CardHeader>
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="font-headline flex items-center gap-2 text-base">
-                                    <History className="w-5 h-5" />
-                                    History
-                                </CardTitle>
-                                <Button variant="ghost" size="sm" onClick={clearHistory}>
-                                    <X className="mr-1 h-4 w-4" /> Clear
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <ScrollArea className="h-48 w-full">
-                                <div className="space-y-2">
-                                    {history.map((item, index) => (
-                                        <button key={index} onClick={() => restoreFromHistory(item)} className="w-full text-left p-2 rounded-md hover:bg-muted text-sm text-muted-foreground truncate">
-                                            {item.prompt}
-                                        </button>
-                                    ))}
-                                </div>
-                            </ScrollArea>
-                        </CardContent>
-                    </Card>
-                )}
             </div>
 
             {/* Center Column */}

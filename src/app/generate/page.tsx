@@ -11,7 +11,6 @@ import DiagramGenerator from '@/components/DiagramGenerator';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportStateProvider } from '@/context/ReportStateContext';
-import { HistoryProvider } from '@/hooks/use-history';
 
 export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState("report");
@@ -41,17 +40,15 @@ export default function GeneratePage() {
       </div>
 
       <div className="w-full">
-        <HistoryProvider>
-            {activeTab === 'proposal' && <ProposalModeGenerator />}
-            {activeTab === 'report' && (
-            <ReportStateProvider>
-                <ReportGenerator />
-            </ReportStateProvider>
-            )}
-            {activeTab === 'diagram' && <DiagramGenerator />}
-            {activeTab === 'code' && <CodeGenerator />}
-            {activeTab === 'presentation' && <PresentationGenerator />}
-        </HistoryProvider>
+        {activeTab === 'proposal' && <ProposalModeGenerator />}
+        {activeTab === 'report' && (
+        <ReportStateProvider>
+            <ReportGenerator />
+        </ReportStateProvider>
+        )}
+        {activeTab === 'diagram' && <DiagramGenerator />}
+        {activeTab === 'code' && <CodeGenerator />}
+        {activeTab === 'presentation' && <PresentationGenerator />}
       </div>
     </div>
   );

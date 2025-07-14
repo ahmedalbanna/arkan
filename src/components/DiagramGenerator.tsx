@@ -9,8 +9,7 @@ import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, RefreshCw } from 'lucide-react';
-import { useHistory } from '@/hooks/use-history';
+import { Loader2, Sparkles, RefreshCw, GitGraph } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
 import DiagramViewer from './DiagramViewer';
@@ -60,7 +59,6 @@ export default function DiagramGenerator() {
     const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
 
     const [proposalJson, setProposalJson] = useState('');
-    const { addHistoryEntry } = useHistory();
     const { agents, isLoaded } = useAgents();
     const [editedCodes, setEditedCodes] = useState<Partial<Record<DiagramType, string>>>({});
 
@@ -69,27 +67,6 @@ export default function DiagramGenerator() {
 
     useEffect(() => {
         if (state.lastGenerated && state.currentPlantUmlCode && !state.error) {
-            let proposalTitle = 'مخطط مشروع';
-            try {
-                const parsed = JSON.parse(proposalJson);
-                if (parsed && parsed.title) {
-                    proposalTitle = parsed.title;
-                }
-            } catch (e) {
-                // Ignore parsing errors
-            }
-
-            addHistoryEntry({
-                id: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-                type: 'diagram',
-                title: `مخطط: ${diagramConfig[state.lastGenerated].title}`,
-                diagramType: state.lastGenerated,
-                plantUmlCode: state.currentPlantUmlCode,
-                imageUrl: state.imageUrl!,
-                proposalTitle: proposalTitle,
-            });
-
             // Sync the generated code with the editor state
             setEditedCodes(prev => ({
                 ...prev,
@@ -97,7 +74,7 @@ export default function DiagramGenerator() {
             }));
             fetchUser();
         }
-    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, addHistoryEntry, proposalJson, fetchUser, state.error]);
+    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, proposalJson, fetchUser, state.error]);
 
     const currentDiagramType = state.lastGenerated;
     const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
