@@ -20,7 +20,7 @@ import { Footer } from '@/components/layout/Footer';
 
 
 function GeneratePageContent() {
-  const [activeTab, setActiveTab] = useState("report");
+  const [activeTab, setActiveTab] = useState("proposal");
 
   return (
     <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
@@ -84,7 +84,7 @@ export default function GeneratePage() {
     return (
         <BuilderStateProvider>
             <GeneratePageContent />
-            
+            <Footer />
         </BuilderStateProvider>
     )
 }
