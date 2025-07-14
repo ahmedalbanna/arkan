@@ -1,32 +1,11 @@
+
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { useReportBuilder, type ReportState, type ReportAction, initialState } from '@/hooks/use-report-builder';
+import React, { createContext, useContext } from 'react';
+import { useReportBuilder, type ReportState } from '@/hooks/use-report-builder';
 
 // Define the context shape
-interface ReportStateContextType {
-  state: ReportState;
-  dispatch: React.Dispatch<ReportAction>;
-  isLoaded: boolean;
-  isGeneratingProposal: boolean;
-  generatingItem: string | null;
-  isAnythingGenerating: boolean;
-  proposal: ReportState['proposal'];
-  proposalJson: string;
-  projectIdea: string;
-  contextSelections: ReportState['contextSelections'];
-  handleProjectIdeaChange: (idea: string) => void;
-  handleProposalGenerated: (proposal: ReportState['proposal']) => void;
-  handleProposalJsonChange: (json: string) => void;
-  handleProposalUpdate: (path: string, value: any) => void;
-  handleSectionUpdate: (key: any, value: string) => void;
-  handleDiagramUpdate: (diagramType: any, code: string) => void;
-  handleNewSession: () => void;
-  handleSubmit: (formData: FormData) => void;
-  toggleContextSelection: (parentKey: string, contextKey: string) => void;
-  setExternalContext: (fileName: string, content: string) => void;
-  removeExternalContext: () => void;
-}
+interface ReportStateContextType extends ReturnType<typeof useReportBuilder> {}
 
 // Create the context
 const ReportStateContext = createContext<ReportStateContextType | undefined>(undefined);
