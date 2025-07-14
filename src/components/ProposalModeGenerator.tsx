@@ -62,7 +62,7 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
@@ -107,7 +107,7 @@ export function ProposalModeGenerator() {
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="h-[calc(100vh-350px)] overflow-y-auto pr-4">
+                                <div className="h-[calc(100vh-310px)] overflow-y-auto pr-4">
                                    <ProposalViewer proposal={proposal} readOnly={true} />
                                 </div>
                             </CardContent>

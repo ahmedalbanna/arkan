@@ -21,7 +21,7 @@ function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("report");
 
   return (
-    <div className="container mx-auto max-w-screen-2xl px-4 py-8">
+    <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8">
        <div className="flex justify-end items-center mb-4">
         <SessionActions />
       </div>
