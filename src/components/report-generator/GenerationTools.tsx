@@ -423,7 +423,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton itemKey={key} title={`${t('reportGenerator.generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
+                                        <GenerateItemButton itemKey={key} title={`${t('generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
