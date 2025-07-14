@@ -12,6 +12,10 @@ import { Footer } from '@/components/layout/Footer';
 import dynamic from 'next/dynamic';
 import { CodeStateProvider } from '@/context/CodeStateContext';
 import { ProposalStateProvider } from '@/context/ProposalStateContext';
+import { ReportStateProvider } from '@/context/ReportStateContext';
+import { DiagramStateProvider } from '@/context/DiagramStateContext';
+import { PresentationStateProvider } from '@/context/PresentationStateContext';
+
 
 const ProposalModeGenerator = dynamic(() => import('@/components/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator));
 const ReportGenerator = dynamic(() => import('@/components/ReportGenerator'));
@@ -56,10 +60,14 @@ function GeneratePageContent() {
                 </ProposalStateProvider>
               </TabsContent>
               <TabsContent value="report" className="h-full">
-                {activeTab === 'report' && <ReportGenerator />}
+                <ReportStateProvider>
+                    {activeTab === 'report' && <ReportGenerator />}
+                </ReportStateProvider>
               </TabsContent>
               <TabsContent value="diagram" className="h-full">
-                {activeTab === 'diagram' && <DiagramGenerator />}
+                <DiagramStateProvider>
+                    {activeTab === 'diagram' && <DiagramGenerator />}
+                </DiagramStateProvider>
               </TabsContent>
               <TabsContent value="code" className="h-full">
                  <CodeStateProvider>
@@ -67,7 +75,9 @@ function GeneratePageContent() {
                  </CodeStateProvider>
               </TabsContent>
               <TabsContent value="presentation" className="h-full">
-                {activeTab === 'presentation' && <PresentationGenerator />}
+                <PresentationStateProvider>
+                    {activeTab === 'presentation' && <PresentationGenerator />}
+                </PresentationStateProvider>
               </TabsContent>
           </div>
         </Tabs>
