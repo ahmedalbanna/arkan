@@ -13,6 +13,8 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { useAgents } from './use-agents';
 import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
+import { deductCredit } from '@/services/credit-service';
+import { useAuth } from '@/context/AuthContext';
 
 
 const STORAGE_KEY = 'arkan-report-generator-state';
@@ -152,6 +154,7 @@ export function useReportBuilder() {
   const { agents } = useAgents();
   const { toast } = useToast();
   const { t } = useLocalization();
+  const { fetchUser, user } = useAuth();
   
   // Load from local storage
   useEffect(() => {
@@ -235,6 +238,7 @@ export function useReportBuilder() {
     dispatch({ type: 'GENERATION_START', payload: {} });
 
     try {
+        await deductCredit(user!.id, 1);
         const cacheKeyPayload = { projectIdea, prompt: proposalAgent.prompt };
         const cacheKey = await generateCacheKey(cacheKeyPayload);
         const cachedResult = getFromCache<ProjectProposal>(cacheKey);
@@ -259,10 +263,11 @@ export function useReportBuilder() {
         dispatch({ type: 'NEW_SESSION' });
         dispatch({ type: 'SET_PROPOSAL', payload: result });
         addHistoryEntry({ id: '', createdAt: '', type: 'proposal', title: `Proposal: ${result.title}`, proposal: result });
-
-    } catch (e) {
+        await fetchUser();
+    } catch (e: any) {
         console.error(e);
-        dispatch({ type: 'GENERATION_ERROR', payload: t('reportGenerator.step1Error') });
+        const errorMessage = e.message || t('reportGenerator.step1Error');
+        dispatch({ type: 'GENERATION_ERROR', payload: errorMessage });
     } finally {
         setIsGeneratingProposal(false);
     }
@@ -299,13 +304,20 @@ export function useReportBuilder() {
     setGeneratingItem(item);
     dispatch({ type: 'GENERATION_START', payload: { item } });
     startTransition(async () => {
-      const result = await handleGenerateReportItem(state, formData);
-      if(result.error) {
-          dispatch({ type: 'GENERATION_ERROR', payload: result.error });
-      } else {
-          dispatch({ type: 'GENERATION_SUCCESS', payload: result });
+      try {
+        await deductCredit(user!.id, 1);
+        const result = await handleGenerateReportItem(state, formData);
+        if(result.error) {
+            dispatch({ type: 'GENERATION_ERROR', payload: result.error });
+        } else {
+            dispatch({ type: 'GENERATION_SUCCESS', payload: result });
+            await fetchUser();
+        }
+      } catch (e: any) {
+        dispatch({ type: 'GENERATION_ERROR', payload: e.message || 'An unexpected error occurred.' });
+      } finally {
+        setGeneratingItem(null);
       }
-      setGeneratingItem(null);
     });
   };
 

@@ -3,6 +3,10 @@
 
 import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
+import { deductCredit } from '@/services/credit-service';
+
+// In a real app, this would come from the authenticated session
+const HARDCODED_USER_ID = 'user-1';
 
 export interface CodeGenerationState {
   prompt?: string;
@@ -34,6 +38,7 @@ export async function handleGenerateCode(
   const prompt = validatedFields.data.prompt;
 
   try {
+    await deductCredit(HARDCODED_USER_ID, 1);
     const result = await generateCode({ prompt });
     
     return {
@@ -42,8 +47,9 @@ export async function handleGenerateCode(
         css: result.css,
         javascript: result.javascript
     };
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
-    return { error: 'An error occurred while generating the code. Please try again.' };
+    const errorMessage = e.message || 'An error occurred while generating the code. Please try again.';
+    return { error: errorMessage };
   }
 }

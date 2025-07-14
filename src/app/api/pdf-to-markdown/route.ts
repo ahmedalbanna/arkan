@@ -2,9 +2,16 @@
 import { NextResponse } from 'next/server';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'; // Import as a library
 import { rewriteToMarkdown } from '@/ai/flows/rewrite-to-markdown';
+import { deductCredit } from '@/services/credit-service';
+
+// This is a temporary solution for a stateless API route.
+// In a real app, you'd get the user ID from the session/token.
+const HARDCODED_USER_ID = 'user-1';
 
 export async function POST(request: Request) {
   try {
+    await deductCredit(HARDCODED_USER_ID, 1);
+    
     const formData = await request.formData();
     const file = formData.get('file') as File; // Get the file using the name 'file' from the frontend FormData
 

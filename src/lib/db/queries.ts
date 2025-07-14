@@ -52,6 +52,30 @@ export async function updateUserCredits(userId: string, creditsToAdd: number): P
     return newBalance;
 }
 
+export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
+    const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+        columns: { credits: true }
+    });
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    if ((user.credits ?? 0) < creditsToDeduct) {
+        throw new Error("Insufficient credits");
+    }
+
+    const newBalance = (user.credits ?? 0) - creditsToDeduct;
+
+    await db.update(users)
+        .set({ credits: newBalance })
+        .where(eq(users.id, userId));
+
+    return newBalance;
+}
+
+
 export async function updateUserByAdmin(userId: string, data: {
     name?: string;
     email?: string;

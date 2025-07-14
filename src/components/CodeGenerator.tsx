@@ -16,6 +16,7 @@ import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 function GenerateButton() {
     const { pending } = useFormStatus();
@@ -69,6 +70,7 @@ const HISTORY_KEY = 'arkan-code-gen-history';
 const MAX_HISTORY = 5;
 
 export default function CodeGenerator() {
+    const { fetchUser } = useAuth();
     const initialState: CodeGenerationState = {};
     const [actionState, formAction] = useActionState(handleGenerateCode, initialState);
     const [displayState, setDisplayState] = useState<CodeGenerationState>(initialState);
@@ -94,19 +96,22 @@ export default function CodeGenerator() {
     useEffect(() => {
         if (actionState.html || actionState.css || actionState.javascript) {
             setDisplayState(actionState);
-            if (actionState.prompt) {
-                 setHistory(prev => {
-                    const newHistory = [actionState, ...prev.filter(h => h.prompt !== actionState.prompt)].slice(0, MAX_HISTORY);
-                    try {
-                       localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-                    } catch (error) {
-                       console.error('Failed to save history to localStorage', error);
-                    }
-                    return newHistory;
-                });
-            }
+             if(!actionState.error) {
+                fetchUser();
+                if (actionState.prompt) {
+                    setHistory(prev => {
+                        const newHistory = [actionState, ...prev.filter(h => h.prompt !== actionState.prompt)].slice(0, MAX_HISTORY);
+                        try {
+                        localStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+                        } catch (error) {
+                        console.error('Failed to save history to localStorage', error);
+                        }
+                        return newHistory;
+                    });
+                }
+             }
         }
-    }, [actionState]);
+    }, [actionState, fetchUser]);
 
     useEffect(() => {
         const timeout = setTimeout(() => {
