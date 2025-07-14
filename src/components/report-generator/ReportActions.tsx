@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Trash2, Loader2, Presentation } from 'lucide-react';
+import { FileText, Trash2, Loader2, Presentation, Download } from 'lucide-react';
 import type { ProjectProposal } from '@/ai/schemas';
 import type { ReportState } from '@/app/generate-report/actions';
 import { type TemplateKey } from '@/lib/docx-styles';
@@ -16,10 +16,11 @@ import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
+import { saveAs } from 'file-saver';
+import { useReportState } from '@/context/ReportStateContext';
 
 interface ReportActionsProps {
   proposal: ProjectProposal | null;
-  reportState: ReportState;
   onNewSession: () => void;
   isGenerating: boolean;
 }
@@ -27,8 +28,9 @@ interface ReportActionsProps {
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
-export const ReportActions = ({ proposal, reportState, onNewSession, isGenerating }: ReportActionsProps) => {
+export const ReportActions = ({ proposal, onNewSession, isGenerating }: ReportActionsProps) => {
   const { t } = useLocalization();
+  const { state: reportState } = useReportState();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
@@ -78,6 +80,18 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
     if (!reportState.presentation?.slides) return;
     exportPresentationAsPptx(reportState.presentation.slides, selectedPptxTemplate);
   }
+
+  const handleExportProjectFile = () => {
+    if (!proposal) return;
+    const projectData = {
+        version: '1.0',
+        generatedAt: new Date().toISOString(),
+        ...reportState
+    };
+    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json;charset=utf-8' });
+    const fileName = `${proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`;
+    saveAs(blob, fileName);
+  };
 
   return (
     <Card>
@@ -133,6 +147,10 @@ export const ReportActions = ({ proposal, reportState, onNewSession, isGeneratin
                  Export Presentation
                </Button>
             )}
+            <Button onClick={handleExportProjectFile} disabled={!proposal || isGenerating} variant="secondary" className="w-full font-headline">
+              <Download className="mr-2 h-4 w-4" />
+              Download Project File
+            </Button>
             <Button onClick={onNewSession} variant="outline" disabled={isGenerating} className="w-full font-headline">
               <Trash2 className="mr-2 h-4 w-4" />
               {t('reportGenerator.newSession')}
