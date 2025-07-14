@@ -76,7 +76,7 @@ function GenerateItemButton({ itemKey, title, isGenerating, generatingDiagram }:
             type="submit"
             name="itemToGenerate"
             value={itemKey}
-            disabled={isGenerating || !agent?.isEnabled}
+            disabled={isGeneratingThis || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
         >
@@ -270,3 +270,5 @@ export const DiagramGenerationTools = ({ isDisabled, diagramsState, isGenerating
         </Card>
     );
 };
+
+    
