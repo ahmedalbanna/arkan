@@ -3,7 +3,6 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CardTitle, Card, CardContent, CardHeader } from '@/components/ui/card';
-import ProposalViewer from '@/components/ProposalViewer';
 import { Button } from '@/components/ui/button';
 import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
@@ -41,23 +40,23 @@ interface ReportResultsProps {
   reportState: ReportState;
   generatingItem: string | null;
   isAnythingGenerating: boolean;
-  proposal: ProjectProposal | null;
-  onProposalUpdate: (path: string, value: any) => void;
   onSectionUpdate: (key: SectionName, value: string) => void;
   onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
   onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, isAnythingGenerating, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate, onDiagramCodeUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, isAnythingGenerating, onSectionUpdate, onDiagramUpdate, onDiagramCodeUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
+  const hasContent = Object.values(reportState.sections).some(s => !!s) || Object.values(reportState.diagrams || {}).some(d => !!d);
 
-  if (!proposal) {
+
+  if (!hasContent && !isAnythingGenerating) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
-                <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
-                <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+                <FileText className="w-16 h-16 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold">Report Content Will Appear Here</h3>
+                <p>Use the Generation Tools to create sections and diagrams for your report.</p>
             </div>
         </Card>
     )
@@ -65,35 +64,25 @@ export const ReportResults = ({ reportState, generatingItem, isAnythingGeneratin
 
   return (
     <div className="space-y-6">
-      <Accordion type="multiple" defaultValue={['proposal', 'report']} className="w-full space-y-6">
-        <AccordionItem value="proposal" className="border-none">
-           <Card>
-                <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline w-full">
-                  <div className="flex items-center">
-                    <FileText className="mr-2 h-5 w-5 text-primary" /> {t('reportGenerator.proposalDetailsTitle')}
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="p-4 pt-0 border-t">
-                    <ProposalViewer proposal={proposal} onUpdate={onProposalUpdate} />
-                </AccordionContent>
-            </Card>
-        </AccordionItem>
-        <AccordionItem value="report" className="border-none">
-          <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
-          <CardContent className="p-0 space-y-4">
-            {reportState.presentation && (
-                <Card>
-                    <CardHeader className="flex-row items-center justify-between p-4">
-                      <CardTitle className="font-headline text-lg flex items-center gap-2">
-                        <presentationConfig.presentation.icon className="h-5 w-5 text-primary" /> {presentationConfig.presentation.title}
-                      </CardTitle>
-                      <Button variant="secondary" size="sm">
-                          <Eye className="mr-2 h-4 w-4" />
-                          View Presentation
-                      </Button>
-                    </CardHeader>
-                </Card>
-            )}
+      <Card>
+        <CardHeader>
+           <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4 space-y-4">
+          {reportState.presentation && (
+              <Card>
+                  <CardHeader className="flex-row items-center justify-between p-4">
+                    <CardTitle className="font-headline text-lg flex items-center gap-2">
+                      <presentationConfig.presentation.icon className="h-5 w-5 text-primary" /> {presentationConfig.presentation.title}
+                    </CardTitle>
+                    <Button variant="secondary" size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        View Presentation
+                    </Button>
+                  </CardHeader>
+              </Card>
+          )}
+          <Accordion type="multiple" className="w-full space-y-4">
             {orderedSections.map((key) => {
               const content = reportState.sections[key];
               const { title, icon: Icon } = sectionConfig[key];
@@ -173,6 +162,7 @@ export const ReportResults = ({ reportState, generatingItem, isAnythingGeneratin
                 </AccordionItem>
               )
             })}
+            </Accordion>
              {generatingItem === 'presentation' && (
                 <Card>
                     <CardHeader className="flex-row items-center justify-between p-4">
@@ -184,10 +174,8 @@ export const ReportResults = ({ reportState, generatingItem, isAnythingGeneratin
                     <CardContent><SectionSkeleton /></CardContent>
                 </Card>
             )}
-
-          </CardContent>
-        </AccordionItem>
-      </Accordion>
+        </CardContent>
+      </Card>
     </div>
   );
 };

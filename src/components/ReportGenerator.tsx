@@ -3,10 +3,11 @@
 
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { useReportState } from '@/context/ReportStateContext';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { EvaluationTools } from './report-generator/EvaluationTools';
+import { Card } from './ui/card';
 
 export default function ReportGenerator() {
   const {
@@ -15,7 +16,6 @@ export default function ReportGenerator() {
     generatingItem,
     isAnythingGenerating,
     proposal,
-    handleProposalUpdate,
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
@@ -36,6 +36,19 @@ export default function ReportGenerator() {
   }
 
   const isToolsDisabled = !proposal || isAnythingGenerating;
+  
+  if (!proposal) {
+    return (
+        <Card className="flex items-center justify-center h-full min-h-[400px]">
+            <div className="text-center text-muted-foreground p-8">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
+                <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+            </div>
+        </Card>
+    )
+  }
+
 
   return (
     <form action={handleSubmit}>
@@ -46,12 +59,10 @@ export default function ReportGenerator() {
           <ReportResults
             reportState={state}
             generatingItem={generatingItem}
-            proposal={proposal}
-            onProposalUpdate={handleProposalUpdate}
+            isAnythingGenerating={isAnythingGenerating}
             onSectionUpdate={handleSectionUpdate}
             onDiagramCodeUpdate={handleDiagramCodeUpdate}
             onDiagramUpdate={handleDiagramUpdate}
-            isAnythingGenerating={isAnythingGenerating}
           />
         </div>
 
