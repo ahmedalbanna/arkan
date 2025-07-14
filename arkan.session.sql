@@ -1,4 +1,4 @@
-DROP Table 'skills';
+DROP Table 'users';
 
 -- Insert data into users table
 INSERT INTO users (id, name,email, avatar_url, bio,credits,created_at) VALUES
