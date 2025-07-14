@@ -6,11 +6,11 @@ import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type Proje
 import { add, format } from 'date-fns';
 import { useToast } from './use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from './use-agents';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { AGENTS } from '@/lib/agents';
+import { saveAs } from 'file-saver';
 
 
 const STORAGE_KEY = 'arkan-report-generator-state-v2';
@@ -139,7 +139,6 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
 export function useReportBuilder() {
   const [state, dispatch] = useReducer(reportReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
   const [isGeneratingProposal, startProposalTransition] = useTransition();
 
@@ -170,51 +169,6 @@ export function useReportBuilder() {
     }
   }, [state, isLoaded]);
 
-  // Toast side-effects for report/diagram items
-  const prevLastGeneratedItem = useRef<string | null>();
-  const prevError = useRef<string | undefined>();
-
-  useEffect(() => {
-    const lastGen = state.lastGenerated;
-    if (lastGen && lastGen !== 'proposal' && lastGen !== prevLastGeneratedItem.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[lastGen] || (diagramConfig as any)[lastGen] || (lastGen === 'evaluation' ? { title: 'Report Evaluation' } : null);
-        const title = itemConfig?.title || lastGen;
-        
-        toast({
-            title: t('reportGenerator.generationSuccess'),
-            description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
-        });
-    }
-
-    if (state.error && state.error !== prevError.current && state.error !== 'Invalid proposal JSON structure.') {
-        toast({
-            title: t('reportGenerator.generationFailed'),
-            description: state.error,
-            variant: "destructive",
-        });
-    }
-
-    prevLastGeneratedItem.current = lastGen;
-    prevError.current = state.error;
-
-  }, [state.lastGenerated, state.error, t, toast]);
-
-
-  // Action handlers
-  const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
-  const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
-  const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
-  const handleDiagramCodeUpdate = (key: DiagramType, code: string) => dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
-  
-  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
-    const formData = new FormData();
-    if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
-    formData.set('itemToGenerate', diagramType);
-    formData.set('intent', 'update_diagram');
-    formData.set('diagramToUpdate', diagramType);
-    formData.set('plantUmlCode', code);
-    handleSubmit(formData);
-  };
   
   const handleNewSession = () => dispatch({ type: 'NEW_SESSION' });
   const handleSaveProjectFile = () => {
@@ -229,10 +183,6 @@ export function useReportBuilder() {
     saveAs(blob, fileName);
   };
 
-  const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
-  const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
-  const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
-  
   const handleGenerateProposal = (projectIdea: string, customGuidelines: string[]) => {
       const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
       if (!proposalAgent) {
@@ -250,7 +200,7 @@ export function useReportBuilder() {
               if (!user) throw new Error("User not authenticated.");
               let fullPrompt = typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base;
               if (customGuidelines && customGuidelines.length > 0) {
-                  fullPrompt += '\n\nAdditionally, please adhere to the following custom guidelines:\n' + customGuidelines.map(g => `- ${g}`).join('\n');
+                  fullPrompt += '\\n\\nAdditionally, please adhere to the following custom guidelines:\\n' + customGuidelines.map(g => `- ${g}`).join('\\n');
               }
               const response = await fetch('/api/generate-proposal', {
                   method: 'POST',
@@ -269,110 +219,15 @@ export function useReportBuilder() {
       });
   };
 
-  const handleSubmit = (formData: FormData) => {
-    const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
-    if (!item) return;
-
-    if (state.externalContext) {
-      formData.set('externalContextContent', state.externalContext.content);
-    }
-    
-    setGeneratingItem(item);
-    dispatch({ type: 'GENERATION_START', payload: { item } });
-    startTransition(async () => {
-      try {
-        if (!user) throw new Error("User not authenticated.");
-
-        const isDiagram = DiagramTypeSchema.options.includes(item as DiagramType);
-        const endpoint = isDiagram ? '/api/generate-diagrams' : '/api/generate-report';
-        
-        const otherDiagrams: Record<string, string> = {};
-        if (state.contextSelections[item]) {
-            for (const key in state.contextSelections[item]) {
-                if (state.contextSelections[item][key] && state.diagrams?.[key as DiagramType]) {
-                    otherDiagrams[key] = state.diagrams[key as DiagramType]!.plantUmlCode;
-                }
-            }
-        }
-        
-        const otherSections: Record<string, string> = {};
-        if (state.contextSelections[item]) {
-            for (const key in state.contextSelections[item]) {
-                if (state.contextSelections[item][key] && state.sections[key as SectionName]) {
-                    otherSections[key] = state.sections[key as SectionName]!;
-                }
-            }
-        }
-        
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                proposal: state.proposal,
-                sectionToGenerate: item,
-                diagramToGenerate: item,
-                otherSections,
-                otherDiagrams,
-                guidelines: formData.getAll('guidelines[]').map(String),
-                instructionText: formData.get('instructionText'),
-                externalContextContent: state.externalContext?.content,
-                acceptanceCriteria: formData.get('acceptanceCriteria'),
-                intent: formData.get('intent'),
-                plantUmlCode: formData.get('plantUmlCode'),
-            }),
-        });
-        
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message || result.errors || 'API request failed');
-
-        if (item !== 'evaluate') {
-            await deductCredit(user.id, 1);
-        }
-
-        if (item === 'evaluate') {
-             dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
-        } else if (isDiagram) {
-            dispatch({ type: 'GENERATION_SUCCESS', payload: {
-              diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
-              lastGenerated: item as DiagramType,
-            }});
-        } else {
-            dispatch({ type: 'GENERATION_SUCCESS', payload: {
-                sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
-                lastGenerated: item as SectionName,
-            }});
-        }
-
-        await fetchUser();
-      } catch (e: any) {
-        dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An unexpected error occurred.' } });
-      } finally {
-        setGeneratingItem(null);
-      }
-    });
-  };
 
   return {
     state,
     dispatch,
     isLoaded,
-    generatingItem,
-    isAnythingGenerating: isGenerating,
     isGeneratingProposal,
-    proposal: state.proposal,
-    proposalJson: state.proposalJson,
-    contextSelections: state.contextSelections,
-    handleProposalJsonChange,
-    handleProposalUpdate,
-    handleSectionUpdate,
-    handleDiagramCodeUpdate,
-    handleDiagramUpdate,
+    isAnythingGenerating: isGeneratingProposal, // In this hook, it's only proposal generation
     handleNewSession,
     handleSaveProjectFile,
-    handleSubmit,
     handleGenerateProposal,
-    toggleContextSelection,
-    setExternalContext,
-    removeExternalContext,
   };
 }

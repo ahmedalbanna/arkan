@@ -1,5 +1,4 @@
-// This file is the new main entry point for the unified builder interface.
-// It will be updated in the next step to implement the three-column layout and mode switcher.
+
 'use client';
 
 import { useState } from 'react';
@@ -10,12 +9,13 @@ import { ProposalModeGenerator } from '@/components/ProposalModeGenerator';
 import DiagramGenerator from '@/components/DiagramGenerator';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BuilderStateProvider } from '@/context/BuilderStateContext';
+import { ReportStateProvider } from '@/context/ReportStateContext';
 import { CodeStateProvider } from '@/context/CodeStateContext';
 import { PresentationStateProvider } from '@/context/PresentationStateContext';
 import { DiagramStateProvider } from '@/context/DiagramStateContext';
 import { SessionActions } from '@/components/SessionActions';
-import { useReportBuilder } from '@/hooks/use-report-builder';
+import { BuilderStateProvider } from '@/context/BuilderStateContext';
+
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("report");
@@ -47,7 +47,11 @@ function GeneratePageContent() {
 
       <div className="w-full">
         {activeTab === 'proposal' && <ProposalModeGenerator />}
-        {activeTab === 'report' && <ReportGenerator />}
+        {activeTab === 'report' && (
+          <ReportStateProvider>
+            <ReportGenerator />
+          </ReportStateProvider>
+        )}
         {activeTab === 'diagram' && (
           <DiagramStateProvider>
             <DiagramGenerator />
@@ -69,10 +73,8 @@ function GeneratePageContent() {
 }
 
 export default function GeneratePage() {
-    const builderState = useReportBuilder();
-
     return (
-        <BuilderStateProvider {...builderState}>
+        <BuilderStateProvider>
             <GeneratePageContent />
         </BuilderStateProvider>
     )

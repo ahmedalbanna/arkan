@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useReportState } from '@/context/ReportStateContext';
 
 interface ReportActionsProps {
   isGenerating: boolean;
@@ -21,7 +21,7 @@ const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 export const ReportActions = ({ isGenerating }: ReportActionsProps) => {
   const { t } = useLocalization();
-  const { state: reportState, proposal } = useBuilderState();
+  const { state: reportState, proposal } = useReportState();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
 

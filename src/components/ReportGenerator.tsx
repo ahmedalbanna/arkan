@@ -6,7 +6,7 @@ import { GenerationTools } from './report-generator/GenerationTools';
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
 import { Loader2 } from 'lucide-react';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useReportState } from '@/context/ReportStateContext';
 import { EvaluationTools } from './report-generator/EvaluationTools';
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
 
@@ -29,7 +29,7 @@ export default function ReportGenerator() {
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,
-  } = useBuilderState();
+  } = useReportState();
 
 
   if (!isLoaded) {

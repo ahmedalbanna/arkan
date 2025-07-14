@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, ReactNode } from 'react';
 import { useReportBuilder } from '@/hooks/use-report-builder';
 
 // Define the context shape based on the hook's return type
@@ -11,9 +11,10 @@ type BuilderStateContextType = ReturnType<typeof useReportBuilder>;
 const BuilderStateContext = createContext<BuilderStateContextType | undefined>(undefined);
 
 // Create the provider component
-export const BuilderStateProvider = ({ children, ...props }: { children: React.ReactNode } & BuilderStateContextType) => {
+export const BuilderStateProvider = ({ children }: { children: React.ReactNode }) => {
+  const builderProps = useReportBuilder();
   return (
-    <BuilderStateContext.Provider value={props}>
+    <BuilderStateContext.Provider value={builderProps}>
       {children}
     </BuilderStateContext.Provider>
   );

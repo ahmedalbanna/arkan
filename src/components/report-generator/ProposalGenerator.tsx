@@ -2,22 +2,15 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Sparkles, Upload } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Upload } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportState } from '@/context/ReportStateContext';
-import { Separator } from '../ui/separator';
 import { useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useReportState } from '@/context/ReportStateContext';
 
 export const ProposalGenerator = () => {
-  const { 
-    state,
-    isGeneratingProposal, 
-    handleGenerateProposal,
-    dispatch,
-  } = useReportState();
+  const { dispatch } = useReportState();
   const { t } = useLocalization();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
