@@ -11,14 +11,16 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig } from '@/lib/report-config';
-import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { diagramConfig, sectionConfig } from '@/lib/report-config';
+import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { ScrollArea } from '../ui/scroll-area';
 
 const orderedDiagrams = DiagramTypeSchema.options;
+const orderedSections = SectionNameSchema.options;
 
 // State for guidelines of a single agent
 type GuidelineState = {
@@ -89,13 +91,22 @@ function GenerateItemButton({ itemKey, title, isGenerating, generatingDiagram }:
 interface DiagramGenerationToolsProps {
     isDisabled: boolean;
     diagramsState: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string }>>;
+    sectionsState: Partial<Record<SectionName, string>>;
     isGenerating: boolean;
     generatingDiagram: string | null;
     contextSelections: Record<string, Record<string, boolean>>;
-    onContextToggle: (parentKey: string, contextKey: string) => void;
+    onContextToggle: (parentKey: string, contextKey: string, contextType: 'diagram' | 'section') => void;
 }
 
-export const DiagramGenerationTools = ({ isDisabled, diagramsState, isGenerating, generatingDiagram, contextSelections, onContextToggle }: DiagramGenerationToolsProps) => {
+export const DiagramGenerationTools = ({ 
+    isDisabled, 
+    diagramsState, 
+    sectionsState,
+    isGenerating, 
+    generatingDiagram, 
+    contextSelections, 
+    onContextToggle 
+}: DiagramGenerationToolsProps) => {
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
     const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
@@ -236,26 +247,56 @@ export const DiagramGenerationTools = ({ isDisabled, diagramsState, isGenerating
                                         ))}
                                         
                                         <TabsContent value="context" className="pt-4">
-                                            <div className="space-y-3">
-                                                <Label className="font-semibold">Contextual Diagrams</Label>
-                                                <p className="text-xs text-muted-foreground">Select other generated diagrams to provide as context.</p>
-                                                <div className="max-h-60 overflow-y-auto space-y-2 rounded-md border p-2">
-                                                    {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
-                                                        <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id={`context-${key}-${contextKey}`}
-                                                                name={`context_${key}_${contextKey}`}
-                                                                disabled={!diagramsState[contextKey]}
-                                                                checked={contextSelections[key]?.[contextKey] ?? false}
-                                                                onCheckedChange={() => onContextToggle(key, contextKey)}
-                                                            />
-                                                            <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
-                                                                {diagramConfig[contextKey].title}
-                                                            </Label>
+                                            <ScrollArea className="max-h-80 w-full">
+                                                <div className="space-y-4 pr-4">
+                                                    <div className="space-y-3">
+                                                        <Label className="font-semibold">Contextual Sections</Label>
+                                                        <p className="text-xs text-muted-foreground">Select text sections to provide as context.</p>
+                                                        <div className="space-y-2">
+                                                            {orderedSections.map(contextKey => (
+                                                                <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id={`context-${key}-${contextKey}`}
+                                                                        name={`context_section_${key}_${contextKey}`}
+                                                                        disabled={!sectionsState[contextKey]}
+                                                                        checked={contextSelections[key]?.[`section_${contextKey}`] ?? false}
+                                                                        onCheckedChange={() => onContextToggle(key, contextKey, 'section')}
+                                                                    />
+                                                                    <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !sectionsState[contextKey] && "text-muted-foreground/50")}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <BookCheck className="h-4 w-4" />
+                                                                            {sectionConfig[contextKey].title}
+                                                                        </div>
+                                                                    </Label>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
+                                                    </div>
+                                                     <div className="space-y-3 pt-4 border-t">
+                                                        <Label className="font-semibold">Contextual Diagrams</Label>
+                                                        <p className="text-xs text-muted-foreground">Select other generated diagrams to provide as context.</p>
+                                                        <div className="space-y-2">
+                                                            {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
+                                                                <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id={`context-${key}-${contextKey}`}
+                                                                        name={`context_diagram_${key}_${contextKey}`}
+                                                                        disabled={!diagramsState[contextKey]}
+                                                                        checked={contextSelections[key]?.[`diagram_${contextKey}`] ?? false}
+                                                                        onCheckedChange={() => onContextToggle(key, contextKey, 'diagram')}
+                                                                    />
+                                                                    <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <diagramConfig[contextKey].icon className="h-4 w-4" />
+                                                                            {diagramConfig[contextKey].title}
+                                                                        </div>
+                                                                    </Label>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            </ScrollArea>
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
@@ -270,5 +311,3 @@ export const DiagramGenerationTools = ({ isDisabled, diagramsState, isGenerating
         </Card>
     );
 };
-
-    

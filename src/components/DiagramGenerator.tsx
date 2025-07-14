@@ -8,6 +8,7 @@ import { diagramConfig } from '@/lib/report-config';
 import { GitGraph, AlertCircle } from 'lucide-react';
 import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
 import { Skeleton } from './ui/skeleton';
+import { useReportState } from '@/context/ReportStateContext';
 
 function DiagramSkeleton() {
   return (
@@ -89,6 +90,7 @@ export default function DiagramGenerator() {
                     <DiagramGenerationTools
                         isDisabled={!proposalJson || isAnythingGenerating}
                         diagramsState={state.diagrams || {}}
+                        sectionsState={state.sections || {}}
                         isGenerating={isAnythingGenerating}
                         generatingDiagram={generatingDiagram}
                         contextSelections={contextSelections}

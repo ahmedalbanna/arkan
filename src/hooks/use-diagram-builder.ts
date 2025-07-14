@@ -3,7 +3,7 @@
 
 import { useState, useReducer, useTransition, useEffect, useCallback } from 'react';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, type DiagramType, SectionNameSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
@@ -11,6 +11,7 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 
 export interface DiagramState {
   diagrams?: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string; }>>;
+  sections?: Partial<Record<SectionName, string>>; // Add sections to diagram state
   lastGenerated?: DiagramType;
   error?: string;
 }
@@ -25,7 +26,7 @@ type Action =
   | { type: 'CLEAR_ERROR' };
 
 
-const initialState: DiagramState = { diagrams: {} };
+const initialState: DiagramState = { diagrams: {}, sections: {} };
 
 const diagramReducer = (state: DiagramState, action: Action) => {
     switch (action.type) {
@@ -98,10 +99,10 @@ export function useDiagramBuilder() {
     const { toast } = useToast();
 
     useEffect(() => {
-        if(builderState.diagrams) {
-            dispatch({ type: 'SET_STATE', payload: { diagrams: builderState.diagrams } });
+        if(builderState.diagrams || builderState.sections) {
+            dispatch({ type: 'SET_STATE', payload: { diagrams: builderState.diagrams, sections: builderState.sections } });
         }
-    }, [builderState.diagrams]);
+    }, [builderState.diagrams, builderState.sections]);
 
     const handleFormSubmit = (formData: FormData) => {
         const validatedFields = GenerateDiagramSchema.safeParse({
@@ -132,10 +133,15 @@ export function useDiagramBuilder() {
                 if (!user) throw new Error("User not authenticated");
 
                 const otherDiagrams: Record<string, string> = {};
+                const otherSections: Record<string, string> = {};
                 if (contextSelections[diagramToGenerate]) {
                     for (const key in contextSelections[diagramToGenerate]) {
-                        if (contextSelections[diagramToGenerate][key] && state.diagrams?.[key as DiagramType]) {
-                            otherDiagrams[key] = state.diagrams[key as DiagramType]!.plantUmlCode;
+                        if (contextSelections[diagramToGenerate][key]) {
+                            if (key.startsWith('diagram_') && state.diagrams?.[key.substring(8) as DiagramType]) {
+                                otherDiagrams[key.substring(8)] = state.diagrams[key.substring(8) as DiagramType]!.plantUmlCode;
+                            } else if (key.startsWith('section_') && state.sections?.[key.substring(8) as SectionName]) {
+                                otherSections[key.substring(8)] = state.sections[key.substring(8) as SectionName]!;
+                            }
                         }
                     }
                 }
@@ -147,6 +153,7 @@ export function useDiagramBuilder() {
                         proposal: proposalData,
                         diagramToGenerate,
                         otherDiagrams,
+                        otherSections,
                         guidelines: validatedFields.data.guidelines,
                     }),
                 });
@@ -213,13 +220,14 @@ export function useDiagramBuilder() {
         });
     }
 
-    const toggleContextSelection = useCallback((parentKey: string, contextKey: string) => {
+    const toggleContextSelection = useCallback((parentKey: string, contextKey: string, contextType: 'diagram' | 'section') => {
+        const fullContextKey = `${contextType}_${contextKey}`;
         setContextSelections(prev => {
             const newSelections = { ...prev };
             if (!newSelections[parentKey]) {
                 newSelections[parentKey] = {};
             }
-            newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
+            newSelections[parentKey][fullContextKey] = !newSelections[parentKey][fullContextKey];
             return newSelections;
         });
     }, []);
