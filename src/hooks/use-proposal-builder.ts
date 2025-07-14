@@ -53,7 +53,7 @@ const GenerateProposalSchema = z.object({
 
 
 export function useProposalBuilder() {
-    const { state: builderState, dispatch: builderDispatch, isGeneratingProposal } = useBuilderState();
+    const { state: builderState, handleGenerateProposal, isGeneratingProposal } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     
     // Template state (static, not part of the persisted state)
@@ -106,14 +106,7 @@ export function useProposalBuilder() {
             return;
         }
         
-        // Use the global dispatch now
-        builderDispatch({
-            type: 'GENERATE_PROPOSAL',
-            payload: {
-                projectIdea: validatedFields.data.projectIdea,
-                prompt: validatedFields.data.prompt
-            }
-        });
+        handleGenerateProposal(validatedFields.data.projectIdea, validatedFields.data.prompt);
     };
 
     return {

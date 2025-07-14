@@ -217,8 +217,9 @@ export function useReportBuilder() {
     saveAs(blob, fileName);
   };
 
-  const handleGenerateProposal = async (projectIdea: string, prompt: string) => {
+  const handleGenerateProposal = useCallback(async (projectIdea: string, prompt: string) => {
       startTransition(async () => {
+          setGeneratingItem('proposal');
           dispatch({ type: 'GENERATION_START', payload: { item: 'proposal' } });
           try {
               if (!user) throw new Error("User not authenticated.");
@@ -238,21 +239,11 @@ export function useReportBuilder() {
           } catch (e: any) {
               dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An error occurred', item: 'proposal' } });
               toast({ title: 'Generation Failed', description: e.message || 'An error occurred', variant: 'destructive' });
+          } finally {
+            setGeneratingItem(null);
           }
       });
-  };
-
-  useEffect(() => {
-    const originalDispatch = dispatch;
-    (dispatch as any) = (action: ReportAction) => {
-        if (action.type === 'GENERATE_PROPOSAL') {
-            handleGenerateProposal(action.payload.projectIdea, action.payload.prompt);
-        } else {
-            originalDispatch(action);
-        }
-    };
-  }, [handleGenerateProposal]);
-
+  }, [user, fetchUser, toast]);
 
   return {
     state,
@@ -263,5 +254,6 @@ export function useReportBuilder() {
     handleNewSession,
     handleSaveProjectFile,
     handleLoadProjectFile,
+    handleGenerateProposal,
   };
 }
