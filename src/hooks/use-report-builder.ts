@@ -233,6 +233,16 @@ export function useReportBuilder() {
         if (!user) throw new Error("User not authenticated.");
 
         const isDiagram = DiagramTypeSchema.options.includes(item as DiagramType);
+        
+        // This mode should only handle sections and evaluation now
+        if (isDiagram) {
+            // Handle diagram updates, but not generation from scratch
+            const intent = formData.get('intent');
+            if (intent !== 'update_diagram') {
+                 throw new Error("Diagram generation should be done in the Diagram Mode.");
+            }
+        }
+        
         const endpoint = isDiagram ? '/api/generate-diagrams' : '/api/generate-report';
         
         const otherDiagrams: Record<string, string> = {};
@@ -259,29 +269,33 @@ export function useReportBuilder() {
             body: JSON.stringify({
                 proposal: state.proposal,
                 sectionToGenerate: item, // For report sections
-                diagramToGenerate: item, // For diagrams
+                diagramToGenerate: item, // For diagrams (updates)
                 otherSections,
                 otherDiagrams,
                 guidelines: formData.getAll('guidelines[]').map(String),
                 instructionText: formData.get('instructionText'),
                 externalContextContent: state.externalContext?.content,
                 acceptanceCriteria: formData.get('acceptanceCriteria'), // For evaluation
+                intent: formData.get('intent'), // For diagram updates
+                plantUmlCode: formData.get('plantUmlCode'), // For diagram updates
             }),
         });
         
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || result.errors || 'API request failed');
 
-        await deductCredit(user.id, 1);
+        if (item !== 'evaluate') {
+            await deductCredit(user.id, 1);
+        }
 
         if (item === 'evaluate') {
              dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
-        } else if (isDiagram) {
+        } else if (isDiagram) { // This will now only be for updates
             dispatch({ type: 'GENERATION_SUCCESS', payload: {
               diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
               lastGenerated: item as DiagramType,
             }});
-        } else {
+        } else { // This is for sections
             dispatch({ type: 'GENERATION_SUCCESS', payload: {
                 sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
                 lastGenerated: item as SectionName,

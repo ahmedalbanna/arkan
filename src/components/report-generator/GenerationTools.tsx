@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
-import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import type { ReportState } from '@/hooks/use-report-builder';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye } from 'lucide-react';
@@ -29,7 +29,6 @@ import { ScrollArea } from '../ui/scroll-area';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
-const allGenerationItems = [...orderedSections, ...orderedDiagrams];
 
 type ControlState = {
     formality: number;
@@ -53,8 +52,8 @@ const getInitialControlState = (): Record<SectionName, ControlState> => {
 
 const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
     const initialState: Record<string, GuidelineState> = {};
-    allGenerationItems.forEach(key => {
-        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType])?.agentId);
+    orderedSections.forEach(key => {
+        const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
         const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
         const checked: Record<number, boolean> = {};
         if (defaultGuidelines) {
@@ -111,7 +110,7 @@ interface GenerateItemButtonProps {
 
 function GenerateItemButton({ itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
     const { agents } = useAgents();
-    const agentId = (sectionConfig[itemKey as SectionName] || diagramConfig[itemKey as keyof typeof diagramConfig])?.agentId;
+    const agentId = sectionConfig[itemKey as SectionName]?.agentId;
     const agent = agents.find(a => a.id === agentId);
     const isGeneratingThis = isPending && generatingItem === itemKey;
 
@@ -250,19 +249,18 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
             </CardHeader>
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
-                    {allGenerationItems.map((key) => {
-                        const isSection = orderedSections.includes(key as SectionName);
-                        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType])?.agentId);
+                    {orderedSections.map((key) => {
+                        const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
                         if (!agent) return null;
 
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
-                        const { title, icon: Icon } = (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType]);
+                        const { title, icon: Icon } = sectionConfig[key];
                         
                         // Get selected guidelines for this agent
                         const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
                         // Get instruction text for this agent (only if it's a section)
-                        const instructionText = isSection ? generateInstructionText(controlState[key as SectionName], t) : '';
+                        const instructionText = generateInstructionText(controlState[key as SectionName], t);
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -275,7 +273,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                     <Tabs defaultValue="prompt" className="w-full">
                                         <TabsList className="grid w-full grid-cols-3">
                                             <TabsTrigger value="prompt">{t('reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                            {isSection && <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>}
+                                            <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>
                                             <TabsTrigger value="context">{t('reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
@@ -336,37 +334,35 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                         ))}
                                         <input type="hidden" name="instructionText" value={instructionText} />
                                         
-                                        {isSection && (
-                                            <TabsContent value="controls" className="pt-4">
-                                                <div className="space-y-6">
-                                                    <div className="space-y-3">
-                                                        <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
-                                                        <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
-                                                        <div className="flex justify-between text-xs text-muted-foreground">
-                                                            <span>{t('reportGenerator.tool_formality_informal')}</span>
-                                                            <span>{t('reportGenerator.tool_formality_balanced')}</span>
-                                                            <span>{t('reportGenerator.tool_formality_formal')}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
-                                                        <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
-                                                            <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
-                                                                <SelectItem value="academic">{t('reportGenerator.tool_tone_academic')}</SelectItem>
-                                                                <SelectItem value="casual">{t('reportGenerator.tool_tone_casual')}</SelectItem>
-                                                                <SelectItem value="persuasive">{t('reportGenerator.tool_tone_persuasive')}</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
-                                                        <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                        <TabsContent value="controls" className="pt-4">
+                                            <div className="space-y-6">
+                                                <div className="space-y-3">
+                                                    <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
+                                                    <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
+                                                    <div className="flex justify-between text-xs text-muted-foreground">
+                                                        <span>{t('reportGenerator.tool_formality_informal')}</span>
+                                                        <span>{t('reportGenerator.tool_formality_balanced')}</span>
+                                                        <span>{t('reportGenerator.tool_formality_formal')}</span>
                                                     </div>
                                                 </div>
-                                            </TabsContent>
-                                        )}
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
+                                                    <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
+                                                        <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
+                                                            <SelectItem value="academic">{t('reportGenerator.tool_tone_academic')}</SelectItem>
+                                                            <SelectItem value="casual">{t('reportGenerator.tool_tone_casual')}</SelectItem>
+                                                            <SelectItem value="persuasive">{t('reportGenerator.tool_tone_persuasive')}</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
+                                                    <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                                </div>
+                                            </div>
+                                        </TabsContent>
                                         <TabsContent value="context" className="pt-4">
                                             <div className="space-y-3">
                                                 <Label className="font-semibold">{t('reportGenerator.tool_context_label')}</Label>
@@ -404,7 +400,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                         </div>
                                                     ))}
                                                     <h4 className="text-xs font-bold uppercase text-muted-foreground pt-2">{t('reportGenerator.tool_context_diagrams')}</h4>
-                                                    {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
+                                                    {orderedDiagrams.map(contextKey => (
                                                         <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                             <Checkbox
                                                                 id={`context-${key}-${contextKey}`}
