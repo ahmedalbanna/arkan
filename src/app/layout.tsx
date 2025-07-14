@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
-      <body className={cn('font-body antialiased min-h-screen flex flex-col')}>
+      <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

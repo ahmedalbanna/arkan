@@ -40,10 +40,9 @@ export default function PresentationGenerator() {
     }, [state.slides]);
 
     const isToolsDisabled = !proposalJson || isGenerating;
-    const hasReportContent = Object.keys(reportState.sections).length > 0 || Object.keys(reportState.diagrams).length > 0;
-
+    
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(); }} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(new FormData(e.currentTarget)); }} className="space-y-6">
              <input type="hidden" name="proposalJson" value={proposalJson} />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
@@ -102,6 +101,7 @@ export default function PresentationGenerator() {
                             <div className="text-center text-muted-foreground p-8">
                                 <Presentation className="w-16 h-16 mx-auto mb-4" />
                                 <p>Your generated presentation will appear here.</p>
+                                {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
                         </Card>
                     )}
@@ -123,59 +123,10 @@ export default function PresentationGenerator() {
                      <PresentationGenerationTools
                         isDisabled={isToolsDisabled}
                         isGenerating={isGenerating}
+                        reportState={reportState}
+                        contextSelections={contextSelections}
+                        onContextToggle={toggleContextSelection}
                     />
-                    <Card className={cn(!hasReportContent && "opacity-50 pointer-events-none")}>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-base">Select Context</CardTitle>
-                            <CardDescription className="text-xs">
-                                Choose which report sections and diagrams to include as context for the presentation.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                             <ScrollArea className="h-64 border rounded-md p-2">
-                                <div className="space-y-2">
-                                    <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
-                                     {Object.entries(reportState.sections).length > 0 ? (
-                                        Object.entries(reportState.sections).map(([key, content]) => (
-                                            <div key={key} className="flex items-center space-x-2 pl-2">
-                                                <Checkbox
-                                                    id={`context-section-${key}`}
-                                                    name={`context_section_${key}`}
-                                                    checked={contextSelections.sections[key as keyof typeof contextSelections.sections]}
-                                                    onCheckedChange={() => toggleContextSelection('sections', key)}
-                                                    disabled={!content}
-                                                />
-                                                <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
-                                                    {sectionConfig[key as keyof typeof sectionConfig].title}
-                                                </Label>
-                                            </div>
-                                        ))
-                                     ) : (
-                                         <p className="text-xs text-muted-foreground p-2">No sections found. Upload a report file.</p>
-                                     )}
-
-                                    <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
-                                    {Object.entries(reportState.diagrams).length > 0 ? (
-                                        Object.entries(reportState.diagrams).map(([key]) => (
-                                            <div key={key} className="flex items-center space-x-2 pl-2">
-                                                <Checkbox
-                                                    id={`context-diagram-${key}`}
-                                                    name={`context_diagram_${key}`}
-                                                    checked={contextSelections.diagrams[key as keyof typeof contextSelections.diagrams]}
-                                                    onCheckedChange={() => toggleContextSelection('diagrams', key)}
-                                                />
-                                                <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
-                                                    {diagramConfig[key as keyof typeof diagramConfig].title}
-                                                </Label>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-xs text-muted-foreground p-2">No diagrams found. Upload a report file.</p>
-                                    )}
-                                </div>
-                             </ScrollArea>
-                        </CardContent>
-                    </Card>
                 </div>
 
             </div>
