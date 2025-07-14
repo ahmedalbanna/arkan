@@ -11,7 +11,6 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 
 export interface DiagramState {
   diagrams?: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string; }>>;
-  sections?: Partial<Record<SectionName, string>>; // Add sections to diagram state
   lastGenerated?: DiagramType;
   error?: string;
 }
@@ -26,7 +25,7 @@ type Action =
   | { type: 'CLEAR_ERROR' };
 
 
-const initialState: DiagramState = { diagrams: {}, sections: {} };
+const initialState: DiagramState = { diagrams: {} };
 
 const diagramReducer = (state: DiagramState, action: Action) => {
     switch (action.type) {
@@ -99,10 +98,10 @@ export function useDiagramBuilder() {
     const { toast } = useToast();
 
     useEffect(() => {
-        if(builderState.diagrams || builderState.sections) {
-            dispatch({ type: 'SET_STATE', payload: { diagrams: builderState.diagrams, sections: builderState.sections } });
+        if(builderState.diagrams) {
+            dispatch({ type: 'SET_STATE', payload: { diagrams: builderState.diagrams } });
         }
-    }, [builderState.diagrams, builderState.sections]);
+    }, [builderState.diagrams]);
 
     const handleFormSubmit = (formData: FormData) => {
         const validatedFields = GenerateDiagramSchema.safeParse({
@@ -137,10 +136,10 @@ export function useDiagramBuilder() {
                 if (contextSelections[diagramToGenerate]) {
                     for (const key in contextSelections[diagramToGenerate]) {
                         if (contextSelections[diagramToGenerate][key]) {
-                            if (key.startsWith('diagram_') && state.diagrams?.[key.substring(8) as DiagramType]) {
-                                otherDiagrams[key.substring(8)] = state.diagrams[key.substring(8) as DiagramType]!.plantUmlCode;
-                            } else if (key.startsWith('section_') && state.sections?.[key.substring(8) as SectionName]) {
-                                otherSections[key.substring(8)] = state.sections[key.substring(8) as SectionName]!;
+                            if (key.startsWith('diagram_') && builderState.diagrams?.[key.substring(8) as DiagramType]) {
+                                otherDiagrams[key.substring(8)] = builderState.diagrams[key.substring(8) as DiagramType]!.plantUmlCode;
+                            } else if (key.startsWith('section_') && builderState.sections?.[key.substring(8) as SectionName]) {
+                                otherSections[key.substring(8)] = builderState.sections[key.substring(8) as SectionName]!;
                             }
                         }
                     }
@@ -234,8 +233,7 @@ export function useDiagramBuilder() {
 
 
     return {
-        state,
-        proposalJson: builderState.proposalJson,
+        state: { ...state, sections: builderState.sections },
         isAnythingGenerating: isGenerating || builderState.lastGenerated === 'proposal',
         generatingDiagram,
         handleFormSubmit,

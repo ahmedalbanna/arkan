@@ -5,10 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import DiagramViewer from './DiagramViewer';
 import { useDiagramState } from '@/context/DiagramStateContext';
 import { diagramConfig } from '@/lib/report-config';
-import { GitGraph, AlertCircle } from 'lucide-react';
+import { GitGraph, AlertCircle, Loader2 } from 'lucide-react';
 import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
 import { Skeleton } from './ui/skeleton';
-import { useReportState } from '@/context/ReportStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 function DiagramSkeleton() {
   return (
@@ -22,7 +22,6 @@ function DiagramSkeleton() {
 export default function DiagramGenerator() {
     const {
         state,
-        proposalJson,
         isAnythingGenerating,
         generatingDiagram,
         handleFormSubmit,
@@ -31,11 +30,21 @@ export default function DiagramGenerator() {
         contextSelections,
         toggleContextSelection,
     } = useDiagramState();
+    
+    const { state: builderState, isLoaded } = useBuilderState();
 
     const currentDiagramType = state.lastGenerated;
     const currentDiagramData = currentDiagramType ? state.diagrams?.[currentDiagramType] : undefined;
 
-    if (!proposalJson) {
+    if (!isLoaded) {
+      return (
+          <div className="flex justify-center items-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+      )
+    }
+
+    if (!builderState.proposal) {
       return (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
@@ -88,7 +97,7 @@ export default function DiagramGenerator() {
                 {/* Right Column */}
                 <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                     <DiagramGenerationTools
-                        isDisabled={!proposalJson || isAnythingGenerating}
+                        isDisabled={!builderState.proposal || isAnythingGenerating}
                         diagramsState={state.diagrams || {}}
                         sectionsState={state.sections || {}}
                         isGenerating={isAnythingGenerating}

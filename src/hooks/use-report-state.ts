@@ -45,7 +45,7 @@ export const initialState: ReportState = {
 const reportReducer = (state: ReportState, action: ReportAction): ReportState => {
   switch (action.type) {
     case 'SET_STATE':
-        const { proposal, proposalJson, ...restOfPayload } = action.payload;
+        const { ...restOfPayload } = action.payload;
         return { ...state, ...restOfPayload };
     case 'GENERATION_START':
       return { ...state, error: undefined, lastGenerated: action.payload.item as any };
@@ -82,7 +82,6 @@ export function useReportState() {
   }, [builderState]);
   
   // Action handlers
-  const handleProposalUpdate = (path: string, value: any) => builderDispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
   const handleSectionUpdate = (key: SectionName, value: string) => builderDispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
   const handleDiagramCodeUpdate = (key: DiagramType, code: string) => builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
   
@@ -188,14 +187,11 @@ export function useReportState() {
     isLoaded,
     generatingItem,
     isAnythingGenerating: isBuilderGenerating,
-    proposal: builderState.proposal,
-    proposalJson: builderState.proposalJson,
-    contextSelections: state.contextSelections,
-    handleProposalUpdate,
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
     handleSubmit,
+    contextSelections: state.contextSelections,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,

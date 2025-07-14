@@ -8,6 +8,7 @@ import { useReportState } from '@/context/ReportStateContext';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { EvaluationTools } from './report-generator/EvaluationTools';
 import { Card } from './ui/card';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 export default function ReportGenerator() {
   const {
@@ -15,7 +16,6 @@ export default function ReportGenerator() {
     isLoaded,
     generatingItem,
     isAnythingGenerating,
-    proposal,
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
@@ -26,6 +26,8 @@ export default function ReportGenerator() {
     removeExternalContext,
   } = useReportState();
 
+  const { state: builderState } = useBuilderState();
+
 
   if (!isLoaded) {
       return (
@@ -35,9 +37,9 @@ export default function ReportGenerator() {
       )
   }
 
-  const isToolsDisabled = !proposal || isAnythingGenerating;
+  const isToolsDisabled = !builderState.proposal || isAnythingGenerating;
   
-  if (!proposal) {
+  if (!builderState.proposal) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
@@ -52,7 +54,7 @@ export default function ReportGenerator() {
 
   return (
     <form action={handleSubmit}>
-       <input type="hidden" name="proposalJson" value={state.proposalJson} />
+       <input type="hidden" name="proposalJson" value={builderState.proposalJson} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
