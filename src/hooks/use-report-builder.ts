@@ -98,7 +98,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
           try {
               let currentDate = new Date(newProposal.timeline.startDate);
               if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
-              newProposal.timeline.endDate = format(newProposal.timeline.phases.reduce((acc, phase) => add(acc, { weeks: Number(phase.durationWeeks || 0) }), currentDate), 'yyyy-MM-dd');
+              newProposal.timeline.endDate = format(newProposal.timeline.phases.reduce((acc: any, phase: { durationWeeks: any; }) => add(acc, { weeks: Number(phase.durationWeeks || 0) }), currentDate), 'yyyy-MM-dd');
           } catch (error) { console.error("Error calculating timeline:", error); }
         }
 

@@ -13,12 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 
 export const ProposalGenerator = () => {
   const { 
+    state,
     isGeneratingProposal, 
     projectIdea, 
     handleProjectIdeaChange, 
     handleGenerateProposal,
     dispatch,
-    state
   } = useReportState();
   const { t } = useLocalization();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +41,7 @@ export const ProposalGenerator = () => {
             if (typeof content === 'string') {
                 const parsedState = JSON.parse(content);
                 // Basic validation
-                if (parsedState.version && parsedState.proposal) {
+                if (parsedState.proposal) {
                     dispatch({ type: 'SET_STATE', payload: parsedState });
                     toast({ title: 'Project Loaded', description: `Successfully loaded "${parsedState.proposal.title}".` });
                 } else {
