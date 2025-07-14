@@ -25,9 +25,9 @@ const MOCK_USERS = [
 async function seed() {
   console.log('Seeding database...');
 
-  await db.transaction(async (tx) => {
-    await tx.delete(users).execute();
-    await tx.insert(users).values(MOCK_USERS.map(({ id, name, email, avatarUrl, bio, credits, createdAt }) => ({ id, name, email, avatarUrl, bio, credits, createdAt }))).execute();
+  db.transaction((tx) => {
+    tx.delete(users).execute();
+    tx.insert(users).values(MOCK_USERS.map(({ id, name, email, avatarUrl, bio, credits, createdAt }) => ({ id, name, email, avatarUrl, bio, credits, createdAt }))).execute();
   });
 
   console.log('Database seeded successfully!');

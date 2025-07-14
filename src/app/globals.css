@@ -88,3 +88,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+@media (width >= 1920px) {
+  .container {
+    max-width: 1920px;
+}
+}
