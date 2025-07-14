@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useReducer, useTransition } from 'react';
+import { useState, useEffect, useCallback, useReducer, useTransition, useRef } from 'react';
 import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useHistory } from '@/hooks/use-history';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
