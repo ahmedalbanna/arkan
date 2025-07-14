@@ -13,7 +13,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -98,15 +98,17 @@ interface DiagramGenerationToolsProps {
     onContextToggle: (parentKey: string, contextKey: string, contextType: 'diagram' | 'section') => void;
 }
 
-export const DiagramGenerationTools = ({ 
-    isDisabled, 
-    diagramsState, 
-    sectionsState,
-    isGenerating, 
-    generatingDiagram, 
-    contextSelections, 
-    onContextToggle 
-}: DiagramGenerationToolsProps) => {
+
+export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
+    const { 
+        isDisabled, 
+        diagramsState, 
+        sectionsState,
+        isGenerating, 
+        generatingDiagram, 
+        contextSelections, 
+        onContextToggle,
+    } = props;
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
     const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
@@ -155,7 +157,7 @@ export const DiagramGenerationTools = ({
     };
 
     if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
+        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
 
     return (
@@ -256,13 +258,13 @@ export const DiagramGenerationTools = ({
                                                             {orderedSections.map(contextKey => (
                                                                 <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                     <Checkbox
-                                                                        id={`context-${key}-${contextKey}`}
+                                                                        id={`context-section-${key}-${contextKey}`}
                                                                         name={`context_section_${key}_${contextKey}`}
                                                                         disabled={!sectionsState[contextKey]}
                                                                         checked={contextSelections[key]?.[`section_${contextKey}`] ?? false}
                                                                         onCheckedChange={() => onContextToggle(key, contextKey, 'section')}
                                                                     />
-                                                                    <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !sectionsState[contextKey] && "text-muted-foreground/50")}>
+                                                                    <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sectionsState[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
                                                                             <BookCheck className="h-4 w-4" />
                                                                             {sectionConfig[contextKey].title}
@@ -279,13 +281,13 @@ export const DiagramGenerationTools = ({
                                                             {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
                                                                 <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                     <Checkbox
-                                                                        id={`context-${key}-${contextKey}`}
+                                                                        id={`context-diagram-${key}-${contextKey}`}
                                                                         name={`context_diagram_${key}_${contextKey}`}
                                                                         disabled={!diagramsState[contextKey]}
                                                                         checked={contextSelections[key]?.[`diagram_${contextKey}`] ?? false}
                                                                         onCheckedChange={() => onContextToggle(key, contextKey, 'diagram')}
                                                                     />
-                                                                    <Label htmlFor={`context-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
+                                                                    <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
                                                                             <diagramConfig[contextKey].icon className="h-4 w-4" />
                                                                             {diagramConfig[contextKey].title}
