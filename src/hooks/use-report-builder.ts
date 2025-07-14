@@ -3,20 +3,17 @@
 
 import { useState, useEffect, useCallback, useReducer, useTransition, useRef } from 'react';
 import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
-import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { add, format } from 'date-fns';
-import { handleGenerateReportItem } from '@/app/generate-report/actions';
 import { useToast } from './use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
-import { generateProposal } from '@/ai/flows/generate-proposal';
 import { useAgents } from './use-agents';
-import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 
 
-const STORAGE_KEY = 'arkan-report-generator-state';
+const STORAGE_KEY = 'arkan-report-generator-state-v2';
 
 // 1. Define State and Action Types
 export interface ReportState {
@@ -108,6 +105,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
     case 'UPDATE_DIAGRAM_CODE':
         return { ...state, diagrams: { ...state.diagrams, [action.payload.key]: { ...state.diagrams![action.payload.key]!, plantUmlCode: action.payload.code } }};
     case 'NEW_SESSION':
+      localStorage.removeItem(STORAGE_KEY);
       return { ...initialState };
     case 'TOGGLE_CONTEXT_SELECTION': {
       const { parentKey, contextKey } = action.payload;
@@ -143,10 +141,9 @@ export function useReportBuilder() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
-  const { agents } = useAgents();
   const { toast } = useToast();
   const { t } = useLocalization();
-  const { fetchUser, user } = useAuth();
+  const { user, fetchUser } = useAuth();
   
   // Load from local storage
   useEffect(() => {
@@ -177,14 +174,13 @@ export function useReportBuilder() {
 
   useEffect(() => {
     if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated] || (presentationConfig as any)[state.lastGenerated] || (state.lastGenerated === 'evaluation' ? { title: 'Report Evaluation' } : null);
+        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated] || (state.lastGenerated === 'evaluation' ? { title: 'Report Evaluation' } : null);
         const title = itemConfig?.title || state.lastGenerated;
         
         toast({
             title: t('reportGenerator.generationSuccess'),
             description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
         });
-        
     }
 
     if (state.error && state.error !== prevError.current && state.error !== 'Invalid proposal JSON structure.') {
@@ -198,7 +194,7 @@ export function useReportBuilder() {
     prevLastGenerated.current = state.lastGenerated;
     prevError.current = state.error;
 
-  }, [state.lastGenerated, state.error, state.sections, state.diagrams, toast, t, state.proposal?.title, state.presentation]);
+  }, [state.lastGenerated, state.error, state.sections, state.diagrams, toast, t]);
 
 
   // Action handlers that dispatch to the reducer
@@ -210,9 +206,7 @@ export function useReportBuilder() {
   const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
     const formData = new FormData();
     if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
-    // Even though we are just updating, we need to provide a value for itemToGenerate for the Zod schema to pass.
-    // The `intent` field is what directs the action to the correct logic path.
-    formData.set('itemToGenerate', diagramType);
+    formData.set('itemToGenerate', diagramType); // Zod needs a value
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
     formData.set('plantUmlCode', code);
@@ -236,14 +230,65 @@ export function useReportBuilder() {
     dispatch({ type: 'GENERATION_START', payload: { item } });
     startTransition(async () => {
       try {
-        await deductCredit(user!.id, 1);
-        const result = await handleGenerateReportItem(state, formData);
-        if(result.error) {
-            dispatch({ type: 'GENERATION_ERROR', payload: result.error });
-        } else {
-            dispatch({ type: 'GENERATION_SUCCESS', payload: result });
-            await fetchUser();
+        if (!user) throw new Error("User not authenticated.");
+
+        const isDiagram = DiagramTypeSchema.options.includes(item as DiagramType);
+        const endpoint = isDiagram ? '/api/generate-diagrams' : '/api/generate-report';
+        
+        const otherDiagrams: Record<string, string> = {};
+        if (state.contextSelections[item]) {
+            for (const key in state.contextSelections[item]) {
+                if (state.contextSelections[item][key] && state.diagrams?.[key as DiagramType]) {
+                    otherDiagrams[key] = state.diagrams[key as DiagramType]!.plantUmlCode;
+                }
+            }
         }
+        
+        const otherSections: Record<string, string> = {};
+        if (state.contextSelections[item]) {
+            for (const key in state.contextSelections[item]) {
+                if (state.contextSelections[item][key] && state.sections[key as SectionName]) {
+                    otherSections[key] = state.sections[key as SectionName]!;
+                }
+            }
+        }
+        
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                proposal: state.proposal,
+                sectionToGenerate: item, // For report sections
+                diagramToGenerate: item, // For diagrams
+                otherSections,
+                otherDiagrams,
+                guidelines: formData.getAll('guidelines[]').map(String),
+                instructionText: formData.get('instructionText'),
+                externalContextContent: state.externalContext?.content,
+                acceptanceCriteria: formData.get('acceptanceCriteria'), // For evaluation
+            }),
+        });
+        
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.errors || 'API request failed');
+
+        await deductCredit(user.id, 1);
+
+        if (item === 'evaluate') {
+             dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
+        } else if (isDiagram) {
+            dispatch({ type: 'GENERATION_SUCCESS', payload: {
+              diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
+              lastGenerated: item as DiagramType,
+            }});
+        } else {
+            dispatch({ type: 'GENERATION_SUCCESS', payload: {
+                sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
+                lastGenerated: item as SectionName,
+            }});
+        }
+
+        await fetchUser();
       } catch (e: any) {
         dispatch({ type: 'GENERATION_ERROR', payload: e.message || 'An unexpected error occurred.' });
       } finally {
@@ -256,13 +301,11 @@ export function useReportBuilder() {
     state,
     dispatch,
     isLoaded,
-    isGeneratingProposal: false, // This is no longer handled here
     generatingItem,
     isAnythingGenerating: isGenerating,
     proposal: state.proposal,
     proposalJson: state.proposalJson,
     contextSelections: state.contextSelections,
-    handleGenerateProposal: () => {}, // This is no longer handled here
     handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,

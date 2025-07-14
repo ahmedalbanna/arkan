@@ -10,7 +10,6 @@ const HARDCODED_USER_ID = 'user-1';
 
 export async function POST(request: Request) {
   try {
-    await deductCredit(HARDCODED_USER_ID, 1);
     
     const formData = await request.formData();
     const file = formData.get('file') as File; // Get the file using the name 'file' from the frontend FormData
@@ -48,6 +47,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Could not extract sufficient text from the PDF.' }, { status: 400 });
     }
 
+    await deductCredit(HARDCODED_USER_ID, 1);
+    
     // Rewrite text to markdown using AI
     const result = await rewriteToMarkdown({ rawText });
 

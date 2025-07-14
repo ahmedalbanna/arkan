@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/app/generate-report/actions';
+import type { ReportState } from '@/hooks/use-report-builder';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
@@ -29,7 +29,7 @@ import { ScrollArea } from '../ui/scroll-area';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
-const allGenerationItems = [...orderedSections, ...orderedDiagrams, 'presentation'];
+const allGenerationItems = [...orderedSections, ...orderedDiagrams];
 
 type ControlState = {
     formality: number;
@@ -54,7 +54,7 @@ const getInitialControlState = (): Record<SectionName, ControlState> => {
 const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
     const initialState: Record<string, GuidelineState> = {};
     allGenerationItems.forEach(key => {
-        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
+        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType])?.agentId);
         const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
         const checked: Record<number, boolean> = {};
         if (defaultGuidelines) {
@@ -111,7 +111,7 @@ interface GenerateItemButtonProps {
 
 function GenerateItemButton({ itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
     const { agents } = useAgents();
-    const agentId = (sectionConfig[itemKey as SectionName] || diagramConfig[itemKey as keyof typeof diagramConfig] || presentationConfig[itemKey as keyof typeof presentationConfig])?.agentId;
+    const agentId = (sectionConfig[itemKey as SectionName] || diagramConfig[itemKey as keyof typeof diagramConfig])?.agentId;
     const agent = agents.find(a => a.id === agentId);
     const isGeneratingThis = isPending && generatingItem === itemKey;
 
@@ -252,12 +252,12 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                 <Accordion type="multiple" className="w-full space-y-1">
                     {allGenerationItems.map((key) => {
                         const isSection = orderedSections.includes(key as SectionName);
-                        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation)?.agentId);
+                        const agent = agents.find(a => a.id === (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType])?.agentId);
                         if (!agent) return null;
 
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
-                        const { title, icon: Icon } = (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType] || presentationConfig.presentation);
+                        const { title, icon: Icon } = (sectionConfig[key as SectionName] || diagramConfig[key as DiagramType]);
                         
                         // Get selected guidelines for this agent
                         const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
@@ -281,7 +281,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
                                             <div className="space-y-2">
                                                 <Label className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
-                                                <div className="p-3 rounded-md border bg-muted">
+                                                <div className="p-3 rounded-md border bg-muted text-xs">
                                                     <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                                                 </div>
                                             </div>

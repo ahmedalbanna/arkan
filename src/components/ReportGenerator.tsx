@@ -1,7 +1,6 @@
 
 'use client';
 
-import { ProposalGenerator } from './report-generator/ProposalGenerator';
 import { ProposalEditor } from './report-generator/ProposalEditor';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { ReportActions } from './report-generator/ReportActions';
@@ -9,18 +8,17 @@ import { ReportResults } from './report-generator/ReportResults';
 import { Loader2 } from 'lucide-react';
 import { useReportState } from '@/context/ReportStateContext';
 import { EvaluationTools } from './report-generator/EvaluationTools';
+import { ProposalGenerator } from './report-generator/ProposalGenerator';
 
 
 export default function ReportGenerator() {
   const {
     state,
     isLoaded,
-    isGeneratingProposal,
     generatingItem,
     isAnythingGenerating,
     proposal,
     proposalJson,
-    handleGenerateProposal,
     handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,

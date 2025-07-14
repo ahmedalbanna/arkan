@@ -19,6 +19,7 @@ const generateReportSchema = z.object({
   // Client now sends selected guidelines and control settings instead of a full prompt
   guidelines: z.array(z.string()).optional(),
   instructionText: z.string().optional(),
+  externalContextContent: z.string().optional(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, sectionToGenerate, otherSections, otherDiagrams, guidelines, instructionText } = validation.data;
+    const { proposal, sectionToGenerate, otherSections, otherDiagrams, guidelines, instructionText, externalContextContent } = validation.data;
 
     const agentInfo = sectionAgentMap[sectionToGenerate];
     if (!agentInfo) {
@@ -70,6 +71,10 @@ export async function POST(request: Request) {
     }
 
     const contextContent = [];
+    if (externalContextContent) {
+        contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
+        contextContent.push(externalContextContent);
+    }
     if (otherSections && Object.keys(otherSections).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
         for (const [sectionName, content] of Object.entries(otherSections)) {

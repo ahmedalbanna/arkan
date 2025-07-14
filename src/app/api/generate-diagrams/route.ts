@@ -20,6 +20,7 @@ const generateDiagramSchema = z.object({
   guidelines: z.array(z.string()).optional(), 
   intent: z.string().optional(),
   plantUmlCode: z.string().optional(),
+  externalContextContent: z.string().optional(),
 });
 
 // Helper function to encode PlantUML for URL
@@ -75,7 +76,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, intent, plantUmlCode } = validation.data;
+    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, intent, plantUmlCode, externalContextContent } = validation.data;
 
     if (intent === 'update_diagram') {
         if (!plantUmlCode) {
@@ -113,6 +114,10 @@ export async function POST(request: Request) {
     }
 
     const contextContent = [];
+    if (externalContextContent) {
+        contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
+        contextContent.push(externalContextContent);
+    }
     if (otherSections && Object.keys(otherSections).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
         for (const [sectionName, content] of Object.entries(otherSections)) {
