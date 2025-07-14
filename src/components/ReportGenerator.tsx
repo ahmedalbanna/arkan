@@ -6,7 +6,7 @@ import { GenerationTools } from './report-generator/GenerationTools';
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
 import { Loader2 } from 'lucide-react';
-import { useReportState } from '@/context/ReportStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 import { EvaluationTools } from './report-generator/EvaluationTools';
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
 
@@ -24,13 +24,12 @@ export default function ReportGenerator() {
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
-    handleNewSession,
     handleSubmit,
     contextSelections,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,
-  } = useReportState();
+  } = useBuilderState();
 
 
   if (!isLoaded) {
@@ -45,7 +44,7 @@ export default function ReportGenerator() {
 
   return (
     <form action={handleSubmit}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)]">
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
           <ProposalGenerator />
@@ -73,8 +72,6 @@ export default function ReportGenerator() {
         {/* Right Column */}
         <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
           <ReportActions
-            proposal={proposal}
-            onNewSession={handleNewSession}
             isGenerating={isAnythingGenerating}
           />
           <GenerationTools

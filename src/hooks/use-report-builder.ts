@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback, useReducer, useTransition, useRef } from 'react';
 import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { add, format } from 'date-fns';
 import { useToast } from './use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -11,6 +10,7 @@ import { useAgents } from './use-agents';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
+import { AGENTS } from '@/lib/agents';
 
 
 const STORAGE_KEY = 'arkan-report-generator-state-v2';
@@ -25,7 +25,7 @@ export interface ReportState {
   proposal: ProjectProposal | null;
   proposalJson: string;
   contextSelections: Record<string, Record<string, boolean>>;
-  lastGenerated: SectionName | DiagramType | 'presentation' | 'evaluation' | null;
+  lastGenerated: 'proposal' | SectionName | DiagramType | 'presentation' | 'evaluation' | null;
   error?: string;
 }
 
@@ -42,7 +42,7 @@ export type ReportAction =
   | { type: 'REMOVE_EXTERNAL_CONTEXT' }
   | { type: 'GENERATION_START'; payload: { item?: string } }
   | { type: 'GENERATION_SUCCESS'; payload: Partial<ReportState> }
-  | { type: 'GENERATION_ERROR'; payload: string };
+  | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
 
 
 // 2. Initial State
@@ -62,7 +62,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
       return { ...state, ...action.payload };
     case 'SET_PROPOSAL':
         const proposalJson = action.payload ? JSON.stringify(action.payload, null, 2) : '';
-        return { ...state, proposal: action.payload, proposalJson };
+        return { ...state, proposal: action.payload, proposalJson, lastGenerated: 'proposal' };
     case 'SET_PROPOSAL_JSON':
         try {
             const parsed = JSON.parse(action.payload);
@@ -120,7 +120,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
       const { externalContext, ...rest } = state;
       return { ...rest, evaluation: state.evaluation };
     case 'GENERATION_START':
-      return { ...state, error: undefined };
+      return { ...state, error: undefined, lastGenerated: action.payload.item as any };
     case 'GENERATION_SUCCESS':
         // When new content is generated, clear the old evaluation
         const { evaluation, ...restOfPayload } = action.payload;
@@ -129,7 +129,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
         }
         return { ...state, ...action.payload, error: undefined };
     case 'GENERATION_ERROR':
-        return { ...state, error: action.payload };
+        return { ...state, error: action.payload.error, lastGenerated: action.payload.item as any };
     default:
       return state;
   }
@@ -141,6 +141,8 @@ export function useReportBuilder() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
+  const [isGeneratingProposal, startProposalTransition] = useTransition();
+
   const { toast } = useToast();
   const { t } = useLocalization();
   const { user, fetchUser } = useAuth();
@@ -168,14 +170,15 @@ export function useReportBuilder() {
     }
   }, [state, isLoaded]);
 
-  // Toast and History side-effects
-  const prevLastGenerated = useRef<string | null>();
+  // Toast side-effects for report/diagram items
+  const prevLastGeneratedItem = useRef<string | null>();
   const prevError = useRef<string | undefined>();
 
   useEffect(() => {
-    if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated] || (state.lastGenerated === 'evaluation' ? { title: 'Report Evaluation' } : null);
-        const title = itemConfig?.title || state.lastGenerated;
+    const lastGen = state.lastGenerated;
+    if (lastGen && lastGen !== 'proposal' && lastGen !== prevLastGeneratedItem.current && !state.error) {
+        const itemConfig = (sectionConfig as any)[lastGen] || (diagramConfig as any)[lastGen] || (lastGen === 'evaluation' ? { title: 'Report Evaluation' } : null);
+        const title = itemConfig?.title || lastGen;
         
         toast({
             title: t('reportGenerator.generationSuccess'),
@@ -191,13 +194,13 @@ export function useReportBuilder() {
         });
     }
 
-    prevLastGenerated.current = state.lastGenerated;
+    prevLastGeneratedItem.current = lastGen;
     prevError.current = state.error;
 
-  }, [state.lastGenerated, state.error, state.sections, state.diagrams, toast, t]);
+  }, [state.lastGenerated, state.error, t, toast]);
 
 
-  // Action handlers that dispatch to the reducer
+  // Action handlers
   const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
   const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
   const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
@@ -206,7 +209,7 @@ export function useReportBuilder() {
   const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
     const formData = new FormData();
     if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
-    formData.set('itemToGenerate', diagramType); // Zod needs a value
+    formData.set('itemToGenerate', diagramType);
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
     formData.set('plantUmlCode', code);
@@ -214,10 +217,58 @@ export function useReportBuilder() {
   };
   
   const handleNewSession = () => dispatch({ type: 'NEW_SESSION' });
+  const handleSaveProjectFile = () => {
+    if (!state.proposal) return;
+    const projectData = {
+        version: '1.0',
+        generatedAt: new Date().toISOString(),
+        ...state
+    };
+    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json;charset=utf-8' });
+    const fileName = `${state.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`;
+    saveAs(blob, fileName);
+  };
+
   const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
   const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
   const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
   
+  const handleGenerateProposal = (projectIdea: string, customGuidelines: string[]) => {
+      const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
+      if (!proposalAgent) {
+          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'Proposal agent not found.', item: 'proposal' } });
+          return;
+      }
+      if (!proposalAgent.isEnabled) {
+          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'The Proposal Generation agent is currently disabled.', item: 'proposal' } });
+          return;
+      }
+
+      startProposalTransition(async () => {
+          dispatch({ type: 'GENERATION_START', payload: { item: 'proposal' } });
+          try {
+              if (!user) throw new Error("User not authenticated.");
+              let fullPrompt = typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base;
+              if (customGuidelines && customGuidelines.length > 0) {
+                  fullPrompt += '\n\nAdditionally, please adhere to the following custom guidelines:\n' + customGuidelines.map(g => `- ${g}`).join('\n');
+              }
+              const response = await fetch('/api/generate-proposal', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ projectIdea, prompt: fullPrompt }),
+              });
+              const result = await response.json();
+              if (!response.ok) throw new Error(result.message || 'API request failed');
+              
+              await deductCredit(user.id, 1);
+              dispatch({ type: 'SET_PROPOSAL', payload: result });
+              await fetchUser();
+          } catch (e: any) {
+              dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An error occurred', item: 'proposal' } });
+          }
+      });
+  };
+
   const handleSubmit = (formData: FormData) => {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
@@ -233,16 +284,6 @@ export function useReportBuilder() {
         if (!user) throw new Error("User not authenticated.");
 
         const isDiagram = DiagramTypeSchema.options.includes(item as DiagramType);
-        
-        // This mode should only handle sections and evaluation now
-        if (isDiagram) {
-            // Handle diagram updates, but not generation from scratch
-            const intent = formData.get('intent');
-            if (intent !== 'update_diagram') {
-                 throw new Error("Diagram generation should be done in the Diagram Mode.");
-            }
-        }
-        
         const endpoint = isDiagram ? '/api/generate-diagrams' : '/api/generate-report';
         
         const otherDiagrams: Record<string, string> = {};
@@ -268,16 +309,16 @@ export function useReportBuilder() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 proposal: state.proposal,
-                sectionToGenerate: item, // For report sections
-                diagramToGenerate: item, // For diagrams (updates)
+                sectionToGenerate: item,
+                diagramToGenerate: item,
                 otherSections,
                 otherDiagrams,
                 guidelines: formData.getAll('guidelines[]').map(String),
                 instructionText: formData.get('instructionText'),
                 externalContextContent: state.externalContext?.content,
-                acceptanceCriteria: formData.get('acceptanceCriteria'), // For evaluation
-                intent: formData.get('intent'), // For diagram updates
-                plantUmlCode: formData.get('plantUmlCode'), // For diagram updates
+                acceptanceCriteria: formData.get('acceptanceCriteria'),
+                intent: formData.get('intent'),
+                plantUmlCode: formData.get('plantUmlCode'),
             }),
         });
         
@@ -290,12 +331,12 @@ export function useReportBuilder() {
 
         if (item === 'evaluate') {
              dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
-        } else if (isDiagram) { // This will now only be for updates
+        } else if (isDiagram) {
             dispatch({ type: 'GENERATION_SUCCESS', payload: {
               diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
               lastGenerated: item as DiagramType,
             }});
-        } else { // This is for sections
+        } else {
             dispatch({ type: 'GENERATION_SUCCESS', payload: {
                 sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
                 lastGenerated: item as SectionName,
@@ -304,7 +345,7 @@ export function useReportBuilder() {
 
         await fetchUser();
       } catch (e: any) {
-        dispatch({ type: 'GENERATION_ERROR', payload: e.message || 'An unexpected error occurred.' });
+        dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An unexpected error occurred.' } });
       } finally {
         setGeneratingItem(null);
       }
@@ -317,6 +358,7 @@ export function useReportBuilder() {
     isLoaded,
     generatingItem,
     isAnythingGenerating: isGenerating,
+    isGeneratingProposal,
     proposal: state.proposal,
     proposalJson: state.proposalJson,
     contextSelections: state.contextSelections,
@@ -326,7 +368,9 @@ export function useReportBuilder() {
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
     handleNewSession,
+    handleSaveProjectFile,
     handleSubmit,
+    handleGenerateProposal,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,

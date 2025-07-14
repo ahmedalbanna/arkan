@@ -10,18 +10,19 @@ import { ProposalModeGenerator } from '@/components/ProposalModeGenerator';
 import DiagramGenerator from '@/components/DiagramGenerator';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReportStateProvider } from '@/context/ReportStateContext';
-import { ProposalStateProvider } from '@/context/ProposalStateContext';
-import { DiagramStateProvider } from '@/context/DiagramStateContext';
+import { BuilderStateProvider } from '@/context/BuilderStateContext';
 import { CodeStateProvider } from '@/context/CodeStateContext';
 import { PresentationStateProvider } from '@/context/PresentationStateContext';
+import { DiagramStateProvider } from '@/context/DiagramStateContext';
+import { SessionActions } from '@/components/SessionActions';
+import { useReportBuilder } from '@/hooks/use-report-builder';
 
-export default function GeneratePage() {
+function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("report");
 
   return (
     <div className="container mx-auto max-w-screen-2xl px-4 py-8">
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-between items-center mb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="proposal" className="gap-2">
@@ -41,19 +42,12 @@ export default function GeneratePage() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+        <SessionActions />
       </div>
 
       <div className="w-full">
-        {activeTab === 'proposal' && (
-          <ProposalStateProvider>
-            <ProposalModeGenerator />
-          </ProposalStateProvider>
-        )}
-        {activeTab === 'report' && (
-          <ReportStateProvider>
-              <ReportGenerator />
-          </ReportStateProvider>
-        )}
+        {activeTab === 'proposal' && <ProposalModeGenerator />}
+        {activeTab === 'report' && <ReportGenerator />}
         {activeTab === 'diagram' && (
           <DiagramStateProvider>
             <DiagramGenerator />
@@ -72,4 +66,14 @@ export default function GeneratePage() {
       </div>
     </div>
   );
+}
+
+export default function GeneratePage() {
+    const builderState = useReportBuilder();
+
+    return (
+        <BuilderStateProvider {...builderState}>
+            <GeneratePageContent />
+        </BuilderStateProvider>
+    )
 }
