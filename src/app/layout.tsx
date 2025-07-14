@@ -3,7 +3,6 @@ import { Poppins, PT_Sans, Cairo } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { Toaster } from '@/components/ui/toaster';
 import { LocalizationProvider } from '@/context/LocalizationContext';
 import LanguageDirectionManager from '@/components/LanguageDirectionManager';
@@ -52,7 +51,6 @@ export default function RootLayout({
               <LanguageDirectionManager>
                 <Header />
                 <main className="flex-grow">{children}</main>
-                <Footer />
                 <Toaster />
               </LanguageDirectionManager>
             </AuthProvider>

@@ -16,13 +16,14 @@ import { DiagramStateProvider } from '@/context/DiagramStateContext';
 import { SessionActions } from '@/components/SessionActions';
 import { BuilderStateProvider } from '@/context/BuilderStateContext';
 import { ProposalStateProvider } from '@/context/ProposalStateContext';
+import { Footer } from '@/components/layout/Footer';
 
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("report");
 
   return (
-    <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8">
+    <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
        <div className="flex justify-end items-center mb-4">
         <SessionActions />
       </div>
@@ -48,7 +49,7 @@ function GeneratePageContent() {
         </Tabs>
       </div>
 
-      <div className="w-full h-[calc(100vh-180px)]">
+      <div className="w-full flex-grow">
         {activeTab === 'proposal' && (
           <ProposalStateProvider>
             <ProposalModeGenerator />
@@ -83,6 +84,7 @@ export default function GeneratePage() {
     return (
         <BuilderStateProvider>
             <GeneratePageContent />
+            <Footer />
         </BuilderStateProvider>
     )
 }
