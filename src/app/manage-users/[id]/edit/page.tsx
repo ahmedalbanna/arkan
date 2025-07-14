@@ -3,7 +3,8 @@ import { getUserProfile } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 
-export default async function EditUserPage({ params }: { params: { id: string } }) {
+export default async function EditUserPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const user = await getUserProfile(params.id);
 
   if (!user) {

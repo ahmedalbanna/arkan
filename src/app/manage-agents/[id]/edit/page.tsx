@@ -1,7 +1,8 @@
 import AgentEditor from '@/components/AgentEditor';
 import { Pencil } from 'lucide-react';
 
-export default function EditAgentPage({ params }: { params: { id: string } }) {
+export default async function EditAgentPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   return (
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <div className="text-center mb-12">
