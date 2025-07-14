@@ -29,9 +29,9 @@ function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agen
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${diagramConfig[diagramType].title}`}
         >
             {isGeneratingThis ? (
-                <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-                <Sparkles className="ml-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-4 w-4" />
             )}
             {diagramConfig[diagramType].title}
         </Button>
@@ -43,7 +43,7 @@ function RenderButton() {
 
     return (
         <Button type="submit" name="formAction" value="render" disabled={isRendering} className="font-headline">
-            {isRendering ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
+            {isRendering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
             Update Diagram
         </Button>
     );

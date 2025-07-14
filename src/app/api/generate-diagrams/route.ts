@@ -18,6 +18,8 @@ const generateDiagramSchema = z.object({
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   // Client now sends selected guidelines instead of a full prompt
   guidelines: z.array(z.string()).optional(), 
+  intent: z.string().optional(),
+  plantUmlCode: z.string().optional(),
 });
 
 // Helper function to encode PlantUML for URL
@@ -66,13 +68,27 @@ const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validation = generateDiagramSchema.safeParse(body);
+    // Loosen schema for render-only intent
+    const validation = generateDiagramSchema.partial().safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines } = validation.data;
+    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, intent, plantUmlCode } = validation.data;
+
+    if (intent === 'update_diagram') {
+        if (!plantUmlCode) {
+            return NextResponse.json({ message: 'PlantUML code is required for an update.'}, { status: 400 });
+        }
+        const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
+        return NextResponse.json({ plantUmlCode, imageUrl }, { status: 200 });
+    }
+
+    if (!proposal || !diagramToGenerate) {
+        return NextResponse.json({ message: 'Proposal and diagram type are required for generation.' }, { status: 400 });
+    }
+
 
     const agentInfo = diagramAgentMap[diagramToGenerate];
     if (!agentInfo) {
