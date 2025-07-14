@@ -6,7 +6,8 @@ import { useState } from 'react';
 import ReportGenerator from "@/components/ReportGenerator";
 import CodeGenerator from "@/components/CodeGenerator";
 import PresentationGenerator from '@/components/PresentationGenerator';
-import { FileText, Laptop, Presentation } from 'lucide-react';
+import { ProposalModeGenerator } from '@/components/ProposalModeGenerator';
+import { FileText, Laptop, Presentation, FilePlus2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportStateProvider } from '@/context/ReportStateContext';
 
@@ -17,7 +18,10 @@ export default function GeneratePage() {
     <div className="container mx-auto max-w-screen-2xl px-4 py-8">
       <div className="flex justify-center mb-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="proposal" className="gap-2">
+              <FilePlus2 className="h-4 w-4" /> Proposal Mode
+            </TabsTrigger>
             <TabsTrigger value="report" className="gap-2">
               <FileText className="h-4 w-4" /> Document Generator
             </TabsTrigger>
@@ -32,6 +36,7 @@ export default function GeneratePage() {
       </div>
 
       <div className="w-full">
+        {activeTab === 'proposal' && <ProposalModeGenerator />}
         {activeTab === 'report' && (
           <ReportStateProvider>
             <ReportGenerator />
