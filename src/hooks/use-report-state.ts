@@ -141,10 +141,8 @@ export function useReportState() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
-  const [isGeneratingProposal, startProposalTransition] = useTransition();
 
   const { toast } = useToast();
-  const { t } = useLocalization();
   const { user, fetchUser } = useAuth();
   
   // Load from local storage
@@ -186,59 +184,10 @@ export function useReportState() {
     handleSubmit(formData);
   };
   
-  const handleNewSession = () => dispatch({ type: 'NEW_SESSION' });
-  const handleSaveProjectFile = () => {
-    if (!state.proposal) return;
-    const projectData = {
-        version: '1.0',
-        generatedAt: new Date().toISOString(),
-        ...state
-    };
-    const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json;charset=utf-8' });
-    const fileName = `${state.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`;
-    saveAs(blob, fileName);
-  };
-
   const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
   const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
   const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
   
-  const handleGenerateProposal = (projectIdea: string, customGuidelines: string[]) => {
-      const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
-      if (!proposalAgent) {
-          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'Proposal agent not found.', item: 'proposal' } });
-          return;
-      }
-      if (!proposalAgent.isEnabled) {
-          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'The Proposal Generation agent is currently disabled.', item: 'proposal' } });
-          return;
-      }
-
-      startProposalTransition(async () => {
-          dispatch({ type: 'GENERATION_START', payload: { item: 'proposal' } });
-          try {
-              if (!user) throw new Error("User not authenticated.");
-              let fullPrompt = typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base;
-              if (customGuidelines && customGuidelines.length > 0) {
-                  fullPrompt += '\\n\\nAdditionally, please adhere to the following custom guidelines:\\n' + customGuidelines.map(g => `- ${g}`).join('\\n');
-              }
-              const response = await fetch('/api/generate-proposal', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ projectIdea, prompt: fullPrompt }),
-              });
-              const result = await response.json();
-              if (!response.ok) throw new Error(result.message || 'API request failed');
-              
-              await deductCredit(user.id, 1);
-              dispatch({ type: 'SET_PROPOSAL', payload: result });
-              await fetchUser();
-          } catch (e: any) {
-              dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An error occurred', item: 'proposal' } });
-          }
-      });
-  };
-
   const handleSubmit = (formData: FormData) => {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
@@ -324,11 +273,9 @@ export function useReportState() {
 
   return {
     state,
-    dispatch,
     isLoaded,
     generatingItem,
     isAnythingGenerating: isGenerating,
-    isGeneratingProposal,
     proposal: state.proposal,
     proposalJson: state.proposalJson,
     contextSelections: state.contextSelections,
@@ -337,10 +284,7 @@ export function useReportState() {
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
-    handleNewSession,
-    handleSaveProjectFile,
     handleSubmit,
-    handleGenerateProposal,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,

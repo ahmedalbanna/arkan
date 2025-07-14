@@ -42,7 +42,7 @@ export default function ReportGenerator() {
 
   return (
     <form action={handleSubmit}>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh+480px)]">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
         {/* Left Column */}
         <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
           <ProposalEditor
