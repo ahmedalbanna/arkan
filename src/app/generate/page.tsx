@@ -84,7 +84,7 @@ export default function GeneratePage() {
     return (
         <BuilderStateProvider>
             <GeneratePageContent />
-            <Footer />
+            
         </BuilderStateProvider>
     )
 }

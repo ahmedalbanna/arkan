@@ -1,36 +1,34 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { AGENTS } from '@/lib/agents';
 import { Loader2, Sparkles, Plus, Trash2, FileText } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { useProposalState } from '@/context/ProposalStateContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type ProposalTemplateKey } from '@/lib/proposal-templates';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
 }
 
 function GenerateButton({ isGenerating }: GenerateButtonProps) {
-    const { agents } = useAgents();
-    const agent = agents.find(a => a.id === 'generate-proposal');
-    
     return (
         <Button
             type="submit"
             name="itemToGenerate"
             value="proposal"
-            disabled={isGenerating || !agent?.isEnabled}
+            disabled={isGenerating}
             className="font-headline w-full"
-            title={!agent?.isEnabled ? 'This agent is disabled' : 'Generate Proposal'}
+            title={'Generate Proposal'}
         >
             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             Generate Proposal
@@ -41,37 +39,29 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
 interface ProposalGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
-    customGuidelines: string[];
-    setCustomGuidelines: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const ProposalGenerationTools = ({ 
     isDisabled, 
     isGenerating,
-    customGuidelines,
-    setCustomGuidelines
 }: ProposalGenerationToolsProps) => {
     
-    const [customGuidelineInput, setCustomGuidelineInput] = useState('');
-    const agent = AGENTS.find(a => a.id === 'generate-proposal');
+    const {
+        templates,
+        selectedTemplate,
+        handleTemplateChange,
+        customGuidelines,
+        handleAddCustomGuideline,
+        handleRemoveCustomGuideline,
+        customGuidelineInput,
+        setCustomGuidelineInput
+    } = useProposalState();
 
-    const handleAddCustomGuideline = () => {
-        const newGuideline = customGuidelineInput.trim();
-        if (newGuideline) {
-            setCustomGuidelines(prev => [...prev, newGuideline]);
-            setCustomGuidelineInput('');
-        }
-    };
+    const currentTemplate = templates[selectedTemplate];
 
-    const handleRemoveCustomGuideline = (indexToRemove: number) => {
-        setCustomGuidelines(prev => prev.filter((_, index) => index !== indexToRemove));
-    };
-
-    if (!agent) {
-        return <Card><CardHeader><CardTitle>Agent not found</CardTitle></CardHeader></Card>;
+    if (!currentTemplate) {
+        return <Card><CardHeader><CardTitle>Loading Templates...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
-
-    const promptConfig = agent.prompt as AgentPrompt;
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
@@ -80,18 +70,31 @@ export const ProposalGenerationTools = ({
                 <CardDescription>Refine the AI's instructions.</CardDescription>
             </CardHeader>
             <CardContent>
+                 <div className="space-y-2 mb-4">
+                    <Label htmlFor="proposal-template">Proposal Template</Label>
+                    <Select value={selectedTemplate} onValueChange={(value) => handleTemplateChange(value as ProposalTemplateKey)}>
+                        <SelectTrigger id="proposal-template">
+                            <SelectValue placeholder="Select a template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(templates).map(([key, template]) => (
+                                <SelectItem key={key} value={key}>{template.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                 </div>
                 <Accordion type="single" collapsible defaultValue="proposal" className="w-full space-y-1">
                     <AccordionItem value="proposal">
                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                             <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4" /> Generate Proposal
+                                <FileText className="h-4 w-4" /> Edit Prompt Details
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-4 p-4">
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
                                 <div className="p-3 rounded-md border bg-muted text-xs">
-                                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{currentTemplate.prompt}</ReactMarkdown>
                                 </div>
                             </div>
                             <div className="space-y-2">

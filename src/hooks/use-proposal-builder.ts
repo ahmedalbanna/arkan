@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useState, useReducer, useTransition } from 'react';
+import { useState, useReducer, useTransition, useEffect, useCallback } from 'react';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { deductCredit } from '@/services/credit-service';
-import { AGENTS } from '@/lib/agents';
-import type { ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
 import { z } from 'zod';
+import type { ProjectProposal } from '@/ai/schemas';
+import { templates as proposalTemplates, type ProposalTemplateKey, type ProposalTemplate } from '@/lib/proposal-templates';
 
 export interface ProposalGenerationState {
   proposal?: ProjectProposal;
@@ -38,6 +38,7 @@ function reducer(state: ProposalGenerationState, action: Action): ProposalGenera
 const GenerateProposalSchema = z.object({
   projectIdea: z.string().min(1, 'Project idea cannot be empty.'),
   guidelines: z.array(z.string()).optional(),
+  prompt: z.string(),
 });
 
 
@@ -45,55 +46,71 @@ export function useProposalBuilder() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
     const [projectIdea, setProjectIdea] = useState('');
-    const [customGuidelines, setCustomGuidelines] = useState<string[]>([]);
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
+    
+    // Template state
+    const [templates, setTemplates] = useState<Record<ProposalTemplateKey, ProposalTemplate>>(proposalTemplates);
+    const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplateKey>('default');
+    
+    // Guideline state
+    const [customGuidelines, setCustomGuidelines] = useState<string[]>([]);
+    const [customGuidelineInput, setCustomGuidelineInput] = useState('');
+
+    const handleTemplateChange = useCallback((key: ProposalTemplateKey) => {
+        setSelectedTemplate(key);
+    }, []);
+    
+    const handleAddCustomGuideline = useCallback(() => {
+        const newGuideline = customGuidelineInput.trim();
+        if (newGuideline) {
+            setCustomGuidelines(prev => [...prev, newGuideline]);
+            setCustomGuidelineInput('');
+        }
+    }, [customGuidelineInput]);
+
+    const handleRemoveCustomGuideline = useCallback((indexToRemove: number) => {
+        setCustomGuidelines(prev => prev.filter((_, index) => index !== indexToRemove));
+    }, []);
+
 
     const handleFormSubmit = () => {
-        const formData = new FormData();
-        formData.set('projectIdea', projectIdea);
-        customGuidelines.forEach(g => formData.append('guidelines[]', g));
+        const currentTemplate = templates[selectedTemplate];
+        if (!currentTemplate) {
+            dispatch({ type: 'GENERATION_FAILURE', payload: 'Selected template not found.' });
+            return;
+        }
+
+        const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
+        let fullPrompt = currentTemplate.prompt;
         
-        const validatedFields = GenerateProposalSchema.safeParse(Object.fromEntries(formData));
+        if (allGuidelines.length > 0) {
+            fullPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + allGuidelines.map(g => `- ${g}`).join('\n');
+        }
+
+        const validatedFields = GenerateProposalSchema.safeParse({
+            projectIdea,
+            guidelines: allGuidelines,
+            prompt: fullPrompt
+        });
 
         if (!validatedFields.success) {
             dispatch({ type: 'GENERATION_FAILURE', payload: 'Project idea cannot be empty.' });
             return;
         }
         
-        const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
-        if (!proposalAgent) {
-            dispatch({ type: 'GENERATION_FAILURE', payload: 'Proposal agent not found.' });
-            return;
-        };
-        
         startTransition(async () => {
             dispatch({ type: 'GENERATION_START' });
-
-            if (!proposalAgent.isEnabled) {
-                dispatch({ type: 'GENERATION_FAILURE', payload: 'The Proposal Generation agent is currently disabled.' });
-                return;
-            }
 
             try {
                 if (!user) throw new Error("User not authenticated.");
 
-                // Construct the prompt on the client side
-                let fullPrompt = typeof proposalAgent.prompt === 'string' 
-                    ? proposalAgent.prompt 
-                    : proposalAgent.prompt.base;
-
-                if (validatedFields.data.guidelines && validatedFields.data.guidelines.length > 0) {
-                    fullPrompt += '\n\nAdditionally, please adhere to the following custom guidelines:\n' + validatedFields.data.guidelines.map(g => `- ${g}`).join('\n');
-                }
-                
-                // Use the API route for proposal generation
                 const response = await fetch('/api/generate-proposal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         projectIdea: validatedFields.data.projectIdea,
-                        prompt: fullPrompt // Send the fully constructed prompt
+                        prompt: validatedFields.data.prompt
                     }),
                 });
 
@@ -121,8 +138,17 @@ export function useProposalBuilder() {
         isGenerating,
         projectIdea,
         setProjectIdea,
+        handleFormSubmit,
+        // Template related
+        templates,
+        selectedTemplate,
+        handleTemplateChange,
+        // Guideline related
         customGuidelines,
         setCustomGuidelines,
-        handleFormSubmit
+        customGuidelineInput,
+        setCustomGuidelineInput,
+        handleAddCustomGuideline,
+        handleRemoveCustomGuideline,
     };
 }

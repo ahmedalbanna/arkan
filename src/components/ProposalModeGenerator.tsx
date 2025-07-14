@@ -24,8 +24,6 @@ export function ProposalModeGenerator() {
         isGenerating,
         projectIdea,
         setProjectIdea,
-        customGuidelines,
-        setCustomGuidelines,
         handleFormSubmit,
     } = useProposalState();
     
@@ -63,7 +61,7 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
@@ -129,8 +127,6 @@ export function ProposalModeGenerator() {
                     <ProposalGenerationTools
                         isDisabled={!projectIdea || isGenerating}
                         isGenerating={isGenerating}
-                        customGuidelines={customGuidelines}
-                        setCustomGuidelines={setCustomGuidelines}
                     />
                 </div>
 
