@@ -19,7 +19,7 @@ import { useCodeState } from '@/context/CodeStateContext';
 function GenerateButton() {
     const { isGenerating } = useCodeState();
     return (
-        <Button type="submit" disabled={isGenerating} className="font-headline">
+        <Button type="submit" disabled={isGenerating} className="font-headline w-full">
             {isGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -174,13 +174,74 @@ export default function CodeGenerator() {
     );
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
-            {/* Left Column */}
-            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                 <Card>
-                    <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(); }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(); }}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    {(state.html || state.css || state.javascript) && (
+                        <Card>
+                            <CardHeader className="flex-row items-center justify-between">
+                                <CardTitle className="font-headline">Generated Code</CardTitle>
+                                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
+                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    Download ZIP
+                                </Button>
+                            </CardHeader>
+                            <CardContent>
+                                <Tabs defaultValue="html" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-3">
+                                        <TabsTrigger value="html">HTML</TabsTrigger>
+                                        <TabsTrigger value="css">CSS</TabsTrigger>
+                                        <TabsTrigger value="javascript">JS</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="html" className="mt-4">
+                                        <CodeDisplay code={state.html || ''} language="html" />
+                                    </TabsContent>
+                                    <TabsContent value="css" className="mt-4">
+                                        <CodeDisplay code={state.css || ''} language="css" />
+                                    </TabsContent>
+                                    <TabsContent value="javascript" className="mt-4">
+                                        <CodeDisplay code={state.javascript || '// No JavaScript generated'} language="javascript" />
+                                    </TabsContent>
+                                </Tabs>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+
+                {/* Center Column */}
+                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                    <Card className="h-full">
                         <CardHeader>
-                            <CardTitle className="font-headline">Describe your UI</CardTitle>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="font-headline flex items-center gap-2">
+                                    <Tv className="w-6 h-6" />
+                                    Live Preview
+                                </CardTitle>
+                                {srcDoc && (
+                                    <div className="flex items-center gap-1">
+                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
+                                            {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
+                                            <Expand className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                        {renderPreview(false)}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">Generation Tools</CardTitle>
+                            <CardDescription>Describe the UI component you want to create.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
@@ -190,6 +251,7 @@ export default function CodeGenerator() {
                                 required
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
+                                disabled={state.isGenerating}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
@@ -198,82 +260,20 @@ export default function CodeGenerator() {
                         <CardFooter>
                             <GenerateButton />
                         </CardFooter>
-                    </form>
-                </Card>
-            </div>
-
-            {/* Center Column */}
-            <div className="lg:col-span-6 overflow-y-auto pr-2">
-                 <Card className="h-full">
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle className="font-headline flex items-center gap-2">
-                                <Tv className="w-6 h-6" />
-                                Live Preview
-                            </CardTitle>
-                            {srcDoc && (
-                                <div className="flex items-center gap-1">
-                                    <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
-                                        {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
-                                        <Expand className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                       {renderPreview(false)}
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Right Column */}
-            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                {(state.html || state.css || state.javascript) && (
-                    <Card>
-                        <CardHeader>
-                             <div className="flex justify-between items-center">
-                                <CardTitle className="font-headline">Generated Code</CardTitle>
-                                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
-                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    Download ZIP
-                                </Button>
-                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Tabs defaultValue="html" className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="html">HTML</TabsTrigger>
-                                    <TabsTrigger value="css">CSS</TabsTrigger>
-                                    <TabsTrigger value="javascript">JS</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="html" className="mt-4">
-                                    <CodeDisplay code={state.html || ''} language="html" />
-                                </TabsContent>
-                                <TabsContent value="css" className="mt-4">
-                                    <CodeDisplay code={state.css || ''} language="css" />
-                                </TabsContent>
-                                <TabsContent value="javascript" className="mt-4">
-                                    <CodeDisplay code={state.javascript || '// No JavaScript generated'} language="javascript" />
-                                </TabsContent>
-                            </Tabs>
-                        </CardContent>
                     </Card>
-                )}
-            </div>
+                </div>
 
-            <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
-                <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
-                    <DialogHeader className="flex-row items-center justify-between border-b pb-2">
-                        <DialogTitle>Expanded Preview</DialogTitle>
-                    </DialogHeader>
-                    <div className="flex-grow min-h-0">
-                         {renderPreview(true)}
-                    </div>
-                </DialogContent>
-            </Dialog>
-        </div>
+                <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
+                    <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
+                        <DialogHeader className="flex-row items-center justify-between border-b pb-2">
+                            <DialogTitle>Expanded Preview</DialogTitle>
+                        </DialogHeader>
+                        <div className="flex-grow min-h-0">
+                            {renderPreview(true)}
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </form>
     );
 }

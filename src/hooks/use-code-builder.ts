@@ -14,23 +14,26 @@ export interface CodeGenerationState {
   css?: string;
   javascript?: string;
   error?: string;
+  isGenerating?: boolean; // Add this to the state
 }
 
 type Action =
   | { type: 'GENERATION_START' }
-  | { type: 'GENERATION_SUCCESS'; payload: Omit<CodeGenerationState, 'error'> }
+  | { type: 'GENERATION_SUCCESS'; payload: Omit<CodeGenerationState, 'error' | 'isGenerating'> }
   | { type: 'GENERATION_FAILURE'; payload: string };
 
-const initialState: CodeGenerationState = {};
+const initialState: CodeGenerationState = {
+    isGenerating: false,
+};
 
 function reducer(state: CodeGenerationState, action: Action): CodeGenerationState {
   switch (action.type) {
     case 'GENERATION_START':
-      return { ...state, error: undefined };
+      return { ...state, error: undefined, isGenerating: true };
     case 'GENERATION_SUCCESS':
-      return { ...action.payload, error: undefined };
+      return { ...action.payload, error: undefined, isGenerating: false };
     case 'GENERATION_FAILURE':
-      return { ...state, error: action.payload };
+      return { ...state, error: action.payload, isGenerating: false };
     default:
       return state;
   }
@@ -42,7 +45,7 @@ const GenerateCodeSchema = z.object({
 
 export function useCodeBuilder() {
     const [state, dispatch] = useReducer(reducer, initialState);
-    const [isGenerating, startTransition] = useTransition();
+    const [isGenerating, startTransition] = useTransition(); // This is for concurrent rendering, not the loading state itself
     const [prompt, setPrompt] = useState('');
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
@@ -55,8 +58,8 @@ export function useCodeBuilder() {
             return;
         }
 
+        dispatch({ type: 'GENERATION_START' });
         startTransition(async () => {
-            dispatch({ type: 'GENERATION_START' });
             try {
                 if (!user) throw new Error("User not authenticated.");
                 await deductCredit(user.id, 1);
@@ -75,8 +78,7 @@ export function useCodeBuilder() {
     };
 
     return {
-        state,
-        isGenerating,
+        state: { ...state, isGenerating: isGenerating || state.isGenerating }, // Combine both generating states
         prompt,
         setPrompt,
         handleGenerateCode
