@@ -28,11 +28,6 @@ export interface ReportState {
 
 export type ReportAction =
   | { type: 'SET_STATE'; payload: Partial<ReportState> }
-  | { type: 'UPDATE_SECTION'; payload: { key: SectionName; value: string } }
-  | { type: 'UPDATE_DIAGRAM_CODE'; payload: { key: DiagramType; code: string } }
-  | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
-  | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
-  | { type: 'REMOVE_EXTERNAL_CONTEXT' }
   | { type: 'GENERATION_START'; payload: { item?: string } }
   | { type: 'GENERATION_SUCCESS'; payload: Partial<Omit<ReportState, 'proposal' | 'proposalJson'>> }
   | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
@@ -52,22 +47,6 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
     case 'SET_STATE':
         const { proposal, proposalJson, ...restOfPayload } = action.payload;
         return { ...state, ...restOfPayload };
-    case 'UPDATE_SECTION':
-        return { ...state, sections: { ...state.sections, [action.payload.key]: action.payload.value }};
-    case 'UPDATE_DIAGRAM_CODE':
-        return { ...state, diagrams: { ...state.diagrams, [action.payload.key]: { ...state.diagrams![action.payload.key]!, plantUmlCode: action.payload.code } }};
-    case 'TOGGLE_CONTEXT_SELECTION': {
-      const { parentKey, contextKey } = action.payload;
-      const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
-      if (!newSelections[parentKey]) newSelections[parentKey] = {};
-      newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
-      return { ...state, contextSelections: newSelections };
-    }
-    case 'SET_EXTERNAL_CONTEXT':
-      return { ...state, externalContext: action.payload };
-    case 'REMOVE_EXTERNAL_CONTEXT':
-      const { externalContext, ...rest } = state;
-      return { ...rest, evaluation: state.evaluation };
     case 'GENERATION_START':
       return { ...state, error: undefined, lastGenerated: action.payload.item as any };
     case 'GENERATION_SUCCESS':
@@ -117,7 +96,7 @@ export function useReportState() {
     handleSubmit(formData);
   };
   
-  const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
+  const toggleContextSelection = (parentKey: string, contextKey: string) => builderDispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
   const setExternalContext = (fileName: string, content: string) => builderDispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
   const removeExternalContext = () => builderDispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
   

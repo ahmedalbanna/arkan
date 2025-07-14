@@ -216,6 +216,10 @@ export function useReportBuilder() {
     const fileName = `${state.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`;
     saveAs(blob, fileName);
   };
+  
+  const handleProposalUpdate = (path: string, value: any) => {
+    dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
+  }
 
   const handleGenerateProposal = useCallback(async (projectIdea: string, prompt: string) => {
       startTransition(async () => {
@@ -255,5 +259,6 @@ export function useReportBuilder() {
     handleSaveProjectFile,
     handleLoadProjectFile,
     handleGenerateProposal,
+    handleProposalUpdate,
   };
 }
