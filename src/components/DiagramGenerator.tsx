@@ -1,16 +1,13 @@
 
 'use client';
 
-import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import DiagramViewer from './DiagramViewer';
 import { useDiagramState } from '@/context/DiagramStateContext';
 import { diagramConfig } from '@/lib/report-config';
-import { GitGraph } from 'lucide-react';
-import { ProposalEditor } from './report-generator/ProposalEditor'; // Reusing this component
+import { GitGraph, AlertCircle } from 'lucide-react';
 import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
 import { Skeleton } from './ui/skeleton';
-
 
 function DiagramSkeleton() {
   return (
@@ -25,7 +22,6 @@ export default function DiagramGenerator() {
     const {
         state,
         proposalJson,
-        setProposalJson,
         isAnythingGenerating,
         generatingDiagram,
         handleFormSubmit,
@@ -38,22 +34,24 @@ export default function DiagramGenerator() {
     const currentDiagramType = state.lastGenerated;
     const currentDiagramData = currentDiagramType ? state.diagrams?.[currentDiagramType] : undefined;
 
+    if (!proposalJson) {
+      return (
+          <Card className="flex items-center justify-center h-full min-h-[400px]">
+              <div className="text-center text-muted-foreground p-8">
+                  <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                  <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
+                  <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+              </div>
+          </Card>
+      )
+    }
+
     return (
         <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(new FormData(e.currentTarget)); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
-                {/* Left Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                    <ProposalEditor
-                        proposalJson={proposalJson}
-                        onProposalJsonChange={setProposalJson}
-                        isDisabled={isAnythingGenerating}
-                        error={state.error && !generatingDiagram ? state.error : undefined}
-                    />
-                </div>
-
                 {/* Center Column */}
-                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-8 overflow-y-auto pr-2">
                      <Card className="h-full">
                         <CardHeader>
                             <CardTitle className="font-headline">Diagram Preview</CardTitle>
@@ -87,7 +85,7 @@ export default function DiagramGenerator() {
                 </div>
 
                 {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                     <DiagramGenerationTools
                         isDisabled={!proposalJson || isAnythingGenerating}
                         diagramsState={state.diagrams || {}}
