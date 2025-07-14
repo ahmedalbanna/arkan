@@ -33,6 +33,7 @@ import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram'
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
+import { evaluateReport, type EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -50,12 +51,13 @@ export interface ReportState {
   presentation?: {
     slides: PresentationSlide[];
   }
+  evaluation?: EvaluateReportOutput;
   externalContext?: {
     fileName: string;
     content: string;
   }
   error?: string;
-  lastGenerated?: SectionName | DiagramType | 'presentation';
+  lastGenerated?: SectionName | DiagramType | 'presentation' | 'evaluation';
 }
 
 const GenerateItemSchema = z.object({
@@ -67,6 +69,7 @@ const GenerateItemSchema = z.object({
   externalContextContent: z.string().optional(),
   guidelines: z.array(z.string()).optional(),
   instructionText: z.string().optional(),
+  acceptanceCriteria: z.string().optional(),
 });
 
 const sectionNames: SectionName[] = [
@@ -123,6 +126,7 @@ export async function handleGenerateReportItem(
     externalContextContent: formData.get('externalContextContent') ?? undefined,
     guidelines: formData.getAll('guidelines[]').map(String),
     instructionText: formData.get('instructionText') ?? undefined,
+    acceptanceCriteria: formData.get('acceptanceCriteria') ?? undefined,
   };
 
   const validatedFields = GenerateItemSchema.safeParse(formValues);
@@ -145,6 +149,7 @@ export async function handleGenerateReportItem(
     externalContextContent,
     guidelines,
     instructionText,
+    acceptanceCriteria,
   } = validatedFields.data;
 
 
@@ -185,6 +190,24 @@ export async function handleGenerateReportItem(
       ...prevState,
       error: 'The proposal data does not match the required structure.',
     };
+  }
+  
+  if (itemToGenerate === 'evaluate') {
+      if (!acceptanceCriteria) {
+          return { ...prevState, error: 'Acceptance criteria are required for evaluation.' };
+      }
+      try {
+          const result = await evaluateReport({
+              proposal: validatedProposal.data,
+              reportSections: prevState.sections,
+              diagrams: Object.fromEntries(Object.entries(prevState.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+              acceptanceCriteria: acceptanceCriteria.split('\n').filter(line => line.trim() !== ''),
+          });
+          return { ...prevState, evaluation: result, lastGenerated: 'evaluation', error: undefined };
+      } catch (e) {
+          console.error('Error evaluating report:', e);
+          return { ...prevState, error: 'An error occurred during evaluation.' };
+      }
   }
   
   const agentId = (sectionConfig[itemToGenerate as SectionName] || diagramConfig[itemToGenerate as DiagramType] || presentationConfig.presentation)?.agentId;

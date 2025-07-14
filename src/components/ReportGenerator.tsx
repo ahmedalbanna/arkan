@@ -7,6 +7,7 @@ import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
 import { Loader2 } from 'lucide-react';
 import { useReportState } from '@/context/ReportStateContext';
+import { EvaluationTools } from './report-generator/EvaluationTools';
 
 
 export default function ReportGenerator() {
@@ -92,6 +93,11 @@ export default function ReportGenerator() {
             onContextToggle={toggleContextSelection}
             onExternalContextUploaded={setExternalContext}
             onExternalContextRemoved={removeExternalContext}
+          />
+           <EvaluationTools
+            isDisabled={isToolsDisabled}
+            isEvaluating={isAnythingGenerating && generatingItem === 'evaluate'}
+            evaluationResult={state.evaluation}
           />
         </div>
       </div>

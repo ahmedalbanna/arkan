@@ -12,6 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { useAgents } from './use-agents';
 import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
+import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 
 
 const STORAGE_KEY = 'arkan-report-generator-state';
@@ -21,12 +22,13 @@ export interface ReportState {
   sections: { [key in SectionName]?: string };
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
   presentation?: { slides: any[] };
+  evaluation?: EvaluateReportOutput;
   externalContext?: { fileName: string; content: string };
   proposal: ProjectProposal | null;
   proposalJson: string;
   projectIdea: string;
   contextSelections: Record<string, Record<string, boolean>>;
-  lastGenerated: SectionName | DiagramType | 'presentation' | null;
+  lastGenerated: SectionName | DiagramType | 'presentation' | 'evaluation' | null;
   error?: string;
 }
 
@@ -122,11 +124,16 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
       return { ...state, externalContext: action.payload };
     case 'REMOVE_EXTERNAL_CONTEXT':
       const { externalContext, ...rest } = state;
-      return rest;
+      return { ...rest, evaluation: state.evaluation };
     case 'GENERATION_START':
       return { ...state, error: undefined };
     case 'GENERATION_SUCCESS':
-      return { ...state, ...action.payload, error: undefined };
+        // When new content is generated, clear the old evaluation
+        const { evaluation, ...restOfPayload } = action.payload;
+        if (action.payload.lastGenerated !== 'evaluation') {
+            return { ...state, ...restOfPayload, error: undefined, evaluation: undefined };
+        }
+        return { ...state, ...action.payload, error: undefined };
     case 'GENERATION_ERROR':
         return { ...state, error: action.payload };
     default:
@@ -175,7 +182,7 @@ export function useReportBuilder() {
 
   useEffect(() => {
     if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated] || (presentationConfig as any)[state.lastGenerated];
+        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated] || (presentationConfig as any)[state.lastGenerated] || (state.lastGenerated === 'evaluation' ? { title: 'Report Evaluation' } : null);
         const title = itemConfig?.title || state.lastGenerated;
         
         toast({
@@ -245,7 +252,7 @@ export function useReportBuilder() {
 
         const result = await generateProposal({
             projectIdea,
-            prompt: proposalAgent.prompt as string,
+            prompt: typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base
         });
 
         saveToCache(cacheKey, result);
