@@ -11,6 +11,10 @@ import DiagramGenerator from '@/components/DiagramGenerator';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ReportStateProvider } from '@/context/ReportStateContext';
+import { ProposalStateProvider } from '@/context/ProposalStateContext';
+import { DiagramStateProvider } from '@/context/DiagramStateContext';
+import { CodeStateProvider } from '@/context/CodeStateContext';
+import { PresentationStateProvider } from '@/context/PresentationStateContext';
 
 export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState("report");
@@ -40,15 +44,31 @@ export default function GeneratePage() {
       </div>
 
       <div className="w-full">
-        {activeTab === 'proposal' && <ProposalModeGenerator />}
-        {activeTab === 'report' && (
-        <ReportStateProvider>
-            <ReportGenerator />
-        </ReportStateProvider>
+        {activeTab === 'proposal' && (
+          <ProposalStateProvider>
+            <ProposalModeGenerator />
+          </ProposalStateProvider>
         )}
-        {activeTab === 'diagram' && <DiagramGenerator />}
-        {activeTab === 'code' && <CodeGenerator />}
-        {activeTab === 'presentation' && <PresentationGenerator />}
+        {activeTab === 'report' && (
+          <ReportStateProvider>
+              <ReportGenerator />
+          </ReportStateProvider>
+        )}
+        {activeTab === 'diagram' && (
+          <DiagramStateProvider>
+            <DiagramGenerator />
+          </DiagramStateProvider>
+        )}
+        {activeTab === 'code' && (
+          <CodeStateProvider>
+            <CodeGenerator />
+          </CodeStateProvider>
+        )}
+        {activeTab === 'presentation' && (
+          <PresentationStateProvider>
+            <PresentationGenerator />
+          </PresentationStateProvider>
+        )}
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
 
 'use client';
 
-import { useActionState, useState, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
-import { handleGenerateDiagram, type DiagramState } from '@/app/generate-diagrams/actions';
+import { useState, useEffect } from 'react';
 import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
@@ -14,19 +12,18 @@ import { useAgents } from '@/hooks/use-agents';
 import type { Agent } from '@/lib/agents';
 import DiagramViewer from './DiagramViewer';
 import { diagramConfig } from '@/lib/report-config';
-import { useAuth } from '@/context/AuthContext';
+import { useDiagramState } from '@/context/DiagramStateContext';
 
 function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agent?: Agent }) {
-    const { pending, data } = useFormStatus();
-
-    const isGeneratingThis = pending && data?.get('diagramToGenerate') === diagramType;
+    const { isGenerating, generatingDiagram } = useDiagramState();
+    const isGeneratingThis = isGenerating && generatingDiagram === diagramType;
 
     return (
         <Button
             type="submit"
             name="diagramToGenerate"
             value={diagramType}
-            disabled={pending || !agent?.isEnabled}
+            disabled={isGenerating || !agent?.isEnabled}
             variant="secondary"
             className="w-full justify-start"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${diagramConfig[diagramType].title}`}
@@ -42,8 +39,7 @@ function GenerateButton({ diagramType, agent }: { diagramType: DiagramType, agen
 }
 
 function RenderButton() {
-    const { pending, data } = useFormStatus();
-    const isRendering = pending && data?.get('formAction') === 'render';
+    const { isRendering } = useDiagramState();
 
     return (
         <Button type="submit" name="formAction" value="render" disabled={isRendering} className="font-headline">
@@ -54,48 +50,32 @@ function RenderButton() {
 }
 
 export default function DiagramGenerator() {
-    const { fetchUser } = useAuth();
-    const initialState: DiagramState = { plantUmlCodes: {} };
-    const [state, formAction] = useActionState(handleGenerateDiagram, initialState);
+    const {
+        state,
+        proposalJson,
+        setProposalJson,
+        editedCodes,
+        handleCodeChange,
+        handleFormSubmit
+    } = useDiagramState();
 
-    const [proposalJson, setProposalJson] = useState('');
     const { agents, isLoaded } = useAgents();
-    const [editedCodes, setEditedCodes] = useState<Partial<Record<DiagramType, string>>>({});
-
+    
     const orderedDiagrams = DiagramTypeSchema.options;
     const diagramAgents = orderedDiagrams.map(key => agents.find(a => a.id === diagramConfig[key].agentId));
-
-    useEffect(() => {
-        if (state.lastGenerated && state.currentPlantUmlCode && !state.error) {
-            // Sync the generated code with the editor state
-            setEditedCodes(prev => ({
-                ...prev,
-                [state.lastGenerated!]: state.currentPlantUmlCode,
-            }));
-            fetchUser();
-        }
-    }, [state.lastGenerated, state.currentPlantUmlCode, state.imageUrl, proposalJson, fetchUser, state.error]);
-
+    
     const currentDiagramType = state.lastGenerated;
     const currentGeneratedCode = currentDiagramType ? state.plantUmlCodes?.[currentDiagramType] : undefined;
     const currentEditedCode = currentDiagramType ? editedCodes[currentDiagramType] : undefined;
     const hasChanges = currentGeneratedCode !== undefined && currentEditedCode !== undefined && currentGeneratedCode !== currentEditedCode;
 
-    const handleCodeChange = (newCode: string) => {
-        if (currentDiagramType) {
-            setEditedCodes(prev => ({ ...prev, [currentDiagramType]: newCode }));
-        }
-    };
-
     return (
-        <form action={formAction}>
+        <form action={handleFormSubmit}>
             {Object.entries(state.plantUmlCodes ?? {}).map(([type, code]) => (
                 code ? <input type="hidden" name={`plantUmlCode_${type}`} value={code} key={type} /> : null
             ))}
             {currentDiagramType && <input type="hidden" name="diagramType" value={currentDiagramType} />}
             {currentEditedCode && <input type="hidden" name="plantUmlCode" value={currentEditedCode} />}
-
-
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">

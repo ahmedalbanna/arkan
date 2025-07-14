@@ -1,22 +1,20 @@
 
 'use client';
 
-import { useState, useActionState, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
-import { handleGeneratePresentation, type PresentationState } from '@/app/generate-presentation/actions';
+import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Presentation } from 'lucide-react';
-import { useAgents } from '@/hooks/use-agents';
 import PresentationViewer from './PresentationViewer';
+import { usePresentationState } from '@/context/PresentationStateContext';
 
 function GenerateButton() {
-    const { pending } = useFormStatus();
+    const { isGenerating } = usePresentationState();
     return (
-        <Button type="submit" disabled={pending} className="w-full font-headline">
-            {pending ? (
+        <Button type="submit" disabled={isGenerating} className="w-full font-headline">
+            {isGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -32,14 +30,14 @@ function GenerateButton() {
 }
 
 export default function PresentationGenerator() {
-    const initialState: PresentationState = {};
-    const [state, formAction] = useActionState(handleGeneratePresentation, initialState);
-
-    const [proposalJson, setProposalJson] = useState('');
-    const { agents, isLoaded } = useAgents();
-    const [showPresentation, setShowPresentation] = useState(false);
+    const {
+        state,
+        proposalJson,
+        setProposalJson,
+        handleGeneratePresentation
+    } = usePresentationState();
     
-    const presentationAgent = agents.find(a => a.id === 'generate-presentation');
+    const [showPresentation, setShowPresentation] = useState(false);
 
     useEffect(() => {
         if (state.slides && state.slides.length > 0) {
@@ -48,7 +46,7 @@ export default function PresentationGenerator() {
     }, [state.slides]);
 
     return (
-        <form action={formAction} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(); }} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
                     <Card>

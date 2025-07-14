@@ -1,26 +1,23 @@
 
 'use client';
 
-import { useActionState, useState } from 'react';
-import { useFormStatus } from 'react-dom';
-import { handleGenerateProposal, type ProposalGenerationState } from '@/app/generate-proposal/actions';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Loader2, Sparkles, FileText, Download } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
+import { useProposalState } from '@/context/ProposalStateContext';
 
 function GenerateButton() {
-    const { pending } = useFormStatus();
+    const { isGenerating } = useProposalState();
     return (
-        <Button type="submit" disabled={pending} className="font-headline">
-            {pending ? (
+        <Button type="submit" disabled={isGenerating} className="font-headline">
+            {isGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -36,27 +33,21 @@ function GenerateButton() {
 }
 
 export function ProposalModeGenerator() {
-    const { fetchUser } = useAuth();
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
-
-    const initialState: ProposalGenerationState = {};
-    const [state, formAction] = useActionState(handleGenerateProposal, initialState);
+    const { state, isGenerating, projectIdea, setProjectIdea, handleGenerateProposal } = useProposalState();
 
     useEffect(() => {
         if(state.proposal && !state.error) {
             toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
-            fetchUser();
         }
         if(state.error) {
             toast({ title: 'Generation Failed', description: state.error, variant: 'destructive' });
         }
-    }, [state, fetchUser, toast]);
+    }, [state, toast]);
 
     const handleExport = () => {
         if(state.proposal) {
-            // For simplicity, we use the first available template, 'modern'.
-            // A more advanced implementation could let the user choose.
             const templateKey: TemplateKey = Object.keys(docxTemplates)[0] as TemplateKey || 'modern';
             exportProposalAsDocx(state.proposal, templateKey);
         }
@@ -66,7 +57,7 @@ export function ProposalModeGenerator() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
-                <form action={formAction}>
+                <form onSubmit={(e) => { e.preventDefault(); handleGenerateProposal(); }}>
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">Generate a Project Proposal</CardTitle>
@@ -80,6 +71,8 @@ export function ProposalModeGenerator() {
                                 placeholder='A mobile app for tracking personal fitness goals, including workouts and nutrition.'
                                 rows={8}
                                 required
+                                value={projectIdea}
+                                onChange={(e) => setProjectIdea(e.target.value)}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
