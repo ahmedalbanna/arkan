@@ -289,7 +289,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                                     />
                                                                     <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
-                                                                            <diagramConfig[contextKey].icon className="h-4 w-4" />
+                                                                            
                                                                             {diagramConfig[contextKey].title}
                                                                         </div>
                                                                     </Label>
