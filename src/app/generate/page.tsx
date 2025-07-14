@@ -48,7 +48,7 @@ function GeneratePageContent() {
         </Tabs>
       </div>
 
-      <div className="w-full h-[calc(100vh-220px)]">
+      <div className="w-full h-[calc(100vh-180px)]">
         {activeTab === 'proposal' && (
           <ProposalStateProvider>
             <ProposalModeGenerator />

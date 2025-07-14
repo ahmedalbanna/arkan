@@ -39,7 +39,7 @@ export default function DiagramGenerator() {
     const currentDiagramData = currentDiagramType ? state.diagrams?.[currentDiagramType] : undefined;
 
     return (
-        <form action={handleFormSubmit}>
+        <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(new FormData(e.currentTarget)); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
                 {/* Left Column */}
