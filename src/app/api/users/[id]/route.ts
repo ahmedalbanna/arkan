@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { getUserProfile, updateUser } from '@/lib/db/queries';
 
 // GET /api/users/[id]
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const userId = params.id;
     if (!userId) {
@@ -29,7 +30,8 @@ const updateUserSchema = z.object({
   credits: z.coerce.number().int().optional(),
 });
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   try {
     const userId = params.id;
     if (!userId) {
