@@ -2,25 +2,25 @@
 'use client';
 
 import { useState } from 'react';
-import ReportGenerator from "@/components/ReportGenerator";
-import CodeGenerator from "@/components/CodeGenerator";
-import PresentationGenerator from '@/components/PresentationGenerator';
-import { ProposalModeGenerator } from '@/components/ProposalModeGenerator';
-import DiagramGenerator from '@/components/DiagramGenerator';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ReportStateProvider } from '@/context/ReportStateContext';
-import { CodeStateProvider } from '@/context/CodeStateContext';
-import { PresentationStateProvider } from '@/context/PresentationStateContext';
-import { DiagramStateProvider } from '@/context/DiagramStateContext';
 import { SessionActions } from '@/components/SessionActions';
-import { BuilderStateProvider } from '@/context/BuilderStateContext';
-import { ProposalStateProvider } from '@/context/ProposalStateContext';
+import { BuilderStateProvider, useBuilderState } from '@/context/BuilderStateContext';
 import { Footer } from '@/components/layout/Footer';
+
+// Lazy load components
+import dynamic from 'next/dynamic';
+
+const ProposalModeGenerator = dynamic(() => import('@/components/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator));
+const ReportGenerator = dynamic(() => import('@/components/ReportGenerator'));
+const DiagramGenerator = dynamic(() => import('@/components/DiagramGenerator'));
+const CodeGenerator = dynamic(() => import('@/components/CodeGenerator'));
+const PresentationGenerator = dynamic(() => import('@/components/PresentationGenerator'));
 
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
+  const { state } = useBuilderState();
 
   return (
     <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
@@ -50,31 +50,21 @@ function GeneratePageContent() {
       </div>
 
       <div className="w-full flex-grow">
-        {activeTab === 'proposal' && (
-          <ProposalStateProvider>
+          <TabsContent value="proposal" className="h-full">
             <ProposalModeGenerator />
-          </ProposalStateProvider>
-        )}
-        {activeTab === 'report' && (
-          <ReportStateProvider>
-            <ReportGenerator />
-          </ReportStateProvider>
-        )}
-        {activeTab === 'diagram' && (
-          <DiagramStateProvider>
-            <DiagramGenerator />
-          </DiagramStateProvider>
-        )}
-        {activeTab === 'code' && (
-          <CodeStateProvider>
-            <CodeGenerator />
-          </CodeStateProvider>
-        )}
-        {activeTab === 'presentation' && (
-          <PresentationStateProvider>
-            <PresentationGenerator />
-          </PresentationStateProvider>
-        )}
+          </TabsContent>
+          <TabsContent value="report" className="h-full">
+            {activeTab === 'report' && <ReportGenerator />}
+          </TabsContent>
+          <TabsContent value="diagram" className="h-full">
+            {activeTab === 'diagram' && <DiagramGenerator />}
+          </TabsContent>
+          <TabsContent value="code" className="h-full">
+             <CodeGenerator />
+          </TabsContent>
+          <TabsContent value="presentation" className="h-full">
+            {activeTab === 'presentation' && <PresentationGenerator />}
+          </TabsContent>
       </div>
     </div>
   );

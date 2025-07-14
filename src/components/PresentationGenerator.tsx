@@ -5,28 +5,19 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Presentation, FileJson, GitGraph, BookCheck } from 'lucide-react';
+import { Loader2, Sparkles, Presentation, AlertCircle } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
-import { usePresentationState } from '@/context/PresentationStateContext';
-import { ProposalEditor } from './report-generator/ProposalEditor';
 import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
-import { ScrollArea } from './ui/scroll-area';
-import { Checkbox } from './ui/checkbox';
-import { Label } from './ui/label';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { cn } from '@/lib/utils';
-import { PresentationActions } from './presentation-generator/PresentationActions';
-
+import { usePresentationState } from '@/context/PresentationStateContext';
 
 export default function PresentationGenerator() {
     const {
         state,
         isGenerating,
-        proposalJson,
-        setProposalJson,
-        reportState,
-        setReportState,
+        proposal,
         handleGeneratePresentation,
+        setReportStateFromFile,
+        reportState,
         contextSelections,
         toggleContextSelection,
     } = usePresentationState();
@@ -39,42 +30,24 @@ export default function PresentationGenerator() {
         }
     }, [state.slides]);
 
-    const isToolsDisabled = !proposalJson || isGenerating;
+    if (!proposal) {
+        return (
+            <Card className="flex items-center justify-center h-full min-h-[400px]">
+                <div className="text-center text-muted-foreground p-8">
+                    <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
+                    <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
+                    <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+                </div>
+            </Card>
+        )
+    }
     
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(new FormData(e.currentTarget)); }} className="space-y-6">
-             <input type="hidden" name="proposalJson" value={proposalJson} />
+        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
-                {/* Left Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                     <ProposalEditor
-                        proposalJson={proposalJson}
-                        onProposalJsonChange={setProposalJson}
-                        isDisabled={isGenerating}
-                        error={state.error}
-                    />
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline text-base">Upload Report File</CardTitle>
-                            <CardDescription className="text-xs">
-                                Upload a saved `.json` project file to use its sections and diagrams as context.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                             <input
-                                type="file"
-                                accept=".json"
-                                onChange={(e) => setReportState(e.target.files?.[0])}
-                                className="text-xs w-full"
-                                disabled={isGenerating}
-                            />
-                        </CardContent>
-                    </Card>
-                </div>
-
                 {/* Center Column */}
-                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-8 overflow-y-auto pr-2">
                     {state?.slides && state.slides.length > 0 ? (
                         <>
                          <Alert className="mb-6">
@@ -115,17 +88,16 @@ export default function PresentationGenerator() {
                 )}
 
                 {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                    <PresentationActions 
-                        isGenerating={isGenerating}
-                        slides={state.slides}
-                    />
+                <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                      <PresentationGenerationTools
-                        isDisabled={isToolsDisabled}
+                        isDisabled={!proposal || isGenerating}
                         isGenerating={isGenerating}
+                        onGenerate={handleGeneratePresentation}
                         reportState={reportState}
+                        onContextFileChange={setReportStateFromFile}
                         contextSelections={contextSelections}
                         onContextToggle={toggleContextSelection}
+                        slides={state.slides}
                     />
                 </div>
 

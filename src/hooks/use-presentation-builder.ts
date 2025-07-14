@@ -10,6 +10,7 @@ import { AGENTS } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 export interface PresentationState {
   slides?: PresentationSlide[];
@@ -21,15 +22,14 @@ type ReportContextState = Pick<FullReportState, 'sections' | 'diagrams'>;
 type Action =
   | { type: 'GENERATION_START' }
   | { type: 'GENERATION_SUCCESS'; payload: PresentationSlide[] }
-  | { type: 'GENERATION_FAILURE'; payload: string }
-  | { type: 'SET_REPORT_STATE', payload: ReportContextState };
+  | { type: 'GENERATION_FAILURE'; payload: string };
 
 const initialState: PresentationState = {};
 
 function reducer(state: PresentationState, action: Action): PresentationState {
   switch (action.type) {
     case 'GENERATION_START':
-      return { ...state, error: undefined };
+      return { ...state, slides: undefined, error: undefined };
     case 'GENERATION_SUCCESS':
       return { slides: action.payload, error: undefined };
     case 'GENERATION_FAILURE':
@@ -40,16 +40,14 @@ function reducer(state: PresentationState, action: Action): PresentationState {
 }
 
 const GeneratePresentationSchema = z.object({
-  proposalJson: z.string().min(1, 'Please paste the project proposal content.'),
-  guidelines: z.array(z.string()).optional(),
-  instructionText: z.string().optional(),
+  proposal: ProjectProposalSchema
 });
 
 
 export function usePresentationBuilder() {
+    const { state: builderState } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
-    const [proposalJson, setProposalJson] = useState('');
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
@@ -58,7 +56,7 @@ export function usePresentationBuilder() {
     const [contextSelections, setContextSelections] = useState({ sections: {} as Record<string, boolean>, diagrams: {} as Record<string, boolean> });
 
 
-    const setReportState = (file: File | null) => {
+    const setReportStateFromFile = (file: File | null) => {
         if (!file) {
             setReportStateInternal({ sections: {}, diagrams: {} });
             setContextSelections({ sections: {}, diagrams: {} });
@@ -101,30 +99,14 @@ export function usePresentationBuilder() {
         }));
     }, []);
 
-    const handleGeneratePresentation = (formData?: FormData) => {
+    const handleGeneratePresentation = () => {
         
         const validatedFields = GeneratePresentationSchema.safeParse({ 
-            proposalJson,
-            guidelines: formData?.getAll('guidelines[]').map(String),
-            instructionText: formData?.get('instructionText') as string | undefined
+            proposal: builderState.proposal
         });
 
         if (!validatedFields.success) {
-            dispatch({ type: 'GENERATION_FAILURE', payload: 'Proposal JSON is required.' });
-            return;
-        }
-
-        let proposalData;
-        try {
-            proposalData = JSON.parse(validatedFields.data.proposalJson);
-        } catch (e) {
-            dispatch({ type: 'GENERATION_FAILURE', payload: 'Invalid JSON format. Please check the content.' });
-            return;
-        }
-
-        const validatedProposal = ProjectProposalSchema.safeParse(proposalData);
-        if (!validatedProposal.success) {
-            dispatch({ type: 'GENERATION_FAILURE', payload: 'The proposal data does not match the required structure.' });
+            dispatch({ type: 'GENERATION_FAILURE', payload: 'A valid proposal is required.' });
             return;
         }
 
@@ -147,12 +129,13 @@ export function usePresentationBuilder() {
                 const selectedSections = Object.fromEntries(
                     Object.entries(reportState.sections).filter(([key]) => contextSelections.sections[key])
                 ) as Record<SectionNameSchema, string>;
+                
                 const selectedDiagrams = Object.fromEntries(
                     Object.entries(reportState.diagrams).filter(([key]) => contextSelections.diagrams[key]).map(([key, value]) => [key, value.plantUmlCode])
                 ) as Record<DiagramTypeSchema, string>;
 
                 const result = await generatePresentation({
-                    proposal: validatedProposal.data,
+                    proposal: validatedFields.data.proposal,
                     sections: selectedSections,
                     diagrams: selectedDiagrams,
                     prompt: typeof presentationAgent.prompt === 'string' ? presentationAgent.prompt : presentationAgent.prompt.base
@@ -166,6 +149,7 @@ export function usePresentationBuilder() {
                 console.error(e);
                 const errorMessage = e.message || 'An error occurred while generating the presentation. Please try again.';
                 dispatch({ type: 'GENERATION_FAILURE', payload: errorMessage });
+                toast({ title: "Generation Failed", description: errorMessage, variant: 'destructive' });
             }
         });
     };
@@ -173,10 +157,9 @@ export function usePresentationBuilder() {
     return {
         state,
         isGenerating,
-        proposalJson,
-        setProposalJson,
+        proposal: builderState.proposal,
         reportState,
-        setReportState,
+        setReportStateFromFile,
         contextSelections,
         toggleContextSelection,
         handleGeneratePresentation
