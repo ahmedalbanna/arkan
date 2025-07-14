@@ -42,7 +42,8 @@ export type ReportAction =
   | { type: 'REMOVE_EXTERNAL_CONTEXT' }
   | { type: 'GENERATION_START'; payload: { item?: string } }
   | { type: 'GENERATION_SUCCESS'; payload: Partial<ReportState> }
-  | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
+  | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } }
+  | { type: 'GENERATE_PROPOSAL', payload: { projectIdea: string, prompt: string } };
 
 
 // 2. Initial State
@@ -130,6 +131,8 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
         return { ...state, ...action.payload, error: undefined };
     case 'GENERATION_ERROR':
         return { ...state, error: action.payload.error, lastGenerated: action.payload.item as any };
+    case 'GENERATE_PROPOSAL':
+        return { ...state, error: undefined, lastGenerated: 'proposal' };
     default:
       return state;
   }
@@ -140,7 +143,7 @@ export function useReportBuilder() {
   const [state, dispatch] = useReducer(reportReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
-  const [isGeneratingProposal, startProposalTransition] = useTransition();
+  const [isGenerating, startTransition] = useTransition();
 
   const { toast } = useToast();
   const { t } = useLocalization();
@@ -214,29 +217,16 @@ export function useReportBuilder() {
     saveAs(blob, fileName);
   };
 
-  const handleGenerateProposal = (projectIdea: string, customGuidelines: string[]) => {
-      const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
-      if (!proposalAgent) {
-          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'Proposal agent not found.', item: 'proposal' } });
-          return;
-      }
-      if (!proposalAgent.isEnabled) {
-          dispatch({ type: 'GENERATION_ERROR', payload: { error: 'The Proposal Generation agent is currently disabled.', item: 'proposal' } });
-          return;
-      }
-
-      startProposalTransition(async () => {
+  const handleGenerateProposal = async (projectIdea: string, prompt: string) => {
+      startTransition(async () => {
           dispatch({ type: 'GENERATION_START', payload: { item: 'proposal' } });
           try {
               if (!user) throw new Error("User not authenticated.");
-              let fullPrompt = typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base;
-              if (customGuidelines && customGuidelines.length > 0) {
-                  fullPrompt += '\\n\\nAdditionally, please adhere to the following custom guidelines:\\n' + customGuidelines.map(g => `- ${g}`).join('\\n');
-              }
+
               const response = await fetch('/api/generate-proposal', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ projectIdea, prompt: fullPrompt }),
+                  body: JSON.stringify({ projectIdea, prompt }),
               });
               const result = await response.json();
               if (!response.ok) throw new Error(result.message || 'API request failed');
@@ -244,22 +234,34 @@ export function useReportBuilder() {
               await deductCredit(user.id, 1);
               dispatch({ type: 'SET_PROPOSAL', payload: result });
               await fetchUser();
+              toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
           } catch (e: any) {
               dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An error occurred', item: 'proposal' } });
+              toast({ title: 'Generation Failed', description: e.message || 'An error occurred', variant: 'destructive' });
           }
       });
   };
+
+  useEffect(() => {
+    const originalDispatch = dispatch;
+    (dispatch as any) = (action: ReportAction) => {
+        if (action.type === 'GENERATE_PROPOSAL') {
+            handleGenerateProposal(action.payload.projectIdea, action.payload.prompt);
+        } else {
+            originalDispatch(action);
+        }
+    };
+  }, [handleGenerateProposal]);
 
 
   return {
     state,
     dispatch,
     isLoaded,
-    isGeneratingProposal,
-    isAnythingGenerating: isGeneratingProposal, // In this hook, it's only proposal generation
+    isGeneratingProposal: isGenerating && generatingItem === 'proposal',
+    isAnythingGenerating: isGenerating,
     handleNewSession,
     handleSaveProjectFile,
     handleLoadProjectFile,
-    handleGenerateProposal,
   };
 }

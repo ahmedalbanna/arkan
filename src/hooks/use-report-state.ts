@@ -11,10 +11,8 @@ import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { AGENTS } from '@/lib/agents';
 import { saveAs } from 'file-saver';
+import { useBuilderState } from './BuilderStateContext';
 
-
-const STORAGE_KEY = 'arkan-report-generator-state-v2';
-const PROPOSAL_STORAGE_KEY = 'arkan-proposal-state';
 
 // 1. Define State and Action Types
 export interface ReportState {
@@ -23,26 +21,20 @@ export interface ReportState {
   presentation?: { slides: any[] };
   evaluation?: EvaluateReportOutput;
   externalContext?: { fileName: string; content: string };
-  proposal: ProjectProposal | null;
-  proposalJson: string;
   contextSelections: Record<string, Record<string, boolean>>;
-  lastGenerated: 'proposal' | SectionName | DiagramType | 'presentation' | 'evaluation' | null;
+  lastGenerated: SectionName | DiagramType | 'presentation' | 'evaluation' | null;
   error?: string;
 }
 
 export type ReportAction =
   | { type: 'SET_STATE'; payload: Partial<ReportState> }
-  | { type: 'SET_PROPOSAL'; payload: ProjectProposal | null }
-  | { type: 'SET_PROPOSAL_JSON'; payload: string }
-  | { type: 'UPDATE_PROPOSAL_FIELD'; payload: { path: string; value: any } }
   | { type: 'UPDATE_SECTION'; payload: { key: SectionName; value: string } }
   | { type: 'UPDATE_DIAGRAM_CODE'; payload: { key: DiagramType; code: string } }
-  | { type: 'NEW_SESSION' }
   | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
   | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
   | { type: 'REMOVE_EXTERNAL_CONTEXT' }
   | { type: 'GENERATION_START'; payload: { item?: string } }
-  | { type: 'GENERATION_SUCCESS'; payload: Partial<ReportState> }
+  | { type: 'GENERATION_SUCCESS'; payload: Partial<Omit<ReportState, 'proposal' | 'proposalJson'>> }
   | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
 
 
@@ -50,8 +42,6 @@ export type ReportAction =
 export const initialState: ReportState = {
   sections: {},
   diagrams: {},
-  proposal: null,
-  proposalJson: '',
   contextSelections: {},
   lastGenerated: null,
 };
@@ -60,54 +50,12 @@ export const initialState: ReportState = {
 const reportReducer = (state: ReportState, action: ReportAction): ReportState => {
   switch (action.type) {
     case 'SET_STATE':
-      return { ...state, ...action.payload };
-    case 'SET_PROPOSAL':
-        const proposalJson = action.payload ? JSON.stringify(action.payload, null, 2) : '';
-        return { ...state, proposal: action.payload, proposalJson, lastGenerated: 'proposal' };
-    case 'SET_PROPOSAL_JSON':
-        try {
-            const parsed = JSON.parse(action.payload);
-            const validated = ProjectProposalSchema.parse(parsed);
-            return { ...state, proposalJson: action.payload, proposal: validated, error: undefined };
-        } catch {
-            return { ...state, proposalJson: action.payload, proposal: null, error: 'Invalid proposal JSON structure.' };
-        }
-    case 'UPDATE_PROPOSAL_FIELD':
-      {
-        if (!state.proposal) return state;
-        const newProposal = JSON.parse(JSON.stringify(state.proposal));
-        
-        const set = (obj: any, path: string, value: any) => {
-            const keys = path.split('.');
-            let current = obj;
-            for (let i = 0; i < keys.length - 1; i++) {
-                current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = value;
-        };
-        set(newProposal, action.payload.path, action.payload.value);
-
-        if (action.payload.path.startsWith('timeline')) {
-          try {
-              let currentDate = new Date(newProposal.timeline.startDate);
-              if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
-              newProposal.timeline.endDate = format(newProposal.timeline.phases.reduce((acc: any, phase: { durationWeeks: any; }) => add(acc, { weeks: Number(phase.durationWeeks || 0) }), currentDate), 'yyyy-MM-dd');
-          } catch (error) { console.error("Error calculating timeline:", error); }
-        }
-
-        if (action.payload.path.startsWith('budget.breakdown')) {
-          newProposal.budget.totalAmount = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
-        }
-        
-        return { ...state, proposal: newProposal, proposalJson: JSON.stringify(newProposal, null, 2) };
-      }
+        const { proposal, proposalJson, ...restOfPayload } = action.payload;
+        return { ...state, ...restOfPayload };
     case 'UPDATE_SECTION':
         return { ...state, sections: { ...state.sections, [action.payload.key]: action.payload.value }};
     case 'UPDATE_DIAGRAM_CODE':
         return { ...state, diagrams: { ...state.diagrams, [action.payload.key]: { ...state.diagrams![action.payload.key]!, plantUmlCode: action.payload.code } }};
-    case 'NEW_SESSION':
-      localStorage.removeItem(STORAGE_KEY);
-      return { ...initialState };
     case 'TOGGLE_CONTEXT_SELECTION': {
       const { parentKey, contextKey } = action.payload;
       const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
@@ -124,9 +72,9 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
       return { ...state, error: undefined, lastGenerated: action.payload.item as any };
     case 'GENERATION_SUCCESS':
         // When new content is generated, clear the old evaluation
-        const { evaluation, ...restOfPayload } = action.payload;
+        const { evaluation, ...restOfSuccessPayload } = action.payload;
         if (action.payload.lastGenerated !== 'evaluation') {
-            return { ...state, ...restOfPayload, error: undefined, evaluation: undefined };
+            return { ...state, ...restOfSuccessPayload, error: undefined, evaluation: undefined };
         }
         return { ...state, ...action.payload, error: undefined };
     case 'GENERATION_ERROR':
@@ -138,6 +86,7 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
 
 
 export function useReportState() {
+  const { state: builderState, dispatch: builderDispatch, isAnythingGenerating: isBuilderGenerating } = useBuilderState();
   const [state, dispatch] = useReducer(reportReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
@@ -146,45 +95,21 @@ export function useReportState() {
   const { toast } = useToast();
   const { user, fetchUser } = useAuth();
   
-  // Load from local storage
   useEffect(() => {
-    try {
-      const savedReportState = localStorage.getItem(STORAGE_KEY);
-      if (savedReportState) {
-        dispatch({ type: 'SET_STATE', payload: JSON.parse(savedReportState) });
-      } else {
-        const savedProposalState = localStorage.getItem(PROPOSAL_STORAGE_KEY);
-        if (savedProposalState) {
-          const { proposal } = JSON.parse(savedProposalState);
-          if (proposal) {
-            dispatch({ type: 'SET_PROPOSAL', payload: proposal });
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load state from localStorage", error);
+    if (builderState) {
+        dispatch({ type: 'SET_STATE', payload: builderState });
     }
     setIsLoaded(true);
-  }, []);
-
-  // Save to local storage
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (error) {
-      console.error("Failed to save state to localStorage", error);
-    }
-  }, [state, isLoaded]);
-
+  }, [builderState]);
+  
   // Action handlers
-  const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
-  const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
-  const handleDiagramCodeUpdate = (key: DiagramType, code: string) => dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
+  const handleProposalUpdate = (path: string, value: any) => builderDispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
+  const handleSectionUpdate = (key: SectionName, value: string) => builderDispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
+  const handleDiagramCodeUpdate = (key: DiagramType, code: string) => builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
   
   const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
     const formData = new FormData();
-    if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
+    if(builderState.proposalJson) formData.set('proposalJson', builderState.proposalJson);
     formData.set('itemToGenerate', diagramType);
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
@@ -193,8 +118,8 @@ export function useReportState() {
   };
   
   const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
-  const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
-  const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
+  const setExternalContext = (fileName: string, content: string) => builderDispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
+  const removeExternalContext = () => builderDispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
   
   const handleSubmit = (formData: FormData) => {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
@@ -205,7 +130,7 @@ export function useReportState() {
     }
     
     setGeneratingItem(item);
-    dispatch({ type: 'GENERATION_START', payload: { item } });
+    builderDispatch({ type: 'GENERATION_START', payload: { item } });
     startTransition(async () => {
       try {
         if (!user) throw new Error("User not authenticated.");
@@ -235,7 +160,7 @@ export function useReportState() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                proposal: state.proposal,
+                proposal: builderState.proposal,
                 sectionToGenerate: item,
                 diagramToGenerate: item,
                 otherSections,
@@ -257,14 +182,14 @@ export function useReportState() {
         }
 
         if (item === 'evaluate') {
-             dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
+             builderDispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
         } else if (isDiagram) {
-            dispatch({ type: 'GENERATION_SUCCESS', payload: {
+            builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
               diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
               lastGenerated: item as DiagramType,
             }});
         } else {
-            dispatch({ type: 'GENERATION_SUCCESS', payload: {
+            builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
                 sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
                 lastGenerated: item as SectionName,
             }});
@@ -272,7 +197,7 @@ export function useReportState() {
 
         await fetchUser();
       } catch (e: any) {
-        dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An unexpected error occurred.' } });
+        builderDispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An unexpected error occurred.' } });
       } finally {
         setGeneratingItem(null);
       }
@@ -283,9 +208,9 @@ export function useReportState() {
     state,
     isLoaded,
     generatingItem,
-    isAnythingGenerating: isGenerating,
-    proposal: state.proposal,
-    proposalJson: state.proposalJson,
+    isAnythingGenerating: isBuilderGenerating,
+    proposal: builderState.proposal,
+    proposalJson: builderState.proposalJson,
     contextSelections: state.contextSelections,
     handleProposalUpdate,
     handleSectionUpdate,
