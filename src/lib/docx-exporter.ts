@@ -162,6 +162,26 @@ function getStylesFromStorage(): Record<TemplateKey, { styles: IStylesOptions }>
     return templates;
 }
 
+export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
+    const allTemplates = getStylesFromStorage();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+
+    const doc = new Document({
+        styles,
+        numbering,
+        sections: [{
+            children: [
+                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+                ...parseMarkdownToDocx(markdownContent),
+            ]
+        }]
+    });
+    
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
+}
+
+
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
     const allTemplates = getStylesFromStorage();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;

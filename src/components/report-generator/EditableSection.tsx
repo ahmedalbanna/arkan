@@ -9,10 +9,12 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown } from 'lucide-react';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
+import { exportSectionAsDocx } from '@/lib/docx-exporter';
+import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 
 
 interface EditableSectionProps {
@@ -27,8 +29,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const [isEditing, setIsEditing] = useState(false);
     const [currentContent, setCurrentContent] = useState(content);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
+    const contentRef = useRef<HTMLDivElement>(null);
 
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
+    const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
@@ -83,6 +87,33 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const handleRejectSuggestion = () => {
         setAiSuggestion(null);
     };
+    
+    // Editor Actions
+    const handleCopyMarkdown = () => {
+        navigator.clipboard.writeText(content);
+        toast({ title: 'Copied as Markdown' });
+        setIsEditorPopoverOpen(false);
+    };
+
+    const handleCopyText = () => {
+        const text = contentRef.current?.innerText || '';
+        navigator.clipboard.writeText(text);
+        toast({ title: 'Copied as Plain Text' });
+        setIsEditorPopoverOpen(false);
+    };
+    
+    const handleExportDocx = async () => {
+        await exportSectionAsDocx(title, content, 'modern');
+        setIsEditorPopoverOpen(false);
+    };
+
+    const handleExportPdf = () => {
+        if (contentRef.current) {
+            exportComponentAsPDF(contentRef.current, `${title}.pdf`);
+        }
+        setIsEditorPopoverOpen(false);
+    };
+
 
     const renderEditableContent = () => {
         if (aiSuggestion !== null) {
@@ -133,44 +164,74 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
                 className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
             >
-                <div className="prose dark:prose-invert max-w-none">
+                <div className="prose dark:prose-invert max-w-none" ref={contentRef}>
                   {renderEditableContent()}
                 </div>
 
-                <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100"
-                            title="AI Actions"
-                        >
-                            <Wand2 className="h-4 w-4" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-56 p-2">
-                        {isProcessingAi ? (
-                            <div className="flex items-center justify-center p-4">
-                                <Loader2 className="h-6 w-6 animate-spin" />
-                            </div>
-                        ) : (
+                <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100">
+                    <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                title="AI Actions"
+                            >
+                                <Wand2 className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-2">
+                            {isProcessingAi ? (
+                                <div className="flex items-center justify-center p-4">
+                                    <Loader2 className="h-6 w-6 animate-spin" />
+                                </div>
+                            ) : (
+                                <div className="grid gap-1">
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
+                                        <BookText className="mr-2 h-4 w-4" /> Summarize
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
+                                        <Maximize className="mr-2 h-4 w-4" /> Expand
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
+                                        <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
+                                        <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
+                                    </Button>
+                                </div>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                    <Popover open={isEditorPopoverOpen} onOpenChange={setIsEditorPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6"
+                                title="Editor Options"
+                            >
+                                <MoreVertical className="h-4 w-4" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-2">
                             <div className="grid gap-1">
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                    <BookText className="mr-2 h-4 w-4" /> Summarize
+                                <Button variant="ghost" className="justify-start" onClick={handleCopyMarkdown}>
+                                    <Copy className="mr-2 h-4 w-4" /> Copy Markdown
                                 </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                    <Maximize className="mr-2 h-4 w-4" /> Expand
+                                <Button variant="ghost" className="justify-start" onClick={handleCopyText}>
+                                    <FileText className="mr-2 h-4 w-4" /> Copy Plain Text
                                 </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                    <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                <Button variant="ghost" className="justify-start" onClick={handleExportDocx}>
+                                    <FileDown className="mr-2 h-4 w-4" /> Download DOCX
                                 </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
-                                    <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
+                                <Button variant="ghost" className="justify-start" onClick={handleExportPdf}>
+                                    <FileDown className="mr-2 h-4 w-4" /> Download PDF
                                 </Button>
                             </div>
-                        )}
-                    </PopoverContent>
-                </Popover>
+                        </PopoverContent>
+                    </Popover>
+                </div>
             </AccordionContent>
         </AccordionItem>
     );

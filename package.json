@@ -3,16 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -f sqlite.db && rm -rf drizzle && npm run db:push && next dev --turbopack -p 9002",
+    "dev": "npm run db:setup && next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "npm run db:push && next build",
+    "build": "npm run db:setup && next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "db:setup": "rm -f sqlite.db && rm -rf drizzle && drizzle-kit push",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx src/lib/db/seed.ts",
-    "postinstall": "drizzle-kit push"
+    "db:seed": "tsx src/lib/db/seed.ts"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.13.0",
@@ -53,6 +53,7 @@
     "formidable": "^3.5.1",
     "genkit": "^1.13.0",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "lucide-react": "^0.475.0",
     "next": "15.3.3",
@@ -67,7 +68,6 @@
     "recharts": "^2.15.1",
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.0",
-    "remark-parse": "^11.0.0",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
