@@ -22,8 +22,11 @@ function GeneratePageContent() {
 
   return (
     <div className="container mx-auto max-w-screen-2xl px-4 py-8">
+       <div className="flex justify-end items-center mb-4">
+        <SessionActions />
+      </div>
       <div className="flex justify-between items-center mb-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="proposal" className="gap-2">
               <FilePlus2 className="h-4 w-4" /> Proposal Mode
@@ -42,7 +45,6 @@ function GeneratePageContent() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-        <SessionActions />
       </div>
 
       <div className="w-full">
