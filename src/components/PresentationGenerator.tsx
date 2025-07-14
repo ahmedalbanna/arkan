@@ -15,6 +15,7 @@ import { Checkbox } from './ui/checkbox';
 import { Label } from './ui/label';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { cn } from '@/lib/utils';
+import { PresentationActions } from './presentation-generator/PresentationActions';
 
 
 export default function PresentationGenerator() {
@@ -115,6 +116,10 @@ export default function PresentationGenerator() {
 
                 {/* Right Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    <PresentationActions 
+                        isGenerating={isGenerating}
+                        slides={state.slides}
+                    />
                      <PresentationGenerationTools
                         isDisabled={isToolsDisabled}
                         isGenerating={isGenerating}
