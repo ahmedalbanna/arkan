@@ -53,7 +53,7 @@ const GenerateProposalSchema = z.object({
 
 
 export function useProposalBuilder() {
-    const { state: builderState, handleGenerateProposal, isGeneratingProposal } = useBuilderState();
+    const { state: builderState, handleGenerateProposal, handleProposalUpdate, isGeneratingProposal } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     
     // Template state (static, not part of the persisted state)
@@ -115,6 +115,7 @@ export function useProposalBuilder() {
         projectIdea: state.projectIdea || '',
         setProjectIdea,
         handleFormSubmit,
+        handleProposalUpdate,
         // Template related
         templates,
         selectedTemplate: state.selectedTemplate || 'default',

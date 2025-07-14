@@ -25,6 +25,7 @@ export function ProposalModeGenerator() {
         projectIdea,
         setProjectIdea,
         handleFormSubmit,
+        handleProposalUpdate,
     } = useProposalState();
     
     const { proposal, error } = state;
@@ -61,7 +62,7 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
@@ -92,7 +93,7 @@ export function ProposalModeGenerator() {
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div className="space-y-1.5">
                                     <CardTitle className="font-headline">Generated Proposal</CardTitle>
-                                    <CardDescription>Review the generated details below.</CardDescription>
+                                    <CardDescription>Review and edit the generated details below.</CardDescription>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" type="button" onClick={handleExportJson}>
@@ -107,7 +108,7 @@ export function ProposalModeGenerator() {
                             </CardHeader>
                             <CardContent>
                                 <div className="h-[calc(100vh-310px)] overflow-y-auto pr-4">
-                                   <ProposalViewer proposal={proposal} readOnly={true} />
+                                   <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
                                 </div>
                             </CardContent>
                         </Card>
