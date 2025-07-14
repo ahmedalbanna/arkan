@@ -4,7 +4,7 @@
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Loader2, Sparkles, FileText, Download } from 'lucide-react';
+import { Loader2, Sparkles, FileText, Download, FileJson } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { useEffect } from 'react';
@@ -12,30 +12,22 @@ import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
 import { useProposalState } from '@/context/ProposalStateContext';
+import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
+import { saveAs } from 'file-saver';
 
-function GenerateButton() {
-    const { isGenerating } = useProposalState();
-    return (
-        <Button type="submit" disabled={isGenerating} className="font-headline">
-            {isGenerating ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                </>
-            ) : (
-                <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Proposal
-                </>
-            )}
-        </Button>
-    );
-}
 
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
-    const { state, isGenerating, projectIdea, setProjectIdea, handleGenerateProposal } = useProposalState();
+    const { 
+        state, 
+        isGenerating, 
+        projectIdea, 
+        setProjectIdea, 
+        handleFormSubmit,
+        customGuidelines,
+        setCustomGuidelines,
+    } = useProposalState();
 
     useEffect(() => {
         if(state.proposal && !state.error) {
@@ -46,24 +38,34 @@ export function ProposalModeGenerator() {
         }
     }, [state, toast]);
 
-    const handleExport = () => {
+    const handleExportDocx = () => {
         if(state.proposal) {
             const templateKey: TemplateKey = Object.keys(docxTemplates)[0] as TemplateKey || 'modern';
             exportProposalAsDocx(state.proposal, templateKey);
         }
     }
+    
+    const handleExportJson = () => {
+        if (!state.proposal) return;
+        const blob = new Blob([JSON.stringify({ proposal: state.proposal }, null, 2)], { type: 'application/json;charset=utf-8' });
+        const fileName = `${state.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_proposal'}.json`;
+        saveAs(blob, fileName);
+    }
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div>
-                <form onSubmit={(e) => { e.preventDefault(); handleGenerateProposal(); }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(); }}>
+             <input type="hidden" name="projectIdea" value={projectIdea} />
+              {customGuidelines.map((g, i) => (
+                <input key={i} type="hidden" name="guidelines[]" value={g} />
+              ))}
+
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+                {/* Left Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Generate a Project Proposal</CardTitle>
-                            <CardDescription>
-                                Start with a simple idea, and the AI will generate a complete, professional project proposal for you.
-                            </CardDescription>
+                            <CardTitle className="font-headline">Describe Your Project Idea</CardTitle>
                         </CardHeader>
                         <CardContent>
                              <Textarea
@@ -73,45 +75,63 @@ export function ProposalModeGenerator() {
                                 required
                                 value={projectIdea}
                                 onChange={(e) => setProjectIdea(e.target.value)}
+                                disabled={isGenerating}
                             />
                             {state?.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
                             )}
                         </CardContent>
-                        <CardFooter>
-                            <GenerateButton />
-                        </CardFooter>
                     </Card>
-                </form>
-            </div>
-            <div>
-                 {state.proposal ? (
-                     <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <div className="space-y-1.5">
-                                <CardTitle className="font-headline">Generated Proposal</CardTitle>
-                                <CardDescription>Review the generated details below.</CardDescription>
+                </div>
+
+                {/* Center Column */}
+                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                    {state.proposal ? (
+                         <Card>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <div className="space-y-1.5">
+                                    <CardTitle className="font-headline">Generated Proposal</CardTitle>
+                                    <CardDescription>Review the generated details below.</CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" type="button" onClick={handleExportJson}>
+                                        <FileJson className="mr-2 h-4 w-4" />
+                                        .json
+                                    </Button>
+                                    <Button variant="outline" type="button" onClick={handleExportDocx}>
+                                        <Download className="mr-2 h-4 w-4" />
+                                        DOCX
+                                    </Button>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="h-[calc(100vh-280px)] overflow-y-auto pr-4">
+                                   <ProposalViewer proposal={state.proposal} readOnly={true} />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card className="flex items-center justify-center h-full min-h-[400px]">
+                            <div className="text-center text-muted-foreground p-8">
+                                <FileText className="w-16 h-16 mx-auto mb-4" />
+                                <p>Your generated project proposal will appear here.</p>
+                                {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
-                            <Button variant="outline" onClick={handleExport}>
-                                <Download className="mr-2 h-4 w-4" />
-                                Export as DOCX
-                            </Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="h-[calc(100vh-280px)] overflow-y-auto pr-4">
-                               <ProposalViewer proposal={state.proposal} readOnly={true} />
-                            </div>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Card className="flex items-center justify-center h-full min-h-[400px]">
-                        <div className="text-center text-muted-foreground p-8">
-                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                            <p>Your generated project proposal will appear here.</p>
-                        </div>
-                    </Card>
-                )}
+                        </Card>
+                    )}
+                </div>
+
+                 {/* Right Column */}
+                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                    <ProposalGenerationTools
+                        isDisabled={!projectIdea || isGenerating}
+                        isGenerating={isGenerating}
+                        customGuidelines={customGuidelines}
+                        setCustomGuidelines={setCustomGuidelines}
+                    />
+                </div>
+
             </div>
-        </div>
+        </form>
     );
 }

@@ -5,9 +5,10 @@ import { useState, useReducer, useTransition } from 'react';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { deductCredit } from '@/services/credit-service';
 import { AGENTS } from '@/lib/agents';
-import type { ProjectProposal } from '@/ai/schemas';
+import type { ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
+import { z } from 'zod';
 
 export interface ProposalGenerationState {
   proposal?: ProjectProposal;
@@ -24,29 +25,43 @@ const initialState: ProposalGenerationState = {};
 function reducer(state: ProposalGenerationState, action: Action): ProposalGenerationState {
   switch (action.type) {
     case 'GENERATION_START':
-      return { error: undefined };
+      return { error: undefined, proposal: undefined };
     case 'GENERATION_SUCCESS':
       return { proposal: action.payload, error: undefined };
     case 'GENERATION_FAILURE':
-      return { error: action.payload };
+      return { error: action.payload, proposal: undefined };
     default:
       return state;
   }
 }
 
+const GenerateProposalSchema = z.object({
+  projectIdea: z.string().min(1, 'Project idea cannot be empty.'),
+  guidelines: z.array(z.string()).optional(),
+});
+
+
 export function useProposalBuilder() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
     const [projectIdea, setProjectIdea] = useState('');
+    const [customGuidelines, setCustomGuidelines] = useState<string[]>([]);
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    const handleGenerateProposal = async () => {
-        const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
-        if (!projectIdea.trim()) {
+    const handleFormSubmit = () => {
+        const formData = new FormData();
+        formData.set('projectIdea', projectIdea);
+        customGuidelines.forEach(g => formData.append('guidelines[]', g));
+        
+        const validatedFields = GenerateProposalSchema.safeParse(Object.fromEntries(formData));
+
+        if (!validatedFields.success) {
             dispatch({ type: 'GENERATION_FAILURE', payload: 'Project idea cannot be empty.' });
             return;
         }
+        
+        const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
         if (!proposalAgent) {
             dispatch({ type: 'GENERATION_FAILURE', payload: 'Proposal agent not found.' });
             return;
@@ -62,11 +77,24 @@ export function useProposalBuilder() {
 
             try {
                 if (!user) throw new Error("User not authenticated.");
+
+                // Construct the prompt on the client side
+                let fullPrompt = typeof proposalAgent.prompt === 'string' 
+                    ? proposalAgent.prompt 
+                    : proposalAgent.prompt.base;
+
+                if (validatedFields.data.guidelines && validatedFields.data.guidelines.length > 0) {
+                    fullPrompt += '\n\nAdditionally, please adhere to the following custom guidelines:\n' + validatedFields.data.guidelines.map(g => `- ${g}`).join('\n');
+                }
+                
                 // Use the API route for proposal generation
                 const response = await fetch('/api/generate-proposal', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ projectIdea }),
+                    body: JSON.stringify({ 
+                        projectIdea: validatedFields.data.projectIdea,
+                        prompt: fullPrompt // Send the fully constructed prompt
+                    }),
                 });
 
                 const result = await response.json();
@@ -93,6 +121,8 @@ export function useProposalBuilder() {
         isGenerating,
         projectIdea,
         setProjectIdea,
-        handleGenerateProposal
+        customGuidelines,
+        setCustomGuidelines,
+        handleFormSubmit
     };
 }
