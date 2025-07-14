@@ -10,26 +10,47 @@ import { z } from 'zod';
 import type { ProjectProposal } from '@/ai/schemas';
 import { templates as proposalTemplates, type ProposalTemplateKey, type ProposalTemplate } from '@/lib/proposal-templates';
 
+const STORAGE_KEY = 'arkan-proposal-state';
+
 export interface ProposalGenerationState {
   proposal?: ProjectProposal;
   error?: string;
+  projectIdea?: string;
+  selectedTemplate?: ProposalTemplateKey;
+  customGuidelines?: string[];
 }
 
 type Action =
-  | { type: 'GENERATION_START' }
+  | { type: 'SET_ENTIRE_STATE'; payload: ProposalGenerationState }
+  | { type: 'GENERATION_START'; payload: { projectIdea: string } }
   | { type: 'GENERATION_SUCCESS'; payload: ProjectProposal }
-  | { type: 'GENERATION_FAILURE'; payload: string };
+  | { type: 'GENERATION_FAILURE'; payload: string }
+  | { type: 'SET_PROJECT_IDEA'; payload: string }
+  | { type: 'SET_SELECTED_TEMPLATE'; payload: ProposalTemplateKey }
+  | { type: 'SET_CUSTOM_GUIDELINES'; payload: string[] };
 
-const initialState: ProposalGenerationState = {};
+const initialState: ProposalGenerationState = {
+  projectIdea: '',
+  selectedTemplate: 'default',
+  customGuidelines: [],
+};
 
 function reducer(state: ProposalGenerationState, action: Action): ProposalGenerationState {
   switch (action.type) {
+    case 'SET_ENTIRE_STATE':
+        return { ...state, ...action.payload };
     case 'GENERATION_START':
-      return { error: undefined, proposal: undefined };
+      return { ...state, projectIdea: action.payload.projectIdea, error: undefined, proposal: undefined };
     case 'GENERATION_SUCCESS':
-      return { proposal: action.payload, error: undefined };
+      return { ...state, proposal: action.payload, error: undefined };
     case 'GENERATION_FAILURE':
-      return { error: action.payload, proposal: undefined };
+      return { ...state, error: action.payload, proposal: undefined };
+    case 'SET_PROJECT_IDEA':
+        return { ...state, projectIdea: action.payload };
+    case 'SET_SELECTED_TEMPLATE':
+        return { ...state, selectedTemplate: action.payload };
+    case 'SET_CUSTOM_GUIDELINES':
+        return { ...state, customGuidelines: action.payload };
     default:
       return state;
   }
@@ -37,7 +58,6 @@ function reducer(state: ProposalGenerationState, action: Action): ProposalGenera
 
 const GenerateProposalSchema = z.object({
   projectIdea: z.string().min(1, 'Project idea cannot be empty.'),
-  guidelines: z.array(z.string()).optional(),
   prompt: z.string(),
 });
 
@@ -45,43 +65,66 @@ const GenerateProposalSchema = z.object({
 export function useProposalBuilder() {
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
-    const [projectIdea, setProjectIdea] = useState('');
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
+    const [isLoaded, setIsLoaded] = useState(false);
     
-    // Template state
-    const [templates, setTemplates] = useState<Record<ProposalTemplateKey, ProposalTemplate>>(proposalTemplates);
-    const [selectedTemplate, setSelectedTemplate] = useState<ProposalTemplateKey>('default');
-    
-    // Guideline state
-    const [customGuidelines, setCustomGuidelines] = useState<string[]>([]);
+    // Template state (static, not part of the persisted state)
+    const [templates] = useState<Record<ProposalTemplateKey, ProposalTemplate>>(proposalTemplates);
+
     const [customGuidelineInput, setCustomGuidelineInput] = useState('');
 
-    const handleTemplateChange = useCallback((key: ProposalTemplateKey) => {
-        setSelectedTemplate(key);
+    useEffect(() => {
+        try {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if(savedState) {
+                dispatch({ type: 'SET_ENTIRE_STATE', payload: JSON.parse(savedState) });
+            }
+        } catch (e) {
+            console.error('Failed to load proposal state from storage', e);
+        }
+        setIsLoaded(true);
     }, []);
-    
+
+    useEffect(() => {
+        if (isLoaded) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error('Failed to save proposal state to storage', e);
+            }
+        }
+    }, [state, isLoaded]);
+
+    const setProjectIdea = (idea: string) => dispatch({ type: 'SET_PROJECT_IDEA', payload: idea });
+    const handleTemplateChange = (key: ProposalTemplateKey) => dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: key });
+
     const handleAddCustomGuideline = useCallback(() => {
         const newGuideline = customGuidelineInput.trim();
         if (newGuideline) {
-            setCustomGuidelines(prev => [...prev, newGuideline]);
+            const newGuidelines = [...(state.customGuidelines || []), newGuideline];
+            dispatch({ type: 'SET_CUSTOM_GUIDELINES', payload: newGuidelines });
             setCustomGuidelineInput('');
         }
-    }, [customGuidelineInput]);
+    }, [customGuidelineInput, state.customGuidelines]);
 
     const handleRemoveCustomGuideline = useCallback((indexToRemove: number) => {
-        setCustomGuidelines(prev => prev.filter((_, index) => index !== indexToRemove));
-    }, []);
+        const newGuidelines = (state.customGuidelines || []).filter((_, index) => index !== indexToRemove);
+        dispatch({ type: 'SET_CUSTOM_GUIDELINES', payload: newGuidelines });
+    }, [state.customGuidelines]);
 
 
     const handleFormSubmit = () => {
-        const currentTemplate = templates[selectedTemplate];
+        const selectedTemplateKey = state.selectedTemplate || 'default';
+        const currentTemplate = templates[selectedTemplateKey];
+        const projectIdea = state.projectIdea || '';
+
         if (!currentTemplate) {
             dispatch({ type: 'GENERATION_FAILURE', payload: 'Selected template not found.' });
             return;
         }
 
-        const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
+        const allGuidelines = [...(currentTemplate.guidelines || []), ...(state.customGuidelines || [])];
         let fullPrompt = currentTemplate.prompt;
         
         if (allGuidelines.length > 0) {
@@ -89,8 +132,7 @@ export function useProposalBuilder() {
         }
 
         const validatedFields = GenerateProposalSchema.safeParse({
-            projectIdea,
-            guidelines: allGuidelines,
+            projectIdea: projectIdea,
             prompt: fullPrompt
         });
 
@@ -100,7 +142,7 @@ export function useProposalBuilder() {
         }
         
         startTransition(async () => {
-            dispatch({ type: 'GENERATION_START' });
+            dispatch({ type: 'GENERATION_START', payload: { projectIdea } });
 
             try {
                 if (!user) throw new Error("User not authenticated.");
@@ -136,16 +178,15 @@ export function useProposalBuilder() {
     return {
         state,
         isGenerating,
-        projectIdea,
+        projectIdea: state.projectIdea || '',
         setProjectIdea,
         handleFormSubmit,
         // Template related
         templates,
-        selectedTemplate,
+        selectedTemplate: state.selectedTemplate || 'default',
         handleTemplateChange,
         // Guideline related
-        customGuidelines,
-        setCustomGuidelines,
+        customGuidelines: state.customGuidelines || [],
         customGuidelineInput,
         setCustomGuidelineInput,
         handleAddCustomGuideline,
