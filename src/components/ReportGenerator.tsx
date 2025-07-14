@@ -20,8 +20,6 @@ export default function ReportGenerator() {
     isAnythingGenerating,
     proposal,
     proposalJson,
-    projectIdea,
-    handleProjectIdeaChange,
     handleGenerateProposal,
     handleProposalJsonChange,
     handleProposalUpdate,

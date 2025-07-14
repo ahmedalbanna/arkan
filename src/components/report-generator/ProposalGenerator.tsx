@@ -15,8 +15,6 @@ export const ProposalGenerator = () => {
   const { 
     state,
     isGeneratingProposal, 
-    projectIdea, 
-    handleProjectIdeaChange, 
     handleGenerateProposal,
     dispatch,
   } = useReportState();
@@ -68,36 +66,10 @@ export const ProposalGenerator = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-xl">{t('reportGenerator.step1Title')}</CardTitle>
-        <CardDescription>{t('reportGenerator.step1Desc')}</CardDescription>
+        <CardTitle className="font-headline text-xl">Load Existing Project</CardTitle>
+        <CardDescription>Upload a previously saved project file to continue working.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Textarea
-          placeholder={t('reportGenerator.step1Placeholder')}
-          rows={5}
-          required
-          value={projectIdea}
-          onChange={(e) => handleProjectIdeaChange(e.target.value)}
-          disabled={isGeneratingProposal}
-        />
-        {state.error && <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>}
-      </CardContent>
-      <CardFooter className="flex-col items-start gap-4">
-        <Button onClick={handleGenerateProposal} disabled={isGeneratingProposal || !projectIdea}>
-          {isGeneratingProposal ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="mr-2 h-4 w-4" />
-          )}
-          {isGeneratingProposal ? t('reportGenerator.step1ButtonLoading') : t('reportGenerator.step1Button')}
-        </Button>
-        
-        <div className="flex items-center w-full gap-2">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">OR</span>
-            <Separator className="flex-1" />
-        </div>
-
         <input
             type="file"
             ref={fileInputRef}
@@ -107,9 +79,9 @@ export const ProposalGenerator = () => {
         />
         <Button onClick={handleImportClick} variant="outline" className="w-full">
             <Upload className="mr-2 h-4 w-4" />
-            Upload Project File
+            Upload Project File (.json)
         </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

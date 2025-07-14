@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Proposal generation agent not configured.' }, { status: 500 });
     }
 
+    // This API route will now be called by the dedicated hook
     const result = await generateProposal({
       projectIdea,
       prompt: typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base
@@ -31,6 +32,9 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error('Error generating proposal:', error);
+    if (error instanceof Error) {
+        return NextResponse.json({ message: error.message }, { status: 500 });
+    }
     return NextResponse.json({ message: 'An unexpected error occurred while generating the proposal.' }, { status: 500 });
   }
 }

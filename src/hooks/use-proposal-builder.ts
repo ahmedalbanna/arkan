@@ -7,6 +7,7 @@ import { deductCredit } from '@/services/credit-service';
 import { AGENTS } from '@/lib/agents';
 import type { ProjectProposal } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from './use-toast';
 
 export interface ProposalGenerationState {
   proposal?: ProjectProposal;
@@ -38,10 +39,18 @@ export function useProposalBuilder() {
     const [isGenerating, startTransition] = useTransition();
     const [projectIdea, setProjectIdea] = useState('');
     const { user, fetchUser } = useAuth();
+    const { toast } = useToast();
 
-    const handleGenerateProposal = () => {
+    const handleGenerateProposal = async () => {
         const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
-        if (!proposalAgent || !projectIdea) return;
+        if (!projectIdea.trim()) {
+            dispatch({ type: 'GENERATION_FAILURE', payload: 'Project idea cannot be empty.' });
+            return;
+        }
+        if (!proposalAgent) {
+            dispatch({ type: 'GENERATION_FAILURE', payload: 'Proposal agent not found.' });
+            return;
+        };
         
         startTransition(async () => {
             dispatch({ type: 'GENERATION_START' });
@@ -53,12 +62,21 @@ export function useProposalBuilder() {
 
             try {
                 if (!user) throw new Error("User not authenticated.");
-                await deductCredit(user.id, 1);
-
-                const result = await generateProposal({ 
-                    projectIdea,
-                    prompt: typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base
+                // Use the API route for proposal generation
+                const response = await fetch('/api/generate-proposal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ projectIdea }),
                 });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    const errorMessage = result.errors?.projectIdea || result.message || 'An unknown error occurred.';
+                    throw new Error(errorMessage);
+                }
+
+                await deductCredit(user.id, 1);
                 
                 dispatch({ type: 'GENERATION_SUCCESS', payload: result });
                 await fetchUser();

@@ -27,7 +27,6 @@ export interface ReportState {
   externalContext?: { fileName: string; content: string };
   proposal: ProjectProposal | null;
   proposalJson: string;
-  projectIdea: string;
   contextSelections: Record<string, Record<string, boolean>>;
   lastGenerated: SectionName | DiagramType | 'presentation' | 'evaluation' | null;
   error?: string;
@@ -35,7 +34,6 @@ export interface ReportState {
 
 export type ReportAction =
   | { type: 'SET_STATE'; payload: Partial<ReportState> }
-  | { type: 'SET_PROJECT_IDEA'; payload: string }
   | { type: 'SET_PROPOSAL'; payload: ProjectProposal | null }
   | { type: 'SET_PROPOSAL_JSON'; payload: string }
   | { type: 'UPDATE_PROPOSAL_FIELD'; payload: { path: string; value: any } }
@@ -56,7 +54,6 @@ export const initialState: ReportState = {
   diagrams: {},
   proposal: null,
   proposalJson: '',
-  projectIdea: '',
   contextSelections: {},
   lastGenerated: null,
 };
@@ -66,8 +63,6 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
   switch (action.type) {
     case 'SET_STATE':
       return { ...state, ...action.payload };
-    case 'SET_PROJECT_IDEA':
-      return { ...state, projectIdea: action.payload };
     case 'SET_PROPOSAL':
         const proposalJson = action.payload ? JSON.stringify(action.payload, null, 2) : '';
         return { ...state, proposal: action.payload, proposalJson };
@@ -75,9 +70,9 @@ const reportReducer = (state: ReportState, action: ReportAction): ReportState =>
         try {
             const parsed = JSON.parse(action.payload);
             const validated = ProjectProposalSchema.parse(parsed);
-            return { ...state, proposalJson: action.payload, proposal: validated };
+            return { ...state, proposalJson: action.payload, proposal: validated, error: undefined };
         } catch {
-            return { ...state, proposalJson: action.payload, proposal: null };
+            return { ...state, proposalJson: action.payload, proposal: null, error: 'Invalid proposal JSON structure.' };
         }
     case 'UPDATE_PROPOSAL_FIELD':
       {
@@ -148,7 +143,6 @@ export function useReportBuilder() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
-  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
   const { agents } = useAgents();
   const { toast } = useToast();
   const { t } = useLocalization();
@@ -193,7 +187,7 @@ export function useReportBuilder() {
         
     }
 
-    if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
+    if (state.error && state.error !== prevError.current && state.error !== 'Invalid proposal JSON structure.') {
         toast({
             title: t('reportGenerator.generationFailed'),
             description: state.error,
@@ -208,50 +202,6 @@ export function useReportBuilder() {
 
 
   // Action handlers that dispatch to the reducer
-  const handleProjectIdeaChange = (idea: string) => dispatch({ type: 'SET_PROJECT_IDEA', payload: idea });
-  
-  const handleGenerateProposal = async () => {
-    const { projectIdea } = state;
-    const proposalAgent = agents.find(a => a.id === 'generate-proposal');
-    if (!projectIdea || !proposalAgent) return;
-
-    setIsGeneratingProposal(true);
-    dispatch({ type: 'GENERATION_START', payload: {} });
-
-    try {
-        await deductCredit(user!.id, 1);
-        const cacheKeyPayload = { projectIdea, prompt: proposalAgent.prompt };
-        const cacheKey = await generateCacheKey(cacheKeyPayload);
-        const cachedResult = getFromCache<ProjectProposal>(cacheKey);
-
-        if (cachedResult) {
-            toast({
-                title: "Loaded from Cache",
-                description: `The proposal for "${cachedResult.title}" was retrieved from the local cache.`,
-            });
-            dispatch({ type: 'NEW_SESSION' }); // Clear previous report data
-            dispatch({ type: 'SET_PROPOSAL', payload: cachedResult });
-            return;
-        }
-
-        const result = await generateProposal({
-            projectIdea,
-            prompt: typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base
-        });
-
-        saveToCache(cacheKey, result);
-        dispatch({ type: 'NEW_SESSION' });
-        dispatch({ type: 'SET_PROPOSAL', payload: result });
-        await fetchUser();
-    } catch (e: any) {
-        console.error(e);
-        const errorMessage = e.message || t('reportGenerator.step1Error');
-        dispatch({ type: 'GENERATION_ERROR', payload: errorMessage });
-    } finally {
-        setIsGeneratingProposal(false);
-    }
-  };
-
   const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
   const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
   const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
@@ -306,15 +256,13 @@ export function useReportBuilder() {
     state,
     dispatch,
     isLoaded,
-    isGeneratingProposal,
+    isGeneratingProposal: false, // This is no longer handled here
     generatingItem,
-    isAnythingGenerating: isGenerating || isGeneratingProposal,
+    isAnythingGenerating: isGenerating,
     proposal: state.proposal,
     proposalJson: state.proposalJson,
-    projectIdea: state.projectIdea,
     contextSelections: state.contextSelections,
-    handleProjectIdeaChange,
-    handleGenerateProposal,
+    handleGenerateProposal: () => {}, // This is no longer handled here
     handleProposalJsonChange,
     handleProposalUpdate,
     handleSectionUpdate,
