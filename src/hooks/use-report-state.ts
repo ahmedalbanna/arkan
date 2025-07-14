@@ -14,6 +14,7 @@ import { saveAs } from 'file-saver';
 
 
 const STORAGE_KEY = 'arkan-report-generator-state-v2';
+const PROPOSAL_STORAGE_KEY = 'arkan-proposal-state';
 
 // 1. Define State and Action Types
 export interface ReportState {
@@ -148,9 +149,17 @@ export function useReportState() {
   // Load from local storage
   useEffect(() => {
     try {
-      const savedState = localStorage.getItem(STORAGE_KEY);
-      if (savedState) {
-        dispatch({ type: 'SET_STATE', payload: JSON.parse(savedState) });
+      const savedReportState = localStorage.getItem(STORAGE_KEY);
+      if (savedReportState) {
+        dispatch({ type: 'SET_STATE', payload: JSON.parse(savedReportState) });
+      } else {
+        const savedProposalState = localStorage.getItem(PROPOSAL_STORAGE_KEY);
+        if (savedProposalState) {
+          const { proposal } = JSON.parse(savedProposalState);
+          if (proposal) {
+            dispatch({ type: 'SET_PROPOSAL', payload: proposal });
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
