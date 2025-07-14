@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,10 +6,10 @@ import { Upload } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useReportState } from '@/context/ReportStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 export const ProposalGenerator = () => {
-  const { dispatch } = useReportState();
+  const { dispatch } = useBuilderState();
   const { t } = useLocalization();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -56,6 +55,8 @@ export const ProposalGenerator = () => {
     fileInputRef.current?.click();
   }
 
+  // This component is now only used within the ReportGenerator to load a project file.
+  // The generation part has been moved to ProposalModeGenerator
   return (
     <Card>
       <CardHeader>

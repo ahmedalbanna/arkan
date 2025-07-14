@@ -171,6 +171,37 @@ export function useReportBuilder() {
 
   
   const handleNewSession = () => dispatch({ type: 'NEW_SESSION' });
+
+  const handleLoadProjectFile = (file: File | null) => {
+    if (!file) return;
+
+    if (file.type !== 'application/json') {
+        toast({ title: 'Invalid File Type', description: 'Please upload a valid .json project file.', variant: 'destructive' });
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const content = e.target?.result;
+            if (typeof content === 'string') {
+                const parsedState = JSON.parse(content);
+                // Basic validation
+                if (parsedState.proposal) {
+                    dispatch({ type: 'SET_STATE', payload: parsedState });
+                    toast({ title: 'Project Loaded', description: `Successfully loaded "${parsedState.proposal.title}".` });
+                } else {
+                    throw new Error('Invalid project file structure.');
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load project file:', error);
+            toast({ title: 'Load Failed', description: 'The selected file could not be read or is corrupted.', variant: 'destructive' });
+        }
+    };
+    reader.readAsText(file);
+  }
+
   const handleSaveProjectFile = () => {
     if (!state.proposal) return;
     const projectData = {
@@ -228,6 +259,7 @@ export function useReportBuilder() {
     isAnythingGenerating: isGeneratingProposal, // In this hook, it's only proposal generation
     handleNewSession,
     handleSaveProjectFile,
+    handleLoadProjectFile,
     handleGenerateProposal,
   };
 }
