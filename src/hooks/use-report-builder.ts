@@ -1,49 +1,152 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import type { ReportState } from '@/app/generate-report/actions';
-import type { ProjectProposal } from '@/ai/schemas';
-import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
+import { useState, useEffect, useCallback, useReducer, useTransition } from 'react';
+import { ProjectProposalSchema, SectionNameSchema, DiagramTypeSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
 import { useHistory } from '@/hooks/use-history';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { add, format } from 'date-fns';
+import { handleGenerateReportItem } from '@/app/generate-report/actions';
+import { useToast } from './use-toast';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const STORAGE_KEY = 'arkan-report-generator-state';
 
+// 1. Define State and Action Types
+export interface ReportState {
+  sections: { [key in SectionName]?: string };
+  diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
+  presentation?: { slides: any[] };
+  externalContext?: { fileName: string; content: string };
+  proposal: ProjectProposal | null;
+  proposalJson: string;
+  projectIdea: string;
+  contextSelections: Record<string, Record<string, boolean>>;
+  lastGenerated: SectionName | DiagramType | 'presentation' | null;
+  error?: string;
+}
+
+export type ReportAction =
+  | { type: 'SET_STATE'; payload: Partial<ReportState> }
+  | { type: 'SET_PROJECT_IDEA'; payload: string }
+  | { type: 'SET_PROPOSAL'; payload: ProjectProposal | null }
+  | { type: 'SET_PROPOSAL_JSON'; payload: string }
+  | { type: 'UPDATE_PROPOSAL_FIELD'; payload: { path: string; value: any } }
+  | { type: 'UPDATE_SECTION'; payload: { key: SectionName; value: string } }
+  | { type: 'UPDATE_DIAGRAM_CODE'; payload: { key: DiagramType; code: string } }
+  | { type: 'NEW_SESSION' }
+  | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
+  | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
+  | { type: 'REMOVE_EXTERNAL_CONTEXT' }
+  | { type: 'GENERATION_START'; payload: { item: string } }
+  | { type: 'GENERATION_SUCCESS'; payload: Partial<ReportState> }
+  | { type: 'GENERATION_ERROR'; payload: string };
+
+
+// 2. Initial State
+export const initialState: ReportState = {
+  sections: {},
+  diagrams: {},
+  proposal: null,
+  proposalJson: '',
+  projectIdea: '',
+  contextSelections: {},
+  lastGenerated: null,
+};
+
+// 3. Reducer Function
+const reportReducer = (state: ReportState, action: ReportAction): ReportState => {
+  switch (action.type) {
+    case 'SET_STATE':
+      return { ...state, ...action.payload };
+    case 'SET_PROJECT_IDEA':
+      return { ...state, projectIdea: action.payload };
+    case 'SET_PROPOSAL':
+        const proposalJson = action.payload ? JSON.stringify(action.payload, null, 2) : '';
+        return { ...state, proposal: action.payload, proposalJson };
+    case 'SET_PROPOSAL_JSON':
+        try {
+            const parsed = JSON.parse(action.payload);
+            const validated = ProjectProposalSchema.parse(parsed);
+            return { ...state, proposalJson: action.payload, proposal: validated };
+        } catch {
+            return { ...state, proposalJson: action.payload, proposal: null };
+        }
+    case 'UPDATE_PROPOSAL_FIELD':
+      {
+        if (!state.proposal) return state;
+        const newProposal = JSON.parse(JSON.stringify(state.proposal));
+        
+        const set = (obj: any, path: string, value: any) => {
+            const keys = path.split('.');
+            let current = obj;
+            for (let i = 0; i < keys.length - 1; i++) {
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = value;
+        };
+        set(newProposal, action.payload.path, action.payload.value);
+
+        if (action.payload.path.startsWith('timeline')) {
+          try {
+              let currentDate = new Date(newProposal.timeline.startDate);
+              if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
+              newProposal.timeline.endDate = format(newProposal.timeline.phases.reduce((acc, phase) => add(acc, { weeks: Number(phase.durationWeeks || 0) }), currentDate), 'yyyy-MM-dd');
+          } catch (error) { console.error("Error calculating timeline:", error); }
+        }
+
+        if (action.payload.path.startsWith('budget.breakdown')) {
+          newProposal.budget.totalAmount = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
+        }
+        
+        return { ...state, proposal: newProposal, proposalJson: JSON.stringify(newProposal, null, 2) };
+      }
+    case 'UPDATE_SECTION':
+        return { ...state, sections: { ...state.sections, [action.payload.key]: action.payload.value }};
+    case 'UPDATE_DIAGRAM_CODE':
+        return { ...state, diagrams: { ...state.diagrams, [action.payload.key]: { ...state.diagrams![action.payload.key]!, plantUmlCode: action.payload.code } }};
+    case 'NEW_SESSION':
+      return { ...initialState };
+    case 'TOGGLE_CONTEXT_SELECTION': {
+      const { parentKey, contextKey } = action.payload;
+      const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
+      if (!newSelections[parentKey]) newSelections[parentKey] = {};
+      newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
+      return { ...state, contextSelections: newSelections };
+    }
+    case 'SET_EXTERNAL_CONTEXT':
+      return { ...state, externalContext: action.payload };
+    case 'REMOVE_EXTERNAL_CONTEXT':
+      const { externalContext, ...rest } = state;
+      return rest;
+    case 'GENERATION_START':
+      return { ...state, error: undefined };
+    case 'GENERATION_SUCCESS':
+      return { ...state, ...action.payload, error: undefined };
+    case 'GENERATION_ERROR':
+        return { ...state, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+
 export function useReportBuilder() {
-  const [state, setState] = useState<ReportState>({ sections: {}, diagrams: {} });
-  const [projectIdea, setProjectIdea] = useState('');
-  const [proposalJson, setProposalJson] = useState('');
-  const [proposal, setProposal] = useState<ProjectProposal | null>(null);
-  const [contextSelections, setContextSelections] = useState<Record<string, Record<string, boolean>>>({});
+  const [state, dispatch] = useReducer(reportReducer, initialState);
   const [isLoaded, setIsLoaded] = useState(false);
   const { addHistoryEntry } = useHistory();
-
+  const [isGenerating, startTransition] = useTransition();
+  const [generatingItem, setGeneratingItem] = useState<string | null>(null);
+  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
+  const { toast } = useToast();
+  const { t } = useLocalization();
+  
   // Load from local storage
   useEffect(() => {
     try {
       const savedState = localStorage.getItem(STORAGE_KEY);
       if (savedState) {
-        const parsed = JSON.parse(savedState);
-        setState({
-          sections: parsed.sections || {},
-          diagrams: parsed.diagrams || {},
-          presentation: parsed.presentation || undefined,
-          lastGenerated: parsed.lastGenerated,
-          externalContext: parsed.externalContext || undefined,
-        });
-        const savedProposalJson = parsed.proposalJson || '';
-        setProposalJson(savedProposalJson);
-        if (savedProposalJson) {
-          try {
-            const parsedProposal = ProjectProposalSchema.parse(JSON.parse(savedProposalJson));
-            setProposal(parsedProposal);
-          } catch {
-            setProposal(null);
-          }
-        }
-        setProjectIdea(parsed.projectIdea || '');
-        setContextSelections(parsed.contextSelections || {});
+        dispatch({ type: 'SET_STATE', payload: JSON.parse(savedState) });
       }
     } catch (error) {
       console.error("Failed to load state from localStorage", error);
@@ -55,115 +158,125 @@ export function useReportBuilder() {
   useEffect(() => {
     if (!isLoaded) return;
     try {
-      const dataToSave = {
-        sections: state.sections,
-        diagrams: state.diagrams,
-        presentation: state.presentation,
-        lastGenerated: state.lastGenerated,
-        externalContext: state.externalContext,
-        proposalJson: proposalJson,
-        projectIdea: projectIdea,
-        contextSelections: contextSelections,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (error) {
       console.error("Failed to save state to localStorage", error);
     }
-  }, [state, proposalJson, projectIdea, isLoaded, contextSelections]);
+  }, [state, isLoaded]);
 
-  const handleNewSession = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setState({ sections: {}, diagrams: {} });
-    setProposalJson('');
-    setProjectIdea('');
-    setProposal(null);
-    setContextSelections({});
-  }, []);
+  // Toast and History side-effects
+  const prevLastGenerated = useRef<string | null>();
+  const prevError = useRef<string | undefined>();
 
-  const processGeneratedItem = useCallback((newState: ReportState) => {
-    setState(newState);
+  useEffect(() => {
+    if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
+        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
+        const title = itemConfig?.title || state.lastGenerated;
+        
+        toast({
+            title: t('reportGenerator.generationSuccess'),
+            description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
+        });
+        
+        // Add to history
+        let historyEntryData;
+        const lastItemKey = state.lastGenerated;
+        let proposalTitle = state.proposal?.title || 'Project Report';
 
-    if (!newState.lastGenerated) return;
-
-    let proposalTitle = 'Project Report';
-    try {
-      const parsed = JSON.parse(proposalJson);
-      if (parsed && parsed.title) {
-        proposalTitle = parsed.title;
-      }
-    } catch (e) { /* ignore */ }
-
-    const lastItemKey = newState.lastGenerated;
-
-    if (SectionNameSchema.options.includes(lastItemKey as SectionName)) {
-      const section = lastItemKey as SectionName;
-      const historyEntry = {
-        id: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        type: 'report' as const,
-        title: `Report Section: ${sectionConfig[section].title}`,
-        proposalTitle,
-        section: section,
-        content: newState.sections[section]!,
-      };
-      addHistoryEntry(historyEntry);
-    } else if (DiagramTypeSchema.options.includes(lastItemKey as DiagramType)) {
-      const diagram = lastItemKey as DiagramType;
-      const diagramData = newState.diagrams?.[diagram];
-      if (diagramData) {
-        const historyEntry = {
-          id: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          type: 'diagram' as const,
-          title: `Diagram: ${diagramConfig[diagram].title}`,
-          diagramType: diagram,
-          plantUmlCode: diagramData.plantUmlCode,
-          imageUrl: diagramData.imageUrl,
-          proposalTitle,
-        };
-        addHistoryEntry(historyEntry);
-      }
+        if (SectionNameSchema.options.includes(lastItemKey as SectionName)) {
+            historyEntryData = { type: 'report', title: `Report: ${title}`, section: lastItemKey, content: state.sections[lastItemKey as SectionName]!, proposalTitle };
+        } else if (DiagramTypeSchema.options.includes(lastItemKey as DiagramType)) {
+            const diagramData = state.diagrams![lastItemKey as DiagramType]!;
+            historyEntryData = { type: 'diagram', title: `Diagram: ${title}`, diagramType: lastItemKey, ...diagramData, proposalTitle };
+        }
+        
+        if (historyEntryData) {
+            addHistoryEntry({id: '', createdAt: '', ...historyEntryData});
+        }
     }
-  }, [addHistoryEntry, proposalJson]);
 
-  const toggleContextSelection = useCallback((parentKey: string, contextKey: string) => {
-    setContextSelections(prev => {
-      const newSelections = JSON.parse(JSON.stringify(prev));
-      if (!newSelections[parentKey]) {
-        newSelections[parentKey] = {};
+    if (state.error && state.error !== prevError.current) {
+        toast({
+            title: t('reportGenerator.generationFailed'),
+            description: state.error,
+            variant: "destructive",
+        });
+    }
+
+    prevLastGenerated.current = state.lastGenerated;
+    prevError.current = state.error;
+
+  }, [state.lastGenerated, state.error, state.sections, state.diagrams, addHistoryEntry, toast, t, state.proposal?.title]);
+
+
+  // Action handlers that dispatch to the reducer
+  const handleProjectIdeaChange = (idea: string) => dispatch({ type: 'SET_PROJECT_IDEA', payload: idea });
+  const handleProposalGenerated = (proposal: ProjectProposal | null) => {
+    setIsGeneratingProposal(false);
+    if(proposal) {
+        dispatch({ type: 'NEW_SESSION' });
+        dispatch({ type: 'SET_PROPOSAL', payload: proposal });
+        addHistoryEntry({ id: '', createdAt: '', type: 'proposal', title: `Proposal: ${proposal.title}`, proposal });
+    }
+  };
+  const handleProposalJsonChange = (json: string) => dispatch({ type: 'SET_PROPOSAL_JSON', payload: json });
+  const handleProposalUpdate = (path: string, value: any) => dispatch({ type: 'UPDATE_PROPOSAL_FIELD', payload: { path, value } });
+  const handleSectionUpdate = (key: SectionName, value: string) => dispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
+  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
+    dispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key: diagramType, code }});
+    const formData = new FormData();
+    if(state.proposalJson) formData.set('proposalJson', state.proposalJson);
+    formData.set('itemToGenerate', diagramType);
+    formData.set('intent', 'update_diagram');
+    formData.set('diagramToUpdate', diagramType);
+    formData.set('plantUmlCode', code);
+    handleSubmit(formData);
+  };
+  const handleNewSession = () => dispatch({ type: 'NEW_SESSION' });
+  const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
+  const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
+  const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
+  
+  const handleSubmit = (formData: FormData) => {
+    const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
+    if (!item) return;
+
+    if (state.externalContext) {
+      formData.set('externalContextContent', state.externalContext.content);
+    }
+    
+    setGeneratingItem(item);
+    dispatch({ type: 'GENERATION_START', payload: { item } });
+    startTransition(async () => {
+      const result = await handleGenerateReportItem(state, formData);
+      if(result.error) {
+          dispatch({ type: 'GENERATION_ERROR', payload: result.error });
+      } else {
+          dispatch({ type: 'GENERATION_SUCCESS', payload: result });
       }
-      newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
-      return newSelections;
+      setGeneratingItem(null);
     });
-  }, []);
-
-  const setExternalContext = useCallback((fileName: string, content: string) => {
-    setState(prev => ({
-      ...prev,
-      externalContext: { fileName, content }
-    }));
-  }, []);
-
-  const removeExternalContext = useCallback(() => {
-    setState(prev => {
-      const { externalContext, ...rest } = prev;
-      return rest;
-    });
-  }, []);
-
+  };
 
   return {
-    isLoaded,
     state,
-    setState: processGeneratedItem,
-    projectIdea,
-    setProjectIdea,
-    proposal,
-    setProposal,
-    proposalJson,
-    setProposalJson,
+    dispatch,
+    isLoaded,
+    isGeneratingProposal,
+    generatingItem,
+    isAnythingGenerating: isGenerating || isGeneratingProposal,
+    proposal: state.proposal,
+    proposalJson: state.proposalJson,
+    projectIdea: state.projectIdea,
+    contextSelections: state.contextSelections,
+    handleProjectIdeaChange,
+    handleProposalGenerated,
+    handleProposalJsonChange,
+    handleProposalUpdate,
+    handleSectionUpdate,
+    handleDiagramUpdate,
     handleNewSession,
-    contextSelections,
+    handleSubmit,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,

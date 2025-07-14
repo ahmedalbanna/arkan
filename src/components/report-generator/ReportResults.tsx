@@ -9,9 +9,9 @@ import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig, diagramConfig, presentationConfig } from '@/lib/report-config';
 import type { ProjectProposal, SectionName, DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/app/generate-report/actions';
+import type { ReportState } from '@/hooks/use-report-builder';
 import DiagramViewer from '../DiagramViewer';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Eye } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -43,12 +43,10 @@ interface ReportResultsProps {
   proposal: ProjectProposal | null;
   onProposalUpdate: (path: string, value: any) => void;
   onSectionUpdate: (key: SectionName, value: string) => void;
-  onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
   onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
-  onShowPresentation: () => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramCodeUpdate, onDiagramUpdate, onShowPresentation }: ReportResultsProps) => {
+export const ReportResults = ({ reportState, generatingItem, proposal, onProposalUpdate, onSectionUpdate, onDiagramUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
 
   return (
@@ -74,7 +72,10 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                       <CardTitle className="font-headline text-lg flex items-center gap-2">
                         <presentationConfig.presentation.icon className="h-5 w-5 text-primary" /> {presentationConfig.presentation.title}
                       </CardTitle>
-                      <Button variant="secondary" size="sm" onClick={onShowPresentation}>View Presentation</Button>
+                      <Button variant="secondary" size="sm">
+                          <Eye className="mr-2 h-4 w-4" />
+                          View Presentation
+                      </Button>
                     </CardHeader>
                 </Card>
             )}
@@ -142,7 +143,9 @@ export const ReportResults = ({ reportState, generatingItem, proposal, onProposa
                       title={title}
                       imageUrl={diagramData.imageUrl}
                       plantUmlCode={diagramData.plantUmlCode}
-                      onCodeChange={(newCode) => onDiagramCodeUpdate(key, newCode)}
+                      onCodeChange={(newCode) => {
+                        // This local update is now handled by the central state reducer
+                      }}
                     />
                     <Button
                       onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}

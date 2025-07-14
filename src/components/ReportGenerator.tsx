@@ -1,186 +1,40 @@
 'use client';
 
-import { useState, useTransition, useActionState, useEffect, useRef } from 'react';
-import { handleGenerateReportItem } from '@/app/generate-report/actions';
-import { useReportBuilder } from '@/hooks/use-report-builder';
 import { ProposalGenerator } from './report-generator/ProposalGenerator';
 import { ProposalEditor } from './report-generator/ProposalEditor';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
-import { add, format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
-import { useAgents } from '@/hooks/use-agents';
-import { ProjectProposalSchema, type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
-import { useToast } from '@/hooks/use-toast';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { useLocalization } from '@/context/LocalizationContext';
-import PresentationViewer from './PresentationViewer';
+import { useReportState } from '@/context/ReportStateContext';
 
-function set(obj: any, path: string, value: any) {
-  const keys = path.split('.');
-  let current = obj;
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    if (i === keys.length - 1) {
-      current[key] = value;
-    } else {
-      if (!current[key]) {
-        current[key] = /^\d+$/.test(keys[i + 1]) ? [] : {};
-      }
-      current = current[key];
-    }
-  }
-}
 
 export default function ReportGenerator() {
-  const [isGenerating, startTransition] = useTransition();
-  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
-  const [generatingItem, setGeneratingItem] = useState<string | null>(null);
-
   const {
-    isLoaded,
     state,
-    setState,
-    projectIdea,
-    setProjectIdea,
+    isLoaded,
+    isGeneratingProposal,
+    generatingItem,
+    isAnythingGenerating,
     proposal,
-    setProposal,
     proposalJson,
-    setProposalJson,
+    projectIdea,
+    handleProjectIdeaChange,
+    handleProposalGenerated,
+    handleProposalJsonChange,
+    handleProposalUpdate,
+    handleSectionUpdate,
+    handleDiagramUpdate,
     handleNewSession,
+    handleSubmit,
     contextSelections,
     toggleContextSelection,
     setExternalContext,
-    removeExternalContext
-  } = useReportBuilder();
-
-  const { isLoaded: agentsLoaded } = useAgents();
-  const { t } = useLocalization();
-
-  const { toast } = useToast();
-  
-  const prevLastGenerated = useRef<string | undefined>();
-  const prevError = useRef<string | undefined>();
-
-  const [showPresentation, setShowPresentation] = useState(false);
-
-  useEffect(() => {
-    if (state.lastGenerated && state.lastGenerated !== prevLastGenerated.current && !state.error) {
-        const itemConfig = (sectionConfig as any)[state.lastGenerated] || (diagramConfig as any)[state.lastGenerated];
-        const title = itemConfig?.title || state.lastGenerated;
-        if (state.lastGenerated === 'presentation' && state.presentation) {
-          setShowPresentation(true);
-        }
-        toast({
-            title: t('reportGenerator.generationSuccess'),
-            description: t('reportGenerator.generationSuccessDesc').replace('{item}', title),
-        });
-    }
-
-    if (state.error && state.error !== prevError.current && state.error !== 'Invalid JSON format. Please check the content.') {
-        toast({
-            title: t('reportGenerator.generationFailed'),
-            description: state.error,
-            variant: "destructive",
-        });
-    }
-
-    prevLastGenerated.current = state.lastGenerated;
-    prevError.current = state.error;
-
-  }, [state.lastGenerated, state.error, toast, t, state.presentation]);
+    removeExternalContext,
+  } = useReportState();
 
 
-  const handleProposalGenerated = (newProposal: ProjectProposal) => {
-    setProposal(newProposal);
-    setProposalJson(JSON.stringify(newProposal, null, 2));
-  };
-
-  const handleProposalJsonChange = (json: string) => {
-    setProposalJson(json);
-    try {
-        const parsed = ProjectProposalSchema.parse(JSON.parse(json));
-        setProposal(parsed);
-    } catch {
-        // Silently fail, UI will be based on last valid proposal
-    }
-  };
-
-  const handleProposalUpdate = (path: string, value: any) => {
-    if (!proposal) return;
-    const newProposal = JSON.parse(JSON.stringify(proposal));
-    set(newProposal, path, value);
-
-    if (path.startsWith('budget.breakdown') || path === 'budget.currency') {
-        const total = newProposal.budget.breakdown.reduce((acc: number, item: { cost: number }) => acc + Number(item.cost || 0), 0);
-        newProposal.budget.totalAmount = total;
-    }
-
-    if (path.startsWith('timeline')) {
-        try {
-            let currentDate = new Date(newProposal.timeline.startDate);
-            if (isNaN(currentDate.getTime())) { currentDate = new Date(); }
-            for (const phase of newProposal.timeline.phases) {
-                currentDate = add(currentDate, { weeks: Number(phase.durationWeeks || 0) });
-            }
-            newProposal.timeline.endDate = format(currentDate, 'yyyy-MM-dd');
-        } catch (error) {
-            console.error("Error calculating timeline:", error);
-        }
-    }
-
-    setProposal(newProposal);
-    setProposalJson(JSON.stringify(newProposal, null, 2));
-  };
-
-  const handleSectionUpdate = (sectionKey: SectionName, newContent: string) => {
-    setState({
-        ...state,
-        sections: { ...state.sections, [sectionKey]: newContent },
-        lastGenerated: state.lastGenerated, // Keep lastGenerated
-    });
-  };
-
-  const handleDiagramCodeUpdate = (diagramType: DiagramType, code: string) => {
-    setState(prevState => {
-        const diagrams = { ...prevState.diagrams };
-        if (diagrams[diagramType]) {
-            diagrams[diagramType]!.plantUmlCode = code;
-        }
-        return {
-            ...prevState,
-            diagrams
-        };
-    });
-  };
-
-  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
-      const formData = new FormData();
-      if (proposalJson) formData.set('proposalJson', proposalJson);
-      formData.set('itemToGenerate', diagramType);
-      formData.set('intent', 'update_diagram');
-      formData.set('diagramToUpdate', diagramType);
-      formData.set('plantUmlCode', code);
-      handleSubmit(formData);
-  };
-
-  const handleSubmit = (formData: FormData) => {
-    const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
-    if (!item) return;
-    if (state.externalContext) {
-      formData.set('externalContextContent', state.externalContext.content);
-    }
-
-    setGeneratingItem(item);
-    startTransition(async () => {
-      const newState = await handleGenerateReportItem(state, formData);
-      setState(newState);
-      setGeneratingItem(null);
-    });
-  };
-
-  if (!isLoaded || !agentsLoaded) {
+  if (!isLoaded) {
       return (
           <div className="flex justify-center items-center p-8">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -188,74 +42,59 @@ export default function ReportGenerator() {
       )
   }
 
-  const isAnythingGenerating = isGenerating || isGeneratingProposal;
   const isToolsDisabled = !proposalJson || isAnythingGenerating;
 
   return (
-    <>
-      {state.presentation && (
-        <PresentationViewer
-          isOpen={showPresentation}
-          onOpenChange={setShowPresentation}
-          slides={state.presentation.slides}
-        />
-      )}
-
-      <form action={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
-          {/* Left Column */}
-          <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-            <ProposalGenerator
-              isGenerating={isGeneratingProposal}
-              setIsGenerating={setIsGeneratingProposal}
-              projectIdea={projectIdea}
-              onProjectIdeaChange={setProjectIdea}
-              onProposalGenerated={handleProposalGenerated}
-              onReset={handleNewSession}
-            />
-            <ProposalEditor
-              proposalJson={proposalJson}
-              onProposalJsonChange={handleProposalJsonChange}
-              isDisabled={isAnythingGenerating}
-              error={state?.error && !generatingItem ? state.error : undefined}
-            />
-          </div>
-
-          {/* Center Column */}
-          <div className="lg:col-span-6 overflow-y-auto pr-2">
-            <ReportResults
-              reportState={state}
-              generatingItem={generatingItem}
-              proposal={proposal}
-              onProposalUpdate={handleProposalUpdate}
-              onSectionUpdate={handleSectionUpdate}
-              onDiagramCodeUpdate={handleDiagramCodeUpdate}
-              onDiagramUpdate={handleDiagramUpdate}
-              onShowPresentation={() => setShowPresentation(true)}
-            />
-          </div>
-
-          {/* Right Column */}
-          <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-            <ReportActions
-              proposal={proposal}
-              reportState={state}
-              onNewSession={handleNewSession}
-              isGenerating={isAnythingGenerating}
-            />
-            <GenerationTools
-              isDisabled={isToolsDisabled}
-              reportState={state}
-              isPending={isGenerating}
-              generatingItem={generatingItem}
-              contextSelections={contextSelections}
-              onContextToggle={toggleContextSelection}
-              onExternalContextUploaded={setExternalContext}
-              onExternalContextRemoved={removeExternalContext}
-            />
-          </div>
+    <form action={handleSubmit}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-150px)]">
+        {/* Left Column */}
+        <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+          <ProposalGenerator
+            isGenerating={isGeneratingProposal}
+            projectIdea={projectIdea}
+            onProjectIdeaChange={handleProjectIdeaChange}
+            onProposalGenerated={handleProposalGenerated}
+          />
+          <ProposalEditor
+            proposalJson={proposalJson}
+            onProposalJsonChange={handleProposalJsonChange}
+            isDisabled={isAnythingGenerating}
+            error={state.error && !generatingItem ? state.error : undefined}
+          />
         </div>
-      </form>
-    </>
+
+        {/* Center Column */}
+        <div className="lg:col-span-6 overflow-y-auto pr-2">
+          <ReportResults
+            reportState={state}
+            generatingItem={generatingItem}
+            proposal={proposal}
+            onProposalUpdate={handleProposalUpdate}
+            onSectionUpdate={handleSectionUpdate}
+            onDiagramUpdate={handleDiagramUpdate}
+          />
+        </div>
+
+        {/* Right Column */}
+        <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+          <ReportActions
+            proposal={proposal}
+            reportState={state}
+            onNewSession={handleNewSession}
+            isGenerating={isAnythingGenerating}
+          />
+          <GenerationTools
+            isDisabled={isToolsDisabled}
+            reportState={state}
+            isPending={isAnythingGenerating && !!generatingItem}
+            generatingItem={generatingItem}
+            contextSelections={contextSelections}
+            onContextToggle={toggleContextSelection}
+            onExternalContextUploaded={setExternalContext}
+            onExternalContextRemoved={removeExternalContext}
+          />
+        </div>
+      </div>
+    </form>
   );
 }

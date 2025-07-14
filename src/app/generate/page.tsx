@@ -7,6 +7,7 @@ import ReportGenerator from "@/components/ReportGenerator";
 import CodeGenerator from "@/components/CodeGenerator";
 import { FileText, Laptop } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ReportStateProvider } from '@/context/ReportStateContext';
 
 export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState("report");
@@ -27,7 +28,11 @@ export default function GeneratePage() {
       </div>
 
       <div className="w-full">
-        {activeTab === 'report' && <ReportGenerator />}
+        {activeTab === 'report' && (
+          <ReportStateProvider>
+            <ReportGenerator />
+          </ReportStateProvider>
+        )}
         {activeTab === 'code' && <CodeGenerator />}
       </div>
     </div>

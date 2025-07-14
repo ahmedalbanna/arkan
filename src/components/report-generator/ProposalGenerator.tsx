@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2, Sparkles } from 'lucide-react';
 import { useAgents } from '@/hooks/use-agents';
 import { generateProposal } from '@/ai/flows/generate-proposal';
-import { useHistory } from '@/hooks/use-history';
 import type { ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { getFromCache, saveToCache, generateCacheKey } from '@/lib/cache';
@@ -16,25 +15,21 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ProposalGeneratorProps {
   isGenerating: boolean;
-  setIsGenerating: (isGenerating: boolean) => void;
   projectIdea: string;
   onProjectIdeaChange: (idea: string) => void;
   onProposalGenerated: (proposal: ProjectProposal) => void;
-  onReset: () => void;
 }
 
-export const ProposalGenerator = ({ isGenerating, setIsGenerating, projectIdea, onProjectIdeaChange, onProposalGenerated, onReset }: ProposalGeneratorProps) => {
+export const ProposalGenerator = ({ isGenerating, projectIdea, onProjectIdeaChange, onProposalGenerated }: ProposalGeneratorProps) => {
   const { t } = useLocalization();
   const [error, setError] = useState<string | undefined>();
   const { agents } = useAgents();
-  const { addHistoryEntry } = useHistory();
   const { toast } = useToast();
 
   const proposalAgent = agents.find(a => a.id === 'generate-proposal');
 
   const handleGenerateClick = async () => {
     if (!projectIdea || !proposalAgent) return;
-    setIsGenerating(true);
     setError(undefined);
 
     const cacheKeyPayload = {
@@ -49,41 +44,21 @@ export const ProposalGenerator = ({ isGenerating, setIsGenerating, projectIdea, 
         title: "Loaded from Cache",
         description: `The proposal for "${cachedResult.title}" was retrieved from the local cache.`,
       });
-      onReset();
-      addHistoryEntry({
-        id: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        type: 'proposal',
-        title: `Project Proposal: ${cachedResult.title}`,
-        proposal: cachedResult,
-      });
       onProposalGenerated(cachedResult);
-      setIsGenerating(false);
       return;
     }
 
     try {
-      onReset();
       const result = await generateProposal({
         projectIdea,
         prompt: proposalAgent.prompt as string,
       });
 
       saveToCache(cacheKey, result);
-
-      addHistoryEntry({
-        id: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        type: 'proposal',
-        title: `Project Proposal: ${result.title}`,
-        proposal: result,
-      });
       onProposalGenerated(result);
     } catch (e) {
       console.error(e);
       setError(t('reportGenerator.step1Error'));
-    } finally {
-      setIsGenerating(false);
     }
   };
 
