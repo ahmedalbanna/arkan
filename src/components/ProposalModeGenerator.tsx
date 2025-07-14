@@ -7,13 +7,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2, Sparkles, FileText, Download, FileJson } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
 import { saveAs } from 'file-saver';
 import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useProposalState } from '@/context/ProposalStateContext';
 
 
 export function ProposalModeGenerator() {
@@ -21,24 +21,25 @@ export function ProposalModeGenerator() {
     const { templates: docxTemplates } = useDocxStyles();
     const {
         state,
-        dispatch,
-        isGeneratingProposal,
-        handleGenerateProposal,
-    } = useBuilderState();
+        isGenerating,
+        projectIdea,
+        setProjectIdea,
+        customGuidelines,
+        setCustomGuidelines,
+        handleFormSubmit,
+    } = useProposalState();
     
-    const [projectIdea, setProjectIdea] = useState('');
-    const [customGuidelines, setCustomGuidelines] = useState<string[]>([]);
-    const { proposal } = state;
+    const { proposal, error } = state;
 
 
     useEffect(() => {
-        if(state.lastGenerated === 'proposal' && state.proposal && !state.error) {
+        if(proposal && !error) {
             toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
         }
-        if(state.lastGenerated === 'proposal' && state.error) {
-            toast({ title: 'Generation Failed', description: state.error, variant: 'destructive' });
+        if(error) {
+            toast({ title: 'Generation Failed', description: error, variant: 'destructive' });
         }
-    }, [state, toast]);
+    }, [proposal, error, toast]);
 
     const handleExportDocx = () => {
         if(proposal) {
@@ -56,13 +57,13 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleGenerateProposal(projectIdea, customGuidelines);
+        handleFormSubmit();
     };
 
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-220px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
@@ -77,10 +78,10 @@ export function ProposalModeGenerator() {
                                 required
                                 value={projectIdea}
                                 onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={isGeneratingProposal}
+                                disabled={isGenerating}
                             />
-                            {state.lastGenerated === 'proposal' && state.error && (
-                                <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
+                            {error && (
+                                <p className="text-sm font-medium text-destructive mt-2">{error}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -117,7 +118,7 @@ export function ProposalModeGenerator() {
                             <div className="text-center text-muted-foreground p-8">
                                 <FileText className="w-16 h-16 mx-auto mb-4" />
                                 <p>Your generated project proposal will appear here.</p>
-                                {isGeneratingProposal && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                                {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
                         </Card>
                     )}
@@ -126,8 +127,8 @@ export function ProposalModeGenerator() {
                  {/* Right Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <ProposalGenerationTools
-                        isDisabled={!projectIdea || isGeneratingProposal}
-                        isGenerating={isGeneratingProposal}
+                        isDisabled={!projectIdea || isGenerating}
+                        isGenerating={isGenerating}
                         customGuidelines={customGuidelines}
                         setCustomGuidelines={setCustomGuidelines}
                     />

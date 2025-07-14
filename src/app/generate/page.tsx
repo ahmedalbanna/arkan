@@ -15,6 +15,7 @@ import { PresentationStateProvider } from '@/context/PresentationStateContext';
 import { DiagramStateProvider } from '@/context/DiagramStateContext';
 import { SessionActions } from '@/components/SessionActions';
 import { BuilderStateProvider } from '@/context/BuilderStateContext';
+import { ProposalStateProvider } from '@/context/ProposalStateContext';
 
 
 function GeneratePageContent() {
@@ -48,7 +49,11 @@ function GeneratePageContent() {
       </div>
 
       <div className="w-full">
-        {activeTab === 'proposal' && <ProposalModeGenerator />}
+        {activeTab === 'proposal' && (
+          <ProposalStateProvider>
+            <ProposalModeGenerator />
+          </ProposalStateProvider>
+        )}
         {activeTab === 'report' && (
           <ReportStateProvider>
             <ReportGenerator />
