@@ -17,8 +17,6 @@ export default function ReportGenerator() {
     generatingItem,
     isAnythingGenerating,
     handleSectionUpdate,
-    handleDiagramCodeUpdate,
-    handleDiagramUpdate,
     handleSubmit,
     contextSelections,
     toggleContextSelection,
@@ -61,10 +59,7 @@ export default function ReportGenerator() {
           <ReportResults
             reportState={state}
             generatingItem={generatingItem}
-            isAnythingGenerating={isAnythingGenerating}
             onSectionUpdate={handleSectionUpdate}
-            onDiagramCodeUpdate={handleDiagramCodeUpdate}
-            onDiagramUpdate={handleDiagramUpdate}
           />
         </div>
 

@@ -35,21 +35,6 @@ export function useReportState() {
   
   // Action handlers now dispatch to the global builder context
   const handleSectionUpdate = (key: SectionName, value: string) => builderDispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
-  const handleDiagramCodeUpdate = (key: DiagramType, code: string) => builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
-  
-  const handleDiagramUpdate = (diagramType: DiagramType) => {
-    const code = builderState.diagrams?.[diagramType]?.plantUmlCode;
-    if (!code) {
-        toast({ title: 'Update Failed', description: 'Could not find code to update diagram.', variant: 'destructive' });
-        return;
-    }
-    const formData = new FormData();
-    if(builderState.proposalJson) formData.set('proposalJson', builderState.proposalJson);
-    formData.set('itemToGenerate', diagramType);
-    formData.set('intent', 'update_diagram');
-    formData.set('plantUmlCode', code);
-    handleSubmit(formData);
-  };
   
   const toggleContextSelection = (parentKey: string, contextKey: string) => builderDispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
   const setExternalContext = (fileName: string, content: string) => builderDispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
@@ -112,7 +97,7 @@ export function useReportState() {
                 guidelines: formData.getAll('guidelines[]').map(String),
                 instructionText: formData.get('instructionText'),
                 externalContextContent: builderState.externalContext?.content,
-                acceptanceCriteria: formData.get('acceptanceCriteria'),
+                acceptanceCriteria: formData.getAll('acceptanceCriteria').map(String).filter(c => c.trim() !== '').join('\n'),
                 intent: formData.get('intent'),
                 plantUmlCode: formData.get('plantUmlCode'),
             }),
@@ -155,8 +140,6 @@ export function useReportState() {
     generatingItem,
     isAnythingGenerating: builderState.isAnythingGenerating,
     handleSectionUpdate,
-    handleDiagramCodeUpdate,
-    handleDiagramUpdate,
     handleSubmit,
     contextSelections: builderState.contextSelections,
     toggleContextSelection,
