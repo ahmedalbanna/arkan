@@ -80,11 +80,12 @@ export default function DiagramGenerator() {
                               {generatedDiagrams.map(key => {
                                 const diagramData = state.diagrams![key]!;
                                 const isUpdatingThis = isAnythingGenerating && generatingDiagram === key;
+                                const Icon = diagramConfig[key].icon;
                                 return (
                                    <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
                                       <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
                                          <div className="flex items-center">
-                                              {diagramConfig[key].icon({className: "mr-2 h-5 w-5 text-primary"})}
+                                              <Icon className="mr-2 h-5 w-5 text-primary" />
                                               {diagramConfig[key].title}
                                          </div>
                                       </AccordionTrigger>
