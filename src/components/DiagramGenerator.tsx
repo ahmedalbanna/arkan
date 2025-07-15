@@ -59,59 +59,57 @@ export default function DiagramGenerator() {
     }
 
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(new FormData(e.currentTarget)); }}>
-            <input type="hidden" name="proposalJson" value={builderState.proposalJson} />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
-                {/* Center Column */}
-                <div className="lg:col-span-8 overflow-y-auto pr-2">
-                     <Card className="h-full">
-                        <CardHeader>
-                            <CardTitle className="font-headline">Diagram Preview</CardTitle>
-                             <CardDescription>
-                                {currentDiagramData ? `Showing: ${diagramConfig[currentDiagramType!].title}` : 'Your generated diagram will appear here.'}
-                             </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                             {isAnythingGenerating && !currentDiagramData ? (
-                                <DiagramSkeleton />
-                             ) : currentDiagramData ? (
-                                <DiagramViewer
-                                   title={diagramConfig[currentDiagramType!].title}
-                                   imageUrl={currentDiagramData.imageUrl}
-                                   plantUmlCode={currentDiagramData.plantUmlCode}
-                                   onCodeChange={(code) => handleDiagramCodeUpdate(currentDiagramType!, code)}
-                                   onUpdate={() => handleDiagramUpdate(currentDiagramType!, currentDiagramData.plantUmlCode)}
-                                   isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
-                                   isReadOnly={isAnythingGenerating} />
-                              ) : (
-                                <div className="flex items-center justify-center h-full min-h-[400px]">
-                                    <div className="text-center text-muted-foreground p-8">
-                                        <GitGraph className="w-16 h-16 mx-auto mb-4" />
-                                        <p>Generate a diagram to get started.</p>
-                                    </div>
+            {/* Center Column */}
+            <div className="lg:col-span-8 overflow-y-auto pr-2">
+                 <Card className="h-full">
+                    <CardHeader>
+                        <CardTitle className="font-headline">Diagram Preview</CardTitle>
+                         <CardDescription>
+                            {currentDiagramData ? `Showing: ${diagramConfig[currentDiagramType!].title}` : 'Your generated diagram will appear here.'}
+                         </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                         {isAnythingGenerating && !currentDiagramData ? (
+                            <DiagramSkeleton />
+                         ) : currentDiagramData ? (
+                            <DiagramViewer
+                               title={diagramConfig[currentDiagramType!].title}
+                               imageUrl={currentDiagramData.imageUrl}
+                               plantUmlCode={currentDiagramData.plantUmlCode}
+                               onCodeChange={(code) => handleDiagramCodeUpdate(currentDiagramType!, code)}
+                               onUpdate={() => handleDiagramUpdate(currentDiagramType!)}
+                               isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
+                               isReadOnly={isAnythingGenerating} />
+                          ) : (
+                            <div className="flex items-center justify-center h-full min-h-[400px]">
+                                <div className="text-center text-muted-foreground p-8">
+                                    <GitGraph className="w-16 h-16 mx-auto mb-4" />
+                                    <p>Generate a diagram to get started.</p>
                                 </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Column */}
-                <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-                    <DiagramGenerationTools
-                        isDisabled={!builderState.proposal || isAnythingGenerating}
-                        diagramsState={state.diagrams || {}}
-                        sectionsState={state.sections || {}}
-                        externalContext={state.externalContext}
-                        isGenerating={isAnythingGenerating}
-                        generatingDiagram={generatingDiagram}
-                        contextSelections={contextSelections}
-                        onContextToggle={toggleContextSelection}
-                        onExternalContextUploaded={setExternalContext}
-                        onExternalContextRemoved={removeExternalContext}
-                    />
-                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
-        </form>
+
+            {/* Right Column */}
+            <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+                <DiagramGenerationTools
+                    isDisabled={!builderState.proposal || isAnythingGenerating}
+                    diagramsState={state.diagrams || {}}
+                    sectionsState={state.sections || {}}
+                    externalContext={state.externalContext}
+                    isGenerating={isAnythingGenerating}
+                    generatingDiagram={generatingDiagram}
+                    contextSelections={contextSelections}
+                    onContextToggle={toggleContextSelection}
+                    onExternalContextUploaded={setExternalContext}
+                    onExternalContextRemoved={removeExternalContext}
+                    onSubmit={handleFormSubmit}
+                />
+            </div>
+        </div>
     );
 }

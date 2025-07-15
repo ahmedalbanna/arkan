@@ -37,12 +37,16 @@ export function useReportState() {
   const handleSectionUpdate = (key: SectionName, value: string) => builderDispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
   const handleDiagramCodeUpdate = (key: DiagramType, code: string) => builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
   
-  const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
+  const handleDiagramUpdate = (diagramType: DiagramType) => {
+    const code = builderState.diagrams?.[diagramType]?.plantUmlCode;
+    if (!code) {
+        toast({ title: 'Update Failed', description: 'Could not find code to update diagram.', variant: 'destructive' });
+        return;
+    }
     const formData = new FormData();
     if(builderState.proposalJson) formData.set('proposalJson', builderState.proposalJson);
     formData.set('itemToGenerate', diagramType);
     formData.set('intent', 'update_diagram');
-    formData.set('diagramToUpdate', diagramType);
     formData.set('plantUmlCode', code);
     handleSubmit(formData);
   };

@@ -41,7 +41,7 @@ interface ReportResultsProps {
   generatingItem: string | null;
   isAnythingGenerating: boolean;
   onSectionUpdate: (key: SectionName, value: string) => void;
-  onDiagramUpdate: (diagramType: DiagramType, code: string) => void;
+  onDiagramUpdate: (diagramType: DiagramType) => void;
   onDiagramCodeUpdate: (diagramType: DiagramType, code: string) => void;
 }
 
@@ -151,7 +151,7 @@ export const ReportResults = ({ reportState, generatingItem, isAnythingGeneratin
                       isReadOnly={isAnythingGenerating}
                     />
                     <Button
-                      onClick={() => onDiagramUpdate(key, diagramData.plantUmlCode)}
+                      onClick={() => onDiagramUpdate(key)}
                       className="font-headline"
                       disabled={isUpdatingThis}
                     >

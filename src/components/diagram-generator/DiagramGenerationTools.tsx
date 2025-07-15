@@ -63,13 +63,14 @@ const getSelectedGuidelines = (agent: Agent | undefined, guidelineState: Guideli
 };
 
 interface GenerateItemButtonProps {
-    itemKey: string;
+    onClick: () => void;
     title: string;
     isGenerating: boolean;
     generatingDiagram: string | null;
+    itemKey: string;
 }
 
-function GenerateItemButton({ itemKey, title, isGenerating, generatingDiagram }: GenerateItemButtonProps) {
+function GenerateItemButton({ onClick, title, isGenerating, generatingDiagram, itemKey }: GenerateItemButtonProps) {
     const { agents } = useAgents();
     const agentId = diagramConfig[itemKey as keyof typeof diagramConfig]?.agentId;
     const agent = agents.find(a => a.id === agentId);
@@ -77,9 +78,8 @@ function GenerateItemButton({ itemKey, title, isGenerating, generatingDiagram }:
 
     return (
         <Button
-            type="submit"
-            name="itemToGenerate"
-            value={itemKey}
+            type="button"
+            onClick={onClick}
             disabled={isGeneratingThis || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
@@ -101,6 +101,7 @@ interface DiagramGenerationToolsProps {
     onContextToggle: (parentKey: string, contextKey: string) => void;
     onExternalContextUploaded: (fileName: string, content: string) => void;
     onExternalContextRemoved: () => void;
+    onSubmit: (itemToGenerate: DiagramType, guidelines: string[]) => void;
 }
 
 
@@ -116,6 +117,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
         onContextToggle,
         onExternalContextUploaded,
         onExternalContextRemoved,
+        onSubmit,
     } = props;
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
@@ -290,11 +292,6 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                 </div>
                                             </div>
                                         </TabsContent>
-
-                                        {/* Hidden inputs to pass data to server action */}
-                                        {selectedGuidelines.map((g, i) => (
-                                            <input key={i} type="hidden" name="guidelines[]" value={g} />
-                                        ))}
                                         
                                         <TabsContent value="context" className="pt-4">
                                             <ScrollArea className="max-h-80 w-full">
@@ -350,7 +347,13 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton itemKey={key} title={title} isGenerating={isGenerating} generatingDiagram={generatingDiagram} />
+                                        <GenerateItemButton
+                                            onClick={() => onSubmit(key as DiagramType, selectedGuidelines)}
+                                            itemKey={key}
+                                            title={title}
+                                            isGenerating={isGenerating}
+                                            generatingDiagram={generatingDiagram}
+                                        />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>

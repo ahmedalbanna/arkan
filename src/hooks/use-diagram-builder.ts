@@ -14,19 +14,17 @@ export function useDiagramBuilder() {
     const { state: builderState, dispatch: builderDispatch } = useBuilderState();
     const [isGenerating, startTransition] = useTransition();
     const [generatingDiagram, setGeneratingDiagram] = useState<DiagramType | null>(null);
-    
+
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    const handleFormSubmit = (formData: FormData) => {
-        const itemToGenerate = formData.get('itemToGenerate') as DiagramType;
-
+    const handleFormSubmit = (itemToGenerate: DiagramType, guidelines: string[]) => {
         const validatedFields = z.object({
             itemToGenerate: DiagramTypeSchema,
             guidelines: z.array(z.string()).optional(),
         }).safeParse({
-            itemToGenerate: itemToGenerate,
-            guidelines: formData.getAll('guidelines[]').map(String),
+            itemToGenerate,
+            guidelines,
         });
 
         if (!validatedFields.success) {
@@ -42,7 +40,7 @@ export function useDiagramBuilder() {
             builderDispatch({ type: 'GENERATION_ERROR', payload: { error: 'The proposal data is missing.' } });
             return;
         }
-        
+
         setGeneratingDiagram(itemToGenerate);
         builderDispatch({ type: 'GENERATION_START', payload: { item: itemToGenerate } });
 
@@ -70,13 +68,13 @@ export function useDiagramBuilder() {
                         }
                     }
                 }
-                
+
                 const response = await fetch('/api/generate-diagrams', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         proposal: proposalData,
-                        diagramToGenerate,
+                        diagramToGenerate: itemToGenerate,
                         otherDiagrams,
                         otherSections,
                         guidelines: validatedFields.data.guidelines,
@@ -86,9 +84,9 @@ export function useDiagramBuilder() {
 
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || 'API request failed');
-                
+
                 await deductCredit(user.id, 1);
-                
+
                 builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
                     diagrams: { ...builderState.diagrams, [itemToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
                     lastGenerated: itemToGenerate,
@@ -111,7 +109,13 @@ export function useDiagramBuilder() {
         builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code } });
     }, [builderDispatch]);
 
-    const handleDiagramUpdate = (diagramType: DiagramType, code: string) => {
+    const handleDiagramUpdate = (diagramType: DiagramType) => {
+        const code = builderState.diagrams?.[diagramType]?.plantUmlCode;
+        if (!code) {
+            toast({ title: "Update Failed", description: "No code found for this diagram.", variant: "destructive" });
+            return;
+        }
+
         setGeneratingDiagram(diagramType);
         builderDispatch({ type: 'GENERATION_START', payload: { item: diagramType } });
 
