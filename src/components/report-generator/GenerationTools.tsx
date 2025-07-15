@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/hooks/use-report-builder';
+import type { ReportState } from '@/hooks/use-report-state';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
@@ -25,6 +25,7 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Skeleton } from '../ui/skeleton';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -238,7 +239,19 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
     }
 
     if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
+                    <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
