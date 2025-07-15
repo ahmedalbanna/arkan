@@ -53,7 +53,7 @@ export default function ReportGenerator() {
 
 
   return (
-    <form action={handleSubmit}>
+    <form action={(formData) => handleSubmit(formData)}>
        <input type="hidden" name="proposalJson" value={builderState.proposalJson} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}

@@ -18,7 +18,6 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 export interface ReportState {
   sections: { [key in SectionName]?: string };
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
-  presentation?: { slides: any[] };
   evaluation?: EvaluateReportOutput;
   externalContext?: { fileName: string; content: string };
   contextSelections: Record<string, Record<string, boolean>>;
@@ -27,7 +26,7 @@ export interface ReportState {
 }
 
 export type ReportAction =
-  | { type: 'SET_STATE'; payload: Partial<ReportState> }
+  | { type: 'SET_BUILDER_STATE'; payload: Partial<Omit<ReportState, 'proposal'|'proposalJson'>> }
   | { type: 'GENERATION_START'; payload: { item?: string } }
   | { type: 'GENERATION_SUCCESS'; payload: Partial<Omit<ReportState, 'proposal' | 'proposalJson'>> }
   | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
@@ -44,9 +43,8 @@ export const initialState: ReportState = {
 // 3. Reducer Function
 const reportReducer = (state: ReportState, action: ReportAction): ReportState => {
   switch (action.type) {
-    case 'SET_STATE':
-        const { ...restOfPayload } = action.payload;
-        return { ...state, ...restOfPayload };
+    case 'SET_BUILDER_STATE':
+        return { ...state, ...action.payload };
     case 'GENERATION_START':
       return { ...state, error: undefined, lastGenerated: action.payload.item as any };
     case 'GENERATION_SUCCESS':
@@ -76,7 +74,7 @@ export function useReportState() {
   
   useEffect(() => {
     if (builderState) {
-        dispatch({ type: 'SET_STATE', payload: builderState });
+        dispatch({ type: 'SET_BUILDER_STATE', payload: builderState });
     }
     setIsLoaded(true);
   }, [builderState]);
@@ -92,13 +90,7 @@ export function useReportState() {
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
     formData.set('plantUmlCode', code);
-    try {
- handleSubmit(formData);
-    } catch (error) {
-      console.error('Error updating diagram:', error);
-      toast({ title: 'Error updating diagram', description: 'Failed to update the diagram. Please try again.', variant: 'destructive' });
-    }
-
+    handleSubmit(formData);
   };
   
   const toggleContextSelection = (parentKey: string, contextKey: string) => builderDispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
@@ -124,18 +116,28 @@ export function useReportState() {
         
         const otherDiagrams: Record<string, string> = {};
         if (state.contextSelections[item]) {
-            for (const key in state.contextSelections[item]) {
-                if (state.contextSelections[item][key] && state.diagrams?.[key as DiagramType]) {
-                    otherDiagrams[key] = state.diagrams[key as DiagramType]!.plantUmlCode;
+            for (const fullContextKey in state.contextSelections[item]) {
+                if (state.contextSelections[item][fullContextKey]) {
+                     if (fullContextKey.startsWith('diagram_')) {
+                        const contextKey = fullContextKey.substring(8) as DiagramType;
+                        if (builderState.diagrams?.[contextKey]) {
+                            otherDiagrams[contextKey] = builderState.diagrams[contextKey]!.plantUmlCode;
+                        }
+                    }
                 }
             }
         }
         
         const otherSections: Record<string, string> = {};
         if (state.contextSelections[item]) {
-            for (const key in state.contextSelections[item]) {
-                if (state.contextSelections[item][key] && state.sections[key as SectionName]) {
-                    otherSections[key] = state.sections[key as SectionName]!;
+            for (const fullContextKey in state.contextSelections[item]) {
+                if (state.contextSelections[item][fullContextKey]) {
+                    if (fullContextKey.startsWith('section_')) {
+                        const contextKey = fullContextKey.substring(8) as SectionName;
+                        if (builderState.sections?.[contextKey]) {
+                            otherSections[contextKey] = builderState.sections[contextKey]!;
+                        }
+                    }
                 }
             }
         }
@@ -190,6 +192,7 @@ export function useReportState() {
 
   return {
     state,
+    proposal: builderState.proposal,
     isLoaded,
     generatingItem,
     isAnythingGenerating: isBuilderGenerating,

@@ -13,11 +13,13 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
@@ -92,10 +94,13 @@ interface DiagramGenerationToolsProps {
     isDisabled: boolean;
     diagramsState: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string }>>;
     sectionsState: Partial<Record<SectionName, string>>;
+    externalContext?: { fileName: string; content: string };
     isGenerating: boolean;
     generatingDiagram: string | null;
     contextSelections: Record<string, Record<string, boolean>>;
-    onContextToggle: (parentKey: string, contextKey: string, contextType: 'diagram' | 'section') => void;
+    onContextToggle: (parentKey: string, contextKey: string) => void;
+    onExternalContextUploaded: (fileName: string, content: string) => void;
+    onExternalContextRemoved: () => void;
 }
 
 
@@ -104,14 +109,20 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
         isDisabled, 
         diagramsState, 
         sectionsState,
+        externalContext,
         isGenerating, 
         generatingDiagram, 
         contextSelections, 
         onContextToggle,
+        onExternalContextUploaded,
+        onExternalContextRemoved,
     } = props;
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
     const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
+    const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const { toast } = useToast();
 
     React.useEffect(() => {
         if (agentsLoaded && agents && agents.length > 0) {
@@ -155,6 +166,43 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
             }
         }));
     };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files?.[0]) {
+            const file = e.target.files[0];
+            if (file.type === 'application/pdf') {
+                setPdfFile(file);
+            } else {
+                toast({ title: "Invalid File Type", description: "Please upload a PDF file.", variant: "destructive" });
+            }
+        }
+    };
+
+    const handleFileUpload = async () => {
+        if (!pdfFile) return;
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        try {
+            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+                throw new Error(errorResult.message);
+            }
+            const result = await response.json();
+            onExternalContextUploaded(pdfFile.name, result.markdown);
+            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
+        } catch (error: any) {
+            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const handleRemoveExternalContext = () => {
+      onExternalContextRemoved();
+      setPdfFile(null);
+    }
 
     if (!agentsLoaded) {
         return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
@@ -262,7 +310,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                                         name={`context_section_${key}_${contextKey}`}
                                                                         disabled={!sectionsState[contextKey]}
                                                                         checked={contextSelections[key]?.[`section_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => onContextToggle(key, contextKey, 'section')}
+                                                                        onCheckedChange={() => onContextToggle(key, `section_${contextKey}`)}
                                                                     />
                                                                     <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sectionsState[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
@@ -285,11 +333,11 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                                         name={`context_diagram_${key}_${contextKey}`}
                                                                         disabled={!diagramsState[contextKey]}
                                                                         checked={contextSelections[key]?.[`diagram_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => onContextToggle(key, contextKey, 'diagram')}
+                                                                        onCheckedChange={() => onContextToggle(key, `diagram_${contextKey}`)}
                                                                     />
                                                                     <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
-                                                                            
+                                                                            <GitGraph className="h-4 w-4" />
                                                                             {diagramConfig[contextKey].title}
                                                                         </div>
                                                                     </Label>
@@ -309,6 +357,45 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                         );
                     })}
                 </Accordion>
+                <div className="pt-4 mt-4 border-t">
+                    <h3 className="text-sm font-semibold mb-2">External Context (PDF)</h3>
+                    {externalContext ? (
+                        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
+                           <div className="flex items-center gap-2 truncate">
+                             <FileText className="h-4 w-4 shrink-0" />
+                             <span className="truncate">{externalContext.fileName}</span>
+                           </div>
+                           <div className="flex items-center">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl">
+                                        <DialogHeader>
+                                            <DialogTitle>{externalContext.fileName}</DialogTitle>
+                                        </DialogHeader>
+                                        <ScrollArea className="h-[60vh] rounded-md border p-4">
+                                            <ReactMarkdown components={markdownComponents}>{externalContext.content}</ReactMarkdown>
+                                        </ScrollArea>
+                                    </DialogContent>
+                                </Dialog>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext} title="Remove File">
+                                    <X className="h-4 w-4" />
+                                </Button>
+                           </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
+                            <Button type="button" size="sm" onClick={handleFileUpload} disabled={!pdfFile || isUploading} className="w-full">
+                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                                Upload & Process PDF
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </CardContent>
         </Card>
     );

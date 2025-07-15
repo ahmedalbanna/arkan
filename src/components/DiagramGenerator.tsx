@@ -29,6 +29,8 @@ export default function DiagramGenerator() {
         handleDiagramUpdate,
         contextSelections,
         toggleContextSelection,
+        setExternalContext,
+        removeExternalContext,
     } = useDiagramState();
     
     const { state: builderState, isLoaded } = useBuilderState();
@@ -56,21 +58,9 @@ export default function DiagramGenerator() {
       )
     }
 
-    // Conditional rendering based on currentDiagramData
-    if (!currentDiagramData) {
-      return (
-        <Card className="flex items-center justify-center h-full min-h-[400px]">
-          <div className="text-center text-muted-foreground p-8">
-            <GitGraph className="w-16 h-16 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold">No Diagram Generated Yet</h3>
-            <p>Please use the form above to generate a diagram.</p>
-          </div>
-        </Card>
-      );
-    }
-
     return (
         <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(new FormData(e.currentTarget)); }}>
+            <input type="hidden" name="proposalJson" value={builderState.proposalJson} />
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
 
                 {/* Center Column */}
@@ -83,7 +73,7 @@ export default function DiagramGenerator() {
                              </CardDescription>
                         </CardHeader>
                         <CardContent>
-                             {generatingDiagram && !currentDiagramData ? (
+                             {isAnythingGenerating && !currentDiagramData ? (
                                 <DiagramSkeleton />
                              ) : currentDiagramData ? (
                                 <DiagramViewer
@@ -95,7 +85,7 @@ export default function DiagramGenerator() {
                                    isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
                                    isReadOnly={isAnythingGenerating} />
                               ) : (
- <div className="flex items-center justify-center h-full min-h-[400px]">
+                                <div className="flex items-center justify-center h-full min-h-[400px]">
                                     <div className="text-center text-muted-foreground p-8">
                                         <GitGraph className="w-16 h-16 mx-auto mb-4" />
                                         <p>Generate a diagram to get started.</p>
@@ -112,10 +102,13 @@ export default function DiagramGenerator() {
                         isDisabled={!builderState.proposal || isAnythingGenerating}
                         diagramsState={state.diagrams || {}}
                         sectionsState={state.sections || {}}
+                        externalContext={state.externalContext}
                         isGenerating={isAnythingGenerating}
                         generatingDiagram={generatingDiagram}
                         contextSelections={contextSelections}
                         onContextToggle={toggleContextSelection}
+                        onExternalContextUploaded={setExternalContext}
+                        onExternalContextRemoved={removeExternalContext}
                     />
                 </div>
             </div>

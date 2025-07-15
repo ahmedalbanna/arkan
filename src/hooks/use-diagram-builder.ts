@@ -3,7 +3,7 @@
 
 import { useState, useReducer, useTransition, useEffect, useCallback } from 'react';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { DiagramTypeSchema, type DiagramType, SectionNameSchema, type SectionName } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
@@ -11,51 +11,41 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 
 export interface DiagramState {
   diagrams?: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string; }>>;
+  sections?: Partial<Record<SectionName, string>>;
+  externalContext?: { fileName: string; content: string };
   lastGenerated?: DiagramType;
   error?: string;
+  contextSelections: Record<string, Record<string, boolean>>;
 }
 
 type Action =
-  | { type: 'SET_STATE'; payload: DiagramState }
+  | { type: 'SET_BUILDER_STATE'; payload: { sections: any, diagrams: any, contextSelections: any } }
   | { type: 'GENERATION_START', payload: { diagramType: DiagramType } }
   | { type: 'GENERATION_SUCCESS', payload: { diagramType: DiagramType, plantUmlCode: string, imageUrl: string } }
-  | { type: 'RENDER_SUCCESS', payload: { diagramType: DiagramType, plantUmlCode: string, imageUrl: string } }
   | { type: 'GENERATION_FAILURE', payload: string }
   | { type: 'UPDATE_DIAGRAM_CODE', payload: { key: DiagramType, code: string } }
+  | { type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey: string; contextKey: string } }
+  | { type: 'SET_EXTERNAL_CONTEXT', payload: { fileName: string; content: string } }
+  | { type: 'REMOVE_EXTERNAL_CONTEXT' }
   | { type: 'CLEAR_ERROR' };
 
 
-const initialState: DiagramState = { diagrams: {} };
+const initialState: DiagramState = { diagrams: {}, sections: {}, contextSelections: {} };
 
-const diagramReducer = (state: DiagramState, action: Action) => {
+const diagramReducer = (state: DiagramState, action: Action): DiagramState => {
     switch (action.type) {
-        case 'SET_STATE':
-            return { ...state, ...action.payload };
+        case 'SET_BUILDER_STATE':
+            return {
+                ...state,
+                sections: action.payload.sections,
+                diagrams: action.payload.diagrams,
+                contextSelections: action.payload.contextSelections,
+            };
         case 'GENERATION_START':
             return { ...state, error: undefined };
         case 'GENERATION_SUCCESS':
-            return {
+             return {
                 ...state,
-                diagrams: {
-                    ...state.diagrams,
-                    [action.payload.diagramType]: {
-                        plantUmlCode: action.payload.plantUmlCode,
-                        imageUrl: action.payload.imageUrl
-                    }
-                },
-                lastGenerated: action.payload.diagramType,
-                error: undefined
-            };
-        case 'RENDER_SUCCESS':
-            return {
-                ...state,
-                diagrams: {
-                    ...state.diagrams,
-                    [action.payload.diagramType]: {
-                        ...state.diagrams![action.payload.diagramType]!,
-                        imageUrl: action.payload.imageUrl,
-                    }
-                },
                 lastGenerated: action.payload.diagramType,
                 error: undefined
             };
@@ -73,6 +63,18 @@ const diagramReducer = (state: DiagramState, action: Action) => {
                     }
                 }
             };
+        case 'TOGGLE_CONTEXT_SELECTION': {
+          const { parentKey, contextKey } = action.payload;
+          const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
+          if (!newSelections[parentKey]) newSelections[parentKey] = {};
+          newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
+          return { ...state, contextSelections: newSelections };
+        }
+        case 'SET_EXTERNAL_CONTEXT':
+          return { ...state, externalContext: action.payload };
+        case 'REMOVE_EXTERNAL_CONTEXT':
+          const { externalContext, ...rest } = state;
+          return { ...rest, sections: state.sections, diagrams: state.diagrams, contextSelections: state.contextSelections };
         case 'CLEAR_ERROR':
             return { ...state, error: undefined };
         default:
@@ -84,6 +86,7 @@ const GenerateDiagramSchema = z.object({
   proposalJson: z.string().min(1, 'Please paste the project proposal content.'),
   itemToGenerate: DiagramTypeSchema,
   guidelines: z.array(z.string()).optional(),
+  externalContextContent: z.string().optional(),
 });
 
 
@@ -92,34 +95,31 @@ export function useDiagramBuilder() {
     const [state, dispatch] = useReducer(diagramReducer, initialState);
     const [isGenerating, startTransition] = useTransition();
     const [generatingDiagram, setGeneratingDiagram] = useState<DiagramType | null>(null);
-    const [contextSelections, setContextSelections] = useState<Record<string, Record<string, boolean>>>({});
     
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
     useEffect(() => {
-        if(builderState.diagrams) {
-            dispatch({ type: 'SET_STATE', payload: { diagrams: builderState.diagrams } });
-        }
-    }, [builderState.diagrams]);
+        dispatch({ type: 'SET_BUILDER_STATE', payload: { 
+            sections: builderState.sections, 
+            diagrams: builderState.diagrams,
+            contextSelections: builderState.contextSelections,
+        }});
+    }, [builderState.sections, builderState.diagrams, builderState.contextSelections]);
 
     const handleFormSubmit = (formData: FormData) => {
         const validatedFields = GenerateDiagramSchema.safeParse({
             proposalJson: builderState.proposalJson,
             itemToGenerate: formData.get('itemToGenerate'),
             guidelines: formData.getAll('guidelines[]').map(String),
+            externalContextContent: formData.get('externalContextContent') ?? undefined,
         });
 
         if (!validatedFields.success) {
             const error = validatedFields.error.flatten().fieldErrors;
-            // Iterate over field errors and display a toast for each
-            Object.entries(error).forEach(([field, messages]) => {
-                if (messages) {
-                    messages.forEach(message => {
-                        toast({ title: "Validation Error", description: `${field}: ${message}`, variant: 'destructive' });
-                    });
-                }
-            });
+            const errorMessage = Object.values(error).flat().join(', ');
+            dispatch({ type: 'GENERATION_FAILURE', payload: `Invalid data: ${errorMessage}` });
+            toast({ title: "Validation Error", description: `Invalid data: ${errorMessage}`, variant: 'destructive' });
             return;
         }
 
@@ -139,13 +139,20 @@ export function useDiagramBuilder() {
 
                 const otherDiagrams: Record<string, string> = {};
                 const otherSections: Record<string, string> = {};
-                if (contextSelections[diagramToGenerate]) {
-                    for (const key in contextSelections[diagramToGenerate]) {
-                        if (contextSelections[diagramToGenerate][key]) {
-                            if (key.startsWith('diagram_') && builderState.diagrams?.[key.substring(8) as DiagramType]) {
-                                otherDiagrams[key.substring(8)] = builderState.diagrams[key.substring(8) as DiagramType]!.plantUmlCode;
-                            } else if (key.startsWith('section_') && builderState.sections?.[key.substring(8) as SectionName]) {
-                                otherSections[key.substring(8)] = builderState.sections[key.substring(8) as SectionName]!;
+
+                if (state.contextSelections[diagramToGenerate]) {
+                    for (const fullContextKey in state.contextSelections[diagramToGenerate]) {
+                        if (state.contextSelections[diagramToGenerate][fullContextKey]) {
+                            if (fullContextKey.startsWith('diagram_')) {
+                                const contextKey = fullContextKey.substring(8) as DiagramType;
+                                if (builderState.diagrams?.[contextKey]) {
+                                    otherDiagrams[contextKey] = builderState.diagrams[contextKey]!.plantUmlCode;
+                                }
+                            } else if (fullContextKey.startsWith('section_')) {
+                                const contextKey = fullContextKey.substring(8) as SectionName;
+                                if (builderState.sections?.[contextKey]) {
+                                    otherSections[contextKey] = builderState.sections[contextKey]!;
+                                }
                             }
                         }
                     }
@@ -160,6 +167,7 @@ export function useDiagramBuilder() {
                         otherDiagrams,
                         otherSections,
                         guidelines: validatedFields.data.guidelines,
+                        externalContextContent: validatedFields.data.externalContextContent,
                     }),
                 });
 
@@ -168,10 +176,14 @@ export function useDiagramBuilder() {
                 
                 await deductCredit(user.id, 1);
                 
-                builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
+                const successPayload = {
                     diagrams: { ...builderState.diagrams, [diagramToGenerate]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl }},
                     lastGenerated: diagramToGenerate,
-                }});
+                };
+
+                builderDispatch({ type: 'GENERATION_SUCCESS', payload: successPayload });
+                dispatch({ type: 'GENERATION_SUCCESS', payload: { diagramType: diagramToGenerate, ...result }});
+
 
                 toast({ title: "Diagram Generated", description: `Successfully created ${diagramToGenerate} diagram.` });
                 await fetchUser();
@@ -205,12 +217,12 @@ export function useDiagramBuilder() {
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message || 'API request failed');
 
-                builderDispatch({
-                    type: 'GENERATION_SUCCESS', payload: {
-                        diagrams: { ...builderState.diagrams, [diagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
-                        lastGenerated: diagramType,
-                    }
-                });
+                const successPayload = {
+                    diagrams: { ...builderState.diagrams, [diagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
+                    lastGenerated: diagramType,
+                };
+                builderDispatch({ type: 'GENERATION_SUCCESS', payload: successPayload });
+                dispatch({ type: 'GENERATION_SUCCESS', payload: { diagramType, ...result }});
 
                 toast({ title: "Diagram Updated", description: "Successfully re-rendered diagram." });
 
@@ -225,27 +237,21 @@ export function useDiagramBuilder() {
         });
     }
 
-    const toggleContextSelection = useCallback((parentKey: string, contextKey: string, contextType: 'diagram' | 'section') => {
-        const fullContextKey = `${contextType}_${contextKey}`;
-        setContextSelections(prev => {
-            const newSelections = { ...prev };
-            if (!newSelections[parentKey]) {
-                newSelections[parentKey] = {};
-            }
-            newSelections[parentKey][fullContextKey] = !newSelections[parentKey][fullContextKey];
-            return newSelections;
-        });
-    }, []);
+    const toggleContextSelection = (parentKey: string, contextKey: string) => dispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });
+    const setExternalContext = (fileName: string, content: string) => dispatch({ type: 'SET_EXTERNAL_CONTEXT', payload: { fileName, content } });
+    const removeExternalContext = () => dispatch({ type: 'REMOVE_EXTERNAL_CONTEXT' });
 
 
     return {
-        state: { ...state, sections: builderState.sections },
+        state,
         isAnythingGenerating: isGenerating || builderState.lastGenerated === 'proposal',
         generatingDiagram,
         handleFormSubmit,
         handleDiagramCodeUpdate,
         handleDiagramUpdate,
-        contextSelections,
+        contextSelections: state.contextSelections,
         toggleContextSelection,
+        setExternalContext,
+        removeExternalContext,
     };
 }
