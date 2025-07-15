@@ -16,55 +16,12 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 
 // 1. Define State and Action Types
 export interface ReportState {
-  sections: { [key in SectionName]?: string };
-  diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
-  evaluation?: EvaluateReportOutput;
-  externalContext?: { fileName: string; content: string };
-  contextSelections: Record<string, Record<string, boolean>>;
-  lastGenerated: SectionName | DiagramType | 'presentation' | 'evaluation' | null;
-  error?: string;
+  // This hook now only manages UI state, like which item is currently being generated.
+  // The actual data (sections, diagrams) is now managed by the global BuilderState.
 }
 
-export type ReportAction =
-  | { type: 'SET_BUILDER_STATE'; payload: Partial<Omit<ReportState, 'proposal'|'proposalJson'>> }
-  | { type: 'GENERATION_START'; payload: { item?: string } }
-  | { type: 'GENERATION_SUCCESS'; payload: Partial<Omit<ReportState, 'proposal' | 'proposalJson'>> }
-  | { type: 'GENERATION_ERROR'; payload: { error: string, item?: string } };
-
-
-// 2. Initial State
-export const initialState: ReportState = {
-  sections: {},
-  diagrams: {},
-  contextSelections: {},
-  lastGenerated: null,
-};
-
-// 3. Reducer Function
-const reportReducer = (state: ReportState, action: ReportAction): ReportState => {
-  switch (action.type) {
-    case 'SET_BUILDER_STATE':
-        return { ...state, ...action.payload };
-    case 'GENERATION_START':
-      return { ...state, error: undefined, lastGenerated: action.payload.item as any };
-    case 'GENERATION_SUCCESS':
-        // When new content is generated, clear the old evaluation
-        const { evaluation, ...restOfSuccessPayload } = action.payload;
-        if (action.payload.lastGenerated !== 'evaluation') {
-            return { ...state, ...restOfSuccessPayload, error: undefined, evaluation: undefined };
-        }
-        return { ...state, ...action.payload, error: undefined };
-    case 'GENERATION_ERROR':
-        return { ...state, error: action.payload.error, lastGenerated: action.payload.item as any };
-    default:
-      return state;
-  }
-};
-
-
 export function useReportState() {
-  const { state: builderState, dispatch: builderDispatch, isAnythingGenerating: isBuilderGenerating } = useBuilderState();
-  const [state, dispatch] = useReducer(reportReducer, initialState);
+  const { state: builderState, dispatch: builderDispatch } = useBuilderState();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isGenerating, startTransition] = useTransition();
   const [generatingItem, setGeneratingItem] = useState<string | null>(null);
@@ -73,13 +30,10 @@ export function useReportState() {
   const { user, fetchUser } = useAuth();
   
   useEffect(() => {
-    if (builderState) {
-        dispatch({ type: 'SET_BUILDER_STATE', payload: builderState });
-    }
     setIsLoaded(true);
-  }, [builderState]);
+  }, []);
   
-  // Action handlers
+  // Action handlers now dispatch to the global builder context
   const handleSectionUpdate = (key: SectionName, value: string) => builderDispatch({ type: 'UPDATE_SECTION', payload: { key, value } });
   const handleDiagramCodeUpdate = (key: DiagramType, code: string) => builderDispatch({ type: 'UPDATE_DIAGRAM_CODE', payload: { key, code }});
   
@@ -101,8 +55,8 @@ export function useReportState() {
     const item = (formData.get('itemToGenerate') || formData.get('diagramToUpdate')) as string;
     if (!item) return;
 
-    if (state.externalContext) {
-      formData.set('externalContextContent', state.externalContext.content);
+    if (builderState.externalContext) {
+      formData.set('externalContextContent', builderState.externalContext.content);
     }
     
     setGeneratingItem(item);
@@ -115,9 +69,9 @@ export function useReportState() {
         const endpoint = isDiagram ? '/api/generate-diagrams' : '/api/generate-report';
         
         const otherDiagrams: Record<string, string> = {};
-        if (state.contextSelections[item]) {
-            for (const fullContextKey in state.contextSelections[item]) {
-                if (state.contextSelections[item][fullContextKey]) {
+        if (builderState.contextSelections[item]) {
+            for (const fullContextKey in builderState.contextSelections[item]) {
+                if (builderState.contextSelections[item][fullContextKey]) {
                      if (fullContextKey.startsWith('diagram_')) {
                         const contextKey = fullContextKey.substring(8) as DiagramType;
                         if (builderState.diagrams?.[contextKey]) {
@@ -129,9 +83,9 @@ export function useReportState() {
         }
         
         const otherSections: Record<string, string> = {};
-        if (state.contextSelections[item]) {
-            for (const fullContextKey in state.contextSelections[item]) {
-                if (state.contextSelections[item][fullContextKey]) {
+        if (builderState.contextSelections[item]) {
+            for (const fullContextKey in builderState.contextSelections[item]) {
+                if (builderState.contextSelections[item][fullContextKey]) {
                     if (fullContextKey.startsWith('section_')) {
                         const contextKey = fullContextKey.substring(8) as SectionName;
                         if (builderState.sections?.[contextKey]) {
@@ -153,7 +107,7 @@ export function useReportState() {
                 otherDiagrams,
                 guidelines: formData.getAll('guidelines[]').map(String),
                 instructionText: formData.get('instructionText'),
-                externalContextContent: state.externalContext?.content,
+                externalContextContent: builderState.externalContext?.content,
                 acceptanceCriteria: formData.get('acceptanceCriteria'),
                 intent: formData.get('intent'),
                 plantUmlCode: formData.get('plantUmlCode'),
@@ -171,12 +125,12 @@ export function useReportState() {
              builderDispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluation' } });
         } else if (isDiagram) {
             builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
-              diagrams: { ...state.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
+              diagrams: { ...builderState.diagrams, [item as DiagramType]: { plantUmlCode: result.plantUmlCode, imageUrl: result.imageUrl } },
               lastGenerated: item as DiagramType,
             }});
         } else {
             builderDispatch({ type: 'GENERATION_SUCCESS', payload: {
-                sections: { ...state.sections, [item as SectionName]: Object.values(result)[0] as string },
+                sections: { ...builderState.sections, [item as SectionName]: Object.values(result)[0] as string },
                 lastGenerated: item as SectionName,
             }});
         }
@@ -191,16 +145,16 @@ export function useReportState() {
   };
 
   return {
-    state,
+    state: builderState, // Pass the global state through
     proposal: builderState.proposal,
     isLoaded,
     generatingItem,
-    isAnythingGenerating: isBuilderGenerating,
+    isAnythingGenerating: builderState.isAnythingGenerating,
     handleSectionUpdate,
     handleDiagramCodeUpdate,
     handleDiagramUpdate,
     handleSubmit,
-    contextSelections: state.contextSelections,
+    contextSelections: builderState.contextSelections,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,
