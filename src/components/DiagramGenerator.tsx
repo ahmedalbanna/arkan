@@ -56,6 +56,19 @@ export default function DiagramGenerator() {
       )
     }
 
+    // Conditional rendering based on currentDiagramData
+    if (!currentDiagramData) {
+      return (
+        <Card className="flex items-center justify-center h-full min-h-[400px]">
+          <div className="text-center text-muted-foreground p-8">
+            <GitGraph className="w-16 h-16 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold">No Diagram Generated Yet</h3>
+            <p>Please use the form above to generate a diagram.</p>
+          </div>
+        </Card>
+      );
+    }
+
     return (
         <form onSubmit={(e) => { e.preventDefault(); handleFormSubmit(new FormData(e.currentTarget)); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -74,16 +87,15 @@ export default function DiagramGenerator() {
                                 <DiagramSkeleton />
                              ) : currentDiagramData ? (
                                 <DiagramViewer
-                                    title={diagramConfig[currentDiagramType!].title}
-                                    imageUrl={currentDiagramData.imageUrl}
-                                    plantUmlCode={currentDiagramData.plantUmlCode}
-                                    onCodeChange={(code) => handleDiagramCodeUpdate(currentDiagramType!, code)}
-                                    onUpdate={() => handleDiagramUpdate(currentDiagramType!, currentDiagramData.plantUmlCode)}
-                                    isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
-                                    isReadOnly={isAnythingGenerating}
-                                />
-                             ) : (
-                                 <div className="flex items-center justify-center h-full min-h-[400px]">
+                                   title={diagramConfig[currentDiagramType!].title}
+                                   imageUrl={currentDiagramData.imageUrl}
+                                   plantUmlCode={currentDiagramData.plantUmlCode}
+                                   onCodeChange={(code) => handleDiagramCodeUpdate(currentDiagramType!, code)}
+                                   onUpdate={() => handleDiagramUpdate(currentDiagramType!, currentDiagramData.plantUmlCode)}
+                                   isUpdating={isAnythingGenerating && generatingDiagram === currentDiagramType}
+                                   isReadOnly={isAnythingGenerating} />
+                              ) : (
+ <div className="flex items-center justify-center h-full min-h-[400px]">
                                     <div className="text-center text-muted-foreground p-8">
                                         <GitGraph className="w-16 h-16 mx-auto mb-4" />
                                         <p>Generate a diagram to get started.</p>

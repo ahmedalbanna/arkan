@@ -241,8 +241,9 @@ export function useReportBuilder() {
               await fetchUser();
               toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
           } catch (e: any) {
-              dispatch({ type: 'GENERATION_ERROR', payload: { error: e.message || 'An error occurred', item: 'proposal' } });
-              toast({ title: 'Generation Failed', description: e.message || 'An error occurred', variant: 'destructive' });
+              console.error('Error generating proposal:', e); // Log the full error
+              const errorMessage = (e instanceof Error && e.message) ? e.message : 'An unexpected error occurred during proposal generation.';
+              toast({ title: 'Generation Failed', description: errorMessage, variant: 'destructive' });
           } finally {
             setGeneratingItem(null);
           }

@@ -92,7 +92,13 @@ export function useReportState() {
     formData.set('intent', 'update_diagram');
     formData.set('diagramToUpdate', diagramType);
     formData.set('plantUmlCode', code);
-    handleSubmit(formData);
+    try {
+ handleSubmit(formData);
+    } catch (error) {
+      console.error('Error updating diagram:', error);
+      toast({ title: 'Error updating diagram', description: 'Failed to update the diagram. Please try again.', variant: 'destructive' });
+    }
+
   };
   
   const toggleContextSelection = (parentKey: string, contextKey: string) => builderDispatch({ type: 'TOGGLE_CONTEXT_SELECTION', payload: { parentKey, contextKey } });

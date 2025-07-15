@@ -114,7 +114,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
     const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
 
     React.useEffect(() => {
-        if (agentsLoaded) {
+        if (agentsLoaded && agents && agents.length > 0) {
             setGuidelineState(getInitialGuidelineState(agents));
         }
     }, [agentsLoaded, agents]);

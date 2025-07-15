@@ -112,8 +112,14 @@ export function useDiagramBuilder() {
 
         if (!validatedFields.success) {
             const error = validatedFields.error.flatten().fieldErrors;
-            const message = error.proposalJson?.[0] || error.itemToGenerate?.[0] || 'Invalid data.';
-            dispatch({ type: 'GENERATION_FAILURE', payload: message });
+            // Iterate over field errors and display a toast for each
+            Object.entries(error).forEach(([field, messages]) => {
+                if (messages) {
+                    messages.forEach(message => {
+                        toast({ title: "Validation Error", description: `${field}: ${message}`, variant: 'destructive' });
+                    });
+                }
+            });
             return;
         }
 
