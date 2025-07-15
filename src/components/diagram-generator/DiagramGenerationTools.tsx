@@ -294,7 +294,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                         </TabsContent>
                                         
                                         <TabsContent value="context" className="pt-4">
-                                            <ScrollArea className="max-h-80 w-full">
+                                            <ScrollArea className="h-60 w-full">
                                                 <div className="space-y-4 pr-4">
                                                     <div className="space-y-3">
                                                         <Label className="font-semibold">Contextual Sections</Label>
