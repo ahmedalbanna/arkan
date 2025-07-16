@@ -31,6 +31,8 @@ export interface CodeGenerationState {
  * This state is managed globally and represents all user-generated content.
  */
 export interface BuilderState {
+  /** The user's initial project idea text for the proposal generator. */
+  projectIdea: string;
   /** The full, parsed project proposal object. Null if not yet generated. */
   proposal: ProjectProposal | null;
   /** The raw JSON string of the project proposal. Used for display and editing. */
@@ -65,6 +67,7 @@ export interface BuilderState {
 export type BuilderAction =
   | { type: 'NEW_SESSION' }
   | { type: 'SET_STATE'; payload: Partial<BuilderState> }
+  | { type: 'SET_PROJECT_IDEA'; payload: string }
   | { type: 'PROPOSAL_GENERATION_START' }
   | { type: 'PROPOSAL_GENERATION_SUCCESS'; payload: { proposal: ProjectProposal } }
   | { type: 'PROPOSAL_GENERATION_ERROR'; payload: { error: string } }
@@ -82,6 +85,7 @@ export type BuilderAction =
 
 
 const initialState: BuilderState = {
+  projectIdea: '',
   proposal: null,
   proposalJson: '',
   sections: {},
@@ -116,6 +120,8 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         }
         return newState;
     }
+    case 'SET_PROJECT_IDEA':
+      return { ...state, projectIdea: action.payload };
     case 'PROPOSAL_GENERATION_START':
       return { ...state, isGeneratingProposal: true, error: undefined };
     case 'PROPOSAL_GENERATION_SUCCESS':

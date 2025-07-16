@@ -14,19 +14,16 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 
 export interface ProposalGenerationState {
   error?: string;
-  projectIdea?: string;
   selectedTemplate?: ProposalTemplateKey;
   customGuidelines?: string[];
 }
 
 type Action =
   | { type: 'SET_ERROR'; payload: string | undefined }
-  | { type: 'SET_PROJECT_IDEA'; payload: string }
   | { type: 'SET_SELECTED_TEMPLATE'; payload: ProposalTemplateKey }
   | { type: 'SET_CUSTOM_GUIDELINES'; payload: string[] };
 
 const initialState: ProposalGenerationState = {
-  projectIdea: '',
   selectedTemplate: 'default',
   customGuidelines: [],
 };
@@ -35,8 +32,6 @@ function reducer(state: ProposalGenerationState, action: Action): ProposalGenera
   switch (action.type) {
     case 'SET_ERROR':
         return { ...state, error: action.payload };
-    case 'SET_PROJECT_IDEA':
-        return { ...state, projectIdea: action.payload };
     case 'SET_SELECTED_TEMPLATE':
         return { ...state, selectedTemplate: action.payload };
     case 'SET_CUSTOM_GUIDELINES':
@@ -53,7 +48,7 @@ const GenerateProposalSchema = z.object({
 
 
 export function useProposalBuilder() {
-    const { state: builderState, handleGenerateProposal, handleProposalUpdate, isGeneratingProposal } = useBuilderState();
+    const { state: builderState, dispatch: builderDispatch, handleGenerateProposal, handleProposalUpdate } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     
     // Template state (static, not part of the persisted state)
@@ -61,7 +56,7 @@ export function useProposalBuilder() {
 
     const [customGuidelineInput, setCustomGuidelineInput] = useState('');
 
-    const setProjectIdea = (idea: string) => dispatch({ type: 'SET_PROJECT_IDEA', payload: idea });
+    const setProjectIdea = (idea: string) => builderDispatch({ type: 'SET_PROJECT_IDEA', payload: idea });
     const handleTemplateChange = (key: ProposalTemplateKey) => dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: key });
 
     const handleAddCustomGuideline = useCallback(() => {
@@ -82,7 +77,7 @@ export function useProposalBuilder() {
     const handleFormSubmit = () => {
         const selectedTemplateKey = state.selectedTemplate || 'default';
         const currentTemplate = templates[selectedTemplateKey];
-        const projectIdea = state.projectIdea || '';
+        const projectIdea = builderState.projectIdea || '';
 
         if (!currentTemplate) {
             dispatch({ type: 'SET_ERROR', payload: 'Selected template not found.' });
@@ -111,8 +106,8 @@ export function useProposalBuilder() {
 
     return {
         state: { ...state, proposal: builderState.proposal, error: builderState.error },
-        isGenerating: isGeneratingProposal,
-        projectIdea: state.projectIdea || '',
+        isGenerating: builderState.isGeneratingProposal,
+        projectIdea: builderState.projectIdea,
         setProjectIdea,
         handleFormSubmit,
         handleProposalUpdate,
