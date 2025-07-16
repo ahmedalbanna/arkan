@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     // Replace placeholders in the prompt
     fullPrompt = fullPrompt
-      .replace('{{{jsonEncode proposal}}}', JSON.stringify(proposal, null, 2))
+      .replace('{{{proposal_json}}}', JSON.stringify(proposal, null, 2))
       .replace('{{{context}}}', contextString);
     // --- End of prompt construction ---
 

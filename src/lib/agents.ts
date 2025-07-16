@@ -263,7 +263,7 @@ You will be provided with the full project proposal in JSON format, and may also
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+{{{proposal_json}}}
 \`\`\`
 
 --- Additional Context (Optional) ---
