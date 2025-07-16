@@ -14,16 +14,15 @@ import { useBuilderState } from '@/context/BuilderStateContext';
 const PRESENTATION_KEY = 'arkan-presentation';
 
 export interface PresentationState {
-  slides?: PresentationSlide[];
   error?: string;
   isLoaded: boolean;
 }
 
 type Action =
   | { type: 'GENERATION_START' }
-  | { type: 'GENERATION_SUCCESS'; payload: PresentationSlide[] }
+  | { type: 'GENERATION_SUCCESS' }
   | { type: 'GENERATION_FAILURE'; payload: string }
-  | { type: 'LOAD_FROM_STORAGE'; payload: PresentationSlide[] };
+  | { type: 'SET_IS_LOADED' };
 
 const initialState: PresentationState = {
     isLoaded: false,
@@ -32,13 +31,13 @@ const initialState: PresentationState = {
 function reducer(state: PresentationState, action: Action): PresentationState {
   switch (action.type) {
     case 'GENERATION_START':
-      return { ...state, slides: undefined, error: undefined };
+      return { ...state, error: undefined };
     case 'GENERATION_SUCCESS':
-      return { ...state, slides: action.payload, error: undefined };
+      return { ...state, error: undefined };
     case 'GENERATION_FAILURE':
       return { ...state, error: action.payload };
-    case 'LOAD_FROM_STORAGE':
-        return { ...state, slides: action.payload, isLoaded: true };
+    case 'SET_IS_LOADED':
+        return { ...state, isLoaded: true };
     default:
       return state;
   }
@@ -50,25 +49,15 @@ const GeneratePresentationSchema = z.object({
 
 
 export function usePresentationBuilder() {
-    const { state: builderState } = useBuilderState();
+    const { state: builderState, dispatch: builderDispatch } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    // Load from local storage on initial mount
+    // On initial mount, we are already loaded because data comes from the builder state
     useEffect(() => {
-        try {
-            const storedPresentation = localStorage.getItem(PRESENTATION_KEY);
-            if (storedPresentation) {
-                dispatch({ type: 'LOAD_FROM_STORAGE', payload: JSON.parse(storedPresentation) });
-            } else {
-                dispatch({ type: 'LOAD_FROM_STORAGE', payload: [] });
-            }
-        } catch (e) {
-            console.error('Failed to load presentation from storage', e);
-            dispatch({ type: 'LOAD_FROM_STORAGE', payload: [] });
-        }
+        dispatch({ type: 'SET_IS_LOADED' });
     }, []);
 
 
@@ -118,6 +107,9 @@ export function usePresentationBuilder() {
 
         startTransition(async () => {
             dispatch({ type: 'GENERATION_START' });
+            // Also dispatch to the global state
+            builderDispatch({ type: 'GENERATION_START', payload: { item: 'presentation' } });
+
             try {
                 if (!user) throw new Error("User not authenticated.");
                 
@@ -137,22 +129,27 @@ export function usePresentationBuilder() {
                 });
 
                 await deductCredit(user.id, 1);
-                dispatch({ type: 'GENERATION_SUCCESS', payload: result.slides });
-                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(result.slides)); // Save to local storage
+                
+                // Dispatch success to both local and global states
+                dispatch({ type: 'GENERATION_SUCCESS' });
+                builderDispatch({ type: 'SET_PRESENTATION_SLIDES', payload: { slides: result.slides }});
+                builderDispatch({ type: 'GENERATION_SUCCESS', payload: { lastGenerated: 'presentation' } });
+
                 await fetchUser();
                 toast({ title: 'Presentation Generated', description: `Created a ${result.slides.length}-slide presentation.` });
             } catch (e: any) {
                 console.error(e);
                 const errorMessage = e.message || 'An error occurred while generating the presentation. Please try again.';
                 dispatch({ type: 'GENERATION_FAILURE', payload: errorMessage });
+                builderDispatch({ type: 'GENERATION_ERROR', payload: { error: errorMessage, item: 'presentation' } });
                 toast({ title: "Generation Failed", description: errorMessage, variant: 'destructive' });
             }
         });
     };
 
     return {
-        state,
-        isGenerating,
+        state: { ...state, slides: builderState.presentation?.slides },
+        isGenerating: isGenerating || builderState.lastGenerated === 'presentation',
         proposal: builderState.proposal,
         sections: builderState.sections,
         diagrams: builderState.diagrams,

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode, useMemo, useEffect } from 'react';
-import { type ProjectProposal, type SectionName, type DiagramType } from '@/ai/schemas';
+import { type ProjectProposal, type SectionName, type DiagramType, type PresentationSlide } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { useToast } from '@/hooks/use-toast';
 import { saveAs } from 'file-saver';
@@ -18,7 +18,7 @@ export interface BuilderState {
   sections: { [key in SectionName]?: string };
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string } };
   evaluation?: EvaluateReportOutput;
-  presentation?: { slides: any[] };
+  presentation?: { slides: PresentationSlide[] };
   externalContext?: { fileName: string; content: string };
   contextSelections: Record<string, Record<string, boolean>>;
   isGeneratingProposal: boolean;
@@ -41,7 +41,8 @@ export type BuilderAction =
   | { type: 'GENERATION_ERROR'; payload: { error: string; item?: string } }
   | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
   | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
-  | { type: 'REMOVE_EXTERNAL_CONTEXT' };
+  | { type: 'REMOVE_EXTERNAL_CONTEXT' }
+  | { type: 'SET_PRESENTATION_SLIDES', payload: { slides: PresentationSlide[] } };
 
 
 const initialState: BuilderState = {
@@ -126,6 +127,8 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
     case 'REMOVE_EXTERNAL_CONTEXT':
         const { externalContext, ...rest } = state;
         return { ...rest };
+    case 'SET_PRESENTATION_SLIDES':
+        return { ...state, presentation: { slides: action.payload.slides } };
     default:
       return state;
   }
