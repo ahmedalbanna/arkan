@@ -4,27 +4,23 @@
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
 import { Loader2, AlertCircle } from 'lucide-react';
-import { useReportState } from '@/context/ReportStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { EvaluationTools } from './report-generator/EvaluationTools';
 import { Card } from './ui/card';
-import { useBuilderState } from '@/context/BuilderStateContext';
 
 export default function ReportGenerator() {
   const {
     state,
-    isLoaded,
-    generatingItem,
-    isAnythingGenerating,
+    handleGenerateReportSection,
     handleSectionUpdate,
-    handleSubmit,
-    contextSelections,
     toggleContextSelection,
     setExternalContext,
     removeExternalContext,
-  } = useReportState();
+    handleEvaluateReport,
+  } = useBuilderState();
 
-  const { state: builderState } = useBuilderState();
+  const { isLoaded, isAnythingGenerating, proposal, lastGenerated } = state;
 
 
   if (!isLoaded) {
@@ -35,9 +31,9 @@ export default function ReportGenerator() {
       )
   }
 
-  const isToolsDisabled = !builderState.proposal || isAnythingGenerating;
+  const isToolsDisabled = !proposal || isAnythingGenerating;
   
-  if (!builderState.proposal) {
+  if (!proposal) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
@@ -51,14 +47,14 @@ export default function ReportGenerator() {
 
 
   return (
-    <form action={(formData) => handleSubmit(formData)}>
-       <input type="hidden" name="proposalJson" value={builderState.proposalJson} />
+    <form action={(formData) => handleEvaluateReport(formData)}>
+       <input type="hidden" name="proposalJson" value={state.proposalJson} />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
           <ReportResults
             reportState={state}
-            generatingItem={generatingItem}
+            generatingItem={isAnythingGenerating ? lastGenerated : null}
             onSectionUpdate={handleSectionUpdate}
           />
         </div>
@@ -71,16 +67,17 @@ export default function ReportGenerator() {
           <GenerationTools
             isDisabled={isToolsDisabled}
             reportState={state}
-            isPending={isAnythingGenerating && !!generatingItem}
-            generatingItem={generatingItem}
-            contextSelections={contextSelections}
+            isPending={isAnythingGenerating}
+            generatingItem={lastGenerated}
+            contextSelections={state.contextSelections}
             onContextToggle={toggleContextSelection}
             onExternalContextUploaded={setExternalContext}
             onExternalContextRemoved={removeExternalContext}
+            onGenerate={handleGenerateReportSection}
           />
            <EvaluationTools
             isDisabled={isToolsDisabled}
-            isEvaluating={isAnythingGenerating && generatingItem === 'evaluate'}
+            isEvaluating={isAnythingGenerating && lastGenerated === 'evaluate'}
             evaluationResult={state.evaluation}
           />
         </div>

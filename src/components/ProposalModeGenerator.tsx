@@ -12,7 +12,7 @@ import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
 import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
-import { useProposalState } from '@/context/ProposalStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 
 export function ProposalModeGenerator() {
@@ -20,24 +20,22 @@ export function ProposalModeGenerator() {
     const { templates: docxTemplates } = useDocxStyles();
     const {
         state,
-        isGenerating,
-        projectIdea,
         setProjectIdea,
-        handleFormSubmit,
+        handleGenerateProposal,
         handleProposalUpdate,
-    } = useProposalState();
+    } = useBuilderState();
     
-    const { proposal, error } = state;
+    const { proposal, error, isGeneratingProposal, projectIdea } = state;
 
 
     useEffect(() => {
         if(proposal && !error) {
             toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
         }
-        if(error) {
+        if(error && state.lastGenerated === 'proposal') {
             toast({ title: 'Generation Failed', description: error, variant: 'destructive' });
         }
-    }, [proposal, error, toast]);
+    }, [proposal, error, state.lastGenerated, toast]);
 
     const handleExportDocx = () => {
         if(proposal) {
@@ -55,7 +53,7 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleFormSubmit();
+        handleGenerateProposal();
     };
 
 
@@ -76,9 +74,9 @@ export function ProposalModeGenerator() {
                                 required
                                 value={projectIdea}
                                 onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={isGenerating}
+                                disabled={isGeneratingProposal}
                             />
-                            {error && (
+                            {error && state.lastGenerated === 'proposal' && (
                                 <p className="text-sm font-medium text-destructive mt-2">{error}</p>
                             )}
                         </CardContent>
@@ -116,7 +114,7 @@ export function ProposalModeGenerator() {
                             <div className="text-center text-muted-foreground p-8">
                                 <FileText className="w-16 h-16 mx-auto mb-4" />
                                 <p>Your generated project proposal will appear here.</p>
-                                {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                                {isGeneratingProposal && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
                         </Card>
                     )}
@@ -125,8 +123,8 @@ export function ProposalModeGenerator() {
                  {/* Right Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <ProposalGenerationTools
-                        isDisabled={!projectIdea || isGenerating}
-                        isGenerating={isGenerating}
+                        isDisabled={!projectIdea || isGeneratingProposal}
+                        isGenerating={isGeneratingProposal}
                     />
                 </div>
 

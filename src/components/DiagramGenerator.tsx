@@ -3,12 +3,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import DiagramViewer from './DiagramViewer';
-import { useDiagramState } from '@/context/DiagramStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 import { diagramConfig } from '@/lib/report-config';
 import { GitGraph, AlertCircle, Loader2 } from 'lucide-react';
 import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
 import { Skeleton } from './ui/skeleton';
-import { useBuilderState } from '@/context/BuilderStateContext';
 import { Accordion } from './ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
 import type { DiagramType } from '@/ai/schemas';
@@ -27,18 +26,17 @@ function DiagramSkeleton() {
 export default function DiagramGenerator() {
     const {
         state,
-        isAnythingGenerating,
-        generatingDiagram,
-        handleFormSubmit,
+        handleGenerateDiagram,
         handleDiagramCodeUpdate,
         handleDiagramUpdate,
-        contextSelections,
         toggleContextSelection,
         setExternalContext,
         removeExternalContext,
-    } = useDiagramState();
+    } = useBuilderState();
     
-    const { state: builderState, isLoaded } = useBuilderState();
+    const { isLoaded, proposal, diagrams, sections, contextSelections, isAnythingGenerating, lastGenerated } = state;
+    const generatingDiagram = isAnythingGenerating && orderedDiagrams.includes(lastGenerated as DiagramType) ? lastGenerated : null;
+
 
     if (!isLoaded) {
       return (
@@ -48,7 +46,7 @@ export default function DiagramGenerator() {
       )
     }
 
-    if (!builderState.proposal) {
+    if (!proposal) {
       return (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
@@ -60,7 +58,7 @@ export default function DiagramGenerator() {
       )
     }
     
-    const generatedDiagrams = orderedDiagrams.filter(key => state.diagrams?.[key]);
+    const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -78,7 +76,7 @@ export default function DiagramGenerator() {
                          {generatedDiagrams.length > 0 ? (
                             <Accordion type="multiple" className="w-full space-y-4">
                               {generatedDiagrams.map(key => {
-                                const diagramData = state.diagrams![key]!;
+                                const diagramData = diagrams![key]!;
                                 const isUpdatingThis = isAnythingGenerating && generatingDiagram === key;
                                 const Icon = diagramConfig[key].icon;
                                 return (
@@ -121,9 +119,9 @@ export default function DiagramGenerator() {
             {/* Right Column */}
             <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                 <DiagramGenerationTools
-                    isDisabled={!builderState.proposal || isAnythingGenerating}
-                    diagramsState={state.diagrams || {}}
-                    sectionsState={state.sections || {}}
+                    isDisabled={!proposal || isAnythingGenerating}
+                    diagramsState={diagrams || {}}
+                    sectionsState={sections || {}}
                     externalContext={state.externalContext}
                     isGenerating={isAnythingGenerating}
                     generatingDiagram={generatingDiagram}
@@ -131,7 +129,7 @@ export default function DiagramGenerator() {
                     onContextToggle={toggleContextSelection}
                     onExternalContextUploaded={setExternalContext}
                     onExternalContextRemoved={removeExternalContext}
-                    onSubmit={handleFormSubmit}
+                    onSubmit={handleGenerateDiagram}
                 />
             </div>
         </div>

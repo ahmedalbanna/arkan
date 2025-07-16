@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,10 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Loader2, Sparkles, Plus, Trash2, FileText } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { useProposalState } from '@/context/ProposalStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type ProposalTemplateKey } from '@/lib/proposal-templates';
 
@@ -47,16 +46,17 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const {
+        state,
         templates,
-        selectedTemplate,
         handleTemplateChange,
         customGuidelines,
         handleAddCustomGuideline,
         handleRemoveCustomGuideline,
         customGuidelineInput,
-        setCustomGuidelineInput
-    } = useProposalState();
+        setCustomGuidelineInput,
+    } = useBuilderState();
 
+    const selectedTemplate = state.selectedTemplate || 'default';
     const currentTemplate = templates[selectedTemplate];
 
     if (!currentTemplate) {

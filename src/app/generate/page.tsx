@@ -18,12 +18,6 @@ const DiagramGenerator = dynamic(() => import('@/components/DiagramGenerator'), 
 const CodeGenerator = dynamic(() => import('@/components/CodeGenerator'), { ssr: false });
 const PresentationGenerator = dynamic(() => import('@/components/PresentationGenerator'), { ssr: false });
 
-const LazyProposalStateProvider = dynamic(() => import('@/context/ProposalStateContext').then(mod => mod.ProposalStateProvider), { ssr: false });
-const LazyReportStateProvider = dynamic(() => import('@/context/ReportStateContext').then(mod => mod.ReportStateProvider), { ssr: false });
-const LazyDiagramStateProvider = dynamic(() => import('@/context/DiagramStateContext').then(mod => mod.DiagramStateProvider), { ssr: false });
-const LazyCodeStateProvider = dynamic(() => import('@/context/CodeStateContext').then(mod => mod.CodeStateProvider), { ssr: false });
-const LazyPresentationStateProvider = dynamic(() => import('@/context/PresentationStateContext').then(mod => mod.PresentationStateProvider), { ssr: false });
-
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
@@ -56,29 +50,19 @@ function GeneratePageContent() {
           
           <div className="w-full flex-grow">
               <TabsContent value="proposal" className="h-full">
-                {activeTab === 'proposal' && <LazyProposalStateProvider>
-                  <ProposalModeGenerator />
-                </LazyProposalStateProvider>}
+                {activeTab === 'proposal' && <ProposalModeGenerator />}
               </TabsContent>
               <TabsContent value="report" className="h-full">
-                {activeTab === 'report' && <LazyReportStateProvider>
-                    {activeTab === 'report' && <ReportGenerator />}
-                </LazyReportStateProvider>}
+                {activeTab === 'report' && <ReportGenerator />}
               </TabsContent>
               <TabsContent value="diagram" className="h-full">
-                {activeTab === 'diagram' && <LazyDiagramStateProvider>
-                    {activeTab === 'diagram' && <DiagramGenerator />}
-                </LazyDiagramStateProvider>}
+                {activeTab === 'diagram' && <DiagramGenerator />}
               </TabsContent>
               <TabsContent value="code" className="h-full">
-                 {activeTab === 'code' && <LazyCodeStateProvider>
-                    <CodeGenerator />
-                 </LazyCodeStateProvider>}
+                 {activeTab === 'code' && <CodeGenerator />}
               </TabsContent>
               <TabsContent value="presentation" className="h-full">
-                {activeTab === 'presentation' && <LazyPresentationStateProvider>
-                    {activeTab === 'presentation' && <PresentationGenerator />}
-                </LazyPresentationStateProvider>}
+                {activeTab === 'presentation' && <PresentationGenerator />}
               </TabsContent>
           </div>
         </Tabs>

@@ -14,13 +14,13 @@ import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
-import { useCodeState } from '@/context/CodeStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 function GenerateButton() {
-    const { state } = useCodeState();
+    const { state } = useBuilderState();
     return (
-        <Button type="submit" disabled={state.isGenerating} className="font-headline w-full">
-            {state.isGenerating ? (
+        <Button type="submit" disabled={state.isAnythingGenerating} className="font-headline w-full">
+            {state.isAnythingGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -65,7 +65,7 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 }
 
 export default function CodeGenerator() {
-    const { state, setPrompt, handleGenerateCode } = useCodeState();
+    const { state, setCodePrompt, handleGenerateCode } = useBuilderState();
     const { codeGenerator: codeState } = state;
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -251,10 +251,10 @@ export default function CodeGenerator() {
                                 rows={8}
                                 required
                                 value={codeState.prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                disabled={state.isGenerating}
+                                onChange={(e) => setCodePrompt(e.target.value)}
+                                disabled={state.isAnythingGenerating}
                             />
-                            {state.error && (
+                            {state.error && state.lastGenerated === 'code' && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
                             )}
                         </CardContent>

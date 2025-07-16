@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/hooks/use-report-state';
+import type { BuilderState } from '@/context/BuilderStateContext';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
@@ -26,90 +26,21 @@ import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
+import { useBuilderState } from '@/context/BuilderStateContext';
 
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
 
-type ControlState = {
-    formality: number;
-    tone: string;
-    wordCount: string;
-};
-
-// State for guidelines of a single agent
-type GuidelineState = {
-    checked: Record<number, boolean>;
-    custom: string[];
-};
-
-const getInitialControlState = (): Record<SectionName, ControlState> => {
-    const initial: Partial<Record<SectionName, ControlState>> = {};
-    orderedSections.forEach(key => {
-        initial[key] = { formality: 50, tone: 'professional', wordCount: '300' };
-    });
-    return initial as Record<SectionName, ControlState>;
-};
-
-const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
-    const initialState: Record<string, GuidelineState> = {};
-    orderedSections.forEach(key => {
-        const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
-        const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
-        const checked: Record<number, boolean> = {};
-        if (defaultGuidelines) {
-            defaultGuidelines.forEach((g, index) => {
-                checked[index] = g.isDefault;
-            });
-        }
-        initialState[key] = { checked, custom: [] };
-    });
-    return initialState;
-};
-
-// This now just generates the additional instruction text, not the whole prompt
-const generateInstructionText = (controls: ControlState, t: (key: string) => string) => {
-    let instructions = [];
-    if (controls.formality !== undefined) {
-        const formality = controls.formality;
-        let formalityDesc = t('reportGenerator.tool_formality_balanced');
-        if (formality < 33) formalityDesc = t('reportGenerator.tool_formality_informal');
-        else if (formality > 66) formalityDesc = t('reportGenerator.tool_formality_formal');
-        instructions.push(`- The writing style should be ${formalityDesc}.`);
-    }
-    if (controls.tone && controls.tone !== "none") {
-        instructions.push(`- Adopt a ${controls.tone} tone.`);
-    }
-    if (controls.wordCount) {
-        instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-    }
-    return instructions.join('\n');
-};
-
-const getSelectedGuidelines = (agent: Agent | undefined, guidelineState: GuidelineState | undefined): string[] => {
-    if (!agent || !guidelineState) return [];
-    
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (guidelineState.checked[index]) {
-            guidelines.push(g.text);
-        }
-    });
-    guidelines.push(...guidelineState.custom);
-    return guidelines;
-};
-
 interface GenerateItemButtonProps {
+    onClick: () => void;
     itemKey: string;
     title: string;
     isPending: boolean;
     generatingItem: string | null;
 }
 
-function GenerateItemButton({ itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
+function GenerateItemButton({ onClick, itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
     const { agents } = useAgents();
     const agentId = sectionConfig[itemKey as SectionName]?.agentId;
     const agent = agents.find(a => a.id === agentId);
@@ -117,9 +48,8 @@ function GenerateItemButton({ itemKey, title, isPending, generatingItem }: Gener
 
     return (
         <Button
-            type="submit"
-            name="itemToGenerate"
-            value={itemKey}
+            type="button"
+            onClick={onClick}
             disabled={isPending || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
@@ -132,74 +62,33 @@ function GenerateItemButton({ itemKey, title, isPending, generatingItem }: Gener
 
 interface GenerationToolsProps {
     isDisabled: boolean;
-    reportState: ReportState;
+    reportState: BuilderState;
     isPending: boolean;
     generatingItem: string | null;
     contextSelections: Record<string, Record<string, boolean>>;
     onContextToggle: (parentKey: string, contextKey: string) => void;
     onExternalContextUploaded: (fileName: string, content: string) => void;
     onExternalContextRemoved: () => void;
+    onGenerate: (section: SectionName) => void;
 }
 
-export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle, onExternalContextUploaded, onExternalContextRemoved }: GenerationToolsProps) => {
+export const GenerationTools = ({ isDisabled, reportState, isPending, generatingItem, contextSelections, onContextToggle, onExternalContextUploaded, onExternalContextRemoved, onGenerate }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const [controlState, setControlState] = useState<Record<SectionName, ControlState>>(getInitialControlState);
-    const [guidelineState, setGuidelineState] = useState<Record<string, GuidelineState>>({});
-    const [customGuidelineInput, setCustomGuidelineInput] = useState<Record<string, string>>({});
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const { toast } = useToast();
+    const {
+        controlState,
+        handleControlChange,
+        guidelineState,
+        handleGuidelineToggle,
+        customGuidelineInput,
+        setCustomGuidelineInput,
+        handleAddCustomGuideline,
+        handleRemoveCustomGuideline
+    } = useBuilderState();
 
-    useEffect(() => {
-        if (agentsLoaded) {
-            setGuidelineState(getInitialGuidelineState(agents));
-        }
-    }, [agentsLoaded, agents]);
-
-    const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => {
-        setControlState(prevState => ({
-            ...prevState,
-            [section]: { ...prevState[section], [field]: value }
-        }));
-    };
-
-    const handleGuidelineToggle = (itemKey: string, guidelineIndex: number, isChecked: boolean) => {
-        setGuidelineState(prev => ({
-            ...prev,
-            [itemKey]: {
-                ...prev[itemKey],
-                checked: {
-                    ...prev[itemKey].checked,
-                    [guidelineIndex]: isChecked
-                }
-            }
-        }));
-    };
-
-    const handleAddCustomGuideline = (itemKey: string) => {
-        const newGuideline = customGuidelineInput[itemKey]?.trim();
-        if (newGuideline) {
-            setGuidelineState(prev => ({
-                ...prev,
-                [itemKey]: {
-                    ...prev[itemKey],
-                    custom: [...prev[itemKey].custom, newGuideline]
-                }
-            }));
-            setCustomGuidelineInput(prev => ({ ...prev, [itemKey]: '' }));
-        }
-    };
-
-    const handleRemoveCustomGuideline = (itemKey: string, indexToRemove: number) => {
-        setGuidelineState(prev => ({
-            ...prev,
-            [itemKey]: {
-                ...prev[itemKey],
-                custom: prev[itemKey].custom.filter((_, index) => index !== indexToRemove)
-            }
-        }));
-    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
@@ -269,11 +158,6 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = sectionConfig[key];
-                        
-                        // Get selected guidelines for this agent
-                        const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
-                        // Get instruction text for this agent (only if it's a section)
-                        const instructionText = generateInstructionText(controlState[key as SectionName], t);
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -331,7 +215,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                     <Input
                                                         placeholder="Add a custom guideline..."
                                                         value={customGuidelineInput[key] || ''}
-                                                        onChange={(e) => setCustomGuidelineInput(prev => ({ ...prev, [key]: e.target.value }))}
+                                                        onChange={(e) => setCustomGuidelineInput(key, e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline(key))}
                                                     />
                                                     <Button type="button" variant="secondary" onClick={() => handleAddCustomGuideline(key)}>
@@ -340,12 +224,6 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                                 </div>
                                             </div>
                                         </TabsContent>
-
-                                        {/* Hidden inputs to pass data to server action */}
-                                        {selectedGuidelines.map((g, i) => (
-                                            <input key={i} type="hidden" name="guidelines[]" value={g} />
-                                        ))}
-                                        <input type="hidden" name="instructionText" value={instructionText} />
                                         
                                         <TabsContent value="controls" className="pt-4">
                                             <div className="space-y-6">
@@ -432,7 +310,7 @@ export const GenerationTools = ({ isDisabled, reportState, isPending, generating
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton itemKey={key} title={`${t('generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
+                                        <GenerateItemButton onClick={() => onGenerate(key)} itemKey={key} title={`${t('generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>

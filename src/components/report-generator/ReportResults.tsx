@@ -6,8 +6,8 @@ import { CardTitle, Card, CardContent, CardHeader } from '@/components/ui/card';
 import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
-import type { SectionName, DiagramType } from '@/ai/schemas';
-import type { ReportState } from '@/hooks/use-report-state';
+import type { SectionName } from '@/ai/schemas';
+import type { BuilderState } from '@/context/BuilderStateContext';
 import { Loader2, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -45,7 +45,7 @@ function FullReportSkeleton() {
 }
 
 interface ReportResultsProps {
-  reportState: ReportState;
+  reportState: BuilderState;
   generatingItem: string | null;
   onSectionUpdate: (key: SectionName, value: string) => void;
 }

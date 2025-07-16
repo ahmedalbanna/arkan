@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
-import { usePresentationState } from '@/context/PresentationStateContext';
+import { useBuilderState } from '@/context/BuilderStateContext';
 import { lazy } from 'react';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -20,23 +20,19 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 export default function PresentationGenerator() {
     const {
         state,
-        presentations,
-        activePresentation,
-        setActivePresentationId,
-        isGenerating,
-        proposal,
         handleGeneratePresentation,
-        sections, 
-        diagrams, 
-        contextSelections,
-        toggleContextSelection,
+        setActivePresentationId,
         guidelineState,
         onGuidelineToggle,
         customGuidelineInput,
         onCustomGuidelineChange,
         onAddCustomGuideline,
         onRemoveCustomGuideline,
-    } = usePresentationState();
+        contextSelections,
+        toggleContextSelection,
+    } = useBuilderState();
+
+    const { proposal, sections, diagrams, isAnythingGenerating, presentation, activePresentationId } = state;
     
     if (!proposal) {
         return (
@@ -49,6 +45,9 @@ export default function PresentationGenerator() {
             </Card>
         )
     }
+
+    const presentations = presentation?.history || [];
+    const activePresentation = presentations.find(p => p.id === activePresentationId);
     
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -111,7 +110,7 @@ export default function PresentationGenerator() {
                         <div className="text-center text-muted-foreground p-8">
                             <Presentation className="w-16 h-16 mx-auto mb-4" />
                             <p>Your generated presentation will appear here.</p>
-                            {isGenerating && activePresentation === undefined && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                            {isAnythingGenerating && activePresentation === undefined && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                         </div>
                     </Card>
                 )}
@@ -120,11 +119,11 @@ export default function PresentationGenerator() {
             {/* Right Column */}
             <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                 <PresentationGenerationTools
-                    isDisabled={!proposal || isGenerating}
-                    isGenerating={isGenerating}
+                    isDisabled={!proposal || isAnythingGenerating}
+                    isGenerating={isAnythingGenerating}
                     onGenerate={handleGeneratePresentation}
-                    sections={sections}
-                    diagrams={diagrams}
+                    sections={sections || {}}
+                    diagrams={diagrams || {}}
                     contextSelections={contextSelections}
                     onContextToggle={toggleContextSelection}
                     presentations={presentations}
