@@ -11,9 +11,9 @@ import { cn } from '@/lib/utils';
 import { Loader2, Sparkles, Plus, Trash2, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type ProposalTemplateKey } from '@/lib/proposal-templates';
+import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -46,18 +46,16 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const {
-        state,
-        templates,
+        selectedTemplate,
         handleTemplateChange,
         customGuidelines,
         handleAddCustomGuideline,
         handleRemoveCustomGuideline,
         customGuidelineInput,
         setCustomGuidelineInput,
-    } = useBuilderState();
+    } = useBuilderStore();
 
-    const selectedTemplate = state.selectedTemplate || 'default';
-    const currentTemplate = templates[selectedTemplate];
+    const currentTemplate = proposalTemplates[selectedTemplate];
 
     if (!currentTemplate) {
         return <Card><CardHeader><CardTitle>Loading Templates...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
@@ -77,7 +75,7 @@ export const ProposalGenerationTools = ({
                             <SelectValue placeholder="Select a template" />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.entries(templates).map(([key, template]) => (
+                            {Object.entries(proposalTemplates).map(([key, template]) => (
                                 <SelectItem key={key} value={key}>{template.name}</SelectItem>
                             ))}
                         </SelectContent>
@@ -110,7 +108,7 @@ export const ProposalGenerationTools = ({
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder="Add a custom guideline..."
-                                        value={customGuidelineInput}
+                                        value={customGuidelineInput['proposal'] || ''}
                                         onChange={(e) => setCustomGuidelineInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline())}
                                     />

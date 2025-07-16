@@ -12,30 +12,33 @@ import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
 import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { saveAs } from 'file-saver';
+import { useAuth } from '@/context/AuthContext';
 
 
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
+    const auth = useAuth();
+
     const {
-        state,
+        proposal,
+        error,
+        isGeneratingProposal,
+        projectIdea,
         setProjectIdea,
         handleGenerateProposal,
         handleProposalUpdate,
-    } = useBuilderState();
-    
-    const { proposal, error, isGeneratingProposal, projectIdea } = state;
+        lastGenerated
+    } = useBuilderStore();
 
 
     useEffect(() => {
-        if(proposal && !error) {
-            toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
-        }
-        if(error && state.lastGenerated === 'proposal') {
+        if(error && lastGenerated === 'proposal') {
             toast({ title: 'Generation Failed', description: error, variant: 'destructive' });
         }
-    }, [proposal, error, state.lastGenerated, toast]);
+    }, [error, lastGenerated, toast]);
 
     const handleExportDocx = () => {
         if(proposal) {
@@ -53,7 +56,7 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleGenerateProposal();
+        handleGenerateProposal(auth);
     };
 
 
@@ -76,7 +79,7 @@ export function ProposalModeGenerator() {
                                 onChange={(e) => setProjectIdea(e.target.value)}
                                 disabled={isGeneratingProposal}
                             />
-                            {error && state.lastGenerated === 'proposal' && (
+                            {error && lastGenerated === 'proposal' && (
                                 <p className="text-sm font-medium text-destructive mt-2">{error}</p>
                             )}
                         </CardContent>
