@@ -1,12 +1,12 @@
 
 'use client';
 
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+export const exportComponentAsPDF = async (element: HTMLElement, filename: string) => {
+    const { default: html2canvas } = await import('html2canvas');
+    const { default: jsPDF } = await import('jspdf');
 
-export const exportComponentAsPDF = (element: HTMLElement, filename: string) => {
     html2canvas(element, {
-        scale: 2, // Increase scale for better resolution
+        scale: 2,
         useCORS: true,
         logging: false,
     }).then(canvas => {

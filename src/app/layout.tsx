@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Poppins, PT_Sans, Cairo } from 'next/font/google';
 import './globals.css';
@@ -52,7 +53,6 @@ export default function RootLayout({
               <LanguageDirectionManager>
                 <Header />
                 <main className="flex-grow">{children}</main>
-                <Footer />
                 <Toaster />
               </LanguageDirectionManager>
             </AuthProvider>

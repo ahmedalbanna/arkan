@@ -1,54 +1,51 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, AlignmentType, TextRun, Table, TableRow, TableCell, WidthType, IStylesOptions, IRunOptions, ImageRun, SectionType, Header, Footer, PageNumber, TableOfContents, INumberingOptions } from 'docx';
-import { saveAs } from 'file-saver';
+import type { IStylesOptions, IRunOptions, SectionType, INumberingOptions } from 'docx';
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
 import type { Root, PhrasingContent, List } from 'mdast';
 import { sectionConfig, diagramConfig } from './report-config';
 import { templates, type TemplateKey } from './docx-styles';
 
-// Helper to convert mdast inline elements to docx.js TextRun objects
-function transformInlines(nodes: PhrasingContent[], options: IRunOptions = {}): TextRun[] {
-    const runs: TextRun[] = [];
-    for (const node of nodes) {
-        switch (node.type) {
-            case 'strong':
-                runs.push(...transformInlines(node.children, { ...options, bold: true }));
-                break;
-            case 'emphasis':
-                runs.push(...transformInlines(node.children, { ...options, italics: true }));
-                break;
-            case 'inlineCode':
-                runs.push(new TextRun({ ...options, text: node.value, font: { name: 'Courier New' } }));
-                break;
-            case 'link':
-                // For now just process children, can be enhanced to a real hyperlink
-                runs.push(...transformInlines(node.children, { ...options, style: 'Hyperlink' }));
-                break;
-            case 'text':
-                runs.push(new TextRun({ ...options, text: node.value }));
-                break;
-            default:
-                break;
-        }
-    }
-    return runs;
-}
+async function createDocxParagraphs(markdown: string) {
+    const { unified } = await import('unified');
+    const { default: remarkParse } = await import('remark-parse');
+    const { default: remarkGfm } = await import('remark-gfm');
+    const { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType } = await import('docx');
 
-// Helper to parse markdown for DOCX using remark (unified)
-const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
     if (!markdown) return [];
 
     const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
-    const docxObjects: (Paragraph | Table)[] = [];
+    const docxObjects: (typeof Paragraph | typeof Table)[] = [];
 
-    // Helper to process lists recursively
-    const processListItems = (listNode: List, level: number): Paragraph[] => {
-        let paragraphs: Paragraph[] = [];
+    const transformInlines = (nodes: PhrasingContent[], options: IRunOptions = {}): InstanceType<typeof TextRun>[] => {
+        const runs: InstanceType<typeof TextRun>[] = [];
+        for (const node of nodes) {
+            switch (node.type) {
+                case 'strong':
+                    runs.push(...transformInlines(node.children, { ...options, bold: true }));
+                    break;
+                case 'emphasis':
+                    runs.push(...transformInlines(node.children, { ...options, italics: true }));
+                    break;
+                case 'inlineCode':
+                    runs.push(new TextRun({ ...options, text: node.value, font: { name: 'Courier New' } }));
+                    break;
+                case 'link':
+                    runs.push(...transformInlines(node.children, { ...options, style: 'Hyperlink' }));
+                    break;
+                case 'text':
+                    runs.push(new TextRun({ ...options, text: node.value }));
+                    break;
+                default:
+                    break;
+            }
+        }
+        return runs;
+    }
+
+    const processListItems = (listNode: List, level: number): InstanceType<typeof Paragraph>[] => {
+        let paragraphs: InstanceType<typeof Paragraph>[] = [];
         for (const listItem of listNode.children) {
             for (const itemContent of listItem.children) {
                 if (itemContent.type === 'paragraph') {
@@ -59,7 +56,6 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
                         numbering: listNode.ordered ? { reference: "default-numbering", level } : undefined,
                     }));
                 } else if (itemContent.type === 'list') {
-                    // Nested list
                     paragraphs.push(...processListItems(itemContent, level + 1));
                 }
             }
@@ -103,7 +99,6 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
                         tableHeader: rowIndex === 0,
                     });
                 });
-
                 docxObjects.push(new Table({
                     rows: tableRows,
                     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -115,7 +110,6 @@ const parseMarkdownToDocx = (markdown: string): (Paragraph | Table)[] => {
                 break;
         }
     }
-
     return docxObjects;
 };
 
@@ -124,10 +118,10 @@ const numbering: INumberingOptions = {
         {
             reference: "default-numbering",
             levels: [
-                { level: 0, format: "decimal", text: "%1.", alignment: AlignmentType.START },
-                { level: 1, format: "lowerLetter", text: "%2)", alignment: AlignmentType.START },
-                { level: 2, format: "lowerRoman", text: "%3.", alignment: AlignmentType.START },
-                { level: 3, format: "upperLetter", text: "%4)", alignment: AlignmentType.START },
+                { level: 0, format: "decimal", text: "%1.", alignment: "start" },
+                { level: 1, format: "lowerLetter", text: "%2)", alignment: "start" },
+                { level: 2, format: "lowerRoman", text: "%3.", alignment: "start" },
+                { level: 3, format: "upperLetter", text: "%4)", alignment: "start" },
             ],
         },
     ],
@@ -163,8 +157,12 @@ function getStylesFromStorage(): Record<TemplateKey, { styles: IStylesOptions }>
 }
 
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
+    const { Document, Packer, Paragraph, HeadingLevel } = await import('docx');
+    const { saveAs } = await import('file-saver');
+    
     const allTemplates = getStylesFromStorage();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const docxContent = await createDocxParagraphs(markdownContent);
 
     const doc = new Document({
         styles,
@@ -172,7 +170,7 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
         sections: [{
             children: [
                 new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
-                ...parseMarkdownToDocx(markdownContent),
+                ...docxContent,
             ]
         }]
     });
@@ -183,27 +181,28 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
 
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
+    const { Document, Packer, Paragraph, HeadingLevel, TextRun, Table, TableRow, TableCell, WidthType, Header, Footer, PageNumber, TableOfContents, AlignmentType } = await import('docx');
+    const { saveAs } = await import('file-saver');
+
     const allTemplates = getStylesFromStorage();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
-
+    
     const doc = new Document({
         styles,
         numbering,
         sections: [
-            // Cover Page Section
             {
-                properties: { type: SectionType.NEXT_PAGE },
+                properties: { type: "nextPage" as SectionType },
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: title, style: 'Title' }),
                     new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 400 } }),
                 ]
             },
-            // Main Content Section
             {
-                properties: { type: SectionType.NEXT_PAGE },
+                properties: { type: "nextPage" as SectionType },
                 headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
@@ -221,9 +220,9 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                         headingStyleRange: "1-3",
                     }),
                     new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
-                    ...parseMarkdownToDocx(objective),
+                    ...await createDocxParagraphs(objective),
                     new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
-                    ...parseMarkdownToDocx(methodology),
+                    ...await createDocxParagraphs(methodology),
                     new Paragraph({ text: "Timeline", heading: HeadingLevel.HEADING_1 }),
                     new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
                     new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
@@ -237,11 +236,11 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
                     ...success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })),
                     new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
-                    ...parseMarkdownToDocx(evaluation),
+                    ...await createDocxParagraphs(evaluation),
                     new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                    ...stakeholders.flatMap(s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(s.interest),]),
+                    ...(await Promise.all(stakeholders.flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
                     new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
-                    ...risks.flatMap(r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...parseMarkdownToDocx(r.mitigation)]),
+                    ...(await Promise.all(risks.flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
                 ],
             }],
     });
@@ -260,28 +259,35 @@ export async function exportReportAsDocx(
     proposalTitle: string,
     templateKey: TemplateKey
 ) {
+    const { Document, Packer, Paragraph, HeadingLevel, AlignmentType, ImageRun, TextRun, TableOfContents, Header, Footer, PageNumber } = await import('docx');
+    const { saveAs } = await import('file-saver');
+
     const allTemplates = getStylesFromStorage();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     const orderedSections = Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
-    const reportBody: (Paragraph | Table | TableOfContents)[] = [];
-    reportBody.push(new TableOfContents("Table of Contents", {
-        hyperlink: true,
-        headingStyleRange: "1-3",
-    }));
-
-    for (const key of orderedSections) {
+    const reportBodyPromises = orderedSections.map(async (key) => {
         const content = sections[key];
         if (content) {
-            reportBody.push(new Paragraph({
-                text: sectionConfig[key].title,
-                heading: HeadingLevel.HEADING_1,
-            }));
-            reportBody.push(...parseMarkdownToDocx(content));
+            return [
+                new Paragraph({ text: sectionConfig[key].title, heading: HeadingLevel.HEADING_1 }),
+                ...(await createDocxParagraphs(content)),
+            ];
         }
-    }
+        return [];
+    });
+    const resolvedReportBody = (await Promise.all(reportBodyPromises)).flat();
+    
+    const reportBody: any[] = [
+        new TableOfContents("Table of Contents", {
+            hyperlink: true,
+            headingStyleRange: "1-3",
+        }),
+        ...resolvedReportBody
+    ];
+
 
     const diagramEntries = orderedDiagrams.map(key => diagrams[key]).filter(Boolean) as { imageUrl: string; }[];
     const hasDiagrams = diagramEntries.length > 0;
@@ -315,7 +321,6 @@ export async function exportReportAsDocx(
                     alignment: AlignmentType.CENTER,
                 }));
             } else if (result) {
-                // Handle cases where image fetching failed
                 reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[result.key as DiagramType].title}]` }));
             }
         }
@@ -325,18 +330,16 @@ export async function exportReportAsDocx(
         styles,
         numbering,
         sections: [
-            // Cover Page
             {
-                properties: { type: SectionType.NEXT_PAGE },
+                properties: { type: "nextPage" as SectionType },
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: `Project Report`, style: 'Title' }),
                     new Paragraph({ text: proposalTitle, style: 'SubTitle', spacing: { after: 400 } }),
                 ]
             },
-            // Main Content
             {
-                properties: { type: SectionType.NEXT_PAGE },
+                properties: { type: "nextPage" as SectionType },
                 headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({

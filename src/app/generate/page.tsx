@@ -17,11 +17,11 @@ import { DiagramStateProvider } from '@/context/DiagramStateContext';
 import { PresentationStateProvider } from '@/context/PresentationStateContext';
 
 
-const ProposalModeGenerator = dynamic(() => import('@/components/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator));
-const ReportGenerator = dynamic(() => import('@/components/ReportGenerator'));
-const DiagramGenerator = dynamic(() => import('@/components/DiagramGenerator'));
-const CodeGenerator = dynamic(() => import('@/components/CodeGenerator'));
-const PresentationGenerator = dynamic(() => import('@/components/PresentationGenerator'));
+const ProposalModeGenerator = dynamic(() => import('@/components/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { ssr: false });
+const ReportGenerator = dynamic(() => import('@/components/ReportGenerator'), { ssr: false });
+const DiagramGenerator = dynamic(() => import('@/components/DiagramGenerator'), { ssr: false });
+const CodeGenerator = dynamic(() => import('@/components/CodeGenerator'), { ssr: false });
+const PresentationGenerator = dynamic(() => import('@/components/PresentationGenerator'), { ssr: false });
 
 
 function GeneratePageContent() {
@@ -90,7 +90,6 @@ export default function GeneratePage() {
     return (
         <BuilderStateProvider>
             <GeneratePageContent />
-            <Footer />
         </BuilderStateProvider>
     )
 }

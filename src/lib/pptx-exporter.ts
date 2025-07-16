@@ -1,7 +1,6 @@
 
 'use client';
 
-import pptxgen from "pptxgenjs";
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
 
@@ -29,7 +28,9 @@ function getStylesFromStorage() {
     return templates;
 }
 
-export function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
+export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
+    const { default: pptxgen } = await import('pptxgenjs');
+
     if (!slides || slides.length === 0) {
         console.error("No slides provided for PPTX export.");
         return;
