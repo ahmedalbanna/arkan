@@ -13,7 +13,7 @@ import { deductCredit } from '@/services/credit-service';
 
 const DOCUMENTS_KEY = 'arkan-documents';
 const DIAGRAMS_KEY = 'arkan-diagrams';
-const PRESENTATION_KEY = 'arkan-presentation';
+const PRESENTATION_KEY = 'arkan-presentation-history'; // Key now reflects history
 const CODE_GENERATOR_KEY = 'arkan-code-generator';
 
 
@@ -22,6 +22,11 @@ export interface CodeGenerationState {
   html: string;
   css: string;
   javascript: string;
+}
+export interface PresentationHistoryEntry {
+    id: string;
+    name: string;
+    slides: PresentationSlide[];
 }
 
 // --- STATE AND ACTION TYPES ---
@@ -43,8 +48,8 @@ export interface BuilderState {
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string } };
   /** The result of the last report evaluation. */
   evaluation?: EvaluateReportOutput;
-  /** The generated presentation slides. */
-  presentation?: { slides: PresentationSlide[] };
+  /** The generated presentation slides, stored as a history of generated presentations. */
+  presentation?: { history: PresentationHistoryEntry[] };
   /** The state for the standalone code generator. */
   codeGenerator: CodeGenerationState;
   /** Content from an externally uploaded file (e.g., a PDF) to be used as context. */
@@ -80,7 +85,6 @@ export type BuilderAction =
   | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
   | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
   | { type: 'REMOVE_EXTERNAL_CONTEXT' }
-  | { type: 'SET_PRESENTATION_SLIDES', payload: { slides: PresentationSlide[] } }
   | { type: 'SET_CODE_GENERATOR_STATE', payload: CodeGenerationState };
 
 
@@ -90,7 +94,7 @@ const initialState: BuilderState = {
   proposalJson: '',
   sections: {},
   diagrams: {},
-  presentation: { slides: [] },
+  presentation: { history: [] },
   codeGenerator: { prompt: '', html: '', css: '', javascript: '' },
   contextSelections: {},
   isGeneratingProposal: false,
@@ -135,7 +139,7 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         sections: {},
         diagrams: {},
         evaluation: undefined,
-        presentation: undefined,
+        presentation: { history: [] }, // Reset presentation history
       };
     case 'PROPOSAL_GENERATION_ERROR':
       return { ...state, isGeneratingProposal: false, error: action.payload.error };
@@ -189,8 +193,6 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         const { externalContext, ...rest } = state;
         return { ...rest };
     }
-    case 'SET_PRESENTATION_SLIDES':
-        return { ...state, presentation: { slides: action.payload.slides } };
     case 'SET_CODE_GENERATOR_STATE':
         return { ...state, codeGenerator: action.payload };
     default:
@@ -223,13 +225,13 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         try {
             const storedSections = localStorage.getItem(DOCUMENTS_KEY);
             const storedDiagrams = localStorage.getItem(DIAGRAMS_KEY);
-            const storedPresentation = localStorage.getItem(PRESENTATION_KEY);
+            const storedPresentationHistory = localStorage.getItem(PRESENTATION_KEY);
             const storedCode = localStorage.getItem(CODE_GENERATOR_KEY);
 
             const payload: Partial<BuilderState> = {};
             if (storedSections) payload.sections = JSON.parse(storedSections);
             if (storedDiagrams) payload.diagrams = JSON.parse(storedDiagrams);
-            if (storedPresentation) payload.presentation = { slides: JSON.parse(storedPresentation) };
+            if (storedPresentationHistory) payload.presentation = { history: JSON.parse(storedPresentationHistory) };
             if (storedCode) payload.codeGenerator = JSON.parse(storedCode);
 
             if (Object.keys(payload).length > 0) {
@@ -249,8 +251,8 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
             if (state.diagrams && Object.keys(state.diagrams).length > 0) {
                 localStorage.setItem(DIAGRAMS_KEY, JSON.stringify(state.diagrams));
             }
-            if (state.presentation && state.presentation.slides.length > 0) {
-                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(state.presentation.slides));
+            if (state.presentation && state.presentation.history && state.presentation.history.length > 0) {
+                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(state.presentation.history));
             }
             if (state.codeGenerator && state.codeGenerator.html) {
                  localStorage.setItem(CODE_GENERATOR_KEY, JSON.stringify(state.codeGenerator));
