@@ -26,10 +26,31 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
-    onGenerate: () => void;
+    onGenerate: (variables: any) => void;
 }
 
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
+
+// Helper to get selected guidelines for a specific item
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: any[]): string[] => {
+    const agentIdSuffix = itemKey;
+    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
+    const currentGuidelineState = guidelineState[itemKey];
+    
+    if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
+
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
+        return currentGuidelineState.custom || [];
+    }
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
+    });
+    guidelines.push(...currentGuidelineState.custom);
+    return guidelines;
+};
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { 
@@ -39,25 +60,23 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     } = props;
 
     const { 
+        proposal,
         sections,
         diagrams,
-        contextSelections,
         guidelineState,
         customGuidelineInput,
         presentations,
-        onContextToggle,
         onGuidelineToggle,
         onCustomGuidelineChange,
         onAddCustomGuideline,
         onRemoveCustomGuideline,
      } = useBuilderStore(state => ({
+        proposal: state.proposal,
         sections: state.sections,
         diagrams: state.diagrams,
-        contextSelections: state.contextSelections,
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
         presentations: state.presentation?.history || [],
-        onContextToggle: state.toggleContextSelection,
         onGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
         onCustomGuidelineChange: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
         onAddCustomGuideline: () => state.handleAddCustomGuidelineForItem('presentation'),
@@ -88,6 +107,16 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         if (!presentations || presentations.length === 0) return;
         const latestPresentation = presentations[0];
         await exportPresentationAsPptx(latestPresentation.slides, selectedPptxTemplate);
+    }
+
+    const handleGenerateClick = () => {
+        const body = {
+            proposal: proposal,
+            sections: sections, // Context selection not yet implemented here
+            diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+            guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
+        };
+        onGenerate(body);
     }
     
 
@@ -208,35 +237,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 </p>
                                             ) : (
                                                 <ScrollArea className="h-48 border rounded-md p-2">
-                                                    <div className="space-y-2">
-                                                        <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
-                                                        {Object.keys(sections).length > 0 ? Object.keys(sections).map((key) => (
-                                                            <div key={key} className="flex items-center space-x-2 pl-2">
-                                                                <Checkbox
-                                                                    id={`context-section-${key}`}
-                                                                    checked={contextSelections['presentation']?.[`section_${key}`] ?? false}
-                                                                    onCheckedChange={() => onContextToggle('presentation', `section_${key}`)}
-                                                                />
-                                                                <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
-                                                                    {sectionConfig[key as keyof typeof sectionConfig].title}
-                                                                </Label>
-                                                            </div>
-                                                        )) : <p className="text-xs text-muted-foreground pl-2">No sections available.</p>}
-
-                                                        <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
-                                                         {Object.keys(diagrams).length > 0 ? Object.keys(diagrams).map((key) => (
-                                                            <div key={key} className="flex items-center space-x-2 pl-2">
-                                                                <Checkbox
-                                                                    id={`context-diagram-${key}`}
-                                                                    checked={contextSelections['presentation']?.[`diagram_${key}`] ?? false}
-                                                                    onCheckedChange={() => onContextToggle('presentation', `diagram_${key}`)}
-                                                                />
-                                                                <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
-                                                                    {diagramConfig[key as keyof typeof diagramConfig].title}
-                                                                </Label>
-                                                            </div>
-                                                        )) : <p className="text-xs text-muted-foreground pl-2">No diagrams available.</p>}
-                                                    </div>
+                                                  {/* Context selection UI would go here */}
                                                 </ScrollArea>
                                             )}
                                         </div>
@@ -249,7 +250,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 <CardFooter>
                     <Button
                         type="button"
-                        onClick={onGenerate}
+                        onClick={handleGenerateClick}
                         disabled={isDisabled || isGenerating}
                         className="font-headline w-full"
                         title={!agent?.isEnabled ? 'This agent is disabled' : 'Generate Presentation'}

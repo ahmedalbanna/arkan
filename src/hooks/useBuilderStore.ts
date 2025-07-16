@@ -6,15 +6,9 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { type ProjectProposal, type SectionName, type DiagramType, type PresentationSlide, SectionNameSchema, DiagramTypeSchema } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { toast } from '@/hooks/use-toast';
-import { saveAs } from 'file-saver';
-import { z } from 'zod';
-import { deductCredit } from '@/services/credit-service';
-import { templates as proposalTemplates, type ProposalTemplateKey, type ProposalTemplate } from '@/lib/proposal-templates';
 import { AGENTS } from '@/lib/agents';
 import type { AgentPrompt } from '@/lib/agents';
-import { presentationConfig } from '@/lib/report-config';
-import type { UserProfile } from '@/lib/db/queries';
-
+import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
 
 export interface PresentationHistoryEntry {
     id: string;
@@ -41,18 +35,12 @@ export type GuidelineState = {
 export interface BuilderState {
   projectIdea: string;
   proposal: ProjectProposal | null;
-  proposalJson: string;
   sections: { [key in SectionName]?: string };
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string } };
   evaluation?: EvaluateReportOutput;
   presentation?: { history: PresentationHistoryEntry[] };
   codeGenerator: CodeGenerationState;
   externalContext?: { fileName: string; content: string };
-  contextSelections: Record<string, Record<string, boolean>>;
-  isGeneratingProposal: boolean;
-  isAnythingGenerating: boolean;
-  lastGenerated: SectionName | DiagramType | 'proposal' | 'presentation' | 'evaluate' | 'code' | null;
-  error?: string;
   
   // UI States
   selectedTemplate: ProposalTemplateKey;
@@ -61,11 +49,7 @@ export interface BuilderState {
   guidelineState: Record<string, GuidelineState>;
   customGuidelineInput: Record<string, string>;
   activePresentationId: string | null;
-  pdfFile: File | null;
-  isUploading: boolean;
 }
-
-type AuthParams = [user: UserProfile, refetchUser: () => void];
 
 interface BuilderActions {
     // Basic Actions
@@ -73,23 +57,21 @@ interface BuilderActions {
     loadState: (state: Partial<BuilderState>) => void;
     setProjectIdea: (idea: string) => void;
     // Proposal Actions
-    handleGenerateProposal: (...auth: AuthParams) => void;
+    setProposal: (proposal: ProjectProposal | null) => void;
     handleProposalUpdate: (path: string, value: any) => void;
     // Report & Diagram Actions
-    handleGenerateReportSection: (section: SectionName, ...auth: AuthParams) => void;
+    setSection: (key: SectionName, content: string) => void;
     handleSectionUpdate: (key: SectionName, value: string) => void;
-    handleEvaluateReport: (formData: FormData, ...auth: AuthParams) => void;
-    handleGenerateDiagram: (diagramType: DiagramType, ...auth: AuthParams) => void;
+    setEvaluation: (evaluation: EvaluateReportOutput | undefined) => void;
+    setDiagram: (key: DiagramType, data: { plantUmlCode: string; imageUrl: string }) => void;
     handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
-    handleDiagramUpdate: (diagramType: DiagramType, ...auth: AuthParams) => void;
     // Code Generator Actions
     setCodePrompt: (prompt: string) => void;
-    handleGenerateCode: (...auth: AuthParams) => void;
+    setGeneratedCode: (code: Partial<CodeGenerationState>) => void;
     // Presentation Actions
-    handleGeneratePresentation: (...auth: AuthParams) => void;
+    addPresentationToHistory: (entry: PresentationHistoryEntry) => void;
     setActivePresentationId: (id: string | null) => void;
     // Context Actions
-    toggleContextSelection: (parentKey: string, contextKey: string) => void;
     setExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: () => void;
     // UI State Actions
@@ -102,10 +84,6 @@ interface BuilderActions {
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
-    setPdfFile: (file: File | null) => void;
-    handlePdfUpload: (...auth: AuthParams) => void;
-    // Error Recovery
-    handleRetryGeneration: (itemKey: SectionName | DiagramType, ...auth: AuthParams) => void;
 }
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
@@ -147,59 +125,18 @@ const getInitialControlState = (): Record<SectionName, ControlState> => {
 const initialState: BuilderState = {
   projectIdea: '',
   proposal: null,
-  proposalJson: '',
   sections: {},
   diagrams: {},
   evaluation: undefined,
   presentation: { history: [] },
   codeGenerator: { prompt: '', html: '', css: '', javascript: '' },
   externalContext: undefined,
-  contextSelections: {},
-  isGeneratingProposal: false,
-  isAnythingGenerating: false,
-  lastGenerated: null,
-  error: undefined,
   selectedTemplate: 'default',
   customGuidelines: [],
   controlState: getInitialControlState(),
   guidelineState: getInitialGuidelineStates(),
   customGuidelineInput: {},
   activePresentationId: null,
-  pdfFile: null,
-  isUploading: false,
-};
-
-// Helper function to extract selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, state: BuilderState): string[] => {
-    const agentIdSuffix = itemKey;
-    const agent = AGENTS.find(a => a.id.endsWith(agentIdSuffix));
-    const currentGuidelineState = state.guidelineState[itemKey];
-    
-    if (!agent || !currentGuidelineState) return state.guidelineState[itemKey]?.custom || [];
-
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
-        return currentGuidelineState.custom || [];
-    }
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
-    });
-    guidelines.push(...currentGuidelineState.custom);
-    return guidelines;
-};
-
-// Helper function to generate instruction text from control state
-const generateInstructionText = (controls: ControlState): string => {
-    let instructions = [];
-    let formalityDesc = "balanced";
-    if (controls.formality < 33) formalityDesc = "informal";
-    else if (controls.formality > 66) formalityDesc = "very formal";
-    instructions.push(`- The writing style should be ${formalityDesc}.`);
-    if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
-    if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-    return instructions.join('\n');
 };
 
 
@@ -225,99 +162,16 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       setProjectIdea: (idea) => set({ projectIdea: idea }),
       
-      // --- UNIVERSAL GENERATION HANDLER (internal) ---
-      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, auth: AuthParams, options: { creditCost?: number } = {}) => {
-          const [user, refetchUser] = auth;
-          const { creditCost = 1 } = options;
-
-          set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
-          try {
-              if (!user) throw new Error("User not authenticated.");
-              if (creditCost > 0) {
-                 await deductCredit(user.id, creditCost);
-              }
-
-              const response = await fetch(endpoint, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(body),
-              });
-              const result = await response.json();
-              if (!response.ok) throw new Error(result.message || 'API request failed');
-              
-              if (endpoint.includes('diagrams')) {
-                  set((state) => ({ diagrams: { ...state.diagrams, [itemKey as DiagramType]: result }}));
-              } else if (itemKey === 'evaluate') {
-                  set({ evaluation: result });
-              } else if(itemKey === 'presentation') {
-                  const newEntry: PresentationHistoryEntry = {
-                      id: new Date().toISOString(),
-                      name: `Presentation - ${new Date().toLocaleTimeString()}`,
-                      slides: result.slides,
-                  };
-                  set(state => ({ presentation: { history: [newEntry, ...(state.presentation?.history || [])] }, activePresentationId: newEntry.id }));
-              } else if (itemKey === 'code') {
-                  set({ codeGenerator: { ...get().codeGenerator, ...result } });
-              } else {
-                  set(state => ({ sections: { ...state.sections, [itemKey as SectionName]: Object.values(result)[0] as string }}));
-              }
-              
-              if (creditCost > 0) {
-                  refetchUser();
-              }
-              toast({ title: "Generation Successful!", description: `Successfully generated ${itemKey}.` });
-
-          } catch (e: any) {
-              set({ error: e.message || 'An unexpected error occurred.' });
-              toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
-          } finally {
-              set({ isAnythingGenerating: false, lastGenerated: itemKey as any });
-              // Small delay before clearing lastGenerated to allow UI to react to error state
-              setTimeout(() => set({ lastGenerated: null }), 100);
-          }
-      },
-      
       // --- PROPOSAL ACTIONS ---
-      handleGenerateProposal: async (...auth) => {
-          const { projectIdea, selectedTemplate, customGuidelines } = get();
-          const currentTemplate = proposalTemplates[selectedTemplate];
-          let fullPrompt = currentTemplate.prompt;
-          const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
-          if (allGuidelines.length > 0) {
-              fullPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + allGuidelines.map(g => `- ${g}`).join('\n');
-          }
-
-          set({ isGeneratingProposal: true, error: undefined, lastGenerated: 'proposal' });
-          try {
-              const [user, refetchUser] = auth;
-              if (!user) throw new Error("User not authenticated.");
-              await deductCredit(user.id, 1);
-              const response = await fetch('/api/generate-proposal', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ projectIdea: projectIdea, prompt: fullPrompt })
-              });
-              const result = await response.json();
-              if (!response.ok) throw new Error(result.message || 'API request failed');
-              set({
-                  proposal: result,
-                  proposalJson: JSON.stringify(result, null, 2),
-                  isGeneratingProposal: false,
-                  error: undefined,
-                  sections: {},
-                  diagrams: {},
-                  evaluation: undefined,
-                  presentation: { history: [] },
-              });
-              refetchUser();
-              toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
-          } catch (e: any) {
-              set({ isGeneratingProposal: false, error: e.message || 'An unexpected error occurred.' });
-              toast({ title: 'Generation Failed', description: e.message, variant: 'destructive' });
-          } finally {
-              set({ isGeneratingProposal: false, lastGenerated: 'proposal' });
-              setTimeout(() => set({ lastGenerated: null }), 100);
-          }
+      setProposal: (proposal) => {
+        set({
+          proposal,
+          // Clear downstream state when a new proposal is set
+          sections: {},
+          diagrams: {},
+          evaluation: undefined,
+          presentation: { history: [] },
+        });
       },
       handleProposalUpdate: (path, value) => {
           const { proposal } = get();
@@ -327,91 +181,32 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const keys = path.split('.');
           for (let i = 0; i < keys.length - 1; i++) { current = current[keys[i]]; }
           current[keys[keys.length - 1]] = value;
-          set({ proposal: newProposal, proposalJson: JSON.stringify(newProposal, null, 2) });
+          set({ proposal: newProposal });
       },
 
       // --- REPORT, DIAGRAM, PRESENTATION ACTIONS ---
-      handleGenerateReportSection: (section, ...auth) => {
-          const state = get();
-          const body = {
-              proposal: state.proposal,
-              sectionToGenerate: section,
-              otherSections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key, value]) => state.contextSelections[section]?.[key] && value)),
-              otherDiagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key, value]) => state.contextSelections[section]?.[key] && value).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines: getSelectedGuidelines(section, state),
-              instructionText: generateInstructionText(state.controlState[section]),
-              externalContextContent: state.contextSelections[section]?.['external'] ? state.externalContext?.content : undefined,
-          };
-          get()._handleGenerateRequest('/api/generate-report', body, section, auth);
-      },
+      setSection: (key, content) => set(state => ({ sections: { ...state.sections, [key]: content }})),
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
-      
-      handleEvaluateReport: (formData, ...auth) => {
-          const state = get();
-          const criteria = formData.get('acceptanceCriteria')?.toString() || '';
-          if (!criteria.trim()) {
-              toast({ title: "Evaluation Skipped", description: "Please provide acceptance criteria.", variant: 'destructive' });
-              return;
-          }
-          const body = {
-              proposal: state.proposal,
-              reportSections: state.sections,
-              diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-              acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
-          };
-          get()._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
-      },
-
-      handleGenerateDiagram: (diagramType, ...auth) => {
-          const state = get();
-          const body = {
-              proposal: state.proposal,
-              diagramToGenerate: diagramType,
-              otherSections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key, value]) => state.contextSelections[diagramType]?.[`section_${key}`] && value)),
-              otherDiagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key, value]) => state.contextSelections[diagramType]?.[`diagram_${key}`] && value).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines: getSelectedGuidelines(diagramType, state),
-              externalContextContent: state.contextSelections[diagramType]?.['external'] ? state.externalContext?.content : undefined,
-          };
-          get()._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
-      },
-
+      setEvaluation: (evaluation) => set({ evaluation }),
+      setDiagram: (key, data) => set(state => ({ diagrams: { ...state.diagrams, [key]: data } })),
       handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
-      
-      handleDiagramUpdate: (diagramType, ...auth) => {
-          const { diagrams } = get();
-          const code = diagrams?.[diagramType]?.plantUmlCode;
-          if (!code) return;
-          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, auth, {creditCost: 0});
-      },
 
-      handleGeneratePresentation: (...auth) => {
-          const state = get();
-          const body = {
-              proposal: state.proposal,
-              sections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key]) => state.contextSelections['presentation']?.[`section_${key}`])),
-              diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines: getSelectedGuidelines('presentation', state),
-          };
-          get()._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
+      // --- PRESENTATION ACTIONS ---
+      addPresentationToHistory: (entry) => {
+          set(state => ({
+              presentation: { history: [entry, ...(state.presentation?.history || [])] },
+              activePresentationId: entry.id
+          }));
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
-      handleGenerateCode: (...auth) => {
-        const state = get();
-        get()._handleGenerateRequest('/api/generate-code', { prompt: state.codeGenerator.prompt }, 'code', auth);
-      },
+      setGeneratedCode: (code) => set(state => ({ codeGenerator: { ...state.codeGenerator, ...code }})),
       
       // --- CONTEXT ACTIONS ---
-      toggleContextSelection: (parentKey, contextKey) => set(state => {
-          const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
-          if (!newSelections[parentKey]) newSelections[parentKey] = {};
-          newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
-          return { contextSelections: newSelections };
-      }),
       setExternalContext: (fileName, content) => set({ externalContext: { fileName, content } }),
-      removeExternalContext: () => set({ externalContext: undefined, pdfFile: null }),
+      removeExternalContext: () => set({ externalContext: undefined }),
       
       // --- UI STATE ACTIONS ---
       handleTemplateChange: (key) => set({ selectedTemplate: key }),
@@ -428,6 +223,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       handleRemoveCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
       setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
       handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section], [field]: value } } })),
+      
       handleGuidelineToggle: (itemKey, guidelineIndex, isChecked) => set(state => {
         const itemGuidelineState = state.guidelineState[itemKey] || { checked: {}, custom: [] };
         const newGuidelineState = {
@@ -461,65 +257,20 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const newGuidelineState = { ...state.guidelineState[itemKey], custom: newCustom };
           return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
       }),
-      setPdfFile: (file) => set({ pdfFile: file }),
-      handlePdfUpload: async (...auth) => {
-        const { pdfFile } = get();
-        if (!pdfFile) return;
-
-        set({ isUploading: true });
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-
-        try {
-            const [user, refetchUser] = auth;
-            if (!user) throw new Error("User not found for PDF upload.");
-            await deductCredit(user.id, 1);
-
-            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
-            if (!response.ok) {
-                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-                throw new Error(errorResult.message);
-            }
-            const result = await response.json();
-            set({ externalContext: { fileName: pdfFile.name, content: result.markdown } });
-            refetchUser();
-            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
-        } catch (error: any) {
-            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
-        } finally {
-            set({ isUploading: false });
-        }
-    },
-    // --- ERROR RECOVERY ---
-    handleRetryGeneration: (itemKey, ...auth) => {
-        set({ error: undefined }); // Clear error before retrying
-        if (SectionNameSchema.safeParse(itemKey).success) {
-            get().handleGenerateReportSection(itemKey as SectionName, ...auth);
-        } else if (DiagramTypeSchema.safeParse(itemKey).success) {
-            get().handleGenerateDiagram(itemKey as DiagramType, ...auth);
-        }
-    },
     }),
     {
       name: 'arkan-builder-state',
       storage: createJSONStorage(() => localStorage),
       // Only persist user-generated content, not transient UI state
       partialize: (state) => ({
+        projectIdea: state.projectIdea,
         proposal: state.proposal,
         sections: state.sections,
         diagrams: state.diagrams,
         presentation: state.presentation,
         codeGenerator: state.codeGenerator,
-        projectIdea: state.projectIdea,
+        externalContext: state.externalContext,
       }),
-      onRehydrateStorage: () => (state, error) => {
-          if (state) {
-              state.isGeneratingProposal = false;
-              state.isAnythingGenerating = false;
-              state.error = undefined;
-              state.lastGenerated = null;
-          }
-      }
     }
   )
 );

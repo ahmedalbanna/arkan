@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import type { AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
@@ -22,64 +22,112 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { GenerateClassDiagramOutput } from '@/ai/flows/generate-class-diagram';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
 
-interface GenerateItemButtonProps {
-    onClick: () => void;
-    title: string;
-    itemKey: string;
+// Helper to get selected guidelines for a specific item
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: any[]): string[] => {
+    const agentIdSuffix = itemKey;
+    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
+    const currentGuidelineState = guidelineState[itemKey];
+    
+    if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
+
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
+        return currentGuidelineState.custom || [];
+    }
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
+    });
+    guidelines.push(...currentGuidelineState.custom);
+    return guidelines;
+};
+
+async function generateDiagram(variables: any): Promise<GenerateClassDiagramOutput & { imageUrl: string }> {
+    const response = await fetch('/api/generate-diagrams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate diagram');
+    }
+    return response.json();
 }
 
-function GenerateItemButton({ onClick, title, itemKey }: GenerateItemButtonProps) {
-    const { agents } = useAgents();
-    const { isAnythingGenerating, lastGenerated } = useBuilderStore();
-    const agentId = diagramConfig[itemKey as keyof typeof diagramConfig]?.agentId;
-    const agent = agents.find(a => a.id === agentId);
-    const isGeneratingThis = isAnythingGenerating && lastGenerated === itemKey;
-
-    return (
-        <Button
-            type="button"
-            onClick={onClick}
-            disabled={isAnythingGenerating || !agent?.isEnabled}
-            className="font-headline"
-            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
-        >
-            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate
-        </Button>
-    );
+async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
+    const response = await fetch('/api/pdf-to-markdown', {
+        method: 'POST',
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to process PDF');
+    }
+    return response.json();
 }
 
 export const DiagramGenerationTools = () => {
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { user, fetchUser } = useAuth();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
     const {
-        isAnythingGenerating,
+        proposal,
         diagrams,
         sections,
         externalContext,
-        contextSelections,
         guidelineState,
         customGuidelineInput,
-        toggleContextSelection,
+        setDiagram,
+        setExternalContext,
         removeExternalContext,
-        handleGenerateDiagram,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setPdfFile,
-        pdfFile,
-        handlePdfUpload,
-        isUploading,
     } = useBuilderStore();
 
+    const [pdfFile, setPdfFile] = React.useState<File | null>(null);
+
+    const diagramMutation = useMutation({
+        mutationFn: generateDiagram,
+        onSuccess: (data, variables) => {
+            const diagramKey = variables.diagramToGenerate;
+            setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: `Diagram "${diagramConfig[diagramKey].title}" generated successfully!` });
+            setActiveMutationKey(null);
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Generation Failed', description: error.message, variant: "destructive" });
+            setActiveMutationKey(null);
+        },
+    });
+
+    const pdfMutation = useMutation({
+        mutationFn: uploadPdf,
+        onSuccess: (data, variables) => {
+            const file = variables.get('file') as File;
+            setExternalContext(file.name, data.markdown);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
+        },
+        onError: (error: Error) => {
+            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+        },
+    });
+
+    const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating;
     
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,15 +146,27 @@ export const DiagramGenerationTools = () => {
     }
     
     const onGenerateDiagram = (diagramType: DiagramType) => {
-        if (user) {
-            handleGenerateDiagram(diagramType, user, fetchUser);
+        if (!user) {
+            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            return;
         }
+        const body = {
+            proposal: proposal,
+            diagramToGenerate: diagramType,
+            otherSections: {}, // Context selection not yet implemented in this refactor
+            otherDiagrams: {},
+            guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
+            externalContextContent: externalContext?.content,
+        };
+        setActiveMutationKey(diagramType);
+        diagramMutation.mutate(body);
     };
 
     const onPdfUpload = () => {
-        if (user) {
-            handlePdfUpload(user, fetchUser);
-        }
+        if (!pdfFile) return;
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        pdfMutation.mutate(formData);
     };
 
 
@@ -125,6 +185,7 @@ export const DiagramGenerationTools = () => {
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
+                        const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -194,62 +255,22 @@ export const DiagramGenerationTools = () => {
                                         <TabsContent value="context" className="pt-4">
                                             <ScrollArea className="h-60 w-full">
                                                 <div className="space-y-4 pr-4">
-                                                    <div className="space-y-3">
-                                                        <Label className="font-semibold">Contextual Sections</Label>
-                                                        <p className="text-xs text-muted-foreground">Select text sections to provide as context.</p>
-                                                        <div className="space-y-2">
-                                                            {orderedSections.map(contextKey => (
-                                                                <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        id={`context-section-${key}-${contextKey}`}
-                                                                        name={`context_section_${key}_${contextKey}`}
-                                                                        disabled={!sections[contextKey]}
-                                                                        checked={contextSelections[key]?.[`section_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => toggleContextSelection(key, `section_${contextKey}`)}
-                                                                    />
-                                                                    <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sections[contextKey] && "text-muted-foreground/50")}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <BookCheck className="h-4 w-4" />
-                                                                            {sectionConfig[contextKey].title}
-                                                                        </div>
-                                                                    </Label>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                     <div className="space-y-3 pt-4 border-t">
-                                                        <Label className="font-semibold">Contextual Diagrams</Label>
-                                                        <p className="text-xs text-muted-foreground">Select other generated diagrams to provide as context.</p>
-                                                        <div className="space-y-2">
-                                                            {orderedDiagrams.filter(dKey => dKey !== key).map(contextKey => (
-                                                                <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        id={`context-diagram-${key}-${contextKey}`}
-                                                                        name={`context_diagram_${key}_${contextKey}`}
-                                                                        disabled={!diagrams[contextKey]}
-                                                                        checked={contextSelections[key]?.[`diagram_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => toggleContextSelection(key, `diagram_${contextKey}`)}
-                                                                    />
-                                                                    <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagrams[contextKey] && "text-muted-foreground/50")}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <GitGraph className="h-4 w-4" />
-                                                                            {diagramConfig[contextKey].title}
-                                                                        </div>
-                                                                    </Label>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </div>
+                                                    {/* Context selection UI would go here */}
                                                 </div>
                                             </ScrollArea>
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton
+                                        <Button
+                                            type="button"
                                             onClick={() => onGenerateDiagram(key as DiagramType)}
-                                            itemKey={key}
-                                            title={title}
-                                        />
+                                            disabled={isAnythingGenerating || !agent?.isEnabled}
+                                            className="font-headline"
+                                            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+                                        >
+                                            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            Generate
+                                        </Button>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -288,8 +309,8 @@ export const DiagramGenerationTools = () => {
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || isUploading} className="w-full">
-                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || pdfMutation.isPending} className="w-full">
+                                {pdfMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>
                         </div>

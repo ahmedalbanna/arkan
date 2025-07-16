@@ -18,7 +18,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import type { AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
@@ -27,67 +27,128 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
 
-interface GenerateItemButtonProps {
-    onClick: () => void;
-    itemKey: string;
-    title: string;
+// Helper to get selected guidelines for a specific item
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: any[]): string[] => {
+    const agentIdSuffix = itemKey;
+    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
+    const currentGuidelineState = guidelineState[itemKey];
+    
+    if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
+
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
+        return currentGuidelineState.custom || [];
+    }
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
+    });
+    guidelines.push(...currentGuidelineState.custom);
+    return guidelines;
+};
+
+// Helper function to generate instruction text from control state
+const generateInstructionText = (controls: any): string => {
+    let instructions = [];
+    let formalityDesc = "balanced";
+    if (controls.formality < 33) formalityDesc = "informal";
+    else if (controls.formality > 66) formalityDesc = "very formal";
+    instructions.push(`- The writing style should be ${formalityDesc}.`);
+    if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
+    if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
+    return instructions.join('\n');
+};
+
+async function generateSection(variables: any): Promise<GenerateIntroductionOutput> {
+    const response = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate section');
+    }
+    return response.json();
 }
 
-function GenerateItemButton({ onClick, itemKey, title }: GenerateItemButtonProps) {
-    const { agents } = useAgents();
-    const { isAnythingGenerating, lastGenerated } = useBuilderStore();
-    const agentId = sectionConfig[itemKey as SectionName]?.agentId;
-    const agent = agents.find(a => a.id === agentId);
-    const isGeneratingThis = isAnythingGenerating && lastGenerated === itemKey;
-
-    return (
-        <Button
-            type="button"
-            onClick={onClick}
-            disabled={isAnythingGenerating || !agent?.isEnabled}
-            className="font-headline"
-            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
-        >
-            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {title}
-        </Button>
-    );
+async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
+    const response = await fetch('/api/pdf-to-markdown', {
+        method: 'POST',
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to process PDF');
+    }
+    return response.json();
 }
 
 export const GenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { user, fetchUser } = useAuth();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
+    const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
     const {
-        isAnythingGenerating,
+        proposal,
         sections,
         diagrams,
         externalContext,
-        contextSelections,
         controlState,
         guidelineState,
         customGuidelineInput,
-        toggleContextSelection,
+        setSection,
+        setExternalContext,
         removeExternalContext,
-        handleGenerateReportSection,
         handleControlChange,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-        setPdfFile,
-        pdfFile,
-        handlePdfUpload,
-        isUploading,
     } = useBuilderStore();
+
+    const [pdfFile, setPdfFile] = React.useState<File | null>(null);
+
+    const sectionMutation = useMutation({
+        mutationFn: generateSection,
+        onSuccess: (data, variables) => {
+            const sectionKey = variables.sectionToGenerate;
+            const content = Object.values(data)[0] as string;
+            setSection(sectionKey, content);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
+            setActiveMutationKey(null);
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Generation Failed', description: error.message, variant: "destructive" });
+            setActiveMutationKey(null);
+        },
+    });
+
+    const pdfMutation = useMutation({
+        mutationFn: uploadPdf,
+        onSuccess: (data, variables) => {
+            const file = variables.get('file') as File;
+            setExternalContext(file.name, data.markdown);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
+        },
+        onError: (error: Error) => {
+            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+        },
+    });
     
+    const isAnythingGenerating = sectionMutation.isPending;
     const isDisabled = isAnythingGenerating;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,15 +163,29 @@ export const GenerationTools = () => {
     };
     
     const onGenerateSection = (section: SectionName) => {
-        if (user) {
-            handleGenerateReportSection(section, user, fetchUser);
-        }
+        if (!user) {
+            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            return;
+        };
+        const body = {
+            proposal: proposal,
+            sectionToGenerate: section,
+            // Context selections are not yet implemented in this refactor
+            otherSections: {},
+            otherDiagrams: {},
+            guidelines: getSelectedGuidelines(section, guidelineState, agents),
+            instructionText: generateInstructionText(controlState[section]),
+            externalContextContent: externalContext?.content,
+        };
+        setActiveMutationKey(section);
+        sectionMutation.mutate(body);
     };
     
     const onPdfUpload = () => {
-        if (user) {
-            handlePdfUpload(user, fetchUser);
-        }
+        if (!pdfFile) return;
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+        pdfMutation.mutate(formData);
     };
 
 
@@ -145,6 +220,7 @@ export const GenerationTools = () => {
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = sectionConfig[key];
+                        const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -250,8 +326,6 @@ export const GenerationTools = () => {
                                                             <div className="flex items-center space-x-2">
                                                                 <Checkbox
                                                                     id={`context-${key}-external`}
-                                                                    checked={contextSelections[key]?.['external'] ?? false}
-                                                                    onCheckedChange={() => toggleContextSelection(key, 'external')}
                                                                 />
                                                                 <Label htmlFor={`context-${key}-external`} className="text-sm font-normal truncate">
                                                                     {externalContext.fileName}
@@ -266,8 +340,6 @@ export const GenerationTools = () => {
                                                                 <Checkbox
                                                                     id={`context-section-${key}-${contextKey}`}
                                                                     disabled={!sections[contextKey]}
-                                                                    checked={contextSelections[key]?.[contextKey] ?? false}
-                                                                    onCheckedChange={() => toggleContextSelection(key, contextKey)}
                                                                 />
                                                                 <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sections[contextKey] && "text-muted-foreground/50")}>
                                                                     <div className="flex items-center gap-2">
@@ -285,8 +357,6 @@ export const GenerationTools = () => {
                                                                 <Checkbox
                                                                     id={`context-diagram-${key}-${contextKey}`}
                                                                     disabled={!diagrams?.[contextKey]}
-                                                                    checked={contextSelections[key]?.[contextKey] ?? false}
-                                                                    onCheckedChange={() => toggleContextSelection(key, contextKey)}
                                                                 />
                                                                 <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagrams?.[contextKey] && "text-muted-foreground/50")}>
                                                                     <div className="flex items-center gap-2">
@@ -302,7 +372,16 @@ export const GenerationTools = () => {
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton onClick={() => onGenerateSection(key)} itemKey={key} title={`${t('generateButton')} ${title}`} />
+                                       <Button
+                                            type="button"
+                                            onClick={() => onGenerateSection(key)}
+                                            disabled={isAnythingGenerating || !agent?.isEnabled}
+                                            className="font-headline"
+                                            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+                                        >
+                                            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            {`${t('generateButton')} ${title}`}
+                                        </Button>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -341,8 +420,8 @@ export const GenerationTools = () => {
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || isUploading} className="w-full">
-                                {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || pdfMutation.isPending} className="w-full">
+                                {pdfMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>
                         </div>

@@ -12,6 +12,8 @@ import { Accordion } from './ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
 import type { DiagramType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '../hooks/use-toast';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -24,18 +26,44 @@ function DiagramSkeleton() {
   )
 }
 
+async function updateDiagram(variables: { plantUmlCode: string }): Promise<{ plantUmlCode: string; imageUrl: string }> {
+    const response = await fetch('/api/generate-diagrams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ intent: 'update_diagram', ...variables }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update diagram');
+    }
+    return response.json();
+}
+
 export default function DiagramGenerator() {
-    const { user, fetchUser } = useAuth();
+    const { user } = useAuth();
     const {
         proposal,
         diagrams,
-        isAnythingGenerating,
-        lastGenerated,
         handleDiagramCodeUpdate,
-        handleDiagramUpdate,
+        setDiagram,
     } = useBuilderStore();
     
-    const generatingDiagram = isAnythingGenerating && orderedDiagrams.includes(lastGenerated as DiagramType) ? lastGenerated : null;
+    const queryClient = useQueryClient();
+    const mutation = useMutation({
+        mutationFn: updateDiagram,
+        onSuccess: (data, variables) => {
+            // Find which diagram this mutation was for to update the correct one
+            const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === variables.plantUmlCode);
+            if(diagramKey) {
+                setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+            }
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: `Diagram updated successfully!` });
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Diagram Update Failed', description: error.message, variant: "destructive" });
+        },
+    });
 
     if (!proposal) {
       return (
@@ -68,7 +96,6 @@ export default function DiagramGenerator() {
                             <Accordion type="multiple" className="w-full space-y-4">
                               {generatedDiagrams.map(key => {
                                 const diagramData = diagrams![key]!;
-                                const isUpdatingThis = isAnythingGenerating && generatingDiagram === key;
                                 const Icon = diagramConfig[key].icon;
                                 return (
                                    <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
@@ -84,17 +111,15 @@ export default function DiagramGenerator() {
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
-                                            onUpdate={() => user && handleDiagramUpdate(key, user, fetchUser)}
-                                            isUpdating={isUpdatingThis}
-                                            isReadOnly={isAnythingGenerating}
+                                            onUpdate={() => mutation.mutate({ plantUmlCode: diagramData.plantUmlCode })}
+                                            isUpdating={mutation.isPending && mutation.variables?.plantUmlCode === diagramData.plantUmlCode}
+                                            isReadOnly={mutation.isPending}
                                         />
                                       </AccordionContent>
                                   </AccordionItem>
                                 )
                               })}
                             </Accordion>
-                         ) : isAnythingGenerating ? (
-                            <DiagramSkeleton />
                          ) : (
                             <div className="flex items-center justify-center h-full min-h-[400px]">
                                 <div className="text-center text-muted-foreground p-8">

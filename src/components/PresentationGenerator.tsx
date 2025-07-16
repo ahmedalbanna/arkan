@@ -12,20 +12,52 @@ import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
+import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/schemas';
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
+async function generatePresentation(variables: any): Promise<GeneratePresentationOutput> {
+    const response = await fetch('/api/generate-presentation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate presentation');
+    }
+    return response.json();
+}
 
 export default function PresentationGenerator() {
-    const { user, fetchUser } = useAuth();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
     const {
         proposal,
-        isAnythingGenerating,
         presentation,
         activePresentationId,
-        handleGeneratePresentation,
+        addPresentationToHistory,
         setActivePresentationId,
     } = useBuilderStore();
+
+    const mutation = useMutation({
+        mutationFn: generatePresentation,
+        onSuccess: (data) => {
+            const newEntry: PresentationHistoryEntry = {
+                id: new Date().toISOString(),
+                name: `Presentation - ${new Date().toLocaleTimeString()}`,
+                slides: data.slides,
+            };
+            addPresentationToHistory(newEntry);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: "Presentation Generated Successfully!" });
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Presentation Generation Failed', description: error.message, variant: 'destructive' });
+        }
+    });
 
     if (!proposal) {
         return (
@@ -41,12 +73,6 @@ export default function PresentationGenerator() {
 
     const presentations = presentation?.history || [];
     const activePresentation = presentations.find(p => p.id === activePresentationId);
-
-    const onGenerate = () => {
-        if (user) {
-            handleGeneratePresentation(user, fetchUser);
-        }
-    }
     
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -109,7 +135,7 @@ export default function PresentationGenerator() {
                         <div className="text-center text-muted-foreground p-8">
                             <Presentation className="w-16 h-16 mx-auto mb-4" />
                             <p>Your generated presentation will appear here.</p>
-                            {isAnythingGenerating && activePresentation === undefined && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                            {mutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                         </div>
                     </Card>
                 )}
@@ -118,9 +144,9 @@ export default function PresentationGenerator() {
             {/* Right Column */}
             <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
                 <PresentationGenerationTools
-                    isDisabled={!proposal || isAnythingGenerating}
-                    isGenerating={isAnythingGenerating}
-                    onGenerate={onGenerate}
+                    isDisabled={!proposal || mutation.isPending}
+                    isGenerating={mutation.isPending}
+                    onGenerate={mutation.mutate}
                 />
             </div>
         </div>

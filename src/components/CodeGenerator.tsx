@@ -16,24 +16,20 @@ import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
 
-function GenerateButton() {
-    const isGenerating = useBuilderStore(s => s.isAnythingGenerating && s.lastGenerated === 'code');
-    return (
-        <Button type="submit" disabled={isGenerating} className="font-headline w-full">
-            {isGenerating ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                </>
-            ) : (
-                <>
-                    <Sparkles className="mr-2 h-4 w-4" />
-                    Generate Code
-                </>
-            )}
-        </Button>
-    );
+async function generateCode(variables: { prompt: string }): Promise<GenerateCodeOutput> {
+    const response = await fetch('/api/generate-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate code');
+    }
+    return response.json();
 }
 
 function CodeDisplay({ code, language }: { code: string; language: string; }) {
@@ -68,20 +64,30 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 export default function CodeGenerator() {
     const { 
         codeGenerator: codeState,
-        isAnythingGenerating,
-        error,
-        lastGenerated,
         setCodePrompt,
-        handleGenerateCode,
+        setGeneratedCode,
     } = useBuilderStore();
     
     const { user, fetchUser } = useAuth();
+    const queryClient = useQueryClient();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const mutation = useMutation({
+        mutationFn: generateCode,
+        onSuccess: (data) => {
+            setGeneratedCode(data);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: "Code Generated Successfully!" });
+        },
+        onError: (error: Error) => {
+            toast({ title: "Code Generation Failed", description: error.message, variant: "destructive" });
+        }
+    });
 
     useEffect(() => {
         const timeout = setTimeout(() => {
@@ -185,11 +191,11 @@ export default function CodeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (user) {
-            handleGenerateCode(user, fetchUser);
-        } else {
+        if (!user) {
             toast({ title: "Authentication Error", description: "You must be logged in to generate code.", variant: "destructive" });
+            return;
         }
+        mutation.mutate({ prompt: codeState.prompt });
     };
 
     return (
@@ -270,14 +276,26 @@ export default function CodeGenerator() {
                                 required
                                 value={codeState.prompt}
                                 onChange={(e) => setCodePrompt(e.target.value)}
-                                disabled={isAnythingGenerating}
+                                disabled={mutation.isPending}
                             />
-                            {error && lastGenerated === 'code' && (
-                                <p className="text-sm font-medium text-destructive mt-2">{error}</p>
+                            {mutation.isError && (
+                                <p className="text-sm font-medium text-destructive mt-2">{mutation.error.message}</p>
                             )}
                         </CardContent>
                         <CardFooter>
-                            <GenerateButton />
+                           <Button type="submit" disabled={mutation.isPending} className="font-headline w-full">
+                                {mutation.isPending ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                        Generate Code
+                                    </>
+                                )}
+                            </Button>
                         </CardFooter>
                     </Card>
                 </div>

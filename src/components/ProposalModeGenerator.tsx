@@ -4,10 +4,9 @@
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Loader2, Sparkles, FileText, Download, FileJson } from 'lucide-react';
+import { Loader2, FileText, Download, FileJson } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
@@ -16,7 +15,9 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from './ui/skeleton';
-
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ProjectProposal } from '@/ai/schemas';
+import { templates as proposalTemplates } from '@/lib/proposal-templates';
 
 function ProposalSkeleton() {
     return (
@@ -48,28 +49,48 @@ function ProposalSkeleton() {
     )
 }
 
+// The async function for the mutation
+async function generateProposal(variables: { projectIdea: string; prompt: string; }): Promise<ProjectProposal> {
+    const response = await fetch('/api/generate-proposal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(variables)
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate proposal');
+    }
+    return response.json();
+}
+
+
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
-    const { user, fetchUser } = useAuth();
+    const { user, refetchUser } = useAuth();
+    const queryClient = useQueryClient();
 
     const {
         proposal,
-        error,
-        isGeneratingProposal,
         projectIdea,
         setProjectIdea,
-        handleGenerateProposal,
         handleProposalUpdate,
-        lastGenerated
+        setProposal,
+        selectedTemplate,
+        customGuidelines,
     } = useBuilderStore();
 
-
-    useEffect(() => {
-        if(error && lastGenerated === 'proposal') {
-            toast({ title: 'Generation Failed', description: error, variant: 'destructive' });
+    const mutation = useMutation({
+        mutationFn: generateProposal,
+        onSuccess: (data) => {
+            setProposal(data);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
         }
-    }, [error, lastGenerated, toast]);
+    });
 
     const handleExportDocx = () => {
         if(proposal) {
@@ -87,11 +108,19 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (user) {
-            handleGenerateProposal(user, fetchUser);
-        } else {
+        if (!user) {
             toast({ title: 'Authentication Error', description: 'You must be logged in to generate a proposal.', variant: 'destructive' });
+            return;
         }
+
+        const currentTemplate = proposalTemplates[selectedTemplate];
+        let fullPrompt = currentTemplate.prompt;
+        const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
+        if (allGuidelines.length > 0) {
+            fullPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + allGuidelines.map(g => `- ${g}`).join('\n');
+        }
+
+        mutation.mutate({ projectIdea, prompt: fullPrompt });
     };
 
 
@@ -112,10 +141,10 @@ export function ProposalModeGenerator() {
                                 required
                                 value={projectIdea}
                                 onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={isGeneratingProposal}
+                                disabled={mutation.isPending}
                             />
-                            {error && lastGenerated === 'proposal' && (
-                                <p className="text-sm font-medium text-destructive mt-2">{error}</p>
+                            {mutation.isError && (
+                                <p className="text-sm font-medium text-destructive mt-2">{mutation.error.message}</p>
                             )}
                         </CardContent>
                     </Card>
@@ -147,7 +176,7 @@ export function ProposalModeGenerator() {
                                 </div>
                             </CardContent>
                         </Card>
-                    ) : isGeneratingProposal ? (
+                    ) : mutation.isPending ? (
                         <ProposalSkeleton />
                     ) : (
                         <Card className="flex items-center justify-center h-full min-h-[400px]">
@@ -162,8 +191,8 @@ export function ProposalModeGenerator() {
                  {/* Right Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <ProposalGenerationTools
-                        isDisabled={!projectIdea || isGeneratingProposal}
-                        isGenerating={isGeneratingProposal}
+                        isDisabled={!projectIdea || mutation.isPending}
+                        isGenerating={mutation.isPending}
                     />
                 </div>
 
