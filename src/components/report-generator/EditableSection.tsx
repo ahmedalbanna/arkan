@@ -49,10 +49,13 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const { toast } = useToast();
 
     useEffect(() => {
+        // This effect synchronizes the local state with the prop from the store.
+        // It only runs when the external `content` prop changes.
+        // The checks prevent overwriting the user's current edits or an active AI suggestion.
         if (!isEditing && aiSuggestion === null) {
             setCurrentContent(content);
         }
-    }, [content, isEditing, aiSuggestion]);
+    }, [content]);
 
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
