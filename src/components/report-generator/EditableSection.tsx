@@ -16,16 +16,20 @@ import { exportSectionAsDocx } from '@/lib/docx-exporter';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
+import { Pluggable } from 'unified';
 
 
 interface EditableSectionProps {
     sectionKey: SectionName;
     title: string;
-    icon: React.ElementType;
-    content: string;
+    icon: React.ElementType; // Icon component for the section
+    content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
 }
 
+// Dynamically import react-markdown and remark-gfm
+// These are client-side dependencies for rendering markdown
+// We disable SSR for these components
 const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
     ssr: false,
     loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />, // Simple loading indicator
@@ -128,9 +132,15 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                     <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
-                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                        {/* 
+                         * Use the dynamically imported ReactMarkdown component
+                         * and pass the dynamically imported remarkGfm plugin.
+                         * Type assertion is used here to ensure correct type compatibility for the dynamically imported plugin.
+                         */}
+                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
                             {aiSuggestion}
-                        </DynamicReactMarkdown>
+                            </DynamicReactMarkdown>
+
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
                         <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
@@ -159,9 +169,13 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             );
         }
         
-        // Display raw content or a simple indicator while loading Markdown parser
+        // Display the content using the dynamically imported ReactMarkdown component
+        // Pass the dynamically imported remarkGfm plugin.
+        // Type assertion is used here to ensure correct type compatibility for the dynamically imported plugin.
         return (
-            <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+            <DynamicReactMarkdown
+                components={markdownComponents}
+                remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
                 {content}
             </DynamicReactMarkdown>);
     }
