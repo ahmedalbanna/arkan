@@ -104,6 +104,8 @@ interface BuilderActions {
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
     setPdfFile: (file: File | null) => void;
     handlePdfUpload: (...auth: AuthParams) => void;
+    // Error Recovery
+    handleRetryGeneration: (itemKey: SectionName | DiagramType, ...auth: AuthParams) => void;
 }
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
@@ -269,7 +271,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               set({ error: e.message || 'An unexpected error occurred.' });
               toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
           } finally {
-              set({ isAnythingGenerating: false, lastGenerated: null });
+              set({ isAnythingGenerating: false, lastGenerated: itemKey as any });
+              // Small delay before clearing lastGenerated to allow UI to react to error state
+              setTimeout(() => set({ lastGenerated: null }), 100);
           }
       },
       
@@ -311,7 +315,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               set({ isGeneratingProposal: false, error: e.message || 'An unexpected error occurred.' });
               toast({ title: 'Generation Failed', description: e.message, variant: 'destructive' });
           } finally {
-              set({ isGeneratingProposal: false, lastGenerated: null });
+              set({ isGeneratingProposal: false, lastGenerated: 'proposal' });
+              setTimeout(() => set({ lastGenerated: null }), 100);
           }
       },
       handleProposalUpdate: (path, value) => {
@@ -395,7 +400,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
       handleGenerateCode: async (...auth) => {
           const { codeGenerator } = get();
+          set({ isAnythingGenerating: true, error: undefined, lastGenerated: 'code' });
           await get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
+          set({ isAnythingGenerating: false, lastGenerated: null });
       },
       
       // --- CONTEXT ACTIONS ---
@@ -483,6 +490,15 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
         } finally {
             set({ isUploading: false });
+        }
+    },
+    // --- ERROR RECOVERY ---
+    handleRetryGeneration: (itemKey, ...auth) => {
+        set({ error: undefined }); // Clear error before retrying
+        if (SectionNameSchema.safeParse(itemKey).success) {
+            get().handleGenerateReportSection(itemKey as SectionName, ...auth);
+        } else if (DiagramTypeSchema.safeParse(itemKey).success) {
+            get().handleGenerateDiagram(itemKey as DiagramType, ...auth);
         }
     },
     }),

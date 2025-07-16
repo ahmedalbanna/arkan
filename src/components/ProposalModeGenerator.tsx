@@ -15,7 +15,38 @@ import { ProposalGenerationTools } from './proposal-generator/ProposalGeneration
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
 import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from './ui/skeleton';
 
+
+function ProposalSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-4 w-1/4 mb-2" />
+                <Skeleton className="h-8 w-3/4" />
+            </CardHeader>
+            <CardContent className="space-y-6">
+                <div className="space-y-2">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/6" />
+                </div>
+                 <div className="space-y-2">
+                    <Skeleton className="h-6 w-32" />
+                     <div className="flex gap-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                     </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
 
 export function ProposalModeGenerator() {
     const { toast } = useToast();
@@ -116,12 +147,13 @@ export function ProposalModeGenerator() {
                                 </div>
                             </CardContent>
                         </Card>
+                    ) : isGeneratingProposal ? (
+                        <ProposalSkeleton />
                     ) : (
                         <Card className="flex items-center justify-center h-full min-h-[400px]">
                             <div className="text-center text-muted-foreground p-8">
                                 <FileText className="w-16 h-16 mx-auto mb-4" />
                                 <p>Your generated project proposal will appear here.</p>
-                                {isGeneratingProposal && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
                         </Card>
                     )}
