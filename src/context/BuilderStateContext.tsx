@@ -50,6 +50,7 @@ const initialState: BuilderState = {
   proposalJson: '',
   sections: {},
   diagrams: {},
+  presentation: { slides: [] },
   contextSelections: {},
   isGeneratingProposal: false,
   isAnythingGenerating: false,
@@ -186,6 +187,11 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
     // Session Management
     const handleNewSession = () => {
         dispatch({ type: 'NEW_SESSION' });
+        // Also clear all related localStorage keys
+        localStorage.removeItem('arkan-presentation');
+        localStorage.removeItem('arkan-agents-state');
+        localStorage.removeItem('arkan-docx-styles');
+        localStorage.removeItem('arkan-pptx-styles');
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
     };
 

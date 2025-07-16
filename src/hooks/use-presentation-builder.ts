@@ -55,10 +55,35 @@ export function usePresentationBuilder() {
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    // On initial mount, we are already loaded because data comes from the builder state
+    // Load from local storage on initial mount
     useEffect(() => {
+        try {
+            const storedSlides = localStorage.getItem(PRESENTATION_KEY);
+            if (storedSlides) {
+                const slides = JSON.parse(storedSlides);
+                if (Array.isArray(slides)) {
+                    builderDispatch({ type: 'SET_PRESENTATION_SLIDES', payload: { slides } });
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load presentation from localStorage', error);
+        }
         dispatch({ type: 'SET_IS_LOADED' });
-    }, []);
+    }, [builderDispatch]);
+
+    // Save to local storage whenever slides change
+    useEffect(() => {
+        try {
+            if (builderState.presentation?.slides && builderState.presentation.slides.length > 0) {
+                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(builderState.presentation.slides));
+            } else if (builderState.proposal === null) {
+                // If the session is new (proposal is null), clear storage.
+                localStorage.removeItem(PRESENTATION_KEY);
+            }
+        } catch (error) {
+            console.error('Failed to save presentation to localStorage', error);
+        }
+    }, [builderState.presentation?.slides, builderState.proposal]);
 
 
     // State for context selections
