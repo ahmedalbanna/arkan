@@ -5,11 +5,14 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Presentation, AlertCircle } from 'lucide-react';
+import { Loader2, Sparkles, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
 import { usePresentationState } from '@/context/PresentationStateContext';
 import { lazy } from 'react';
+import { ScrollArea } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
@@ -17,17 +20,24 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 export default function PresentationGenerator() {
     const {
         state,
+        presentations,
+        activePresentation,
+        setActivePresentationId,
         isGenerating,
         proposal,
         handleGeneratePresentation,
-        sections, // sections are already typed as Partial in usePresentationState hook
-        diagrams, // diagrams are already typed as Partial in usePresentationState hook
+        sections, 
+        diagrams, 
         contextSelections,
         toggleContextSelection,
+        guidelineState,
+        onGuidelineToggle,
+        customGuidelineInput,
+        onCustomGuidelineChange,
+        onAddCustomGuideline,
+        onRemoveCustomGuideline,
     } = usePresentationState();
     
-    const [showPresentation, setShowPresentation] = useState(false);
-
     if (!proposal) {
         return (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
@@ -41,65 +51,91 @@ export default function PresentationGenerator() {
     }
     
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleGeneratePresentation(); }}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-
-                {/* Center Column */}
-                <div className="lg:col-span-8 overflow-y-auto pr-2">
-                    {state?.slides && state.slides.length > 0 ? (
-                        <>
-                         <Alert className="mb-6">
-                            <Sparkles className="h-4 w-4" />
-                            <AlertTitle className="font-headline">Generation Complete!</AlertTitle>
-                            <AlertDescription>
-                                A {state.slides.length}-slide presentation has been generated. Click below to view and export it.
-                            </AlertDescription>
-                        </Alert>
-                        <Card className="text-center">
-                            <CardHeader>
-                                <CardTitle className="font-headline">Presentation Ready</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <Presentation className="w-24 h-24 text-primary mx-auto" />
-                            </CardContent>
-                            <CardFooter className="justify-center">
-                                <Button type="button" onClick={() => setShowPresentation(true)}>View Presentation</Button>
-                            </CardFooter>
-                        </Card>
-                        </>
-                    ) : (
-                        <Card className="flex items-center justify-center h-full min-h-[300px]">
-                            <div className="text-center text-muted-foreground p-8">
-                                <Presentation className="w-16 h-16 mx-auto mb-4" />
-                                <p>Your generated presentation will appear here.</p>
-                                {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
-                            </div>
-                        </Card>
-                    )}
-                </div>
-                 {state.slides && state.slides.length > 0 && (
-                     <DynamicPresentationViewer
-                        isOpen={showPresentation} 
-                        onOpenChange={setShowPresentation} 
-                        slides={state.slides} 
-                     />
-                )}
-
-                {/* Right Column */}
-                <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-                     <PresentationGenerationTools
-                        isDisabled={!proposal || isGenerating}
-                        isGenerating={isGenerating}
-                        onGenerate={handleGeneratePresentation}
-                        sections={sections}
-                        diagrams={diagrams}
-                        contextSelections={contextSelections}
-                        onContextToggle={toggleContextSelection}
-                        slides={state.slides}
-                    />
-                </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+            {/* Left Column */}
+            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                           <History className="w-6 h-6" />
+                           History
+                        </CardTitle>
+                        <CardDescription>Select a previously generated presentation.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-96">
+                             {presentations.length > 0 ? (
+                                <div className="space-y-2">
+                                    {presentations.map(p => {
+                                         const isValidDate = p.id && !isNaN(new Date(p.id).getTime());
+                                         return (
+                                             <Button
+                                                 key={p.id}
+                                                 variant="ghost"
+                                                 onClick={() => setActivePresentationId(p.id)}
+                                                 className={cn(
+                                                     "w-full h-auto justify-start text-left p-2",
+                                                     activePresentation?.id === p.id && "bg-muted"
+                                                 )}
+                                             >
+                                                 <div className="flex flex-col">
+                                                    <span>{p.name} ({(p.slides || []).length} slides)</span>
+                                                    {isValidDate && (
+                                                         <span className="text-xs text-muted-foreground">
+                                                            {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
+                                                        </span>
+                                                    )}
+                                                 </div>
+                                             </Button>
+                                         )
+                                    })}
+                                </div>
+                             ) : (
+                                <p className="text-sm text-muted-foreground text-center">No presentations generated yet.</p>
+                             )}
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
             </div>
-        </form>
+
+
+            {/* Center Column */}
+            <div className="lg:col-span-5 overflow-y-auto pr-2">
+                {activePresentation?.slides && activePresentation.slides.length > 0 ? (
+                    <DynamicPresentationViewer
+                        key={activePresentation.id}
+                        slides={activePresentation.slides} 
+                    />
+                ) : (
+                    <Card className="flex items-center justify-center h-full min-h-[300px]">
+                        <div className="text-center text-muted-foreground p-8">
+                            <Presentation className="w-16 h-16 mx-auto mb-4" />
+                            <p>Your generated presentation will appear here.</p>
+                            {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                        </div>
+                    </Card>
+                )}
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+                <PresentationGenerationTools
+                    isDisabled={!proposal || isGenerating}
+                    isGenerating={isGenerating}
+                    onGenerate={handleGeneratePresentation}
+                    sections={sections}
+                    diagrams={diagrams}
+                    contextSelections={contextSelections}
+                    onContextToggle={toggleContextSelection}
+                    presentations={presentations}
+                    guidelineState={guidelineState}
+                    onGuidelineToggle={onGuidelineToggle}
+                    customGuidelineInput={customGuidelineInput}
+                    onCustomGuidelineChange={onCustomGuidelineChange}
+                    onAddCustomGuideline={onAddCustomGuideline}
+                    onRemoveCustomGuideline={onRemoveCustomGuideline}
+                />
+            </div>
+        </div>
     );
 }
