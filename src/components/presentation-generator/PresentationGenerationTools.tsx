@@ -20,24 +20,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import type { PresentationHistoryEntry as PresentationType, SectionName, DiagramType } from '@/hooks/use-presentation-builder'; // Renamed to avoid conflict with Lucide icon
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
-    onGenerate: (guidelines: string[]) => void;
-    sections: Record<SectionName, any>;
-    diagrams: Record<DiagramType, any>;
-    contextSelections: Record<string, Record<string, boolean>>;
-    onContextToggle: (parentKey: string, contextKey: string) => void;
-    presentations: PresentationType[];
-    guidelineState: { checked: Record<number, boolean>; custom: string[] };
-    onGuidelineToggle: (index: number, checked: boolean) => void;
-    customGuidelineInput: string;
-    onCustomGuidelineChange: (value: string) => void;
-    onAddCustomGuideline: () => void;
-    onRemoveCustomGuideline: (index: number) => void;
+    onGenerate: () => void;
 }
 
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
@@ -47,18 +36,33 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         isDisabled, 
         isGenerating,
         onGenerate,
+    } = props;
+
+    const { 
         sections,
         diagrams,
         contextSelections,
-        onContextToggle,
-        presentations,
         guidelineState,
-        onGuidelineToggle,
         customGuidelineInput,
+        presentations,
+        onContextToggle,
+        onGuidelineToggle,
         onCustomGuidelineChange,
         onAddCustomGuideline,
         onRemoveCustomGuideline,
-    } = props;
+     } = useBuilderStore(state => ({
+        sections: state.sections,
+        diagrams: state.diagrams,
+        contextSelections: state.contextSelections,
+        guidelineState: state.guidelineState,
+        customGuidelineInput: state.customGuidelineInput,
+        presentations: state.presentation?.history || [],
+        onContextToggle: state.toggleContextSelection,
+        onGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
+        onCustomGuidelineChange: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
+        onAddCustomGuideline: () => state.handleAddCustomGuidelineForItem('presentation'),
+        onRemoveCustomGuideline: (index: number) => state.handleRemoveCustomGuidelineForItem('presentation', index),
+     }));
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
@@ -86,22 +90,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         await exportPresentationAsPptx(latestPresentation.slides, selectedPptxTemplate);
     }
     
-    const getSelectedGuidelines = (): string[] => {
-        if (!agent || !guidelineState) return [];
-        
-        const promptConfig = agent.prompt as AgentPrompt;
-        if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
-    
-        const guidelines: string[] = [];
-        promptConfig.guidelines.forEach((g, index) => {
-            if (guidelineState.checked[index]) {
-                guidelines.push(g.text);
-            }
-        });
-        guidelines.push(...guidelineState.custom);
-        return guidelines;
-    };
-
 
     if (!agentsLoaded || !agent) {
         return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
@@ -109,6 +97,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const promptConfig = agent.prompt as AgentPrompt;
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
+    const currentGuidelineState = guidelineState.presentation;
 
     return (
         <div className="space-y-6">
@@ -174,7 +163,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                         <div key={index} className="flex items-start gap-2">
                                                             <Checkbox
                                                                 id={`guideline-presentation-${index}`}
-                                                                checked={guidelineState?.checked[index] ?? false}
+                                                                checked={currentGuidelineState?.checked[index] ?? false}
                                                                 onCheckedChange={(checked) => onGuidelineToggle(index, !!checked)}
                                                             />
                                                             <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
@@ -188,7 +177,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
                                         <div className="space-y-2">
                                             <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
-                                            {guidelineState?.custom.map((custom, index) => (
+                                            {currentGuidelineState?.custom.map((custom, index) => (
                                                 <div key={index} className="flex items-center gap-2 text-sm">
                                                     <span>- {custom}</span>
                                                     <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onRemoveCustomGuideline(index)}>
@@ -199,7 +188,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             <div className="flex gap-2">
                                                 <Input
                                                     placeholder="Add a custom guideline..."
-                                                    value={customGuidelineInput}
+                                                    value={customGuidelineInput['presentation'] || ''}
                                                     onChange={(e) => onCustomGuidelineChange(e.target.value)}
                                                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddCustomGuideline())}
                                                 />
@@ -260,7 +249,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 <CardFooter>
                     <Button
                         type="button"
-                        onClick={() => onGenerate(getSelectedGuidelines())}
+                        onClick={onGenerate}
                         disabled={isDisabled || isGenerating}
                         className="font-headline w-full"
                         title={!agent?.isEnabled ? 'This agent is disabled' : 'Generate Presentation'}

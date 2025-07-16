@@ -3,7 +3,7 @@
 
 import { ReportActions } from './report-generator/ReportActions';
 import { ReportResults } from './report-generator/ReportResults';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './report-generator/GenerationTools';
 import { EvaluationTools } from './report-generator/EvaluationTools';
@@ -11,13 +11,14 @@ import { Card } from './ui/card';
 import { useAuth } from '@/context/AuthContext';
 
 export default function ReportGenerator() {
-    const auth = useAuth();
+    const { user, fetchUser } = useAuth();
     const {
         proposal,
         isAnythingGenerating,
         lastGenerated,
         handleEvaluateReport,
-        evaluation
+        evaluation,
+        handleSectionUpdate
     } = useBuilderStore();
 
 
@@ -35,16 +36,21 @@ export default function ReportGenerator() {
 
   const isToolsDisabled = !proposal || isAnythingGenerating;
 
+  const onEvaluate = (formData: FormData) => {
+    if (user) {
+        handleEvaluateReport(formData, user, fetchUser);
+    }
+  }
+
   return (
-    <form onSubmit={(e) => {
-        e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        handleEvaluateReport(formData);
-    }}>
+    <form onSubmit={(e) => { e.preventDefault(); onEvaluate(new FormData(e.currentTarget)); }}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
-          <ReportResults />
+          <ReportResults
+            generatingItem={lastGenerated}
+            onSectionUpdate={handleSectionUpdate}
+          />
         </div>
 
         {/* Right Column -> All tools */}

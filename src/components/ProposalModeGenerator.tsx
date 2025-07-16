@@ -20,6 +20,7 @@ import { useAuth } from '@/context/AuthContext';
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
+    const { user, fetchUser } = useAuth();
 
     const {
         proposal,
@@ -55,7 +56,11 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleGenerateProposal();
+        if (user) {
+            handleGenerateProposal(user, fetchUser);
+        } else {
+            toast({ title: 'Authentication Error', description: 'You must be logged in to generate a proposal.', variant: 'destructive' });
+        }
     };
 
 

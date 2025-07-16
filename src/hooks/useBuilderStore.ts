@@ -13,7 +13,7 @@ import { templates as proposalTemplates, type ProposalTemplateKey, type Proposal
 import { AGENTS } from '@/lib/agents';
 import type { AgentPrompt } from '@/lib/agents';
 import { presentationConfig } from '@/lib/report-config';
-import { useAuth } from '@/context/AuthContext';
+import type { UserProfile } from '@/lib/db/queries';
 
 
 export interface PresentationHistoryEntry {
@@ -65,26 +65,28 @@ export interface BuilderState {
   isUploading: boolean;
 }
 
+type AuthParams = [user: UserProfile, fetchUser: () => Promise<void>];
+
 interface BuilderActions {
     // Basic Actions
     newSession: () => void;
     loadState: (state: Partial<BuilderState>) => void;
     setProjectIdea: (idea: string) => void;
     // Proposal Actions
-    handleGenerateProposal: () => void;
+    handleGenerateProposal: (...auth: AuthParams) => void;
     handleProposalUpdate: (path: string, value: any) => void;
     // Report & Diagram Actions
-    handleGenerateReportSection: (section: SectionName) => void;
+    handleGenerateReportSection: (section: SectionName, ...auth: AuthParams) => void;
     handleSectionUpdate: (key: SectionName, value: string) => void;
-    handleEvaluateReport: (formData: FormData) => void;
-    handleGenerateDiagram: (diagramType: DiagramType) => void;
+    handleEvaluateReport: (formData: FormData, ...auth: AuthParams) => void;
+    handleGenerateDiagram: (diagramType: DiagramType, ...auth: AuthParams) => void;
     handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
-    handleDiagramUpdate: (diagramType: DiagramType) => void;
+    handleDiagramUpdate: (diagramType: DiagramType, ...auth: AuthParams) => void;
     // Code Generator Actions
     setCodePrompt: (prompt: string) => void;
-    handleGenerateCode: () => void;
+    handleGenerateCode: (...auth: AuthParams) => void;
     // Presentation Actions
-    handleGeneratePresentation: () => void;
+    handleGeneratePresentation: (...auth: AuthParams) => void;
     setActivePresentationId: (id: string | null) => void;
     // Context Actions
     toggleContextSelection: (parentKey: string, contextKey: string) => void;
@@ -101,7 +103,7 @@ interface BuilderActions {
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
     setPdfFile: (file: File | null) => void;
-    handlePdfUpload: () => void;
+    handlePdfUpload: (...auth: AuthParams) => void;
 }
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
@@ -117,6 +119,18 @@ const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
             initialState[key] = { checked, custom: [] };
         }
     });
+    // Add presentation specifically if not covered by agent loop logic
+    if (!initialState['presentation']) {
+        const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
+        const prompt = presentationAgent?.prompt as AgentPrompt | undefined;
+        if (prompt?.guidelines) {
+             const checked: Record<number, boolean> = {};
+             prompt.guidelines.forEach((g, index) => {
+                checked[index] = g.isDefault;
+             });
+             initialState['presentation'] = { checked, custom: [] };
+        }
+    }
     return initialState;
 };
 
@@ -155,9 +169,11 @@ const initialState: BuilderState = {
 
 // Helper function to extract selected guidelines for a specific item
 const getSelectedGuidelines = (itemKey: string, state: BuilderState): string[] => {
-    const agent = AGENTS.find(a => a.id.includes(itemKey));
+    const agentIdSuffix = itemKey;
+    const agent = AGENTS.find(a => a.id.endsWith(agentIdSuffix));
     const currentGuidelineState = state.guidelineState[itemKey];
-    if (!agent || !currentGuidelineState) return [];
+    
+    if (!agent || !currentGuidelineState) return state.guidelineState[itemKey]?.custom || [];
 
     const promptConfig = agent.prompt as AgentPrompt;
     if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
@@ -207,10 +223,59 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       setProjectIdea: (idea) => set({ projectIdea: idea }),
       
+      // --- UNIVERSAL GENERATION HANDLER (internal) ---
+      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, auth: AuthParams, options: { creditCost?: number } = {}) => {
+          const [user, fetchUser] = auth;
+          const { creditCost = 1 } = options;
+
+          set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
+          try {
+              if (!user) throw new Error("User not authenticated.");
+              if (creditCost > 0) {
+                 await deductCredit(user.id, creditCost);
+              }
+
+              const response = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify(body),
+              });
+              const result = await response.json();
+              if (!response.ok) throw new Error(result.message || 'API request failed');
+              
+              if (endpoint.includes('diagrams')) {
+                  set((state) => ({ diagrams: { ...state.diagrams, [itemKey as DiagramType]: result }}));
+              } else if (itemKey === 'evaluate') {
+                  set({ evaluation: result });
+              } else if(itemKey === 'presentation') {
+                  const newEntry: PresentationHistoryEntry = {
+                      id: new Date().toISOString(),
+                      name: `Presentation - ${new Date().toLocaleTimeString()}`,
+                      slides: result.slides,
+                  };
+                  set(state => ({ presentation: { history: [newEntry, ...(state.presentation?.history || [])] }, activePresentationId: newEntry.id }));
+              } else if (itemKey === 'code') {
+                  set({ codeGenerator: { ...get().codeGenerator, ...result } });
+              } else {
+                  set(state => ({ sections: { ...state.sections, [itemKey as SectionName]: Object.values(result)[0] as string }}));
+              }
+              
+              if (creditCost > 0) {
+                  await fetchUser();
+              }
+              toast({ title: "Generation Successful!", description: `Successfully generated ${itemKey}.` });
+
+          } catch (e: any) {
+              set({ error: e.message || 'An unexpected error occurred.' });
+              toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
+          } finally {
+              set({ isAnythingGenerating: false });
+          }
+      },
+      
       // --- PROPOSAL ACTIONS ---
-      handleGenerateProposal: async () => {
+      handleGenerateProposal: async (...auth) => {
           const { projectIdea, selectedTemplate, customGuidelines } = get();
-          const { user, fetchUser } = useAuth.getState();
           const currentTemplate = proposalTemplates[selectedTemplate];
           let fullPrompt = currentTemplate.prompt;
           const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
@@ -220,6 +285,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
           set({ isGeneratingProposal: true, error: undefined, lastGenerated: 'proposal' });
           try {
+              const [user, fetchUser] = auth;
               if (!user) throw new Error("User not authenticated.");
               await deductCredit(user.id, 1);
               const response = await fetch('/api/generate-proposal', {
@@ -258,60 +324,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           current[keys[keys.length - 1]] = value;
           set({ proposal: newProposal, proposalJson: JSON.stringify(newProposal, null, 2) });
       },
-      
-      // --- UNIVERSAL GENERATION HANDLER (internal) ---
-      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, options: { creditCost?: number } = {}) => {
-          const { user, fetchUser } = useAuth.getState();
-          const { creditCost = 1 } = options;
-
-          set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
-          try {
-              if (!user) throw new Error("User not authenticated.");
-              if (creditCost > 0) {
-                 await deductCredit(user.id, creditCost);
-              }
-
-              const response = await fetch(endpoint, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(body),
-              });
-              const result = await response.json();
-              if (!response.ok) throw new Error(result.message || 'API request failed');
-              
-              // Handle state updates based on itemKey
-              if (endpoint.includes('diagrams')) {
-                  set((state) => ({ diagrams: { ...state.diagrams, [itemKey as DiagramType]: result }}));
-              } else if (itemKey === 'evaluate') {
-                  set({ evaluation: result });
-              } else if(itemKey === 'presentation') {
-                  const newEntry: PresentationHistoryEntry = {
-                      id: new Date().toISOString(),
-                      name: `Presentation - ${new Date().toLocaleTimeString()}`,
-                      slides: result.slides,
-                  };
-                  set(state => ({ presentation: { history: [newEntry, ...(state.presentation?.history || [])] }, activePresentationId: newEntry.id }));
-              } else if (itemKey === 'code') {
-                  set({ codeGenerator: { ...get().codeGenerator, ...result } });
-              } else {
-                  set(state => ({ sections: { ...state.sections, [itemKey as SectionName]: Object.values(result)[0] as string }}));
-              }
-              
-              if (creditCost > 0) {
-                  await fetchUser();
-              }
-              toast({ title: "Generation Successful!", description: `Successfully generated ${itemKey}.` });
-
-          } catch (e: any) {
-              set({ error: e.message || 'An unexpected error occurred.' });
-              toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
-          } finally {
-              set({ isAnythingGenerating: false });
-          }
-      },
 
       // --- REPORT, DIAGRAM, PRESENTATION ACTIONS ---
-      handleGenerateReportSection: (section) => {
+      handleGenerateReportSection: (section, ...auth) => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -322,11 +337,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               instructionText: generateInstructionText(state.controlState[section]),
               externalContextContent: state.contextSelections[section]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-report', body, section);
+          state._handleGenerateRequest('/api/generate-report', body, section, auth);
       },
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
       
-      handleEvaluateReport: (formData) => {
+      handleEvaluateReport: (formData, ...auth) => {
           const state = get();
           const criteria = formData.get('acceptanceCriteria')?.toString() || '';
           if (!criteria.trim()) {
@@ -339,10 +354,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
               acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
           };
-          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', {creditCost: 0}); // Assuming evaluation is free
+          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
       },
 
-      handleGenerateDiagram: (diagramType) => {
+      handleGenerateDiagram: (diagramType, ...auth) => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -352,19 +367,19 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               guidelines: getSelectedGuidelines(diagramType, state),
               externalContextContent: state.contextSelections[diagramType]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType);
+          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
       },
 
       handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
       
-      handleDiagramUpdate: (diagramType) => {
+      handleDiagramUpdate: (diagramType, ...auth) => {
           const { diagrams } = get();
           const code = diagrams?.[diagramType]?.plantUmlCode;
           if (!code) return;
-          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, {creditCost: 0});
+          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, auth, {creditCost: 0});
       },
 
-      handleGeneratePresentation: () => {
+      handleGeneratePresentation: (...auth) => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -372,15 +387,15 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
               guidelines: getSelectedGuidelines('presentation', state),
           };
-          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation');
+          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
-      handleGenerateCode: async () => {
+      handleGenerateCode: async (...auth) => {
           const { codeGenerator } = get();
-          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code');
+          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
       },
       
       // --- CONTEXT ACTIONS ---
@@ -430,7 +445,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
       }),
       setPdfFile: (file) => set({ pdfFile: file }),
-      handlePdfUpload: async () => {
+      handlePdfUpload: async (...auth) => {
         const { pdfFile } = get();
         if (!pdfFile) return;
 
@@ -439,6 +454,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         formData.append('file', pdfFile);
 
         try {
+            const [user] = auth;
+            if (!user) throw new Error("User not found for PDF upload.");
+            await deductCredit(user.id, 1);
+
             const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
             if (!response.ok) {
                 const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
@@ -446,6 +465,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
             }
             const result = await response.json();
             set({ externalContext: { fileName: pdfFile.name, content: result.markdown } });
+            await auth[1](); // fetchUser
             toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
         } catch (error: any) {
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });

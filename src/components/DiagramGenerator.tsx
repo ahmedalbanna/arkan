@@ -25,6 +25,7 @@ function DiagramSkeleton() {
 }
 
 export default function DiagramGenerator() {
+    const { user, fetchUser } = useAuth();
     const {
         proposal,
         diagrams,
@@ -83,7 +84,7 @@ export default function DiagramGenerator() {
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
-                                            onUpdate={() => handleDiagramUpdate(key)}
+                                            onUpdate={() => user && handleDiagramUpdate(key, user, fetchUser)}
                                             isUpdating={isUpdatingThis}
                                             isReadOnly={isAnythingGenerating}
                                         />

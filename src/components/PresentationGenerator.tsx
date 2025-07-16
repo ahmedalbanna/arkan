@@ -17,23 +17,14 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
 
 export default function PresentationGenerator() {
+    const { user, fetchUser } = useAuth();
     const {
         proposal,
-        sections,
-        diagrams,
         isAnythingGenerating,
         presentation,
         activePresentationId,
-        contextSelections,
-        guidelineState,
-        customGuidelineInput,
         handleGeneratePresentation,
         setActivePresentationId,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-        toggleContextSelection,
     } = useBuilderStore();
 
     if (!proposal) {
@@ -50,6 +41,12 @@ export default function PresentationGenerator() {
 
     const presentations = presentation?.history || [];
     const activePresentation = presentations.find(p => p.id === activePresentationId);
+
+    const onGenerate = () => {
+        if (user) {
+            handleGeneratePresentation(user, fetchUser);
+        }
+    }
     
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -123,18 +120,7 @@ export default function PresentationGenerator() {
                 <PresentationGenerationTools
                     isDisabled={!proposal || isAnythingGenerating}
                     isGenerating={isAnythingGenerating}
-                    onGenerate={() => handleGeneratePresentation()}
-                    sections={sections || {}}
-                    diagrams={diagrams || {}}
-                    contextSelections={contextSelections}
-                    onContextToggle={toggleContextSelection}
-                    presentations={presentations}
-                    guidelineState={guidelineState.presentation}
-                    onGuidelineToggle={(index, checked) => handleGuidelineToggle('presentation', index, checked)}
-                    customGuidelineInput={customGuidelineInput['presentation'] || ''}
-                    onCustomGuidelineChange={(value) => setCustomGuidelineInputForItem('presentation', value)}
-                    onAddCustomGuideline={() => handleAddCustomGuidelineForItem('presentation')}
-                    onRemoveCustomGuideline={(index) => handleRemoveCustomGuidelineForItem('presentation', index)}
+                    onGenerate={onGenerate}
                 />
             </div>
         </div>

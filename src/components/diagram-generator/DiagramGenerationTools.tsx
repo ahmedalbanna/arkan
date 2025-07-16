@@ -21,6 +21,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useAuth } from '@/context/AuthContext';
 
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -56,6 +57,7 @@ function GenerateItemButton({ onClick, title, itemKey }: GenerateItemButtonProps
 export const DiagramGenerationTools = () => {
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
+    const { user, fetchUser } = useAuth();
 
     const {
         isAnythingGenerating,
@@ -94,6 +96,19 @@ export const DiagramGenerationTools = () => {
     if (!agentsLoaded) {
         return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
+    
+    const onGenerateDiagram = (diagramType: DiagramType) => {
+        if (user) {
+            handleGenerateDiagram(diagramType, user, fetchUser);
+        }
+    };
+
+    const onPdfUpload = () => {
+        if (user) {
+            handlePdfUpload(user, fetchUser);
+        }
+    };
+
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
@@ -231,7 +246,7 @@ export const DiagramGenerationTools = () => {
                                     </Tabs>
                                     <div className="pt-2">
                                         <GenerateItemButton
-                                            onClick={() => handleGenerateDiagram(key as DiagramType)}
+                                            onClick={() => onGenerateDiagram(key as DiagramType)}
                                             itemKey={key}
                                             title={title}
                                         />
@@ -273,7 +288,7 @@ export const DiagramGenerationTools = () => {
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={handlePdfUpload} disabled={!pdfFile || isUploading} className="w-full">
+                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || isUploading} className="w-full">
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>

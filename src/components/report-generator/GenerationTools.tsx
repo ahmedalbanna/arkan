@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from '../ui/scroll-area';
 import { Skeleton } from '../ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useAuth } from '@/context/AuthContext';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -62,6 +63,7 @@ export const GenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
+    const { user, fetchUser } = useAuth();
 
     const {
         isAnythingGenerating,
@@ -73,7 +75,6 @@ export const GenerationTools = () => {
         guidelineState,
         customGuidelineInput,
         toggleContextSelection,
-        setExternalContext,
         removeExternalContext,
         handleGenerateReportSection,
         handleControlChange,
@@ -97,6 +98,18 @@ export const GenerationTools = () => {
             } else {
                 toast({ title: "Invalid File Type", description: "Please upload a PDF file.", variant: "destructive" });
             }
+        }
+    };
+    
+    const onGenerateSection = (section: SectionName) => {
+        if (user) {
+            handleGenerateReportSection(section, user, fetchUser);
+        }
+    };
+    
+    const onPdfUpload = () => {
+        if (user) {
+            handlePdfUpload(user, fetchUser);
         }
     };
 
@@ -289,7 +302,7 @@ export const GenerationTools = () => {
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton onClick={() => handleGenerateReportSection(key)} itemKey={key} title={`${t('generateButton')} ${title}`} />
+                                        <GenerateItemButton onClick={() => onGenerateSection(key)} itemKey={key} title={`${t('generateButton')} ${title}`} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -328,7 +341,7 @@ export const GenerationTools = () => {
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={handlePdfUpload} disabled={!pdfFile || isUploading} className="w-full">
+                            <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || isUploading} className="w-full">
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>
