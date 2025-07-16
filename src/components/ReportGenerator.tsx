@@ -47,30 +47,8 @@ export default function ReportGenerator() {
 
         {/* Right Column -> All tools */}
         <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-          <ReportActions
-            isGenerating={store.isAnythingGenerating}
-          />
-          <GenerationTools
-            isDisabled={isToolsDisabled}
-            isPending={store.isAnythingGenerating}
-            generatingItem={store.lastGenerated}
-            sections={store.sections}
-            diagrams={store.diagrams}
-            externalContext={store.externalContext}
-            contextSelections={store.contextSelections}
-            controlState={store.controlState}
-            guidelineState={store.guidelineState}
-            customGuidelineInput={store.customGuidelineInput}
-            onContextToggle={store.toggleContextSelection}
-            onExternalContextUploaded={store.setExternalContext}
-            onExternalContextRemoved={store.removeExternalContext}
-            onGenerate={(section) => store.handleGenerateReportSection(section, auth)}
-            onControlChange={store.handleControlChange}
-            onGuidelineToggle={store.handleGuidelineToggle}
-            onCustomGuidelineChange={store.setCustomGuidelineInputForItem}
-            onAddCustomGuideline={store.handleAddCustomGuidelineForItem}
-            onRemoveCustomGuideline={store.handleRemoveCustomGuidelineForItem}
-          />
+          <ReportActions />
+          <GenerationTools />
            <EvaluationTools
             isDisabled={isToolsDisabled}
             isEvaluating={store.isAnythingGenerating && store.lastGenerated === 'evaluate'}

@@ -11,18 +11,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
-import { useBuilderState } from '@/context/BuilderStateContext';
-
-interface ReportActionsProps {
-  isGenerating: boolean;
-}
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
-export const ReportActions = ({ isGenerating }: ReportActionsProps) => {
+export const ReportActions = () => {
   const { t } = useLocalization();
-  const { state } = useBuilderState();
-  const { proposal, sections, diagrams } = state;
+  const { proposal, sections, diagrams, isAnythingGenerating } = useBuilderStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
 
@@ -72,7 +67,7 @@ export const ReportActions = ({ isGenerating }: ReportActionsProps) => {
               </Select>
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
-        <Button onClick={handleExportReportDOCX} disabled={!hasContent || isGenerating} className="w-full font-headline">
+        <Button onClick={handleExportReportDOCX} disabled={!hasContent || isAnythingGenerating} className="w-full font-headline">
           <FileText className="mr-2 h-4 w-4" />
           {t('reportGenerator.exportReport')}
         </Button>
