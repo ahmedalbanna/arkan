@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useState, useReducer, useTransition, useCallback } from 'react';
+import { useState, useReducer, useTransition, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { ProjectProposalSchema, type PresentationSlide, SectionNameSchema, DiagramTypeSchema } from '@/ai/schemas';
-import type { ReportState as FullReportState } from '@/hooks/use-report-builder';
+import { ProjectProposalSchema, type PresentationSlide, type SectionName, type DiagramType } from '@/ai/schemas';
 import { AGENTS } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
@@ -16,8 +15,6 @@ export interface PresentationState {
   slides?: PresentationSlide[];
   error?: string;
 }
-
-type ReportContextState = Pick<FullReportState, 'sections' | 'diagrams'>;
 
 type Action =
   | { type: 'GENERATION_START' }
@@ -51,43 +48,17 @@ export function usePresentationBuilder() {
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    // State for context
-    const [reportState, setReportStateInternal] = useState<ReportContextState>({ sections: {}, diagrams: {} });
+    // State for context selections
     const [contextSelections, setContextSelections] = useState({ sections: {} as Record<string, boolean>, diagrams: {} as Record<string, boolean> });
+    
+    // Automatically select all available content when it changes
+    useEffect(() => {
+        const newSelections = { sections: {} as Record<string, boolean>, diagrams: {} as Record<string, boolean> };
+        Object.keys(builderState.sections).forEach(key => newSelections.sections[key] = true);
+        Object.keys(builderState.diagrams).forEach(key => newSelections.diagrams[key] = true);
+        setContextSelections(newSelections);
+    }, [builderState.sections, builderState.diagrams]);
 
-
-    const setReportStateFromFile = (file: File | null) => {
-        if (!file) {
-            setReportStateInternal({ sections: {}, diagrams: {} });
-            setContextSelections({ sections: {}, diagrams: {} });
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const content = e.target?.result as string;
-                const parsed = JSON.parse(content) as FullReportState;
-                if (parsed.sections || parsed.diagrams) {
-                    const sections = parsed.sections || {};
-                    const diagrams = parsed.diagrams || {};
-                    setReportStateInternal({ sections, diagrams });
-                    
-                    const newSelections = { sections: {} as Record<string, boolean>, diagrams: {} as Record<string, boolean> };
-                    Object.keys(sections).forEach(key => newSelections.sections[key] = true);
-                    Object.keys(diagrams).forEach(key => newSelections.diagrams[key] = true);
-                    setContextSelections(newSelections);
-
-                    toast({ title: 'Report File Loaded', description: `Loaded context from ${file.name}` });
-                } else {
-                    throw new Error('Invalid file structure');
-                }
-            } catch (err) {
-                toast({ title: 'Error', description: 'Could not parse the report file.', variant: 'destructive' });
-            }
-        };
-        reader.readAsText(file);
-    };
 
     const toggleContextSelection = useCallback((type: 'sections' | 'diagrams', key: string) => {
         setContextSelections(prev => ({
@@ -127,12 +98,12 @@ export function usePresentationBuilder() {
                 if (!user) throw new Error("User not authenticated.");
                 
                 const selectedSections = Object.fromEntries(
-                    Object.entries(reportState.sections).filter(([key]) => contextSelections.sections[key])
-                ) as Record<SectionNameSchema, string>;
+                    Object.entries(builderState.sections).filter(([key]) => contextSelections.sections[key])
+                ) as Record<SectionName, string>;
                 
                 const selectedDiagrams = Object.fromEntries(
-                    Object.entries(reportState.diagrams).filter(([key]) => contextSelections.diagrams[key]).map(([key, value]) => [key, value.plantUmlCode])
-                ) as Record<DiagramTypeSchema, string>;
+                    Object.entries(builderState.diagrams).filter(([key]) => contextSelections.diagrams[key]).map(([key, value]) => [key, value.plantUmlCode])
+                ) as Record<DiagramType, string>;
 
                 const result = await generatePresentation({
                     proposal: validatedFields.data.proposal,
@@ -158,8 +129,8 @@ export function usePresentationBuilder() {
         state,
         isGenerating,
         proposal: builderState.proposal,
-        reportState,
-        setReportStateFromFile,
+        sections: builderState.sections,
+        diagrams: builderState.diagrams,
         contextSelections,
         toggleContextSelection,
         handleGeneratePresentation

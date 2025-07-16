@@ -20,14 +20,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import type { PresentationSlide } from '@/ai/schemas';
+import type { PresentationSlide, SectionName, DiagramType } from '@/ai/schemas';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
     onGenerate: () => void;
-    reportState: { sections: Record<string, any>, diagrams: Record<string, any> };
-    onContextFileChange: (file: File | null) => void;
+    sections: Record<SectionName, any>;
+    diagrams: Record<DiagramType, any>;
     contextSelections: { sections: Record<string, boolean>, diagrams: Record<string, boolean> };
     onContextToggle: (type: 'sections' | 'diagrams', key: string) => void;
     slides?: PresentationSlide[];
@@ -39,8 +39,8 @@ export const PresentationGenerationTools = ({
     isDisabled, 
     isGenerating,
     onGenerate,
-    reportState,
-    onContextFileChange,
+    sections,
+    diagrams,
     contextSelections,
     onContextToggle,
     slides,
@@ -51,7 +51,7 @@ export const PresentationGenerationTools = ({
 
     const agent = agents.find(a => a.id === presentationConfig.presentation.agentId);
 
-    const hasReportContent = Object.keys(reportState.sections).length > 0 || Object.keys(reportState.diagrams).length > 0;
+    const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams).length > 0;
 
     React.useEffect(() => {
         const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
@@ -65,9 +65,9 @@ export const PresentationGenerationTools = ({
         localStorage.setItem(PPTX_TEMPLATE_KEY, key);
     }
     
-    const handleExportPresentation = () => {
+    const handleExportPresentation = async () => {
         if (!slides) return;
-        exportPresentationAsPptx(slides, selectedPptxTemplate);
+        await exportPresentationAsPptx(slides, selectedPptxTemplate);
     }
 
     if (!agentsLoaded || !agent) {
@@ -126,49 +126,43 @@ export const PresentationGenerationTools = ({
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label className="font-semibold">Context from Report File</Label>
-                                    <Input
-                                        type="file"
-                                        accept=".json"
-                                        onChange={(e) => onContextFileChange(e.target.files?.[0] ?? null)}
-                                        className="text-xs w-full"
-                                        disabled={isGenerating}
-                                    />
-                                    {hasReportContent && (
-                                        <div className="space-y-2 pt-2">
-                                            <Label className="text-xs text-muted-foreground">Select content to include:</Label>
-                                            <ScrollArea className="h-48 border rounded-md p-2">
-                                                <div className="space-y-2">
-                                                    <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
-                                                    {Object.keys(reportState.sections).map((key) => (
-                                                        <div key={key} className="flex items-center space-x-2 pl-2">
-                                                            <Checkbox
-                                                                id={`context-section-${key}`}
-                                                                checked={contextSelections.sections[key] ?? false}
-                                                                onCheckedChange={() => onContextToggle('sections', key)}
-                                                            />
-                                                            <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
-                                                                {sectionConfig[key as keyof typeof sectionConfig].title}
-                                                            </Label>
-                                                        </div>
-                                                    ))}
+                                    <Label className="font-semibold">Context from Current Session</Label>
+                                    {!hasContent ? (
+                                        <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
+                                            No sections or diagrams have been generated yet.
+                                        </p>
+                                    ) : (
+                                        <ScrollArea className="h-48 border rounded-md p-2">
+                                            <div className="space-y-2">
+                                                <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
+                                                {Object.keys(sections).length > 0 ? Object.keys(sections).map((key) => (
+                                                    <div key={key} className="flex items-center space-x-2 pl-2">
+                                                        <Checkbox
+                                                            id={`context-section-${key}`}
+                                                            checked={contextSelections.sections[key] ?? false}
+                                                            onCheckedChange={() => onContextToggle('sections', key)}
+                                                        />
+                                                        <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
+                                                            {sectionConfig[key as keyof typeof sectionConfig].title}
+                                                        </Label>
+                                                    </div>
+                                                )) : <p className="text-xs text-muted-foreground pl-2">No sections available.</p>}
 
-                                                    <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
-                                                     {Object.keys(reportState.diagrams).map((key) => (
-                                                        <div key={key} className="flex items-center space-x-2 pl-2">
-                                                            <Checkbox
-                                                                id={`context-diagram-${key}`}
-                                                                checked={contextSelections.diagrams[key] ?? false}
-                                                                onCheckedChange={() => onContextToggle('diagrams', key)}
-                                                            />
-                                                            <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
-                                                                {diagramConfig[key as keyof typeof diagramConfig].title}
-                                                            </Label>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </ScrollArea>
-                                        </div>
+                                                <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
+                                                 {Object.keys(diagrams).length > 0 ? Object.keys(diagrams).map((key) => (
+                                                    <div key={key} className="flex items-center space-x-2 pl-2">
+                                                        <Checkbox
+                                                            id={`context-diagram-${key}`}
+                                                            checked={contextSelections.diagrams[key] ?? false}
+                                                            onCheckedChange={() => onContextToggle('diagrams', key)}
+                                                        />
+                                                        <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
+                                                            {diagramConfig[key as keyof typeof diagramConfig].title}
+                                                        </Label>
+                                                    </div>
+                                                )) : <p className="text-xs text-muted-foreground pl-2">No diagrams available.</p>}
+                                            </div>
+                                        </ScrollArea>
                                     )}
                                 </div>
                             </AccordionContent>

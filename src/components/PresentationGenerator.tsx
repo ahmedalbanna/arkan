@@ -9,6 +9,10 @@ import { Loader2, Sparkles, Presentation, AlertCircle } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
 import { usePresentationState } from '@/context/PresentationStateContext';
+import { lazy } from 'react';
+
+const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
+
 
 export default function PresentationGenerator() {
     const {
@@ -16,8 +20,8 @@ export default function PresentationGenerator() {
         isGenerating,
         proposal,
         handleGeneratePresentation,
-        setReportStateFromFile,
-        reportState,
+        sections,
+        diagrams,
         contextSelections,
         toggleContextSelection,
     } = usePresentationState();
@@ -80,7 +84,7 @@ export default function PresentationGenerator() {
                     )}
                 </div>
                  {state.slides && state.slides.length > 0 && (
-                     <PresentationViewer 
+                     <DynamicPresentationViewer
                         isOpen={showPresentation} 
                         onOpenChange={setShowPresentation} 
                         slides={state.slides} 
@@ -93,8 +97,8 @@ export default function PresentationGenerator() {
                         isDisabled={!proposal || isGenerating}
                         isGenerating={isGenerating}
                         onGenerate={handleGeneratePresentation}
-                        reportState={reportState}
-                        onContextFileChange={setReportStateFromFile}
+                        sections={sections}
+                        diagrams={diagrams}
                         contextSelections={contextSelections}
                         onContextToggle={toggleContextSelection}
                         slides={state.slides}
