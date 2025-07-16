@@ -255,13 +255,21 @@ The conclusion should:`,
     icon: Presentation,
     pageUrl: '#', // This agent is used on the project page directly
     isEnabled: true,
-    prompt: {
-      base: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
+    prompt: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
 
 Create a logical flow for the presentation, starting with an introduction and problem statement, moving through the solution and design, and ending with a conclusion. Select the most important information to display. Keep slide content concise and focused on bullet points. Use the speaker notes to add detail and elaborate on the points.
 
-You will be provided with the full project proposal in JSON format, as well as any previously generated text sections or diagrams. Synthesize all this information to create the slide deck.`
-    }
+You will be provided with the full project proposal in JSON format, and may also be provided with generated text sections or diagrams. Synthesize all this information to create the slide deck.
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+{{{jsonEncode proposal}}}
+\`\`\`
+
+--- Additional Context (Optional) ---
+{{{context}}}
+---
+`
   },
   // Diagram Agents
   {

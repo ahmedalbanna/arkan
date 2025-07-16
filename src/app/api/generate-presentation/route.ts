@@ -1,8 +1,9 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { generatePresentation, GeneratePresentationInputSchema } from '@/ai/flows/generate-presentation';
+import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { AGENTS } from '@/lib/agents';
+import { GeneratePresentationInputSchema } from '@/ai/schemas';
 
 export async function POST(request: Request) {
   try {
@@ -14,16 +15,42 @@ export async function POST(request: Request) {
     }
 
     const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
-    if (!presentationAgent) {
-      return NextResponse.json({ message: 'Presentation generation agent not configured.' }, { status: 500 });
+    if (!presentationAgent || typeof presentationAgent.prompt !== 'string') {
+      return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
     const { proposal, sections, diagrams } = validation.data;
+
+    // --- Server-side prompt construction ---
+    let fullPrompt = presentationAgent.prompt;
+
+    const contextContent = [];
+    if (sections && Object.keys(sections).length > 0) {
+        contextContent.push('--- REPORT SECTIONS ---');
+        for (const [sectionName, content] of Object.entries(sections)) {
+            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+        }
+    }
+    if (diagrams && Object.keys(diagrams).length > 0) {
+        contextContent.push('--- DIAGRAMS (PlantUML) ---');
+        for (const [diagramType, diagramCode] of Object.entries(diagrams)) {
+            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+        }
+    }
+    const contextString = contextContent.join('\n\n');
+
+    // Replace placeholders in the prompt
+    fullPrompt = fullPrompt
+      .replace('{{{jsonEncode proposal}}}', JSON.stringify(proposal, null, 2))
+      .replace('{{{context}}}', contextString);
+    // --- End of prompt construction ---
+
+
     const result = await generatePresentation({
       proposal,
       sections,
       diagrams,
-      prompt: typeof presentationAgent.prompt === 'string' ? presentationAgent.prompt : presentationAgent.prompt.base
+      prompt: fullPrompt, // Pass the fully constructed prompt
     });
 
     return NextResponse.json(result, { status: 200 });
