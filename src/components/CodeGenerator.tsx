@@ -14,13 +14,14 @@ import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useAuth } from '@/context/AuthContext';
 
 function GenerateButton() {
-    const { state } = useBuilderState();
+    const isGenerating = useBuilderStore(s => s.isAnythingGenerating && s.lastGenerated === 'code');
     return (
-        <Button type="submit" disabled={state.isAnythingGenerating} className="font-headline w-full">
-            {state.isAnythingGenerating ? (
+        <Button type="submit" disabled={isGenerating} className="font-headline w-full">
+            {isGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -65,8 +66,16 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 }
 
 export default function CodeGenerator() {
-    const { state, setCodePrompt, handleGenerateCode } = useBuilderState();
-    const { codeGenerator: codeState } = state;
+    const { 
+        codeGenerator: codeState,
+        isAnythingGenerating,
+        error,
+        lastGenerated,
+        setCodePrompt,
+        handleGenerateCode,
+    } = useBuilderStore();
+    
+    const auth = useAuth();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -175,7 +184,7 @@ export default function CodeGenerator() {
     );
 
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(); }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(auth); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
@@ -252,10 +261,10 @@ export default function CodeGenerator() {
                                 required
                                 value={codeState.prompt}
                                 onChange={(e) => setCodePrompt(e.target.value)}
-                                disabled={state.isAnythingGenerating}
+                                disabled={isAnythingGenerating}
                             />
-                            {state.error && state.lastGenerated === 'code' && (
-                                <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
+                            {error && lastGenerated === 'code' && (
+                                <p className="text-sm font-medium text-destructive mt-2">{error}</p>
                             )}
                         </CardContent>
                         <CardFooter>

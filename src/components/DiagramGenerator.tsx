@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import DiagramViewer from './DiagramViewer';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { diagramConfig } from '@/lib/report-config';
 import { GitGraph, AlertCircle, Loader2 } from 'lucide-react';
 import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
@@ -11,6 +11,7 @@ import { Skeleton } from './ui/skeleton';
 import { Accordion } from './ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
 import type { DiagramType } from '@/ai/schemas';
+import { useAuth } from '@/context/AuthContext';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -24,27 +25,24 @@ function DiagramSkeleton() {
 }
 
 export default function DiagramGenerator() {
+    const auth = useAuth();
     const {
-        state,
+        proposal,
+        diagrams,
+        sections,
+        contextSelections,
+        isAnythingGenerating,
+        lastGenerated,
+        externalContext,
         handleGenerateDiagram,
         handleDiagramCodeUpdate,
         handleDiagramUpdate,
         toggleContextSelection,
         setExternalContext,
         removeExternalContext,
-    } = useBuilderState();
+    } = useBuilderStore();
     
-    const { isLoaded, proposal, diagrams, sections, contextSelections, isAnythingGenerating, lastGenerated } = state;
     const generatingDiagram = isAnythingGenerating && orderedDiagrams.includes(lastGenerated as DiagramType) ? lastGenerated : null;
-
-
-    if (!isLoaded) {
-      return (
-          <div className="flex justify-center items-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-      )
-    }
 
     if (!proposal) {
       return (
@@ -122,14 +120,14 @@ export default function DiagramGenerator() {
                     isDisabled={!proposal || isAnythingGenerating}
                     diagramsState={diagrams || {}}
                     sectionsState={sections || {}}
-                    externalContext={state.externalContext}
+                    externalContext={externalContext}
                     isGenerating={isAnythingGenerating}
                     generatingDiagram={generatingDiagram}
                     contextSelections={contextSelections}
                     onContextToggle={toggleContextSelection}
                     onExternalContextUploaded={setExternalContext}
                     onExternalContextRemoved={removeExternalContext}
-                    onSubmit={handleGenerateDiagram}
+                    onSubmit={(diagramType, guidelines) => handleGenerateDiagram(diagramType, guidelines, auth)}
                 />
             </div>
         </div>
