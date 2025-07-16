@@ -7,9 +7,9 @@ import { EditableSection } from './EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
-import type { BuilderState } from '@/context/BuilderStateContext';
 import { Loader2, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -45,14 +45,14 @@ function FullReportSkeleton() {
 }
 
 interface ReportResultsProps {
-  reportState: BuilderState;
   generatingItem: string | null;
   onSectionUpdate: (key: SectionName, value: string) => void;
 }
 
-export const ReportResults = ({ reportState, generatingItem, onSectionUpdate }: ReportResultsProps) => {
+export const ReportResults = ({ generatingItem, onSectionUpdate }: ReportResultsProps) => {
   const { t } = useLocalization();
-  const hasContent = Object.values(reportState.sections).some(s => !!s);
+  const sections = useBuilderStore(s => s.sections);
+  const hasContent = Object.values(sections).some(s => !!s);
   const isAnythingGenerating = !!generatingItem;
 
   if (!hasContent && !isAnythingGenerating) {
@@ -80,7 +80,7 @@ export const ReportResults = ({ reportState, generatingItem, onSectionUpdate }: 
         <CardContent className="p-4 space-y-4">
           <Accordion type="multiple" className="w-full space-y-4" defaultValue={generatingItem ? [generatingItem] : undefined}>
             {orderedSections.map((key) => {
-              const content = reportState.sections[key];
+              const content = sections[key];
               const { title, icon: Icon } = sectionConfig[key];
               const isGenerating = generatingItem === key;
 

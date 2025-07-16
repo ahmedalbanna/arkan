@@ -39,7 +39,6 @@ export default function ReportGenerator() {
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
           <ReportResults
-            sections={store.sections}
             generatingItem={store.isAnythingGenerating ? store.lastGenerated : null}
             onSectionUpdate={store.handleSectionUpdate}
           />
