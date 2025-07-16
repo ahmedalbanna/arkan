@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
 import { useBuilderState } from '@/context/BuilderStateContext';
 
+const DIAGRAMS_KEY = 'arkan-diagrams';
 
 export function useDiagramBuilder() {
     const { state: builderState, dispatch: builderDispatch } = useBuilderState();
@@ -17,6 +18,34 @@ export function useDiagramBuilder() {
 
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
+
+    // Load from local storage on initial mount
+    useEffect(() => {
+        try {
+            const storedDiagrams = localStorage.getItem(DIAGRAMS_KEY);
+            if (storedDiagrams) {
+                const diagrams = JSON.parse(storedDiagrams);
+                builderDispatch({ type: 'SET_STATE', payload: { diagrams } });
+            }
+        } catch (error) {
+            console.error('Failed to load diagrams from localStorage', error);
+        }
+    }, [builderDispatch]);
+
+    // Save to local storage whenever diagrams change
+    useEffect(() => {
+        try {
+            if (builderState.diagrams && Object.keys(builderState.diagrams).length > 0) {
+                localStorage.setItem(DIAGRAMS_KEY, JSON.stringify(builderState.diagrams));
+            } else if (builderState.proposal === null) {
+                // If the session is new (proposal is null), clear storage.
+                localStorage.removeItem(DIAGRAMS_KEY);
+            }
+        } catch (error) {
+            console.error('Failed to save diagrams to localStorage', error);
+        }
+    }, [builderState.diagrams, builderState.proposal]);
+
 
     const handleFormSubmit = (itemToGenerate: DiagramType, guidelines: string[]) => {
         const validatedFields = z.object({

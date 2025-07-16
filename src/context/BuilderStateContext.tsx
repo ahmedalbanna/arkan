@@ -192,6 +192,7 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         localStorage.removeItem('arkan-agents-state');
         localStorage.removeItem('arkan-docx-styles');
         localStorage.removeItem('arkan-pptx-styles');
+        localStorage.removeItem('arkan-diagrams');
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
     };
 
