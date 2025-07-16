@@ -260,16 +260,7 @@ The conclusion should:`,
 
 Create a logical flow for the presentation, starting with an introduction and problem statement, moving through the solution and design, and ending with a conclusion. Select the most important information to display. Keep slide content concise and focused on bullet points. Use the speaker notes to add detail and elaborate on the points.
 
-You will be provided with the full project proposal in JSON format, and may also be provided with generated text sections or diagrams. Synthesize all this information to create the slide deck.
-
---- Main Input: Project Proposal ---
-\`\`\`json
-{{{proposal_json}}}
-\`\`\`
-
---- Additional Context (Optional) ---
-{{{context}}}
----`,
+You will be provided with the full project proposal in JSON format, and may also be provided with generated text sections or diagrams. Synthesize all this information to create the slide deck.`,
       guidelines: [
         { text: "The total number of slides should be between 7 and 12.", isDefault: true },
         { text: "Start with a Title slide that includes the project title and author.", isDefault: true },

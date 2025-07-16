@@ -15,14 +15,19 @@ export async function POST(request: Request) {
     }
 
     const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
-    if (!presentationAgent || typeof presentationAgent.prompt !== 'string') {
+    if (!presentationAgent || typeof presentationAgent.prompt === 'string') { // prompt should be complex
       return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
     const { proposal, sections, diagrams } = validation.data;
 
     // --- Server-side prompt construction ---
-    let fullPrompt = presentationAgent.prompt;
+    let fullPrompt = presentationAgent.prompt.base;
+
+    // Add guidelines to the prompt
+    if (presentationAgent.prompt.guidelines) {
+        fullPrompt += '\n\n' + presentationAgent.prompt.guidelines.map(g => `- ${g.text}`).join('\n');
+    }
 
     const contextContent = [];
     if (sections && Object.keys(sections).length > 0) {
@@ -39,10 +44,17 @@ export async function POST(request: Request) {
     }
     const contextString = contextContent.join('\n\n');
 
-    // Replace placeholders in the prompt
-    fullPrompt = fullPrompt
-      .replace('{{{proposal_json}}}', JSON.stringify(proposal, null, 2))
-      .replace('{{{context}}}', contextString);
+    fullPrompt += `
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+${JSON.stringify(proposal, null, 2)}
+\`\`\`
+
+--- Additional Context (Optional) ---
+${contextString || 'No additional context provided.'}
+---
+`;
     // --- End of prompt construction ---
 
 
