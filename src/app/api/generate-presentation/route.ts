@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { AGENTS } from '@/lib/agents';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import type { AgentPrompt } from '@/lib/agents';
 
 const ApiGeneratePresentationSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -23,14 +24,16 @@ export async function POST(request: Request) {
     }
 
     const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
-    if (!presentationAgent || typeof presentationAgent.prompt === 'string') { // prompt should be complex
+    // Updated validation: Check for agent existence and if the prompt is an object with a 'base' property.
+    if (!presentationAgent || typeof presentationAgent.prompt !== 'object' || !('base' in (presentationAgent.prompt as AgentPrompt))) {
       return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
     const { proposal, sections, diagrams, guidelines } = validation.data;
+    const agentPrompt = presentationAgent.prompt as AgentPrompt;
 
     // --- Server-side prompt construction ---
-    let fullPrompt = presentationAgent.prompt.base;
+    let fullPrompt = agentPrompt.base;
 
     // Add guidelines to the prompt
     if (guidelines && guidelines.length > 0) {
