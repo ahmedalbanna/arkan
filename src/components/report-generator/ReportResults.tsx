@@ -23,6 +23,27 @@ function SectionSkeleton() {
   )
 }
 
+function FullReportSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+                <div className="space-y-3 p-4 border rounded-lg">
+                    <div className="flex justify-between items-center">
+                        <Skeleton className="h-6 w-1/3" />
+                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    </div>
+                    <SectionSkeleton />
+                </div>
+                <Skeleton className="h-14 w-full" />
+                <Skeleton className="h-14 w-full" />
+            </CardContent>
+        </Card>
+    )
+}
+
 interface ReportResultsProps {
   reportState: ReportState;
   generatingItem: string | null;
@@ -33,7 +54,6 @@ export const ReportResults = ({ reportState, generatingItem, onSectionUpdate }: 
   const { t } = useLocalization();
   const hasContent = Object.values(reportState.sections).some(s => !!s);
   const isAnythingGenerating = !!generatingItem;
-
 
   if (!hasContent && !isAnythingGenerating) {
     return (
@@ -47,6 +67,10 @@ export const ReportResults = ({ reportState, generatingItem, onSectionUpdate }: 
     )
   }
 
+  if (!hasContent && isAnythingGenerating) {
+    return <FullReportSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -54,7 +78,7 @@ export const ReportResults = ({ reportState, generatingItem, onSectionUpdate }: 
            <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-4">
-          <Accordion type="multiple" className="w-full space-y-4">
+          <Accordion type="multiple" className="w-full space-y-4" defaultValue={generatingItem ? [generatingItem] : undefined}>
             {orderedSections.map((key) => {
               const content = reportState.sections[key];
               const { title, icon: Icon } = sectionConfig[key];
