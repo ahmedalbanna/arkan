@@ -11,6 +11,9 @@ import { z } from 'zod';
 import { useAuth } from './AuthContext';
 import { deductCredit } from '@/services/credit-service';
 
+const DOCUMENTS_KEY = 'arkan-documents';
+
+
 // --- STATE AND ACTION TYPES ---
 export interface BuilderState {
   proposal: ProjectProposal | null;
@@ -155,6 +158,29 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
     const { toast } = useToast();
     const { user, fetchUser } = useAuth();
     
+    // Load from local storage on initial mount
+    useEffect(() => {
+        try {
+            const storedDocuments = localStorage.getItem(DOCUMENTS_KEY);
+            if (storedDocuments) {
+                dispatch({ type: 'SET_STATE', payload: { sections: JSON.parse(storedDocuments) } });
+            }
+        } catch (error) {
+            console.error('Failed to load documents from localStorage', error);
+        }
+    }, []);
+
+    // Save to local storage whenever sections change
+    useEffect(() => {
+        try {
+            if (Object.keys(state.sections).length > 0) {
+                localStorage.setItem(DOCUMENTS_KEY, JSON.stringify(state.sections));
+            }
+        } catch (error) {
+            console.error('Failed to save documents to localStorage', error);
+        }
+    }, [state.sections]);
+
     // Proposal Generation
     const handleGenerateProposal = async (projectIdea: string, prompt: string) => {
         dispatch({ type: 'PROPOSAL_GENERATION_START' });
@@ -193,6 +219,7 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         localStorage.removeItem('arkan-docx-styles');
         localStorage.removeItem('arkan-pptx-styles');
         localStorage.removeItem('arkan-diagrams');
+        localStorage.removeItem(DOCUMENTS_KEY);
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
     };
 
