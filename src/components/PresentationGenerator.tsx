@@ -17,7 +17,6 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
 
 export default function PresentationGenerator() {
-    const auth = useAuth();
     const {
         proposal,
         sections,
@@ -124,10 +123,10 @@ export default function PresentationGenerator() {
                 <PresentationGenerationTools
                     isDisabled={!proposal || isAnythingGenerating}
                     isGenerating={isAnythingGenerating}
-                    onGenerate={(guidelines) => handleGeneratePresentation(guidelines, auth)}
+                    onGenerate={() => handleGeneratePresentation()}
                     sections={sections || {}}
                     diagrams={diagrams || {}}
-                    contextSelections={contextSelections || {}}
+                    contextSelections={contextSelections}
                     onContextToggle={toggleContextSelection}
                     presentations={presentations}
                     guidelineState={guidelineState.presentation}

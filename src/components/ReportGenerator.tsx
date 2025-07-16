@@ -12,10 +12,16 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function ReportGenerator() {
     const auth = useAuth();
-    const store = useBuilderStore();
+    const {
+        proposal,
+        isAnythingGenerating,
+        lastGenerated,
+        handleEvaluateReport,
+        evaluation
+    } = useBuilderStore();
 
 
-  if (!store.proposal) {
+  if (!proposal) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
@@ -27,13 +33,13 @@ export default function ReportGenerator() {
     )
   }
 
-  const isToolsDisabled = !store.proposal || store.isAnythingGenerating;
+  const isToolsDisabled = !proposal || isAnythingGenerating;
 
   return (
     <form onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        store.handleEvaluateReport(formData, auth);
+        handleEvaluateReport(formData);
     }}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
@@ -47,8 +53,8 @@ export default function ReportGenerator() {
           <GenerationTools />
            <EvaluationTools
             isDisabled={isToolsDisabled}
-            isEvaluating={store.isAnythingGenerating && store.lastGenerated === 'evaluate'}
-            evaluationResult={store.evaluation}
+            isEvaluating={isAnythingGenerating && lastGenerated === 'evaluate'}
+            evaluationResult={evaluation}
           />
         </div>
       </div>

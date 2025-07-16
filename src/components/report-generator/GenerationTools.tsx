@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,29 +85,7 @@ export const GenerationTools = () => {
         pdfFile,
         handlePdfUpload,
         isUploading,
-    } = useBuilderStore(state => ({
-        isAnythingGenerating: state.isAnythingGenerating,
-        sections: state.sections,
-        diagrams: state.diagrams,
-        externalContext: state.externalContext,
-        contextSelections: state.contextSelections,
-        controlState: state.controlState,
-        guidelineState: state.guidelineState,
-        customGuidelineInput: state.customGuidelineInput,
-        toggleContextSelection: state.toggleContextSelection,
-        setExternalContext: state.setExternalContext,
-        removeExternalContext: state.removeExternalContext,
-        handleGenerateReportSection: state.handleGenerateReportSection,
-        handleControlChange: state.handleControlChange,
-        handleGuidelineToggle: state.handleGuidelineToggle,
-        setCustomGuidelineInputForItem: state.setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem: state.handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem: state.handleRemoveCustomGuidelineForItem,
-        setPdfFile: state.setPdfFile,
-        pdfFile: state.pdfFile,
-        handlePdfUpload: state.handlePdfUpload,
-        isUploading: state.isUploading,
-    }));
+    } = useBuilderStore();
     
     const isDisabled = isAnythingGenerating;
 

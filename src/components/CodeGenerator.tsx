@@ -15,7 +15,6 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
 
 function GenerateButton() {
     const isGenerating = useBuilderStore(s => s.isAnythingGenerating && s.lastGenerated === 'code');
@@ -75,7 +74,6 @@ export default function CodeGenerator() {
         handleGenerateCode,
     } = useBuilderStore();
     
-    const auth = useAuth();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -184,7 +182,7 @@ export default function CodeGenerator() {
     );
 
     return (
-        <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(auth); }}>
+        <form onSubmit={(e) => { e.preventDefault(); handleGenerateCode(); }}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">

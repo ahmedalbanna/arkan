@@ -71,20 +71,20 @@ interface BuilderActions {
     loadState: (state: Partial<BuilderState>) => void;
     setProjectIdea: (idea: string) => void;
     // Proposal Actions
-    handleGenerateProposal: (auth: ReturnType<typeof useAuth>) => void;
+    handleGenerateProposal: () => void;
     handleProposalUpdate: (path: string, value: any) => void;
     // Report & Diagram Actions
-    handleGenerateReportSection: (section: SectionName, auth: ReturnType<typeof useAuth>) => void;
+    handleGenerateReportSection: (section: SectionName) => void;
     handleSectionUpdate: (key: SectionName, value: string) => void;
-    handleEvaluateReport: (formData: FormData, auth: ReturnType<typeof useAuth>) => void;
-    handleGenerateDiagram: (diagramType: DiagramType, auth: ReturnType<typeof useAuth>) => void;
+    handleEvaluateReport: (formData: FormData) => void;
+    handleGenerateDiagram: (diagramType: DiagramType) => void;
     handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
-    handleDiagramUpdate: (diagramType: DiagramType, auth: ReturnType<typeof useAuth>) => void;
+    handleDiagramUpdate: (diagramType: DiagramType) => void;
     // Code Generator Actions
     setCodePrompt: (prompt: string) => void;
-    handleGenerateCode: (auth: ReturnType<typeof useAuth>) => void;
+    handleGenerateCode: () => void;
     // Presentation Actions
-    handleGeneratePresentation: (auth: ReturnType<typeof useAuth>) => void;
+    handleGeneratePresentation: () => void;
     setActivePresentationId: (id: string | null) => void;
     // Context Actions
     toggleContextSelection: (parentKey: string, contextKey: string) => void;
@@ -208,9 +208,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setProjectIdea: (idea) => set({ projectIdea: idea }),
       
       // --- PROPOSAL ACTIONS ---
-      handleGenerateProposal: async (auth) => {
+      handleGenerateProposal: async () => {
           const { projectIdea, selectedTemplate, customGuidelines } = get();
-          const { user, fetchUser } = auth;
+          const { user, fetchUser } = useAuth.getState();
           const currentTemplate = proposalTemplates[selectedTemplate];
           let fullPrompt = currentTemplate.prompt;
           const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
@@ -260,8 +260,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       
       // --- UNIVERSAL GENERATION HANDLER (internal) ---
-      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, auth: ReturnType<typeof useAuth>, options: { creditCost?: number } = {}) => {
-          const { user, fetchUser } = auth;
+      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, options: { creditCost?: number } = {}) => {
+          const { user, fetchUser } = useAuth.getState();
           const { creditCost = 1 } = options;
 
           set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
@@ -304,14 +304,14 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
           } catch (e: any) {
               set({ error: e.message || 'An unexpected error occurred.' });
-              toast({ title: "Generation Failed", description: e.message, variant: 'destructive' });
+              toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
           } finally {
               set({ isAnythingGenerating: false });
           }
       },
 
       // --- REPORT, DIAGRAM, PRESENTATION ACTIONS ---
-      handleGenerateReportSection: (section, auth) => {
+      handleGenerateReportSection: (section) => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -322,11 +322,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               instructionText: generateInstructionText(state.controlState[section]),
               externalContextContent: state.contextSelections[section]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-report', body, section, auth);
+          state._handleGenerateRequest('/api/generate-report', body, section);
       },
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
       
-      handleEvaluateReport: (formData, auth) => {
+      handleEvaluateReport: (formData) => {
           const state = get();
           const criteria = formData.get('acceptanceCriteria')?.toString() || '';
           if (!criteria.trim()) {
@@ -339,10 +339,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
               acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
           };
-          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
+          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', {creditCost: 0}); // Assuming evaluation is free
       },
 
-      handleGenerateDiagram: (diagramType, auth) => {
+      handleGenerateDiagram: (diagramType) => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -352,19 +352,19 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               guidelines: getSelectedGuidelines(diagramType, state),
               externalContextContent: state.contextSelections[diagramType]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
+          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType);
       },
 
       handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
       
-      handleDiagramUpdate: (diagramType, auth) => {
+      handleDiagramUpdate: (diagramType) => {
           const { diagrams } = get();
           const code = diagrams?.[diagramType]?.plantUmlCode;
           if (!code) return;
-          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, auth, {creditCost: 0});
+          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, {creditCost: 0});
       },
 
-      handleGeneratePresentation: (auth) => {
+      handleGeneratePresentation: () => {
           const state = get();
           const body = {
               proposal: state.proposal,
@@ -372,15 +372,15 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
               guidelines: getSelectedGuidelines('presentation', state),
           };
-          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
+          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation');
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
-      handleGenerateCode: async (auth) => {
+      handleGenerateCode: async () => {
           const { codeGenerator } = get();
-          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
+          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code');
       },
       
       // --- CONTEXT ACTIONS ---

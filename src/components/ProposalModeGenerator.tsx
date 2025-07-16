@@ -20,7 +20,6 @@ import { useAuth } from '@/context/AuthContext';
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
-    const auth = useAuth();
 
     const {
         proposal,
@@ -56,7 +55,7 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        handleGenerateProposal(auth);
+        handleGenerateProposal();
     };
 
 

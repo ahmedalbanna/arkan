@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
 
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -55,22 +54,19 @@ function GenerateItemButton({ onClick, title, itemKey }: GenerateItemButtonProps
 }
 
 export const DiagramGenerationTools = () => {
-    const auth = useAuth();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
 
     const {
         isAnythingGenerating,
-        diagramsState,
-        sectionsState,
+        diagrams,
+        sections,
         externalContext,
         contextSelections,
         guidelineState,
         customGuidelineInput,
-        onContextToggle,
-        onExternalContextUploaded,
-        onExternalContextRemoved,
-        onSubmit,
+        toggleContextSelection,
+        removeExternalContext,
         handleGenerateDiagram,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
@@ -80,28 +76,8 @@ export const DiagramGenerationTools = () => {
         pdfFile,
         handlePdfUpload,
         isUploading,
-    } = useBuilderStore(state => ({
-        isAnythingGenerating: state.isAnythingGenerating,
-        diagramsState: state.diagrams,
-        sectionsState: state.sections,
-        externalContext: state.externalContext,
-        contextSelections: state.contextSelections,
-        guidelineState: state.guidelineState,
-        customGuidelineInput: state.customGuidelineInput,
-        onContextToggle: state.toggleContextSelection,
-        onExternalContextUploaded: state.setExternalContext,
-        onExternalContextRemoved: state.removeExternalContext,
-        onSubmit: state.handleGenerateDiagram,
-        handleGenerateDiagram: state.handleGenerateDiagram,
-        handleGuidelineToggle: state.handleGuidelineToggle,
-        setCustomGuidelineInputForItem: state.setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem: state.handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem: state.handleRemoveCustomGuidelineForItem,
-        setPdfFile: state.setPdfFile,
-        pdfFile: state.pdfFile,
-        handlePdfUpload: state.handlePdfUpload,
-        isUploading: state.isUploading,
-    }));
+    } = useBuilderStore();
+
     const isDisabled = isAnythingGenerating;
     
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,11 +188,11 @@ export const DiagramGenerationTools = () => {
                                                                     <Checkbox
                                                                         id={`context-section-${key}-${contextKey}`}
                                                                         name={`context_section_${key}_${contextKey}`}
-                                                                        disabled={!sectionsState[contextKey]}
+                                                                        disabled={!sections[contextKey]}
                                                                         checked={contextSelections[key]?.[`section_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => onContextToggle(key, `section_${contextKey}`)}
+                                                                        onCheckedChange={() => toggleContextSelection(key, `section_${contextKey}`)}
                                                                     />
-                                                                    <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sectionsState[contextKey] && "text-muted-foreground/50")}>
+                                                                    <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sections[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
                                                                             <BookCheck className="h-4 w-4" />
                                                                             {sectionConfig[contextKey].title}
@@ -235,11 +211,11 @@ export const DiagramGenerationTools = () => {
                                                                     <Checkbox
                                                                         id={`context-diagram-${key}-${contextKey}`}
                                                                         name={`context_diagram_${key}_${contextKey}`}
-                                                                        disabled={!diagramsState[contextKey]}
+                                                                        disabled={!diagrams[contextKey]}
                                                                         checked={contextSelections[key]?.[`diagram_${contextKey}`] ?? false}
-                                                                        onCheckedChange={() => onContextToggle(key, `diagram_${contextKey}`)}
+                                                                        onCheckedChange={() => toggleContextSelection(key, `diagram_${contextKey}`)}
                                                                     />
-                                                                    <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagramsState[contextKey] && "text-muted-foreground/50")}>
+                                                                    <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagrams[contextKey] && "text-muted-foreground/50")}>
                                                                         <div className="flex items-center gap-2">
                                                                             <GitGraph className="h-4 w-4" />
                                                                             {diagramConfig[contextKey].title}
@@ -255,7 +231,7 @@ export const DiagramGenerationTools = () => {
                                     </Tabs>
                                     <div className="pt-2">
                                         <GenerateItemButton
-                                            onClick={() => handleGenerateDiagram(key as DiagramType, auth)}
+                                            onClick={() => handleGenerateDiagram(key as DiagramType)}
                                             itemKey={key}
                                             title={title}
                                         />
@@ -289,7 +265,7 @@ export const DiagramGenerationTools = () => {
                                         </ScrollArea>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onExternalContextRemoved} title="Remove File">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
                                     <X className="h-4 w-4" />
                                 </Button>
                            </div>

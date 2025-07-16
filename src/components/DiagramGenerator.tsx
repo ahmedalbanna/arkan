@@ -25,7 +25,6 @@ function DiagramSkeleton() {
 }
 
 export default function DiagramGenerator() {
-    const auth = useAuth();
     const {
         proposal,
         diagrams,
@@ -33,14 +32,7 @@ export default function DiagramGenerator() {
         lastGenerated,
         handleDiagramCodeUpdate,
         handleDiagramUpdate,
-    } = useBuilderStore(state => ({
-        proposal: state.proposal,
-        diagrams: state.diagrams,
-        isAnythingGenerating: state.isAnythingGenerating,
-        lastGenerated: state.lastGenerated,
-        handleDiagramCodeUpdate: state.handleDiagramCodeUpdate,
-        handleDiagramUpdate: state.handleDiagramUpdate,
-    }));
+    } = useBuilderStore();
     
     const generatingDiagram = isAnythingGenerating && orderedDiagrams.includes(lastGenerated as DiagramType) ? lastGenerated : null;
 
@@ -91,7 +83,7 @@ export default function DiagramGenerator() {
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
-                                            onUpdate={() => handleDiagramUpdate(key, auth)}
+                                            onUpdate={() => handleDiagramUpdate(key)}
                                             isUpdating={isUpdatingThis}
                                             isReadOnly={isAnythingGenerating}
                                         />
