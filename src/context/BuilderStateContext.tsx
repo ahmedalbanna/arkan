@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode, useMemo, useEffect, useState, useCallback } from 'react';
@@ -66,6 +67,7 @@ export interface BuilderState {
   customGuidelines: string[];
   controlState: Record<SectionName, ControlState>;
   guidelineState: Record<string, GuidelineState>;
+  customGuidelineInput: Record<string, string>;
   activePresentationId: string | null;
 }
 
@@ -90,6 +92,7 @@ export type BuilderAction =
   | { type: 'SET_CUSTOM_GUIDELINES', payload: string[] }
   | { type: 'SET_CONTROL_STATE', payload: { section: SectionName, field: keyof ControlState, value: string | number } }
   | { type: 'SET_GUIDELINE_STATE', payload: { itemKey: string, guidelineState: GuidelineState } }
+  | { type: 'SET_CUSTOM_GUIDELINE_INPUT', payload: { itemKey: string, value: string } }
   | { type: 'SET_ACTIVE_PRESENTATION', payload: string | null };
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
@@ -144,6 +147,7 @@ const initialState: BuilderState = {
   customGuidelines: [],
   controlState: getInitialControlState(),
   guidelineState: getInitialGuidelineStates(),
+  customGuidelineInput: {},
   activePresentationId: null,
 };
 
@@ -220,6 +224,8 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         return {...state, controlState: {...state.controlState, [action.payload.section]: { ...state.controlState[action.payload.section], [action.payload.field]: action.payload.value }}};
     case 'SET_GUIDELINE_STATE':
         return {...state, guidelineState: {...state.guidelineState, [action.payload.itemKey]: action.payload.guidelineState}};
+    case 'SET_CUSTOM_GUIDELINE_INPUT':
+        return {...state, customGuidelineInput: {...state.customGuidelineInput, [action.payload.itemKey]: action.payload.value}};
     case 'SET_ACTIVE_PRESENTATION':
         return {...state, activePresentationId: action.payload};
     default:
@@ -262,18 +268,15 @@ type BuilderStateContextType = {
     handleControlChange: (section: SectionName, field: keyof ControlState, value: string | number) => void;
     guidelineState: Record<string, GuidelineState>;
     handleGuidelineToggle: (itemKey: string, guidelineIndex: number, isChecked: boolean) => void;
-    setCustomGuidelineInput: (itemKey: string, value: string) => void;
-    handleAddCustomGuideline: (itemKey: string) => void;
-    handleRemoveCustomGuideline: (itemKey: string, index: number) => void;
-    onGuidelineToggle: (index: number, checked: boolean) => void;
-    onCustomGuidelineChange: (value: string) => void;
-    onAddCustomGuideline: () => void;
-    onRemoveCustomGuideline: (index: number) => void;
+    allCustomGuidelineInputs: Record<string, string>;
+    setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
+    handleAddCustomGuidelineForItem: (itemKey: string) => void;
+    handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
 };
 
 const BuilderStateContext = createContext<BuilderStateContextType | undefined>(undefined);
 
-export const BuilderStateProvider = ({ children }: { children: React.ReactNode }) => {
+export const BuilderStateProvider = ({ children }: { children: React.Node }) => {
     const [state, dispatch] = useReducer(builderReducer, initialState);
     const { toast } = useToast();
     const { user, fetchUser } = useAuth();
@@ -316,15 +319,19 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
 
     // --- PROPOSAL LOGIC ---
     const [templates] = useState<Record<ProposalTemplateKey, ProposalTemplate>>(proposalTemplates);
-    const [customGuidelineInput, setCustomGuidelineInput] = useState('');
+    const customGuidelineInput = state.customGuidelineInput['proposal'] || '';
+    const setProposalCustomGuidelineInput = (value: string) => dispatch({ type: 'SET_CUSTOM_GUIDELINE_INPUT', payload: { itemKey: 'proposal', value } });
+
     const handleTemplateChange = (key: ProposalTemplateKey) => dispatch({ type: 'SET_SELECTED_TEMPLATE', payload: key });
+    
     const handleAddCustomGuideline = useCallback(() => {
         const newGuideline = customGuidelineInput.trim();
         if (newGuideline) {
             dispatch({ type: 'SET_CUSTOM_GUIDELINES', payload: [...state.customGuidelines, newGuideline] });
-            setCustomGuidelineInput('');
+            setProposalCustomGuidelineInput('');
         }
     }, [customGuidelineInput, state.customGuidelines]);
+    
     const handleRemoveCustomGuideline = useCallback((indexToRemove: number) => {
         const newGuidelines = state.customGuidelines.filter((_, index) => index !== indexToRemove);
         dispatch({ type: 'SET_CUSTOM_GUIDELINES', payload: newGuidelines });
@@ -368,20 +375,24 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
 
     // --- REPORT & DIAGRAM LOGIC ---
     const handleControlChange = (section: SectionName, field: keyof ControlState, value: string | number) => dispatch({type: 'SET_CONTROL_STATE', payload: { section, field, value }});
-    const [sectionCustomGuidelineInput, setSectionCustomGuidelineInput] = useState<Record<string, string>>({});
+    
+    const setCustomGuidelineInputForItem = (itemKey: string, value: string) => {
+        dispatch({ type: 'SET_CUSTOM_GUIDELINE_INPUT', payload: { itemKey, value } });
+    };
+    
     const handleGuidelineToggle = (itemKey: string, guidelineIndex: number, isChecked: boolean) => {
         const newGuidelineState = { ...state.guidelineState[itemKey], checked: { ...state.guidelineState[itemKey].checked, [guidelineIndex]: isChecked }};
         dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
     };
-    const handleAddSectionCustomGuideline = (itemKey: string) => {
-        const newGuideline = sectionCustomGuidelineInput[itemKey]?.trim();
+    const handleAddCustomGuidelineForItem = (itemKey: string) => {
+        const newGuideline = state.customGuidelineInput[itemKey]?.trim();
         if (newGuideline) {
             const newGuidelineState = { ...state.guidelineState[itemKey], custom: [...state.guidelineState[itemKey].custom, newGuideline]};
             dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
-            setSectionCustomGuidelineInput(prev => ({ ...prev, [itemKey]: '' }));
+            setCustomGuidelineInputForItem(itemKey, '');
         }
     };
-    const handleRemoveSectionCustomGuideline = (itemKey: string, indexToRemove: number) => {
+    const handleRemoveCustomGuidelineForItem = (itemKey: string, indexToRemove: number) => {
         const newCustom = state.guidelineState[itemKey].custom.filter((_, i) => i !== indexToRemove);
         const newGuidelineState = { ...state.guidelineState[itemKey], custom: newCustom };
         dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
@@ -431,6 +442,14 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
                 dispatch({ type: 'GENERATION_SUCCESS', payload: { diagrams: { ...state.diagrams, [itemKey as DiagramType]: result }, lastGenerated: itemKey as DiagramType }});
             } else if (itemKey === 'evaluate') {
                 dispatch({ type: 'GENERATION_SUCCESS', payload: { evaluation: result, lastGenerated: 'evaluate' }});
+            } else if(endpoint.includes('presentation')) {
+                const newEntry: PresentationHistoryEntry = {
+                    id: new Date().toISOString(),
+                    name: `Presentation - ${new Date().toLocaleTimeString()}`,
+                    slides: result.slides,
+                };
+                const newHistory = [newEntry, ...(state.presentation?.history || [])];
+                dispatch({ type: 'GENERATION_SUCCESS', payload: { presentation: { history: newHistory }, lastGenerated: 'presentation', activePresentationId: newEntry.id } });
             } else {
                  dispatch({ type: 'GENERATION_SUCCESS', payload: { sections: { ...state.sections, [itemKey as SectionName]: Object.values(result)[0] as string }, lastGenerated: itemKey as SectionName }});
             }
@@ -440,7 +459,7 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
             dispatch({ type: 'GENERATION_FAILURE', payload: { error: e.message || 'An unexpected error occurred.', item: itemKey } });
             toast({ title: "Generation Failed", description: e.message, variant: 'destructive' });
         }
-    }, [user, fetchUser, state.diagrams, state.sections, toast]);
+    }, [user, fetchUser, state.diagrams, state.sections, state.presentation, toast]);
 
     const handleGenerateReportSection = useCallback((section: SectionName) => {
         const body = {
@@ -507,28 +526,6 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
     }, [user, fetchUser, state.codeGenerator.prompt]);
 
     // --- PRESENTATION LOGIC ---
-    const [presentationGuidelineInput, setPresentationGuidelineInput] = useState('');
-    const handlePresentationGuidelineToggle = (index: number, checked: boolean) => {
-        const itemKey = 'presentation';
-        const newGuidelineState = { ...state.guidelineState[itemKey], checked: { ...state.guidelineState[itemKey].checked, [index]: checked }};
-        dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
-    };
-    const handleAddPresentationCustomGuideline = () => {
-        const itemKey = 'presentation';
-        const newGuideline = presentationGuidelineInput.trim();
-        if (newGuideline) {
-            const newGuidelineState = { ...state.guidelineState[itemKey], custom: [...state.guidelineState[itemKey].custom, newGuideline]};
-            dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
-            setPresentationGuidelineInput('');
-        }
-    };
-    const handleRemovePresentationCustomGuideline = (index: number) => {
-        const itemKey = 'presentation';
-        const newCustom = state.guidelineState[itemKey].custom.filter((_, i) => i !== index);
-        const newGuidelineState = { ...state.guidelineState[itemKey], custom: newCustom };
-        dispatch({ type: 'SET_GUIDELINE_STATE', payload: { itemKey, guidelineState: newGuidelineState }});
-    };
-    
     const handleGeneratePresentation = useCallback((guidelines: string[]) => {
         const body = {
             proposal: state.proposal,
@@ -536,14 +533,8 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
             diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
             guidelines
         };
-        handleGenerateRequest('/api/generate-presentation', body, 'presentation').then(() => {
-            // After successful generation, set the new presentation as active
-            const newHistory = state.presentation?.history || [];
-            if(newHistory.length > 0) {
-                 dispatch({ type: 'SET_ACTIVE_PRESENTATION', payload: newHistory[0].id });
-            }
-        });
-    }, [state.proposal, state.sections, state.diagrams, state.contextSelections, handleGenerateRequest, state.presentation?.history]);
+        handleGenerateRequest('/api/generate-presentation', body, 'presentation');
+    }, [state.proposal, state.sections, state.diagrams, state.contextSelections, handleGenerateRequest]);
     const setActivePresentationId = useCallback((id: string | null) => dispatch({ type: 'SET_ACTIVE_PRESENTATION', payload: id }), []);
 
 
@@ -615,20 +606,17 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         customGuidelines: state.customGuidelines,
         handleAddCustomGuideline,
         handleRemoveCustomGuideline,
-        customGuidelineInput,
-        setCustomGuidelineInput,
+        customGuidelineInput: customGuidelineInput,
+        setCustomGuidelineInput: setProposalCustomGuidelineInput,
         controlState: state.controlState,
         handleControlChange,
         guidelineState: state.guidelineState,
         handleGuidelineToggle,
-        setCustomGuidelineInput: setSectionCustomGuidelineInput,
-        handleAddCustomGuideline: handleAddSectionCustomGuideline,
-        handleRemoveCustomGuideline: handleRemoveSectionCustomGuideline,
-        onGuidelineToggle: handlePresentationGuidelineToggle,
-        onCustomGuidelineChange: setPresentationGuidelineInput,
-        onAddCustomGuideline: handleAddPresentationCustomGuideline,
-        onRemoveCustomGuideline: handleRemovePresentationCustomGuideline,
-    }), [state, dispatch, setProjectIdea, handleGenerateProposal, handleProposalUpdate, handleNewSession, handleSaveProjectFile, handleLoadProjectFile, handleGenerateReportSection, handleSectionUpdate, handleEvaluateReport, handleGenerateDiagram, handleDiagramCodeUpdate, handleDiagramUpdate, setCodePrompt, handleGenerateCode, handleGeneratePresentation, setActivePresentationId, toggleContextSelection, setExternalContext, removeExternalContext, templates, handleTemplateChange, state.customGuidelines, handleAddCustomGuideline, handleRemoveCustomGuideline, customGuidelineInput, state.controlState, handleControlChange, state.guidelineState, handleGuidelineToggle, setSectionCustomGuidelineInput, handleAddSectionCustomGuideline, handleRemoveSectionCustomGuideline, handlePresentationGuidelineToggle, setPresentationGuidelineInput, handleAddPresentationCustomGuideline, handleRemovePresentationCustomGuideline]);
+        allCustomGuidelineInputs: state.customGuidelineInput,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
+    }), [state, dispatch, setProjectIdea, handleGenerateProposal, handleProposalUpdate, handleNewSession, handleSaveProjectFile, handleLoadProjectFile, handleGenerateReportSection, handleSectionUpdate, handleEvaluateReport, handleGenerateDiagram, handleDiagramCodeUpdate, handleDiagramUpdate, setCodePrompt, handleGenerateCode, handleGeneratePresentation, setActivePresentationId, toggleContextSelection, setExternalContext, removeExternalContext, templates, handleTemplateChange, state.customGuidelines, handleAddCustomGuideline, handleRemoveCustomGuideline, customGuidelineInput, setProposalCustomGuidelineInput, state.controlState, handleControlChange, state.guidelineState, handleGuidelineToggle, state.customGuidelineInput, setCustomGuidelineInputForItem, handleAddCustomGuidelineForItem, handleRemoveCustomGuidelineForItem]);
 
     return (
         <BuilderStateContext.Provider value={value}>
