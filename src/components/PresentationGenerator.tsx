@@ -104,14 +104,14 @@ export default function PresentationGenerator() {
                 {activePresentation?.slides && activePresentation.slides.length > 0 ? (
                     <DynamicPresentationViewer
                         key={activePresentation.id}
-                        slides={activePresentation.slides} 
+                        slides={activePresentation.slides}
                     />
                 ) : (
                     <Card className="flex items-center justify-center h-full min-h-[300px]">
                         <div className="text-center text-muted-foreground p-8">
                             <Presentation className="w-16 h-16 mx-auto mb-4" />
                             <p>Your generated presentation will appear here.</p>
-                            {isGenerating && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                            {isGenerating && activePresentation === undefined && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                         </div>
                     </Card>
                 )}
