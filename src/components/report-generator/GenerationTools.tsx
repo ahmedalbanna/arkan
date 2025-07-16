@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,21 +35,20 @@ interface GenerateItemButtonProps {
     onClick: () => void;
     itemKey: string;
     title: string;
-    isPending: boolean;
-    generatingItem: string | null;
 }
 
-function GenerateItemButton({ onClick, itemKey, title, isPending, generatingItem }: GenerateItemButtonProps) {
+function GenerateItemButton({ onClick, itemKey, title }: GenerateItemButtonProps) {
     const { agents } = useAgents();
+    const { isAnythingGenerating, lastGenerated } = useBuilderStore();
     const agentId = sectionConfig[itemKey as SectionName]?.agentId;
     const agent = agents.find(a => a.id === agentId);
-    const isGeneratingThis = isPending && generatingItem === itemKey;
+    const isGeneratingThis = isAnythingGenerating && lastGenerated === itemKey;
 
     return (
         <Button
             type="button"
             onClick={onClick}
-            disabled={isPending || !agent?.isEnabled}
+            disabled={isAnythingGenerating || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
         >
@@ -59,55 +58,58 @@ function GenerateItemButton({ onClick, itemKey, title, isPending, generatingItem
     );
 }
 
-interface GenerationToolsProps {
-    isDisabled: boolean;
-    isPending: boolean;
-    generatingItem: string | null;
-    sections: Partial<Record<SectionName, string>>;
-    diagrams: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string }>>;
-    externalContext?: { fileName: string; content: string };
-    contextSelections: Record<string, Record<string, boolean>>;
-    controlState: Record<SectionName, { formality: number; tone: string; wordCount: string }>;
-    guidelineState: Record<string, { checked: Record<number, boolean>; custom: string[] }>;
-    customGuidelineInput: Record<string, string>;
-    onContextToggle: (parentKey: string, contextKey: string) => void;
-    onExternalContextUploaded: (fileName: string, content: string) => void;
-    onExternalContextRemoved: () => void;
-    onGenerate: (section: SectionName) => void;
-    onControlChange: (section: SectionName, field: keyof { formality: number; tone: string; wordCount: string; }, value: string | number) => void;
-    onGuidelineToggle: (itemKey: string, guidelineIndex: number, isChecked: boolean) => void;
-    onCustomGuidelineChange: (itemKey: string, value: string) => void;
-    onAddCustomGuideline: (itemKey: string) => void;
-    onRemoveCustomGuideline: (itemKey: string, index: number) => void;
-}
-
-
-export const GenerationTools = ({
-    isDisabled,
-    isPending,
-    generatingItem,
-    sections,
-    diagrams,
-    externalContext,
-    contextSelections,
-    controlState,
-    guidelineState,
-    customGuidelineInput,
-    onContextToggle,
-    onExternalContextUploaded,
-    onExternalContextRemoved,
-    onGenerate,
-    onControlChange,
-    onGuidelineToggle,
-    onCustomGuidelineChange,
-    onAddCustomGuideline,
-    onRemoveCustomGuideline,
-}: GenerationToolsProps) => {
+export const GenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
     const { toast } = useToast();
+
+    const {
+        isAnythingGenerating,
+        sections,
+        diagrams,
+        externalContext,
+        contextSelections,
+        controlState,
+        guidelineState,
+        customGuidelineInput,
+        toggleContextSelection,
+        setExternalContext,
+        removeExternalContext,
+        handleGenerateReportSection,
+        handleControlChange,
+        handleGuidelineToggle,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
+        setPdfFile,
+        pdfFile,
+        handlePdfUpload,
+        isUploading,
+    } = useBuilderStore(state => ({
+        isAnythingGenerating: state.isAnythingGenerating,
+        sections: state.sections,
+        diagrams: state.diagrams,
+        externalContext: state.externalContext,
+        contextSelections: state.contextSelections,
+        controlState: state.controlState,
+        guidelineState: state.guidelineState,
+        customGuidelineInput: state.customGuidelineInput,
+        toggleContextSelection: state.toggleContextSelection,
+        setExternalContext: state.setExternalContext,
+        removeExternalContext: state.removeExternalContext,
+        handleGenerateReportSection: state.handleGenerateReportSection,
+        handleControlChange: state.handleControlChange,
+        handleGuidelineToggle: state.handleGuidelineToggle,
+        setCustomGuidelineInputForItem: state.setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem: state.handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem: state.handleRemoveCustomGuidelineForItem,
+        setPdfFile: state.setPdfFile,
+        pdfFile: state.pdfFile,
+        handlePdfUpload: state.handlePdfUpload,
+        isUploading: state.isUploading,
+    }));
+    
+    const isDisabled = isAnythingGenerating;
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
@@ -120,31 +122,6 @@ export const GenerationTools = ({
         }
     };
 
-    const handleFileUpload = async () => {
-        if (!pdfFile) return;
-        setIsUploading(true);
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        try {
-            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
-            if (!response.ok) {
-                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-                throw new Error(errorResult.message);
-            }
-            const result = await response.json();
-            onExternalContextUploaded(pdfFile.name, result.markdown);
-            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
-        } catch (error: any) {
-            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    const handleRemoveExternalContext = () => {
-      onExternalContextRemoved();
-      setPdfFile(null);
-    }
 
     if (!agentsLoaded) {
         return (
@@ -209,7 +186,7 @@ export const GenerationTools = ({
                                                                 <Checkbox
                                                                     id={`guideline-${key}-${index}`}
                                                                     checked={guidelineState[key]?.checked[index] ?? false}
-                                                                    onCheckedChange={(checked) => onGuidelineToggle(key, index, !!checked)}
+                                                                    onCheckedChange={(checked) => handleGuidelineToggle(key, index, !!checked)}
                                                                 />
                                                                 <Label htmlFor={`guideline-${key}-${index}`} className="font-normal text-sm flex-1">
                                                                     <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
@@ -225,7 +202,7 @@ export const GenerationTools = ({
                                                 {guidelineState[key]?.custom.map((custom, index) => (
                                                     <div key={index} className="flex items-center gap-2 text-sm">
                                                         <span>- {custom}</span>
-                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onRemoveCustomGuideline(key, index)}>
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>
                                                             <Trash2 className="h-3 w-3 text-destructive" />
                                                         </Button>
                                                     </div>
@@ -234,10 +211,10 @@ export const GenerationTools = ({
                                                     <Input
                                                         placeholder="Add a custom guideline..."
                                                         value={customGuidelineInput[key] || ''}
-                                                        onChange={(e) => onCustomGuidelineChange(key, e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddCustomGuideline(key))}
+                                                        onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
                                                     />
-                                                    <Button type="button" variant="secondary" onClick={() => onAddCustomGuideline(key)}>
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </div>
@@ -248,7 +225,7 @@ export const GenerationTools = ({
                                             <div className="space-y-6">
                                                 <div className="space-y-3">
                                                     <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
-                                                    <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => onControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
+                                                    <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
                                                     <div className="flex justify-between text-xs text-muted-foreground">
                                                         <span>{t('reportGenerator.tool_formality_informal')}</span>
                                                         <span>{t('reportGenerator.tool_formality_balanced')}</span>
@@ -257,7 +234,7 @@ export const GenerationTools = ({
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
-                                                    <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => onControlChange(key as SectionName, 'tone', val)}>
+                                                    <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
                                                         <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
@@ -269,7 +246,7 @@ export const GenerationTools = ({
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
-                                                    <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => onControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                                    <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
                                                 </div>
                                             </div>
                                         </TabsContent>
@@ -283,7 +260,7 @@ export const GenerationTools = ({
                                                                 <Checkbox
                                                                     id={`context-${key}-external`}
                                                                     checked={contextSelections[key]?.['external'] ?? false}
-                                                                    onCheckedChange={() => onContextToggle(key, 'external')}
+                                                                    onCheckedChange={() => toggleContextSelection(key, 'external')}
                                                                 />
                                                                 <Label htmlFor={`context-${key}-external`} className="text-sm font-normal truncate">
                                                                     {externalContext.fileName}
@@ -299,7 +276,7 @@ export const GenerationTools = ({
                                                                     id={`context-section-${key}-${contextKey}`}
                                                                     disabled={!sections[contextKey]}
                                                                     checked={contextSelections[key]?.[contextKey] ?? false}
-                                                                    onCheckedChange={() => onContextToggle(key, contextKey)}
+                                                                    onCheckedChange={() => toggleContextSelection(key, contextKey)}
                                                                 />
                                                                 <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sections[contextKey] && "text-muted-foreground/50")}>
                                                                     <div className="flex items-center gap-2">
@@ -318,7 +295,7 @@ export const GenerationTools = ({
                                                                     id={`context-diagram-${key}-${contextKey}`}
                                                                     disabled={!diagrams?.[contextKey]}
                                                                     checked={contextSelections[key]?.[contextKey] ?? false}
-                                                                    onCheckedChange={() => onContextToggle(key, contextKey)}
+                                                                    onCheckedChange={() => toggleContextSelection(key, contextKey)}
                                                                 />
                                                                 <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagrams?.[contextKey] && "text-muted-foreground/50")}>
                                                                     <div className="flex items-center gap-2">
@@ -334,7 +311,7 @@ export const GenerationTools = ({
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <GenerateItemButton onClick={() => onGenerate(key)} itemKey={key} title={`${t('generateButton')} ${title}`} isPending={isPending} generatingItem={generatingItem} />
+                                        <GenerateItemButton onClick={() => handleGenerateReportSection(key)} itemKey={key} title={`${t('generateButton')} ${title}`} />
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
@@ -365,7 +342,7 @@ export const GenerationTools = ({
                                         </ScrollArea>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext} title="Remove File">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
                                     <X className="h-4 w-4" />
                                 </Button>
                            </div>
@@ -373,7 +350,7 @@ export const GenerationTools = ({
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={handleFileUpload} disabled={!pdfFile || isUploading} className="w-full">
+                            <Button type="button" size="sm" onClick={handlePdfUpload} disabled={!pdfFile || isUploading} className="w-full">
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>

@@ -29,18 +29,18 @@ export default function DiagramGenerator() {
     const {
         proposal,
         diagrams,
-        sections,
-        contextSelections,
         isAnythingGenerating,
         lastGenerated,
-        externalContext,
-        handleGenerateDiagram,
         handleDiagramCodeUpdate,
         handleDiagramUpdate,
-        toggleContextSelection,
-        setExternalContext,
-        removeExternalContext,
-    } = useBuilderStore();
+    } = useBuilderStore(state => ({
+        proposal: state.proposal,
+        diagrams: state.diagrams,
+        isAnythingGenerating: state.isAnythingGenerating,
+        lastGenerated: state.lastGenerated,
+        handleDiagramCodeUpdate: state.handleDiagramCodeUpdate,
+        handleDiagramUpdate: state.handleDiagramUpdate,
+    }));
     
     const generatingDiagram = isAnythingGenerating && orderedDiagrams.includes(lastGenerated as DiagramType) ? lastGenerated : null;
 
@@ -91,7 +91,7 @@ export default function DiagramGenerator() {
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
-                                            onUpdate={() => handleDiagramUpdate(key)}
+                                            onUpdate={() => handleDiagramUpdate(key, auth)}
                                             isUpdating={isUpdatingThis}
                                             isReadOnly={isAnythingGenerating}
                                         />
@@ -116,19 +116,7 @@ export default function DiagramGenerator() {
 
             {/* Right Column */}
             <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-                <DiagramGenerationTools
-                    isDisabled={!proposal || isAnythingGenerating}
-                    diagramsState={diagrams || {}}
-                    sectionsState={sections || {}}
-                    externalContext={externalContext}
-                    isGenerating={isAnythingGenerating}
-                    generatingDiagram={generatingDiagram}
-                    contextSelections={contextSelections}
-                    onContextToggle={toggleContextSelection}
-                    onExternalContextUploaded={setExternalContext}
-                    onExternalContextRemoved={removeExternalContext}
-                    onSubmit={(diagramType, guidelines) => handleGenerateDiagram(diagramType, guidelines, auth)}
-                />
+                <DiagramGenerationTools />
             </div>
         </div>
     );

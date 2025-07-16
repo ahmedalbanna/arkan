@@ -33,15 +33,12 @@ export default function ReportGenerator() {
     <form onSubmit={(e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
-        store.handleEvaluateReport(formData);
+        store.handleEvaluateReport(formData, auth);
     }}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
-          <ReportResults
-            generatingItem={store.isAnythingGenerating ? store.lastGenerated : null}
-            onSectionUpdate={store.handleSectionUpdate}
-          />
+          <ReportResults />
         </div>
 
         {/* Right Column -> All tools */}

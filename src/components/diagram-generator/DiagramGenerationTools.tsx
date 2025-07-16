@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,67 +20,31 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useAuth } from '@/context/AuthContext';
+
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
 
-// State for guidelines of a single agent
-type GuidelineState = {
-    checked: Record<number, boolean>;
-    custom: string[];
-};
-
-const getInitialGuidelineState = (agents: Agent[]): Record<string, GuidelineState> => {
-    const initialState: Record<string, GuidelineState> = {};
-    orderedDiagrams.forEach(key => {
-        const agent = agents.find(a => a.id === diagramConfig[key].agentId);
-        const defaultGuidelines = (agent?.prompt as AgentPrompt)?.guidelines;
-        const checked: Record<number, boolean> = {};
-        if (defaultGuidelines) {
-            defaultGuidelines.forEach((g, index) => {
-                checked[index] = g.isDefault;
-            });
-        }
-        initialState[key] = { checked, custom: [] };
-    });
-    return initialState;
-};
-
-const getSelectedGuidelines = (agent: Agent | undefined, guidelineState: GuidelineState | undefined): string[] => {
-    if (!agent || !guidelineState) return [];
-    
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (guidelineState.checked[index]) {
-            guidelines.push(g.text);
-        }
-    });
-    guidelines.push(...guidelineState.custom);
-    return guidelines;
-};
-
 interface GenerateItemButtonProps {
     onClick: () => void;
     title: string;
-    isGenerating: boolean;
-    generatingDiagram: string | null;
     itemKey: string;
 }
 
-function GenerateItemButton({ onClick, title, isGenerating, generatingDiagram, itemKey }: GenerateItemButtonProps) {
+function GenerateItemButton({ onClick, title, itemKey }: GenerateItemButtonProps) {
     const { agents } = useAgents();
+    const { isAnythingGenerating, lastGenerated } = useBuilderStore();
     const agentId = diagramConfig[itemKey as keyof typeof diagramConfig]?.agentId;
     const agent = agents.find(a => a.id === agentId);
-    const isGeneratingThis = isGenerating && generatingDiagram === itemKey;
+    const isGeneratingThis = isAnythingGenerating && lastGenerated === itemKey;
 
     return (
         <Button
             type="button"
             onClick={onClick}
-            disabled={isGeneratingThis || !agent?.isEnabled}
+            disabled={isAnythingGenerating || !agent?.isEnabled}
             className="font-headline"
             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
         >
@@ -90,85 +54,56 @@ function GenerateItemButton({ onClick, title, isGenerating, generatingDiagram, i
     );
 }
 
-interface DiagramGenerationToolsProps {
-    isDisabled: boolean;
-    diagramsState: Partial<Record<DiagramType, { plantUmlCode: string; imageUrl: string }>>;
-    sectionsState: Partial<Record<SectionName, string>>;
-    externalContext?: { fileName: string; content: string };
-    isGenerating: boolean;
-    generatingDiagram: string | null;
-    contextSelections: Record<string, Record<string, boolean>>;
-    onContextToggle: (parentKey: string, contextKey: string) => void;
-    onExternalContextUploaded: (fileName: string, content: string) => void;
-    onExternalContextRemoved: () => void;
-    onSubmit: (itemToGenerate: DiagramType, guidelines: string[]) => void;
-}
+export const DiagramGenerationTools = () => {
+    const auth = useAuth();
+    const { agents, isLoaded: agentsLoaded } = useAgents();
+    const { toast } = useToast();
 
-
-export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
-    const { 
-        isDisabled, 
-        diagramsState, 
+    const {
+        isAnythingGenerating,
+        diagramsState,
         sectionsState,
         externalContext,
-        isGenerating, 
-        generatingDiagram, 
-        contextSelections, 
+        contextSelections,
+        guidelineState,
+        customGuidelineInput,
         onContextToggle,
         onExternalContextUploaded,
         onExternalContextRemoved,
         onSubmit,
-    } = props;
-    const { agents, isLoaded: agentsLoaded } = useAgents();
-    const [guidelineState, setGuidelineState] = React.useState<Record<string, GuidelineState>>({});
-    const [customGuidelineInput, setCustomGuidelineInput] = React.useState<Record<string, string>>({});
-    const [pdfFile, setPdfFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const { toast } = useToast();
-
-    React.useEffect(() => {
-        if (agentsLoaded && agents && agents.length > 0) {
-            setGuidelineState(getInitialGuidelineState(agents));
-        }
-    }, [agentsLoaded, agents]);
-
-    const handleGuidelineToggle = (itemKey: string, guidelineIndex: number, isChecked: boolean) => {
-        setGuidelineState(prev => ({
-            ...prev,
-            [itemKey]: {
-                ...prev[itemKey],
-                checked: {
-                    ...prev[itemKey].checked,
-                    [guidelineIndex]: isChecked
-                }
-            }
-        }));
-    };
-
-    const handleAddCustomGuideline = (itemKey: string) => {
-        const newGuideline = customGuidelineInput[itemKey]?.trim();
-        if (newGuideline) {
-            setGuidelineState(prev => ({
-                ...prev,
-                [itemKey]: {
-                    ...prev[itemKey],
-                    custom: [...prev[itemKey].custom, newGuideline]
-                }
-            }));
-            setCustomGuidelineInput(prev => ({ ...prev, [itemKey]: '' }));
-        }
-    };
-
-    const handleRemoveCustomGuideline = (itemKey: string, indexToRemove: number) => {
-        setGuidelineState(prev => ({
-            ...prev,
-            [itemKey]: {
-                ...prev[itemKey],
-                custom: prev[itemKey].custom.filter((_, index) => index !== indexToRemove)
-            }
-        }));
-    };
-
+        handleGenerateDiagram,
+        handleGuidelineToggle,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
+        setPdfFile,
+        pdfFile,
+        handlePdfUpload,
+        isUploading,
+    } = useBuilderStore(state => ({
+        isAnythingGenerating: state.isAnythingGenerating,
+        diagramsState: state.diagrams,
+        sectionsState: state.sections,
+        externalContext: state.externalContext,
+        contextSelections: state.contextSelections,
+        guidelineState: state.guidelineState,
+        customGuidelineInput: state.customGuidelineInput,
+        onContextToggle: state.toggleContextSelection,
+        onExternalContextUploaded: state.setExternalContext,
+        onExternalContextRemoved: state.removeExternalContext,
+        onSubmit: state.handleGenerateDiagram,
+        handleGenerateDiagram: state.handleGenerateDiagram,
+        handleGuidelineToggle: state.handleGuidelineToggle,
+        setCustomGuidelineInputForItem: state.setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem: state.handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem: state.handleRemoveCustomGuidelineForItem,
+        setPdfFile: state.setPdfFile,
+        pdfFile: state.pdfFile,
+        handlePdfUpload: state.handlePdfUpload,
+        isUploading: state.isUploading,
+    }));
+    const isDisabled = isAnythingGenerating;
+    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -179,33 +114,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
             }
         }
     };
-
-    const handleFileUpload = async () => {
-        if (!pdfFile) return;
-        setIsUploading(true);
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        try {
-            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
-            if (!response.ok) {
-                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
-                throw new Error(errorResult.message);
-            }
-            const result = await response.json();
-            onExternalContextUploaded(pdfFile.name, result.markdown);
-            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
-        } catch (error: any) {
-            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
-        } finally {
-            setIsUploading(false);
-        }
-    };
-
-    const handleRemoveExternalContext = () => {
-      onExternalContextRemoved();
-      setPdfFile(null);
-    }
-
+    
     if (!agentsLoaded) {
         return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
@@ -225,8 +134,6 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                         const promptConfig = agent.prompt as AgentPrompt;
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
-                        
-                        const selectedGuidelines = getSelectedGuidelines(agent, guidelineState[key]);
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -274,7 +181,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                 {guidelineState[key]?.custom.map((custom, index) => (
                                                     <div key={index} className="flex items-center gap-2 text-sm">
                                                         <span>- {custom}</span>
-                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuideline(key, index)}>
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>
                                                             <Trash2 className="h-3 w-3 text-destructive" />
                                                         </Button>
                                                     </div>
@@ -283,10 +190,10 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                                     <Input
                                                         placeholder="Add a custom guideline..."
                                                         value={customGuidelineInput[key] || ''}
-                                                        onChange={(e) => setCustomGuidelineInput(prev => ({ ...prev, [key]: e.target.value }))}
-                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline(key))}
+                                                        onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
                                                     />
-                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuideline(key)}>
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </div>
@@ -348,11 +255,9 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                     </Tabs>
                                     <div className="pt-2">
                                         <GenerateItemButton
-                                            onClick={() => onSubmit(key as DiagramType, selectedGuidelines)}
+                                            onClick={() => handleGenerateDiagram(key as DiagramType, auth)}
                                             itemKey={key}
                                             title={title}
-                                            isGenerating={isGenerating}
-                                            generatingDiagram={generatingDiagram}
                                         />
                                     </div>
                                 </AccordionContent>
@@ -384,7 +289,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                                         </ScrollArea>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRemoveExternalContext} title="Remove File">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onExternalContextRemoved} title="Remove File">
                                     <X className="h-4 w-4" />
                                 </Button>
                            </div>
@@ -392,7 +297,7 @@ export const DiagramGenerationTools = (props: DiagramGenerationToolsProps) => {
                     ) : (
                         <div className="space-y-2">
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                            <Button type="button" size="sm" onClick={handleFileUpload} disabled={!pdfFile || isUploading} className="w-full">
+                            <Button type="button" size="sm" onClick={handlePdfUpload} disabled={!pdfFile || isUploading} className="w-full">
                                 {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
                                 Upload & Process PDF
                             </Button>

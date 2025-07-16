@@ -61,6 +61,8 @@ export interface BuilderState {
   guidelineState: Record<string, GuidelineState>;
   customGuidelineInput: Record<string, string>;
   activePresentationId: string | null;
+  pdfFile: File | null;
+  isUploading: boolean;
 }
 
 interface BuilderActions {
@@ -74,15 +76,15 @@ interface BuilderActions {
     // Report & Diagram Actions
     handleGenerateReportSection: (section: SectionName, auth: ReturnType<typeof useAuth>) => void;
     handleSectionUpdate: (key: SectionName, value: string) => void;
-    handleEvaluateReport: (formData: FormData) => void;
-    handleGenerateDiagram: (diagramType: DiagramType, guidelines: string[], auth: ReturnType<typeof useAuth>) => void;
+    handleEvaluateReport: (formData: FormData, auth: ReturnType<typeof useAuth>) => void;
+    handleGenerateDiagram: (diagramType: DiagramType, auth: ReturnType<typeof useAuth>) => void;
     handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
-    handleDiagramUpdate: (diagramType: DiagramType) => void;
+    handleDiagramUpdate: (diagramType: DiagramType, auth: ReturnType<typeof useAuth>) => void;
     // Code Generator Actions
     setCodePrompt: (prompt: string) => void;
     handleGenerateCode: (auth: ReturnType<typeof useAuth>) => void;
     // Presentation Actions
-    handleGeneratePresentation: (guidelines: string[], auth: ReturnType<typeof useAuth>) => void;
+    handleGeneratePresentation: (auth: ReturnType<typeof useAuth>) => void;
     setActivePresentationId: (id: string | null) => void;
     // Context Actions
     toggleContextSelection: (parentKey: string, contextKey: string) => void;
@@ -98,28 +100,23 @@ interface BuilderActions {
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
+    setPdfFile: (file: File | null) => void;
+    handlePdfUpload: () => void;
 }
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
     const initialState: Record<string, GuidelineState> = {};
     AGENTS.forEach(agent => {
-        if (typeof agent.prompt === 'object' && agent.prompt.guidelines) {
+        const prompt = agent.prompt as AgentPrompt | undefined;
+        if (prompt?.guidelines) {
             const checked: Record<number, boolean> = {};
-            agent.prompt.guidelines.forEach((g, index) => {
+            prompt.guidelines.forEach((g, index) => {
                 checked[index] = g.isDefault;
             });
-            initialState[agent.id.replace('generate-', '')] = { checked, custom: [] };
+            const key = agent.id.replace('generate-', '');
+            initialState[key] = { checked, custom: [] };
         }
     });
-    const presentationAgent = AGENTS.find(a => a.id === presentationConfig.presentation.agentId);
-    const prompt = presentationAgent?.prompt as AgentPrompt | undefined;
-    const checked: Record<number, boolean> = {};
-    if (prompt?.guidelines) {
-        prompt.guidelines.forEach((g, i) => {
-            checked[i] = g.isDefault;
-        });
-    }
-    initialState['presentation'] = { checked, custom: [] };
     return initialState;
 };
 
@@ -152,6 +149,39 @@ const initialState: BuilderState = {
   guidelineState: getInitialGuidelineStates(),
   customGuidelineInput: {},
   activePresentationId: null,
+  pdfFile: null,
+  isUploading: false,
+};
+
+// Helper function to extract selected guidelines for a specific item
+const getSelectedGuidelines = (itemKey: string, state: BuilderState): string[] => {
+    const agent = AGENTS.find(a => a.id.includes(itemKey));
+    const currentGuidelineState = state.guidelineState[itemKey];
+    if (!agent || !currentGuidelineState) return [];
+
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
+        return currentGuidelineState.custom || [];
+    }
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
+    });
+    guidelines.push(...currentGuidelineState.custom);
+    return guidelines;
+};
+
+// Helper function to generate instruction text from control state
+const generateInstructionText = (controls: ControlState): string => {
+    let instructions = [];
+    let formalityDesc = "balanced";
+    if (controls.formality < 33) formalityDesc = "informal";
+    else if (controls.formality > 66) formalityDesc = "very formal";
+    instructions.push(`- The writing style should be ${formalityDesc}.`);
+    if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
+    if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
+    return instructions.join('\n');
 };
 
 
@@ -214,6 +244,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           } catch (e: any) {
               set({ isGeneratingProposal: false, error: e.message || 'An unexpected error occurred.' });
               toast({ title: 'Generation Failed', description: e.message, variant: 'destructive' });
+          } finally {
+              set({ isGeneratingProposal: false });
           }
       },
       handleProposalUpdate: (path, value) => {
@@ -227,12 +259,18 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           set({ proposal: newProposal, proposalJson: JSON.stringify(newProposal, null, 2) });
       },
       
-      // --- UNIVERSAL GENERATION HANDLER ---
-      _handleGenerateRequest: async (endpoint, body, itemKey, auth) => {
+      // --- UNIVERSAL GENERATION HANDLER (internal) ---
+      _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, auth: ReturnType<typeof useAuth>, options: { creditCost?: number } = {}) => {
           const { user, fetchUser } = auth;
+          const { creditCost = 1 } = options;
+
           set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
           try {
               if (!user) throw new Error("User not authenticated.");
+              if (creditCost > 0) {
+                 await deductCredit(user.id, creditCost);
+              }
+
               const response = await fetch(endpoint, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
@@ -240,24 +278,30 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               });
               const result = await response.json();
               if (!response.ok) throw new Error(result.message || 'API request failed');
-              if (itemKey !== 'evaluate') await deductCredit(user.id, 1);
               
+              // Handle state updates based on itemKey
               if (endpoint.includes('diagrams')) {
                   set((state) => ({ diagrams: { ...state.diagrams, [itemKey as DiagramType]: result }}));
               } else if (itemKey === 'evaluate') {
                   set({ evaluation: result });
-              } else if(endpoint.includes('presentation')) {
+              } else if(itemKey === 'presentation') {
                   const newEntry: PresentationHistoryEntry = {
                       id: new Date().toISOString(),
                       name: `Presentation - ${new Date().toLocaleTimeString()}`,
                       slides: result.slides,
                   };
                   set(state => ({ presentation: { history: [newEntry, ...(state.presentation?.history || [])] }, activePresentationId: newEntry.id }));
+              } else if (itemKey === 'code') {
+                  set({ codeGenerator: { ...get().codeGenerator, ...result } });
               } else {
                   set(state => ({ sections: { ...state.sections, [itemKey as SectionName]: Object.values(result)[0] as string }}));
               }
+              
+              if (creditCost > 0) {
+                  await fetchUser();
+              }
               toast({ title: "Generation Successful!", description: `Successfully generated ${itemKey}.` });
-              await fetchUser();
+
           } catch (e: any) {
               set({ error: e.message || 'An unexpected error occurred.' });
               toast({ title: "Generation Failed", description: e.message, variant: 'destructive' });
@@ -268,67 +312,75 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       // --- REPORT, DIAGRAM, PRESENTATION ACTIONS ---
       handleGenerateReportSection: (section, auth) => {
-          const { proposal, sections, diagrams, contextSelections, controlState, externalContext, _handleGenerateRequest, _getSelectedGuidelines, _generateInstructionText } = get();
+          const state = get();
           const body = {
-              proposal: proposal,
+              proposal: state.proposal,
               sectionToGenerate: section,
-              otherSections: Object.fromEntries(Object.entries(sections || {}).filter(([key, value]) => contextSelections[section]?.[key] && value)),
-              otherDiagrams: Object.fromEntries(Object.entries(diagrams || {}).filter(([key, value]) => contextSelections[section]?.[key] && value).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines: _getSelectedGuidelines(section),
-              instructionText: _generateInstructionText(controlState[section]),
-              externalContextContent: contextSelections[section]?.['external'] ? externalContext?.content : undefined,
+              otherSections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key, value]) => state.contextSelections[section]?.[key] && value)),
+              otherDiagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key, value]) => state.contextSelections[section]?.[key] && value).map(([key, value]) => [key, value.plantUmlCode])),
+              guidelines: getSelectedGuidelines(section, state),
+              instructionText: generateInstructionText(state.controlState[section]),
+              externalContextContent: state.contextSelections[section]?.['external'] ? state.externalContext?.content : undefined,
           };
-          _handleGenerateRequest('/api/generate-report', body, section, auth);
+          state._handleGenerateRequest('/api/generate-report', body, section, auth);
       },
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
-      handleEvaluateReport: (formData) => {
-          // This logic might need slight adaptation if auth is needed
-          const { proposal, sections, diagrams, _handleGenerateRequest } = get();
-          const criteria = formData.getAll('acceptanceCriteria').map(String).filter(c => c.trim() !== '').join('\n');
+      
+      handleEvaluateReport: (formData, auth) => {
+          const state = get();
+          const criteria = formData.get('acceptanceCriteria')?.toString() || '';
+          if (!criteria.trim()) {
+              toast({ title: "Evaluation Skipped", description: "Please provide acceptance criteria.", variant: 'destructive' });
+              return;
+          }
           const body = {
-              proposal,
-              reportSections: sections,
-              diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-              acceptanceCriteria: criteria.split('\n'),
+              proposal: state.proposal,
+              reportSections: state.sections,
+              diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+              acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
           };
-          _handleGenerateRequest('/api/generate-report', body, 'evaluate', useAuth());
+          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
       },
-      handleGenerateDiagram: (diagramType, guidelines, auth) => {
-          const { proposal, sections, diagrams, contextSelections, externalContext, _handleGenerateRequest } = get();
+
+      handleGenerateDiagram: (diagramType, auth) => {
+          const state = get();
           const body = {
-              proposal: proposal,
+              proposal: state.proposal,
               diagramToGenerate: diagramType,
-              otherSections: Object.fromEntries(Object.entries(sections || {}).filter(([key, value]) => contextSelections[diagramType]?.[`section_${key}`] && value)),
-              otherDiagrams: Object.fromEntries(Object.entries(diagrams || {}).filter(([key, value]) => contextSelections[diagramType]?.[`diagram_${key}`] && value).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines,
-              externalContextContent: contextSelections[diagramType]?.['external'] ? externalContext?.content : undefined,
+              otherSections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key, value]) => state.contextSelections[diagramType]?.[`section_${key}`] && value)),
+              otherDiagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key, value]) => state.contextSelections[diagramType]?.[`diagram_${key}`] && value).map(([key, value]) => [key, value.plantUmlCode])),
+              guidelines: getSelectedGuidelines(diagramType, state),
+              externalContextContent: state.contextSelections[diagramType]?.['external'] ? state.externalContext?.content : undefined,
           };
-          _handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
+          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
       },
+
       handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
-      handleDiagramUpdate: (diagramType) => {
-          const { diagrams, _handleGenerateRequest } = get();
+      
+      handleDiagramUpdate: (diagramType, auth) => {
+          const { diagrams } = get();
           const code = diagrams?.[diagramType]?.plantUmlCode;
           if (!code) return;
-          _handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, useAuth());
+          get()._handleGenerateRequest('/api/generate-diagrams', { intent: 'update_diagram', plantUmlCode: code }, diagramType, auth, {creditCost: 0});
       },
-      handleGeneratePresentation: (guidelines, auth) => {
-          const { proposal, sections, diagrams, contextSelections, _handleGenerateRequest } = get();
+
+      handleGeneratePresentation: (auth) => {
+          const state = get();
           const body = {
-              proposal,
-              sections: Object.fromEntries(Object.entries(sections || {}).filter(([key]) => contextSelections['presentation']?.[`section_${key}`])),
-              diagrams: Object.fromEntries(Object.entries(diagrams || {}).filter(([key]) => contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
-              guidelines
+              proposal: state.proposal,
+              sections: Object.fromEntries(Object.entries(state.sections || {}).filter(([key]) => state.contextSelections['presentation']?.[`section_${key}`])),
+              diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
+              guidelines: getSelectedGuidelines('presentation', state),
           };
-          _handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
+          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
       handleGenerateCode: async (auth) => {
-          const { codeGenerator, _handleGenerateRequest } = get();
-          _handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
+          const { codeGenerator } = get();
+          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
       },
       
       // --- CONTEXT ACTIONS ---
@@ -339,7 +391,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           return { contextSelections: newSelections };
       }),
       setExternalContext: (fileName, content) => set({ externalContext: { fileName, content } }),
-      removeExternalContext: () => set({ externalContext: undefined }),
+      removeExternalContext: () => set({ externalContext: undefined, pdfFile: null }),
       
       // --- UI STATE ACTIONS ---
       handleTemplateChange: (key) => set({ selectedTemplate: key }),
@@ -365,7 +417,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const { guidelineState, customGuidelineInput } = get();
           const newGuideline = customGuidelineInput[itemKey]?.trim();
           if (newGuideline) {
-              const newGuidelineState = { ...guidelineState[itemKey], custom: [...guidelineState[itemKey].custom, newGuideline]};
+              const newGuidelineState = { ...guidelineState[itemKey], custom: [...(guidelineState[itemKey]?.custom || []), newGuideline]};
               set(state => ({
                   guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState },
                   customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: '' }
@@ -377,33 +429,30 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const newGuidelineState = { ...state.guidelineState[itemKey], custom: newCustom };
           return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
       }),
-      
-      // --- Internal Helper Functions (not exposed on final hook but used above) ---
-      _getSelectedGuidelines: (itemKey) => {
-          const { guidelineState } = get();
-          const agent = AGENTS.find(a => a.id.includes(itemKey));
-          const currentGuidelineState = guidelineState[itemKey];
-          if (!agent || !currentGuidelineState) return [];
-          const promptConfig = agent.prompt as AgentPrompt;
-          if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
-          const guidelines: string[] = [];
-          promptConfig.guidelines.forEach((g, index) => {
-              if (currentGuidelineState.checked[index]) guidelines.push(g.text);
-          });
-          guidelines.push(...currentGuidelineState.custom);
-          return guidelines;
-      },
-      _generateInstructionText: (controls) => {
-          let instructions = [];
-          let formalityDesc = "balanced";
-          if (controls.formality < 33) formalityDesc = "informal";
-          else if (controls.formality > 66) formalityDesc = "very formal";
-          instructions.push(`- The writing style should be ${formalityDesc}.`);
-          if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
-          if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-          return instructions.join('\n');
-      },
+      setPdfFile: (file) => set({ pdfFile: file }),
+      handlePdfUpload: async () => {
+        const { pdfFile } = get();
+        if (!pdfFile) return;
 
+        set({ isUploading: true });
+        const formData = new FormData();
+        formData.append('file', pdfFile);
+
+        try {
+            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
+            if (!response.ok) {
+                const errorResult = await response.json().catch(() => ({ message: 'An unknown error occurred' }));
+                throw new Error(errorResult.message);
+            }
+            const result = await response.json();
+            set({ externalContext: { fileName: pdfFile.name, content: result.markdown } });
+            toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
+        } catch (error: any) {
+            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+        } finally {
+            set({ isUploading: false });
+        }
+    },
     }),
     {
       name: 'arkan-builder-state',
@@ -415,6 +464,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: state.diagrams,
         presentation: state.presentation,
         codeGenerator: state.codeGenerator,
+        projectIdea: state.projectIdea,
       }),
       onRehydrateStorage: () => (state, error) => {
           if (state) {
