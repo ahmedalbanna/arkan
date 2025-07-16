@@ -337,7 +337,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               instructionText: generateInstructionText(state.controlState[section]),
               externalContextContent: state.contextSelections[section]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-report', body, section, auth);
+          get()._handleGenerateRequest('/api/generate-report', body, section, auth);
       },
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
       
@@ -354,7 +354,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
               acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
           };
-          state._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
+          get()._handleGenerateRequest('/api/evaluate-report', body, 'evaluate', auth, {creditCost: 0}); // Assuming evaluation is free
       },
 
       handleGenerateDiagram: (diagramType, ...auth) => {
@@ -367,7 +367,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               guidelines: getSelectedGuidelines(diagramType, state),
               externalContextContent: state.contextSelections[diagramType]?.['external'] ? state.externalContext?.content : undefined,
           };
-          state._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
+          get()._handleGenerateRequest('/api/generate-diagrams', body, diagramType, auth);
       },
 
       handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
@@ -387,7 +387,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               diagrams: Object.fromEntries(Object.entries(state.diagrams || {}).filter(([key]) => state.contextSelections['presentation']?.[`diagram_${key}`]).map(([key, value]) => [key, value.plantUmlCode])),
               guidelines: getSelectedGuidelines('presentation', state),
           };
-          state._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
+          get()._handleGenerateRequest('/api/generate-presentation', body, 'presentation', auth);
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       
@@ -424,8 +424,20 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
       handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section], [field]: value } } })),
       handleGuidelineToggle: (itemKey, guidelineIndex, isChecked) => set(state => {
-          const newGuidelineState = { ...state.guidelineState[itemKey], checked: { ...state.guidelineState[itemKey].checked, [guidelineIndex]: isChecked }};
-          return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
+        const itemGuidelineState = state.guidelineState[itemKey] || { checked: {}, custom: [] };
+        const newGuidelineState = {
+            ...itemGuidelineState,
+            checked: {
+                ...itemGuidelineState.checked,
+                [guidelineIndex]: isChecked,
+            },
+        };
+        return {
+            guidelineState: {
+                ...state.guidelineState,
+                [itemKey]: newGuidelineState,
+            },
+        };
       }),
       setCustomGuidelineInputForItem: (itemKey, value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } })),
       handleAddCustomGuidelineForItem: (itemKey) => {
