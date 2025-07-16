@@ -1,9 +1,8 @@
 import UserManagementConsole from '@/components/UserManagementConsole';
 import { Users } from 'lucide-react';
-import { getAllUsers } from '@/lib/db/queries';
 
 export default async function ManageUsersPage() {
-  const users = await getAllUsers();
+  // Initial data fetching is now handled by the client component with React Query
   return (
     <div className="container mx-auto max-w-7xl px-4 py-12">
       <div className="text-center mb-12">
@@ -15,7 +14,7 @@ export default async function ManageUsersPage() {
           Oversee, edit, and manage all users on the platform.
         </p>
       </div>
-      <UserManagementConsole users={users} />
+      <UserManagementConsole />
     </div>
   );
 }
