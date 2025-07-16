@@ -16,7 +16,7 @@ async function createDocxParagraphs(markdown: string) {
     if (!markdown) return [];
 
     const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
-    const docxObjects: (typeof Paragraph | typeof Table)[] = [];
+    const docxObjects: (InstanceType<typeof Paragraph> | InstanceType<typeof Table>)[] = [];
 
     const transformInlines = (nodes: PhrasingContent[], options: IRunOptions = {}): InstanceType<typeof TextRun>[] => {
         const runs: InstanceType<typeof TextRun>[] = [];
@@ -280,7 +280,7 @@ export async function exportReportAsDocx(
     });
     const resolvedReportBody = (await Promise.all(reportBodyPromises)).flat();
     
-    const reportBody: any[] = [
+    const reportBody: (InstanceType<typeof Paragraph> | InstanceType<typeof TableOfContents>)[] = [
         new TableOfContents("Table of Contents", {
             hyperlink: true,
             headingStyleRange: "1-3",
