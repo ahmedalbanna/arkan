@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
+import { ScrollArea } from './ui/scroll-area';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];
@@ -75,11 +76,13 @@ export default function PresentationViewer({ slides }: PresentationViewerProps) 
             ))}
           </ul>
         </div>
-        <div className="bg-muted p-4 rounded-lg prose prose-sm max-w-none">
-          <h3 className="font-semibold mb-2">Speaker Notes</h3>
-          <div className="text-sm text-muted-foreground">
-            <ReactMarkdown components={markdownComponents}>{slide.speakerNotes}</ReactMarkdown>
-          </div>
+        <div className="bg-muted p-4 rounded-lg flex flex-col min-h-0">
+            <h3 className="font-semibold mb-2 shrink-0">Speaker Notes</h3>
+            <ScrollArea className="flex-grow">
+                 <div className="prose prose-sm max-w-none text-muted-foreground pr-4">
+                    <ReactMarkdown components={markdownComponents}>{slide.speakerNotes}</ReactMarkdown>
+                </div>
+            </ScrollArea>
         </div>
       </CardContent>
       <div className="flex justify-between items-center p-4 border-t">
