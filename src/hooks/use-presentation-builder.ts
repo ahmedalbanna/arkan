@@ -252,7 +252,7 @@ export function usePresentationBuilder() {
         presentations,
         activePresentation,
         setActivePresentationId: (id: string | null) => dispatch({ type: 'SET_ACTIVE_PRESENTATION', payload: id }),
-        isGenerating: isGenerating || builderState.lastGenerated === 'presentation',
+        isGenerating: isGenerating || builderState.isAnythingGenerating,
         proposal: builderState.proposal,
         sections: builderState.sections,
         diagrams: builderState.diagrams,
