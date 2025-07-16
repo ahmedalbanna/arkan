@@ -12,33 +12,10 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function ReportGenerator() {
     const auth = useAuth();
-    const {
-        proposal,
-        isAnythingGenerating,
-        lastGenerated,
-        sections,
-        diagrams,
-        evaluation,
-        externalContext,
-        contextSelections,
-        controlState,
-        guidelineState,
-        customGuidelineInput,
-        handleSectionUpdate,
-        handleGenerateReportSection,
-        handleEvaluateReport,
-        toggleContextSelection,
-        setExternalContext,
-        removeExternalContext,
-        handleControlChange,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-    } = useBuilderStore();
+    const store = useBuilderStore();
 
 
-  if (!proposal) {
+  if (!store.proposal) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
@@ -50,51 +27,54 @@ export default function ReportGenerator() {
     )
   }
 
-  const isToolsDisabled = !proposal || isAnythingGenerating;
+  const isToolsDisabled = !store.proposal || store.isAnythingGenerating;
 
   return (
-    <form action={(formData) => handleEvaluateReport(formData)}>
-       <input type="hidden" name="proposalJson" value={JSON.stringify(proposal)} />
+    <form onSubmit={(e) => {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+        store.handleEvaluateReport(formData);
+    }}>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
         {/* Left Column -> Now the main results view */}
         <div className="lg:col-span-8 overflow-y-auto pr-2">
           <ReportResults
-            sections={sections}
-            generatingItem={isAnythingGenerating ? lastGenerated : null}
-            onSectionUpdate={handleSectionUpdate}
+            sections={store.sections}
+            generatingItem={store.isAnythingGenerating ? store.lastGenerated : null}
+            onSectionUpdate={store.handleSectionUpdate}
           />
         </div>
 
         {/* Right Column -> All tools */}
         <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
           <ReportActions
-            isGenerating={isAnythingGenerating}
+            isGenerating={store.isAnythingGenerating}
           />
           <GenerationTools
             isDisabled={isToolsDisabled}
-            isPending={isAnythingGenerating}
-            generatingItem={lastGenerated}
-            sections={sections}
-            diagrams={diagrams}
-            externalContext={externalContext}
-            contextSelections={contextSelections}
-            onContextToggle={toggleContextSelection}
-            onExternalContextUploaded={setExternalContext}
-            onExternalContextRemoved={removeExternalContext}
-            onGenerate={(section) => handleGenerateReportSection(section, auth)}
-            controlState={controlState}
-            onControlChange={handleControlChange}
-            guidelineState={guidelineState}
-            onGuidelineToggle={handleGuidelineToggle}
-            customGuidelineInput={customGuidelineInput}
-            onCustomGuidelineChange={setCustomGuidelineInputForItem}
-            onAddCustomGuideline={handleAddCustomGuidelineForItem}
-            onRemoveCustomGuideline={handleRemoveCustomGuidelineForItem}
+            isPending={store.isAnythingGenerating}
+            generatingItem={store.lastGenerated}
+            sections={store.sections}
+            diagrams={store.diagrams}
+            externalContext={store.externalContext}
+            contextSelections={store.contextSelections}
+            controlState={store.controlState}
+            guidelineState={store.guidelineState}
+            customGuidelineInput={store.customGuidelineInput}
+            onContextToggle={store.toggleContextSelection}
+            onExternalContextUploaded={store.setExternalContext}
+            onExternalContextRemoved={store.removeExternalContext}
+            onGenerate={(section) => store.handleGenerateReportSection(section, auth)}
+            onControlChange={store.handleControlChange}
+            onGuidelineToggle={store.handleGuidelineToggle}
+            onCustomGuidelineChange={store.setCustomGuidelineInputForItem}
+            onAddCustomGuideline={store.handleAddCustomGuidelineForItem}
+            onRemoveCustomGuideline={store.handleRemoveCustomGuidelineForItem}
           />
            <EvaluationTools
             isDisabled={isToolsDisabled}
-            isEvaluating={isAnythingGenerating && lastGenerated === 'evaluate'}
-            evaluationResult={evaluation}
+            isEvaluating={store.isAnythingGenerating && store.lastGenerated === 'evaluate'}
+            evaluationResult={store.evaluation}
           />
         </div>
       </div>

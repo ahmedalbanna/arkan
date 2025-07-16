@@ -1,36 +1,42 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { Loader2, Sparkles, Presentation, AlertCircle, History } from 'lucide-react';
+import { Loader2, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
-import { useBuilderState } from '@/context/BuilderStateContext';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { lazy } from 'react';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
 
 export default function PresentationGenerator() {
+    const auth = useAuth();
     const {
-        state,
+        proposal,
+        sections,
+        diagrams,
+        isAnythingGenerating,
+        presentation,
+        activePresentationId,
+        contextSelections,
+        guidelineState,
+        customGuidelineInput,
         handleGeneratePresentation,
         setActivePresentationId,
         handleGuidelineToggle,
-        setCustomGuidelineInput,
-        handleAddCustomGuideline,
-        handleRemoveCustomGuideline,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
-    } = useBuilderState();
+    } = useBuilderStore();
 
-    const { proposal, sections, diagrams, isAnythingGenerating, presentation, activePresentationId, contextSelections, guidelineState, customGuidelineInput } = state;
-    
     if (!proposal) {
         return (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
@@ -118,18 +124,18 @@ export default function PresentationGenerator() {
                 <PresentationGenerationTools
                     isDisabled={!proposal || isAnythingGenerating}
                     isGenerating={isAnythingGenerating}
-                    onGenerate={handleGeneratePresentation}
+                    onGenerate={(guidelines) => handleGeneratePresentation(guidelines, auth)}
                     sections={sections || {}}
                     diagrams={diagrams || {}}
-                    contextSelections={contextSelections}
+                    contextSelections={contextSelections || {}}
                     onContextToggle={toggleContextSelection}
                     presentations={presentations}
                     guidelineState={guidelineState.presentation}
                     onGuidelineToggle={(index, checked) => handleGuidelineToggle('presentation', index, checked)}
                     customGuidelineInput={customGuidelineInput['presentation'] || ''}
-                    onCustomGuidelineChange={(value) => setCustomGuidelineInput('presentation', value)}
-                    onAddCustomGuideline={() => handleAddCustomGuideline('presentation')}
-                    onRemoveCustomGuideline={(index) => handleRemoveCustomGuideline('presentation', index)}
+                    onCustomGuidelineChange={(value) => setCustomGuidelineInputForItem('presentation', value)}
+                    onAddCustomGuideline={() => handleAddCustomGuidelineForItem('presentation')}
+                    onRemoveCustomGuideline={(index) => handleRemoveCustomGuidelineForItem('presentation', index)}
                 />
             </div>
         </div>
