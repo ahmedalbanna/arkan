@@ -11,7 +11,6 @@ import { useEffect } from 'react';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
-import { saveAs } from 'file-saver';
 import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
 import { useProposalState } from '@/context/ProposalStateContext';
 

@@ -10,11 +10,6 @@ import { Footer } from '@/components/layout/Footer';
 
 // Lazy load components
 import dynamic from 'next/dynamic';
-import { CodeStateProvider } from '@/context/CodeStateContext';
-import { ProposalStateProvider } from '@/context/ProposalStateContext';
-import { ReportStateProvider } from '@/context/ReportStateContext';
-import { DiagramStateProvider } from '@/context/DiagramStateContext';
-import { PresentationStateProvider } from '@/context/PresentationStateContext';
 
 
 const ProposalModeGenerator = dynamic(() => import('@/components/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { ssr: false });
@@ -22,6 +17,12 @@ const ReportGenerator = dynamic(() => import('@/components/ReportGenerator'), { 
 const DiagramGenerator = dynamic(() => import('@/components/DiagramGenerator'), { ssr: false });
 const CodeGenerator = dynamic(() => import('@/components/CodeGenerator'), { ssr: false });
 const PresentationGenerator = dynamic(() => import('@/components/PresentationGenerator'), { ssr: false });
+
+const LazyProposalStateProvider = dynamic(() => import('@/context/ProposalStateContext').then(mod => mod.ProposalStateProvider), { ssr: false });
+const LazyReportStateProvider = dynamic(() => import('@/context/ReportStateContext').then(mod => mod.ReportStateProvider), { ssr: false });
+const LazyDiagramStateProvider = dynamic(() => import('@/context/DiagramStateContext').then(mod => mod.DiagramStateProvider), { ssr: false });
+const LazyCodeStateProvider = dynamic(() => import('@/context/CodeStateContext').then(mod => mod.CodeStateProvider), { ssr: false });
+const LazyPresentationStateProvider = dynamic(() => import('@/context/PresentationStateContext').then(mod => mod.PresentationStateProvider), { ssr: false });
 
 
 function GeneratePageContent() {
@@ -55,29 +56,29 @@ function GeneratePageContent() {
           
           <div className="w-full flex-grow">
               <TabsContent value="proposal" className="h-full">
-                <ProposalStateProvider>
+                {activeTab === 'proposal' && <LazyProposalStateProvider>
                   <ProposalModeGenerator />
-                </ProposalStateProvider>
+                </LazyProposalStateProvider>}
               </TabsContent>
               <TabsContent value="report" className="h-full">
-                <ReportStateProvider>
+                {activeTab === 'report' && <LazyReportStateProvider>
                     {activeTab === 'report' && <ReportGenerator />}
-                </ReportStateProvider>
+                </LazyReportStateProvider>}
               </TabsContent>
               <TabsContent value="diagram" className="h-full">
-                <DiagramStateProvider>
+                {activeTab === 'diagram' && <LazyDiagramStateProvider>
                     {activeTab === 'diagram' && <DiagramGenerator />}
-                </DiagramStateProvider>
+                </LazyDiagramStateProvider>}
               </TabsContent>
               <TabsContent value="code" className="h-full">
-                 <CodeStateProvider>
+                 {activeTab === 'code' && <LazyCodeStateProvider>
                     <CodeGenerator />
-                 </CodeStateProvider>
+                 </LazyCodeStateProvider>}
               </TabsContent>
               <TabsContent value="presentation" className="h-full">
-                <PresentationStateProvider>
+                {activeTab === 'presentation' && <LazyPresentationStateProvider>
                     {activeTab === 'presentation' && <PresentationGenerator />}
-                </PresentationStateProvider>
+                </LazyPresentationStateProvider>}
               </TabsContent>
           </div>
         </Tabs>

@@ -7,13 +7,14 @@ import type { SectionName } from '@/ai/schemas';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown } from 'lucide-react';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
+import { Button } from '@/components/ui/button';
+import dynamic from 'next/dynamic';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 
 
@@ -24,6 +25,12 @@ interface EditableSectionProps {
     content: string;
     onUpdate: (key: SectionName, value: string) => void;
 }
+
+const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
+    ssr: false,
+    loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />, // Simple loading indicator
+});
+const DynamicRemarkGfm = dynamic(() => import('remark-gfm'), { ssr: false });
 
 export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -121,7 +128,9 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                     <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
-                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{aiSuggestion}</ReactMarkdown>
+                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                            {aiSuggestion}
+                        </DynamicReactMarkdown>
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
                         <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
@@ -150,7 +159,11 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             );
         }
         
-        return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>;
+        // Display raw content or a simple indicator while loading Markdown parser
+        return (
+            <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                {content}
+            </DynamicReactMarkdown>);
     }
 
     return (

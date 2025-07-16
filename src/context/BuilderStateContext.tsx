@@ -12,6 +12,10 @@ import { useAuth } from './AuthContext';
 import { deductCredit } from '@/services/credit-service';
 
 const DOCUMENTS_KEY = 'arkan-documents';
+const DIAGRAMS_KEY = 'arkan-diagrams';
+const PRESENTATION_KEY = 'arkan-presentation';
+const CODE_GENERATOR_KEY = 'arkan-code-generator';
+
 
 export interface CodeGenerationState {
   prompt: string;
@@ -21,22 +25,43 @@ export interface CodeGenerationState {
 }
 
 // --- STATE AND ACTION TYPES ---
+
+/**
+ * Represents the entire state of the document and diagram builder.
+ * This state is managed globally and represents all user-generated content.
+ */
 export interface BuilderState {
+  /** The full, parsed project proposal object. Null if not yet generated. */
   proposal: ProjectProposal | null;
+  /** The raw JSON string of the project proposal. Used for display and editing. */
   proposalJson: string;
+  /** A map of all generated report sections, keyed by section name. */
   sections: { [key in SectionName]?: string };
+  /** A map of all generated diagrams, keyed by diagram type. */
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string } };
+  /** The result of the last report evaluation. */
   evaluation?: EvaluateReportOutput;
+  /** The generated presentation slides. */
   presentation?: { slides: PresentationSlide[] };
+  /** The state for the standalone code generator. */
   codeGenerator: CodeGenerationState;
+  /** Content from an externally uploaded file (e.g., a PDF) to be used as context. */
   externalContext?: { fileName: string; content: string };
+  /** Tracks which context items (sections, diagrams) are selected for a given generation task. */
   contextSelections: Record<string, Record<string, boolean>>;
+  /** Flag indicating if the initial proposal generation is in progress. */
   isGeneratingProposal: boolean;
+  /** Flag indicating if any generation (section, diagram, etc.) is in progress. */
   isAnythingGenerating: boolean;
+  /** The key of the last item that was generated, used for UI feedback. */
   lastGenerated: SectionName | DiagramType | 'proposal' | 'presentation' | 'evaluate' | 'code' | null;
+  /** Stores any error message from the last failed generation. */
   error?: string;
 }
 
+/**
+ * Defines the actions that can be dispatched to update the builder state.
+ */
 export type BuilderAction =
   | { type: 'NEW_SESSION' }
   | { type: 'SET_STATE'; payload: Partial<BuilderState> }
@@ -70,16 +95,27 @@ const initialState: BuilderState = {
 };
 
 // --- REDUCER ---
+
+/**
+ * Manages state transitions for the builder context based on dispatched actions.
+ * @param state - The current builder state.
+ * @param action - The action to perform.
+ * @returns The new builder state.
+ */
 const builderReducer = (state: BuilderState, action: BuilderAction): BuilderState => {
   switch (action.type) {
     case 'NEW_SESSION':
+      // Resets the entire state to its initial value.
       return { ...initialState };
-    case 'SET_STATE':
+    case 'SET_STATE': {
+        // Sets the state from an external source, like loading a project file.
         const newState = { ...state, ...action.payload };
         if (action.payload.proposal) {
+            // Ensures the JSON string representation is in sync with the proposal object.
             newState.proposalJson = JSON.stringify(action.payload.proposal, null, 2);
         }
         return newState;
+    }
     case 'PROPOSAL_GENERATION_START':
       return { ...state, isGeneratingProposal: true, error: undefined };
     case 'PROPOSAL_GENERATION_SUCCESS':
@@ -89,7 +125,7 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         proposalJson: JSON.stringify(action.payload.proposal, null, 2),
         isGeneratingProposal: false,
         error: undefined,
-        // Reset downstream artifacts when a new proposal is made
+        // Reset downstream artifacts when a new proposal is made.
         sections: {},
         diagrams: {},
         evaluation: undefined,
@@ -97,14 +133,16 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
       };
     case 'PROPOSAL_GENERATION_ERROR':
       return { ...state, isGeneratingProposal: false, error: action.payload.error };
-    case 'UPDATE_PROPOSAL_JSON':
+    case 'UPDATE_PROPOSAL_JSON': {
+        // When the user edits the proposal JSON, try to parse it back into the object.
         let proposal = state.proposal;
         try {
             proposal = z.custom<ProjectProposal>().parse(JSON.parse(action.payload));
         } catch (e) {
-            // Ignore parse errors, will be handled on use
+            // Ignore parse errors, they will be handled on use.
         }
         return { ...state, proposal, proposalJson: action.payload };
+    }
     case 'UPDATE_SECTION':
         return { ...state, sections: { ...state.sections, [action.payload.key]: action.payload.value }};
     case 'UPDATE_DIAGRAM_CODE':
@@ -121,25 +159,30 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         };
     case 'GENERATION_START':
         return { ...state, isAnythingGenerating: true, error: undefined, lastGenerated: action.payload.item as any };
-    case 'GENERATION_SUCCESS':
+    case 'GENERATION_SUCCESS': {
         const { evaluation, ...restOfPayload } = action.payload;
+        // If the generation was for an evaluation, we don't want to clear the previous evaluation result.
         if (action.payload.lastGenerated !== 'evaluation') {
             return { ...state, ...restOfPayload, isAnythingGenerating: false, error: undefined, evaluation: undefined };
         }
         return { ...state, ...action.payload, isAnythingGenerating: false, error: undefined };
+    }
     case 'GENERATION_ERROR':
         return { ...state, isAnythingGenerating: false, error: action.payload.error, lastGenerated: action.payload.item as any };
-    case 'TOGGLE_CONTEXT_SELECTION':
+    case 'TOGGLE_CONTEXT_SELECTION': {
         const { parentKey, contextKey } = action.payload;
         const newSelections = JSON.parse(JSON.stringify(state.contextSelections));
         if (!newSelections[parentKey]) newSelections[parentKey] = {};
         newSelections[parentKey][contextKey] = !newSelections[parentKey][contextKey];
         return { ...state, contextSelections: newSelections };
+    }
     case 'SET_EXTERNAL_CONTEXT':
         return { ...state, externalContext: action.payload };
-    case 'REMOVE_EXTERNAL_CONTEXT':
+    case 'REMOVE_EXTERNAL_CONTEXT': {
+        // Creates a new state object without the externalContext property.
         const { externalContext, ...rest } = state;
         return { ...rest };
+    }
     case 'SET_PRESENTATION_SLIDES':
         return { ...state, presentation: { slides: action.payload.slides } };
     case 'SET_CODE_GENERATOR_STATE':
@@ -169,30 +212,53 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
     const { toast } = useToast();
     const { user, fetchUser } = useAuth();
     
-    // Load from local storage on initial mount
+    // Load persisted state from local storage on initial mount
     useEffect(() => {
         try {
-            const storedDocuments = localStorage.getItem(DOCUMENTS_KEY);
-            if (storedDocuments) {
-                dispatch({ type: 'SET_STATE', payload: { sections: JSON.parse(storedDocuments) } });
+            const storedSections = localStorage.getItem(DOCUMENTS_KEY);
+            const storedDiagrams = localStorage.getItem(DIAGRAMS_KEY);
+            const storedPresentation = localStorage.getItem(PRESENTATION_KEY);
+            const storedCode = localStorage.getItem(CODE_GENERATOR_KEY);
+
+            const payload: Partial<BuilderState> = {};
+            if (storedSections) payload.sections = JSON.parse(storedSections);
+            if (storedDiagrams) payload.diagrams = JSON.parse(storedDiagrams);
+            if (storedPresentation) payload.presentation = { slides: JSON.parse(storedPresentation) };
+            if (storedCode) payload.codeGenerator = JSON.parse(storedCode);
+
+            if (Object.keys(payload).length > 0) {
+                 dispatch({ type: 'SET_STATE', payload });
             }
         } catch (error) {
-            console.error('Failed to load documents from localStorage', error);
+            console.error('Failed to load state from localStorage', error);
         }
     }, []);
 
-    // Save to local storage whenever sections change
+    // Effect to save individual parts of the state to local storage when they change.
     useEffect(() => {
         try {
-            if (Object.keys(state.sections).length > 0) {
+            if (state.sections && Object.keys(state.sections).length > 0) {
                 localStorage.setItem(DOCUMENTS_KEY, JSON.stringify(state.sections));
             }
+            if (state.diagrams && Object.keys(state.diagrams).length > 0) {
+                localStorage.setItem(DIAGRAMS_KEY, JSON.stringify(state.diagrams));
+            }
+            if (state.presentation && state.presentation.slides.length > 0) {
+                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(state.presentation.slides));
+            }
+            if (state.codeGenerator && state.codeGenerator.html) {
+                 localStorage.setItem(CODE_GENERATOR_KEY, JSON.stringify(state.codeGenerator));
+            }
         } catch (error) {
-            console.error('Failed to save documents to localStorage', error);
+            console.error('Failed to save state to localStorage', error);
         }
-    }, [state.sections]);
+    }, [state.sections, state.diagrams, state.presentation, state.codeGenerator]);
 
-    // Proposal Generation
+    /**
+     * Initiates the AI generation of a new project proposal.
+     * @param projectIdea - The user's initial idea.
+     * @param prompt - The full prompt to send to the AI.
+     */
     const handleGenerateProposal = async (projectIdea: string, prompt: string) => {
         dispatch({ type: 'PROPOSAL_GENERATION_START' });
         try {
@@ -206,7 +272,11 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         }
     };
     
-    // Proposal field update
+    /**
+     * Updates a specific field within the nested project proposal object.
+     * @param path - A dot-separated string representing the path to the value (e.g., "timeline.phases.0.name").
+     * @param value - The new value to set.
+     */
     const handleProposalUpdate = (path: string, value: any) => {
         if (!state.proposal) return;
         const newProposal = JSON.parse(JSON.stringify(state.proposal));
@@ -221,28 +291,38 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         dispatch({ type: 'SET_STATE', payload: { proposal: newProposal }});
     };
 
-    // Session Management
+    /**
+     * Clears the entire application state and local storage to start fresh.
+     */
     const handleNewSession = () => {
         dispatch({ type: 'NEW_SESSION' });
-        // Also clear all related localStorage keys
-        localStorage.removeItem('arkan-presentation');
+        // Also clear all related localStorage keys.
+        localStorage.removeItem(DOCUMENTS_KEY);
+        localStorage.removeItem(DIAGRAMS_KEY);
+        localStorage.removeItem(PRESENTATION_KEY);
+        localStorage.removeItem(CODE_GENERATOR_KEY);
         localStorage.removeItem('arkan-agents-state');
         localStorage.removeItem('arkan-docx-styles');
         localStorage.removeItem('arkan-pptx-styles');
-        localStorage.removeItem('arkan-diagrams');
-        localStorage.removeItem(DOCUMENTS_KEY);
-        localStorage.removeItem('arkan-code-generator');
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
     };
 
+    /**
+     * Saves the entire current builder state to a downloadable JSON file.
+     */
     const handleSaveProjectFile = () => {
         if (!state.proposal) return;
+        // Exclude ephemeral UI state from the saved file.
         const { isGeneratingProposal, isAnythingGenerating, ...stateToSave } = state;
         const blob = new Blob([JSON.stringify(stateToSave, null, 2)], { type: 'application/json;charset=utf-8' });
         const fileName = `${state.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`;
         saveAs(blob, fileName);
     };
 
+    /**
+     * Loads a project state from a user-provided JSON file.
+     * @param file - The file uploaded by the user.
+     */
     const handleLoadProjectFile = (file: File | null) => {
         if (!file) return;
         if (file.type !== 'application/json') {
