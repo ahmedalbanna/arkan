@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +20,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import type { Presentation, SectionName, DiagramType } from '@/hooks/use-presentation-builder';
+import type { Presentation as PresentationType, SectionName, DiagramType } from '@/hooks/use-presentation-builder'; // Renamed to avoid conflict with Lucide icon
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -30,7 +31,7 @@ interface PresentationGenerationToolsProps {
     diagrams: Record<DiagramType, any>;
     contextSelections: { sections: Record<string, boolean>, diagrams: Record<string, boolean> };
     onContextToggle: (type: 'sections' | 'diagrams', key: string) => void;
-    presentations: Presentation[];
+    presentations: PresentationType[];
     guidelineState: { checked: Record<number, boolean>; custom: string[] };
     onGuidelineToggle: (index: number, checked: boolean) => void;
     customGuidelineInput: string;
@@ -61,7 +62,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
-    const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
+    const [selectedPptxTemplate, setSelectedPptxTemplate] = React.useState<PptxTemplateKey>('modern');
 
     const agent = agents.find(a => a.id === presentationConfig.presentation.agentId);
 
