@@ -7,42 +7,31 @@ import { generateCode } from '@/ai/flows/generate-code';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
+import { useBuilderState, type CodeGenerationState } from '@/context/BuilderStateContext';
 
-const CODE_KEY = 'arkan-code-generator';
 
-export interface CodeGenerationState {
-  prompt: string;
-  html: string;
-  css: string;
-  javascript: string;
+export interface LocalCodeState {
   error?: string;
   isGenerating?: boolean;
 }
 
 type Action =
   | { type: 'GENERATION_START' }
-  | { type: 'GENERATION_SUCCESS'; payload: Omit<CodeGenerationState, 'error' | 'isGenerating'> }
-  | { type: 'GENERATION_FAILURE'; payload: string }
-  | { type: 'SET_STATE'; payload: CodeGenerationState };
+  | { type: 'GENERATION_SUCCESS' }
+  | { type: 'GENERATION_FAILURE'; payload: string };
 
-const initialState: CodeGenerationState = {
+const initialState: LocalCodeState = {
   isGenerating: false,
-  prompt: '',
-  html: '',
-  css: '',
-  javascript: '',
 };
 
-function reducer(state: CodeGenerationState, action: Action): CodeGenerationState {
+function reducer(state: LocalCodeState, action: Action): LocalCodeState {
   switch (action.type) {
     case 'GENERATION_START':
       return { ...state, error: undefined, isGenerating: true };
     case 'GENERATION_SUCCESS':
-      return { ...action.payload, error: undefined, isGenerating: false };
+      return { ...state, error: undefined, isGenerating: false };
     case 'GENERATION_FAILURE':
       return { ...state, error: action.payload, isGenerating: false };
-    case 'SET_STATE':
-        return { ...state, ...action.payload };
     default:
       return state;
   }
@@ -53,40 +42,19 @@ const GenerateCodeSchema = z.object({
 });
 
 export function useCodeBuilder() {
+    const { state: builderState, dispatch: builderDispatch } = useBuilderState();
     const [state, dispatch] = useReducer(reducer, initialState);
     const [isGenerating, startTransition] = useTransition();
-    const [prompt, setPrompt] = useState('');
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
 
-    // Load from local storage on initial mount
-    useEffect(() => {
-        try {
-            const storedCode = localStorage.getItem(CODE_KEY);
-            if (storedCode) {
-                const parsed = JSON.parse(storedCode);
-                dispatch({ type: 'SET_STATE', payload: parsed });
-                setPrompt(parsed.prompt || '');
-            }
-        } catch (error) {
-            console.error('Failed to load code state from localStorage', error);
-        }
-    }, []);
-
-    // Save to local storage whenever code is successfully generated
-    useEffect(() => {
-        if (state.html || state.css || state.javascript) {
-            try {
-                localStorage.setItem(CODE_KEY, JSON.stringify(state));
-            } catch (error) {
-                console.error('Failed to save code state to localStorage', error);
-            }
-        }
-    }, [state]);
-
+    const setPrompt = (prompt: string) => {
+        const newState = { ...builderState.codeGenerator, prompt };
+        builderDispatch({ type: 'SET_CODE_GENERATOR_STATE', payload: newState });
+    }
 
     const handleGenerateCode = () => {
-        const validatedFields = GenerateCodeSchema.safeParse({ prompt });
+        const validatedFields = GenerateCodeSchema.safeParse({ prompt: builderState.codeGenerator.prompt });
 
         if (!validatedFields.success) {
             dispatch({ type: 'GENERATION_FAILURE', payload: validatedFields.error.flatten().fieldErrors.prompt?.[0] || 'Invalid prompt.' });
@@ -94,6 +62,8 @@ export function useCodeBuilder() {
         }
 
         dispatch({ type: 'GENERATION_START' });
+        builderDispatch({ type: 'GENERATION_START', payload: { item: 'code' } });
+
         startTransition(async () => {
             try {
                 if (!user) throw new Error("User not authenticated.");
@@ -101,20 +71,25 @@ export function useCodeBuilder() {
                 
                 const result = await generateCode({ prompt: validatedFields.data.prompt });
                 
-                dispatch({ type: 'GENERATION_SUCCESS', payload: { ...result, prompt: validatedFields.data.prompt } });
+                const newCodeState = { ...result, prompt: validatedFields.data.prompt };
+                
+                dispatch({ type: 'GENERATION_SUCCESS' });
+                builderDispatch({ type: 'SET_CODE_GENERATOR_STATE', payload: newCodeState });
+                builderDispatch({ type: 'GENERATION_SUCCESS', payload: { lastGenerated: 'code' } });
+
                 await fetchUser();
                 toast({ title: 'Code Generated', description: 'HTML, CSS, and JS have been generated.' });
             } catch (e: any) {
                 console.error(e);
                 const errorMessage = e.message || 'An error occurred while generating the code. Please try again.';
                 dispatch({ type: 'GENERATION_FAILURE', payload: errorMessage });
+                builderDispatch({ type: 'GENERATION_ERROR', payload: { error: errorMessage, item: 'code' } });
             }
         });
     };
 
     return {
-        state: { ...state, isGenerating: isGenerating || state.isGenerating },
-        prompt,
+        state: { ...builderState, ...state, isGenerating: isGenerating || builderState.isAnythingGenerating },
         setPrompt,
         handleGenerateCode
     };

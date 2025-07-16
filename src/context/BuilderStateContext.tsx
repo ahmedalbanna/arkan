@@ -13,6 +13,12 @@ import { deductCredit } from '@/services/credit-service';
 
 const DOCUMENTS_KEY = 'arkan-documents';
 
+export interface CodeGenerationState {
+  prompt: string;
+  html: string;
+  css: string;
+  javascript: string;
+}
 
 // --- STATE AND ACTION TYPES ---
 export interface BuilderState {
@@ -22,11 +28,12 @@ export interface BuilderState {
   diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string } };
   evaluation?: EvaluateReportOutput;
   presentation?: { slides: PresentationSlide[] };
+  codeGenerator: CodeGenerationState;
   externalContext?: { fileName: string; content: string };
   contextSelections: Record<string, Record<string, boolean>>;
   isGeneratingProposal: boolean;
   isAnythingGenerating: boolean;
-  lastGenerated: SectionName | DiagramType | 'proposal' | 'presentation' | 'evaluate' | null;
+  lastGenerated: SectionName | DiagramType | 'proposal' | 'presentation' | 'evaluate' | 'code' | null;
   error?: string;
 }
 
@@ -45,7 +52,8 @@ export type BuilderAction =
   | { type: 'TOGGLE_CONTEXT_SELECTION'; payload: { parentKey: string; contextKey: string } }
   | { type: 'SET_EXTERNAL_CONTEXT'; payload: { fileName: string; content: string } }
   | { type: 'REMOVE_EXTERNAL_CONTEXT' }
-  | { type: 'SET_PRESENTATION_SLIDES', payload: { slides: PresentationSlide[] } };
+  | { type: 'SET_PRESENTATION_SLIDES', payload: { slides: PresentationSlide[] } }
+  | { type: 'SET_CODE_GENERATOR_STATE', payload: CodeGenerationState };
 
 
 const initialState: BuilderState = {
@@ -54,6 +62,7 @@ const initialState: BuilderState = {
   sections: {},
   diagrams: {},
   presentation: { slides: [] },
+  codeGenerator: { prompt: '', html: '', css: '', javascript: '' },
   contextSelections: {},
   isGeneratingProposal: false,
   isAnythingGenerating: false,
@@ -133,6 +142,8 @@ const builderReducer = (state: BuilderState, action: BuilderAction): BuilderStat
         return { ...rest };
     case 'SET_PRESENTATION_SLIDES':
         return { ...state, presentation: { slides: action.payload.slides } };
+    case 'SET_CODE_GENERATOR_STATE':
+        return { ...state, codeGenerator: action.payload };
     default:
       return state;
   }
@@ -220,6 +231,7 @@ export const BuilderStateProvider = ({ children }: { children: React.ReactNode }
         localStorage.removeItem('arkan-pptx-styles');
         localStorage.removeItem('arkan-diagrams');
         localStorage.removeItem(DOCUMENTS_KEY);
+        localStorage.removeItem('arkan-code-generator');
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
     };
 

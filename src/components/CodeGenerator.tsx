@@ -17,10 +17,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useCodeState } from '@/context/CodeStateContext';
 
 function GenerateButton() {
-    const { isGenerating } = useCodeState();
+    const { state } = useCodeState();
     return (
-        <Button type="submit" disabled={isGenerating} className="font-headline w-full">
-            {isGenerating ? (
+        <Button type="submit" disabled={state.isGenerating} className="font-headline w-full">
+            {state.isGenerating ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
@@ -65,7 +65,8 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 }
 
 export default function CodeGenerator() {
-    const { state, prompt, setPrompt, handleGenerateCode } = useCodeState();
+    const { state, setPrompt, handleGenerateCode } = useCodeState();
+    const { codeGenerator: codeState } = state;
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -78,17 +79,17 @@ export default function CodeGenerator() {
             setSrcDoc(`
                 <html>
                     <head>
-                        <style>${state.css || ''}</style>
+                        <style>${codeState.css || ''}</style>
                     </head>
                     <body>
-                        ${state.html || ''}
-                        <script>${state.javascript || ''}<\/script>
+                        ${codeState.html || ''}
+                        <script>${codeState.javascript || ''}<\/script>
                     </body>
                 </html>
             `);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [state]);
+    }, [codeState]);
 
     const takeScreenshot = async () => {
         if (!iframeRef.current?.contentWindow) return;
@@ -127,12 +128,12 @@ export default function CodeGenerator() {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    ${state.html || ''}
+    ${codeState.html || ''}
     <script src="script.js"></script>
 </body>
 </html>`);
-            zip.file("style.css", state.css || "");
-            zip.file("script.js", state.javascript || "");
+            zip.file("style.css", codeState.css || "");
+            zip.file("script.js", codeState.javascript || "");
 
             const blob = await zip.generateAsync({ type: "blob" });
             saveAs(blob, "generated-code.zip");
@@ -178,7 +179,7 @@ export default function CodeGenerator() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-                    {(state.html || state.css || state.javascript) && (
+                    {(codeState.html || codeState.css || codeState.javascript) && (
                         <Card>
                             <CardHeader className="flex-row items-center justify-between">
                                 <CardTitle className="font-headline">Generated Code</CardTitle>
@@ -195,13 +196,13 @@ export default function CodeGenerator() {
                                         <TabsTrigger value="javascript">JS</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="html" className="mt-4">
-                                        <CodeDisplay code={state.html || ''} language="html" />
+                                        <CodeDisplay code={codeState.html || ''} language="html" />
                                     </TabsContent>
                                     <TabsContent value="css" className="mt-4">
-                                        <CodeDisplay code={state.css || ''} language="css" />
+                                        <CodeDisplay code={codeState.css || ''} language="css" />
                                     </TabsContent>
                                     <TabsContent value="javascript" className="mt-4">
-                                        <CodeDisplay code={state.javascript || '// No JavaScript generated'} language="javascript" />
+                                        <CodeDisplay code={codeState.javascript || '// No JavaScript generated'} language="javascript" />
                                     </TabsContent>
                                 </Tabs>
                             </CardContent>
@@ -249,11 +250,11 @@ export default function CodeGenerator() {
                                 placeholder='A simple button that says "Click me!" and changes color when hovered.'
                                 rows={8}
                                 required
-                                value={prompt}
+                                value={codeState.prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 disabled={state.isGenerating}
                             />
-                            {state?.error && (
+                            {state.error && (
                                 <p className="text-sm font-medium text-destructive mt-2">{state.error}</p>
                             )}
                         </CardContent>
