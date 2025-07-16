@@ -269,7 +269,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               set({ error: e.message || 'An unexpected error occurred.' });
               toast({ title: "Generation Failed", description: e.message, variant: "destructive" });
           } finally {
-              set({ isAnythingGenerating: false });
+              set({ isAnythingGenerating: false, lastGenerated: null });
           }
       },
       
@@ -311,7 +311,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               set({ isGeneratingProposal: false, error: e.message || 'An unexpected error occurred.' });
               toast({ title: 'Generation Failed', description: e.message, variant: 'destructive' });
           } finally {
-              set({ isGeneratingProposal: false });
+              set({ isGeneratingProposal: false, lastGenerated: null });
           }
       },
       handleProposalUpdate: (path, value) => {
@@ -395,7 +395,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
       handleGenerateCode: async (...auth) => {
           const { codeGenerator } = get();
-          get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
+          await get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
       },
       
       // --- CONTEXT ACTIONS ---
