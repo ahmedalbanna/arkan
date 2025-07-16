@@ -11,26 +11,34 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
 import { useBuilderState } from '@/context/BuilderStateContext';
 
+const PRESENTATION_KEY = 'arkan-presentation';
+
 export interface PresentationState {
   slides?: PresentationSlide[];
   error?: string;
+  isLoaded: boolean;
 }
 
 type Action =
   | { type: 'GENERATION_START' }
   | { type: 'GENERATION_SUCCESS'; payload: PresentationSlide[] }
-  | { type: 'GENERATION_FAILURE'; payload: string };
+  | { type: 'GENERATION_FAILURE'; payload: string }
+  | { type: 'LOAD_FROM_STORAGE'; payload: PresentationSlide[] };
 
-const initialState: PresentationState = {};
+const initialState: PresentationState = {
+    isLoaded: false,
+};
 
 function reducer(state: PresentationState, action: Action): PresentationState {
   switch (action.type) {
     case 'GENERATION_START':
       return { ...state, slides: undefined, error: undefined };
     case 'GENERATION_SUCCESS':
-      return { slides: action.payload, error: undefined };
+      return { ...state, slides: action.payload, error: undefined };
     case 'GENERATION_FAILURE':
       return { ...state, error: action.payload };
+    case 'LOAD_FROM_STORAGE':
+        return { ...state, slides: action.payload, isLoaded: true };
     default:
       return state;
   }
@@ -47,6 +55,22 @@ export function usePresentationBuilder() {
     const [isGenerating, startTransition] = useTransition();
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
+
+    // Load from local storage on initial mount
+    useEffect(() => {
+        try {
+            const storedPresentation = localStorage.getItem(PRESENTATION_KEY);
+            if (storedPresentation) {
+                dispatch({ type: 'LOAD_FROM_STORAGE', payload: JSON.parse(storedPresentation) });
+            } else {
+                dispatch({ type: 'LOAD_FROM_STORAGE', payload: [] });
+            }
+        } catch (e) {
+            console.error('Failed to load presentation from storage', e);
+            dispatch({ type: 'LOAD_FROM_STORAGE', payload: [] });
+        }
+    }, []);
+
 
     // State for context selections
     const [contextSelections, setContextSelections] = useState({ sections: {} as Record<string, boolean>, diagrams: {} as Record<string, boolean> });
@@ -114,6 +138,7 @@ export function usePresentationBuilder() {
 
                 await deductCredit(user.id, 1);
                 dispatch({ type: 'GENERATION_SUCCESS', payload: result.slides });
+                localStorage.setItem(PRESENTATION_KEY, JSON.stringify(result.slides)); // Save to local storage
                 await fetchUser();
                 toast({ title: 'Presentation Generated', description: `Created a ${result.slides.length}-slide presentation.` });
             } catch (e: any) {
