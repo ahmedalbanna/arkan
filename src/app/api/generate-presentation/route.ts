@@ -3,12 +3,20 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { AGENTS } from '@/lib/agents';
-import { GeneratePresentationInputSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+
+const ApiGeneratePresentationSchema = z.object({
+  proposal: ProjectProposalSchema,
+  sections: z.record(SectionNameSchema, z.string()).optional(),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  guidelines: z.array(z.string()).optional(),
+});
+
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validation = GeneratePresentationInputSchema.safeParse(body);
+    const validation = ApiGeneratePresentationSchema.safeParse(body);
 
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
@@ -19,14 +27,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
-    const { proposal, sections, diagrams } = validation.data;
+    const { proposal, sections, diagrams, guidelines } = validation.data;
 
     // --- Server-side prompt construction ---
     let fullPrompt = presentationAgent.prompt.base;
 
     // Add guidelines to the prompt
-    if (presentationAgent.prompt.guidelines) {
-        fullPrompt += '\n\n' + presentationAgent.prompt.guidelines.map(g => `- ${g.text}`).join('\n');
+    if (guidelines && guidelines.length > 0) {
+        fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
     }
 
     const contextContent = [];

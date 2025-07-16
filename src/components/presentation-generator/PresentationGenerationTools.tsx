@@ -20,31 +20,45 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import type { PresentationSlide, SectionName, DiagramType } from '@/ai/schemas';
+import type { Presentation, SectionName, DiagramType } from '@/hooks/use-presentation-builder';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
-    onGenerate: () => void;
+    onGenerate: (guidelines: string[]) => void;
     sections: Record<SectionName, any>;
     diagrams: Record<DiagramType, any>;
     contextSelections: { sections: Record<string, boolean>, diagrams: Record<string, boolean> };
     onContextToggle: (type: 'sections' | 'diagrams', key: string) => void;
-    slides?: PresentationSlide[];
+    presentations: Presentation[];
+    guidelineState: { checked: Record<number, boolean>; custom: string[] };
+    onGuidelineToggle: (index: number, checked: boolean) => void;
+    customGuidelineInput: string;
+    onCustomGuidelineChange: (value: string) => void;
+    onAddCustomGuideline: () => void;
+    onRemoveCustomGuideline: (index: number) => void;
 }
 
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
-export const PresentationGenerationTools = ({ 
-    isDisabled, 
-    isGenerating,
-    onGenerate,
-    sections,
-    diagrams,
-    contextSelections,
-    onContextToggle,
-    slides,
-}: PresentationGenerationToolsProps) => {
+export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
+    const { 
+        isDisabled, 
+        isGenerating,
+        onGenerate,
+        sections,
+        diagrams,
+        contextSelections,
+        onContextToggle,
+        presentations,
+        guidelineState,
+        onGuidelineToggle,
+        customGuidelineInput,
+        onCustomGuidelineChange,
+        onAddCustomGuideline,
+        onRemoveCustomGuideline,
+    } = props;
+
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
     const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
@@ -66,15 +80,34 @@ export const PresentationGenerationTools = ({
     }
     
     const handleExportPresentation = async () => {
-        if (!slides) return;
-        await exportPresentationAsPptx(slides, selectedPptxTemplate);
+        if (!presentations || presentations.length === 0) return;
+        const latestPresentation = presentations[0];
+        await exportPresentationAsPptx(latestPresentation.slides, selectedPptxTemplate);
     }
+    
+    const getSelectedGuidelines = (): string[] => {
+        if (!agent || !guidelineState) return [];
+        
+        const promptConfig = agent.prompt as AgentPrompt;
+        if (typeof promptConfig === 'string' || !promptConfig.guidelines) return [];
+    
+        const guidelines: string[] = [];
+        promptConfig.guidelines.forEach((g, index) => {
+            if (guidelineState.checked[index]) {
+                guidelines.push(g.text);
+            }
+        });
+        guidelines.push(...guidelineState.custom);
+        return guidelines;
+    };
+
 
     if (!agentsLoaded || !agent) {
         return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
     }
 
     const promptConfig = agent.prompt as AgentPrompt;
+    const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
 
     return (
         <div className="space-y-6">
@@ -98,7 +131,7 @@ export const PresentationGenerationTools = ({
                         </Select>
                         ) : <Loader2 className="h-5 w-5 animate-spin" /> }
                     </div>
-                    <Button onClick={handleExportPresentation} disabled={isGenerating || !slides || slides.length === 0} className="w-full font-headline">
+                    <Button onClick={handleExportPresentation} disabled={isGenerating || !presentations || presentations.length === 0} className="w-full font-headline">
                         <FileDown className="mr-2 h-4 w-4" />
                         Export Presentation
                     </Button>
@@ -119,52 +152,106 @@ export const PresentationGenerationTools = ({
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="space-y-4 p-4">
-                                <div className="space-y-2">
-                                    <Label className="font-semibold">Base Prompt</Label>
-                                    <div className="p-3 rounded-md border bg-muted text-xs">
-                                        <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="font-semibold">Context from Current Session</Label>
-                                    {!hasContent ? (
-                                        <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
-                                            No sections or diagrams have been generated yet.
-                                        </p>
-                                    ) : (
-                                        <ScrollArea className="h-48 border rounded-md p-2">
-                                            <div className="space-y-2">
-                                                <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
-                                                {Object.keys(sections).length > 0 ? Object.keys(sections).map((key) => (
-                                                    <div key={key} className="flex items-center space-x-2 pl-2">
-                                                        <Checkbox
-                                                            id={`context-section-${key}`}
-                                                            checked={contextSelections.sections[key] ?? false}
-                                                            onCheckedChange={() => onContextToggle('sections', key)}
-                                                        />
-                                                        <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
-                                                            {sectionConfig[key as keyof typeof sectionConfig].title}
-                                                        </Label>
-                                                    </div>
-                                                )) : <p className="text-xs text-muted-foreground pl-2">No sections available.</p>}
-
-                                                <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
-                                                 {Object.keys(diagrams).length > 0 ? Object.keys(diagrams).map((key) => (
-                                                    <div key={key} className="flex items-center space-x-2 pl-2">
-                                                        <Checkbox
-                                                            id={`context-diagram-${key}`}
-                                                            checked={contextSelections.diagrams[key] ?? false}
-                                                            onCheckedChange={() => onContextToggle('diagrams', key)}
-                                                        />
-                                                        <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
-                                                            {diagramConfig[key as keyof typeof diagramConfig].title}
-                                                        </Label>
-                                                    </div>
-                                                )) : <p className="text-xs text-muted-foreground pl-2">No diagrams available.</p>}
+                                <Tabs defaultValue="prompt" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-2">
+                                        <TabsTrigger value="prompt">Prompt</TabsTrigger>
+                                        <TabsTrigger value="context">Context</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="prompt" className="pt-4 space-y-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                            <div className="p-3 rounded-md border bg-muted text-xs">
+                                                <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                                             </div>
-                                        </ScrollArea>
-                                    )}
-                                </div>
+                                        </div>
+
+                                        {hasGuidelines && (
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                <div className="space-y-2 p-3 rounded-md border">
+                                                    {promptConfig.guidelines!.map((guideline, index) => (
+                                                        <div key={index} className="flex items-start gap-2">
+                                                            <Checkbox
+                                                                id={`guideline-presentation-${index}`}
+                                                                checked={guidelineState?.checked[index] ?? false}
+                                                                onCheckedChange={(checked) => onGuidelineToggle(index, !!checked)}
+                                                            />
+                                                            <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
+                                                                <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                            {guidelineState?.custom.map((custom, index) => (
+                                                <div key={index} className="flex items-center gap-2 text-sm">
+                                                    <span>- {custom}</span>
+                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onRemoveCustomGuideline(index)}>
+                                                        <Trash2 className="h-3 w-3 text-destructive" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    placeholder="Add a custom guideline..."
+                                                    value={customGuidelineInput}
+                                                    onChange={(e) => onCustomGuidelineChange(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddCustomGuideline())}
+                                                />
+                                                <Button type="button" variant="secondary" onClick={onAddCustomGuideline}>
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="context" className="pt-4">
+                                        <div className="space-y-2">
+                                            <Label className="font-semibold">Context from Current Session</Label>
+                                            {!hasContent ? (
+                                                <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
+                                                    No sections or diagrams have been generated yet.
+                                                </p>
+                                            ) : (
+                                                <ScrollArea className="h-48 border rounded-md p-2">
+                                                    <div className="space-y-2">
+                                                        <h4 className="text-sm font-semibold flex items-center gap-2"><BookCheck className="h-4 w-4" /> Sections</h4>
+                                                        {Object.keys(sections).length > 0 ? Object.keys(sections).map((key) => (
+                                                            <div key={key} className="flex items-center space-x-2 pl-2">
+                                                                <Checkbox
+                                                                    id={`context-section-${key}`}
+                                                                    checked={contextSelections.sections[key] ?? false}
+                                                                    onCheckedChange={() => onContextToggle('sections', key)}
+                                                                />
+                                                                <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
+                                                                    {sectionConfig[key as keyof typeof sectionConfig].title}
+                                                                </Label>
+                                                            </div>
+                                                        )) : <p className="text-xs text-muted-foreground pl-2">No sections available.</p>}
+
+                                                        <h4 className="text-sm font-semibold flex items-center gap-2 pt-2"><GitGraph className="h-4 w-4" /> Diagrams</h4>
+                                                         {Object.keys(diagrams).length > 0 ? Object.keys(diagrams).map((key) => (
+                                                            <div key={key} className="flex items-center space-x-2 pl-2">
+                                                                <Checkbox
+                                                                    id={`context-diagram-${key}`}
+                                                                    checked={contextSelections.diagrams[key] ?? false}
+                                                                    onCheckedChange={() => onContextToggle('diagrams', key)}
+                                                                />
+                                                                <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
+                                                                    {diagramConfig[key as keyof typeof diagramConfig].title}
+                                                                </Label>
+                                                            </div>
+                                                        )) : <p className="text-xs text-muted-foreground pl-2">No diagrams available.</p>}
+                                                    </div>
+                                                </ScrollArea>
+                                            )}
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
                             </AccordionContent>
                         </AccordionItem>
                     </Accordion>
@@ -172,7 +259,7 @@ export const PresentationGenerationTools = ({
                 <CardFooter>
                     <Button
                         type="button"
-                        onClick={onGenerate}
+                        onClick={() => onGenerate(getSelectedGuidelines())}
                         disabled={isDisabled || isGenerating}
                         className="font-headline w-full"
                         title={!agent?.isEnabled ? 'This agent is disabled' : 'Generate Presentation'}
