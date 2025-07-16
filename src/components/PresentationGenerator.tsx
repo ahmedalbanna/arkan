@@ -22,12 +22,12 @@ export default function PresentationGenerator() {
         state,
         handleGeneratePresentation,
         setActivePresentationId,
+        handleGuidelineToggle,
         guidelineState,
-        onGuidelineToggle,
+        setCustomGuidelineInput,
         customGuidelineInput,
-        onCustomGuidelineChange,
-        onAddCustomGuideline,
-        onRemoveCustomGuideline,
+        handleAddCustomGuideline,
+        handleRemoveCustomGuideline,
         contextSelections,
         toggleContextSelection,
     } = useBuilderState();
@@ -127,12 +127,12 @@ export default function PresentationGenerator() {
                     contextSelections={contextSelections}
                     onContextToggle={toggleContextSelection}
                     presentations={presentations}
-                    guidelineState={guidelineState}
-                    onGuidelineToggle={onGuidelineToggle}
-                    customGuidelineInput={customGuidelineInput}
-                    onCustomGuidelineChange={onCustomGuidelineChange}
-                    onAddCustomGuideline={onAddCustomGuideline}
-                    onRemoveCustomGuideline={onRemoveCustomGuideline}
+                    guidelineState={guidelineState.presentation}
+                    onGuidelineToggle={(index, checked) => handleGuidelineToggle('presentation', index, checked)}
+                    customGuidelineInput={customGuidelineInput['presentation'] || ''}
+                    onCustomGuidelineChange={(value) => setCustomGuidelineInput('presentation', value)}
+                    onAddCustomGuideline={() => handleAddCustomGuideline('presentation')}
+                    onRemoveCustomGuideline={(index) => handleRemoveCustomGuideline('presentation', index)}
                 />
             </div>
         </div>
