@@ -1,29 +1,36 @@
 
 'use client';
 
-import { useState, useReducer, useTransition } from 'react';
+import { useState, useReducer, useTransition, useEffect } from 'react';
 import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
 import { deductCredit } from '@/services/credit-service';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from './use-toast';
 
+const CODE_KEY = 'arkan-code-generator';
+
 export interface CodeGenerationState {
-  prompt?: string;
-  html?: string;
-  css?: string;
-  javascript?: string;
+  prompt: string;
+  html: string;
+  css: string;
+  javascript: string;
   error?: string;
-  isGenerating?: boolean; // Add this to the state
+  isGenerating?: boolean;
 }
 
 type Action =
   | { type: 'GENERATION_START' }
   | { type: 'GENERATION_SUCCESS'; payload: Omit<CodeGenerationState, 'error' | 'isGenerating'> }
-  | { type: 'GENERATION_FAILURE'; payload: string };
+  | { type: 'GENERATION_FAILURE'; payload: string }
+  | { type: 'SET_STATE'; payload: CodeGenerationState };
 
 const initialState: CodeGenerationState = {
-    isGenerating: false,
+  isGenerating: false,
+  prompt: '',
+  html: '',
+  css: '',
+  javascript: '',
 };
 
 function reducer(state: CodeGenerationState, action: Action): CodeGenerationState {
@@ -34,6 +41,8 @@ function reducer(state: CodeGenerationState, action: Action): CodeGenerationStat
       return { ...action.payload, error: undefined, isGenerating: false };
     case 'GENERATION_FAILURE':
       return { ...state, error: action.payload, isGenerating: false };
+    case 'SET_STATE':
+        return { ...state, ...action.payload };
     default:
       return state;
   }
@@ -45,10 +54,36 @@ const GenerateCodeSchema = z.object({
 
 export function useCodeBuilder() {
     const [state, dispatch] = useReducer(reducer, initialState);
-    const [isGenerating, startTransition] = useTransition(); // This is for concurrent rendering, not the loading state itself
+    const [isGenerating, startTransition] = useTransition();
     const [prompt, setPrompt] = useState('');
     const { user, fetchUser } = useAuth();
     const { toast } = useToast();
+
+    // Load from local storage on initial mount
+    useEffect(() => {
+        try {
+            const storedCode = localStorage.getItem(CODE_KEY);
+            if (storedCode) {
+                const parsed = JSON.parse(storedCode);
+                dispatch({ type: 'SET_STATE', payload: parsed });
+                setPrompt(parsed.prompt || '');
+            }
+        } catch (error) {
+            console.error('Failed to load code state from localStorage', error);
+        }
+    }, []);
+
+    // Save to local storage whenever code is successfully generated
+    useEffect(() => {
+        if (state.html || state.css || state.javascript) {
+            try {
+                localStorage.setItem(CODE_KEY, JSON.stringify(state));
+            } catch (error) {
+                console.error('Failed to save code state to localStorage', error);
+            }
+        }
+    }, [state]);
+
 
     const handleGenerateCode = () => {
         const validatedFields = GenerateCodeSchema.safeParse({ prompt });
@@ -78,7 +113,7 @@ export function useCodeBuilder() {
     };
 
     return {
-        state: { ...state, isGenerating: isGenerating || state.isGenerating }, // Combine both generating states
+        state: { ...state, isGenerating: isGenerating || state.isGenerating },
         prompt,
         setPrompt,
         handleGenerateCode
