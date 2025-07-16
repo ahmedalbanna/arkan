@@ -20,19 +20,13 @@ export default function PresentationGenerator() {
         isGenerating,
         proposal,
         handleGeneratePresentation,
-        sections,
-        diagrams,
+        sections, // sections are already typed as Partial in usePresentationState hook
+        diagrams, // diagrams are already typed as Partial in usePresentationState hook
         contextSelections,
         toggleContextSelection,
     } = usePresentationState();
     
     const [showPresentation, setShowPresentation] = useState(false);
-
-    useEffect(() => {
-        if (state.slides && state.slides.length > 0) {
-            setShowPresentation(true);
-        }
-    }, [state.slides]);
 
     if (!proposal) {
         return (
