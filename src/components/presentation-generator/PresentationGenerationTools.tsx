@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import type { Presentation as PresentationType, SectionName, DiagramType } from '@/hooks/use-presentation-builder'; // Renamed to avoid conflict with Lucide icon
+import type { PresentationHistoryEntry as PresentationType, SectionName, DiagramType } from '@/hooks/use-presentation-builder'; // Renamed to avoid conflict with Lucide icon
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PresentationGenerationToolsProps {
@@ -29,8 +29,8 @@ interface PresentationGenerationToolsProps {
     onGenerate: (guidelines: string[]) => void;
     sections: Record<SectionName, any>;
     diagrams: Record<DiagramType, any>;
-    contextSelections: { sections: Record<string, boolean>, diagrams: Record<string, boolean> };
-    onContextToggle: (type: 'sections' | 'diagrams', key: string) => void;
+    contextSelections: Record<string, Record<string, boolean>>;
+    onContextToggle: (parentKey: string, contextKey: string) => void;
     presentations: PresentationType[];
     guidelineState: { checked: Record<number, boolean>; custom: string[] };
     onGuidelineToggle: (index: number, checked: boolean) => void;
@@ -225,8 +225,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                             <div key={key} className="flex items-center space-x-2 pl-2">
                                                                 <Checkbox
                                                                     id={`context-section-${key}`}
-                                                                    checked={contextSelections.sections[key] ?? false}
-                                                                    onCheckedChange={() => onContextToggle('sections', key)}
+                                                                    checked={contextSelections['presentation']?.[`section_${key}`] ?? false}
+                                                                    onCheckedChange={() => onContextToggle('presentation', `section_${key}`)}
                                                                 />
                                                                 <Label htmlFor={`context-section-${key}`} className="text-sm font-normal">
                                                                     {sectionConfig[key as keyof typeof sectionConfig].title}
@@ -239,8 +239,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                             <div key={key} className="flex items-center space-x-2 pl-2">
                                                                 <Checkbox
                                                                     id={`context-diagram-${key}`}
-                                                                    checked={contextSelections.diagrams[key] ?? false}
-                                                                    onCheckedChange={() => onContextToggle('diagrams', key)}
+                                                                    checked={contextSelections['presentation']?.[`diagram_${key}`] ?? false}
+                                                                    onCheckedChange={() => onContextToggle('presentation', `diagram_${key}`)}
                                                                 />
                                                                 <Label htmlFor={`context-diagram-${key}`} className="text-sm font-normal">
                                                                     {diagramConfig[key as keyof typeof diagramConfig].title}

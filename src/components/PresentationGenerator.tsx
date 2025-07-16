@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, Sparkles, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
@@ -23,16 +23,13 @@ export default function PresentationGenerator() {
         handleGeneratePresentation,
         setActivePresentationId,
         handleGuidelineToggle,
-        guidelineState,
         setCustomGuidelineInput,
-        customGuidelineInput,
         handleAddCustomGuideline,
         handleRemoveCustomGuideline,
-        contextSelections,
         toggleContextSelection,
     } = useBuilderState();
 
-    const { proposal, sections, diagrams, isAnythingGenerating, presentation, activePresentationId } = state;
+    const { proposal, sections, diagrams, isAnythingGenerating, presentation, activePresentationId, contextSelections, guidelineState, customGuidelineInput } = state;
     
     if (!proposal) {
         return (
