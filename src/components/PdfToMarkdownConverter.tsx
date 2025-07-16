@@ -20,7 +20,7 @@ export default function PdfToMarkdownConverter() {
   const [isCopied, setIsCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { fetchUser } = useAuth();
+  const { refetchUser } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -62,7 +62,7 @@ export default function PdfToMarkdownConverter() {
       }
 
       setMarkdown(result.markdown);
-      await fetchUser(); // Refresh user credits in the header
+      refetchUser(); // Refresh user credits in the header
 
     } catch (err: any) {
       setError(err.message || 'Failed to process the PDF. Please try again.');

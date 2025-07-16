@@ -65,7 +65,7 @@ export interface BuilderState {
   isUploading: boolean;
 }
 
-type AuthParams = [user: UserProfile, fetchUser: () => Promise<void>];
+type AuthParams = [user: UserProfile, refetchUser: () => void];
 
 interface BuilderActions {
     // Basic Actions
@@ -227,7 +227,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       
       // --- UNIVERSAL GENERATION HANDLER (internal) ---
       _handleGenerateRequest: async (endpoint: string, body: object, itemKey: string, auth: AuthParams, options: { creditCost?: number } = {}) => {
-          const [user, fetchUser] = auth;
+          const [user, refetchUser] = auth;
           const { creditCost = 1 } = options;
 
           set({ isAnythingGenerating: true, error: undefined, lastGenerated: itemKey as any });
@@ -263,7 +263,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
               }
               
               if (creditCost > 0) {
-                  await fetchUser();
+                  refetchUser();
               }
               toast({ title: "Generation Successful!", description: `Successfully generated ${itemKey}.` });
 
@@ -289,7 +289,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
           set({ isGeneratingProposal: true, error: undefined, lastGenerated: 'proposal' });
           try {
-              const [user, fetchUser] = auth;
+              const [user, refetchUser] = auth;
               if (!user) throw new Error("User not authenticated.");
               await deductCredit(user.id, 1);
               const response = await fetch('/api/generate-proposal', {
@@ -309,7 +309,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
                   evaluation: undefined,
                   presentation: { history: [] },
               });
-              await fetchUser();
+              refetchUser();
               toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
           } catch (e: any) {
               set({ isGeneratingProposal: false, error: e.message || 'An unexpected error occurred.' });
@@ -398,11 +398,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
-      handleGenerateCode: async (...auth) => {
-          const { codeGenerator } = get();
-          set({ isAnythingGenerating: true, error: undefined, lastGenerated: 'code' });
-          await get()._handleGenerateRequest('/api/generate-code', { prompt: codeGenerator.prompt }, 'code', auth);
-          set({ isAnythingGenerating: false, lastGenerated: null });
+      handleGenerateCode: (...auth) => {
+        const state = get();
+        get()._handleGenerateRequest('/api/generate-code', { prompt: state.codeGenerator.prompt }, 'code', auth);
       },
       
       // --- CONTEXT ACTIONS ---
@@ -473,7 +471,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         formData.append('file', pdfFile);
 
         try {
-            const [user] = auth;
+            const [user, refetchUser] = auth;
             if (!user) throw new Error("User not found for PDF upload.");
             await deductCredit(user.id, 1);
 
@@ -484,7 +482,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
             }
             const result = await response.json();
             set({ externalContext: { fileName: pdfFile.name, content: result.markdown } });
-            await auth[1](); // fetchUser
+            refetchUser();
             toast({ title: "Context Added", description: `Successfully processed ${pdfFile.name}.` });
         } catch (error: any) {
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });

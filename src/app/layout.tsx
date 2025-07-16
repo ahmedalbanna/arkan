@@ -10,6 +10,7 @@ import LanguageDirectionManager from '@/components/LanguageDirectionManager';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '@/context/AuthContext';
 import { Footer } from '@/components/layout/Footer';
+import QueryProvider from '@/components/QueryProvider';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -48,15 +49,17 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <LocalizationProvider>
-            <AuthProvider>
-              <LanguageDirectionManager>
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Toaster />
-              </LanguageDirectionManager>
-            </AuthProvider>
-          </LocalizationProvider>
+          <QueryProvider>
+            <LocalizationProvider>
+              <AuthProvider>
+                <LanguageDirectionManager>
+                  <Header />
+                  <main className="flex-grow">{children}</main>
+                  <Toaster />
+                </LanguageDirectionManager>
+              </AuthProvider>
+            </LocalizationProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
