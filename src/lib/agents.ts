@@ -255,7 +255,8 @@ The conclusion should:`,
     icon: Presentation,
     pageUrl: '#', // This agent is used on the project page directly
     isEnabled: true,
-    prompt: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
+    prompt: {
+      base: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
 
 Create a logical flow for the presentation, starting with an introduction and problem statement, moving through the solution and design, and ending with a conclusion. Select the most important information to display. Keep slide content concise and focused on bullet points. Use the speaker notes to add detail and elaborate on the points.
 
@@ -268,8 +269,16 @@ You will be provided with the full project proposal in JSON format, and may also
 
 --- Additional Context (Optional) ---
 {{{context}}}
----
-`
+---`,
+      guidelines: [
+        { text: "The total number of slides should be between 7 and 12.", isDefault: true },
+        { text: "Start with a Title slide that includes the project title and author.", isDefault: true },
+        { text: "Each slide must have a clear title.", isDefault: true },
+        { text: "Slide content should be a list of 2-5 concise bullet points.", isDefault: true },
+        { text: "Speaker notes must be detailed, providing elaboration for each bullet point.", isDefault: true },
+        { text: "Maintain a professional and engaging tone throughout.", isDefault: true },
+      ]
+    }
   },
   // Diagram Agents
   {
