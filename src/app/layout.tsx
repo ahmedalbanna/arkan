@@ -14,6 +14,7 @@ import QueryProvider from '@/components/QueryProvider';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth as adminAuth } from '@/lib/firebase/admin';
+import { NextRequest } from 'next/server';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -44,7 +45,7 @@ const PUBLIC_PATHS = ['/login', '/signup'];
 
 async function checkAuth(pathname: string) {
   // Check if the current path is public
-  if (PUBLIC_PATHS.includes(pathname)) {
+  if (PUBLIC_PATHS.includes(pathname) || pathname === '/') {
     return;
   }
 
@@ -70,15 +71,12 @@ export default async function RootLayout({
 }>) {
   
   // Since we don't have access to the pathname directly in layouts,
-  // we'll skip the auth check for the root path ('/') as it's public.
-  // A more robust solution might involve a different layout structure, but this works for now.
-  const isRoot = !params.path;
+  // we'll construct it from params.
+  const pathname = `/${(params.path || []).join('/')}`;
 
-  // We are skipping the server-side auth check for now to resolve build issues.
   // The client-side AuthContext will handle redirects after hydration.
-  // if (!isRoot) {
-  //   await checkAuth(`/${(params.path || []).join('/')}`);
-  // }
+  // We can now re-enable the server-side check.
+  await checkAuth(pathname);
 
   return (
     <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
