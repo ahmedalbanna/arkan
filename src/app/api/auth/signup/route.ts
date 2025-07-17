@@ -28,17 +28,20 @@ export async function POST(req: Request) {
       displayName: name,
     });
 
+    // Create a corresponding user profile in Firestore
     const newUserProfile = {
         name,
         email,
-        credits: 10,
+        credits: 10, // Assign some starting credits
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         bio: '',
         profilePictureUrl: '',
     };
+
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
     
+    // Return a success response with the new user's basic info
     return NextResponse.json({ 
       user: {
         uid: userRecord.uid, 
@@ -49,17 +52,22 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Signup error:", error);
 
+    // Specific Firebase Auth error codes
     if (error.code === 'auth/email-already-exists') {
-      return NextResponse.json({ error: "Email address already in use" }, { status: 409 });
+      return NextResponse.json({ error: { _form: ["Email address already in use"] } }, { status: 409 });
     } else if (error.code === 'auth/invalid-email') {
-      return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
+      return NextResponse.json({ error: { email: ["Invalid email format"] } }, { status: 400 });
     } else if (error.code === 'auth/weak-password') {
-       return NextResponse.json({ error: "Password is too weak" }, { status: 400 });
-    } else if (error instanceof z.ZodError) {
+       return NextResponse.json({ error: { password: ["Password is too weak. It must be at least 6 characters long."] } }, { status: 400 });
+    }
+
+    // Handle Zod errors specifically, although safeParse should prevent this catch block.
+    if (error instanceof z.ZodError) {
         return NextResponse.json({ error: error.flatten().fieldErrors }, { status: 400 });
     }
 
     // Generic error fallback that ensures a JSON response
-    return NextResponse.json({ error: "An unexpected error occurred. Please try again later." }, { status: 500 });
+    // This will catch any other errors and prevent the JSON.parse error on the client.
+    return NextResponse.json({ error: { _form: ["An unexpected server error occurred. Please try again later."] } }, { status: 500 });
   }
 }

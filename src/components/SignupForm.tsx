@@ -8,12 +8,14 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { AlertCircle } from 'lucide-react';
+
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -27,6 +29,7 @@ export default function SignupForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(formSchema),
@@ -39,6 +42,7 @@ export default function SignupForm() {
 
   async function onSubmit(values: SignupFormValues) {
     setIsLoading(true);
+    setFormError(null);
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -49,7 +53,22 @@ export default function SignupForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Signup failed. Please try again.');
+        // Handle structured Zod errors from the server
+        if (data.error?.name) form.setError("name", { message: data.error.name[0] });
+        if (data.error?.email) form.setError("email", { message: data.error.email[0] });
+        if (data.error?.password) form.setError("password", { message: data.error.password[0] });
+        
+        // Handle general form-level errors
+        if (data.error?._form) {
+          setFormError(data.error._form[0]);
+        }
+        
+        // Fallback for unexpected error structures
+        if (!data.error) {
+            throw new Error('An unexpected error occurred.');
+        }
+
+        return; // Stop execution if there was an error
       }
       
       toast({
@@ -60,11 +79,7 @@ export default function SignupForm() {
       router.push('/login');
 
     } catch (error: any) {
-      toast({
-        title: 'Signup Error',
-        description: error.message,
-        variant: 'destructive',
-      });
+        setFormError(error.message || 'An unknown error occurred. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +94,13 @@ export default function SignupForm() {
             <CardDescription>Enter your details to create a new account.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {formError && (
+                <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Signup Error</AlertTitle>
+                    <AlertDescription>{formError}</AlertDescription>
+                </Alert>
+            )}
             <FormField
               control={form.control}
               name="name"
