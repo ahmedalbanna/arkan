@@ -1,104 +1,112 @@
 
 'use server';
-import { db } from './index';
-import { users } from './schema';
-import { eq, desc } from 'drizzle-orm';
+import { adminDb } from '@/lib/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
-export async function getUserProfile(id: string) {
-    const data = await db.query.users.findFirst({
-        where: eq(users.id, id),
-    });
-    return data;
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  credits: number;
+  createdAt: string; // Storing as ISO string
+  updatedAt: string; // Storing as ISO string
+  bio?: string;
+  profilePictureUrl?: string;
 }
-export type UserProfile = NonNullable<Awaited<ReturnType<typeof getUserProfile>>>;
 
-
-export async function getAllUsers() {
-    const data = await db.query.users.findMany({
-      orderBy: [desc(users.createdAt)]
-    });
-    return data;
+export async function getUserProfile(id: string): Promise<UserProfile | null> {
+    const userDoc = await adminDb.collection('users').doc(id).get();
+    if (!userDoc.exists) {
+        return null;
+    }
+    const data = userDoc.data();
+    return { id: userDoc.id, ...data } as UserProfile;
 }
-export type AllUsers = Awaited<ReturnType<typeof getAllUsers>>;
 
 export async function getPaginatedUsers({ page, limit }: { page: number; limit: number; }) {
-    const offset = (page - 1) * limit;
-    const data = await db.query.users.findMany({
-        orderBy: [desc(users.createdAt)],
-        limit: limit,
-        offset: offset,
-    });
-    return data;
-}
+    let query = adminDb.collection('users')
+      .orderBy('createdAt', 'desc')
+      .limit(limit);
 
+    if (page > 1) {
+      const startAfterDoc = await adminDb.collection('users')
+        .orderBy('createdAt', 'desc')
+        .limit((page - 1) * limit)
+        .get()
+        .then(snapshot => snapshot.docs[snapshot.docs.length - 1]);
+      
+      if(startAfterDoc) {
+          query = query.startAfter(startAfterDoc);
+      }
+    }
+    
+    const snapshot = await query.get();
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+}
 
 export async function updateUser(userId: string, data: {
     name: string;
     avatarUrl?: string;
     bio?: string;
 }) {
-    await db.update(users).set({
+    await adminDb.collection('users').doc(userId).update({
         name: data.name,
         profilePictureUrl: data.avatarUrl,
         bio: data.bio,
         updatedAt: new Date().toISOString(),
-    }).where(eq(users.id, userId));
+    });
 }
 
 export async function updateUserCredits(userId: string, creditsToAdd: number): Promise<number> {
-    const user = await db.query.users.findFirst({
-        where: eq(users.id, userId),
-        columns: { credits: true }
+    const userRef = adminDb.collection('users').doc(userId);
+    
+    // It's safer to use a transaction for this in a real high-concurrency app,
+    // but FieldValue.increment is atomic and sufficient for many cases.
+    await userRef.update({
+        credits: FieldValue.increment(creditsToAdd),
+        updatedAt: new Date().toISOString(),
     });
-
-    if (!user) {
-        throw new Error("User not found");
-    }
-
-    const newBalance = (user.credits ?? 0) + creditsToAdd;
-
-    await db.update(users)
-        .set({ credits: newBalance, updatedAt: new Date().toISOString() })
-        .where(eq(users.id, userId));
-
-    return newBalance;
+    
+    const updatedUser = await userRef.get();
+    return updatedUser.data()?.credits ?? 0;
 }
 
 export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
-    const user = await db.query.users.findFirst({
-        where: eq(users.id, userId),
-        columns: { credits: true }
+    const userRef = adminDb.collection('users').doc(userId);
+
+    // Using a transaction to ensure atomicity for credit deduction
+    return adminDb.runTransaction(async (transaction) => {
+        const userDoc = await transaction.get(userRef);
+        if (!userDoc.exists) {
+            throw new Error("User not found");
+        }
+        
+        const currentCredits = userDoc.data()?.credits ?? 0;
+        
+        if (currentCredits < creditsToDeduct) {
+            throw new Error("Insufficient credits");
+        }
+        
+        const newBalance = currentCredits - creditsToDeduct;
+        transaction.update(userRef, { 
+            credits: newBalance,
+            updatedAt: new Date().toISOString() 
+        });
+        
+        return newBalance;
     });
-
-    if (!user) {
-        throw new Error("User not found");
-    }
-
-    if ((user.credits ?? 0) < creditsToDeduct) {
-        throw new Error("Insufficient credits");
-    }
-
-    const newBalance = (user.credits ?? 0) - creditsToDeduct;
-
-    await db.update(users)
-        .set({ credits: newBalance, updatedAt: new Date().toISOString() })
-        .where(eq(users.id, userId));
-
-    return newBalance;
 }
 
-
-export async function updateUserByAdmin(userId: string, data: {
-    name?: string;
-    email?: string;
-    bio?: string;
-    credits?: number;
-}) {
-  await db.update(users).set({...data, updatedAt: new Date().toISOString()}).where(eq(users.id, userId));
+export async function updateUserByAdmin(userId: string, data: Partial<UserProfile>) {
+  const { id, ...updateData } = data; // Exclude id from the update payload
+  await adminDb.collection('users').doc(userId).update({
+      ...updateData,
+      updatedAt: new Date().toISOString()
+  });
 }
 
 export async function deleteUser(userId: string) {
     // This should also handle deleting the user from Firebase Auth
-    // and potentially cascade-deleting related data. For now, it just deletes from the DB.
-    await db.delete(users).where(eq(users.id, userId));
+    // For now, it just deletes from Firestore.
+    await adminDb.collection('users').doc(userId).delete();
 }

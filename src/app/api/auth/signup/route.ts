@@ -1,10 +1,7 @@
 
 import { NextResponse } from 'next/server';
-import { auth } from '@/lib/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
-import { db } from '@/lib/db';
-import { users } from '@/lib/db/schema';
+import { auth, adminDb } from '@/lib/firebase/admin';
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,32 +21,29 @@ export async function POST(req: Request) {
     const { email, password, name } = validation.data;
 
     // Step 1: Create user in Firebase Auth
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      displayName: name,
+    });
 
-    // Step 2: Create user in our own database
-    try {
-      await db.insert(users).values({
-        id: user.uid,
-        email: user.email!,
-        name: name,
+    // Step 2: Create user in our own database (Firestore)
+    const newUserProfile = {
+        name,
+        email,
         credits: 10, // Default starting credits
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-      });
-    } catch (dbError) {
-      // If DB insert fails, we should ideally delete the Firebase user to avoid orphaned accounts.
-      // This is a more advanced transactional pattern. For now, we log the error.
-      console.error("Failed to create user in DB after creating in Firebase Auth:", dbError);
-      // We can choose to return an error to the user here.
-      return NextResponse.json({ error: "Failed to create user profile in database." }, { status: 500 });
-    }
-
+        bio: '',
+        profilePictureUrl: '',
+    };
+    await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
+    
     // Return only non-sensitive data
     return NextResponse.json({ 
       user: {
-        uid: user.uid, 
-        email: user.email 
+        uid: userRecord.uid, 
+        email: userRecord.email 
       }
     }, { status: 201 });
 
@@ -57,7 +51,7 @@ export async function POST(req: Request) {
     console.error("Signup error:", error);
 
     // Firebase Authentication error handling
-    if (error.code === 'auth/email-already-in-use') {
+    if (error.code === 'auth/email-already-exists') {
       return NextResponse.json({ error: "Email address already in use" }, { status: 409 });
     } else if (error.code === 'auth/invalid-email') {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
