@@ -1,5 +1,5 @@
 
-import 'server-only';
+'use server';
 import { db } from './index';
 import { users } from './schema';
 import { eq, desc } from 'drizzle-orm';
