@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import type { DiagramType, SectionName, PresentationHistoryEntry } from '@/ai/schemas';
 import type { GuidelineState } from '@/hooks/useBuilderStore';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -74,6 +75,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         presentation,
         activePresentationId,
         contextSelection,
+        selectedPresentationTemplateId, // New state
+        setSelectedPresentationTemplateId, // New action
         toggleContextSelection,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
@@ -89,6 +92,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         presentation: state.presentation,
         activePresentationId: state.activePresentationId,
         contextSelection: state.contextSelection,
+        selectedPresentationTemplateId: state.selectedPresentationTemplateId,
+        setSelectedPresentationTemplateId: state.setSelectedPresentationTemplateId,
         toggleContextSelection: state.toggleContextSelection,
         handleGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
         setCustomGuidelineInputForItem: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
@@ -140,6 +145,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             diagrams: selectedDiagrams,
             guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
+            templateId: selectedPresentationTemplateId, // Pass the templateId
         };
         onGenerate(body);
     }
@@ -153,6 +159,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState.presentation;
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
+    const selectedTemplate = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === selectedPresentationTemplateId);
+
 
     return (
         <div className="space-y-6">
@@ -162,11 +170,11 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="pptx-template-select">PPTX Template</Label>
+                        <Label htmlFor="pptx-template-select">PPTX Export Style</Label>
                         {pptxLoaded ? (
                         <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange}>
                             <SelectTrigger id="pptx-template-select">
-                                <SelectValue placeholder="Select a template" />
+                                <SelectValue placeholder="Select a style" />
                             </SelectTrigger>
                             <SelectContent>
                                 {Object.entries(pptxTemplates).map(([key, template]) => (
@@ -189,11 +197,26 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                     <CardDescription>Configure and generate the presentation.</CardDescription>
                 </CardHeader>
                 <CardContent>
+                    <div className="space-y-2 mb-4">
+                        <Label htmlFor="presentation-template-select">Presentation Template</Label>
+                        <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
+                            <SelectTrigger id="presentation-template-select">
+                                <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {PRESENTATION_GENERATION_TEMPLATES.map(template => (
+                                    <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
+                    </div>
+
                     <Accordion type="single" collapsible defaultValue="presentation" className="w-full space-y-1">
                         <AccordionItem value="presentation">
                             <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                 <div className="flex items-center gap-2">
-                                    <Presentation className="h-4 w-4" /> {presentationConfig.presentation.title}
+                                    <Presentation className="h-4 w-4" /> Edit Generation Details
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="space-y-4 p-4">

@@ -9,6 +9,8 @@ import { toast } from '@/hooks/use-toast';
 import { AGENTS } from '@/lib/agents';
 import type { AgentPrompt } from '@/lib/agents';
 import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+
 
 export interface PresentationHistoryEntry {
     id: string;
@@ -52,6 +54,7 @@ export interface BuilderState {
   // UI States
   selectedTemplate: ProposalTemplateKey;
   selectedReportTemplateId: string;
+  selectedPresentationTemplateId: string; // New state
   customGuidelines: string[];
   controlState: Record<SectionName, ControlState>;
   guidelineState: Record<string, GuidelineState>;
@@ -88,6 +91,7 @@ interface BuilderActions {
     // UI State Actions
     handleTemplateChange: (key: ProposalTemplateKey) => void;
     setSelectedReportTemplateId: (id: string) => void;
+    setSelectedPresentationTemplateId: (id: string) => void; // New action
     handleAddCustomGuideline: () => void;
     handleRemoveCustomGuideline: (index: number) => void;
     setCustomGuidelineInput: (value: string) => void;
@@ -150,6 +154,7 @@ const initialState: BuilderState = {
   externalContext: undefined,
   selectedTemplate: 'default',
   selectedReportTemplateId: 'software-report',
+  selectedPresentationTemplateId: 'software-presentation', // New state
   customGuidelines: [],
   controlState: getInitialControlState(),
   guidelineState: getInitialGuidelineStates(),
@@ -248,6 +253,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       // --- UI STATE ACTIONS ---
       handleTemplateChange: (key) => set({ selectedTemplate: key }),
       setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
+      setSelectedPresentationTemplateId: (id) => set({ selectedPresentationTemplateId: id }), // New action
       handleAddCustomGuideline: () => {
           const { customGuidelines, customGuidelineInput } = get();
           const newGuideline = customGuidelineInput['proposal']?.trim();

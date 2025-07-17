@@ -12,6 +12,7 @@ const ApiGeneratePresentationSchema = z.object({
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
   externalContextContent: z.string().optional(),
+  templateId: z.string().optional(), // Added templateId
 });
 
 
