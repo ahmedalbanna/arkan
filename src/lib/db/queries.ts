@@ -1,3 +1,4 @@
+
 import 'server-only';
 import { db } from './index';
 import { users } from './schema';
@@ -19,6 +20,16 @@ export async function getAllUsers() {
     return data;
 }
 export type AllUsers = Awaited<ReturnType<typeof getAllUsers>>;
+
+export async function getPaginatedUsers({ page, limit }: { page: number; limit: number; }) {
+    const offset = (page - 1) * limit;
+    const data = await db.query.users.findMany({
+        orderBy: [desc(users.createdAt)],
+        limit: limit,
+        offset: offset,
+    });
+    return data;
+}
 
 
 export async function updateUser(userId: string, data: {

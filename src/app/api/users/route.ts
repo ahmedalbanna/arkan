@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAllUsers } from '@/lib/db/queries';
+import { getPaginatedUsers } from '@/lib/db/queries';
 
 const userSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -38,9 +38,27 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+const userListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(50).default(10),
+});
+
+
+export async function GET(request: Request) {
   try {
-    const users = await getAllUsers();
+    const { searchParams } = new URL(request.url);
+    const query = userListQuerySchema.safeParse({
+        page: searchParams.get('page'),
+        limit: searchParams.get('limit'),
+    });
+    
+    if (!query.success) {
+        return NextResponse.json({ errors: query.error.flatten().fieldErrors }, { status: 400 });
+    }
+
+    const { page, limit } = query.data;
+
+    const users = await getPaginatedUsers({ page, limit });
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
     console.error('Error fetching users:', error);

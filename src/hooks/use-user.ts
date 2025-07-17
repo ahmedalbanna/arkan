@@ -61,7 +61,7 @@ export function usePurchaseCredits() {
     return useMutation({
         mutationFn: purchasePlan,
         onSuccess: (data, plan) => {
-            // Invalidate the user query to trigger a refetch of their profile/credits
+            // Invalidate all user queries to refetch their profile/credits
             queryClient.invalidateQueries({ queryKey: userKeys.all });
             
             toast({
