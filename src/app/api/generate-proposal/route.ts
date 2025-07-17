@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     const { projectIdea, prompt } = validation.data;
 
-    const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal');
+    const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal-report');
     if (!proposalAgent) {
       return NextResponse.json({ message: 'Proposal generation agent not configured.' }, { status: 500 });
     }
