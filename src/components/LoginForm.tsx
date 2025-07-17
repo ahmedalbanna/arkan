@@ -15,6 +15,7 @@ import { Loader2, KeyRound, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { auth } from '@/lib/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
+import { Label } from './ui/label';
 
 const emailSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
