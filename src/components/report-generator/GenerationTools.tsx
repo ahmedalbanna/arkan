@@ -18,7 +18,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph } from 'lucide-react';
-import type { AgentGuideline, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
@@ -29,12 +29,13 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
+import type { GuidelineState } from '@/hooks/useBuilderStore';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
 
 // Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: any[]): string[] => {
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
     const agentIdSuffix = itemKey;
     const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
     const currentGuidelineState = guidelineState[itemKey];
@@ -351,7 +352,7 @@ export const GenerationTools = () => {
                                                                 </Label>
                                                             </div>
                                                         ))}
-                                                        {orderedSections.filter(sKey => !sections[sKey]).length === orderedSections.length -1 && (
+                                                        {orderedSections.filter(sKey => sKey !==key && !sections[sKey]).length === orderedSections.length -1 && (
                                                           <p className="text-xs text-muted-foreground">No other sections generated yet.</p>
                                                         )}
                                                     </div>
@@ -440,5 +441,3 @@ export const GenerationTools = () => {
         </Card>
     );
 };
-
-    
