@@ -100,5 +100,8 @@ export async function updateUserByAdmin(userId: string, data: Partial<Omit<UserP
 }
 
 export async function deleteUser(userId: string) {
+    // Note: This only deletes the Firestore record. For a full deletion,
+    // you would also need to call `adminAuth.deleteUser(userId)` and delete
+    // any associated data in Storage or other services.
     await adminDb.collection('users').doc(userId).delete();
 }
