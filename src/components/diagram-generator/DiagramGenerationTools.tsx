@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText } from 'lucide-react';
-import type { AgentGuideline, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
@@ -24,14 +24,16 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateClassDiagramOutput } from '@/ai/flows/generate-class-diagram';
+import type { GuidelineState } from '@/hooks/useBuilderStore';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
 
 // Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: any[]): string[] => {
-    const agentIdSuffix = itemKey;
-    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
+    const agentIdSuffix = `generate-${itemKey}-diagram`;
+    const agent = agents.find(a => a.id.startsWith('generate-') && a.id.endsWith('-diagram') && a.id.includes(itemKey));
+
     const currentGuidelineState = guidelineState[itemKey];
     
     if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
@@ -375,5 +377,3 @@ export const DiagramGenerationTools = () => {
         </Card>
     );
 };
-
-    

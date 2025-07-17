@@ -22,7 +22,9 @@ import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import type { DiagramType, SectionName } from '@/ai/schemas';
+import type { DiagramType, SectionName, PresentationHistoryEntry } from '@/ai/schemas';
+import type { GuidelineState } from '@/hooks/useBuilderStore';
+
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
@@ -36,9 +38,8 @@ interface PresentationGenerationToolsProps {
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
 // Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, any>, agents: any[]): string[] => {
-    const agentIdSuffix = itemKey;
-    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
+    const agent = agents.find(a => a.id === 'generate-presentation');
     const currentGuidelineState = guidelineState[itemKey];
     
     if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
@@ -70,6 +71,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         guidelineState,
         customGuidelineInput,
         presentation,
+        activePresentationId,
         contextSelection,
         toggleContextSelection,
         handleGuidelineToggle,
@@ -83,6 +85,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
         presentation: state.presentation,
+        activePresentationId: state.activePresentationId,
         contextSelection: state.contextSelection,
         toggleContextSelection: state.toggleContextSelection,
         handleGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
@@ -114,7 +117,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     
     const handleExportPresentation = async () => {
         if (!presentations || presentations.length === 0) return;
-        const activePresentation = presentations.find(p => p.id === useBuilderStore.getState().activePresentationId) || presentations[0];
+        const activePresentation = presentations.find(p => p.id === activePresentationId) || presentations[0];
         await exportPresentationAsPptx(activePresentation.slides, selectedPptxTemplate);
     }
 
