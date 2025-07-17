@@ -13,9 +13,11 @@ import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth } from '@/lib/firebase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, locale, setLocale } = useLocalization();
   const { userProfile, isLoading, firebaseUser } = useAuth();
 
@@ -25,6 +27,8 @@ export function Header() {
 
   const handleLogout = async () => {
     await auth.signOut();
+    router.push('/');
+    router.refresh();
   }
 
   const navLinks = [
