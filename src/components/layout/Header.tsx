@@ -99,7 +99,10 @@ export function Header() {
 
         <div className="flex-1 flex justify-end items-center gap-2">
           {isLoading ? (
-            <Skeleton className="h-8 w-20" />
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-8 w-20" />
+              <Skeleton className="h-8 w-8 rounded-full" />
+            </div>
           ) : firebaseUser && userProfile ? (
             <>
               <Button variant="outline" asChild>
