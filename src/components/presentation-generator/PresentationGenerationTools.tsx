@@ -210,7 +210,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             {currentGuidelineState?.custom.map((custom, index) => (
                                                 <div key={index} className="flex items-center gap-2 text-sm">
                                                     <span>- {custom}</span>
-                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem('presentation', index)}>
+                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
                                                         <Trash2 className="h-3 w-3 text-destructive" />
                                                     </Button>
                                                 </div>
