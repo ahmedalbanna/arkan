@@ -12,6 +12,8 @@ import { generateSystemProgramming } from '@/ai/flows/generate-system-programmin
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { deductCredit } from '@/services/credit-service';
+import { auth } from '@/lib/firebase/admin';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -89,6 +91,14 @@ ${JSON.stringify(proposal, null, 2)}
 
 export async function POST(request: Request) {
   try {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authorization.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userId = decodedToken.uid;
+    
     const body = await request.json();
     const validation = generateReportSchema.safeParse(body);
 
@@ -104,6 +114,8 @@ export async function POST(request: Request) {
       if (!template) {
         return NextResponse.json({ message: 'Invalid report template ID.' }, { status: 400 });
       }
+
+      await deductCredit(userId, template.agentIds.length); // Deduct credits for the full report
 
       const generatedSections: { [key in SectionName]?: string } = {};
       
@@ -139,6 +151,8 @@ export async function POST(request: Request) {
 
     // Handle single section generation
     if (sectionToGenerate) {
+      await deductCredit(userId, 1); // Deduct 1 credit for a single section
+      
       const agentInfo = sectionAgentMap[sectionToGenerate];
       if (!agentInfo) {
         return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
@@ -166,6 +180,12 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error(`Error generating report:`, error);
+    if (error instanceof Error) {
+        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
+            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+        return NextResponse.json({ message: error.message }, { status: 500 });
+    }
     return NextResponse.json({ message: 'An unexpected error occurred while generating the report.' }, { status: 500 });
   }
 }

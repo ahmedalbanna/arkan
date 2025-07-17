@@ -11,6 +11,8 @@ import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram'
 import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
 import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 import { deflateSync } from 'zlib';
+import { deductCredit } from '@/services/credit-service';
+import { auth } from '@/lib/firebase/admin';
 
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -69,6 +71,14 @@ const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> 
 
 export async function POST(request: Request) {
   try {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authorization.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userId = decodedToken.uid;
+    
     const body = await request.json();
     // Loosen schema for render-only intent
     const validation = generateDiagramSchema.partial().safeParse(body);
@@ -79,6 +89,7 @@ export async function POST(request: Request) {
 
     const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, intent, plantUmlCode, externalContextContent } = validation.data;
 
+    // The intent 'update_diagram' just re-renders PlantUML and should not cost credits.
     if (intent === 'update_diagram') {
         if (!plantUmlCode) {
             return NextResponse.json({ message: 'PlantUML code is required for an update.'}, { status: 400 });
@@ -86,6 +97,9 @@ export async function POST(request: Request) {
         const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
         return NextResponse.json({ plantUmlCode, imageUrl }, { status: 200 });
     }
+    
+    // Deduct credit for new diagram generation.
+    await deductCredit(userId, 1);
 
     if (!proposal || !diagramToGenerate) {
         return NextResponse.json({ message: 'Proposal and diagram type are required for generation.' }, { status: 400 });
@@ -162,6 +176,12 @@ ${JSON.stringify(proposal, null, 2)}
 
   } catch (error) {
     console.error(`Error generating diagram:`, error);
+    if (error instanceof Error) {
+        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
+            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+        return NextResponse.json({ message: error.message }, { status: 500 });
+    }
     return NextResponse.json({ message: 'An unexpected error occurred while generating the diagram.' }, { status: 500 });
   }
 }
