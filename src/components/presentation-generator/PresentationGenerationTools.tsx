@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { presentationConfig, sectionConfig, diagramConfig } from '@/lib/report-config';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Presentation, FileDown } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Presentation, FileDown, FileText } from 'lucide-react';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -68,6 +68,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         proposal,
         sections,
         diagrams,
+        externalContext,
         guidelineState,
         customGuidelineInput,
         presentation,
@@ -82,6 +83,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         proposal: state.proposal,
         sections: state.sections,
         diagrams: state.diagrams,
+        externalContext: state.externalContext,
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
         presentation: state.presentation,
@@ -122,7 +124,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     }
 
     const handleGenerateClick = () => {
-        const selection = contextSelection['presentation'] || { sections: {}, diagrams: {} };
+        const selection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
 
         const selectedSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
@@ -137,19 +139,20 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             sections: selectedSections,
             diagrams: selectedDiagrams,
             guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
+            externalContextContent: selection.externalContext ? externalContext?.content : undefined,
         };
         onGenerate(body);
     }
     
 
     if (!agentsLoaded || !agent) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>
+        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
 
     const promptConfig = agent.prompt as AgentPrompt;
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState.presentation;
-    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {} };
+    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
 
     return (
         <div className="space-y-6">
@@ -254,9 +257,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                     <TabsContent value="context" className="pt-4">
                                         <div className="space-y-2">
                                             <Label className="font-semibold">Context from Current Session</Label>
-                                            {!hasContent ? (
+                                            {!hasContent && !externalContext ? (
                                                 <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
-                                                    No sections or diagrams have been generated yet.
+                                                    No sections, diagrams, or external context available.
                                                 </p>
                                             ) : (
                                                 <ScrollArea className="h-48 border rounded-md p-2">
@@ -278,6 +281,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                   </Label>
                                                               </div>
                                                           ))}
+                                                          {Object.keys(sections).length === 0 && (
+                                                            <p className="text-xs text-muted-foreground">No sections generated yet.</p>
+                                                          )}
                                                       </div>
                                                       {Object.keys(diagrams || {}).length > 0 && (
                                                         <div className="space-y-2 pt-2 border-t">
@@ -297,6 +303,24 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                     </Label>
                                                                 </div>
                                                             ))}
+                                                        </div>
+                                                      )}
+                                                      {externalContext && (
+                                                        <div className="space-y-2 pt-2 border-t">
+                                                            <Label className="font-semibold">External Context</Label>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id="context-external-pres"
+                                                                    checked={!!currentSelection.externalContext}
+                                                                    onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', null, !!checked)}
+                                                                />
+                                                                <Label htmlFor="context-external-pres" className="text-sm font-normal">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <FileText className="h-4 w-4" />
+                                                                        {externalContext.fileName}
+                                                                    </div>
+                                                                </Label>
+                                                            </div>
                                                         </div>
                                                       )}
                                                   </div>

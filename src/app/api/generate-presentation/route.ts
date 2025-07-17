@@ -11,6 +11,7 @@ const ApiGeneratePresentationSchema = z.object({
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
+  externalContextContent: z.string().optional(),
 });
 
 
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
-    const { proposal, sections, diagrams, guidelines } = validation.data;
+    const { proposal, sections, diagrams, guidelines, externalContextContent } = validation.data;
     const agentPrompt = presentationAgent.prompt as AgentPrompt;
 
     // --- Server-side prompt construction ---
@@ -41,6 +42,10 @@ export async function POST(request: Request) {
     }
 
     const contextContent = [];
+    if (externalContextContent) {
+        contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
+        contextContent.push(externalContextContent);
+    }
     if (sections && Object.keys(sections).length > 0) {
         contextContent.push('--- REPORT SECTIONS ---');
         for (const [sectionName, content] of Object.entries(sections)) {

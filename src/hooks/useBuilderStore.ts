@@ -35,6 +35,7 @@ export type GuidelineState = {
 export interface ContextSelection {
   sections: Partial<Record<SectionName, boolean>>;
   diagrams: Partial<Record<DiagramType, boolean>>;
+  externalContext: boolean;
 }
 
 
@@ -81,7 +82,7 @@ interface BuilderActions {
     // Context Actions
     setExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: () => void;
-    toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams' | 'externalContext', contextKey: SectionName | DiagramType, isSelected: boolean) => void;
+    toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams' | 'externalContext', contextKey: SectionName | DiagramType | null, isSelected: boolean) => void;
     // UI State Actions
     handleTemplateChange: (key: ProposalTemplateKey) => void;
     handleAddCustomGuideline: () => void;
@@ -96,29 +97,34 @@ interface BuilderActions {
 
 const getInitialGuidelineStates = (): Record<string, GuidelineState> => {
     const initialState: Record<string, GuidelineState> = {};
-    AGENTS.forEach(agent => {
-        const prompt = agent.prompt as AgentPrompt | undefined;
-        if (prompt?.guidelines) {
-            const checked: Record<number, boolean> = {};
-            prompt.guidelines.forEach((g, index) => {
-                checked[index] = g.isDefault;
-            });
-            const key = agent.id.replace('generate-', '');
-            initialState[key] = { checked, custom: [] };
-        }
+    const allItemKeys = [
+      ...SectionNameSchema.options, 
+      ...DiagramTypeSchema.options, 
+      'presentation', 
+      'proposal'
+    ];
+
+    allItemKeys.forEach(itemKey => {
+      let agent;
+      if (itemKey === 'proposal') {
+          agent = AGENTS.find(a => a.id === 'generate-proposal-report');
+      } else if (itemKey === 'presentation') {
+          agent = AGENTS.find(a => a.id === 'generate-presentation');
+      } else {
+          agent = AGENTS.find(a => a.id.includes(itemKey));
+      }
+
+      if (agent && typeof agent.prompt === 'object' && agent.prompt.guidelines) {
+          const checked: Record<number, boolean> = {};
+          agent.prompt.guidelines.forEach((g, index) => {
+              checked[index] = g.isDefault;
+          });
+          initialState[itemKey] = { checked, custom: [] };
+      } else {
+          initialState[itemKey] = { checked: {}, custom: [] };
+      }
     });
-    // Add presentation specifically if not covered by agent loop logic
-    if (!initialState['presentation']) {
-        const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
-        const prompt = presentationAgent?.prompt as AgentPrompt | undefined;
-        if (prompt?.guidelines) {
-             const checked: Record<number, boolean> = {};
-             prompt.guidelines.forEach((g, index) => {
-                checked[index] = g.isDefault;
-             });
-             initialState['presentation'] = { checked, custom: [] };
-        }
-    }
+
     return initialState;
 };
 
@@ -223,9 +229,13 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         set(state => {
           const newContextSelection = { ...state.contextSelection };
           if (!newContextSelection[itemKey]) {
-            newContextSelection[itemKey] = { sections: {}, diagrams: {} };
+            newContextSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: false };
           }
-          newContextSelection[itemKey][contextType][contextKey as any] = isSelected;
+          if (contextType === 'externalContext') {
+            newContextSelection[itemKey].externalContext = isSelected;
+          } else if (contextKey) {
+            newContextSelection[itemKey][contextType][contextKey as any] = isSelected;
+          }
           return { contextSelection: newContextSelection };
         });
       },
@@ -267,7 +277,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const { guidelineState, customGuidelineInput } = get();
           const newGuideline = customGuidelineInput[itemKey]?.trim();
           if (newGuideline) {
-              const newGuidelineState = { ...guidelineState[itemKey]!, custom: [...(guidelineState[itemKey]?.custom || []), newGuideline]};
+              const itemState = guidelineState[itemKey] || { checked: {}, custom: [] };
+              const newGuidelineState = { ...itemState, custom: [...itemState.custom, newGuideline]};
               set(state => ({
                   guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState },
                   customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: '' }
@@ -275,8 +286,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           }
       },
       handleRemoveCustomGuidelineForItem: (itemKey, index) => set(state => {
-          const newCustom = state.guidelineState[itemKey]!.custom.filter((_, i) => i !== index);
-          const newGuidelineState = { ...state.guidelineState[itemKey]!, custom: newCustom };
+          const itemState = state.guidelineState[itemKey]!;
+          const newCustom = itemState.custom.filter((_, i) => i !== index);
+          const newGuidelineState = { ...itemState, custom: newCustom };
           return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
       }),
     }),
@@ -296,5 +308,3 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     }
   )
 );
-
-    

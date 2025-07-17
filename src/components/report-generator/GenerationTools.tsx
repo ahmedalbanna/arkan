@@ -171,7 +171,7 @@ export const GenerationTools = () => {
             return;
         };
         
-        const selection = contextSelection[section] || { sections: {}, diagrams: {} };
+        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: false };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
@@ -188,7 +188,7 @@ export const GenerationTools = () => {
             otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
-            externalContextContent: externalContext?.content,
+            externalContextContent: selection.externalContext ? externalContext?.content : undefined,
         };
         setActiveMutationKey(section);
         sectionMutation.mutate(body);
@@ -234,7 +234,7 @@ export const GenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = sectionConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {} };
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: false };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -399,33 +399,35 @@ export const GenerationTools = () => {
                     })}
                 </Accordion>
                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">External Context (PDF)</h3>
+                    <h3 className="text-sm font-semibold mb-2">External Context</h3>
                     {externalContext ? (
-                        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
-                           <div className="flex items-center gap-2 truncate">
-                             <FileText className="h-4 w-4 shrink-0" />
-                             <span className="truncate">{externalContext.fileName}</span>
-                           </div>
-                           <div className="flex items-center">
-                                <Dialog>
-                                    <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="max-w-3xl">
-                                        <DialogHeader>
-                                            <DialogTitle>{externalContext.fileName}</DialogTitle>
-                                        </DialogHeader>
-                                        <ScrollArea className="h-[60vh] rounded-md border p-4">
-                                            <ReactMarkdown components={markdownComponents}>{externalContext.content}</ReactMarkdown>
-                                        </ScrollArea>
-                                    </DialogContent>
-                                </Dialog>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
-                                    <X className="h-4 w-4" />
-                                </Button>
-                           </div>
+                        <div className="space-y-2">
+                             <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
+                               <div className="flex items-center gap-2 truncate">
+                                 <FileText className="h-4 w-4 shrink-0" />
+                                 <span className="truncate">{externalContext.fileName}</span>
+                               </div>
+                               <div className="flex items-center">
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-3xl">
+                                            <DialogHeader>
+                                                <DialogTitle>{externalContext.fileName}</DialogTitle>
+                                            </DialogHeader>
+                                            <ScrollArea className="h-[60vh] rounded-md border p-4">
+                                                <ReactMarkdown components={markdownComponents}>{externalContext.content}</ReactMarkdown>
+                                            </ScrollArea>
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                               </div>
+                            </div>
                         </div>
                     ) : (
                         <div className="space-y-2">

@@ -145,17 +145,13 @@ export const DiagramGenerationTools = () => {
         }
     };
     
-    if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
-    }
-    
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!user) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         }
 
-        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {} };
+        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: false };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
@@ -170,7 +166,7 @@ export const DiagramGenerationTools = () => {
             otherSections,
             otherDiagrams,
             guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
-            externalContextContent: externalContext?.content,
+            externalContextContent: selection.externalContext ? externalContext?.content : undefined,
         };
         setActiveMutationKey(diagramType);
         diagramMutation.mutate(body);
@@ -184,6 +180,10 @@ export const DiagramGenerationTools = () => {
     };
 
 
+    if (!agentsLoaded) {
+        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+    }
+    
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
@@ -200,7 +200,7 @@ export const DiagramGenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {} };
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: false };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -313,6 +313,25 @@ export const DiagramGenerationTools = () => {
                                                           ))}
                                                       </div>
                                                     )}
+                                                     {/* Context selection UI for external file */}
+                                                    {externalContext && (
+                                                        <div className="space-y-2 pt-2 border-t">
+                                                            <Label className="font-semibold">External Context</Label>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id={`context-external-${key}`}
+                                                                        checked={!!currentSelection.externalContext}
+                                                                        onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', null, !!checked)}
+                                                                    />
+                                                                    <Label htmlFor={`context-external-${key}`} className="text-sm font-normal">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <FileText className="h-4 w-4" />
+                                                                            {externalContext.fileName}
+                                                                        </div>
+                                                                    </Label>
+                                                                </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </ScrollArea>
                                         </TabsContent>
@@ -335,7 +354,7 @@ export const DiagramGenerationTools = () => {
                     })}
                 </Accordion>
                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">External Context (PDF)</h3>
+                    <h3 className="text-sm font-semibold mb-2">External Context</h3>
                     {externalContext ? (
                         <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
                            <div className="flex items-center gap-2 truncate">

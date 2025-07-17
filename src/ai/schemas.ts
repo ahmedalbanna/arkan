@@ -80,6 +80,14 @@ export const PresentationSlideSchema = z.object({
 });
 export type PresentationSlide = z.infer<typeof PresentationSlideSchema>;
 
+export const PresentationHistoryEntrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  slides: z.array(PresentationSlideSchema),
+});
+export type PresentationHistoryEntry = z.infer<typeof PresentationHistoryEntrySchema>;
+
+
 export const GeneratePresentationInputSchema = z.object({
   proposal: ProjectProposalSchema,
   sections: z.record(SectionNameSchema, z.string()).optional(),
