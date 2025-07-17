@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { AllUsers } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/db/queries';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import {
@@ -24,8 +24,7 @@ import { userKeys } from '@/lib/query-keys';
 const USERS_PER_PAGE = 10;
 
 // This query function now uses the page number to fetch a specific "page" of users.
-async function fetchUsers(page: number): Promise<AllUsers> {
-    // The API route needs to be updated to handle these query parameters.
+async function fetchUsers(page: number): Promise<UserProfile[]> {
     const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`);
     if (!response.ok) {
         throw new Error('Failed to fetch users');
@@ -90,7 +89,7 @@ export default function UserManagementConsole() {
     return (
         <Card>
             <CardContent className="p-8 text-center text-destructive">
-                Failed to load users
+                Failed to load users.
             </CardContent>
         </Card>
     )

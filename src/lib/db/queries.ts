@@ -92,10 +92,9 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
     });
 }
 
-export async function updateUserByAdmin(userId: string, data: Partial<UserProfile>) {
-  const { id, ...updateData } = data;
+export async function updateUserByAdmin(userId: string, data: Partial<Omit<UserProfile, 'id'>>) {
   await adminDb.collection('users').doc(userId).update({
-      ...updateData,
+      ...data,
       updatedAt: new Date().toISOString()
   });
 }
