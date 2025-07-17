@@ -260,7 +260,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       handleRemoveCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
       setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
-      handleControlChange: (section, field, keyof ControlState, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section]!, [field]: value } } })),
+      handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section]!, [field]: value } } })),
       
       handleGuidelineToggle: (itemKey, guidelineIndex, isChecked) => set(state => {
         const itemGuidelineState = state.guidelineState[itemKey] || { checked: {}, custom: [] };
