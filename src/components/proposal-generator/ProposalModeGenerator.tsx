@@ -1,20 +1,20 @@
 
 'use client';
 
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, FileText, Download, FileJson } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { TemplateKey } from '@/lib/docx-styles';
-import { ProposalGenerationTools } from './proposal-generator/ProposalGenerationTools';
+import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
 import { useAuth } from '@/context/AuthContext';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
 import { templates as proposalTemplates } from '@/lib/proposal-templates';

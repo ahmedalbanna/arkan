@@ -1,14 +1,14 @@
 
 'use client';
 
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
-import { PresentationGenerationTools } from './presentation-generator/PresentationGenerationTools';
+import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { lazy } from 'react';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';

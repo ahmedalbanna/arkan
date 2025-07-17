@@ -5,7 +5,7 @@ import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';

@@ -17,7 +17,7 @@ import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadClo
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -100,9 +100,9 @@ export const DiagramGenerationTools = () => {
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
     } = useBuilderStore();
-
+    // State for PDF upload
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
-
+    // Handle diagram generation
     const diagramMutation = useMutation({
         mutationFn: generateDiagram,
         onSuccess: (data, variables) => {
@@ -117,7 +117,7 @@ export const DiagramGenerationTools = () => {
             setActiveMutationKey(null);
         },
     });
-
+    // Handle PDF upload
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
@@ -130,10 +130,10 @@ export const DiagramGenerationTools = () => {
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
         },
     });
-
+    // Check if anything is generating
     const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating;
-    
+    // Handle file upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -144,7 +144,7 @@ export const DiagramGenerationTools = () => {
             }
         }
     };
-    
+    // Handle diagram generation
     const onGenerateDiagram = (diagramType: DiagramType) => {
         if (!user) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});

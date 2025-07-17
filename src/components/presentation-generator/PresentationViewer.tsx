@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight, FileDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];

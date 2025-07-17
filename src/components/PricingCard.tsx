@@ -2,7 +2,7 @@
 'use client';
 
 import type { PricingPlan } from '@/lib/types';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';

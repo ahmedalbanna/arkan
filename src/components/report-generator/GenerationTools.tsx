@@ -23,8 +23,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
-import { Skeleton } from '../ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -66,7 +66,7 @@ const generateInstructionText = (controls: any): string => {
     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     return instructions.join('\n');
 };
-
+// Helper function to generate a section
 async function generateSection(variables: any): Promise<GenerateIntroductionOutput> {
     const response = await fetch('/api/generate-report', {
         method: 'POST',
@@ -79,7 +79,7 @@ async function generateSection(variables: any): Promise<GenerateIntroductionOutp
     }
     return response.json();
 }
-
+// Helper function to upload a PDF
 async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
     const response = await fetch('/api/pdf-to-markdown', {
         method: 'POST',
@@ -119,9 +119,10 @@ export const GenerationTools = () => {
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
     } = useBuilderStore();
-
+    // State for PDF upload
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
+    // Handle section generation
     const sectionMutation = useMutation({
         mutationFn: generateSection,
         onSuccess: (data, variables) => {
@@ -138,6 +139,7 @@ export const GenerationTools = () => {
         },
     });
 
+    // Handle PDF upload
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
@@ -150,10 +152,11 @@ export const GenerationTools = () => {
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
         },
     });
-    
+    // Check if anything is generating
     const isAnythingGenerating = sectionMutation.isPending;
     const isDisabled = isAnythingGenerating;
 
+    // Handle file upload
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -164,7 +167,8 @@ export const GenerationTools = () => {
             }
         }
     };
-    
+
+    // Handle section generation
     const onGenerateSection = (section: SectionName) => {
         if (!user) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
@@ -180,7 +184,7 @@ export const GenerationTools = () => {
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
 
-
+        
         const body = {
             proposal: proposal,
             sectionToGenerate: section,
@@ -201,7 +205,7 @@ export const GenerationTools = () => {
         pdfMutation.mutate(formData);
     };
 
-
+    // UI for each section
     if (!agentsLoaded) {
         return (
             <Card>
@@ -377,6 +381,25 @@ export const GenerationTools = () => {
                                                           ))}
                                                       </div>
                                                     )}
+                                                    {/* Context selection UI for external file */}
+                                                    {externalContext && (
+                                                        <div className="space-y-2 pt-2 border-t">
+                                                            <Label className="font-semibold">External Context</Label>
+                                                            <div className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id="context-external-pres"
+                                                                    checked={!!currentSelection.externalContext}
+                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', null, !!checked)} // the key is required for identifiy the builder mode. The key is the one who determines the activation of any section that is assigned to it
+                                                                />
+                                                                <Label htmlFor="context-external-pres" className="text-sm font-normal">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <FileText className="h-4 w-4" />
+                                                                        {externalContext.fileName}
+                                                                    </div>
+                                                                </Label>
+                                                            </div>
+                                                        </div>
+                                                      )}
                                                 </div>
                                             </ScrollArea>
                                         </TabsContent>

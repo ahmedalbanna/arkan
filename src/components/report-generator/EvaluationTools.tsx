@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { CheckCircle, FileText, Frown, Loader2, Meh, Smile, Star, UploadCloud } from 'lucide-react';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { useToast } from '@/hooks/use-toast';
-import { Progress } from '../ui/progress';
+import { Progress } from '@/components/ui/progress';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { ExternalLink, Pencil, Loader2 } from 'lucide-react';
 
 function AgentCard({ agent, onToggle }: { agent: Agent, onToggle: (id: string, isEnabled: boolean) => void }) {

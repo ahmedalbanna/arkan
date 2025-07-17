@@ -2,14 +2,14 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
+import { Input } from '@/components/ui/input';
 import { Loader2, UploadCloud, FileText, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/context/AuthContext';
 
 export default function PdfToMarkdownConverter() {

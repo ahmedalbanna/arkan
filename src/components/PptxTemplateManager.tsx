@@ -5,7 +5,7 @@ import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';

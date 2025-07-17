@@ -2,12 +2,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from './ui/button';
-import { Textarea } from './ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Loader2, Download, Copy, Check, Share2, RefreshCw } from 'lucide-react';
 import { saveAs } from 'file-saver';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface DiagramViewerProps {
     title: string;

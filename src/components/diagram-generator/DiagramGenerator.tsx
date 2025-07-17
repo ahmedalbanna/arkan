@@ -1,19 +1,19 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import DiagramViewer from './DiagramViewer';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { diagramConfig } from '@/lib/report-config';
 import { GitGraph, AlertCircle, Loader2 } from 'lucide-react';
-import { DiagramGenerationTools } from './diagram-generator/DiagramGenerationTools';
-import { Skeleton } from './ui/skeleton';
-import { Accordion } from './ui/accordion';
-import { AccordionItem, AccordionTrigger, AccordionContent } from './ui/accordion';
+import { DiagramGenerationTools } from './DiagramGenerationTools';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Accordion } from '@/components/ui/accordion';
+import { AccordionItem, AccordionTrigger, AccordionContent } from '../ui/accordion';
 import type { DiagramType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '../hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
