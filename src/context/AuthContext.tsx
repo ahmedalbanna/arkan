@@ -17,6 +17,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Handles setting/clearing the session cookie via our API route
+async function manageSessionCookie(user: FirebaseUser | null) {
+  if (user) {
+    const idToken = await user.getIdToken(true);
+    await fetch('/api/auth/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+    });
+  } else {
+    await fetch('/api/auth/session', {
+      method: 'DELETE',
+    });
+  }
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,6 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setFirebaseUser(user);
       setIsLoading(false);
+      manageSessionCookie(user);
     });
 
     return () => unsubscribe();

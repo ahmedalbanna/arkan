@@ -26,7 +26,11 @@ export function Header() {
   };
 
   const handleLogout = async () => {
+    // First, clear the server-side session cookie
+    await fetch('/api/auth/session', { method: 'DELETE' });
+    // Then, sign out the user from the client-side Firebase SDK
     await auth.signOut();
+    // Redirect to home and refresh the app state
     router.push('/');
     router.refresh();
   }
