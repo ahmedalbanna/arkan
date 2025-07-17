@@ -16,6 +16,8 @@ import Link from 'next/link';
 import { auth } from '@/lib/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
 import { Label } from './ui/label';
+import { useLogin } from '@/hooks/use-user';
+import type { LoginCredentials } from '@/lib/types';
 
 const emailSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
@@ -38,11 +40,12 @@ declare global {
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('email');
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
+  const [isPhoneLoading, setIsPhoneLoading] = useState(false);
 
+  const loginMutation = useLogin();
 
   const form = useForm({
     resolver: authMode === 'email' ? zodResolver(emailSchema) : zodResolver(phoneSchema),
@@ -57,16 +60,14 @@ export default function LoginForm() {
     if (!window.recaptchaVerifier) {
       window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
         'size': 'invisible',
-        'callback': (response: any) => {
-          // reCAPTCHA solved, allow signInWithPhoneNumber.
-        },
+        'callback': (response: any) => {},
       });
     }
     return window.recaptchaVerifier;
   };
 
   const handlePhoneSubmit = async ({ phone }: { phone: string }) => {
-    setIsLoading(true);
+    setIsPhoneLoading(true);
     try {
         const appVerifier = setupRecaptcha();
         const confirmationResult = await signInWithPhoneNumber(auth, phone, appVerifier);
@@ -77,15 +78,17 @@ export default function LoginForm() {
         console.error("Phone auth error:", error);
         toast({ title: 'Error Sending Code', description: 'Could not send verification code. Please check the number and try again.', variant: 'destructive' });
     } finally {
-        setIsLoading(false);
+        setIsPhoneLoading(false);
     }
   };
 
   const handleOtpSubmit = async () => {
-    setIsLoading(true);
+    setIsPhoneLoading(true);
     try {
         if (window.confirmationResult) {
             await window.confirmationResult.confirm(otp);
+            // After OTP confirmation, Firebase client SDK handles auth state.
+            // The onAuthStateChanged listener and session cookie API will take over.
             toast({ title: 'Login Successful', description: "You've been successfully signed in." });
             router.push('/generate');
             router.refresh();
@@ -93,48 +96,19 @@ export default function LoginForm() {
     } catch (error) {
         toast({ title: 'Invalid Code', description: 'The verification code is incorrect. Please try again.', variant: 'destructive' });
     } finally {
-        setIsLoading(false);
+        setIsPhoneLoading(false);
     }
   };
 
-  async function onSubmit(values: any) {
+  function onSubmit(values: LoginCredentials) {
     if (authMode === 'phone') {
-        handlePhoneSubmit(values);
+        handlePhoneSubmit({ phone: values.email }); // Reusing the schema field, but it's a phone number
         return;
     }
-
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Login failed. Please try again.');
-      }
-      
-      toast({
-        title: 'Login Successful',
-        description: "You've been successfully signed in.",
-      });
-
-      router.push('/generate');
-      router.refresh();
-
-    } catch (error: any) {
-      toast({
-        title: 'Login Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate(values);
   }
+
+  const isLoading = loginMutation.isPending || isPhoneLoading;
 
   return (
     <Card>

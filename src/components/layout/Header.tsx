@@ -11,16 +11,15 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { auth } from '@/lib/firebase';
+import { useLogout } from '@/hooks/use-user';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const { t, locale, setLocale } = useLocalization();
   const { userProfile, isLoading, firebaseUser } = useAuth();
+  const logoutMutation = useLogout();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -30,16 +29,6 @@ export function Header() {
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
   };
-
-  const handleLogout = async () => {
-    // First, clear the server-side session cookie
-    await fetch('/api/auth/session', { method: 'DELETE' });
-    // Then, sign out the user from the client-side Firebase SDK
-    await auth.signOut();
-    // Redirect to home and refresh the app state
-    router.push('/');
-    router.refresh();
-  }
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
@@ -132,7 +121,7 @@ export function Header() {
                            Profile
                         </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Logout
                     </DropdownMenuItem>

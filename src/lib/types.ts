@@ -1,3 +1,4 @@
+
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 
 export interface User {
@@ -17,4 +18,10 @@ export interface PricingPlan {
   credits: number;
   features: string[];
   isPopular?: boolean;
+}
+
+export interface LoginCredentials {
+    email: string;
+    password?: string; // Optional for phone auth
+    phone?: string;    // Optional for email auth
 }

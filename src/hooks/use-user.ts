@@ -4,26 +4,49 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import type { UserProfile } from '@/lib/db/queries';
-import type { PricingPlan } from '@/lib/types';
+import type { PricingPlan, LoginCredentials } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
 // --- Query Functions ---
-// These are the async functions that perform the actual API calls.
 
 async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
-  // If no userId is provided, don't attempt to fetch
   if (!userId) {
     return null;
   }
   const response = await fetch(`/api/users/${userId}`);
   if (!response.ok) {
     if (response.status === 404) {
-      return null; // Handle user not found gracefully
+      return null;
     }
     throw new Error('Failed to fetch user profile');
   }
   return response.json();
+}
+
+async function loginUser(credentials: LoginCredentials) {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Login failed. Please try again.');
+  }
+  return response.json();
+}
+
+async function logoutUser() {
+    const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+    });
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Logout failed.');
+    }
+    return response.json();
 }
 
 async function purchasePlan(plan: PricingPlan): Promise<{ newBalance: number }> {
@@ -43,24 +66,64 @@ async function purchasePlan(plan: PricingPlan): Promise<{ newBalance: number }> 
 
 
 // --- Custom Hooks ---
-// These hooks encapsulate the React Query logic for fetching and mutating user data.
 
-/**
- * Custom hook to fetch a user's profile.
- * @param userId The ID of the user to fetch.
- */
 export function useUserProfile(userId: string) {
   return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: () => fetchUserProfile(userId),
-    staleTime: 1000 * 60 * 5, // Cache user data for 5 minutes
-    enabled: !!userId, // Only run the query if a userId is provided
+    staleTime: 1000 * 60 * 5, 
+    enabled: !!userId,
   });
 }
 
-/**
- * Custom hook to handle the credit purchase mutation.
- */
+export function useLogin() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: loginUser,
+        onSuccess: () => {
+            toast({
+                title: 'Login Successful',
+                description: "You've been successfully signed in.",
+            });
+            // Invalidate queries to refetch user-specific data
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
+            router.push('/generate');
+            router.refresh();
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Login Error',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
+    });
+}
+
+export function useLogout() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: logoutUser,
+        onSuccess: async () => {
+            await fetch('/api/auth/session', { method: 'DELETE' });
+            queryClient.clear(); // Clear all cached data on logout
+            router.push('/login');
+            router.refresh();
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Logout Error',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
+    });
+}
+
 export function usePurchaseCredits() {
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -68,14 +131,11 @@ export function usePurchaseCredits() {
     return useMutation({
         mutationFn: purchasePlan,
         onSuccess: (data, plan) => {
-            // Invalidate all user queries to refetch their profile/credits
             queryClient.invalidateQueries({ queryKey: userKeys.all });
-            
             toast({
                 title: 'Purchase Successful!',
                 description: `You are now on the ${plan.name} plan.`,
             });
-            // Redirect to profile page to see the new plan details
             router.push('/profile/user-1');
         },
         onError: (error: Error) => {
