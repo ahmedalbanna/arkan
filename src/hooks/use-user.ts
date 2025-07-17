@@ -109,7 +109,7 @@ export function useLogin() {
             // Invalidate queries to refetch user-specific data after redirect
             queryClient.invalidateQueries({ queryKey: userKeys.all });
             router.push('/generate');
-            // The onAuthStateChanged listener in AuthContext will handle the user state update
+            router.refresh(); // Force a refresh to ensure layout server component re-renders
         },
         onError: (error: Error) => {
             toast({

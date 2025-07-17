@@ -11,7 +11,7 @@ const purchaseSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const sessionCookie = request.headers.get('Cookie')?.split('; ').find(c => c.startsWith('__session='))?.split('=')[1] ?? '';
+    const sessionCookie = request.cookies.get('__session')?.value;
     if (!sessionCookie) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Purchase error:', error);
-    if (error instanceof Error && error.message.includes('auth/session-cookie-expired')) {
+    if (error instanceof Error && (error.message.includes('auth/session-cookie-expired') || error.message.includes('SESSION_COOKIE_EXPIRED'))) {
         return NextResponse.json({ message: 'Session expired, please log in again.' }, { status: 401 });
     }
     return NextResponse.json({ message: 'An unexpected error occurred during the purchase.' }, { status: 500 });
