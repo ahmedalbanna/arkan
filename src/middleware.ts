@@ -2,6 +2,10 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 
+// This forces the middleware to run on the Node.js runtime.
+// It's required because the Firebase Admin SDK is not compatible with the Edge runtime.
+export const runtime = 'nodejs';
+
 export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('__session')?.value;
 
