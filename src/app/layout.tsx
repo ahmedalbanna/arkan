@@ -11,10 +11,9 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { AuthProvider } from '@/context/AuthContext';
 import { Footer } from '@/components/layout/Footer';
 import QueryProvider from '@/components/QueryProvider';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-import { NextRequest } from 'next/server';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -42,21 +41,23 @@ const fontSans = Cairo({
 // List of public paths that do not require authentication
 const PUBLIC_PATHS = ['/login', '/signup'];
 
-
-async function checkAuth(pathname: string) {
-  // Check if the current path is public
+// This function runs on the server for every request
+async function checkAuth(pathname: string, sessionCookieValue: string | undefined) {
+  // If the path is public, do nothing
   if (PUBLIC_PATHS.includes(pathname) || pathname === '/') {
     return;
   }
 
-  const sessionCookie = cookies().get('__session')?.value;
-  if (!sessionCookie) {
-    redirect('/login');
+  // If the path is protected, check for a valid session
+  if (!sessionCookieValue) {
+    redirect('/login'); // Redirect if no session cookie
   }
 
   try {
-    await adminAuth.verifySessionCookie(sessionCookie, true);
+    // Verify the cookie is valid
+    await adminAuth.verifySessionCookie(sessionCookieValue, true);
   } catch (error) {
+    // If verification fails, redirect to login
     console.warn('Session cookie verification failed, redirecting to login.');
     redirect('/login');
   }
@@ -64,19 +65,21 @@ async function checkAuth(pathname: string) {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { path: string[] };
 }>) {
   
-  // Since we don't have access to the pathname directly in layouts,
-  // we'll construct it from params.
-  const pathname = `/${(params.path || []).join('/')}`;
+  // We need to get the current path to check if it's protected
+  const headersList = headers();
+  const pathname = headersList.get('x-next-pathname') || '/';
+  
+  // Get the session cookie value here, at the top level
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('__session')?.value;
 
-  // The client-side AuthContext will handle redirects after hydration.
-  // We can now re-enable the server-side check.
-  await checkAuth(pathname);
+
+  // Run the server-side authentication check for protected routes
+  await checkAuth(pathname, sessionCookie);
 
   return (
     <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
