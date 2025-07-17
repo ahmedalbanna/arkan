@@ -25,3 +25,9 @@ export interface LoginCredentials {
     password?: string; // Optional for phone auth
     phone?: string;    // Optional for email auth
 }
+
+export interface SignupCredentials {
+    name: string;
+    email: string;
+    password?: string;
+}

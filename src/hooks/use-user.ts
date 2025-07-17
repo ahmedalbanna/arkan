@@ -4,7 +4,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import type { UserProfile } from '@/lib/db/queries';
-import type { PricingPlan, LoginCredentials } from '@/lib/types';
+import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -45,6 +45,21 @@ async function logoutUser() {
     if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Logout failed.');
+    }
+    return response.json();
+}
+
+async function signupUser(credentials: SignupCredentials) {
+    const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        // The signup API route returns structured errors, so we pass them along
+        throw errorData;
     }
     return response.json();
 }
@@ -124,6 +139,26 @@ export function useLogout() {
     });
 }
 
+export function useSignup() {
+    const router = useRouter();
+
+    return useMutation({
+        mutationFn: signupUser,
+        onSuccess: () => {
+            toast({
+                title: 'Account Created!',
+                description: 'Your account has been successfully created. Please log in.',
+            });
+            router.push('/login');
+        },
+        onError: (error: any) => {
+            // No need for a generic toast here because the form will handle displaying specific field errors.
+            // A generic form-level error will be handled by the component.
+            console.error("Signup mutation error:", error);
+        }
+    });
+}
+
 export function usePurchaseCredits() {
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -136,7 +171,9 @@ export function usePurchaseCredits() {
                 title: 'Purchase Successful!',
                 description: `You are now on the ${plan.name} plan.`,
             });
-            router.push('/profile/user-1');
+            // Assuming the user ID is 'user-1' for now, as in the original code.
+            // In a real app, this would come from the authenticated session.
+            router.push('/profile/user-1'); 
         },
         onError: (error: Error) => {
             toast({

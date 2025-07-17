@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,11 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
+import { useSignup } from '@/hooks/use-user';
+import type { SignupCredentials } from '@/lib/types';
 
 
 const formSchema = z.object({
@@ -23,15 +24,11 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-type SignupFormValues = z.infer<typeof formSchema>;
-
 export default function SignupForm() {
   const router = useRouter();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const signupMutation = useSignup();
 
-  const form = useForm<SignupFormValues>({
+  const form = useForm<SignupCredentials>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -39,51 +36,23 @@ export default function SignupForm() {
       password: '',
     },
   });
-
-  async function onSubmit(values: SignupFormValues) {
-    setIsLoading(true);
-    setFormError(null);
-    try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle structured Zod errors from the server
-        if (data.error?.name) form.setError("name", { message: data.error.name[0] });
-        if (data.error?.email) form.setError("email", { message: data.error.email[0] });
-        if (data.error?.password) form.setError("password", { message: data.error.password[0] });
-        
-        // Handle general form-level errors
-        if (data.error?._form) {
-          setFormError(data.error._form[0]);
-        }
-        
-        // Fallback for unexpected error structures
-        if (!data.error) {
-            throw new Error('An unexpected error occurred.');
-        }
-
-        return; // Stop execution if there was an error
-      }
-      
-      toast({
-        title: 'Account Created!',
-        description: 'Your account has been successfully created. Please log in.',
-      });
-
-      router.push('/login');
-
-    } catch (error: any) {
-        setFormError(error.message || 'An unknown error occurred. Please check your connection and try again.');
-    } finally {
-      setIsLoading(false);
+  
+  // Set form errors from mutation error
+  useEffect(() => {
+    const errorData = signupMutation.error as any;
+    if (errorData?.error) {
+      const fieldErrors = errorData.error;
+      if (fieldErrors.name) form.setError('name', { message: fieldErrors.name[0] });
+      if (fieldErrors.email) form.setError('email', { message: fieldErrors.email[0] });
+      if (fieldErrors.password) form.setError('password', { message: fieldErrors.password[0] });
     }
+  }, [signupMutation.error, form]);
+
+  function onSubmit(values: SignupCredentials) {
+    signupMutation.mutate(values);
   }
+
+  const formLevelError = (signupMutation.error as any)?.error?._form?.[0];
 
   return (
     <Card>
@@ -94,11 +63,11 @@ export default function SignupForm() {
             <CardDescription>Enter your details to create a new account.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {formError && (
+            {formLevelError && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Signup Error</AlertTitle>
-                    <AlertDescription>{formError}</AlertDescription>
+                    <AlertDescription>{formLevelError}</AlertDescription>
                 </Alert>
             )}
             <FormField
@@ -108,7 +77,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your Name" {...field} disabled={isLoading} />
+                    <Input placeholder="Your Name" {...field} disabled={signupMutation.isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +90,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} disabled={isLoading} />
+                    <Input placeholder="name@example.com" {...field} disabled={signupMutation.isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,7 +103,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
+                    <Input type="password" placeholder="••••••••" {...field} disabled={signupMutation.isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -142,8 +111,8 @@ export default function SignupForm() {
             />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full font-headline" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" className="w-full font-headline" disabled={signupMutation.isPending}>
+              {signupMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Create Account
             </Button>
              <p className="text-sm text-muted-foreground">
