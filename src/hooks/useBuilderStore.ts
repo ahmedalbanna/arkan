@@ -51,6 +51,7 @@ export interface BuilderState {
   
   // UI States
   selectedTemplate: ProposalTemplateKey;
+  selectedReportTemplateId: string;
   customGuidelines: string[];
   controlState: Record<SectionName, ControlState>;
   guidelineState: Record<string, GuidelineState>;
@@ -69,6 +70,7 @@ interface BuilderActions {
     handleProposalUpdate: (path: string, value: any) => void;
     // Report & Diagram Actions
     setSection: (key: SectionName, content: string) => void;
+    setAllSections: (sections: { [key in SectionName]?: string }) => void;
     handleSectionUpdate: (key: SectionName, value: string) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | undefined) => void;
     setDiagram: (key: DiagramType, data: { plantUmlCode: string; imageUrl: string }) => void;
@@ -85,6 +87,7 @@ interface BuilderActions {
     toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams' | 'externalContext', contextKey: SectionName | DiagramType | null, isSelected: boolean) => void;
     // UI State Actions
     handleTemplateChange: (key: ProposalTemplateKey) => void;
+    setSelectedReportTemplateId: (id: string) => void;
     handleAddCustomGuideline: () => void;
     handleRemoveCustomGuideline: (index: number) => void;
     setCustomGuidelineInput: (value: string) => void;
@@ -146,6 +149,7 @@ const initialState: BuilderState = {
   codeGenerator: { prompt: '', html: '', css: '', javascript: '' },
   externalContext: undefined,
   selectedTemplate: 'default',
+  selectedReportTemplateId: 'software-report',
   customGuidelines: [],
   controlState: getInitialControlState(),
   guidelineState: getInitialGuidelineStates(),
@@ -204,6 +208,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
 
       // --- REPORT, DIAGRAM, PRESENTATION ACTIONS ---
       setSection: (key, content) => set(state => ({ sections: { ...state.sections, [key]: content }})),
+      setAllSections: (sections) => set(state => ({ sections: { ...state.sections, ...sections } })),
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
       setEvaluation: (evaluation) => set({ evaluation }),
       setDiagram: (key, data) => set(state => ({ diagrams: { ...state.diagrams, [key]: data } })),
@@ -242,6 +247,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       
       // --- UI STATE ACTIONS ---
       handleTemplateChange: (key) => set({ selectedTemplate: key }),
+      setSelectedReportTemplateId: (id) => set({ selectedReportTemplateId: id }),
       handleAddCustomGuideline: () => {
           const { customGuidelines, customGuidelineInput } = get();
           const newGuideline = customGuidelineInput['proposal']?.trim();
@@ -254,7 +260,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       handleRemoveCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
       setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
-      handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section]!, [field]: value } } })),
+      handleControlChange: (section, field, keyof ControlState, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section]!, [field]: value } } })),
       
       handleGuidelineToggle: (itemKey, guidelineIndex, isChecked) => set(state => {
         const itemGuidelineState = state.guidelineState[itemKey] || { checked: {}, custom: [] };

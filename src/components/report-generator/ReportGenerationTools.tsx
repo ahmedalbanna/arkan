@@ -30,6 +30,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
 import type { GuidelineState } from '@/hooks/useBuilderStore';
+import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -66,8 +68,8 @@ const generateInstructionText = (controls: any): string => {
     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     return instructions.join('\n');
 };
-// Helper function to generate a section
-async function generateSection(variables: any): Promise<GenerateIntroductionOutput> {
+// Helper function to generate a section or a full report
+async function generateReport(variables: any): Promise<any> {
     const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,7 +77,7 @@ async function generateSection(variables: any): Promise<GenerateIntroductionOutp
     });
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to generate section');
+        throw new Error(error.message || 'Failed to generate report');
     }
     return response.json();
 }
@@ -109,7 +111,10 @@ export const GenerationTools = () => {
         guidelineState,
         customGuidelineInput,
         contextSelection,
+        selectedReportTemplateId,
+        setSelectedReportTemplateId,
         setSection,
+        setAllSections,
         setExternalContext,
         removeExternalContext,
         handleControlChange,
@@ -122,19 +127,25 @@ export const GenerationTools = () => {
     // State for PDF upload
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
-    // Handle section generation
-    const sectionMutation = useMutation({
-        mutationFn: generateSection,
+    // Handle section/report generation
+    const reportMutation = useMutation({
+        mutationFn: generateReport,
         onSuccess: (data, variables) => {
-            const sectionKey = variables.sectionToGenerate;
-            const content = Object.values(data)[0] as string;
-            setSection(sectionKey, content);
+            if (variables.templateId) { // Full report was generated
+                setAllSections(data.sections);
+                toast({ title: `Full report generated successfully!` });
+            } else { // Single section
+                const sectionKey = variables.sectionToGenerate;
+                const content = Object.values(data)[0] as string;
+                setSection(sectionKey, content);
+                toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
+            }
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
             setActiveMutationKey(null);
         },
         onError: (error: Error, variables) => {
-            toast({ title: `Failed to generate "${sectionConfig[variables.sectionToGenerate].title}"`, description: error.message, variant: "destructive" });
+            const item = variables.templateId || variables.sectionToGenerate;
+            toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -153,7 +164,7 @@ export const GenerationTools = () => {
         },
     });
     // Check if anything is generating
-    const isAnythingGenerating = sectionMutation.isPending;
+    const isAnythingGenerating = reportMutation.isPending;
     const isDisabled = isAnythingGenerating;
 
     // Handle file upload
@@ -168,7 +179,7 @@ export const GenerationTools = () => {
         }
     };
 
-    // Handle section generation
+    // Handle single section generation
     const onGenerateSection = (section: SectionName) => {
         if (!user) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
@@ -195,9 +206,24 @@ export const GenerationTools = () => {
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
         };
         setActiveMutationKey(section);
-        sectionMutation.mutate(body);
+        reportMutation.mutate(body);
     };
     
+    // Handle full report generation
+    const onGenerateFullReport = () => {
+        if (!user) {
+             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            return;
+        }
+        const body = {
+            proposal,
+            templateId: selectedReportTemplateId,
+            // We can pass a global context selection for the full report if needed
+        };
+        setActiveMutationKey(selectedReportTemplateId);
+        reportMutation.mutate(body);
+    };
+
     const onPdfUpload = () => {
         if (!pdfFile) return;
         const formData = new FormData();
@@ -205,7 +231,6 @@ export const GenerationTools = () => {
         pdfMutation.mutate(formData);
     };
 
-    // UI for each section
     if (!agentsLoaded) {
         return (
             <Card>
@@ -221,6 +246,9 @@ export const GenerationTools = () => {
             </Card>
         );
     }
+    
+    const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
+    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
@@ -229,8 +257,28 @@ export const GenerationTools = () => {
                 <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
             </CardHeader>
             <CardContent>
+                <div className="space-y-2 mb-4">
+                    <Label htmlFor="report-template-select">Report Template</Label>
+                    <Select value={selectedReportTemplateId} onValueChange={(val) => setSelectedReportTemplateId(val)}>
+                        <SelectTrigger id="report-template-select">
+                            <SelectValue placeholder="Select a template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {REPORT_GENERATION_TEMPLATES.map(template => (
+                                <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
+                </div>
+
+                <Button onClick={onGenerateFullReport} className="w-full mb-4 font-headline">
+                    {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Generate Full Report
+                </Button>
+
                 <Accordion type="multiple" className="w-full space-y-1">
-                    {orderedSections.map((key) => {
+                    {availableSections.map((key) => {
                         const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
                         if (!agent) return null;
 
@@ -387,11 +435,11 @@ export const GenerationTools = () => {
                                                             <Label className="font-semibold">External Context</Label>
                                                             <div className="flex items-center space-x-2">
                                                                 <Checkbox
-                                                                    id="context-external-pres"
+                                                                    id={`context-external-${key}`}
                                                                     checked={!!currentSelection.externalContext}
-                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', null, !!checked)} // the key is required for identifiy the builder mode. The key is the one who determines the activation of any section that is assigned to it
+                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', null, !!checked)}
                                                                 />
-                                                                <Label htmlFor="context-external-pres" className="text-sm font-normal">
+                                                                <Label htmlFor={`context-external-${key}`} className="text-sm font-normal">
                                                                     <div className="flex items-center gap-2">
                                                                         <FileText className="h-4 w-4" />
                                                                         {externalContext.fileName}
