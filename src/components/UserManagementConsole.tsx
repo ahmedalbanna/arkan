@@ -70,6 +70,32 @@ export default function UserManagementConsole() {
       placeholderData: (previousData) => previousData, // Keep showing old data while fetching new page
   });
 
+  if (isLoading) {
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex justify-between items-center">
+                    <span>All Users</span>
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <UserTableSkeleton />
+            </CardContent>
+        </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+        <Card>
+            <CardContent className="p-8 text-center text-destructive">
+                Failed to load users
+            </CardContent>
+        </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -80,11 +106,6 @@ export default function UserManagementConsole() {
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg">
-          {isLoading ? (
-            <UserTableSkeleton />
-          ) : isError ? (
-            <div className="p-8 text-center text-destructive">Failed to load users.</div>
-          ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -114,7 +135,6 @@ export default function UserManagementConsole() {
                 ))}
               </TableBody>
             </Table>
-          )}
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
             <Button
