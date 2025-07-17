@@ -65,13 +65,18 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
       toast({ title: 'Success', description: 'User has been updated successfully.' });
     }
     if (updateState?.errors?._form) {
-      toast({ title: 'Error', description: updateState.errors._form, variant: 'destructive' });
+      // Use toast for consistent form-level error feedback
+      toast({
+        title: 'Error updating user',
+        description: updateState.errors._form,
+        variant: 'destructive',
+      });
     }
   }, [updateState, toast]);
 
   useEffect(() => {
     if (deleteState?.error) {
-      toast({ title: 'Error', description: deleteState.error, variant: 'destructive' });
+      toast({ title: 'Error deleting user', description: deleteState.error, variant: 'destructive' });
     }
   }, [deleteState, toast]);
 
@@ -108,6 +113,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col items-start gap-4 p-6 border-t">
+            {/* The form-level error is now handled by the toast, but we can keep this as a fallback if needed */}
             {updateState.errors?._form && (
               <p className="text-sm font-medium text-destructive">{updateState.errors._form}</p>
             )}

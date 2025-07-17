@@ -16,6 +16,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useSignup } from '@/hooks/use-user';
 import type { SignupCredentials } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 
 const formSchema = z.object({
@@ -26,6 +27,7 @@ const formSchema = z.object({
 
 export default function SignupForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const signupMutation = useSignup();
 
   const form = useForm<SignupCredentials>({
@@ -42,16 +44,27 @@ export default function SignupForm() {
     const errorData = signupMutation.error as any;
     if (errorData?.error) {
       const fieldErrors = errorData.error;
+      // Set field-specific errors
       if (fieldErrors.name) form.setError('name', { message: fieldErrors.name[0] });
       if (fieldErrors.email) form.setError('email', { message: fieldErrors.email[0] });
       if (fieldErrors.password) form.setError('password', { message: fieldErrors.password[0] });
+      
+      // Display form-level errors in a toast for consistency
+      if (fieldErrors._form) {
+        toast({
+          title: 'Signup Error',
+          description: fieldErrors._form[0],
+          variant: 'destructive',
+        });
+      }
     }
-  }, [signupMutation.error, form]);
+  }, [signupMutation.error, form, toast]);
 
   function onSubmit(values: SignupCredentials) {
     signupMutation.mutate(values);
   }
 
+  // This is used for rendering the inline alert component for form-level errors
   const formLevelError = (signupMutation.error as any)?.error?._form?.[0];
 
   return (

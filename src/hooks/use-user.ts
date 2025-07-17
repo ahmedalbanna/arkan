@@ -155,7 +155,8 @@ export function useSignup() {
             router.push('/login');
         },
         onError: (error: any) => {
-            // No need for a generic toast here because the form will handle displaying specific field errors.
+            // This hook's consumer (SignupForm) is responsible for displaying the specific error details.
+            // We don't show a generic toast here because the form handles field and form-level errors.
             console.error("Signup mutation error:", error);
         }
     });
