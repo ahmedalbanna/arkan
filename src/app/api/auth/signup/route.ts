@@ -55,8 +55,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
     } else if (error.code === 'auth/weak-password') {
        return NextResponse.json({ error: "Password is too weak" }, { status: 400 });
+    } else if (error instanceof z.ZodError) {
+        return NextResponse.json({ error: error.flatten().fieldErrors }, { status: 400 });
     }
 
-    return NextResponse.json({ error: "An unexpected error occurred" }, { status: 500 });
+    // Generic error fallback that ensures a JSON response
+    return NextResponse.json({ error: "An unexpected error occurred. Please try again later." }, { status: 500 });
   }
 }
