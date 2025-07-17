@@ -81,7 +81,7 @@ interface BuilderActions {
     // Context Actions
     setExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: () => void;
-    toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams', contextKey: SectionName | DiagramType, isSelected: boolean) => void;
+    toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams' | 'externalContext', contextKey: SectionName | DiagramType, isSelected: boolean) => void;
     // UI State Actions
     handleTemplateChange: (key: ProposalTemplateKey) => void;
     handleAddCustomGuideline: () => void;

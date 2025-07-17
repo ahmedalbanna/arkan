@@ -16,7 +16,7 @@ export interface AgentData {
   id: string;
   name: string;
   description: string;
-  category: 'Content Generation' | 'Report & Diagram Generation';
+  category: 'Content Generation' | 'Proposal Generation' | 'Report Generation' | 'Diagram Generation' | 'Presentation Generation' | 'Code Generation';
   pageUrl: string;
   isEnabled: boolean;
   prompt: AgentPrompt | string; // Can be simple string or complex object
@@ -61,12 +61,12 @@ Please analyze the following project description and provide the output in the r
 Description: {{{projectDescription}}}`
   },
   {
-    id: 'generate-proposal',
+    id: 'generate-proposal-report',
     name: 'Project Proposal Agent',
     description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
-    category: 'Content Generation',
+    category: 'Proposal Generation',
     icon: FileText,
-    pageUrl: '/generate-report', // Changed from /generate-proposal
+    pageUrl: '/generate-proposal',
     isEnabled: true,
     prompt: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
 
@@ -78,10 +78,10 @@ Project Idea: {{{projectIdea}}}`
   },
   // Report Section Agents
   {
-    id: 'generate-introduction',
+    id: 'generate-introduction-section',
     name: 'Introduction Agent',
     description: 'Writes a professional introduction for a project report based on the full proposal data.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: BookMarked,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -100,10 +100,10 @@ The introduction should be well-structured, engaging, and must include:`,
     }
   },
   {
-    id: 'generate-literature-review',
+    id: 'generate-literature-review-section',
     name: 'Literature Review Agent',
     description: 'Generates an academic and technical literature review section for the project report.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: Library,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -121,10 +121,10 @@ Your review should:`,
     }
   },
   {
-    id: 'generate-system-analysis',
+    id: 'generate-system-analysis-section',
     name: 'System Analysis Agent',
     description: 'Generates the system analysis section, including functional and non-functional requirements.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: Waypoints,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -142,10 +142,10 @@ Your analysis must cover:`,
     }
   },
   {
-    id: 'generate-design-strategy',
+    id: 'generate-design-strategy-section',
     name: 'Design Strategy Agent',
     description: 'Generates the design strategy section, focusing on user experience and user interface.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: BookText,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -163,10 +163,10 @@ This section should articulate:`,
     }
   },
   {
-    id: 'generate-system-design',
+    id: 'generate-system-design-section',
     name: 'System Design Agent',
     description: 'Generates the system design section, defining the architecture, data model, and components.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -184,10 +184,10 @@ This section must detail:`,
     }
   },
   {
-    id: 'generate-system-programming',
+    id: 'generate-system-programming-section',
     name: 'System Programming Agent',
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: Code,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -206,10 +206,10 @@ This section should outline:`,
     }
   },
   {
-    id: 'generate-system-testing',
+    id: 'generate-system-testing-section',
     name: 'System Testing Agent',
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: TestTube2,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -227,10 +227,10 @@ This section must define the testing strategy, including:`,
     }
   },
   {
-    id: 'generate-conclusion',
+    id: 'generate-conclusion-section',
     name: 'Conclusion Agent',
     description: 'Writes a concise and impactful conclusion for the final project report.',
-    category: 'Report & Diagram Generation',
+    category: 'Report Generation',
     icon: Flag,
     pageUrl: '/generate-report',
     isEnabled: true,
@@ -247,11 +247,12 @@ The conclusion should:`,
         ]
     }
   },
+  // End Report Section Agents
   {
     id: 'generate-presentation',
     name: 'Presentation Agent',
     description: 'Creates a slide deck from project proposal and report content.',
-    category: 'Report & Diagram Generation',
+    category: 'Presentation Generation',
     icon: Presentation,
     pageUrl: '#', // This agent is used on the project page directly
     isEnabled: true,
@@ -276,9 +277,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-use-case-diagram',
     name: 'Use Case Diagram Agent',
     description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -294,9 +295,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-class-diagram',
     name: 'Class Diagram Agent',
     description: 'Produces a PlantUML Class diagram showing classes, attributes, methods, and relationships.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -312,9 +313,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-sequence-diagram',
     name: 'Sequence Diagram Agent',
     description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -331,9 +332,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-activity-diagram',
     name: 'Activity Diagram Agent',
     description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -350,9 +351,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-component-diagram',
     name: 'Component Diagram Agent',
     description: 'Produces a PlantUML Component diagram depicting the system architecture in terms of components.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -368,9 +369,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-archimate-diagram',
     name: 'ArchiMate Diagram Agent',
     description: 'Produces a PlantUML ArchiMate diagram to model enterprise architecture across multiple layers.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -387,9 +388,9 @@ You will be provided with the full project proposal in JSON format, and may also
     id: 'generate-er-diagram',
     name: 'ER Diagram Agent',
     description: 'Produces a PlantUML Entity-Relationship (ER) diagram to model the database schema.',
-    category: 'Report & Diagram Generation',
+    category: 'Diagram Generation',
     icon: DatabaseZap,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate-diagram',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,

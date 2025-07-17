@@ -24,14 +24,14 @@ const generateReportSchema = z.object({
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
-  introduction: { flow: generateIntroduction, agentId: 'generate-introduction' },
-  literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review' },
-  systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis' },
-  designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy' },
-  systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design' },
-  systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming' },
-  systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing' },
-  conclusion: { flow: generateConclusion, agentId: 'generate-conclusion' },
+  introduction: { flow: generateIntroduction, agentId: 'generate-introduction-section' },
+  literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review-section' },
+  systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis-section' },
+  designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy-section' },
+  systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design-section' },
+  systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming-section' },
+  systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing-section' },
+  conclusion: { flow: generateConclusion, agentId: 'generate-conclusion-section' },
 };
 
 export async function POST(request: Request) {
@@ -70,6 +70,11 @@ export async function POST(request: Request) {
     if (instructionText) {
         fullPrompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructionText}`;
     }
+
+    if (guidelines && guidelines.length > 0) {
+      fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+  }
+
 
     const contextContent = [];
     if (externalContextContent) {

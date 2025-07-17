@@ -36,7 +36,7 @@ const orderedDiagrams = DiagramTypeSchema.options;
 
 // Helper to get selected guidelines for a specific item
 const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
-    const agentIdSuffix = itemKey;
+    const agentIdSuffix = `generate-${itemKey}-section`;
     const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
     const currentGuidelineState = guidelineState[itemKey];
     
