@@ -1,8 +1,10 @@
+
 // src/app/api/pdf-to-markdown/route.ts
 import { NextResponse } from 'next/server';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'; // Import as a library
 import { rewriteToMarkdown } from '@/ai/flows/rewrite-to-markdown';
 import { deductCredit } from '@/services/credit-service';
+import { auth } from '@/lib/firebase/admin';
 
 // This is a temporary solution for a stateless API route.
 // In a real app, you'd get the user ID from the session/token.
@@ -10,7 +12,14 @@ const HARDCODED_USER_ID = 'user-1';
 
 export async function POST(request: Request) {
   try {
-    
+    const authorization = request.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) {
+        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+    }
+    const token = authorization.substring(7);
+    const decodedToken = await auth.verifyIdToken(token);
+    const userId = decodedToken.uid;
+
     const formData = await request.formData();
     const file = formData.get('file') as File; // Get the file using the name 'file' from the frontend FormData
 
@@ -47,7 +56,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Could not extract sufficient text from the PDF.' }, { status: 400 });
     }
 
-    await deductCredit(HARDCODED_USER_ID, 1);
+    await deductCredit(userId, 1);
     
     // Rewrite text to markdown using AI
     const result = await rewriteToMarkdown({ rawText });
@@ -56,6 +65,9 @@ export async function POST(request: Request) {
 
   } catch (error) {
     console.error('Error processing PDF:', error);
+    if (error instanceof Error && (error.message.includes("Unauthorized") || error.message.includes("token"))) {
+        return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+    }
     if (error instanceof Error) {
         return NextResponse.json({ message: error.message }, { status: 500 });
     }

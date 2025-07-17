@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
         name: name,
         credits: 10, // Default starting credits
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
     } catch (dbError) {
       // If DB insert fails, we should ideally delete the Firebase user to avoid orphaned accounts.

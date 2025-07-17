@@ -39,8 +39,9 @@ export async function updateUser(userId: string, data: {
 }) {
     await db.update(users).set({
         name: data.name,
-        avatarUrl: data.avatarUrl,
-        bio: data.bio
+        profilePictureUrl: data.avatarUrl,
+        bio: data.bio,
+        updatedAt: new Date().toISOString(),
     }).where(eq(users.id, userId));
 }
 
@@ -57,7 +58,7 @@ export async function updateUserCredits(userId: string, creditsToAdd: number): P
     const newBalance = (user.credits ?? 0) + creditsToAdd;
 
     await db.update(users)
-        .set({ credits: newBalance })
+        .set({ credits: newBalance, updatedAt: new Date().toISOString() })
         .where(eq(users.id, userId));
 
     return newBalance;
@@ -80,7 +81,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
     const newBalance = (user.credits ?? 0) - creditsToDeduct;
 
     await db.update(users)
-        .set({ credits: newBalance })
+        .set({ credits: newBalance, updatedAt: new Date().toISOString() })
         .where(eq(users.id, userId));
 
     return newBalance;
@@ -93,9 +94,11 @@ export async function updateUserByAdmin(userId: string, data: {
     bio?: string;
     credits?: number;
 }) {
-  await db.update(users).set(data).where(eq(users.id, userId));
+  await db.update(users).set({...data, updatedAt: new Date().toISOString()}).where(eq(users.id, userId));
 }
 
 export async function deleteUser(userId: string) {
+    // This should also handle deleting the user from Firebase Auth
+    // and potentially cascade-deleting related data. For now, it just deletes from the DB.
     await db.delete(users).where(eq(users.id, userId));
 }
