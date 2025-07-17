@@ -107,6 +107,7 @@ export const GenerationTools = () => {
         controlState,
         guidelineState,
         customGuidelineInput,
+        contextSelection,
         setSection,
         setExternalContext,
         removeExternalContext,
@@ -115,6 +116,7 @@ export const GenerationTools = () => {
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        toggleContextSelection,
     } = useBuilderStore();
 
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
@@ -167,12 +169,22 @@ export const GenerationTools = () => {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         };
+        
+        const selection = contextSelection[section] || { sections: {}, diagrams: {} };
+        const otherSections = Object.entries(selection.sections)
+            .filter(([, isSelected]) => isSelected)
+            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+        
+        const otherDiagrams = Object.entries(selection.diagrams)
+            .filter(([, isSelected]) => isSelected)
+            .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+
+
         const body = {
             proposal: proposal,
             sectionToGenerate: section,
-            // Context selections are not yet implemented in this refactor
-            otherSections: {},
-            otherDiagrams: {},
+            otherSections,
+            otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContextContent: externalContext?.content,
@@ -221,6 +233,7 @@ export const GenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = sectionConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {} };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -320,28 +333,17 @@ export const GenerationTools = () => {
                                         <TabsContent value="context" className="pt-4">
                                             <ScrollArea className="h-60 w-full">
                                                 <div className="space-y-4 pr-4">
-                                                    {externalContext && (
-                                                        <div className="space-y-2">
-                                                            <Label className="font-semibold">External Document</Label>
-                                                            <div className="flex items-center space-x-2">
-                                                                <Checkbox
-                                                                    id={`context-${key}-external`}
-                                                                />
-                                                                <Label htmlFor={`context-${key}-external`} className="text-sm font-normal truncate">
-                                                                    {externalContext.fileName}
-                                                                </Label>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                    {/* Context selection UI for other sections */}
                                                     <div className="space-y-2">
                                                         <Label className="font-semibold">Contextual Sections</Label>
-                                                        {orderedSections.filter(sKey => sKey !== key).map(contextKey => (
+                                                        {orderedSections.filter(sKey => sKey !== key && sections[sKey]).map(contextKey => (
                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                 <Checkbox
                                                                     id={`context-section-${key}-${contextKey}`}
-                                                                    disabled={!sections[contextKey]}
+                                                                    checked={!!currentSelection.sections[contextKey]}
+                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'sections', contextKey, !!checked)}
                                                                 />
-                                                                <Label htmlFor={`context-section-${key}-${contextKey}`} className={cn("text-sm font-normal", !sections[contextKey] && "text-muted-foreground/50")}>
+                                                                <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
                                                                     <div className="flex items-center gap-2">
                                                                         <BookCheck className="h-4 w-4" />
                                                                         {sectionConfig[contextKey].title}
@@ -349,24 +351,31 @@ export const GenerationTools = () => {
                                                                 </Label>
                                                             </div>
                                                         ))}
+                                                        {orderedSections.filter(sKey => !sections[sKey]).length === orderedSections.length -1 && (
+                                                          <p className="text-xs text-muted-foreground">No other sections generated yet.</p>
+                                                        )}
                                                     </div>
-                                                    <div className="space-y-2 pt-2 border-t">
-                                                        <Label className="font-semibold">Contextual Diagrams</Label>
-                                                         {orderedDiagrams.map(contextKey => (
-                                                            <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                <Checkbox
-                                                                    id={`context-diagram-${key}-${contextKey}`}
-                                                                    disabled={!diagrams?.[contextKey]}
-                                                                />
-                                                                <Label htmlFor={`context-diagram-${key}-${contextKey}`} className={cn("text-sm font-normal", !diagrams?.[contextKey] && "text-muted-foreground/50")}>
-                                                                    <div className="flex items-center gap-2">
-                                                                        <GitGraph className="h-4 w-4" />
-                                                                        {diagramConfig[contextKey].title}
-                                                                    </div>
-                                                                </Label>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                                    {/* Context selection UI for diagrams */}
+                                                    {Object.keys(diagrams || {}).length > 0 && (
+                                                      <div className="space-y-2 pt-2 border-t">
+                                                          <Label className="font-semibold">Contextual Diagrams</Label>
+                                                          {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
+                                                              <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                  <Checkbox
+                                                                      id={`context-diagram-${key}-${contextKey}`}
+                                                                      checked={!!currentSelection.diagrams[contextKey]}
+                                                                      onCheckedChange={(checked) => toggleContextSelection(key, 'diagrams', contextKey, !!checked)}
+                                                                  />
+                                                                  <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
+                                                                      <div className="flex items-center gap-2">
+                                                                          <GitGraph className="h-4 w-4" />
+                                                                          {diagramConfig[contextKey].title}
+                                                                      </div>
+                                                                  </Label>
+                                                              </div>
+                                                          ))}
+                                                      </div>
+                                                    )}
                                                 </div>
                                             </ScrollArea>
                                         </TabsContent>

@@ -32,6 +32,12 @@ export type GuidelineState = {
     custom: string[];
 };
 
+export interface ContextSelection {
+  sections: Partial<Record<SectionName, boolean>>;
+  diagrams: Partial<Record<DiagramType, boolean>>;
+}
+
+
 export interface BuilderState {
   projectIdea: string;
   proposal: ProjectProposal | null;
@@ -49,6 +55,7 @@ export interface BuilderState {
   guidelineState: Record<string, GuidelineState>;
   customGuidelineInput: Record<string, string>;
   activePresentationId: string | null;
+  contextSelection: Record<string, ContextSelection>;
 }
 
 interface BuilderActions {
@@ -74,6 +81,7 @@ interface BuilderActions {
     // Context Actions
     setExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: () => void;
+    toggleContextSelection: (itemKey: string, contextType: 'sections' | 'diagrams', contextKey: SectionName | DiagramType, isSelected: boolean) => void;
     // UI State Actions
     handleTemplateChange: (key: ProposalTemplateKey) => void;
     handleAddCustomGuideline: () => void;
@@ -137,6 +145,7 @@ const initialState: BuilderState = {
   guidelineState: getInitialGuidelineStates(),
   customGuidelineInput: {},
   activePresentationId: null,
+  contextSelection: {},
 };
 
 
@@ -157,6 +166,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         if (newState.diagrams) payload.diagrams = newState.diagrams;
         if (newState.presentation) payload.presentation = newState.presentation;
         if (newState.codeGenerator) payload.codeGenerator = newState.codeGenerator;
+        // Reset transient UI state on load
+        payload.contextSelection = {};
         set(payload);
         toast({ title: 'Project Loaded', description: `Successfully loaded "${newState.proposal?.title || 'project'}".` });
       },
@@ -171,6 +182,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           diagrams: {},
           evaluation: undefined,
           presentation: { history: [] },
+          contextSelection: {},
         });
       },
       handleProposalUpdate: (path, value) => {
@@ -207,6 +219,16 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       // --- CONTEXT ACTIONS ---
       setExternalContext: (fileName, content) => set({ externalContext: { fileName, content } }),
       removeExternalContext: () => set({ externalContext: undefined }),
+      toggleContextSelection: (itemKey, contextType, contextKey, isSelected) => {
+        set(state => {
+          const newContextSelection = { ...state.contextSelection };
+          if (!newContextSelection[itemKey]) {
+            newContextSelection[itemKey] = { sections: {}, diagrams: {} };
+          }
+          newContextSelection[itemKey][contextType][contextKey as any] = isSelected;
+          return { contextSelection: newContextSelection };
+        });
+      },
       
       // --- UI STATE ACTIONS ---
       handleTemplateChange: (key) => set({ selectedTemplate: key }),

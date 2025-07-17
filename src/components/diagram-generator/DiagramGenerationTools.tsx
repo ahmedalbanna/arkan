@@ -88,6 +88,7 @@ export const DiagramGenerationTools = () => {
         externalContext,
         guidelineState,
         customGuidelineInput,
+        contextSelection,
         setDiagram,
         setExternalContext,
         removeExternalContext,
@@ -95,6 +96,7 @@ export const DiagramGenerationTools = () => {
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        toggleContextSelection,
     } = useBuilderStore();
 
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
@@ -150,11 +152,21 @@ export const DiagramGenerationTools = () => {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         }
+
+        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {} };
+        const otherSections = Object.entries(selection.sections)
+            .filter(([, isSelected]) => isSelected)
+            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+        
+        const otherDiagrams = Object.entries(selection.diagrams)
+            .filter(([, isSelected]) => isSelected)
+            .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+
         const body = {
             proposal: proposal,
             diagramToGenerate: diagramType,
-            otherSections: {}, // Context selection not yet implemented in this refactor
-            otherDiagrams: {},
+            otherSections,
+            otherDiagrams,
             guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
             externalContextContent: externalContext?.content,
         };
@@ -186,6 +198,7 @@ export const DiagramGenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {} };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -254,8 +267,50 @@ export const DiagramGenerationTools = () => {
                                         
                                         <TabsContent value="context" className="pt-4">
                                             <ScrollArea className="h-60 w-full">
-                                                <div className="space-y-4 pr-4">
-                                                    {/* Context selection UI would go here */}
+                                            <div className="space-y-4 pr-4">
+                                                    {/* Context selection UI for other sections */}
+                                                    <div className="space-y-2">
+                                                        <Label className="font-semibold">Contextual Sections</Label>
+                                                        {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
+                                                            <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`context-section-${key}-${contextKey}`}
+                                                                    checked={!!currentSelection.sections[contextKey]}
+                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'sections', contextKey, !!checked)}
+                                                                />
+                                                                <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <BookCheck className="h-4 w-4" />
+                                                                        {sectionConfig[contextKey].title}
+                                                                    </div>
+                                                                </Label>
+                                                            </div>
+                                                        ))}
+                                                        {Object.keys(sections).length === 0 && (
+                                                          <p className="text-xs text-muted-foreground">No sections generated yet.</p>
+                                                        )}
+                                                    </div>
+                                                    {/* Context selection UI for diagrams */}
+                                                    {Object.keys(diagrams || {}).length > 0 && (
+                                                      <div className="space-y-2 pt-2 border-t">
+                                                          <Label className="font-semibold">Contextual Diagrams</Label>
+                                                          {orderedDiagrams.filter(dKey => dKey !== key && diagrams?.[dKey]).map(contextKey => (
+                                                              <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
+                                                                  <Checkbox
+                                                                      id={`context-diagram-${key}-${contextKey}`}
+                                                                      checked={!!currentSelection.diagrams[contextKey]}
+                                                                      onCheckedChange={(checked) => toggleContextSelection(key, 'diagrams', contextKey, !!checked)}
+                                                                  />
+                                                                  <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
+                                                                      <div className="flex items-center gap-2">
+                                                                          <GitGraph className="h-4 w-4" />
+                                                                          {diagramConfig[contextKey].title}
+                                                                      </div>
+                                                                  </Label>
+                                                              </div>
+                                                          ))}
+                                                      </div>
+                                                    )}
                                                 </div>
                                             </ScrollArea>
                                         </TabsContent>
