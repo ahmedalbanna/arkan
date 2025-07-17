@@ -18,13 +18,14 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Pencil, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from './ui/skeleton';
+import { userKeys } from '@/lib/query-keys';
 
 
 const USERS_PER_PAGE = 10;
 
-// This would replace the direct `getAllUsers` call on the page.
-// The API route would need to be updated to handle `page` and `limit` query params.
+// This query function now uses the page number to fetch a specific "page" of users.
 async function fetchUsers(page: number): Promise<AllUsers> {
+    // The API route needs to be updated to handle these query parameters.
     const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`);
     if (!response.ok) {
         throw new Error('Failed to fetch users');
@@ -62,8 +63,9 @@ function UserTableSkeleton() {
 export default function UserManagementConsole() {
   const [page, setPage] = useState(1);
 
+  // The query key now uses the factory and includes the page number.
   const { data: users, isLoading, isError, isFetching } = useQuery({
-      queryKey: ['users', page],
+      queryKey: userKeys.list(page),
       queryFn: () => fetchUsers(page),
       placeholderData: (previousData) => previousData, // Keep showing old data while fetching new page
   });
@@ -119,7 +121,7 @@ export default function UserManagementConsole() {
                 variant="outline"
                 size="sm"
                 onClick={() => setPage(p => Math.max(p - 1, 1))}
-                disabled={page === 1}
+                disabled={page === 1 || isFetching}
             >
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
@@ -129,7 +131,7 @@ export default function UserManagementConsole() {
                 variant="outline"
                 size="sm"
                 onClick={() => setPage(p => p + 1)}
-                disabled={!users || users.length < USERS_PER_PAGE}
+                disabled={!users || users.length < USERS_PER_PAGE || isFetching}
             >
                 Next
                 <ChevronRight className="ml-2 h-4 w-4" />

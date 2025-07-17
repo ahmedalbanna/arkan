@@ -6,51 +6,11 @@ import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-async function purchasePlan(plan: PricingPlan): Promise<{ newBalance: number }> {
-    const response = await fetch('/api/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Purchase failed');
-    }
-
-    return response.json();
-}
+import { usePurchaseCredits } from '@/hooks/use-user'; // Import the new custom mutation hook
 
 export function PricingCard({ plan }: { plan: PricingPlan }) {
-    const { toast } = useToast();
-    const router = useRouter();
-    const queryClient = useQueryClient();
-
-    const mutation = useMutation({
-        mutationFn: purchasePlan,
-        onSuccess: (data) => {
-            // Invalidate the user query to trigger a refetch of their profile/credits
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            
-            toast({
-                title: 'Purchase Successful!',
-                description: `You are now on the ${plan.name} plan with ${data.newBalance} credits.`,
-            });
-            // Redirect to profile page to see the new plan details
-            router.push('/profile/user-1');
-        },
-        onError: (error) => {
-            toast({
-                title: 'Purchase Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
-        },
-    });
+    // Use the custom hook to handle the mutation logic
+    const mutation = usePurchaseCredits();
 
     return (
         <Card className={cn('flex flex-col', plan.isPopular && 'border-primary shadow-lg')}>
