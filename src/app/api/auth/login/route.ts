@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { z } from 'zod';
+import { auth as adminAuth } from '@/lib/firebase/admin';
+
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -19,24 +21,34 @@ export async function POST(req: Request) {
     }
 
     const { email, password } = validation.data;
-
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-
-    // The session is managed client-side by the Firebase SDK,
-    // so we just need to return a success response.
-    // The onAuthStateChanged listener on the client will handle the user state.
     
-    // We can also return a token if we need server-to-server auth, but for now this is fine.
-    const token = await user.getIdToken();
+    // We sign in with the client SDK to get an ID token, but we don't trust the client.
+    // The id token is then used to create a secure, httpOnly session cookie.
+    // This is a common pattern to bridge client-side Firebase Auth with server-side sessions.
+    // NOTE: For this to work, we're essentially using a "dummy" client auth instance on the server.
+    // This is a bit of a workaround. A more robust solution might involve a custom token flow,
+    // but this works for bridging client-initiated login with server-side sessions.
+    
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const idToken = await userCredential.user.getIdToken();
 
-    return NextResponse.json({
-        user: {
-            uid: user.uid,
-            email: user.email
-        },
-        token
-    }, { status: 200 });
+    // Set session expiration to 5 days.
+    const expiresIn = 60 * 60 * 24 * 5 * 1000;
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+
+    const options = {
+      name: '__session',
+      value: sessionCookie,
+      maxAge: expiresIn,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    };
+    
+    const response = NextResponse.json({ status: 'success' }, { status: 200 });
+    response.cookies.set(options);
+    
+    return response;
 
   } catch (error: any) {
     console.error("Login error:", error);

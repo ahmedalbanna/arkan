@@ -7,6 +7,9 @@ import type { UserProfile } from '@/lib/db/queries';
 import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/types';
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+
 
 // --- Query Functions ---
 
@@ -39,9 +42,10 @@ async function loginUser(credentials: LoginCredentials) {
 }
 
 async function logoutUser() {
-    const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-    });
+    // We must sign out the client SDK first
+    await signOut(auth);
+    // Then clear the server session cookie
+    const response = await fetch('/api/auth/logout', { method: 'POST' });
     if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Logout failed.');
@@ -102,10 +106,10 @@ export function useLogin() {
                 title: 'Login Successful',
                 description: "You've been successfully signed in.",
             });
-            // Invalidate queries to refetch user-specific data
+            // Invalidate queries to refetch user-specific data after redirect
             queryClient.invalidateQueries({ queryKey: userKeys.all });
             router.push('/generate');
-            router.refresh();
+            // The onAuthStateChanged listener in AuthContext will handle the user state update
         },
         onError: (error: Error) => {
             toast({
@@ -123,11 +127,10 @@ export function useLogout() {
 
     return useMutation({
         mutationFn: logoutUser,
-        onSuccess: async () => {
-            await fetch('/api/auth/session', { method: 'DELETE' });
+        onSuccess: () => {
             queryClient.clear(); // Clear all cached data on logout
             router.push('/login');
-            router.refresh();
+            // onAuthStateChanged in AuthContext will handle setting user to null
         },
         onError: (error: Error) => {
             toast({
@@ -153,7 +156,6 @@ export function useSignup() {
         },
         onError: (error: any) => {
             // No need for a generic toast here because the form will handle displaying specific field errors.
-            // A generic form-level error will be handled by the component.
             console.error("Signup mutation error:", error);
         }
     });
@@ -161,7 +163,6 @@ export function useSignup() {
 
 export function usePurchaseCredits() {
     const queryClient = useQueryClient();
-    const router = useRouter();
 
     return useMutation({
         mutationFn: purchasePlan,
@@ -171,9 +172,6 @@ export function usePurchaseCredits() {
                 title: 'Purchase Successful!',
                 description: `You are now on the ${plan.name} plan.`,
             });
-            // Assuming the user ID is 'user-1' for now, as in the original code.
-            // In a real app, this would come from the authenticated session.
-            router.push('/profile/user-1'); 
         },
         onError: (error: Error) => {
             toast({

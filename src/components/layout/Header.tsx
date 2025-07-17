@@ -121,7 +121,7 @@ export function Header() {
                            Profile
                         </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => logoutMutation.mutate()}>
+                    <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Logout
                     </DropdownMenuItem>
