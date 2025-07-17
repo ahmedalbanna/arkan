@@ -15,6 +15,7 @@ export interface UserProfile {
 }
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
+    if (!id) return null;
     const userDoc = await adminDb.collection('users').doc(id).get();
     if (!userDoc.exists) {
         return null;
@@ -29,14 +30,13 @@ export async function getPaginatedUsers({ page, limit }: { page: number; limit: 
       .limit(limit);
 
     if (page > 1) {
-      const startAfterDoc = await adminDb.collection('users')
+      const snapshot = await adminDb.collection('users')
         .orderBy('createdAt', 'desc')
         .limit((page - 1) * limit)
-        .get()
-        .then(snapshot => snapshot.docs[snapshot.docs.length - 1]);
-      
-      if(startAfterDoc) {
-          query = query.startAfter(startAfterDoc);
+        .get();
+      const lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      if (lastDoc) {
+        query = query.startAfter(lastDoc);
       }
     }
     
@@ -46,13 +46,11 @@ export async function getPaginatedUsers({ page, limit }: { page: number; limit: 
 
 export async function updateUser(userId: string, data: {
     name: string;
-    avatarUrl?: string;
+    profilePictureUrl?: string;
     bio?: string;
 }) {
     await adminDb.collection('users').doc(userId).update({
-        name: data.name,
-        profilePictureUrl: data.avatarUrl,
-        bio: data.bio,
+        ...data,
         updatedAt: new Date().toISOString(),
     });
 }
@@ -60,8 +58,6 @@ export async function updateUser(userId: string, data: {
 export async function updateUserCredits(userId: string, creditsToAdd: number): Promise<number> {
     const userRef = adminDb.collection('users').doc(userId);
     
-    // It's safer to use a transaction for this in a real high-concurrency app,
-    // but FieldValue.increment is atomic and sufficient for many cases.
     await userRef.update({
         credits: FieldValue.increment(creditsToAdd),
         updatedAt: new Date().toISOString(),
@@ -74,7 +70,6 @@ export async function updateUserCredits(userId: string, creditsToAdd: number): P
 export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
     const userRef = adminDb.collection('users').doc(userId);
 
-    // Using a transaction to ensure atomicity for credit deduction
     return adminDb.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists) {
@@ -98,7 +93,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
 }
 
 export async function updateUserByAdmin(userId: string, data: Partial<UserProfile>) {
-  const { id, ...updateData } = data; // Exclude id from the update payload
+  const { id, ...updateData } = data;
   await adminDb.collection('users').doc(userId).update({
       ...updateData,
       updatedAt: new Date().toISOString()
@@ -106,7 +101,5 @@ export async function updateUserByAdmin(userId: string, data: Partial<UserProfil
 }
 
 export async function deleteUser(userId: string) {
-    // This should also handle deleting the user from Firebase Auth
-    // For now, it just deletes from Firestore.
     await adminDb.collection('users').doc(userId).delete();
 }

@@ -21,8 +21,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch user profile from our DB based on the Firebase Auth user's ID
-  const { data: userProfile, isLoading: isProfileLoading, refetch } = useUserProfile(firebaseUser?.uid ?? '');
+  const { data: userProfileData, isLoading: isProfileLoading, refetch } = useUserProfile(firebaseUser?.uid ?? '');
+
+  const userProfile = userProfileData ?? null;
 
   const refetchUser = useCallback(() => {
     refetch();
@@ -34,11 +35,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoading(false);
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  // When the firebaseUser changes (login/logout), refetch the profile
   useEffect(() => {
     if (firebaseUser?.uid) {
       refetchUser();
@@ -49,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ 
         firebaseUser, 
-        userProfile: userProfile ?? null,
+        userProfile,
         isLoading: isLoading || (!!firebaseUser && isProfileLoading),
         refetchUser
     }}>

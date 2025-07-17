@@ -1,7 +1,9 @@
 
+'use server';
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth, adminDb } from '@/lib/firebase/admin';
+import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -20,18 +22,16 @@ export async function POST(req: Request) {
 
     const { email, password, name } = validation.data;
 
-    // Step 1: Create user in Firebase Auth
-    const userRecord = await auth.createUser({
+    const userRecord = await adminAuth.createUser({
       email,
       password,
       displayName: name,
     });
 
-    // Step 2: Create user in our own database (Firestore)
     const newUserProfile = {
         name,
         email,
-        credits: 10, // Default starting credits
+        credits: 10,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         bio: '',
@@ -39,7 +39,6 @@ export async function POST(req: Request) {
     };
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
     
-    // Return only non-sensitive data
     return NextResponse.json({ 
       user: {
         uid: userRecord.uid, 
@@ -50,7 +49,6 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Signup error:", error);
 
-    // Firebase Authentication error handling
     if (error.code === 'auth/email-already-exists') {
       return NextResponse.json({ error: "Email address already in use" }, { status: 409 });
     } else if (error.code === 'auth/invalid-email') {

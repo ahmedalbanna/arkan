@@ -1,13 +1,13 @@
-I0717 21:06:10.148103    1046 load.go:37] Reloading schema and connectors...
-I0717 21:06:10.194120    1046 control.go:84] [/emulator/studio ea22] UpdateResources(): done
+I0717 21:34:15.272470     705 load.go:37] Reloading schema and connectors...
+I0717 21:34:15.359709     705 control.go:84] [/emulator/studio b8c7] UpdateResources(): done
 Schema: sources: schema/schema.gql [2088B] 
 Connector "default": sources: connector/mutations.gql [1233B] connector/queries.gql [1802B] 
-I0717 21:06:10.254483    1046 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "/home/user/studio/dataconnect/connector/dataconnect-generated/js/default-connector"
-I0717 21:06:10.276462    1046 collector.go:107] schema extensions wrote into "/home/user/studio/dataconnect/.dataconnect/schema"
+I0717 21:34:15.456840     705 codegen.go:82] [connector "default" javascriptSdk] Generating sources into "/home/user/studio/dataconnect/connector/dataconnect-generated/js/default-connector"
+I0717 21:34:15.513224     705 collector.go:107] schema extensions wrote into "/home/user/studio/dataconnect/.dataconnect/schema"
 Generated sources: prelude.gql [71203B] 
-I0717 21:06:10.277285    1046 collector.go:107] connector "default" javascriptSdk wrote into "/home/user/studio/dataconnect/connector/dataconnect-generated/js/default-connector"
-Generated sources: package.json [634B] README.md [2773B] index.d.ts [246B] esm/index.esm.js [109B] esm/package.json [17B] index.cjs.js [144B] 
-I0717 21:06:10.277320    1046 installsdk.go:138] generate.javascriptSdk.packageJsonDir is not specified, skipping automatic installation of JS package
-I0717 21:06:10.277416    1046 load.go:115] Finished reloading
-I0717 21:06:10.295231    1046 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001
-I0717 21:06:10.378538    1046 engine.go:170] [/emulator/studio ea22] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
+I0717 21:34:15.518481     705 collector.go:107] connector "default" javascriptSdk wrote into "/home/user/studio/dataconnect/connector/dataconnect-generated/js/default-connector"
+Generated sources: index.d.ts [246B] esm/index.esm.js [109B] esm/package.json [17B] index.cjs.js [144B] package.json [634B] README.md [2773B] 
+I0717 21:34:15.518527     705 installsdk.go:138] generate.javascriptSdk.packageJsonDir is not specified, skipping automatic installation of JS package
+I0717 21:34:15.518589     705 load.go:115] Finished reloading
+I0717 21:34:15.539971     705 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+I0717 21:34:15.737335     705 engine.go:170] [/emulator/studio b8c7] ExecuteGraphqlRead IntrospectionQuery: succeeded. 
