@@ -14,12 +14,18 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { auth } from '@/lib/firebase';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { t, locale, setLocale } = useLocalization();
   const { userProfile, isLoading, firebaseUser } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -98,7 +104,7 @@ export function Header() {
         </nav>
 
         <div className="flex-1 flex justify-end items-center gap-2">
-          {isLoading ? (
+          {(!isClient || isLoading) ? (
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-20" />
               <Skeleton className="h-8 w-8 rounded-full" />
