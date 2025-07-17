@@ -5,8 +5,8 @@ import { ReportActions } from './ReportActions';
 import { ReportResults } from './ReportResults';
 import { AlertCircle } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { GenerationTools } from './GenerationTools';
-import { EvaluationTools } from './EvaluationTools';
+import { GenerationTools } from './ReportGenerationTools';
+import { EvaluationTools } from '../EvaluationTools';
 import { Card } from '@/components/ui/card';
 
 export default function ReportGenerator() {

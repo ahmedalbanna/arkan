@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 
 
 const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { ssr: false });
-const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportGenerator'), { ssr: false });
+const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), { ssr: false });
 const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), { ssr: false });
 const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), { ssr: false });
 const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), { ssr: false });

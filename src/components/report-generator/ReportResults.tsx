@@ -3,7 +3,7 @@
 
 import { Accordion } from '@/components/ui/accordion';
 import { CardTitle, Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
-import { EditableSection } from './EditableSection';
+import { EditableSection } from '../EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
