@@ -16,9 +16,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Pencil, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
+import { fetchUserProfile } from '@/hooks/use-user';
 
 
 const USERS_PER_PAGE = 10;
@@ -61,6 +62,7 @@ function UserTableSkeleton() {
 
 export default function UserManagementConsole() {
   const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
 
   // The query key now uses the factory and includes the page number.
   const { data: users, isLoading, isError, isFetching } = useQuery({
@@ -68,6 +70,13 @@ export default function UserManagementConsole() {
       queryFn: () => fetchUsers(page),
       placeholderData: (previousData) => previousData, // Keep showing old data while fetching new page
   });
+
+  const prefetchUser = async (userId: string) => {
+    await queryClient.prefetchQuery({
+        queryKey: userKeys.profile(userId),
+        queryFn: () => fetchUserProfile(userId),
+    });
+  }
 
   if (isLoading) {
     return (
@@ -123,7 +132,7 @@ export default function UserManagementConsole() {
                     <TableCell>{user.credits}</TableCell>
                     <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
                     <TableCell className="text-right">
-                      <Button asChild variant="ghost" size="icon">
+                      <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
                         <Link href={`/manage-users/${user.id}/edit`}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">Edit User</span>

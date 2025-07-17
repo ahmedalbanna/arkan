@@ -13,7 +13,7 @@ import { signOut } from 'firebase/auth';
 
 // --- Query Functions ---
 
-async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
   if (!userId) {
     return null;
   }
