@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -12,6 +12,7 @@ interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   userProfile: UserProfile | null;
   isLoading: boolean;
+  refetchUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,6 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Fetch user profile from our DB based on the Firebase Auth user's ID
   const { data: userProfile, isLoading: isProfileLoading, refetch } = useUserProfile(firebaseUser?.uid ?? '');
+
+  const refetchUser = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -36,16 +41,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // When the firebaseUser changes (login/logout), refetch the profile
   useEffect(() => {
     if (firebaseUser?.uid) {
-      refetch();
+      refetchUser();
     }
-  }, [firebaseUser, refetch]);
+  }, [firebaseUser, refetchUser]);
 
 
   return (
     <AuthContext.Provider value={{ 
         firebaseUser, 
         userProfile: userProfile ?? null,
-        isLoading: isLoading || (!!firebaseUser && isProfileLoading) 
+        isLoading: isLoading || (!!firebaseUser && isProfileLoading),
+        refetchUser
     }}>
       {children}
     </AuthContext.Provider>
