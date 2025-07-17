@@ -8,6 +8,7 @@ export interface UserProfile {
   name: string;
   email: string;
   credits: number;
+  role: 'user' | 'admin';
   createdAt: string; // Storing as ISO string
   updatedAt: string; // Storing as ISO string
   bio?: string;

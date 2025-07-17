@@ -2,9 +2,34 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser } from '@/lib/db/queries';
+import { auth as adminAuth } from '@/lib/firebase/admin';
+
+// Helper to verify admin role
+async function verifyAdmin(request: Request) {
+    const sessionCookie = request.cookies.get('__session')?.value;
+    if (!sessionCookie) {
+        return { authorized: false, message: 'Unauthorized' };
+    }
+    try {
+        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const user = await getUserProfile(decodedToken.uid);
+        if (user?.role !== 'admin') {
+            return { authorized: false, message: 'Forbidden' };
+        }
+        return { authorized: true, userId: decodedToken.uid };
+    } catch (error) {
+        return { authorized: false, message: 'Unauthorized' };
+    }
+}
+
 
 // GET /api/users/[id]
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+  const adminCheck = await verifyAdmin(request);
+  if (!adminCheck.authorized) {
+    return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+  }
+
   const params = await props.params;
   try {
     const userId = params.id;
@@ -31,6 +56,11 @@ const updateUserSchema = z.object({
 });
 
 export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+  const adminCheck = await verifyAdmin(request);
+  if (!adminCheck.authorized) {
+    return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+  }
+
   const params = await props.params;
   try {
     const userId = params.id;
@@ -56,7 +86,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     if (name || avatarUrl || bio) {
         await updateUser(userId, {
             name: name ?? user.name,
-            avatarUrl: avatarUrl ?? user.avatarUrl ?? undefined,
+            profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
             bio: bio ?? user.bio ?? undefined,
         });
     }

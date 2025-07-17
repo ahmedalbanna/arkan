@@ -1,27 +1,25 @@
 
-"use client";
+'use client';
 
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { HomeIcon, SlidersHorizontal, Users, Palette, FileImage, Bot, LogOut } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // Import your useAuth hook
+import { useLogout } from '@/hooks/use-user'; // Import your useLogout mutation hook
+import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLogout } from '@/hooks/use-user';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useEffect, useState } from 'react';
 
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
-  const { userProfile, isLoading, firebaseUser } = useAuth();
-  const logoutMutation = useLogout();
+  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth(); // Get firebaseUser, userProfile, and loading state
+  const logoutMutation = useLogout(); // Use the useLogout mutation hook
   const [isClient, setIsClient] = useState(false);
 
+  // Ensure client-side rendering for hooks
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -35,6 +33,7 @@ export function Header() {
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
   ];
 
+  // These might be admin-only links, you'll need to add logic to check userProfile.role or similar
   const adminLinks = [
     { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
@@ -42,7 +41,7 @@ export function Header() {
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
   ];
 
-  const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
+  const renderNavLinks = (links: typeof navLinks | typeof adminLinks, isMobile = false) =>
     links.map((link) => (
       <Button
         key={link.href}
@@ -60,81 +59,95 @@ export function Header() {
       </Button>
     ));
 
+  // Handle logout
+  const handleLogout = async () => {
+      await logoutMutation.mutate(); // Trigger the logout mutation
+  };
+
+  // Don't render until client-side is ready if needed for hooks
+  if (!isClient && typeof window !== 'undefined') {
+      return null; // Or a loading placeholder
+  }
+
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center px-4">
-        <div className="md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">{t('header.openMenu')}</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm">
-              <SheetTitle className="sr-only">{t('header.openMenu')}</SheetTitle>
-              <nav className="flex flex-col gap-4 pt-8">
-                {renderNavLinks(navLinks, true)}
-                <div className="my-4 border-t"></div>
-                {renderNavLinks(adminLinks, true)}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        <div className="flex-1 flex justify-center md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-            {t('header.title')}
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
+      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+        <div className="flex gap-6 md:gap-10">
+          <Link href="/" className="flex items-center space-x-2">
+             {/* Replace with your logo component or image */}
+            <span className="inline-block font-bold">App Name</span>
           </Link>
+          {/* Main navigation links */}
+          <nav className="hidden gap-6 md:flex">
+            {renderNavLinks(navLinks)}
+             {/* Render admin links only if user is admin */}
+             {userProfile?.role === 'admin' && renderNavLinks(adminLinks)}
+          </nav>
         </div>
+        <div className="flex flex-1 items-center justify-end space-x-4">
+          <nav className="flex items-center space-x-1">
+             {/* Language Toggle */}
+             <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleLocale}
+                className="font-headline"
+             >
+                {locale === 'en' ? 'العربية' : 'English'}
+             </Button>
+             {/* Theme Toggle - Assuming you have this component */}
+             {/* <ThemeToggle /> */}
 
-        <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
-          {renderNavLinks(navLinks)}
-        </nav>
-
-        <div className="flex-1 flex justify-end items-center gap-2">
-          {(!isClient || isLoading) ? (
-            <div className="flex items-center gap-2">
-              <Skeleton className="h-8 w-20" />
-              <Skeleton className="h-8 w-8 rounded-full" />
-            </div>
-          ) : firebaseUser && userProfile ? (
-            <>
-              <Button variant="outline" asChild>
-                <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
-                  <Gem className="h-4 w-4" />
-                  <span>{userProfile.credits} {t('header.credits')}</span>
-                </Link>
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                        <Link href={`/profile/${userProfile.id}`}>
-                           <UserCog className="mr-2 h-4 w-4" />
-                           Profile
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Logout
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          ) : (
-             <Button asChild><Link href="/login">Login</Link></Button>
-          )}
-          <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
-            <Languages className="h-5 w-5" />
-          </Button>
+             {/* Conditional Rendering based on Authentication State */}
+            {isLoadingAuth ? (
+              // Show loading state while auth is being determined
+              <Skeleton className="h-8 w-24" />
+            ) : firebaseUser ? (
+              // If user is logged in, display user info and logout button
+              <>
+                {/* Display user's name or a placeholder */}
+                {userProfile && userProfile.name ? (
+                   <span className="font-headline hidden md:inline">{userProfile.name}</span>
+                ) : (
+                   <span className="font-headline hidden md:inline">Welcome!</span>
+                )}
+                {/* Link to profile page (optional) */}
+                 {userProfile && (
+                   <Button variant="ghost" size="sm" asChild>
+                     <Link href={`/profile/${firebaseUser.uid}`}>Profile</Link> {/* Assuming a profile page */}
+                   </Button>
+                 )}
+                {/* Logout Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending} // Disable button while logging out
+                  className="font-headline"
+                >
+                   {logoutMutation.isPending ? 'Logging out...' : (
+                      <>
+                         <LogOut className="mr-2 h-4 w-4" />
+                         Logout
+                      </>
+                   )}
+                </Button>
+              </>
+            ) : (
+              // If user is not logged in, display Login and Sign Up links
+              <>
+                <Button variant="ghost" size="sm" asChild className="font-headline">
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button variant="ghost" size="sm" asChild className="font-headline">
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
+          </nav>
+           {/* Mobile Menu Toggle (assuming you have one) */}
+           {/* <MobileMenuToggle /> */}
         </div>
       </div>
     </header>

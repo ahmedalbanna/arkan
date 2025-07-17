@@ -33,6 +33,7 @@ export async function POST(req: Request) {
         name,
         email,
         credits: 10, // Assign some starting credits
+        role: 'user', // Assign the default role
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         bio: '',

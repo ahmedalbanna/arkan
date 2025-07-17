@@ -1,7 +1,26 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getPaginatedUsers } from '@/lib/db/queries';
+import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
+import { auth as adminAuth } from '@/lib/firebase/admin';
+
+// Helper to verify admin role
+async function verifyAdmin(request: Request) {
+    const sessionCookie = request.cookies.get('__session')?.value;
+    if (!sessionCookie) {
+        return { authorized: false, message: 'Unauthorized' };
+    }
+    try {
+        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const user = await getUserProfile(decodedToken.uid);
+        if (user?.role !== 'admin') {
+            return { authorized: false, message: 'Forbidden' };
+        }
+        return { authorized: true, userId: decodedToken.uid };
+    } catch (error) {
+        return { authorized: false, message: 'Unauthorized' };
+    }
+}
 
 const userSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -10,6 +29,11 @@ const userSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const adminCheck = await verifyAdmin(request);
+  if (!adminCheck.authorized) {
+    return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+  }
+
   try {
     const body = await request.json();
     const validation = userSchema.safeParse(body);
@@ -45,6 +69,11 @@ const userListQuerySchema = z.object({
 
 
 export async function GET(request: Request) {
+  const adminCheck = await verifyAdmin(request);
+  if (!adminCheck.authorized) {
+    return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const query = userListQuerySchema.safeParse({
