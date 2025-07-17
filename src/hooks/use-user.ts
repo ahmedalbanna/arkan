@@ -11,9 +11,16 @@ import { useRouter } from 'next/navigation';
 // --- Query Functions ---
 // These are the async functions that perform the actual API calls.
 
-async function fetchUserProfile(userId: string): Promise<UserProfile> {
+async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
+  // If no userId is provided, don't attempt to fetch
+  if (!userId) {
+    return null;
+  }
   const response = await fetch(`/api/users/${userId}`);
   if (!response.ok) {
+    if (response.status === 404) {
+      return null; // Handle user not found gracefully
+    }
     throw new Error('Failed to fetch user profile');
   }
   return response.json();
@@ -66,7 +73,7 @@ export function usePurchaseCredits() {
             
             toast({
                 title: 'Purchase Successful!',
-                description: `You are now on the ${plan.name} plan with ${data.newBalance} credits.`,
+                description: `You are now on the ${plan.name} plan.`,
             });
             // Redirect to profile page to see the new plan details
             router.push('/profile/user-1');

@@ -11,15 +11,20 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { auth } from '@/lib/firebase';
 
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
-  const { user, isLoading } = useAuth();
+  const { userProfile, isLoading, firebaseUser } = useAuth();
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
   };
+
+  const handleLogout = async () => {
+    await auth.signOut();
+  }
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
@@ -86,14 +91,19 @@ export function Header() {
         <div className="flex-1 flex justify-end items-center gap-2">
           {isLoading ? (
             <Skeleton className="h-8 w-20" />
-          ) : user ? (
-            <Button variant="outline" asChild>
-              <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
-                <Gem className="h-4 w-4" />
-                <span>{user.credits} {t('header.credits')}</span>
-              </Link>
-            </Button>
-          ) : null}
+          ) : firebaseUser ? (
+            <>
+              <Button variant="outline" asChild>
+                <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
+                  <Gem className="h-4 w-4" />
+                  <span>{userProfile?.credits ?? 0} {t('header.credits')}</span>
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout}>Logout</Button>
+            </>
+          ) : (
+             <Button asChild><Link href="/login">Login</Link></Button>
+          )}
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
