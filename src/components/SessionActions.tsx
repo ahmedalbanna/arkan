@@ -15,14 +15,10 @@ export const SessionActions = () => {
     // Select multiple state slices from the store
     const { 
         proposal, 
-        isAnythingGenerating, 
-        isGeneratingProposal, 
         newSession,
         loadState
     } = useBuilderStore(state => ({
         proposal: state.proposal,
-        isAnythingGenerating: state.isAnythingGenerating,
-        isGeneratingProposal: state.isGeneratingProposal,
         newSession: state.newSession,
         loadState: state.loadState
     }));
@@ -38,7 +34,6 @@ export const SessionActions = () => {
     }));
 
 
-    const isDisabled = isAnythingGenerating || isGeneratingProposal;
     
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -90,7 +85,6 @@ export const SessionActions = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleUploadClick}
-                disabled={isDisabled}
                 title="Upload a previously saved project file"
             >
                 <Upload className="mr-2 h-4 w-4" />
@@ -100,7 +94,7 @@ export const SessionActions = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleSaveProjectFile}
-                disabled={!proposal || isDisabled}
+                disabled={!proposal}
                 title="Download all generated content and proposal into a single file"
             >
                 <Download className="mr-2 h-4 w-4" />
@@ -110,7 +104,6 @@ export const SessionActions = () => {
                 variant="destructive"
                 size="sm"
                 onClick={newSession}
-                disabled={isDisabled}
                 title="Clear all content and start a new session"
             >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -119,3 +112,5 @@ export const SessionActions = () => {
         </div>
     );
 }
+
+    

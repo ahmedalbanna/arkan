@@ -17,7 +17,7 @@ const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 export const ReportActions = () => {
   const { t } = useLocalization();
-  const { proposal, sections, diagrams, isAnythingGenerating } = useBuilderStore();
+  const { proposal, sections, diagrams } = useBuilderStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
 
@@ -67,7 +67,7 @@ export const ReportActions = () => {
               </Select>
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
-        <Button onClick={handleExportReportDOCX} disabled={!hasContent || isAnythingGenerating} className="w-full font-headline">
+        <Button onClick={handleExportReportDOCX} disabled={!hasContent} className="w-full font-headline">
           <FileText className="mr-2 h-4 w-4" />
           {t('reportGenerator.exportReport')}
         </Button>
@@ -75,3 +75,5 @@ export const ReportActions = () => {
     </Card>
   );
 };
+
+    

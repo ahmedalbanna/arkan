@@ -189,7 +189,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       handleSectionUpdate: (key, value) => set(state => ({ sections: { ...state.sections, [key]: value } })),
       setEvaluation: (evaluation) => set({ evaluation }),
       setDiagram: (key, data) => set(state => ({ diagrams: { ...state.diagrams, [key]: data } })),
-      handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
+      handleDiagramCodeUpdate: (key, code) => set(state => ({ diagrams: { ...state.diagrams!, [key]: { ...state.diagrams![key]!, plantUmlCode: code } } })),
 
       // --- PRESENTATION ACTIONS ---
       addPresentationToHistory: (entry) => {
@@ -222,7 +222,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       handleRemoveCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
       setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
-      handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section], [field]: value } } })),
+      handleControlChange: (section, field, value) => set(state => ({ controlState: { ...state.controlState, [section]: { ...state.controlState[section]!, [field]: value } } })),
       
       handleGuidelineToggle: (itemKey, guidelineIndex, isChecked) => set(state => {
         const itemGuidelineState = state.guidelineState[itemKey] || { checked: {}, custom: [] };
@@ -245,7 +245,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const { guidelineState, customGuidelineInput } = get();
           const newGuideline = customGuidelineInput[itemKey]?.trim();
           if (newGuideline) {
-              const newGuidelineState = { ...guidelineState[itemKey], custom: [...(guidelineState[itemKey]?.custom || []), newGuideline]};
+              const newGuidelineState = { ...guidelineState[itemKey]!, custom: [...(guidelineState[itemKey]?.custom || []), newGuideline]};
               set(state => ({
                   guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState },
                   customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: '' }
@@ -253,8 +253,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           }
       },
       handleRemoveCustomGuidelineForItem: (itemKey, index) => set(state => {
-          const newCustom = state.guidelineState[itemKey].custom.filter((_, i) => i !== index);
-          const newGuidelineState = { ...state.guidelineState[itemKey], custom: newCustom };
+          const newCustom = state.guidelineState[itemKey]!.custom.filter((_, i) => i !== index);
+          const newGuidelineState = { ...state.guidelineState[itemKey]!, custom: newCustom };
           return { guidelineState: { ...state.guidelineState, [itemKey]: newGuidelineState }};
       }),
     }),
@@ -274,3 +274,5 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     }
   )
 );
+
+    

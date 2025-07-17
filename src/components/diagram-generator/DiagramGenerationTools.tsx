@@ -108,8 +108,8 @@ export const DiagramGenerationTools = () => {
             toast({ title: `Diagram "${diagramConfig[diagramKey].title}" generated successfully!` });
             setActiveMutationKey(null);
         },
-        onError: (error: Error) => {
-            toast({ title: 'Generation Failed', description: error.message, variant: "destructive" });
+        onError: (error: Error, variables) => {
+            toast({ title: `Failed to generate "${diagramConfig[variables.diagramToGenerate].title}"`, description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -320,3 +320,5 @@ export const DiagramGenerationTools = () => {
         </Card>
     );
 };
+
+    

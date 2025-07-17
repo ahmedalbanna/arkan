@@ -65,22 +65,22 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         diagrams,
         guidelineState,
         customGuidelineInput,
-        presentations,
-        onGuidelineToggle,
-        onCustomGuidelineChange,
-        onAddCustomGuideline,
-        onRemoveCustomGuideline,
+        presentation,
+        handleGuidelineToggle,
+        setCustomGuidelineInputForItem,
+        handleAddCustomGuidelineForItem,
+        handleRemoveCustomGuidelineForItem,
      } = useBuilderStore(state => ({
         proposal: state.proposal,
         sections: state.sections,
         diagrams: state.diagrams,
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
-        presentations: state.presentation?.history || [],
-        onGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
-        onCustomGuidelineChange: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
-        onAddCustomGuideline: () => state.handleAddCustomGuidelineForItem('presentation'),
-        onRemoveCustomGuideline: (index: number) => state.handleRemoveCustomGuidelineForItem('presentation', index),
+        presentation: state.presentation,
+        handleGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
+        setCustomGuidelineInputForItem: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
+        handleAddCustomGuidelineForItem: () => state.handleAddCustomGuidelineForItem('presentation'),
+        handleRemoveCustomGuidelineForItem: (index: number) => state.handleRemoveCustomGuidelineForItem('presentation', index),
      }));
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -89,7 +89,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const agent = agents.find(a => a.id === presentationConfig.presentation.agentId);
 
-    const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams).length > 0;
+    const presentations = presentation?.history || [];
+    const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams || {}).length > 0;
 
     React.useEffect(() => {
         const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
@@ -193,7 +194,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                             <Checkbox
                                                                 id={`guideline-presentation-${index}`}
                                                                 checked={currentGuidelineState?.checked[index] ?? false}
-                                                                onCheckedChange={(checked) => onGuidelineToggle(index, !!checked)}
+                                                                onCheckedChange={(checked) => handleGuidelineToggle(index, !!checked)}
                                                             />
                                                             <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
                                                                 <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
@@ -209,7 +210,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             {currentGuidelineState?.custom.map((custom, index) => (
                                                 <div key={index} className="flex items-center gap-2 text-sm">
                                                     <span>- {custom}</span>
-                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => onRemoveCustomGuideline(index)}>
+                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem('presentation', index)}>
                                                         <Trash2 className="h-3 w-3 text-destructive" />
                                                     </Button>
                                                 </div>
@@ -218,10 +219,10 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 <Input
                                                     placeholder="Add a custom guideline..."
                                                     value={customGuidelineInput['presentation'] || ''}
-                                                    onChange={(e) => onCustomGuidelineChange(e.target.value)}
-                                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), onAddCustomGuideline())}
+                                                    onChange={(e) => setCustomGuidelineInputForItem(e.target.value)}
+                                                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem())}
                                                 />
-                                                <Button type="button" variant="secondary" onClick={onAddCustomGuideline}>
+                                                <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem()}>
                                                     <Plus className="h-4 w-4" />
                                                 </Button>
                                             </div>
@@ -263,3 +264,5 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         </div>
     );
 };
+
+    

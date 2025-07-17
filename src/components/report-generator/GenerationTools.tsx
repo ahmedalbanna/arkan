@@ -129,8 +129,8 @@ export const GenerationTools = () => {
             toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
             setActiveMutationKey(null);
         },
-        onError: (error: Error) => {
-            toast({ title: 'Generation Failed', description: error.message, variant: "destructive" });
+        onError: (error: Error, variables) => {
+            toast({ title: `Failed to generate "${sectionConfig[variables.sectionToGenerate].title}"`, description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -431,3 +431,5 @@ export const GenerationTools = () => {
         </Card>
     );
 };
+
+    
