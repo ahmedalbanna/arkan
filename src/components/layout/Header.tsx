@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -12,6 +12,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth } from '@/lib/firebase';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 export function Header() {
   const pathname = usePathname();
@@ -91,18 +92,35 @@ export function Header() {
         <div className="flex-1 flex justify-end items-center gap-2">
           {isLoading ? (
             <Skeleton className="h-8 w-20" />
-          ) : firebaseUser ? (
+          ) : firebaseUser && userProfile ? (
             <>
               <Button variant="outline" asChild>
                 <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
                   <Gem className="h-4 w-4" />
-                  <span>{userProfile?.credits ?? 0} {t('header.credits')}</span>
+                  <span>{userProfile.credits} {t('header.credits')}</span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <User className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                        <Link href={`/profile/${userProfile.id}`}>
+                           <UserCog className="mr-2 h-4 w-4" />
+                           Profile
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
              <Button asChild><Link href="/login">Login</Link></Button>
