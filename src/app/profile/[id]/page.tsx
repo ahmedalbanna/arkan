@@ -20,7 +20,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
       <Card>
         <CardHeader className="text-center">
             <Avatar className="w-24 h-24 mx-auto mb-4 border-4 border-primary/20">
-              <AvatarImage src={user.avatarUrl ?? ''} alt={user.name} />
+              <AvatarImage src={user.profilePictureUrl ?? ''} alt={user.name} />
               <AvatarFallback className="text-3xl">
                 {user.name.charAt(0).toUpperCase()}
               </AvatarFallback>
