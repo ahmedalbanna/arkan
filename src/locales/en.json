@@ -476,7 +476,12 @@
       "speakerNotes": "Speaker Notes",
       "prev": "Previous",
       "next": "Next",
-      "goToSlide": "Go to slide {slideNumber}"
+      "goToSlide": "Go to slide {slideNumber}",
+      "toasts": {
+        "success": "Presentation Generated Successfully!",
+        "failed": "Presentation Generation Failed",
+        "authError": "You must be logged in to generate a presentation."
+      }
     },
     "editableSection": {
       "aiSuggestion": "AI SUGGESTION",

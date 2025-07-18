@@ -476,7 +476,12 @@
       "speakerNotes": "ملاحظات المتحدث",
       "prev": "السابق",
       "next": "التالي",
-      "goToSlide": "اذهب إلى الشريحة {slideNumber}"
+      "goToSlide": "اذهب إلى الشريحة {slideNumber}",
+      "toasts": {
+        "success": "تم إنشاء العرض التقديمي بنجاح!",
+        "failed": "فشل إنشاء العرض التقديمي",
+        "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي."
+      }
     },
     "editableSection": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",

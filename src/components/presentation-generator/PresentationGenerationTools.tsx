@@ -25,6 +25,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import type { DiagramType, SectionName, PresentationHistoryEntry } from '@/ai/schemas';
 import type { GuidelineState } from '@/hooks/useBuilderStore';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { useLocalization } from '@/context/LocalizationContext';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -59,6 +60,7 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
 };
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
+    const { t } = useLocalization();
     const { 
         isDisabled, 
         isGenerating,
@@ -152,7 +154,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     
 
     if (!agentsLoaded || !agent) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
 
     const promptConfig = agent.prompt as AgentPrompt;
@@ -166,19 +168,19 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">Actions</CardTitle>
+                    <CardTitle className="font-headline">{t('builder.presentationGenerator.actionsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="pptx-template-select">PPTX Export Style</Label>
+                        <Label htmlFor="pptx-template-select">{t('builder.presentationGenerator.exportStyleLabel')}</Label>
                         {pptxLoaded ? (
                         <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange}>
                             <SelectTrigger id="pptx-template-select">
-                                <SelectValue placeholder="Select a style" />
+                                <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {Object.entries(pptxTemplates).map(([key, template]) => (
-                                    <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                                    <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -186,22 +188,22 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                     </div>
                     <Button onClick={handleExportPresentation} disabled={isGenerating || !presentations || presentations.length === 0} className="w-full font-headline">
                         <FileDown className="mr-2 h-4 w-4" />
-                        Export Presentation
+                        {t('builder.presentationGenerator.exportButton')}
                     </Button>
                 </CardContent>
             </Card>
 
             <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
                 <CardHeader>
-                    <CardTitle className="font-headline">Generation Tools</CardTitle>
-                    <CardDescription>Configure and generate the presentation.</CardDescription>
+                    <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
+                    <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-2 mb-4">
-                        <Label htmlFor="presentation-template-select">Presentation Template</Label>
+                        <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
                         <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
                             <SelectTrigger id="presentation-template-select">
-                                <SelectValue placeholder="Select a template" />
+                                <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {PRESENTATION_GENERATION_TEMPLATES.map(template => (
@@ -216,18 +218,18 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <AccordionItem value="presentation">
                             <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                 <div className="flex items-center gap-2">
-                                    <Presentation className="h-4 w-4" /> Edit Generation Details
+                                    <Presentation className="h-4 w-4" /> {t('builder.presentationGenerator.editDetails')}
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="space-y-4 p-4">
                                 <Tabs defaultValue="prompt" className="w-full">
                                     <TabsList className="grid w-full grid-cols-2">
-                                        <TabsTrigger value="prompt">Prompt</TabsTrigger>
-                                        <TabsTrigger value="context">Context</TabsTrigger>
+                                        <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                        <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="prompt" className="pt-4 space-y-4">
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
                                             <div className="p-3 rounded-md border bg-muted text-xs">
                                                 <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                                             </div>
@@ -235,7 +237,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
                                         {hasGuidelines && (
                                             <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
                                                 <div className="space-y-2 p-3 rounded-md border">
                                                     {promptConfig.guidelines!.map((guideline, index) => (
                                                         <div key={index} className="flex items-start gap-2">
@@ -254,7 +256,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                         )}
 
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
                                             {currentGuidelineState?.custom.map((custom, index) => (
                                                 <div key={index} className="flex items-center gap-2 text-sm">
                                                     <span>- {custom}</span>
@@ -265,7 +267,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             ))}
                                             <div className="flex gap-2">
                                                 <Input
-                                                    placeholder="Add a custom guideline..."
+                                                    placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
                                                     value={customGuidelineInput['presentation'] || ''}
                                                     onChange={(e) => setCustomGuidelineInputForItem(e.target.value)}
                                                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem())}
@@ -279,16 +281,16 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
                                     <TabsContent value="context" className="pt-4">
                                         <div className="space-y-2">
-                                            <Label className="font-semibold">Context from Current Session</Label>
+                                            <Label className="font-semibold">{t('builder.reportGenerator.tool_tab_context')}</Label>
                                             {!hasContent && !externalContext ? (
                                                 <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
-                                                    No sections, diagrams, or external context available.
+                                                    {t('builder.reportGenerator.no_other_sections')}
                                                 </p>
                                             ) : (
                                                 <ScrollArea className="h-48 border rounded-md p-2">
                                                   <div className="space-y-4 pr-4">
                                                       <div className="space-y-2">
-                                                          <Label className="font-semibold">Sections</Label>
+                                                          <Label className="font-semibold">{t('builder.reportGenerator.context_sections')}</Label>
                                                           {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
                                                               <div key={`ctx-s-pres-${contextKey}`} className="flex items-center space-x-2">
                                                                   <Checkbox
@@ -299,18 +301,18 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                   <Label htmlFor={`context-section-pres-${contextKey}`} className="text-sm font-normal">
                                                                       <div className="flex items-center gap-2">
                                                                           <BookCheck className="h-4 w-4" />
-                                                                          {sectionConfig[contextKey].title}
+                                                                          {t(sectionConfig[contextKey].title)}
                                                                       </div>
                                                                   </Label>
                                                               </div>
                                                           ))}
                                                           {Object.keys(sections).length === 0 && (
-                                                            <p className="text-xs text-muted-foreground">No sections generated yet.</p>
+                                                            <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.no_other_sections')}</p>
                                                           )}
                                                       </div>
                                                       {Object.keys(diagrams || {}).length > 0 && (
                                                         <div className="space-y-2 pt-2 border-t">
-                                                            <Label className="font-semibold">Diagrams</Label>
+                                                            <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
                                                             {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
                                                                 <div key={`ctx-d-pres-${contextKey}`} className="flex items-center space-x-2">
                                                                     <Checkbox
@@ -321,7 +323,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                     <Label htmlFor={`context-diagram-pres-${contextKey}`} className="text-sm font-normal">
                                                                         <div className="flex items-center gap-2">
                                                                             <GitGraph className="h-4 w-4" />
-                                                                            {diagramConfig[contextKey].title}
+                                                                            {t(diagramConfig[contextKey].title)}
                                                                         </div>
                                                                     </Label>
                                                                 </div>
@@ -330,7 +332,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                       )}
                                                       {externalContext && (
                                                         <div className="space-y-2 pt-2 border-t">
-                                                            <Label className="font-semibold">External Context</Label>
+                                                            <Label className="font-semibold">{t('builder.reportGenerator.context_external')}</Label>
                                                             <div className="flex items-center space-x-2">
                                                                 <Checkbox
                                                                     id="context-external-pres"
@@ -362,10 +364,10 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         onClick={handleGenerateClick}
                         disabled={isDisabled || isGenerating}
                         className="font-headline w-full"
-                        title={!agent?.isEnabled ? 'This agent is disabled' : 'Generate Presentation'}
+                        title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.presentationGenerator.generateButton')}
                     >
                         {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                        Generate Presentation
+                        {t('builder.presentationGenerator.generateButton')}
                     </Button>
                 </CardFooter>
             </Card>

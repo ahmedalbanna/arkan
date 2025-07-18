@@ -15,6 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/schemas';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
@@ -35,6 +36,7 @@ async function generatePresentation(variables: { body: any, token: string }): Pr
 }
 
 export default function PresentationGenerator() {
+    const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const {
@@ -55,16 +57,16 @@ export default function PresentationGenerator() {
             };
             addPresentationToHistory(newEntry);
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: "Presentation Generated Successfully!" });
+            toast({ title: t('builder.presentationGenerator.toasts.success') });
         },
         onError: (error: Error) => {
-            toast({ title: 'Presentation Generation Failed', description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.presentationGenerator.toasts.failed'), description: error.message, variant: 'destructive' });
         }
     });
 
     const onGenerate = async (body: any) => {
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to generate a presentation.", variant: "destructive" });
+            toast({ title: t('builder.toasts.authError'), description: t('builder.presentationGenerator.toasts.authError'), variant: "destructive" });
             return;
         }
         const token = await firebaseUser.getIdToken();
@@ -76,8 +78,8 @@ export default function PresentationGenerator() {
             <Card className="flex items-center justify-center h-full min-h-[400px]">
                 <div className="text-center text-muted-foreground p-8">
                     <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                    <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
-                    <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+                    <h3 className="text-lg font-semibold">{t('builder.presentationGenerator.noProposal')}</h3>
+                    <p>{t('builder.presentationGenerator.noProposalDesc')}</p>
                 </div>
             </Card>
         )
@@ -94,9 +96,9 @@ export default function PresentationGenerator() {
                     <CardHeader>
                         <CardTitle className="font-headline flex items-center gap-2">
                            <History className="w-6 h-6" />
-                           History
+                           {t('builder.presentationGenerator.historyTitle')}
                         </CardTitle>
-                        <CardDescription>Select a previously generated presentation.</CardDescription>
+                        <CardDescription>{t('builder.presentationGenerator.historyDesc')}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ScrollArea className="h-96">
@@ -115,7 +117,7 @@ export default function PresentationGenerator() {
                                                  )}
                                              >
                                                  <div className="flex flex-col">
-                                                    <span>{p.name} ({(p.slides || []).length} slides)</span>
+                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
                                                     {isValidDate && (
                                                          <span className="text-xs text-muted-foreground">
                                                             {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
@@ -127,7 +129,7 @@ export default function PresentationGenerator() {
                                     })}
                                 </div>
                              ) : (
-                                <p className="text-sm text-muted-foreground text-center">No presentations generated yet.</p>
+                                <p className="text-sm text-muted-foreground text-center">{t('builder.presentationGenerator.historyEmpty')}</p>
                              )}
                         </ScrollArea>
                     </CardContent>
@@ -146,7 +148,7 @@ export default function PresentationGenerator() {
                     <Card className="flex items-center justify-center h-full min-h-[300px]">
                         <div className="text-center text-muted-foreground p-8">
                             <Presentation className="w-16 h-16 mx-auto mb-4" />
-                            <p>Your generated presentation will appear here.</p>
+                            <p>{t('builder.presentationGenerator.viewerEmpty')}</p>
                             {mutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                         </div>
                     </Card>
