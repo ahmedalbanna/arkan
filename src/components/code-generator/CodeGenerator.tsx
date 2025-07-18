@@ -18,6 +18,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function generateCode(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate-code', {
@@ -65,6 +66,7 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 }
 
 export default function CodeGenerator() {
+    const { t } = useLocalization();
     const { 
         codeGenerator: codeState,
         setCodePrompt,
@@ -85,10 +87,10 @@ export default function CodeGenerator() {
         onSuccess: (data) => {
             setGeneratedCode(data);
             refetchUser(); // Invalidate user query to update credits
-            toast({ title: "Code Generated Successfully!" });
+            toast({ title: t('builder.codeGenerator.toasts.success') });
         },
         onError: (error: Error) => {
-            toast({ title: "Code Generation Failed", description: error.message, variant: "destructive" });
+            toast({ title: t('builder.codeGenerator.toasts.failed'), description: error.message, variant: "destructive" });
         }
     });
 
@@ -126,8 +128,8 @@ export default function CodeGenerator() {
         } catch (error) {
             console.error("Screenshot failed:", error);
             toast({
-                title: "Screenshot Failed",
-                description: "There was an error capturing the preview.",
+                title: t('builder.codeGenerator.toasts.screenshotFailed'),
+                description: t('builder.codeGenerator.toasts.screenshotFailedDesc'),
                 variant: "destructive"
             })
         } finally {
@@ -159,8 +161,8 @@ export default function CodeGenerator() {
         } catch (error) {
             console.error("ZIP download failed:", error);
             toast({
-                title: "Download Failed",
-                description: "There was an error creating the ZIP file.",
+                title: t('builder.codeGenerator.toasts.zipFailed'),
+                description: t('builder.codeGenerator.toasts.zipFailedDesc'),
                 variant: "destructive"
             })
         } finally {
@@ -186,7 +188,7 @@ export default function CodeGenerator() {
                 />
             ) : (
                 <div className="text-center text-muted-foreground p-8">
-                    <p>Your generated code preview will appear here.</p>
+                    <p>{t('builder.codeGenerator.emptyPreview')}</p>
                 </div>
             )}
         </div>
@@ -195,7 +197,7 @@ export default function CodeGenerator() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to generate code.", variant: "destructive" });
+            toast({ title: t('builder.toasts.authError'), description: "You must be logged in to generate code.", variant: "destructive" });
             return;
         }
         const token = await firebaseUser.getIdToken();
@@ -210,10 +212,10 @@ export default function CodeGenerator() {
                     {(codeState.html || codeState.css || codeState.javascript) && (
                         <Card>
                             <CardHeader className="flex-row items-center justify-between">
-                                <CardTitle className="font-headline">Generated Code</CardTitle>
+                                <CardTitle className="font-headline">{t('builder.codeGenerator.generatedCode')}</CardTitle>
                                 <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
                                     {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    Download ZIP
+                                    {t('builder.codeGenerator.downloadZip')}
                                 </Button>
                             </CardHeader>
                             <CardContent>
@@ -230,7 +232,7 @@ export default function CodeGenerator() {
                                         <CodeDisplay code={codeState.css || ''} language="css" />
                                     </TabsContent>
                                     <TabsContent value="javascript" className="mt-4">
-                                        <CodeDisplay code={codeState.javascript || '// No JavaScript generated'} language="javascript" />
+                                        <CodeDisplay code={codeState.javascript || t('builder.codeGenerator.noJs')} language="javascript" />
                                     </TabsContent>
                                 </Tabs>
                             </CardContent>
@@ -245,14 +247,14 @@ export default function CodeGenerator() {
                             <div className="flex justify-between items-center">
                                 <CardTitle className="font-headline flex items-center gap-2">
                                     <Tv className="w-6 h-6" />
-                                    Live Preview
+                                    {t('builder.codeGenerator.livePreview')}
                                 </CardTitle>
                                 {srcDoc && (
                                     <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title="Take Screenshot">
+                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.tooltips.screenshot')}>
                                             {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title="Expand Preview">
+                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.tooltips.expand')}>
                                             <Expand className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -269,13 +271,13 @@ export default function CodeGenerator() {
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Generation Tools</CardTitle>
-                            <CardDescription>Describe the UI component you want to create.</CardDescription>
+                            <CardTitle className="font-headline">{t('builder.codeGenerator.toolsTitle')}</CardTitle>
+                            <CardDescription>{t('builder.codeGenerator.toolsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
                                 name="prompt"
-                                placeholder='A simple button that says "Click me!" and changes color when hovered.'
+                                placeholder={t('builder.codeGenerator.promptPlaceholder')}
                                 rows={8}
                                 required
                                 value={codeState.prompt}
@@ -291,12 +293,12 @@ export default function CodeGenerator() {
                                 {mutation.isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Generating...
+                                        {t('builder.codeGenerator.generateButtonLoading')}
                                     </>
                                 ) : (
                                     <>
                                         <Sparkles className="mr-2 h-4 w-4" />
-                                        Generate Code
+                                        {t('builder.codeGenerator.generateButton')}
                                     </>
                                 )}
                             </Button>
@@ -307,7 +309,7 @@ export default function CodeGenerator() {
                 <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
                     <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
                         <DialogHeader className="flex-row items-center justify-between border-b pb-2">
-                            <DialogTitle>Expanded Preview</DialogTitle>
+                            <DialogTitle>{t('builder.codeGenerator.expandedTitle')}</DialogTitle>
                         </DialogHeader>
                         <div className="flex-grow min-h-0">
                             {renderPreview(true)}
