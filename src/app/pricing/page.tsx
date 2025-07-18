@@ -1,3 +1,4 @@
+
 import { PricingCard } from '@/components/PricingCard';
 import type { PricingPlan } from '@/lib/types';
 import { Gem } from 'lucide-react';
@@ -8,7 +9,7 @@ const plans: PricingPlan[] = [
     name: 'Starter',
     price: 5,
     credits: 50,
-    features: ['50 AI Credits', 'Basic Project Summaries', 'Standard DOCX Export', 'Renews every 30 days'],
+    features: ['50 AI Credits', 'Basic Project Summaries', 'Standard DOCX Export', 'One-time payment'],
   },
   {
     id: 'professional',
@@ -21,7 +22,7 @@ const plans: PricingPlan[] = [
       'Diagram Generation',
       'Advanced DOCX Templates',
       'Priority Support',
-      'Renews every 30 days',
+      'One-time payment',
     ],
     isPopular: true,
   },
@@ -36,7 +37,7 @@ const plans: PricingPlan[] = [
       'Team Collaboration (Coming Soon)',
       'Custom Agent Configuration',
       'Dedicated Support Channel',
-      'Renews every 30 days',
+      'One-time payment',
     ],
   },
 ];
@@ -51,7 +52,7 @@ export default function PricingPage() {
           Choose Your Plan
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Select the perfect credit package to power your AI-driven workflows. Your plan renews every 30 days.
+          Select the perfect credit package to power your AI-driven workflows.
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

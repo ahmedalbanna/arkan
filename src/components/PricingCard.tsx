@@ -6,11 +6,21 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePurchaseCredits } from '@/hooks/use-user'; // Import the new custom mutation hook
+import { usePurchaseCredits } from '@/hooks/use-user';
+import { useRouter } from 'next/navigation';
 
 export function PricingCard({ plan }: { plan: PricingPlan }) {
-    // Use the custom hook to handle the mutation logic
-    const mutation = usePurchaseCredits();
+    const router = useRouter();
+
+    const handleSelectPlan = () => {
+        const params = new URLSearchParams({
+            planId: plan.id,
+            planName: plan.name,
+            credits: plan.credits.toString(),
+            price: plan.price.toString(),
+        });
+        router.push(`/payment/submit?${params.toString()}`);
+    }
 
     return (
         <Card className={cn('flex flex-col', plan.isPopular && 'border-primary shadow-lg')}>
@@ -23,7 +33,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
                 <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
                 <CardDescription>
                     <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground"> / month</span>
+                    <span className="text-muted-foreground"> / one-time</span>
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
@@ -39,18 +49,10 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
             </CardContent>
             <CardFooter>
                 <Button
-                    onClick={() => mutation.mutate(plan)}
+                    onClick={handleSelectPlan}
                     className="w-full font-headline"
-                    disabled={mutation.isPending}
                 >
-                    {mutation.isPending ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Processing...
-                        </>
-                    ) : (
-                        `Purchase ${plan.name}`
-                    )}
+                    Select Plan
                 </Button>
             </CardFooter>
         </Card>
