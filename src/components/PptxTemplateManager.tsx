@@ -11,11 +11,13 @@ import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { useLocalization } from '@/context/LocalizationContext';
 
-const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana', 'Tahoma'];
+const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
 export default function PptxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
+  const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(templateKey, path, value);
@@ -44,13 +46,13 @@ export default function PptxTemplateManager() {
         return (
           <Card key={key} className="flex flex-col">
             <CardHeader>
-              <CardTitle className="font-headline">{template.name}</CardTitle>
-              <CardDescription>{template.description}</CardDescription>
+              <CardTitle className="font-headline">{t(template.name)}</CardTitle>
+              <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
                <Image
                   src={template.imageUrl}
-                  alt={`${template.name} preview`}
+                  alt={`${t(template.name)} preview`}
                   width={400}
                   height={225}
                   className="w-full h-auto rounded-md border"
@@ -58,10 +60,10 @@ export default function PptxTemplateManager() {
                 />
               <Accordion type="multiple" className="w-full" defaultValue={['general']}>
                 <AccordionItem value="general">
-                  <AccordionTrigger>General Styles</AccordionTrigger>
+                  <AccordionTrigger>{t('pptxTemplates.generalStyles')}</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label>Background Color</Label>
+                        <Label>{t('pptxTemplates.backgroundColor')}</Label>
                         <div className="flex items-center gap-2">
                             <Input
                                 type="color"
@@ -80,10 +82,10 @@ export default function PptxTemplateManager() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="title">
-                  <AccordionTrigger>Title Text</AccordionTrigger>
+                  <AccordionTrigger>{t('pptxTemplates.titleText')}</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="space-y-2">
-                        <Label>Font Family</Label>
+                        <Label>{t('pptxTemplates.fontFamily')}</Label>
                         <Select
                           value={styles.title.fontFace}
                           onValueChange={(value) => handleStyleChange(key, 'title.fontFace', value)}
@@ -95,7 +97,7 @@ export default function PptxTemplateManager() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label>Font Size (pt)</Label>
+                        <Label>{t('pptxTemplates.fontSize')}</Label>
                         <Input
                           type="number"
                           value={styles.title.fontSize}
@@ -103,7 +105,7 @@ export default function PptxTemplateManager() {
                         />
                       </div>
                     <div className="space-y-2">
-                      <Label>Font Color</Label>
+                      <Label>{t('pptxTemplates.fontColor')}</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
@@ -122,10 +124,10 @@ export default function PptxTemplateManager() {
                   </AccordionContent>
                 </AccordionItem>
                  <AccordionItem value="body">
-                  <AccordionTrigger>Body Text</AccordionTrigger>
+                  <AccordionTrigger>{t('pptxTemplates.bodyText')}</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                      <div className="space-y-2">
-                        <Label>Font Family</Label>
+                        <Label>{t('pptxTemplates.fontFamily')}</Label>
                          <Select
                           value={styles.body.fontFace}
                           onValueChange={(value) => handleStyleChange(key, 'body.fontFace', value)}
@@ -137,7 +139,7 @@ export default function PptxTemplateManager() {
                         </Select>
                       </div>
                        <div className="space-y-2">
-                        <Label>Font Size (pt)</Label>
+                        <Label>{t('pptxTemplates.fontSize')}</Label>
                         <Input
                           type="number"
                           value={styles.body.fontSize}
@@ -145,7 +147,7 @@ export default function PptxTemplateManager() {
                         />
                       </div>
                     <div className="space-y-2">
-                      <Label>Font Color</Label>
+                      <Label>{t('pptxTemplates.fontColor')}</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
@@ -168,7 +170,7 @@ export default function PptxTemplateManager() {
             <CardFooter>
               <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Save Template
+                {t('pptxTemplates.saveButton')}
               </Button>
             </CardFooter>
           </Card>

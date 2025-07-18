@@ -223,7 +223,27 @@
   },
   "pptxTemplates": {
     "pageTitle": "Manage Presentation Templates",
-    "pageSubtitle": "Customize the appearance of exported PPTX presentations."
+    "pageSubtitle": "Customize the appearance of exported PPTX presentations.",
+    "generalStyles": "General Styles",
+    "titleText": "Title Text",
+    "bodyText": "Body Text",
+    "backgroundColor": "Background Color",
+    "fontFamily": "Font Family",
+    "fontSize": "Font Size (pt)",
+    "fontColor": "Font Color",
+    "saveButton": "Save Template",
+    "modern": {
+      "name": "Modern",
+      "description": "A clean and contemporary design with a light background and sans-serif fonts."
+    },
+    "dark": {
+      "name": "Dark Mode",
+      "description": "A sleek, dark-themed template perfect for tech-focused presentations."
+    },
+    "professional": {
+      "name": "Professional",
+      "description": "A formal, corporate style using serif fonts and a professional color scheme."
+    }
   },
   "submitPayment": {
     "pageTitle": "Submit Proof of Payment",

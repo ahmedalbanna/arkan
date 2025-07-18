@@ -222,8 +222,28 @@
     "declineButton": "رفض"
   },
   "pptxTemplates": {
-    "pageTitle": "Manage Presentation Templates",
-    "pageSubtitle": "Customize the appearance of exported PPTX presentations."
+    "pageTitle": "إدارة قوالب العروض التقديمية",
+    "pageSubtitle": "قم بتخصيص مظهر العروض التقديمية المصدرة بصيغة PPTX.",
+    "generalStyles": "الأنماط العامة",
+    "titleText": "نص العنوان",
+    "bodyText": "نص المحتوى",
+    "backgroundColor": "لون الخلفية",
+    "fontFamily": "نوع الخط",
+    "fontSize": "حجم الخط (نقطة)",
+    "fontColor": "لون الخط",
+    "saveButton": "حفظ القالب",
+    "modern": {
+      "name": "حديث",
+      "description": "تصميم نظيف وعصري بخلفية فاتحة وخطوط sans-serif."
+    },
+    "dark": {
+      "name": "الوضع الداكن",
+      "description": "قالب داكن وأنيق، مثالي للعروض التي تركز على التكنولوجيا."
+    },
+    "professional": {
+      "name": "احترافي",
+      "description": "أسلوب رسمي للشركات يستخدم خطوط serif ونظام ألوان احترافي."
+    }
   },
   "submitPayment": {
     "pageTitle": "Submit Proof of Payment",

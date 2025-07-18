@@ -42,23 +42,23 @@ const professional: PptxStyleOptions = {
 
 export const templates: Record<PptxTemplateKey, PptxTemplate> = {
     modern: {
-        name: 'Modern',
+        name: 'pptxTemplates.modern.name',
         styles: modern,
-        description: 'A clean and contemporary design with a light background and sans-serif fonts.',
+        description: 'pptxTemplates.modern.description',
         imageUrl: 'https://placehold.co/400x225.png',
         dataAiHint: 'presentation modern',
     },
     dark: {
-        name: 'Dark Mode',
+        name: 'pptxTemplates.dark.name',
         styles: dark,
-        description: 'A sleek, dark-themed template perfect for tech-focused presentations.',
+        description: 'pptxTemplates.dark.description',
         imageUrl: 'https://placehold.co/400x225.png',
         dataAiHint: 'presentation dark',
     },
     professional: {
-        name: 'Professional',
+        name: 'pptxTemplates.professional.name',
         styles: professional,
-        description: 'A formal, corporate style using serif fonts and a professional color scheme.',
+        description: 'pptxTemplates.professional.description',
         imageUrl: 'https://placehold.co/400x225.png',
         dataAiHint: 'presentation professional',
     },
