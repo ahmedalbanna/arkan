@@ -6,7 +6,7 @@ import type { ProjectProposal, ManipulateTextOutput } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck, X, Check } from 'lucide-react';
+import { Pin, Briefcase, Users, ShieldAlert, BadgeEuro, Calendar, CheckCircle, Flag, Braces, Wand2, BookText, Maximize, PenLine, Loader2, MoreVertical, CheckSquare, Copy, Trash2, SpellCheck, X, Check, FilePenLine } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,8 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useTranslate } from '@/hooks/use-translation';
 
 
 interface EditableFieldProps {
@@ -34,15 +36,21 @@ interface EditableFieldProps {
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '', readOnly = false }) => {
+    const { t } = useLocalization();
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
     const [ast, setAst] = useState<object | null>(null);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
-    const [isProcessingAi, setIsProcessingAi] = useState(false);
-    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
+    const { locale } = useLocalization();
+    const translateMutation = useTranslate();
+    
+    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+
+    const isProcessingAi = translateMutation.isPending;
+
 
     useEffect(() => {
         if (!isEditing && aiSuggestion === null) {
@@ -74,58 +82,38 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
         setAst(tree);
     };
 
-    const handleAiAction = async (command: string) => {
-        if (readOnly || !firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to use AI actions.", variant: "destructive" });
-            return;
-        }
-        setIsProcessingAi(true);
-        setAiSuggestion(null);
-        try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/manipulate-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    textToManipulate: String(currentValue),
-                    command: command,
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to manipulate text.");
-            }
-
-            const result: ManipulateTextOutput = await response.json();
-            setAiSuggestion(result.rewrittenText);
-            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
-        } catch (error: any) {
-            console.error("AI action failed:", error);
-            const isCreditError = error.message && error.message.toLowerCase().includes('credit');
-            toast({
-                title: isCreditError ? 'Insufficient Credits' : 'AI Action Failed',
-                description: error.message || "An unexpected error occurred.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsProcessingAi(false);
-            setIsAiPopoverOpen(false);
-        }
+    const handleTranslate = async () => {
+        if (readOnly || !firebaseUser) return;
+        
+        translateMutation.mutate({ 
+            text: String(currentValue),
+            targetLang: locale === 'en' ? 'ar' : 'en' 
+        }, {
+            onSuccess: (data) => {
+                setAiSuggestion(data.translatedText);
+                toast({ title: t('builder.editableSection.toasts.translateSuccess') });
+            },
+            onError: (error) => {
+                const isCreditError = error.message.toLowerCase().includes('credit');
+                toast({ 
+                    title: t('builder.editableSection.toasts.translateFailed'), 
+                    description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
+                    variant: 'destructive' 
+                });
+            },
+            onSettled: () => setIsAiPopoverOpen(false),
+        });
     };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(String(currentValue));
-        toast({ title: "Copied to clipboard" });
+        toast({ title: t('builder.proposalViewer.toasts.copied') });
     };
 
     const handleDelete = () => {
         if (readOnly) return;
         onUpdate?.(path, '');
-        toast({ title: "Content cleared" });
+        toast({ title: t('builder.proposalViewer.toasts.cleared') });
     };
 
     const handleAcceptSuggestion = () => {
@@ -144,18 +132,18 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     if (aiSuggestion !== null && !readOnly) {
         return (
             <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
-                <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
+                <p className="text-xs font-semibold text-accent-foreground mb-2">{t('builder.proposalViewer.aiSuggestion')}</p>
                 <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
                     <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{aiSuggestion}</ReactMarkdown>
                 </div>
                 <div className="flex justify-end gap-2 mt-2">
                     <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
                         <X className="mr-2 h-4 w-4" />
-                        Reject
+                        {t('builder.proposalViewer.reject')}
                     </Button>
                     <Button variant="secondary" size="sm" onClick={handleAcceptSuggestion}>
                         <Check className="mr-2 h-4 w-4" />
-                        Accept
+                        {t('builder.proposalViewer.accept')}
                     </Button>
                 </div>
             </div>
@@ -205,36 +193,27 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
                             <div className="grid gap-1">
-                                <p className="p-2 text-xs font-semibold text-muted-foreground">AI Actions</p>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')} disabled={isProcessingAi}>
-                                    {isProcessingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BookText className="mr-2 h-4 w-4" />}
-                                    Summarize
-                                </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')} disabled={isProcessingAi}>
-                                    <Maximize className="mr-2 h-4 w-4" /> Expand
-                                </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')} disabled={isProcessingAi}>
-                                    <PenLine className="mr-2 h-4 w-4" /> Rewrite
-                                </Button>
-                                <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')} disabled={isProcessingAi}>
-                                    <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
+                                <p className="p-2 text-xs font-semibold text-muted-foreground">{t('builder.proposalViewer.aiActions.title')}</p>
+                                <Button variant="ghost" className="justify-start" onClick={handleTranslate} disabled={isProcessingAi}>
+                                    {isProcessingAi ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                                    {t('builder.proposalViewer.aiActions.translate')}
                                 </Button>
 
-                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Markdown Tools</p>
+                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">{t('builder.proposalViewer.markdownTools.title')}</p>
                                 
                                 <Button variant="ghost" className="justify-start" onClick={handleCopy}>
-                                    <Copy className="mr-2 h-4 w-4" /> Copy
+                                    <Copy className="mr-2 h-4 w-4" /> {t('builder.proposalViewer.markdownTools.copy')}
                                 </Button>
 
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <Button variant="ghost" className="justify-start" onClick={handleViewAst}>
-                                            <Braces className="mr-2 h-4 w-4" /> View AST
+                                            <Braces className="mr-2 h-4 w-4" /> {t('builder.proposalViewer.markdownTools.viewAst')}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="max-w-2xl">
                                         <DialogHeader>
-                                            <DialogTitle>Markdown AST (JSON)</DialogTitle>
+                                            <DialogTitle>{t('builder.proposalViewer.markdownTools.astTitle')}</DialogTitle>
                                         </DialogHeader>
                                         <pre className="mt-2 h-[450px] w-full overflow-auto rounded-md bg-muted p-4">
                                             <code className="text-muted-foreground text-xs">
@@ -244,9 +223,9 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
                                     </DialogContent>
                                 </Dialog>
 
-                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">Destructive</p>
+                                <p className="p-2 text-xs font-semibold text-muted-foreground pt-2 border-t mt-1">{t('builder.proposalViewer.destructive.title')}</p>
                                 <Button variant="ghost" className="justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDelete}>
-                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                    <Trash2 className="mr-2 h-4 w-4" /> {t('builder.proposalViewer.destructive.delete')}
                                 </Button>
                             </div>
                         </PopoverContent>
@@ -259,6 +238,7 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
 
 
 export default function ProposalViewer({ proposal, onUpdate, readOnly = false }: { proposal: ProjectProposal; onUpdate?: (path: string, value: any) => void; readOnly?: boolean; }) {
+    const { t } = useLocalization();
     if (!proposal) return null;
 
     const defaultOpen = ["Objective", "Methodology"];
@@ -280,7 +260,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Objective" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> Objective</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Pin className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.objective')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
@@ -293,7 +273,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Methodology" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> Methodology</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Briefcase className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.methodology')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
@@ -306,19 +286,19 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Timeline" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> Timeline</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Calendar className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.timeline')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0 space-y-4">
-                                <div className="flex items-center gap-2"><strong>Start Date:</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" readOnly={readOnly} /></div>
-                                <div className="flex items-center gap-2"><strong>End Date:</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
-                                <h4 className="font-semibold">Phases:</h4>
+                                <div className="flex items-center gap-2"><strong>{t('builder.proposalViewer.startDate')}</strong> <EditableField value={proposal.timeline.startDate} path="timeline.startDate" onUpdate={onUpdate} type="date" readOnly={readOnly} /></div>
+                                <div className="flex items-center gap-2"><strong>{t('builder.proposalViewer.endDate')}</strong> <span className="text-muted-foreground">{proposal.timeline.endDate}</span></div>
+                                <h4 className="font-semibold">{t('builder.proposalViewer.phases')}</h4>
                                 <ul className="space-y-2 text-muted-foreground">
                                     {proposal.timeline.phases.map((phase, index) => (
                                         <li key={index} className="flex justify-between items-center gap-2">
                                             <EditableField value={phase.name} path={`timeline.phases.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} />
                                             <div className="flex items-center gap-1">
-                                                (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> weeks)
+                                                (<EditableField value={phase.durationWeeks} path={`timeline.phases.${index}.durationWeeks`} onUpdate={onUpdate} type="number" className="w-16 text-center" readOnly={readOnly} /> {t('builder.proposalViewer.weeks')})
                                             </div>
                                         </li>
                                     ))}
@@ -331,20 +311,20 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Budget" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> Budget</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><BadgeEuro className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.budget')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
                                 <div className="mb-4 flex gap-2 items-center">
-                                    <strong>Total:</strong>
+                                    <strong>{t('builder.proposalViewer.total')}</strong>
                                     <span className="text-muted-foreground">{proposal.budget.totalAmount.toLocaleString()}</span>
                                     <EditableField value={proposal.budget.currency} path="budget.currency" onUpdate={onUpdate} className="w-20" readOnly={readOnly} />
                                 </div>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Item</TableHead>
-                                            <TableHead className="text-left">Cost</TableHead>
+                                            <TableHead>{t('builder.proposalViewer.item')}</TableHead>
+                                            <TableHead className="text-left">{t('builder.proposalViewer.cost')}</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -364,7 +344,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Outcomes" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> Expected Outcomes</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Flag className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.outcomes')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
@@ -381,17 +361,17 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Success" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> Success Criteria & Evaluation</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><CheckCircle className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.successCriteria')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0 space-y-4">
-                                <h4 className="font-semibold">Criteria:</h4>
+                                <h4 className="font-semibold">{t('builder.proposalViewer.criteria')}</h4>
                                 <ul className="list-disc pl-5 space-y-2 text-muted-foreground">
                                     {proposal.success_criteria.map((criterion, index) => (
                                         <li key={index}><EditableField value={criterion} path={`success_criteria.${index}`} onUpdate={onUpdate} multiline readOnly={readOnly} /></li>
                                     ))}
                                 </ul>
-                                <h4 className="font-semibold pt-4 border-t">Evaluation Plan:</h4>
+                                <h4 className="font-semibold pt-4 border-t">{t('builder.proposalViewer.evaluationPlan')}</h4>
                                 <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline readOnly={readOnly} />
                             </div>
                         </AccordionContent>
@@ -401,7 +381,7 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Stakeholders" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> Stakeholders</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><Users className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.stakeholders')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
@@ -420,14 +400,14 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                 <AccordionItem value="Risks" className="border-b-0">
                     <Card>
                         <AccordionTrigger className="w-full text-left p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> Risks & Mitigations</CardTitle>
+                            <CardTitle className="flex items-center gap-2 font-headline text-lg"><ShieldAlert className="h-5 w-5 text-primary" /> {t('builder.proposalViewer.risks')}</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
                                 {proposal.risks.map((risk, index) => (
                                     <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                                        <div><strong>Risk:</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
-                                        <div><strong>Mitigation:</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
+                                        <div><strong>{t('builder.proposalViewer.risk')}</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
+                                        <div><strong>{t('builder.proposalViewer.mitigation')}</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
                                     </div>
                                 ))}
                             </div>

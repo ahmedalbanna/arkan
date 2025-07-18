@@ -277,5 +277,249 @@
     "oneTime": "one-time",
     "aiCredits": "AI Credits",
     "selectPlanButton": "Select Plan"
+  },
+  "builder": {
+    "tabs": {
+      "proposal": "وضع المقترح",
+      "document": "منشئ المستندات",
+      "diagram": "منشئ الرسوم",
+      "code": "منشئ الأكواد",
+      "presentation": "وضع العرض التقديمي"
+    },
+    "buttons": {
+      "uploadProject": "رفع مشروع",
+      "downloadProject": "تنزيل المشروع",
+      "newSession": "جلسة جديدة"
+    },
+    "tooltips": {
+      "uploadProject": "رفع ملف مشروع تم حفظه مسبقًا",
+      "downloadProject": "تنزيل كل المحتوى الذي تم إنشاؤه والمقترح في ملف واحد",
+      "newSession": "مسح كل المحتوى وبدء جلسة جديدة"
+    },
+    "errors": {
+      "invalidProjectFile": "هيكل ملف المشروع غير صالح."
+    },
+    "toasts": {
+      "loadFailedTitle": "فشل التحميل",
+      "loadFailedDesc": "لا يمكن قراءة الملف المحدد أو أنه تالف.",
+      "projectLoadedTitle": "تم تحميل المشروع",
+      "projectLoadedDesc": "تم تحميل \"{projectName}\" بنجاح.",
+      "newSessionTitle": "بدأت جلسة جديدة",
+      "newSessionDesc": "تم مسح كل المحتوى.",
+      "authError": "يجب عليك تسجيل الدخول لتنفيذ هذا الإجراء.",
+      "generationFailed": "فشل الإنشاء",
+      "insufficientCredits": "رصيد غير كاف. يرجى شراء المزيد من الرصيد."
+    },
+    "proposalGenerator": {
+      "title": "صف فكرة مشروعك",
+      "placeholder": "تطبيق جوال لتتبع أهداف اللياقة البدنية الشخصية، بما في ذلك التمارين والتغذية.",
+      "generatedTitle": "المقترح الذي تم إنشاؤه",
+      "generatedDescription": "راجع وعدّل التفاصيل التي تم إنشاؤها أدناه.",
+      "exportJson": ".json",
+      "exportDocx": "DOCX",
+      "emptyState": "سيظهر مقترح مشروعك الذي تم إنشاؤه هنا.",
+      "toolsTitle": "أدوات الإنشاء",
+      "toolsDescription": "صقل تعليمات الذكاء الاصطناعي.",
+      "templateLabel": "قالب المقترح",
+      "editPromptLabel": "تعديل تفاصيل الطلب",
+      "basePromptLabel": "الطلب الأساسي",
+      "customGuidelinesLabel": "إرشادات مخصصة",
+      "customGuidelinePlaceholder": "أضف إرشادًا مخصصًا...",
+      "generateButton": "إنشاء المقترح"
+    },
+    "proposalViewer": {
+      "category": "الفئة",
+      "title": "العنوان",
+      "objective": "الهدف",
+      "methodology": "المنهجية",
+      "timeline": "الجدول الزمني",
+      "startDate": "تاريخ البدء:",
+      "endDate": "تاريخ الانتهاء:",
+      "phases": "المراحل:",
+      "weeks": "أسابيع",
+      "budget": "الميزانية",
+      "total": "الإجمالي:",
+      "item": "البند",
+      "cost": "التكلفة",
+      "outcomes": "النتائج المتوقعة",
+      "successCriteria": "معايير النجاح والتقييم",
+      "criteria": "المعايير:",
+      "evaluationPlan": "خطة التقييم:",
+      "stakeholders": "الأطراف المعنية",
+      "risks": "المخاطر واستراتيجيات التخفيف",
+      "risk": "المخاطرة:",
+      "mitigation": "استراتيجية التخفيف:",
+      "aiSuggestion": "اقتراح الذكاء الاصطناعي",
+      "reject": "رفض",
+      "accept": "قبول",
+      "aiActions": {
+        "title": "إجراءات الذكاء الاصطناعي",
+        "summarize": "تلخيص",
+        "expand": "توسيع",
+        "rewrite": "إعادة صياغة",
+        "checkGrammar": "تدقيق نحوي",
+        "translate": "ترجمة"
+      },
+      "markdownTools": {
+        "title": "أدوات الماركدون",
+        "copy": "نسخ",
+        "viewAst": "عرض AST",
+        "astTitle": "Markdown AST (JSON)"
+      },
+      "destructive": {
+        "title": "إجراءات خطيرة",
+        "delete": "حذف"
+      },
+      "toasts": {
+        "copied": "تم النسخ إلى الحافظة",
+        "cleared": "تم مسح المحتوى"
+      }
+    },
+    "reportGenerator": {
+      "noProposal": "لم يتم تحميل أي مقترح",
+      "noProposalDesc": "يرجى إنشاء مقترح في \"وضع المقترح\" أولاً، أو رفع ملف مشروع.",
+      "resultsTitle": "محتوى التقرير",
+      "emptyStateTitle": "سيظهر محتوى التقرير هنا",
+      "emptyStateDesc": "استخدم أدوات الإنشاء لإنشاء أقسام لتقريرك.",
+      "actionsTitle": "الإجراءات",
+      "actionsDesc": "صدّر مخرجاتك أو ابدأ جلسة جديدة.",
+      "docxTemplate": "قالب DOCX",
+      "exportReport": "تصدير التقرير",
+      "toolsTitle": "أدوات الإنشاء",
+      "toolsDesc": "كوّن وأنشئ أقسام التقرير.",
+      "reportTemplate": "قالب التقرير",
+      "generateFullReport": "إنشاء التقرير بالكامل",
+      "generateButton": "إنشاء",
+      "externalContextTitle": "سياق خارجي",
+      "uploadButton": "رفع ومعالجة PDF",
+      "viewContent": "عرض المحتوى",
+      "removeFile": "إزالة الملف",
+      "evaluationTitle": "معايير القبول والتقييم",
+      "evaluationDesc": "حدد معايير لتقييم جودة التقرير.",
+      "criteriaPlaceholder": "أدخل كل معيار في سطر جديد...",
+      "processPdf": "معالجة",
+      "evaluationResult": "نتيجة التقييم",
+      "qualityScore": "درجة الجودة",
+      "evaluateReport": "تقييم التقرير",
+      "toasts": {
+        "evaluationComplete": "اكتمل التقييم!",
+        "evaluationFailed": "فشل التقييم",
+        "evaluationSkipped": "تم تخطي التقييم",
+        "evaluationSkippedDesc": "يرجى تقديم معايير القبول.",
+        "fileProcessed": "تمت معالجة الملف",
+        "fileProcessedDesc": "تم استخراج المعايير من ملف PDF.",
+        "contextAdded": "تمت إضافة السياق",
+        "contextAddedDesc": "تمت معالجة {fileName} بنجاح.",
+        "uploadFailed": "فشل الرفع"
+      }
+    },
+    "diagramGenerator": {
+      "noProposal": "لم يتم تحميل أي مقترح",
+      "noProposalDesc": "يرجى إنشاء مقترح في \"وضع المقترح\" أولاً، أو رفع ملف مشروع.",
+      "title": "الرسوم البيانية التي تم إنشاؤها",
+      "description": "راجع، عدّل، وحدّث الرسوم البيانية التي تم إنشاؤها أدناه.",
+      "emptyState": "ستظهر الرسوم البيانية التي تم إنشاؤها هنا في أكورديون.",
+      "toolsTitle": "أدوات الإنشاء",
+      "toolsDesc": "كوّن وأنشئ الرسوم البيانية.",
+      "basePrompt": "الطلب الأساسي",
+      "guidelines": "الإرشادات",
+      "customGuidelines": "إرشادات مخصصة",
+      "addGuidelinePlaceholder": "أضف إرشادًا مخصصًا...",
+      "contextSections": "الأقسام السياقية",
+      "contextDiagrams": "الرسوم البيانية السياقية",
+      "noSections": "لم يتم إنشاء أي أقسام بعد.",
+      "noOtherDiagrams": "لم يتم إنشاء أي رسوم بيانية أخرى بعد.",
+      "externalContext": "سياق خارجي",
+      "generateButton": "إنشاء",
+      "disabledTooltip": "هذا الوكيل معطّل",
+      "updateDiagram": "تحديث الرسم البياني",
+      "tooltips": {
+        "download": "تنزيل الصورة",
+        "copy": "نسخ الكود",
+        "copied": "تم النسخ!",
+        "openRenderer": "فتح العارض عبر الإنترنت"
+      }
+    },
+    "codeGenerator": {
+      "generatedCode": "الكود الذي تم إنشاؤه",
+      "downloadZip": "تنزيل ZIP",
+      "noJs": "// لم يتم إنشاء JavaScript",
+      "livePreview": "معاينة حية",
+      "emptyPreview": "ستظهر معاينة الكود الذي تم إنشاؤه هنا.",
+      "tooltips": {
+        "screenshot": "التقاط لقطة شاشة",
+        "expand": "توسيع المعاينة"
+      },
+      "expandedTitle": "معاينة موسعة",
+      "toolsTitle": "أدوات الإنشاء",
+      "toolsDesc": "صف مكوّن واجهة المستخدم الذي تريد إنشاءه.",
+      "promptPlaceholder": "زر بسيط مكتوب عليه \"انقر هنا!\" ويتغير لونه عند التمرير عليه.",
+      "generateButton": "إنشاء الكود",
+      "generateButtonLoading": "جارٍ الإنشاء...",
+      "toasts": {
+        "success": "تم إنشاء الكود بنجاح!",
+        "failed": "فشل إنشاء الكود",
+        "screenshotFailed": "فشل التقاط لقطة الشاشة",
+        "screenshotFailedDesc": "حدث خطأ أثناء التقاط المعاينة.",
+        "zipFailed": "فشل التنزيل",
+        "zipFailedDesc": "حدث خطأ أثناء إنشاء ملف ZIP."
+      }
+    },
+    "presentationGenerator": {
+      "noProposal": "لم يتم تحميل أي مقترح",
+      "noProposalDesc": "يرجى إنشاء مقترح في \"وضع المقترح\" أولاً، أو رفع ملف مشروع.",
+      "historyTitle": "السجل",
+      "historyDesc": "اختر عرضًا تقديميًا تم إنشاؤه مسبقًا.",
+      "historyItem": "{slideCount} شرائح",
+      "historyEmpty": "لم يتم إنشاء أي عروض تقديمية بعد.",
+      "viewerEmpty": "سيظهر عرضك التقديمي الذي تم إنشاؤه هنا.",
+      "toolsTitle": "أدوات الإنشاء",
+      "toolsDesc": "كوّن وأنشئ العرض التقديمي.",
+      "templateLabel": "قالب العرض التقديمي",
+      "editDetails": "تعديل تفاصيل الإنشاء",
+      "generateButton": "إنشاء العرض التقديمي",
+      "actionsTitle": "الإجراءات",
+      "actionsDesc": "صدّر عرضك التقديمي الذي تم إنشاؤه.",
+      "exportStyleLabel": "نمط تصدير PPTX",
+      "exportStylePlaceholder": "اختر نمطًا",
+      "exportButton": "تصدير العرض التقديمي",
+      "viewerTitle": "لا توجد شرائح",
+      "viewerDesc": "لا توجد شرائح لعرضها في هذا العرض التقديمي.",
+      "slideLabel": "شريحة {current} من {total}",
+      "exportTooltip": "تصدير إلى PPTX",
+      "content": "المحتوى",
+      "speakerNotes": "ملاحظات المتحدث",
+      "prev": "السابق",
+      "next": "التالي",
+      "goToSlide": "اذهب إلى الشريحة {slideNumber}"
+    },
+    "editableSection": {
+      "aiSuggestion": "اقتراح الذكاء الاصطناعي",
+      "reject": "رفض",
+      "accept": "قبول",
+      "tooltips": {
+        "aiActions": "إجراءات الذكاء الاصطناعي",
+        "editorOptions": "خيارات المحرر"
+      },
+      "aiActions": {
+        "summarize": "تلخيص",
+        "expand": "توسيع",
+        "rewrite": "إعادة صياغة",
+        "checkGrammar": "تدقيق نحوي",
+        "translate": "ترجمة"
+      },
+      "editorActions": {
+        "copyMd": "نسخ ماركدون",
+        "copyText": "نسخ نص عادي",
+        "downloadDocx": "تنزيل DOCX",
+        "downloadPdf": "تنزيل PDF"
+      },
+      "toasts": {
+        "copiedMd": "تم نسخ الماركدون",
+        "copiedText": "تم نسخ النص العادي",
+        "translateSuccess": "اكتملت الترجمة!",
+        "translateFailed": "فشلت الترجمة"
+      }
+    }
   }
 }

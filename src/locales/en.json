@@ -277,5 +277,248 @@
     "oneTime": "one-time",
     "aiCredits": "AI Credits",
     "selectPlanButton": "Select Plan"
+  },
+  "builder": {
+    "tabs": {
+      "proposal": "Proposal Mode",
+      "document": "Document Generator",
+      "diagram": "Diagram Generator",
+      "code": "Code Generator",
+      "presentation": "Presentation Mode"
+    },
+    "buttons": {
+      "uploadProject": "Upload Project",
+      "downloadProject": "Download Project",
+      "newSession": "New Session"
+    },
+    "tooltips": {
+      "uploadProject": "Upload a previously saved project file",
+      "downloadProject": "Download all generated content and proposal into a single file",
+      "newSession": "Clear all content and start a new session"
+    },
+    "errors": {
+      "invalidProjectFile": "Invalid project file structure."
+    },
+    "toasts": {
+      "loadFailedTitle": "Load Failed",
+      "loadFailedDesc": "The selected file could not be read or is corrupted.",
+      "projectLoadedTitle": "Project Loaded",
+      "projectLoadedDesc": "Successfully loaded \"{projectName}\".",
+      "newSessionTitle": "New Session Started",
+      "newSessionDesc": "All content has been cleared.",
+      "authError": "You must be logged in to perform this action.",
+      "generationFailed": "Generation Failed",
+      "insufficientCredits": "Insufficient credits. Please purchase more."
+    },
+    "proposalGenerator": {
+      "title": "Describe Your Project Idea",
+      "placeholder": "A mobile app for tracking personal fitness goals, including workouts and nutrition.",
+      "generatedTitle": "Generated Proposal",
+      "generatedDescription": "Review and edit the generated details below.",
+      "exportJson": ".json",
+      "exportDocx": "DOCX",
+      "emptyState": "Your generated project proposal will appear here.",
+      "toolsTitle": "Generation Tools",
+      "toolsDescription": "Refine the AI's instructions.",
+      "templateLabel": "Proposal Template",
+      "editPromptLabel": "Edit Prompt Details",
+      "basePromptLabel": "Base Prompt",
+      "customGuidelinesLabel": "Custom Guidelines",
+      "customGuidelinePlaceholder": "Add a custom guideline...",
+      "generateButton": "Generate Proposal"
+    },
+    "proposalViewer": {
+      "category": "Category",
+      "title": "Title",
+      "objective": "Objective",
+      "methodology": "Methodology",
+      "timeline": "Timeline",
+      "startDate": "Start Date:",
+      "endDate": "End Date:",
+      "phases": "Phases:",
+      "weeks": "weeks",
+      "budget": "Budget",
+      "total": "Total:",
+      "item": "Item",
+      "cost": "Cost",
+      "outcomes": "Expected Outcomes",
+      "successCriteria": "Success Criteria & Evaluation",
+      "criteria": "Criteria:",
+      "evaluationPlan": "Evaluation Plan:",
+      "stakeholders": "Stakeholders",
+      "risks": "Risks & Mitigations",
+      "risk": "Risk:",
+      "mitigation": "Mitigation:",
+      "aiSuggestion": "AI SUGGESTION",
+      "reject": "Reject",
+      "accept": "Accept",
+      "aiActions": {
+        "title": "AI Actions",
+        "summarize": "Summarize",
+        "expand": "Expand",
+        "rewrite": "Rewrite",
+        "checkGrammar": "Check Grammar"
+      },
+      "markdownTools": {
+        "title": "Markdown Tools",
+        "copy": "Copy",
+        "viewAst": "View AST",
+        "astTitle": "Markdown AST (JSON)"
+      },
+      "destructive": {
+        "title": "Destructive",
+        "delete": "Delete"
+      },
+      "toasts": {
+        "copied": "Copied to clipboard",
+        "cleared": "Content cleared"
+      }
+    },
+    "reportGenerator": {
+      "noProposal": "No Proposal Loaded",
+      "noProposalDesc": "Please generate a proposal in \"Proposal Mode\" first, or upload a project file.",
+      "resultsTitle": "Report Content",
+      "emptyStateTitle": "Report Content Will Appear Here",
+      "emptyStateDesc": "Use the Generation Tools to create sections for your report.",
+      "actionsTitle": "Actions",
+      "actionsDesc": "Export your generated report.",
+      "docxTemplate": "DOCX Template",
+      "exportReport": "Export Report",
+      "toolsTitle": "Generation Tools",
+      "toolsDesc": "Configure and generate report sections.",
+      "reportTemplate": "Report Template",
+      "generateFullReport": "Generate Full Report",
+      "generateButton": "Generate",
+      "externalContextTitle": "External Context",
+      "uploadButton": "Upload & Process PDF",
+      "viewContent": "View Content",
+      "removeFile": "Remove File",
+      "evaluationTitle": "Acceptance Criteria & Evaluation",
+      "evaluationDesc": "Define criteria to evaluate the report's quality.",
+      "criteriaPlaceholder": "Enter each criterion on a new line...",
+      "processPdf": "Process",
+      "evaluationResult": "Evaluation Result",
+      "qualityScore": "Quality Score",
+      "evaluateReport": "Evaluate Report",
+      "toasts": {
+        "evaluationComplete": "Evaluation Complete!",
+        "evaluationFailed": "Evaluation Failed",
+        "evaluationSkipped": "Evaluation Skipped",
+        "evaluationSkippedDesc": "Please provide acceptance criteria.",
+        "fileProcessed": "File Processed",
+        "fileProcessedDesc": "Criteria extracted from PDF.",
+        "contextAdded": "Context Added",
+        "contextAddedDesc": "Successfully processed {fileName}.",
+        "uploadFailed": "Upload Failed"
+      }
+    },
+    "diagramGenerator": {
+      "noProposal": "No Proposal Loaded",
+      "noProposalDesc": "Please generate a proposal in \"Proposal Mode\" first, or upload a project file.",
+      "title": "Generated Diagrams",
+      "description": "Review, edit, and update your generated diagrams below.",
+      "emptyState": "Your generated diagrams will appear here in an accordion.",
+      "toolsTitle": "Generation Tools",
+      "toolsDesc": "Configure and generate diagrams.",
+      "basePrompt": "Base Prompt",
+      "guidelines": "Guidelines",
+      "customGuidelines": "Custom Guidelines",
+      "addGuidelinePlaceholder": "Add a custom guideline...",
+      "contextSections": "Contextual Sections",
+      "contextDiagrams": "Contextual Diagrams",
+      "noSections": "No sections generated yet.",
+      "noOtherDiagrams": "No other diagrams generated yet.",
+      "externalContext": "External Context",
+      "generateButton": "Generate",
+      "disabledTooltip": "This agent is disabled",
+      "updateDiagram": "Update Diagram",
+      "tooltips": {
+        "download": "Download Image",
+        "copy": "Copy Code",
+        "copied": "Copied!",
+        "openRenderer": "Open Online Renderer"
+      }
+    },
+    "codeGenerator": {
+      "generatedCode": "Generated Code",
+      "downloadZip": "Download ZIP",
+      "noJs": "// No JavaScript generated",
+      "livePreview": "Live Preview",
+      "emptyPreview": "Your generated code preview will appear here.",
+      "tooltips": {
+        "screenshot": "Take Screenshot",
+        "expand": "Expand Preview"
+      },
+      "expandedTitle": "Expanded Preview",
+      "toolsTitle": "Generation Tools",
+      "toolsDesc": "Describe the UI component you want to create.",
+      "promptPlaceholder": "A simple button that says \"Click me!\" and changes color when hovered.",
+      "generateButton": "Generate Code",
+      "generateButtonLoading": "Generating...",
+      "toasts": {
+        "success": "Code Generated Successfully!",
+        "failed": "Code Generation Failed",
+        "screenshotFailed": "Screenshot Failed",
+        "screenshotFailedDesc": "There was an error capturing the preview.",
+        "zipFailed": "Download Failed",
+        "zipFailedDesc": "There was an error creating the ZIP file."
+      }
+    },
+    "presentationGenerator": {
+      "noProposal": "No Proposal Loaded",
+      "noProposalDesc": "Please generate a proposal in \"Proposal Mode\" first, or upload a project file.",
+      "historyTitle": "History",
+      "historyDesc": "Select a previously generated presentation.",
+      "historyItem": "{slideCount} slides",
+      "historyEmpty": "No presentations generated yet.",
+      "viewerEmpty": "Your generated presentation will appear here.",
+      "toolsTitle": "Generation Tools",
+      "toolsDesc": "Configure and generate the presentation.",
+      "templateLabel": "Presentation Template",
+      "editDetails": "Edit Generation Details",
+      "generateButton": "Generate Presentation",
+      "actionsTitle": "Actions",
+      "actionsDesc": "Export your generated presentation.",
+      "exportStyleLabel": "PPTX Export Style",
+      "exportStylePlaceholder": "Select a style",
+      "exportButton": "Export Presentation",
+      "viewerTitle": "No Slides",
+      "viewerDesc": "There are no slides to display for this presentation.",
+      "slideLabel": "Slide {current} of {total}",
+      "exportTooltip": "Export to PPTX",
+      "content": "Content",
+      "speakerNotes": "Speaker Notes",
+      "prev": "Previous",
+      "next": "Next",
+      "goToSlide": "Go to slide {slideNumber}"
+    },
+    "editableSection": {
+      "aiSuggestion": "AI SUGGESTION",
+      "reject": "Reject",
+      "accept": "Accept",
+      "tooltips": {
+        "aiActions": "AI Actions",
+        "editorOptions": "Editor Options"
+      },
+      "aiActions": {
+        "summarize": "Summarize",
+        "expand": "Expand",
+        "rewrite": "Rewrite",
+        "checkGrammar": "Check Grammar",
+        "translate": "Translate"
+      },
+      "editorActions": {
+        "copyMd": "Copy Markdown",
+        "copyText": "Copy Plain Text",
+        "downloadDocx": "Download DOCX",
+        "downloadPdf": "Download PDF"
+      },
+      "toasts": {
+        "copiedMd": "Copied as Markdown",
+        "copiedText": "Copied as Plain Text",
+        "translateSuccess": "Translation Complete!",
+        "translateFailed": "Translation Failed"
+      }
+    }
   }
 }

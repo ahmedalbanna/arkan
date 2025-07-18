@@ -14,12 +14,14 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
 }
 
 function GenerateButton({ isGenerating }: GenerateButtonProps) {
+    const { t } = useLocalization();
     return (
         <Button
             type="submit"
@@ -27,10 +29,10 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
             value="proposal"
             disabled={isGenerating}
             className="font-headline w-full"
-            title={'Generate Proposal'}
+            title={t('builder.proposalGenerator.generateButton')}
         >
             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate Proposal
+            {t('builder.proposalGenerator.generateButton')}
         </Button>
     );
 }
@@ -45,6 +47,7 @@ export const ProposalGenerationTools = ({
     isGenerating,
 }: ProposalGenerationToolsProps) => {
     
+    const { t } = useLocalization();
     const {
         selectedTemplate,
         handleTemplateChange,
@@ -64,12 +67,12 @@ export const ProposalGenerationTools = ({
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">Generation Tools</CardTitle>
-                <CardDescription>Refine the AI's instructions.</CardDescription>
+                <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
+                <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="space-y-2 mb-4">
-                    <Label htmlFor="proposal-template">Proposal Template</Label>
+                    <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
                     <Select value={selectedTemplate} onValueChange={(value) => handleTemplateChange(value as ProposalTemplateKey)}>
                         <SelectTrigger id="proposal-template">
                             <SelectValue placeholder="Select a template" />
@@ -85,18 +88,18 @@ export const ProposalGenerationTools = ({
                     <AccordionItem value="proposal">
                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                             <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4" /> Edit Prompt Details
+                                <FileText className="h-4 w-4" /> {t('builder.proposalGenerator.editPromptLabel')}
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-4 p-4">
                             <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.basePromptLabel')}</Label>
                                 <div className="p-3 rounded-md border bg-muted text-xs">
                                     <ReactMarkdown components={markdownComponents}>{currentTemplate.prompt}</ReactMarkdown>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
                                 {customGuidelines.map((custom, index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">
                                         <span>- {custom}</span>
@@ -107,7 +110,7 @@ export const ProposalGenerationTools = ({
                                 ))}
                                 <div className="flex gap-2">
                                     <Input
-                                        placeholder="Add a custom guideline..."
+                                        placeholder={t('builder.proposalGenerator.customGuidelinePlaceholder')}
                                         value={customGuidelineInput['proposal'] || ''}
                                         onChange={(e) => setCustomGuidelineInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline())}

@@ -7,10 +7,12 @@ import { useRef } from 'react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
 import { useToast } from '@/hooks/use-toast';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export const SessionActions = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
+    const { t } = useLocalization();
 
     // Select multiple state slices from the store
     const { 
@@ -52,11 +54,11 @@ export const SessionActions = () => {
                 if (parsedState.proposal) {
                     loadState(parsedState);
                 } else {
-                    throw new Error('Invalid project file structure.');
+                    throw new Error(t('builder.errors.invalidProjectFile'));
                 }
             } catch (error) {
                 console.error('Failed to load project file:', error);
-                toast({ title: 'Load Failed', description: 'The selected file could not be read or is corrupted.', variant: 'destructive' });
+                toast({ title: t('builder.toasts.loadFailedTitle'), description: t('builder.toasts.loadFailedDesc'), variant: 'destructive' });
             }
         };
         reader.readAsText(file);
@@ -85,32 +87,30 @@ export const SessionActions = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleUploadClick}
-                title="Upload a previously saved project file"
+                title={t('builder.tooltips.uploadProject')}
             >
                 <Upload className="mr-2 h-4 w-4" />
-                Upload Project
+                {t('builder.buttons.uploadProject')}
             </Button>
             <Button
                 variant="outline"
                 size="sm"
                 onClick={handleSaveProjectFile}
                 disabled={!proposal}
-                title="Download all generated content and proposal into a single file"
+                title={t('builder.tooltips.downloadProject')}
             >
                 <Download className="mr-2 h-4 w-4" />
-                Download Project
+                {t('builder.buttons.downloadProject')}
             </Button>
             <Button
                 variant="destructive"
                 size="sm"
                 onClick={newSession}
-                title="Clear all content and start a new session"
+                title={t('builder.tooltips.newSession')}
             >
                 <Trash2 className="mr-2 h-4 w-4" />
-                New Session
+                {t('builder.buttons.newSession')}
             </Button>
         </div>
     );
 }
-
-    

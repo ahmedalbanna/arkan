@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
 import { templates as proposalTemplates } from '@/lib/proposal-templates';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function ProposalSkeleton() {
     return (
@@ -69,6 +70,7 @@ async function generateProposal(variables: { projectIdea: string; prompt: string
 
 export function ProposalModeGenerator() {
     const { toast } = useToast();
+    const { t } = useLocalization();
     const { templates: docxTemplates } = useDocxStyles();
     const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
@@ -88,10 +90,10 @@ export function ProposalModeGenerator() {
         onSuccess: (data) => {
             setProposal(data);
             refetchUser(); // Invalidate user query to update credits
-            toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
+            toast({ title: t('builder.toasts.generationSuccess'), description: t('builder.toasts.generationSuccessDesc', {item: 'Proposal'}) });
         },
         onError: (error: Error) => {
-            toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.toasts.generationFailed'), description: error.message, variant: 'destructive' });
         }
     });
 
@@ -112,7 +114,7 @@ export function ProposalModeGenerator() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!firebaseUser) {
-            toast({ title: 'Authentication Error', description: 'You must be logged in to generate a proposal.', variant: 'destructive' });
+            toast({ title: "Authentication Error", description: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
 
@@ -140,12 +142,12 @@ export function ProposalModeGenerator() {
                 <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">Describe Your Project Idea</CardTitle>
+                            <CardTitle className="font-headline">{t('builder.proposalGenerator.title')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                              <Textarea
                                 name="projectIdea"
-                                placeholder='A mobile app for tracking personal fitness goals, including workouts and nutrition.'
+                                placeholder={t('builder.proposalGenerator.placeholder')}
                                 rows={8}
                                 required
                                 value={projectIdea}
@@ -165,17 +167,17 @@ export function ProposalModeGenerator() {
                          <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <div className="space-y-1.5">
-                                    <CardTitle className="font-headline">Generated Proposal</CardTitle>
-                                    <CardDescription>Review and edit the generated details below.</CardDescription>
+                                    <CardTitle className="font-headline">{t('builder.proposalGenerator.generatedTitle')}</CardTitle>
+                                    <CardDescription>{t('builder.proposalGenerator.generatedDescription')}</CardDescription>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button variant="outline" type="button" onClick={handleExportJson}>
                                         <FileJson className="mr-2 h-4 w-4" />
-                                        .json
+                                        {t('builder.proposalGenerator.exportJson')}
                                     </Button>
                                     <Button variant="outline" type="button" onClick={handleExportDocx}>
                                         <Download className="mr-2 h-4 w-4" />
-                                        DOCX
+                                        {t('builder.proposalGenerator.exportDocx')}
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -191,7 +193,7 @@ export function ProposalModeGenerator() {
                         <Card className="flex items-center justify-center h-full min-h-[400px]">
                             <div className="text-center text-muted-foreground p-8">
                                 <FileText className="w-16 h-16 mx-auto mb-4" />
-                                <p>Your generated project proposal will appear here.</p>
+                                <p>{t('builder.proposalGenerator.emptyState')}</p>
                             </div>
                         </Card>
                     )}
