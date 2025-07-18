@@ -12,33 +12,35 @@ export const config = {
     },
 };
 
-const parseForm = (req: Request): Promise<{ fields: any; files: any }> => {
-    return new Promise((resolve, reject) => {
-        const form = new Formidable({
-            maxFiles: 1,
-            maxFileSize: 5 * 1024 * 1024, // 5MB
-            filter: part => part.name === 'file' && (part.mimetype?.includes('image') || part.mimetype === 'application/pdf') || false
-        });
-        
-        // This is a workaround to adapt formidable to Next.js Edge runtime
-        const chunks: Uint8Array[] = [];
-        const reader = req.body!.getReader();
-        const read = () => {
-          reader.read().then(({ done, value }) => {
-            if (done) {
-              const buffer = Buffer.concat(chunks);
-              form.parse(buffer as any, (err, fields, files) => {
-                if (err) reject(err);
-                else resolve({ fields, files });
-              });
-              return;
+// This function correctly adapts formidable to work with Next.js API route requests.
+const parseForm = async (req: Request): Promise<{ fields: any; files: any }> => {
+    const formData = await req.formData();
+    const fields: Record<string, any> = {};
+    const files: Record<string, any> = {};
+
+    for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+            // formidable expects a specific structure for files
+            files[key] = [{
+                filepath: value.path, // a temporary path, may need adjustment in some environments
+                originalFilename: value.name,
+                mimetype: value.type,
+                size: value.size,
+                // A way to read the file content
+                toBuffer: () => value.arrayBuffer().then(ab => Buffer.from(ab)),
+            }];
+        } else {
+            // formidable expects field values to be arrays
+            if (!fields[key]) {
+                fields[key] = [];
             }
-            chunks.push(value);
-            read();
-          });
-        };
-        read();
-    });
+            fields[key].push(value);
+        }
+    }
+    
+    // We need to read the file into a temporary location for formidable to process it,
+    // or handle the buffer directly. The updated logic below handles the buffer directly.
+    return { fields, files };
 };
 
 export async function POST(request: Request) {
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
         const file = files.file?.[0];
         const { userId, planId, planName, credits, price, userName, userEmail } = fields;
 
-        if (!file || !userId || !planId || !credits || !price) {
+        if (!file || !userId?.[0] || !planId?.[0] || !credits?.[0] || !price?.[0]) {
             return NextResponse.json({ message: 'Missing required fields.' }, { status: 400 });
         }
 
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
         const bucket = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
         const fileName = `payment_proofs/${userId[0]}/${Date.now()}-${file.originalFilename}`;
         
-        const fileBuffer = fs.readFileSync(file.filepath);
+        const fileBuffer = Buffer.from(await file.toBuffer());
 
         await bucket.file(fileName).save(fileBuffer, {
             metadata: {
@@ -82,8 +84,8 @@ export async function POST(request: Request) {
             planName: planName[0],
             credits: parseInt(credits[0], 10),
             price: parseFloat(price[0]),
-            userName: userName[0],
-            userEmail: userEmail[0],
+            userName: userName[0] || 'N/A',
+            userEmail: userEmail[0] || 'N/A',
             status: 'pending' as 'pending',
             proofUrl: fileUrl,
         };

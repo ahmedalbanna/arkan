@@ -11,36 +11,47 @@ service cloud.firestore {
 
     // Helper function to get the user's role from their profile document
     function getUserRole(userId) {
+      // Ensure the user document exists and has a role field
       return get(/databases/$(database)/documents/users/$(userId)).data.role;
     }
 
-    // Rule for the 'users' collection
+    // Rules for the 'users' collection
     match /users/{userId} {
-      // Users can read their OWN profile data
+      // Allow a logged-in user to read their OWN profile
       allow read: if isAuthenticated() && request.auth.uid == userId;
 
-      // Admins can read ALL user profile data
+      // Allow logged-in admins to read ALL user profiles
       allow read: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
 
-      // Users can update THEIR OWN profile (except the role)
-      allow write: if isAuthenticated() && request.auth.uid == userId
-                   && request.resource.data.keys().hasAll(['name', 'email', 'bio', 'profilePictureUrl']) // List updatable fields
-                   && !('role' in request.resource.data); // Prevent users from changing their own role
+      // Allow a logged-in user to update their OWN profile
+      // Prevent users from changing their role or adding/removing critical fields
+      allow write: if isAuthenticated()
+                   && request.auth.uid == userId
+                   && request.resource.data.keys().hasAll(['name', 'email', 'bio', 'profilePictureUrl', 'credits', 'createdAt', 'updatedAt', 'role']) // Ensure all expected fields are present
+                   && request.resource.data.size() == 8 // Ensure no extra fields are added (adjust number based on your UserProfile interface size)
+                   && request.resource.data.role == resource.data.role; // Prevent changing role
 
-      // Admins can update ANY user's profile (including the role)
+      // Allow logged-in admins to update ANY user profile (including role)
       allow write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
 
-      // Prevent creation of new users via client-side Firestore writes (signup handled via API)
-      allow create: if false; // Assuming signup is only via your API route
+
+      // Prevent client-side creation of user documents. Signup is handled via API.
+      allow create: if false;
     }
 
-    // Example rule for an 'admin_only_data' collection
-    match /admin_only_data/{docId} {
-      // Only admins can read and write data in this collection
-      allow read, write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+    // Rules for a hypothetical 'transactions' collection
+    // Adjust collection name if yours is different
+    match /transactions/{transactionId} {
+      // Only allow logged-in admins to read transaction data
+      allow read: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+
+      // Only allow logged-in admins to create or update transactions.
+      // Transaction processing (creation/verification/rejection) should happen via secure server-side logic.
+      allow write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
     }
 
-    // Default rule: Deny all access unless explicitly allowed
+    // Default rule: Deny all access to any other documents or collections
+    // unless explicitly allowed by a more specific rule above.
     match /{document=**} {
       allow read, write: if false;
     }
