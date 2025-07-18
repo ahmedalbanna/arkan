@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,9 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Banknote, Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useMutation } from '@tanstack/react-query';
 
 const formSchema = z.object({
   file: z
@@ -25,23 +26,62 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+async function submitPaymentProof(formData: FormData) {
+    const { firebaseUser } = useAuth.getState();
+    if (!firebaseUser) throw new Error("User not authenticated");
+    const token = await firebaseUser.getIdToken();
+    
+    const response = await fetch('/api/purchase-request', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+    });
+    
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to submit request.');
+    }
+    return response.json();
+}
+
 export default function SubmitPaymentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const planId = searchParams.get('planId');
   const planName = searchParams.get('planName');
   const planCredits = searchParams.get('credits');
+  const planPrice = searchParams.get('price');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
   });
 
+  const mutation = useMutation({
+    mutationFn: submitPaymentProof,
+    onSuccess: () => {
+      toast({
+        title: 'Request Submitted',
+        description: 'Your payment proof has been uploaded. An admin will review it shortly.',
+      });
+      router.push('/generate');
+    },
+    onError: (error: Error) => {
+        toast({
+            title: 'Submission Failed',
+            description: error.message,
+            variant: 'destructive',
+        });
+    }
+  });
+
+
   const onSubmit = async (data: FormValues) => {
-    if (!planId || !planCredits || !firebaseUser) {
+    if (!planId || !planCredits || !planPrice || !firebaseUser) {
       toast({
         title: 'Error',
         description: 'Missing required information. Please go back to the pricing page and select a plan.',
@@ -50,43 +90,17 @@ export default function SubmitPaymentForm() {
       return;
     }
 
-    setIsSubmitting(true);
-
     const formData = new FormData();
     formData.append('file', data.file);
     formData.append('userId', firebaseUser.uid);
     formData.append('planId', planId);
+    formData.append('planName', planName || 'Unknown Plan');
     formData.append('credits', planCredits);
+    formData.append('price', planPrice);
     formData.append('userName', firebaseUser.displayName || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
-
-    try {
-      // This API route will be enhanced later to handle file uploads and Firestore writes
-      const response = await fetch('/api/purchase-request', {
-        method: 'POST',
-        body: formData, // Sending FormData directly
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit request.');
-      }
-
-      toast({
-        title: 'Request Submitted',
-        description: 'Your payment proof has been uploaded. An admin will review it shortly.',
-      });
-      router.push('/generate');
-
-    } catch (error: any) {
-      toast({
-        title: 'Submission Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    
+    mutation.mutate(formData);
   };
 
   return (
@@ -125,6 +139,7 @@ export default function SubmitPaymentForm() {
                     name={name}
                     ref={ref}
                     className="file:text-primary file:font-semibold"
+                    disabled={mutation.isPending}
                   />
                 )}
               />
@@ -132,8 +147,8 @@ export default function SubmitPaymentForm() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isSubmitting} className="w-full">
-              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+            <Button type="submit" disabled={mutation.isPending} className="w-full">
+              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
               Submit for Verification
             </Button>
           </CardFooter>

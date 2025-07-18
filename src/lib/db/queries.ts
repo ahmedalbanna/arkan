@@ -15,6 +15,19 @@ export interface UserProfile {
   profilePictureUrl?: string;
 }
 
+export interface TransactionData {
+  userId: string;
+  planId: string;
+  planName: string;
+  credits: number;
+  price: number;
+  userName: string;
+  userEmail: string;
+  status: 'pending' | 'verified' | 'rejected';
+  proofUrl: string;
+  createdAt: string;
+}
+
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
     if (!id) return null;
     const userDoc = await adminDb.collection('users').doc(id).get();
@@ -105,4 +118,13 @@ export async function deleteUser(userId: string) {
     // you would also need to call `adminAuth.deleteUser(userId)` and delete
     // any associated data in Storage or other services.
     await adminDb.collection('users').doc(userId).delete();
+}
+
+export async function createTransaction(data: Omit<TransactionData, 'createdAt'>) {
+    const transactionRef = adminDb.collection('transactions').doc();
+    await transactionRef.set({
+        ...data,
+        createdAt: new Date().toISOString(),
+    });
+    return { id: transactionRef.id };
 }
