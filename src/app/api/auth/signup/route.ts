@@ -38,6 +38,7 @@ export async function POST(req: Request) {
         updatedAt: new Date().toISOString(),
         bio: '',
         profilePictureUrl: '',
+        role: 'user' as UserRole, // Assign a default role, e.g., 'user'
     };
 
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);

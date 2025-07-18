@@ -1,6 +1,6 @@
 
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
-
+export type UserRole = 'user' | 'admin' | 'editor' | 'guest'; // Define possible roles
 export interface User {
   id: string;
   name: string;
@@ -8,7 +8,8 @@ export interface User {
   avatarUrl: string;
   bio: string;
   credits: number;
-  createdAt: string;
+  createdAt: string; // Make sure this is in your type if it's in Firestore
+  role: UserRole; // Add the role field
 }
 
 export interface PricingPlan {

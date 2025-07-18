@@ -1,19 +1,48 @@
+firestore
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
+    // Helper function to check if a user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to get the user's role from their profile document
+    function getUserRole(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role;
+    }
+
+    // Rule for the 'users' collection
+    match /users/{userId} {
+      // Users can read their OWN profile data
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+
+      // Admins can read ALL user profile data
+      allow read: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+
+      // Users can update THEIR OWN profile (except the role)
+      allow write: if isAuthenticated() && request.auth.uid == userId
+                   && request.resource.data.keys().hasAll(['name', 'email', 'bio', 'profilePictureUrl']) // List updatable fields
+                   && !('role' in request.resource.data); // Prevent users from changing their own role
+
+      // Admins can update ANY user's profile (including the role)
+      allow write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+
+      // Prevent creation of new users via client-side Firestore writes (signup handled via API)
+      allow create: if false; // Assuming signup is only via your API route
+    }
+
+    // Example rule for an 'admin_only_data' collection
+    match /admin_only_data/{docId} {
+      // Only admins can read and write data in this collection
+      allow read, write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+    }
+
+    // Default rule: Deny all access unless explicitly allowed
     match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2025, 8, 11);
+      allow read, write: if false;
     }
   }
 }
