@@ -10,6 +10,7 @@ import type { TransactionData } from "@/lib/db/queries";
 import { useVerifyPayment } from "@/hooks/use-transactions";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
+import { useLocalization } from "@/context/LocalizationContext";
 
 interface PendingPaymentCardProps {
     transaction: TransactionData;
@@ -18,6 +19,7 @@ interface PendingPaymentCardProps {
 export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
     const [adminNotes, setAdminNotes] = useState('');
     const { mutate, isPending } = useVerifyPayment();
+    const { t } = useLocalization();
 
     const handleVerification = (status: 'verified' | 'rejected') => {
         mutate({
@@ -41,17 +43,17 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-3 text-sm">
-                <p><strong>User:</strong> {transaction.userName} ({transaction.userEmail})</p>
-                <p><strong>Amount:</strong> ${transaction.price.toFixed(2)}</p>
-                <p><strong>Credits:</strong> {transaction.credits}</p>
+                <p><strong>{t('managePayments.userLabel')}:</strong> {transaction.userName} ({transaction.userEmail})</p>
+                <p><strong>{t('managePayments.amountLabel')}:</strong> ${transaction.price.toFixed(2)}</p>
+                <p><strong>{t('managePayments.creditsLabel')}:</strong> {transaction.credits}</p>
                 <Button asChild size="sm" variant="outline">
                     <a href={transaction.proofUrl} target="_blank" rel="noopener noreferrer">
-                        View Proof <ExternalLink className="ml-2 h-4 w-4" />
+                        {t('managePayments.viewProofButton')} <ExternalLink className="mx-2 h-4 w-4" />
                     </a>
                 </Button>
                 <div>
                     <Textarea
-                        placeholder="Add verification notes (optional)..."
+                        placeholder={t('managePayments.notesPlaceholder')}
                         value={adminNotes}
                         onChange={(e) => setAdminNotes(e.target.value)}
                         className="text-xs mt-2"
@@ -68,7 +70,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                     disabled={isPending}
                 >
                     {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
-                    Decline
+                    {t('managePayments.declineButton')}
                 </Button>
                 <Button
                     size="sm"
@@ -76,7 +78,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                     disabled={isPending}
                 >
                     {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                    Approve
+                    {t('managePayments.approveButton')}
                 </Button>
             </CardFooter>
         </Card>

@@ -6,11 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { usePurchaseCredits } from '@/hooks/use-user';
 import { useRouter } from 'next/navigation';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export function PricingCard({ plan }: { plan: PricingPlan }) {
     const router = useRouter();
+    const { t } = useLocalization();
 
     const handleSelectPlan = () => {
         const params = new URLSearchParams({
@@ -26,18 +27,18 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
         <Card className={cn('flex flex-col', plan.isPopular && 'border-primary shadow-lg')}>
             {plan.isPopular && (
                 <div className="bg-primary text-primary-foreground text-center text-sm font-bold py-1 rounded-t-lg">
-                    Most Popular
+                    {t('pricing.mostPopular')}
                 </div>
             )}
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
                 <CardDescription>
                     <span className="text-4xl font-bold">${plan.price}</span>
-                    <span className="text-muted-foreground"> / one-time</span>
+                    <span className="text-muted-foreground"> / {t('pricing.oneTime')}</span>
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-                <p className="font-semibold">{plan.credits} AI Credits</p>
+                <p className="font-semibold">{plan.credits} {t('pricing.aiCredits')}</p>
                 <ul className="space-y-2">
                     {plan.features.map((feature, i) => (
                         <li key={i} className="flex items-center gap-2 text-muted-foreground">
@@ -52,7 +53,7 @@ export function PricingCard({ plan }: { plan: PricingPlan }) {
                     onClick={handleSelectPlan}
                     className="w-full font-headline"
                 >
-                    Select Plan
+                    {t('pricing.selectPlanButton')}
                 </Button>
             </CardFooter>
         </Card>

@@ -13,6 +13,7 @@ import { Loader2, UploadCloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   file: z
@@ -45,10 +46,11 @@ async function submitPaymentProof({ formData, token }: { formData: FormData, tok
 }
 
 export default function SubmitPaymentForm() {
-    const router = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
+  const { t } = useLocalization();
 
   const planId = searchParams.get('planId');
   const planName = searchParams.get('planName');
@@ -63,14 +65,14 @@ export default function SubmitPaymentForm() {
     mutationFn: submitPaymentProof,
     onSuccess: () => {
       toast({
-        title: 'Request Submitted',
-        description: 'Your payment proof has been uploaded. An admin will review it shortly.',
+        title: t('submitPayment.successTitle'),
+        description: t('submitPayment.successDescription'),
       });
       router.push('/generate');
     },
     onError: (error: Error) => {
         toast({
-            title: 'Submission Failed',
+            title: t('submitPayment.errorTitle'),
             description: error.message,
             variant: 'destructive',
         });
@@ -81,8 +83,8 @@ export default function SubmitPaymentForm() {
   const onSubmit = async (data: FormValues) => {
     if (!planId || !planCredits || !planPrice || !firebaseUser) {
       toast({
-        title: 'Error',
-        description: 'Missing required information. Please go back to the pricing page and select a plan.',
+        title: t('submitPayment.missingInfoErrorTitle'),
+        description: t('submitPayment.missingInfoErrorDescription'),
         variant: 'destructive',
       });
       return;
@@ -107,25 +109,25 @@ export default function SubmitPaymentForm() {
     <div className="space-y-8">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Bank Transfer Details</CardTitle>
-          <CardDescription>Please transfer the required amount to the account below.</CardDescription>
+          <CardTitle className="font-headline">{t('submitPayment.bankDetailsTitle')}</CardTitle>
+          <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2 text-sm bg-muted p-4 rounded-lg">
-          <p><strong>Bank Name:</strong> Arkan National Bank</p>
-          <p><strong>Account Holder:</strong> Arkan Professional Platform</p>
-          <p><strong>IBAN:</strong> SA03 8000 0000 6080 1016 7519</p>
-          <p><strong>Reference:</strong> Your User ID ({firebaseUser?.uid || 'Please log in'})</p>
+          <p><strong>{t('submitPayment.bankNameLabel')}:</strong> Arkan National Bank</p>
+          <p><strong>{t('submitPayment.accountHolderLabel')}:</strong> Arkan Professional Platform</p>
+          <p><strong>{t('submitPayment.ibanLabel')}:</strong> SA03 8000 0000 6080 1016 7519</p>
+          <p><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
         </CardContent>
       </Card>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Upload Receipt</CardTitle>
-            {planName && <CardDescription>You have selected the <strong>{planName}</strong> plan.</CardDescription>}
+            <CardTitle>{t('submitPayment.uploadReceiptTitle')}</CardTitle>
+            {planName && <CardDescription>{t('submitPayment.selectedPlanDescription').replace('{planName}', planName)}</CardDescription>}
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <Label htmlFor="file">Proof of Payment</Label>
+              <Label htmlFor="file">{t('submitPayment.proofLabel')}</Label>
               <Controller
                 name="file"
                 control={form.control}
@@ -149,7 +151,7 @@ export default function SubmitPaymentForm() {
           <CardFooter>
             <Button type="submit" disabled={mutation.isPending} className="w-full">
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-              Submit for Verification
+              {t('submitPayment.submitButton')}
             </Button>
           </CardFooter>
         </Card>

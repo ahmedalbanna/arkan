@@ -1,7 +1,10 @@
 
+'use client';
+
 import { PricingCard } from '@/components/PricingCard';
 import type { PricingPlan } from '@/lib/types';
 import { Gem } from 'lucide-react';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const plans: PricingPlan[] = [
   {
@@ -44,15 +47,17 @@ const plans: PricingPlan[] = [
 
 
 export default function PricingPage() {
+  const { t } = useLocalization();
+  
   return (
     <div className="container mx-auto max-w-5xl px-4 py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <Gem className="w-10 h-10" />
-          Choose Your Plan
+          {t('pricing.pageTitle')}
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Select the perfect credit package to power your AI-driven workflows.
+          {t('pricing.pageSubtitle')}
         </p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

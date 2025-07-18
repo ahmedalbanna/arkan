@@ -12,6 +12,9 @@ export default async function EditUserPage(props: { params: Promise<{ id: string
     notFound();
   }
 
+  // NOTE: This is a server component, so we can't use the localization hook directly.
+  // In a real-world scenario, we'd pass translations from the layout or use a server-side translation library.
+  // For this context, we will keep the English text.
   return (
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <div className="text-center mb-12">

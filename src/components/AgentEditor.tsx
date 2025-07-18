@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function AgentEditorSkeleton() {
   return (
@@ -47,6 +48,7 @@ function AgentEditorSkeleton() {
 export default function AgentEditor({ agentId }: { agentId: string }) {
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLocalization();
   const { data: agent, isLoading: isLoaded, isError } = useAgent(agentId);
   const updateAgentMutation = useUpdateAgent();
 
@@ -85,7 +87,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
     return (
          <Card className="p-8 text-center text-destructive">
             <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-            <p>Failed to load agent configuration.</p>
+            <p>{t('agentEditor.errorLoading')}</p>
         </Card>
     )
   }
@@ -101,14 +103,14 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
             <div>
               <CardTitle className="font-headline">{agent.name}</CardTitle>
               <CardDescription>
-                المعرف: {agent.id} | الفئة: {agent.category}
+                {t('agentEditor.idLabel')}: {agent.id} | {t('agentEditor.categoryLabel')}: {agent.category}
               </CardDescription>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="agent-name">اسم الوكيل</Label>
+            <Label htmlFor="agent-name">{t('agentEditor.nameLabel')}</Label>
             <Input
               id="agent-name"
               value={name}
@@ -119,11 +121,11 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="agent-prompt">
-              {isComplexPrompt ? 'موجه الأوامر الأساسي (Base Prompt)' : 'موجه الأوامر (Prompt)'}
+              {isComplexPrompt ? t('agentEditor.basePromptLabel') : t('agentEditor.promptLabel')}
             </Label>
              {isComplexPrompt && (
               <p className="text-xs text-muted-foreground">
-                أنت تقوم بتعديل الجزء الأساسي من الموجه فقط. يتم إدارة الإرشادات المحددة في أداة إنشاء التقارير.
+                {t('agentEditor.complexPromptNote')}
               </p>
             )}
             <Textarea
@@ -144,7 +146,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
             ) : (
               <Save className="ml-2 h-4 w-4" />
             )}
-            حفظ التغييرات
+            {t('agentEditor.saveButton')}
           </Button>
         </CardFooter>
       </Card>

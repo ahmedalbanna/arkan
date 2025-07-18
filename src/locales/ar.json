@@ -16,7 +16,8 @@
     "pricing": "الأسعار",
     "pptxTemplates": "قوالب العروض",
     "pdfToMarkdown": "تحويل PDF إلى ماركداون",
-    "manageUsers": "إدارة المستخدمين"
+    "manageUsers": "إدارة المستخدمين",
+    "managePayments": "إدارة المدفوعات"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
@@ -93,5 +94,71 @@
     "tool_context_diagrams": "المخططات",
     "generateButton": "توليد",
     "errorInsufficientCredits": "الرصيد غير كاف. يرجى شحن حسابك."
+  },
+  "agentEditor": {
+    "pageTitle": "تعديل الوكيل",
+    "pageSubtitle": "قم بتحديث اسم ووصف وكيل الذكاء الاصطناعي.",
+    "idLabel": "المعرف",
+    "categoryLabel": "الفئة",
+    "nameLabel": "اسم الوكيل",
+    "basePromptLabel": "موجه الأوامر الأساسي",
+    "promptLabel": "موجه الأوامر",
+    "complexPromptNote": "أنت تقوم بتعديل الجزء الأساسي من الموجه فقط. يتم إدارة الإرشادات المحددة في أداة إنشاء التقارير.",
+    "saveButton": "حفظ التغييرات",
+    "errorLoading": "فشل تحميل إعدادات الوكيل."
+  },
+  "managePayments": {
+    "pageTitle": "إدارة طلبات الدفع",
+    "pageSubtitle": "مراجعة ومعالجة طلبات الدفع المعلقة من المستخدمين.",
+    "errorLoading": "فشل تحميل طلبات الدفع",
+    "noPending": "لا توجد طلبات دفع معلقة.",
+    "userLabel": "المستخدم",
+    "amountLabel": "المبلغ",
+    "creditsLabel": "الرصيد",
+    "viewProofButton": "عرض الإثبات",
+    "notesPlaceholder": "إضافة ملاحظات تحقق (اختياري)...",
+    "approveButton": "موافقة",
+    "declineButton": "رفض"
+  },
+  "pptxTemplates": {
+    "pageTitle": "إدارة قوالب العروض التقديمية",
+    "pageSubtitle": "قم بتخصيص مظهر العروض التقديمية المصدرة (PPTX)."
+  },
+  "manageUsers": {
+    "pageTitle": "إدارة المستخدمين",
+    "pageSubtitle": "الإشراف على جميع المستخدمين في المنصة وتعديلهم وإدارتهم."
+  },
+  "submitPayment": {
+    "pageTitle": "إرسال إثبات الدفع",
+    "pageSubtitle": "يرجى إتمام التحويل البنكي ورفع إيصال الدفع أدناه.",
+    "bankDetailsTitle": "تفاصيل التحويل البنكي",
+    "bankDetailsDescription": "يرجى تحويل المبلغ المطلوب إلى الحساب أدناه.",
+    "bankNameLabel": "اسم البنك",
+    "accountHolderLabel": "صاحب الحساب",
+    "ibanLabel": "آيبان",
+    "referenceLabel": "المرجع",
+    "yourUserIdLabel": "معرف المستخدم الخاص بك",
+    "pleaseLogin": "يرجى تسجيل الدخول",
+    "uploadReceiptTitle": "رفع الإيصال",
+    "selectedPlanDescription": "لقد اخترت خطة {planName}.",
+    "proofLabel": "إثبات الدفع",
+    "submitButton": "إرسال للتحقق",
+    "successTitle": "تم إرسال الطلب",
+    "successDescription": "تم رفع إثبات الدفع الخاص بك. سيقوم المسؤول بمراجعته قريبًا.",
+    "errorTitle": "فشل الإرسال",
+    "missingInfoErrorTitle": "خطأ",
+    "missingInfoErrorDescription": "معلومات مطلوبة غير موجودة. يرجى العودة إلى صفحة الأسعار واختيار خطة."
+  },
+  "pdfToMarkdown": {
+    "pageTitle": "تحويل PDF إلى Markdown",
+    "pageSubtitle": "ارفع ملف PDF، ودع الذكاء الاصطناعي يستخرج ويعيد تنسيق المحتوى إلى Markdown نظيف."
+  },
+  "pricing": {
+    "pageTitle": "اختر خطتك",
+    "pageSubtitle": "اختر باقة الرصيد المثالية لدعم سير عملك المدعوم بالذكاء الاصطناعي.",
+    "mostPopular": "الأكثر شيوعاً",
+    "oneTime": "دفعة واحدة",
+    "aiCredits": "رصيد ذكاء اصطناعي",
+    "selectPlanButton": "اختر الخطة"
   }
 }

@@ -94,5 +94,71 @@
     "tool_context_diagrams": "Diagrams",
     "generateButton": "Generate",
     "errorInsufficientCredits": "Insufficient credits. Please top-up your account."
+  },
+  "agentEditor": {
+    "pageTitle": "Edit Agent",
+    "pageSubtitle": "Update the name and prompt for this AI agent.",
+    "idLabel": "ID",
+    "categoryLabel": "Category",
+    "nameLabel": "Agent Name",
+    "basePromptLabel": "Base Prompt",
+    "promptLabel": "Prompt",
+    "complexPromptNote": "You are only editing the base part of the prompt. Specific guidelines are managed in the report builder.",
+    "saveButton": "Save Changes",
+    "errorLoading": "Failed to load agent configuration."
+  },
+  "managePayments": {
+    "pageTitle": "Manage Payment Requests",
+    "pageSubtitle": "Review and process pending payment submissions from users.",
+    "errorLoading": "Failed to load payment requests",
+    "noPending": "No pending payment requests.",
+    "userLabel": "User",
+    "amountLabel": "Amount",
+    "creditsLabel": "Credits",
+    "viewProofButton": "View Proof",
+    "notesPlaceholder": "Add verification notes (optional)...",
+    "approveButton": "Approve",
+    "declineButton": "Decline"
+  },
+  "pptxTemplates": {
+    "pageTitle": "Manage Presentation Templates",
+    "pageSubtitle": "Customize the appearance of exported PPTX presentations."
+  },
+  "manageUsers": {
+    "pageTitle": "User Management",
+    "pageSubtitle": "Oversee, edit, and manage all users on the platform."
+  },
+  "submitPayment": {
+    "pageTitle": "Submit Proof of Payment",
+    "pageSubtitle": "Please complete the bank transfer and upload your receipt below.",
+    "bankDetailsTitle": "Bank Transfer Details",
+    "bankDetailsDescription": "Please transfer the required amount to the account below.",
+    "bankNameLabel": "Bank Name",
+    "accountHolderLabel": "Account Holder",
+    "ibanLabel": "IBAN",
+    "referenceLabel": "Reference",
+    "yourUserIdLabel": "Your User ID",
+    "pleaseLogin": "Please log in",
+    "uploadReceiptTitle": "Upload Receipt",
+    "selectedPlanDescription": "You have selected the {planName} plan.",
+    "proofLabel": "Proof of Payment",
+    "submitButton": "Submit for Verification",
+    "successTitle": "Request Submitted",
+    "successDescription": "Your payment proof has been uploaded. An admin will review it shortly.",
+    "errorTitle": "Submission Failed",
+    "missingInfoErrorTitle": "Error",
+    "missingInfoErrorDescription": "Missing required information. Please go back to the pricing page and select a plan."
+  },
+  "pdfToMarkdown": {
+    "pageTitle": "PDF to Markdown Converter",
+    "pageSubtitle": "Upload a PDF, and let the AI extract and reformat the content into clean markdown."
+  },
+  "pricing": {
+    "pageTitle": "Choose Your Plan",
+    "pageSubtitle": "Select the perfect credit package to power your AI-driven workflows.",
+    "mostPopular": "Most Popular",
+    "oneTime": "one-time",
+    "aiCredits": "AI Credits",
+    "selectPlanButton": "Select Plan"
   }
 }

@@ -9,6 +9,7 @@ import { PendingPaymentCard } from './PendingPaymentCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function ConsoleSkeleton() {
     return (
@@ -33,6 +34,7 @@ function ConsoleSkeleton() {
 
 export function PaymentVerificationConsole() {
     const { firebaseUser } = useAuth();
+    const { t } = useLocalization();
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
@@ -48,7 +50,7 @@ export function PaymentVerificationConsole() {
     const { data: transactions, isLoading, isError, error } = useQuery({
         queryKey: transactionKeys.pending(),
         queryFn: () => getPendingTransactions(token!),
-        enabled: !!token, // Only run the query when the token is available
+        enabled: !!token,
         staleTime: 1000 * 60, // 1 minute
     });
 
@@ -60,7 +62,7 @@ export function PaymentVerificationConsole() {
         return (
             <div className="p-8 text-center text-destructive border rounded-lg">
                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                <p>Failed to load payment requests: {error.message}</p>
+                <p>{t('managePayments.errorLoading')}: {error.message}</p>
             </div>
         );
     }
@@ -68,7 +70,7 @@ export function PaymentVerificationConsole() {
     if (!transactions || transactions.length === 0) {
         return (
             <div className="p-8 text-center text-muted-foreground border rounded-lg">
-                <p>No pending payment requests.</p>
+                <p>{t('managePayments.noPending')}</p>
             </div>
         )
     }
