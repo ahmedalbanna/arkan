@@ -40,7 +40,7 @@ export function Header() {
   
   const adminLinks = [
     { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
-    { href: '/manage-payments', label: 'Manage Payments', icon: CreditCard },
+    { href: '/manage-payments', label: t('header.managePayments'), icon: CreditCard },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },

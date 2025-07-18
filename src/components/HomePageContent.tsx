@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -21,12 +22,12 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                     </p>
                     <div className="flex justify-center gap-4">
                         <Button asChild size="lg" className="font-headline">
-                            <Link href="/generate-report">
+                            <Link href="/generate">
                                 {t('home.exploreProjects')} <ArrowLeft className="mr-2 rtl:mr-0 rtl:ml-2" />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline">
-                            <Link href="/generate-code">{t('home.trySummarizer')}</Link>
+                            <Link href="/generate">{t('home.trySummarizer')}</Link>
                         </Button>
                     </div>
                 </div>

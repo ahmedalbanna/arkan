@@ -66,7 +66,7 @@ Description: {{{projectDescription}}}`
     description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
     category: 'Proposal Generation',
     icon: FileText,
-    pageUrl: '/generate-proposal',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
 
@@ -83,7 +83,7 @@ Project Idea: {{{projectIdea}}}`
     description: 'Writes a professional introduction for a project report based on the full proposal data.',
     category: 'Report Generation',
     icon: BookMarked,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
       base: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report.
@@ -105,7 +105,7 @@ The introduction should be well-structured, engaging, and must include:`,
     description: 'Generates an academic and technical literature review section for the project report.',
     category: 'Report Generation',
     icon: Library,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
@@ -126,7 +126,7 @@ Your review should:`,
     description: 'Generates the system analysis section, including functional and non-functional requirements.',
     category: 'Report Generation',
     icon: Waypoints,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
@@ -147,7 +147,7 @@ Your analysis must cover:`,
     description: 'Generates the design strategy section, focusing on user experience and user interface.',
     category: 'Report Generation',
     icon: BookText,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
@@ -168,7 +168,7 @@ This section should articulate:`,
     description: 'Generates the system design section, defining the architecture, data model, and components.',
     category: 'Report Generation',
     icon: Code,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
@@ -189,7 +189,7 @@ This section must detail:`,
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
     category: 'Report Generation',
     icon: Code,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
@@ -211,7 +211,7 @@ This section should outline:`,
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
     category: 'Report Generation',
     icon: TestTube2,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
@@ -232,7 +232,7 @@ This section must define the testing strategy, including:`,
     description: 'Writes a concise and impactful conclusion for the final project report.',
     category: 'Report Generation',
     icon: Flag,
-    pageUrl: '/generate-report',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: `You are an expert technical writer. Based on the provided project proposal and any additional context, write a concise and impactful 'Conclusion' section for the final report.
@@ -254,7 +254,7 @@ The conclusion should:`,
     description: 'Creates a slide deck from project proposal and report content.',
     category: 'Presentation Generation',
     icon: Presentation,
-    pageUrl: '#', // This agent is used on the project page directly
+    pageUrl: '/generate', // This agent is used on the project page directly
     isEnabled: true,
     prompt: {
       base: `You are an expert presentation creator. Your task is to take a project proposal, along with generated report sections and diagrams, and create a compelling presentation slide deck.
@@ -279,7 +279,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -297,7 +297,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Class diagram showing classes, attributes, methods, and relationships.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -315,7 +315,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Sequence diagram to illustrate object interactions in a specific scenario.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -334,7 +334,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Activity diagram to model the workflow of system processes.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -353,7 +353,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Component diagram depicting the system architecture in terms of components.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -371,7 +371,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML ArchiMate diagram to model enterprise architecture across multiple layers.',
     category: 'Diagram Generation',
     icon: GitGraph,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
@@ -390,7 +390,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'Produces a PlantUML Entity-Relationship (ER) diagram to model the database schema.',
     category: 'Diagram Generation',
     icon: DatabaseZap,
-    pageUrl: '/generate-diagram',
+    pageUrl: '/generate',
     isEnabled: true,
     prompt: {
         base: diagramBasePrompt,
