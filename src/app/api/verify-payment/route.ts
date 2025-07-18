@@ -9,7 +9,7 @@ import { getUserProfile } from '@/lib/db/queries';
 async function verifyAdmin(request: Request) {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
+        return { authorized: false, message: 'Unauthorized', adminId: null };
     }
     const token = authorization.substring(7);
     

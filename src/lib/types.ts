@@ -31,3 +31,15 @@ export interface SignupCredentials {
     email: string;
     password?: string;
 }
+export interface PaymentRequest {
+  userId: string;
+  planId: string;
+  planName: string;
+  credits: number;
+  price: number;
+  userName: string;
+  userEmail: string;
+  paymentProofUrl: string;
+  status: 'pending' | 'approved' | 'rejected'; // Add other statuses as needed
+  createdAt: string; // ISO 8601 date string
+}
