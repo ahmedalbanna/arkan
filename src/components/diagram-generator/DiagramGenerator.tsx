@@ -26,11 +26,14 @@ function DiagramSkeleton() {
   )
 }
 
-async function updateDiagram(variables: { plantUmlCode: string }): Promise<{ plantUmlCode: string; imageUrl: string }> {
+async function updateDiagram(variables: { plantUmlCode: string, token: string }): Promise<{ plantUmlCode: string; imageUrl: string }> {
     const response = await fetch('/api/generate-diagrams', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ intent: 'update_diagram', ...variables }),
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`
+        },
+        body: JSON.stringify({ intent: 'update_diagram', plantUmlCode: variables.plantUmlCode }),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -40,7 +43,7 @@ async function updateDiagram(variables: { plantUmlCode: string }): Promise<{ pla
 }
 
 export default function DiagramGenerator() {
-    const { user } = useAuth();
+    const { firebaseUser } = useAuth();
     const {
         proposal,
         diagrams,
@@ -64,6 +67,15 @@ export default function DiagramGenerator() {
             toast({ title: 'Diagram Update Failed', description: error.message, variant: "destructive" });
         },
     });
+
+    const handleUpdateDiagram = async (plantUmlCode: string) => {
+        if (!firebaseUser) {
+            toast({ title: 'Authentication Error', description: 'You must be logged in to update a diagram.', variant: 'destructive' });
+            return;
+        }
+        const token = await firebaseUser.getIdToken();
+        mutation.mutate({ plantUmlCode, token });
+    };
 
     if (!proposal) {
       return (
@@ -111,7 +123,7 @@ export default function DiagramGenerator() {
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
-                                            onUpdate={() => mutation.mutate({ plantUmlCode: diagramData.plantUmlCode })}
+                                            onUpdate={() => handleUpdateDiagram(diagramData.plantUmlCode)}
                                             isUpdating={mutation.isPending && mutation.variables?.plantUmlCode === diagramData.plantUmlCode}
                                             isReadOnly={mutation.isPending}
                                         />

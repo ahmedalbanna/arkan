@@ -51,11 +51,11 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
     return guidelines;
 };
 
-async function generateDiagram(variables: any): Promise<GenerateClassDiagramOutput & { imageUrl: string }> {
+async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateClassDiagramOutput & { imageUrl: string }> {
     const response = await fetch('/api/generate-diagrams', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(variables),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
+        body: JSON.stringify(variables.body),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -64,10 +64,11 @@ async function generateDiagram(variables: any): Promise<GenerateClassDiagramOutp
     return response.json();
 }
 
-async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
+async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
     const response = await fetch('/api/pdf-to-markdown', {
         method: 'POST',
-        body: formData,
+        headers: { 'Authorization': `Bearer ${variables.token}` },
+        body: variables.formData,
     });
     if (!response.ok) {
         const error = await response.json();
@@ -79,7 +80,7 @@ async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
 export const DiagramGenerationTools = () => {
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
@@ -106,14 +107,14 @@ export const DiagramGenerationTools = () => {
     const diagramMutation = useMutation({
         mutationFn: generateDiagram,
         onSuccess: (data, variables) => {
-            const diagramKey = variables.diagramToGenerate;
+            const diagramKey = variables.body.diagramToGenerate;
             setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
             queryClient.invalidateQueries({ queryKey: ['user'] });
             toast({ title: `Diagram "${diagramConfig[diagramKey].title}" generated successfully!` });
             setActiveMutationKey(null);
         },
         onError: (error: Error, variables) => {
-            toast({ title: `Failed to generate "${diagramConfig[variables.diagramToGenerate].title}"`, description: error.message, variant: "destructive" });
+            toast({ title: `Failed to generate "${diagramConfig[variables.body.diagramToGenerate].title}"`, description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -121,7 +122,7 @@ export const DiagramGenerationTools = () => {
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
-            const file = variables.get('file') as File;
+            const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
             queryClient.invalidateQueries({ queryKey: ['user'] });
             toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
@@ -145,12 +146,13 @@ export const DiagramGenerationTools = () => {
         }
     };
     // Handle diagram generation
-    const onGenerateDiagram = (diagramType: DiagramType) => {
-        if (!user) {
+    const onGenerateDiagram = async (diagramType: DiagramType) => {
+        if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         }
 
+        const token = await firebaseUser.getIdToken();
         const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: false };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
@@ -169,14 +171,15 @@ export const DiagramGenerationTools = () => {
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
         };
         setActiveMutationKey(diagramType);
-        diagramMutation.mutate(body);
+        diagramMutation.mutate({ body, token });
     };
 
-    const onPdfUpload = () => {
-        if (!pdfFile) return;
+    const onPdfUpload = async () => {
+        if (!pdfFile || !firebaseUser) return;
+        const token = await firebaseUser.getIdToken();
         const formData = new FormData();
         formData.append('file', pdfFile);
-        pdfMutation.mutate(formData);
+        pdfMutation.mutate({ formData, token });
     };
 
 

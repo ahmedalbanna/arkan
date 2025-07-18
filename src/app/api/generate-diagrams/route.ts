@@ -12,7 +12,7 @@ import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram'
 import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { auth as adminAuth } from '@/lib/firebase/admin';
 
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     const token = authorization.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
     
     const body = await request.json();
