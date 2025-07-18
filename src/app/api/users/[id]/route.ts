@@ -1,9 +1,10 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser } from '@/lib/db/queries';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
+
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
     const sessionCookie = (await cookies()).get("__session")?.value;
@@ -32,29 +33,28 @@ async function verifyAccess(request: Request, targetUserId: string) {
     }
 }
 
-
 // GET /api/users/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-  try {
-    const userId = params.id;
-    if (!userId) {
-        return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
-    }
+    try {
+        const { id: userId } = await params; // Await params and destructure id
+        if (!userId) {
+            return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+        }
 
-    const accessCheck = await verifyAccess(request, userId);
-    if (!accessCheck.authorized) {
-      return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
-    }
+        const accessCheck = await verifyAccess(request, userId);
+        if (!accessCheck.authorized) {
+            return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
+        }
 
-    const user = await getUserProfile(userId);
-    if (!user) {
-      return NextResponse.json({ message: 'User not found.' }, { status: 404 });
+        const user = await getUserProfile(userId);
+        if (!user) {
+            return NextResponse.json({ message: 'User not found.' }, { status: 404 });
+        }
+        return NextResponse.json(user, { status: 200 });
+    } catch (error) {
+        console.error(`Error fetching user ${params.id}:`, error);  //Keep original param for logging
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
-    return NextResponse.json(user, { status: 200 });
-  } catch (error) {
-    console.error(`Error fetching user ${params.id}:`, error);
-    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
-  }
 }
 
 // PUT /api/users/[id]
@@ -66,77 +66,77 @@ const updateUserSchema = z.object({
 });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  const userId = params.id;
-  if (!userId) {
-      return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
-  }
-  const accessCheck = await verifyAccess(request, userId);
-    if (!accessCheck.authorized || accessCheck.userId !== userId) { // For now, only user can edit themselves. Admin edits are separate
-    return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
-  }
-  
   try {
-    // Check if user exists first
-    const user = await getUserProfile(userId);
-    if (!user) {
-      return NextResponse.json({ message: 'User not found.' }, { status: 404 });
-    }
+      const { id: userId } = await params; // Await params and destructure id
+      if (!userId) {
+          return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+      }
+      const accessCheck = await verifyAccess(request, userId);
+      if (!accessCheck.authorized || accessCheck.userId !== userId) { // For now, only user can edit themselves. Admin edits are separate
+          return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
+      }
 
-    const body = await request.json();
-    const validation = updateUserSchema.safeParse(body);
+      // Check if user exists first
+      const user = await getUserProfile(userId);
+      if (!user) {
+          return NextResponse.json({ message: 'User not found.' }, { status: 404 });
+      }
 
-    if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
-    }
+      const body = await request.json();
+      const validation = updateUserSchema.safeParse(body);
 
-    const { name, avatarUrl, bio } = validation.data;
+      if (!validation.success) {
+          return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      }
 
-    // Handle profile update
-    if (name || avatarUrl || bio) {
-        await updateUser(userId, {
-            name: name ?? user.name,
-            profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
-            bio: bio ?? user.bio ?? undefined,
-        });
-    }
+      const { name, avatarUrl, bio } = validation.data;
 
-    const updatedUser = await getUserProfile(userId);
+      // Handle profile update
+      if (name || avatarUrl || bio) {
+          await updateUser(userId, {
+              name: name ?? user.name,
+              profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
+              bio: bio ?? user.bio ?? undefined,
+          });
+      }
 
-    return NextResponse.json(updatedUser, { status: 200 });
+      const updatedUser = await getUserProfile(userId);
+
+      return NextResponse.json(updatedUser, { status: 200 });
 
   } catch (error) {
-    console.error(`Error updating user ${params.id}:`, error);
-    if (error instanceof Error) {
-      return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+      console.error(`Error updating user ${params.id}:`, error); // Keep original param for logging
+      if (error instanceof Error) {
+          return NextResponse.json({ message: error.message }, { status: 500 });
+      }
+      return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    const targetUserId = params.id;
+      const { id: targetUserId } = await params; // Await params and destructure id
 
-    const sessionCookie = (await cookies()).get('__session')?.value;
-    if (!sessionCookie) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
-    const requesterId = decodedToken.uid;
-    
-    const requesterProfile = await getUserProfile(requesterId);
-    if (requesterProfile?.role !== 'admin') {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+      const sessionCookie = (await cookies()).get('__session')?.value;
+      if (!sessionCookie) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+      const requesterId = decodedToken.uid;
 
-    // 4. Perform the action (delete the user)
-    await adminAuth.deleteUser(targetUserId);
-    await adminDb.collection('users').doc(targetUserId).delete();
+      const requesterProfile = await getUserProfile(requesterId);
+      if (requesterProfile?.role !== 'admin') {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
 
-    return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
+      // 4. Perform the action (delete the user)
+      await adminAuth.deleteUser(targetUserId);
+      await adminDb.collection('users').doc(targetUserId).delete();
+
+      return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
 
   } catch (error: any) {
-    console.error("Error deleting user:", error);
-    return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
+      console.error("Error deleting user:", error);
+      return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
   }
 }
