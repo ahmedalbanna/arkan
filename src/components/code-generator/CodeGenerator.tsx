@@ -19,11 +19,14 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
 
-async function generateCode(variables: { prompt: string }): Promise<GenerateCodeOutput> {
+async function generateCode(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate-code', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(variables),
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify({ prompt: variables.prompt }),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -68,7 +71,7 @@ export default function CodeGenerator() {
         setGeneratedCode,
     } = useBuilderStore();
     
-    const { user, fetchUser } = useAuth();
+    const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -81,7 +84,7 @@ export default function CodeGenerator() {
         mutationFn: generateCode,
         onSuccess: (data) => {
             setGeneratedCode(data);
-            queryClient.invalidateQueries({ queryKey: ['user'] });
+            refetchUser(); // Invalidate user query to update credits
             toast({ title: "Code Generated Successfully!" });
         },
         onError: (error: Error) => {
@@ -189,13 +192,14 @@ export default function CodeGenerator() {
         </div>
     );
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) {
+        if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in to generate code.", variant: "destructive" });
             return;
         }
-        mutation.mutate({ prompt: codeState.prompt });
+        const token = await firebaseUser.getIdToken();
+        mutation.mutate({ prompt: codeState.prompt, token });
     };
 
     return (
