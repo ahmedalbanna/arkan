@@ -7,6 +7,8 @@ import { getPendingTransactions } from '@/services/transaction-service';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { PendingPaymentCard } from './PendingPaymentCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
+import { useEffect, useState } from 'react';
 
 function ConsoleSkeleton() {
     return (
@@ -30,13 +32,27 @@ function ConsoleSkeleton() {
 }
 
 export function PaymentVerificationConsole() {
+    const { firebaseUser } = useAuth();
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchToken = async () => {
+            if (firebaseUser) {
+                const idToken = await firebaseUser.getIdToken();
+                setToken(idToken);
+            }
+        };
+        fetchToken();
+    }, [firebaseUser]);
+
     const { data: transactions, isLoading, isError, error } = useQuery({
         queryKey: transactionKeys.pending(),
-        queryFn: getPendingTransactions,
+        queryFn: () => getPendingTransactions(token!),
+        enabled: !!token, // Only run the query when the token is available
         staleTime: 1000 * 60, // 1 minute
     });
 
-    if (isLoading) {
+    if (isLoading || !token) {
         return <ConsoleSkeleton />;
     }
 

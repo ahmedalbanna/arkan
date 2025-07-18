@@ -2,12 +2,11 @@
 'use client';
 
 import type { TransactionData } from '@/lib/db/queries';
-import { useAuth } from '@/context/AuthContext';
 
-export async function getPendingTransactions(): Promise<TransactionData[]> {
-    const { firebaseUser } = useAuth.getState();
-    if (!firebaseUser) throw new Error("User not authenticated");
-    const token = await firebaseUser.getIdToken();
+export async function getPendingTransactions(token: string): Promise<TransactionData[]> {
+    if (!token) {
+        throw new Error("Authentication token is required.");
+    }
 
     const response = await fetch('/api/transactions/pending', {
         headers: {
