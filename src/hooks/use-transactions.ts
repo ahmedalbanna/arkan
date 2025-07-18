@@ -3,7 +3,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { transactionKeys } from '@/lib/query-keys';
+import { transactionKeys, userKeys } from '@/lib/query-keys';
 
 interface VerifyPaymentVariables {
     transactionId: string;
@@ -32,8 +32,10 @@ export function useVerifyPayment() {
     return useMutation({
         mutationFn: verifyPayment,
         onSuccess: (data, variables) => {
-            // When a payment is verified, invalidate the pending list to refresh it
+            // Invalidate queries to refetch data
             queryClient.invalidateQueries({ queryKey: transactionKeys.pending() });
+            queryClient.invalidateQueries({ queryKey: userKeys.profile(variables.userId) });
+
             toast({
                 title: 'Success',
                 description: `Transaction has been ${variables.status}.`,
