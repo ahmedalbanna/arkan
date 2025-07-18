@@ -1,3 +1,4 @@
+
 /**
  * Query Key Factories for React Query
  * 
@@ -23,5 +24,8 @@ export const agentKeys = {
   detail: (agentId: string) => [...agentKeys.details(), agentId] as const,
 };
 
-// Add factories for other data domains as needed...
-// export const reportKeys = { ... }
+export const transactionKeys = {
+    all: ['transactions'] as const,
+    lists: () => [...transactionKeys.all, 'list'] as const,
+    pending: () => [...transactionKeys.lists(), 'pending'] as const,
+}

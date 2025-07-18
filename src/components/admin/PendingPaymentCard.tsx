@@ -1,0 +1,84 @@
+
+'use client';
+
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { format } from 'date-fns';
+import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
+import type { TransactionData } from "@/lib/db/queries";
+import { useVerifyPayment } from "@/hooks/use-transactions";
+import { useState } from "react";
+import { Textarea } from "../ui/textarea";
+
+interface PendingPaymentCardProps {
+    transaction: TransactionData;
+}
+
+export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
+    const [adminNotes, setAdminNotes] = useState('');
+    const { mutate, isPending } = useVerifyPayment();
+
+    const handleVerification = (status: 'verified' | 'rejected') => {
+        mutate({
+            transactionId: transaction.id,
+            userId: transaction.userId,
+            creditsToGrant: transaction.credits,
+            status,
+            adminNotes: adminNotes || (status === 'verified' ? 'Payment approved.' : 'Payment rejected.'),
+        });
+    }
+
+    return (
+        <Card className="flex flex-col">
+            <CardHeader>
+                <div className="flex justify-between items-start">
+                    <CardTitle className="font-headline text-lg">{transaction.planName}</CardTitle>
+                    <Badge variant="secondary">{transaction.status}</Badge>
+                </div>
+                <CardDescription>
+                    {format(new Date(transaction.createdAt), 'd MMM yyyy, h:mm a')}
+                </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-grow space-y-3 text-sm">
+                <p><strong>User:</strong> {transaction.userName} ({transaction.userEmail})</p>
+                <p><strong>Amount:</strong> ${transaction.price.toFixed(2)}</p>
+                <p><strong>Credits:</strong> {transaction.credits}</p>
+                <Button asChild size="sm" variant="outline">
+                    <a href={transaction.proofUrl} target="_blank" rel="noopener noreferrer">
+                        View Proof <ExternalLink className="ml-2 h-4 w-4" />
+                    </a>
+                </Button>
+                <div>
+                    <Textarea
+                        placeholder="Add verification notes (optional)..."
+                        value={adminNotes}
+                        onChange={(e) => setAdminNotes(e.target.value)}
+                        className="text-xs mt-2"
+                        rows={2}
+                        disabled={isPending}
+                    />
+                </div>
+            </CardContent>
+            <CardFooter className="gap-2 justify-end">
+                <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => handleVerification('rejected')}
+                    disabled={isPending}
+                >
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
+                    Decline
+                </Button>
+                <Button
+                    size="sm"
+                    onClick={() => handleVerification('verified')}
+                    disabled={isPending}
+                >
+                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                    Approve
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+}

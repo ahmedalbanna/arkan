@@ -16,6 +16,7 @@ export interface UserProfile {
 }
 
 export interface TransactionData {
+  id: string; // Firestore document ID
   userId: string;
   planId: string;
   planName: string;
@@ -26,6 +27,9 @@ export interface TransactionData {
   status: 'pending' | 'verified' | 'rejected';
   proofUrl: string;
   createdAt: string;
+  adminNotes?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
 }
 
 export async function getUserProfile(id: string): Promise<UserProfile | null> {
@@ -120,11 +124,24 @@ export async function deleteUser(userId: string) {
     await adminDb.collection('users').doc(userId).delete();
 }
 
-export async function createTransaction(data: Omit<TransactionData, 'createdAt'>) {
+export async function createTransaction(data: Omit<TransactionData, 'createdAt' | 'id'>) {
     const transactionRef = adminDb.collection('transactions').doc();
     await transactionRef.set({
         ...data,
         createdAt: new Date().toISOString(),
     });
     return { id: transactionRef.id };
+}
+
+export async function getPendingTransactions(): Promise<TransactionData[]> {
+    const snapshot = await adminDb.collection('transactions')
+        .where('status', '==', 'pending')
+        .orderBy('createdAt', 'asc')
+        .get();
+    
+    if (snapshot.empty) {
+        return [];
+    }
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
 }

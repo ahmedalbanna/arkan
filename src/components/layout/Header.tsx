@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -40,6 +40,7 @@ export function Header() {
   
   const adminLinks = [
     { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
+    { href: '/manage-payments', label: 'Manage Payments', icon: CreditCard },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
