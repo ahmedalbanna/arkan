@@ -7,6 +7,7 @@ export const users = sqliteTable('users', {
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
   credits: integer('credits').notNull().default(0),
+  role: text('role', { enum: ['user', 'admin'] }).notNull().default('user'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   bio: text('bio'),
@@ -59,9 +60,14 @@ export const transactions = sqliteTable('transactions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   amount: integer('amount').notNull(),
-  type: text('type').notNull(),
+  type: text('type', { enum: ['purchase', 'usage'] }).notNull(),
+  status: text('status', { enum: ['pending', 'verified', 'rejected'] }).notNull().default('pending'),
   timestamp: text('timestamp').notNull(),
   description: text('description'),
+  proofUrl: text('proof_url'), // To store the path to the uploaded proof of payment
+  adminNotes: text('admin_notes'), // For admins to add notes on verification/rejection
+  verifiedBy: text('verified_by'), // ID of the admin who verified
+  verifiedAt: text('verified_at'),
 });
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
