@@ -95,9 +95,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
         } catch (error: any) {
             console.error("AI action failed:", error);
+            const isCreditError = error.message && error.message.toLowerCase().includes('credit');
             toast({
-                title: "AI Action Failed",
-                description: error.message || "Could not modify the text. Please try again.",
+                title: isCreditError ? 'Insufficient Credits' : 'AI Action Failed',
+                description: error.message || "An unexpected error occurred.",
                 variant: "destructive",
             });
         } finally {
