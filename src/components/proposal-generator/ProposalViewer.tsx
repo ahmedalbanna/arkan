@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import type { ProjectProposal } from '@/ai/schemas';
+import type { ProjectProposal, ManipulateTextOutput } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -16,10 +16,11 @@ import remarkParse from 'remark-parse';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useAuth } from '@/context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 interface EditableFieldProps {
@@ -40,6 +41,8 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
+    const { firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         if (!isEditing && aiSuggestion === null) {
@@ -72,20 +75,39 @@ const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, mu
     };
 
     const handleAiAction = async (command: string) => {
-        if (readOnly) return;
+        if (readOnly || !firebaseUser) {
+            toast({ title: "Authentication Error", description: "You must be logged in to use AI actions.", variant: "destructive" });
+            return;
+        }
         setIsProcessingAi(true);
         setAiSuggestion(null);
         try {
-            const result = await manipulateText({
-                textToManipulate: String(currentValue),
-                command: command,
+            const token = await firebaseUser.getIdToken();
+            const response = await fetch('/api/manipulate-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    textToManipulate: String(currentValue),
+                    command: command,
+                })
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to manipulate text.");
+            }
+
+            const result: ManipulateTextOutput = await response.json();
             setAiSuggestion(result.rewrittenText);
-        } catch (error) {
+            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
+        } catch (error: any) {
             console.error("AI action failed:", error);
             toast({
                 title: "AI Action Failed",
-                description: "Could not modify the text. Please try again.",
+                description: error.message || "Could not modify the text. Please try again.",
                 variant: "destructive",
             });
         } finally {

@@ -9,7 +9,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown } from 'lucide-react';
-import { manipulateText } from '@/ai/flows/manipulate-text';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -17,7 +16,9 @@ import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 import { Pluggable } from 'unified';
-
+import { useAuth } from '@/context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import type { ManipulateTextOutput } from '@/ai/schemas';
 
 interface EditableSectionProps {
     sectionKey: SectionName;
@@ -28,11 +29,9 @@ interface EditableSectionProps {
 }
 
 // Dynamically import react-markdown and remark-gfm
-// These are client-side dependencies for rendering markdown
-// We disable SSR for these components
 const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
     ssr: false,
-    loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />, // Simple loading indicator
+    loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />,
 });
 const DynamicRemarkGfm = dynamic(() => import('remark-gfm'), { ssr: false });
 
@@ -47,15 +46,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const [isProcessingAi, setIsProcessingAi] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
+    const { firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
-        // This effect synchronizes the local state with the prop from the store.
-        // It only runs when the external `content` prop changes.
-        // The checks prevent overwriting the user's current edits or an active AI suggestion.
         if (!isEditing && aiSuggestion === null) {
             setCurrentContent(content);
         }
-    }, [content]);
+    }, [content, isEditing, aiSuggestion]);
 
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
@@ -70,19 +68,36 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     };
 
     const handleAiAction = async (command: string) => {
+        if (!firebaseUser) {
+            toast({ title: "Authentication Error", description: "You must be logged in to use AI actions.", variant: "destructive" });
+            return;
+        }
         setIsProcessingAi(true);
         setAiSuggestion(null);
         try {
-            const result = await manipulateText({
-                textToManipulate: currentContent,
-                command: command,
+            const token = await firebaseUser.getIdToken();
+            const response = await fetch('/api/manipulate-text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ textToManipulate: currentContent, command }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to manipulate text.");
+            }
+
+            const result: ManipulateTextOutput = await response.json();
             setAiSuggestion(result.rewrittenText);
-        } catch (error) {
+            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
+        } catch (error: any) {
             console.error("AI action failed:", error);
             toast({
                 title: "AI Action Failed",
-                description: "Could not modify the text. Please try again.",
+                description: error.message || "Could not modify the text. Please try again.",
                 variant: "destructive",
             });
         } finally {
@@ -102,7 +117,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         setAiSuggestion(null);
     };
     
-    // Editor Actions
     const handleCopyMarkdown = () => {
         navigator.clipboard.writeText(content);
         toast({ title: 'Copied as Markdown' });
@@ -135,14 +149,9 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                     <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
-                        {/* 
-                         * Use the dynamically imported ReactMarkdown component
-                         * and pass the dynamically imported remarkGfm plugin.
-                         * Type assertion is used here to ensure correct type compatibility for the dynamically imported plugin.
-                         */}
                         <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
                             {aiSuggestion}
-                            </DynamicReactMarkdown>
+                        </DynamicReactMarkdown>
 
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
@@ -172,9 +181,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             );
         }
         
-        // Display the content using the dynamically imported ReactMarkdown component
-        // Pass the dynamically imported remarkGfm plugin.
-        // Type assertion is used here to ensure correct type compatibility for the dynamically imported plugin.
         return (
             <DynamicReactMarkdown
                 components={markdownComponents}
