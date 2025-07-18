@@ -1,91 +1,124 @@
-
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { AGENTS as initialAgents, type Agent, type AgentPrompt } from '@/lib/agents';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
+import { agentKeys } from '@/lib/query-keys';
+import type { Agent, AgentPrompt } from '@/lib/agents';
+import { useAuth } from '@/context/AuthContext';
 
-const AGENTS_KEY = 'arkan-agents-state';
+// --- API Service Functions ---
 
-function isAgentPrompt(prompt: any): prompt is AgentPrompt {
-    return typeof prompt === 'object' && prompt !== null && 'base' in prompt;
+async function fetchAgents(token: string): Promise<Agent[]> {
+    const response = await fetch('/api/agents', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch agents');
+    }
+    return response.json();
 }
 
-export function useAgents() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    try {
-      const storedAgents = localStorage.getItem(AGENTS_KEY);
-      if (storedAgents) {
-        const parsedAgents: Agent[] = JSON.parse(storedAgents);
-        const agentMap = new Map(parsedAgents.map(a => [a.id, a]));
-        
-        const mergedAgents = initialAgents.map(initialAgent => {
-          const storedData = agentMap.get(initialAgent.id);
-          if (storedData) {
-            // Merge stored data, preserving non-serializable icon and structure of prompt
-            const mergedPrompt = (isAgentPrompt(initialAgent.prompt) && isAgentPrompt(storedData.prompt))
-              ? { ...initialAgent.prompt, base: storedData.prompt.base }
-              : storedData.prompt;
-
-            return { ...initialAgent, ...storedData, icon: initialAgent.icon, prompt: mergedPrompt };
-          }
-          return initialAgent;
-        });
-        setAgents(mergedAgents);
-      } else {
-        setAgents(initialAgents);
-      }
-    } catch (error) {
-      console.error('Failed to load agents from localStorage', error);
-      setAgents(initialAgents);
-    }
-    setIsLoaded(true);
-  }, []);
-
-  const saveAgents = (updatedAgents: Agent[]) => {
-    setAgents(updatedAgents);
-    try {
-        const agentsToStore = updatedAgents.map(agent => {
-            if (isAgentPrompt(agent.prompt)) {
-                // Only store the base part of the complex prompt object to avoid overwriting guidelines
-                return { ...agent, prompt: { base: agent.prompt.base } };
-            }
-            return agent;
-        });
-      localStorage.setItem(AGENTS_KEY, JSON.stringify(agentsToStore));
-    } catch (error) {
-      console.error('Failed to save agents to localStorage', error);
-    }
-  };
-
-  const updateAgent = useCallback((id: string, data: Partial<Omit<Agent, 'id' | 'prompt'>> & { prompt?: string }) => {
-    setAgents(prevAgents => {
-        const updatedAgents = prevAgents.map(agent => {
-            if (agent.id === id) {
-                const newAgent = { ...agent, ...data };
-                // If the prompt is a string, update the base of the complex prompt object if it exists
-                if (typeof data.prompt === 'string' && isAgentPrompt(agent.prompt)) {
-                    newAgent.prompt = { ...agent.prompt, base: data.prompt };
-                } else if (typeof data.prompt === 'string') {
-                    // This case handles agents with simple string prompts
-                    newAgent.prompt = data.prompt;
-                }
-                return newAgent;
-            }
-            return agent;
-        });
-        saveAgents(updatedAgents);
-        return updatedAgents;
+async function fetchAgent(agentId: string, token: string): Promise<Agent | null> {
+    if (!agentId) return null;
+    const response = await fetch(`/api/agents/${agentId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
     });
-}, []);
+    if (!response.ok) {
+        if(response.status === 404) return null;
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch agent');
+    }
+    return response.json();
+}
 
+interface UpdateAgentPayload {
+    name?: string;
+    prompt?: string;
+    isEnabled?: boolean;
+}
 
-  const getAgent = useCallback((id: string): Agent | undefined => {
-    return agents.find(agent => agent.id === id);
-  }, [agents]);
+async function updateAgentApi(
+    { agentId, payload }: { agentId: string; payload: UpdateAgentPayload },
+    token: string
+) {
+    const response = await fetch(`/api/agents/${agentId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
 
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update agent.');
+    }
+    return response.json();
+}
 
-  return { agents, isLoaded, updateAgent, getAgent };
+// --- Custom Hooks ---
+
+export function useAgents() {
+    const { firebaseUser } = useAuth();
+
+    const { data: agents, isLoading: isLoaded, isError } = useQuery({
+        queryKey: agentKeys.lists(),
+        queryFn: async () => {
+            const token = await firebaseUser?.getIdToken();
+            if (!token) throw new Error("User not authenticated");
+            return fetchAgents(token);
+        },
+        enabled: !!firebaseUser,
+    });
+
+    const getAgent = (id: string): Agent | undefined => {
+        return agents?.find(agent => agent.id === id);
+    };
+
+    return { agents: agents || [], isLoaded: !isLoaded, isError, getAgent };
+}
+
+export function useAgent(agentId: string) {
+    const { firebaseUser } = useAuth();
+    return useQuery({
+        queryKey: agentKeys.detail(agentId),
+        queryFn: async () => {
+            const token = await firebaseUser?.getIdToken();
+            if (!token) throw new Error("User not authenticated");
+            return fetchAgent(agentId, token);
+        },
+        enabled: !!firebaseUser && !!agentId,
+    });
+}
+
+export function useUpdateAgent() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (variables: { agentId: string; payload: UpdateAgentPayload }) => {
+            const token = await firebaseUser?.getIdToken();
+            if (!token) throw new Error("User not authenticated");
+            return updateAgentApi(variables, token);
+        },
+        onSuccess: (data, variables) => {
+            // Invalidate queries to refetch data
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
+
+            toast({
+                title: 'Agent Updated',
+                description: `Agent "${data.name}" has been successfully updated.`,
+            });
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Update Failed',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
+    });
 }

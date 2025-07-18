@@ -3,68 +3,91 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAgents } from '@/hooks/use-agents';
+import { useAgent, useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function AgentEditorSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-8 h-8 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </CardContent>
+      <CardFooter className="justify-end">
+        <Skeleton className="h-10 w-32" />
+      </CardFooter>
+    </Card>
+  )
+}
+
 
 export default function AgentEditor({ agentId }: { agentId: string }) {
   const router = useRouter();
-  const { getAgent, updateAgent, isLoaded } = useAgents();
   const { toast } = useToast();
-  const [agent, setAgent] = useState<Agent | null>(null);
+  const { data: agent, isLoading: isLoaded, isError } = useAgent(agentId);
+  const updateAgentMutation = useUpdateAgent();
+
   const [name, setName] = useState('');
   const [prompt, setPrompt] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (isLoaded) {
-      const foundAgent = getAgent(agentId);
-      if (foundAgent) {
-        setAgent(foundAgent);
-        setName(foundAgent.name);
-        const agentPrompt = foundAgent.prompt;
-        if (typeof agentPrompt === 'string') {
-          setPrompt(agentPrompt);
-        } else if (typeof agentPrompt === 'object' && agentPrompt.base) {
-          setPrompt(agentPrompt.base);
-        }
-      } else {
-        router.push('/manage-agents');
+    if (agent) {
+      setName(agent.name);
+      const agentPrompt = agent.prompt;
+      if (typeof agentPrompt === 'string') {
+        setPrompt(agentPrompt);
+      } else if (typeof agentPrompt === 'object' && agentPrompt.base) {
+        setPrompt(agentPrompt.base);
       }
     }
-  }, [agentId, getAgent, isLoaded, router]);
-
+  }, [agent]);
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-    // The `updateAgent` hook now correctly handles both simple string prompts
-    // and complex prompt objects by only updating the 'base' property for the latter.
-    updateAgent(agentId, { name, prompt });
-
-    setTimeout(() => {
-      setIsSaving(false);
-      toast({
-        title: "تم الحفظ بنجاح",
-        description: `تم تحديث بيانات الوكيل "${name}".`,
-      });
-      router.push('/manage-agents');
-    }, 500);
+    updateAgentMutation.mutate({ 
+        agentId, 
+        payload: { name, prompt } 
+    }, {
+        onSuccess: () => {
+            router.push('/manage-agents');
+        }
+    });
   };
 
-  if (!isLoaded || !agent) {
+  if (!isLoaded) {
+    return <AgentEditorSkeleton />;
+  }
+  
+  if (isError || !agent) {
     return (
-      <Card>
-        <CardContent className="p-6 flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </CardContent>
-      </Card>
-    );
+         <Card className="p-8 text-center text-destructive">
+            <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+            <p>Failed to load agent configuration.</p>
+        </Card>
+    )
   }
 
   const isComplexPrompt = typeof agent.prompt === 'object' && agent.prompt !== null && 'guidelines' in agent.prompt;
@@ -91,6 +114,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={updateAgentMutation.isPending}
             />
           </div>
           <div className="space-y-2">
@@ -109,12 +133,13 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
               required
               rows={20}
               className="font-mono text-sm"
+              disabled={updateAgentMutation.isPending}
             />
           </div>
         </CardContent>
         <CardFooter className="justify-end">
-          <Button type="submit" disabled={isSaving} className="font-headline">
-            {isSaving ? (
+          <Button type="submit" disabled={updateAgentMutation.isPending || !name || !prompt} className="font-headline">
+            {updateAgentMutation.isPending ? (
               <Loader2 className="ml-2 h-4 w-4 animate-spin" />
             ) : (
               <Save className="ml-2 h-4 w-4" />

@@ -13,19 +13,21 @@ function stripMarkdown(text: string): string {
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Links
 }
 
-function getStylesFromStorage() {
+async function getStylesFromServer(): Promise<Record<PptxTemplateKey, any>> {
     if (typeof window === 'undefined') {
         return templates;
     }
-    const stored = localStorage.getItem('arkan-pptx-styles');
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
+    try {
+        const response = await fetch('/api/templates/pptx');
+        if (!response.ok) {
+            console.error('Failed to fetch PPTX templates from server, falling back to defaults.');
             return templates;
         }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching PPTX templates, falling back to defaults:', error);
+        return templates;
     }
-    return templates;
 }
 
 export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
@@ -35,7 +37,7 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         console.error("No slides provided for PPTX export.");
         return;
     }
-    const allTemplates = getStylesFromStorage();
+    const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     let pptx = new pptxgen();

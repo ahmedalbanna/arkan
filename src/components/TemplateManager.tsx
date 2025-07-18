@@ -9,32 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
 export default function TemplateManager() {
-  const { templates, updateStyle, isLoaded } = useDocxStyles();
-  const [savingState, setSavingState] = useState<Record<TemplateKey, boolean>>(() => ({} as Record<TemplateKey, boolean>));
-  const { toast } = useToast();
+  const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(templateKey, path, value);
   };
 
   const handleSave = (key: TemplateKey) => {
-    setSavingState(prev => ({ ...prev, [key]: true }));
-    // The useDocxStyles hook automatically saves to localStorage on update,
-    // so we just show a toast and reset the loading state.
-    setTimeout(() => {
-      toast({
-        title: "Template Saved",
-        description: `Your changes to the "${templates[key].name}" template have been saved.`,
-      });
-      setSavingState(prev => ({ ...prev, [key]: false }));
-    }, 500);
+    saveChanges(key);
   };
 
   if (!isLoaded) {
@@ -164,8 +151,8 @@ export default function TemplateManager() {
               </Accordion>
             </CardContent>
             <CardFooter>
-              <Button onClick={() => handleSave(key)} disabled={savingState[key]} className="font-headline">
-                {savingState[key] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Save Template
               </Button>
             </CardFooter>

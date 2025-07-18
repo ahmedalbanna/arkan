@@ -141,26 +141,26 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     }
 }
 
-function getStylesFromStorage(): Record<TemplateKey, { styles: IStylesOptions }> {
-    if (typeof window === 'undefined') {
-        return templates;
-    }
-    const stored = localStorage.getItem('arkan-docx-styles');
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
+async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: IStylesOptions }>> {
+    try {
+        const response = await fetch('/api/templates/docx');
+        if (!response.ok) {
+            console.error('Failed to fetch DOCX templates from server, falling back to defaults.');
             return templates;
         }
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching DOCX templates, falling back to defaults:', error);
+        return templates;
     }
-    return templates;
 }
+
 
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
     const { Document, Packer, Paragraph, HeadingLevel } = await import('docx');
     const { saveAs } = await import('file-saver');
     
-    const allTemplates = getStylesFromStorage();
+    const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
 
@@ -184,7 +184,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
     const { Document, Packer, Paragraph, HeadingLevel, TextRun, Table, TableRow, TableCell, WidthType, Header, Footer, PageNumber, TableOfContents, AlignmentType } = await import('docx');
     const { saveAs } = await import('file-saver');
 
-    const allTemplates = getStylesFromStorage();
+    const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
@@ -262,7 +262,7 @@ export async function exportReportAsDocx(
     const { Document, Packer, Paragraph, HeadingLevel, AlignmentType, ImageRun, TextRun, TableOfContents, Header, Footer, PageNumber } = await import('docx');
     const { saveAs } = await import('file-saver');
 
-    const allTemplates = getStylesFromStorage();
+    const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     const orderedSections = Object.keys(sectionConfig) as SectionName[];

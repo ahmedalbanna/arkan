@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useAgents } from '@/hooks/use-agents';
+import { useAgents, useUpdateAgent } from '@/hooks/use-agents';
 import { type Agent } from '@/lib/agents';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -8,10 +9,41 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2 } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-function AgentCard({ agent, onToggle }: { agent: Agent, onToggle: (id: string, isEnabled: boolean) => void }) {
+function AgentSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-8 h-8 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-40" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-4/5 mt-2" />
+      </CardContent>
+      <CardFooter className="justify-between">
+        <Skeleton className="h-9 w-32" />
+        <Skeleton className="h-8 w-20" />
+      </CardFooter>
+    </Card>
+  )
+}
+
+
+function AgentCard({ agent }: { agent: Agent }) {
   const { id, name, description, category, icon: Icon, isEnabled, pageUrl } = agent;
+  const updateAgentMutation = useUpdateAgent();
+
+  const handleToggle = (checked: boolean) => {
+    updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
+  }
 
   return (
     <Card className="flex flex-col">
@@ -28,7 +60,8 @@ function AgentCard({ agent, onToggle }: { agent: Agent, onToggle: (id: string, i
             <Switch
               id={`switch-${id}`}
               checked={isEnabled}
-              onCheckedChange={(checked) => onToggle(id, checked)}
+              onCheckedChange={handleToggle}
+              disabled={updateAgentMutation.isPending}
               aria-label={`Enable ${name}`}
             />
             <Label htmlFor={`switch-${id}`}>{isEnabled ? 'مُفعّل' : 'مُعطّل'}</Label>
@@ -57,25 +90,32 @@ function AgentCard({ agent, onToggle }: { agent: Agent, onToggle: (id: string, i
 }
 
 export default function AgentManager() {
-  const { agents, isLoaded, updateAgent } = useAgents();
-
-  const handleToggle = (id: string, isEnabled: boolean) => {
-    updateAgent(id, { isEnabled });
-  };
+  const { agents, isLoaded, isError } = useAgents();
 
   if (!isLoaded) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
-        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
+        <AgentSkeleton />
+        <AgentSkeleton />
+        <AgentSkeleton />
+        <AgentSkeleton />
       </div>
+    );
+  }
+
+  if (isError) {
+    return (
+        <Card className="p-8 text-center text-destructive">
+            <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+            <p>Failed to load agent configurations.</p>
+        </Card>
     );
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {agents.map((agent) => (
-        <AgentCard key={agent.id} agent={agent} onToggle={handleToggle} />
+        <AgentCard key={agent.id} agent={agent} />
       ))}
     </div>
   );

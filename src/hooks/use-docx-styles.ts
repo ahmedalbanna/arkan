@@ -1,63 +1,102 @@
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { templates as initialTemplates, type Template, type TemplateKey } from '@/lib/docx-styles';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Template, TemplateKey } from '@/lib/docx-styles';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
 
-const DOCX_STYLES_KEY = 'arkan-docx-styles';
+const DOCX_TEMPLATES_QUERY_KEY = 'docx-templates';
 
-// Helper to set nested property
-function set(obj: any, path: string, value: any) {
-  const keys = path.split('.');
-  let current = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    current = current[keys[i]];
-    if (typeof current !== 'object' || current === null) return; // Path is not valid
-  }
-  current[keys[keys.length - 1]] = value;
+// --- API Service Functions ---
+
+async function fetchDocxTemplates(): Promise<Record<TemplateKey, Template>> {
+    const response = await fetch('/api/templates/docx');
+    if (!response.ok) {
+        throw new Error('Failed to fetch DOCX templates');
+    }
+    return response.json();
 }
 
+async function updateDocxTemplateApi({ key, styles }: { key: TemplateKey, styles: any }, token: string) {
+    const response = await fetch(`/api/templates/docx/${key}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ styles }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update DOCX template');
+    }
+    return response.json();
+}
+
+
+// --- Custom Hooks ---
 
 export function useDocxStyles() {
-  const [templates, setTemplates] = useState<Record<TemplateKey, Template>>({} as Record<TemplateKey, Template>);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const { data: templates, isLoading: isLoaded } = useQuery({
+      queryKey: [DOCX_TEMPLATES_QUERY_KEY],
+      queryFn: fetchDocxTemplates,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnWindowFocus: false,
+  });
 
-  useEffect(() => {
-    try {
-      const storedStyles = localStorage.getItem(DOCX_STYLES_KEY);
-      if (storedStyles) {
-        setTemplates(JSON.parse(storedStyles));
-      } else {
-        setTemplates(initialTemplates);
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  const mutation = useMutation({
+      mutationFn: async (variables: { key: TemplateKey; styles: any }) => {
+          if (!firebaseUser) throw new Error("User not authenticated.");
+          const token = await firebaseUser.getIdToken();
+          return updateDocxTemplateApi(variables, token);
+      },
+      onSuccess: (data, variables) => {
+          queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (oldData: any) => {
+            if (!oldData) return oldData;
+            return { ...oldData, [variables.key]: { ...oldData[variables.key], styles: data.styles }};
+          });
+          toast({
+              title: "Template Saved",
+              description: `Your changes to the "${data.name}" template have been saved.`,
+          });
+      },
+      onError: (error: Error) => {
+          toast({
+              title: "Update Failed",
+              description: error.message,
+              variant: 'destructive',
+          });
       }
-    } catch (error) {
-      console.error('Failed to load styles from localStorage', error);
-      setTemplates(initialTemplates);
-    }
-    setIsLoaded(true);
-  }, []);
+  });
 
-  const saveTemplates = (updatedTemplates: Record<TemplateKey, Template>) => {
-    setTemplates(updatedTemplates);
-    try {
-      localStorage.setItem(DOCX_STYLES_KEY, JSON.stringify(updatedTemplates));
-    } catch (error) {
-      console.error('Failed to save styles to localStorage', error);
-    }
-  };
-
-  const updateStyle = useCallback((templateKey: TemplateKey, path: string, value: string | number | boolean) => {
-    setTemplates(prevTemplates => {
-      const newTemplates = JSON.parse(JSON.stringify(prevTemplates));
+  const updateStyle = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
+    queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (oldData: any) => {
+      if (!oldData) return oldData;
+      const newTemplates = JSON.parse(JSON.stringify(oldData));
       const templateToUpdate = newTemplates[templateKey];
       
-      // The path to update is within the `styles.default` object.
-      set(templateToUpdate.styles.default, path, value);
+      const keys = path.split('.');
+      let current = templateToUpdate.styles.default;
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
       
-      saveTemplates(newTemplates);
       return newTemplates;
     });
-  }, []);
+  };
 
-  return { templates, isLoaded, updateStyle };
+  const saveChanges = (templateKey: TemplateKey) => {
+      if (templates) {
+          mutation.mutate({ key: templateKey, styles: templates[templateKey].styles });
+      }
+  };
+
+
+  return { templates, isLoaded: !isLoaded, updateStyle, saveChanges, isSaving: mutation.isPending };
 }
+

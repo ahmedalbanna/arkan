@@ -9,32 +9,20 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana', 'Tahoma'];
 
 export default function PptxTemplateManager() {
-  const { templates, updateStyle, isLoaded } = usePptxStyles();
-  const [savingState, setSavingState] = useState<Record<PptxTemplateKey, boolean>>(() => ({} as Record<PptxTemplateKey, boolean>));
-
-  const { toast } = useToast();
+  const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(templateKey, path, value);
   };
 
   const handleSave = (key: PptxTemplateKey) => {
-    setSavingState(prev => ({ ...prev, [key]: true }));
-    setTimeout(() => {
-      toast({
-        title: "Template Saved",
-        description: `Your changes to the "${templates[key].name}" template have been saved.`,
-      });
-      setSavingState(prev => ({ ...prev, [key]: false }));
-    }, 500);
+    saveChanges(key);
   };
 
   if (!isLoaded) {
@@ -178,8 +166,8 @@ export default function PptxTemplateManager() {
               </Accordion>
             </CardContent>
             <CardFooter>
-              <Button onClick={() => handleSave(key)} disabled={savingState[key]} className="font-headline">
-                {savingState[key] ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+              <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Save Template
               </Button>
             </CardFooter>
