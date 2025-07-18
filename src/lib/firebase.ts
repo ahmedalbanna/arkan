@@ -4,13 +4,14 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAS53fE8gVGVRPfvQwdcn6cUErGTnuzRe8",
-  authDomain: "arkan-docudec.firebaseapp.com",
-  projectId: "arkan-docudec",
-  storageBucket: "arkan-docudec.firebasestorage.app",
-  messagingSenderId: "469447445154",
-  appId: "1:469447445154:web:97814194d896c245fea5fb",
-  measurementId: "G-TY2YT3VZ2Q"
+  apiKey: "AIzaSyDFB2d0Cx2UtglBPMyuevtCiRUWROb_fmk",
+  authDomain: "docudec.firebaseapp.com",
+  databaseURL: "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "docudec",
+  storageBucket: "docudec.appspot.com",
+  messagingSenderId: "201859762958",
+  appId: "1:201859762958:web:602e322feffdcb11ed255f",
+  measurementId: "G-K42VXYX7NQ"
 };
 
 // Initialize Firebase

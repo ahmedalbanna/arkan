@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         }
 
         const storage = getStorage();
-        const bucket = storage.bucket('arkan-docudec.appspot.com');
+        const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
         const fileName = `payment_proofs/${userId}/${Date.now()}-${file.name}`;
         
         const fileBuffer = Buffer.from(await file.arrayBuffer());

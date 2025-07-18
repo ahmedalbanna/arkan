@@ -20,7 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
-  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth(); // Get firebaseUser, userProfile, and loading state
+  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();  
   const logoutMutation = useLogout(); // Use the useLogout mutation hook
   const [isClient, setIsClient] = useState(false);
 
@@ -46,7 +46,7 @@ export function Header() {
     { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
   ];
 
-  const renderNavLinks = (links: typeof navLinks | typeof adminLinks, isMobile = false) =>
+  const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
     links.map((link) => (
       <Button
         key={link.href}
@@ -90,7 +90,19 @@ export function Header() {
                 {userProfile?.role === 'admin' && (
                   <>
                     <div className="my-4 border-t"></div>
-                    {isClient ? renderNavLinks(adminLinks, true) : <Skeleton className="h-10 w-full" />}
+                    {adminLinks.map((link) => ( // Render admin links as buttons in the mobile menu
+                      <Button
+                        key={link.href}
+                        asChild
+                        variant="ghost"
+                        className="font-headline w-full justify-start text-lg py-6"
+                      >
+                        <Link href={link.href}>
+                          <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
+                          {link.label}
+                        </Link>
+                      </Button>
+                    ))}
                   </>
                 )}
               </nav>
@@ -137,12 +149,18 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                   {userProfile.role === 'admin' && (
-                    <DropdownMenuItem asChild>
-                        <Link href="/manage-users">
-                            <Users className="mr-2 h-4 w-4" />
-                            Manage Users
-                        </Link>
-                    </DropdownMenuItem>
+                    <>
+                      <DropdownMenuSeparator /> {/* Separator before admin links */}
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel> {/* Label for admin section */}
+                      {adminLinks.map((link) => (
+                        <DropdownMenuItem key={link.href} asChild>
+                          <Link href={link.href}>
+                            <link.icon className="mr-2 h-4 w-4" />
+                            {link.label}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
