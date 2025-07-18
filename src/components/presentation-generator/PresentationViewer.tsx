@@ -10,6 +10,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { EditableContent } from '../EditableContent';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 interface PresentationViewerProps {
   slides: PresentationSlide[];
@@ -17,6 +19,7 @@ interface PresentationViewerProps {
 
 export default function PresentationViewer({ slides }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const updatePresentationSlide = useBuilderStore(s => s.updatePresentationSlide);
 
   useEffect(() => {
     // When a new set of slides is passed, reset to the first slide.
@@ -52,7 +55,11 @@ export default function PresentationViewer({ slides }: PresentationViewerProps) 
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle className="font-headline text-2xl text-primary">{slide.title}</CardTitle>
+            <EditableContent 
+                value={slide.title} 
+                onUpdate={(newTitle) => updatePresentationSlide(currentSlide, 'title', newTitle)}
+                className="font-headline text-2xl text-primary"
+            />
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExport} title="Export to PPTX">
               <FileDown className="mr-2 h-4 w-4" />
@@ -71,7 +78,11 @@ export default function PresentationViewer({ slides }: PresentationViewerProps) 
           <ul className="list-disc pl-5 space-y-2 text-lg">
             {slide.content.map((item, index) => (
               <li key={index}>
-                <ReactMarkdown components={markdownComponents}>{item}</ReactMarkdown>
+                <EditableContent 
+                    value={item}
+                    onUpdate={(newValue) => updatePresentationSlide(currentSlide, 'content', newValue, index)}
+                    multiline
+                />
               </li>
             ))}
           </ul>

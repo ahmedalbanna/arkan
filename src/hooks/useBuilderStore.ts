@@ -84,6 +84,7 @@ interface BuilderActions {
     // Presentation Actions
     addPresentationToHistory: (entry: PresentationHistoryEntry) => void;
     setActivePresentationId: (id: string | null) => void;
+    updatePresentationSlide: (slideIndex: number, field: 'title' | 'content', value: string, contentIndex?: number) => void;
     // Context Actions
     setExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: () => void;
@@ -227,7 +228,32 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           }));
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
-      
+      updatePresentationSlide: (slideIndex, field, value, contentIndex) => {
+        set(state => {
+            const { presentation, activePresentationId } = state;
+            if (!presentation || !activePresentationId) return {};
+
+            const history = presentation.history.map(entry => {
+                if (entry.id === activePresentationId) {
+                    const newSlides = [...entry.slides];
+                    const slideToUpdate = { ...newSlides[slideIndex] };
+                    if (field === 'title') {
+                        slideToUpdate.title = value;
+                    } else if (field === 'content' && contentIndex !== undefined) {
+                        const newContent = [...slideToUpdate.content];
+                        newContent[contentIndex] = value;
+                        slideToUpdate.content = newContent;
+                    }
+                    newSlides[slideIndex] = slideToUpdate;
+                    return { ...entry, slides: newSlides };
+                }
+                return entry;
+            });
+
+            return { presentation: { ...presentation, history } };
+        });
+    },
+
       // --- CODE GENERATOR ACTIONS ---
       setCodePrompt: (prompt) => set(state => ({ codeGenerator: { ...state.codeGenerator, prompt } })),
       setGeneratedCode: (code) => set(state => ({ codeGenerator: { ...state.codeGenerator, ...code }})),
