@@ -26,10 +26,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-async function submitPaymentProof(formData: FormData) {
-    const { firebaseUser } = useAuth.getState();
-    if (!firebaseUser) throw new Error("User not authenticated");
-    const token = await firebaseUser.getIdToken();
+async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
+    if (!token) throw new Error("User not authenticated");
     
     const response = await fetch('/api/purchase-request', {
         method: 'POST',
@@ -47,7 +45,7 @@ async function submitPaymentProof(formData: FormData) {
 }
 
 export default function SubmitPaymentForm() {
-  const router = useRouter();
+    const router = useRouter();
   const searchParams = useSearchParams();
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
@@ -89,6 +87,8 @@ export default function SubmitPaymentForm() {
       });
       return;
     }
+    
+    const token = await firebaseUser.getIdToken();
 
     const formData = new FormData();
     formData.append('file', data.file);
@@ -100,7 +100,7 @@ export default function SubmitPaymentForm() {
     formData.append('userName', firebaseUser.displayName || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
     
-    mutation.mutate(formData);
+    mutation.mutate({ formData, token });
   };
 
   return (

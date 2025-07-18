@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
+import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase/admin';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
     if (status === 'verified') {
       await adminDb.runTransaction(async (t) => {
         const userRef = adminDb.collection('users').doc(userId);
-        t.update(userRef, { credits: adminDb.FieldValue.increment(creditsToGrant) });
+        t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
 
         t.update(transactionRef, {
           status: 'verified',
