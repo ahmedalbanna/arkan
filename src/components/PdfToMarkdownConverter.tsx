@@ -20,7 +20,7 @@ export default function PdfToMarkdownConverter() {
   const [isCopied, setIsCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
-  const { refetchUser } = useAuth();
+  const { firebaseUser, refetchUser } = useAuth();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,6 +41,10 @@ export default function PdfToMarkdownConverter() {
       setError("Please select a file to upload.");
       return;
     }
+    if (!firebaseUser) {
+        toast({ title: 'Authentication Required', description: 'You must be logged in to convert a file.', variant: 'destructive' });
+        return;
+    }
 
     setIsLoading(true);
     setError(null);
@@ -48,10 +52,12 @@ export default function PdfToMarkdownConverter() {
 
     const formData = new FormData();
     formData.append('file', file);
-
+    
     try {
+      const token = await firebaseUser.getIdToken();
       const response = await fetch('/api/pdf-to-markdown', {
         method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
         body: formData,
       });
 

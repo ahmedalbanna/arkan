@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/pdfjs-dist/legacy/build/pdf.worker.mjs',
+        destination: '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',
+      },
+    ]
+  }
 };
 
 export default nextConfig;
