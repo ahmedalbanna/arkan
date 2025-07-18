@@ -98,8 +98,9 @@ export function Header() {
         </div>
 
         <div className="flex-1 flex justify-center md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary"/>
+          <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
             {t('header.title')}
+          </Link>
         </div>
         <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
           {renderNavLinks(navLinks)}
@@ -129,7 +130,7 @@ export function Header() {
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link href={`/profile/${userProfile.id}`}>
+                    <Link href={`/profile/${firebaseUser.uid}`}>
                       <UserCog className="mr-2 h-4 w-4" />
                       Profile
                     </Link>
@@ -143,7 +144,7 @@ export function Header() {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
+                  <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>

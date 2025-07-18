@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
+import { User } from '@/lib/types'; // Assuming you have a User type
 
 
 // --- Query Functions ---
