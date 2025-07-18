@@ -14,11 +14,14 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-async function evaluateReport(variables: any): Promise<EvaluateReportOutput> {
+async function evaluateReport(variables: { body: any; token: string }): Promise<EvaluateReportOutput> {
     const response = await fetch('/api/evaluate-report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(variables),
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify(variables.body),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -29,7 +32,7 @@ async function evaluateReport(variables: any): Promise<EvaluateReportOutput> {
 
 export const EvaluationTools = () => {
     const { proposal, sections, diagrams, evaluation, setEvaluation } = useBuilderStore();
-    const { user } = useAuth();
+    const { firebaseUser } = useAuth();
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
@@ -60,12 +63,22 @@ export const EvaluationTools = () => {
     };
 
     const handleProcessPdf = async () => {
-        if (!pdfFile) return;
+        if (!pdfFile || !firebaseUser) {
+             toast({ title: "Authentication Error", description: "You must be logged in to process a file.", variant: 'destructive' });
+            return
+        };
         setIsUploading(true);
         const formData = new FormData();
         formData.append('file', pdfFile);
+        
         try {
-            const response = await fetch('/api/pdf-to-markdown', { method: 'POST', body: formData });
+            const token = await firebaseUser.getIdToken();
+            const response = await fetch('/api/pdf-to-markdown', { 
+                method: 'POST', 
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData 
+            });
+
             if (!response.ok) {
                 throw new Error((await response.json()).message || 'Failed to process PDF.');
             }
@@ -76,6 +89,7 @@ export const EvaluationTools = () => {
                 .map((line: string) => line.trim().replace(/^(-|\d+\.)\s*/, ''))
                 .join('\n');
             setCriteria(extractedCriteria);
+            queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
             toast({ title: 'File Processed', description: 'Criteria extracted from PDF.' });
         } catch (error: any) {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -84,23 +98,25 @@ export const EvaluationTools = () => {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) {
-            toast({ title: "Authentication Error", description: "You must be logged in.", variant: 'destructive' });
+        if (!firebaseUser) {
+            toast({ title: "Authentication Error", description: "You must be logged in to evaluate a report.", variant: 'destructive' });
             return;
         }
         if (!criteria.trim()) {
             toast({ title: "Evaluation Skipped", description: "Please provide acceptance criteria.", variant: 'destructive' });
             return;
         }
+
+        const token = await firebaseUser.getIdToken();
         const body = {
             proposal,
             reportSections: sections,
             diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
             acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
         };
-        mutation.mutate(body);
+        mutation.mutate({ body, token });
     }
   
     const getScoreColor = (score: number) => {

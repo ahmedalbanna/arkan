@@ -31,6 +31,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Invalid file type. Only PDF is allowed.' }, { status: 400 });
     }
 
+    await deductCredit(userId, 1);
+
     // Read the file into an ArrayBuffer
     const fileArrayBuffer = await file.arrayBuffer();
     const fileUint8Array = new Uint8Array(fileArrayBuffer);
@@ -55,8 +57,6 @@ export async function POST(request: Request) {
     if (!rawText || rawText.trim().length < 20) {
         return NextResponse.json({ message: 'Could not extract sufficient text from the PDF.' }, { status: 400 });
     }
-
-    await deductCredit(userId, 1);
     
     // Rewrite text to markdown using AI
     const result = await rewriteToMarkdown({ rawText });
