@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+ console.log('onAuthStateChanged fired:', user);
       setFirebaseUser(user);
       setIsLoading(false);
       manageSessionCookie(user);
