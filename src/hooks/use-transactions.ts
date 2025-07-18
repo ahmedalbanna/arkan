@@ -4,6 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
+import { useAuth } from '@/context/AuthContext';
 
 interface VerifyPaymentVariables {
     transactionId: string;
@@ -13,10 +14,13 @@ interface VerifyPaymentVariables {
     adminNotes?: string;
 }
 
-async function verifyPayment(variables: VerifyPaymentVariables) {
+async function verifyPayment(variables: VerifyPaymentVariables, token: string) {
     const response = await fetch('/api/verify-payment', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(variables),
     });
     if (!response.ok) {
@@ -28,9 +32,14 @@ async function verifyPayment(variables: VerifyPaymentVariables) {
 
 export function useVerifyPayment() {
     const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
 
     return useMutation({
-        mutationFn: verifyPayment,
+        mutationFn: async (variables: VerifyPaymentVariables) => {
+            if (!firebaseUser) throw new Error("Admin not authenticated.");
+            const token = await firebaseUser.getIdToken();
+            return verifyPayment(variables, token);
+        },
         onSuccess: (data, variables) => {
             // Invalidate queries to refetch data
             queryClient.invalidateQueries({ queryKey: transactionKeys.pending() });

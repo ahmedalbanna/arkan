@@ -9,6 +9,23 @@ import { cookies } from 'next/headers';
 async function verifyAccess(request: Request, targetUserId: string) {
     const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {
+        // Fallback to Authorization header for API clients
+        const authHeader = request.headers.get('Authorization');
+        if (authHeader?.startsWith('Bearer ')) {
+            const token = authHeader.substring(7);
+            try {
+                 const decodedToken = await adminAuth.verifyIdToken(token, true);
+                 const requesterId = decodedToken.uid;
+                 if (requesterId === targetUserId) return { authorized: true, userId: requesterId };
+                 
+                 const requesterProfile = await getUserProfile(requesterId);
+                 if (requesterProfile?.role === 'admin') return { authorized: true, userId: requesterId };
+
+                 return { authorized: false, message: 'Forbidden' };
+            } catch (e) {
+                return { authorized: false, message: 'Unauthorized' };
+            }
+        }
         return { authorized: false, message: 'Unauthorized' };
     }
     try {
@@ -36,7 +53,7 @@ async function verifyAccess(request: Request, targetUserId: string) {
 // GET /api/users/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
-        const { id: userId } = await params; // Await params and destructure id
+        const userId = params.id;
         if (!userId) {
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }
@@ -67,7 +84,7 @@ const updateUserSchema = z.object({
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-      const { id: userId } = await params; // Await params and destructure id
+      const userId = params.id;
       if (!userId) {
           return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
       }
@@ -115,13 +132,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-      const { id: targetUserId } = await params; // Await params and destructure id
+      const targetUserId = params.id;
 
-      const sessionCookie = (await cookies()).get('__session')?.value;
-      if (!sessionCookie) {
+      // Use Authorization header for auth
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
           return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
-      const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+      const token = authHeader.substring(7);
+
+      const decodedToken = await adminAuth.verifyIdToken(token, true);
       const requesterId = decodedToken.uid;
 
       const requesterProfile = await getUserProfile(requesterId);
@@ -129,7 +149,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
-      // 4. Perform the action (delete the user)
+      // Perform the action (delete the user)
       await adminAuth.deleteUser(targetUserId);
       await adminDb.collection('users').doc(targetUserId).delete();
 

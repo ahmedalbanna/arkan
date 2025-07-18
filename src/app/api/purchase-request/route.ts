@@ -2,45 +2,12 @@
 import { NextResponse } from 'next/server';
 import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
-import { Formidable } from 'formidable';
-import fs from 'fs';
 import { createTransaction } from '@/lib/db/queries';
 
 export const config = {
     api: {
         bodyParser: false,
     },
-};
-
-// This function correctly adapts formidable to work with Next.js API route requests.
-const parseForm = async (req: Request): Promise<{ fields: any; files: any }> => {
-    const formData = await req.formData();
-    const fields: Record<string, any> = {};
-    const files: Record<string, any> = {};
-
-    for (const [key, value] of formData.entries()) {
-        if (value instanceof File) {
-            // formidable expects a specific structure for files
-            files[key] = [{
-                filepath: value.path, // a temporary path, may need adjustment in some environments
-                originalFilename: value.name,
-                mimetype: value.type,
-                size: value.size,
-                // A way to read the file content
-                toBuffer: () => value.arrayBuffer().then(ab => Buffer.from(ab)),
-            }];
-        } else {
-            // formidable expects field values to be arrays
-            if (!fields[key]) {
-                fields[key] = [];
-            }
-            fields[key].push(value);
-        }
-    }
-    
-    // We need to read the file into a temporary location for formidable to process it,
-    // or handle the buffer directly. The updated logic below handles the buffer directly.
-    return { fields, files };
 };
 
 export async function POST(request: Request) {
@@ -52,24 +19,29 @@ export async function POST(request: Request) {
         const token = authorization.substring(7);
         await adminAuth.verifyIdToken(token, true);
 
-        const { fields, files } = await parseForm(request);
+        const formData = await request.formData();
+        const file = formData.get('file') as File | null;
+        const userId = formData.get('userId') as string | null;
+        const planId = formData.get('planId') as string | null;
+        const planName = formData.get('planName') as string | null;
+        const credits = formData.get('credits') as string | null;
+        const price = formData.get('price') as string | null;
+        const userName = formData.get('userName') as string | null;
+        const userEmail = formData.get('userEmail') as string | null;
 
-        const file = files.file?.[0];
-        const { userId, planId, planName, credits, price, userName, userEmail } = fields;
-
-        if (!file || !userId?.[0] || !planId?.[0] || !credits?.[0] || !price?.[0]) {
+        if (!file || !userId || !planId || !credits || !price) {
             return NextResponse.json({ message: 'Missing required fields.' }, { status: 400 });
         }
 
         const storage = getStorage();
         const bucket = storage.bucket(process.env.FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
-        const fileName = `payment_proofs/${userId[0]}/${Date.now()}-${file.originalFilename}`;
+        const fileName = `payment_proofs/${userId}/${Date.now()}-${file.name}`;
         
-        const fileBuffer = Buffer.from(await file.toBuffer());
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
 
         await bucket.file(fileName).save(fileBuffer, {
             metadata: {
-                contentType: file.mimetype,
+                contentType: file.type,
             },
         });
 
@@ -79,14 +51,14 @@ export async function POST(request: Request) {
         });
 
         const transactionData = {
-            userId: userId[0],
-            planId: planId[0],
-            planName: planName[0],
-            credits: parseInt(credits[0], 10),
-            price: parseFloat(price[0]),
-            userName: userName[0] || 'N/A',
-            userEmail: userEmail[0] || 'N/A',
-            status: 'pending' as 'pending',
+            userId,
+            planId,
+            planName: planName || 'Unknown Plan',
+            credits: parseInt(credits, 10),
+            price: parseFloat(price),
+            userName: userName || 'N/A',
+            userEmail: userEmail || 'N/A',
+            status: 'pending' as const,
             proofUrl: fileUrl,
         };
 

@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/admin';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-import { updateUserCredits } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
-// Helper to verify admin role
+
+// Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
@@ -37,7 +37,7 @@ const verifyPaymentSchema = z.object({
 export async function POST(request: Request) {
   try {
     const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
+    if (!adminCheck.authorized || !adminCheck.adminId) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
     }
 
