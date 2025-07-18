@@ -50,11 +50,14 @@ function ProposalSkeleton() {
 }
 
 // The async function for the mutation
-async function generateProposal(variables: { projectIdea: string; prompt: string; }): Promise<ProjectProposal> {
+async function generateProposal(variables: { projectIdea: string; prompt: string; token: string; }): Promise<ProjectProposal> {
     const response = await fetch('/api/generate-proposal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(variables)
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}` 
+        },
+        body: JSON.stringify({ projectIdea: variables.projectIdea, prompt: variables.prompt })
     });
     if (!response.ok) {
         const error = await response.json();
@@ -67,7 +70,7 @@ async function generateProposal(variables: { projectIdea: string; prompt: string
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { templates: docxTemplates } = useDocxStyles();
-    const { user, refetchUser } = useAuth();
+    const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
 
     const {
@@ -84,7 +87,7 @@ export function ProposalModeGenerator() {
         mutationFn: generateProposal,
         onSuccess: (data) => {
             setProposal(data);
-            queryClient.invalidateQueries({ queryKey: ['user'] });
+            refetchUser(); // Invalidate user query to update credits
             toast({ title: 'Proposal Generated', description: 'Your project proposal has been created successfully.' });
         },
         onError: (error: Error) => {
@@ -106,10 +109,16 @@ export function ProposalModeGenerator() {
         saveAs(blob, fileName);
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user) {
+        if (!firebaseUser) {
             toast({ title: 'Authentication Error', description: 'You must be logged in to generate a proposal.', variant: 'destructive' });
+            return;
+        }
+
+        const token = await firebaseUser.getIdToken();
+        if (!token) {
+             toast({ title: 'Authentication Error', description: 'Could not verify your session. Please log in again.', variant: 'destructive' });
             return;
         }
 
@@ -120,7 +129,7 @@ export function ProposalModeGenerator() {
             fullPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + allGuidelines.map(g => `- ${g}`).join('\n');
         }
 
-        mutation.mutate({ projectIdea, prompt: fullPrompt });
+        mutation.mutate({ projectIdea, prompt: fullPrompt, token });
     };
 
 

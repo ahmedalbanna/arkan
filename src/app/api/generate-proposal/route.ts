@@ -15,7 +15,7 @@ export async function POST(request: Request) {
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        return NextResponse.json({ message: 'Unauthorized: Missing or invalid token.' }, { status: 401 });
     }
     const token = authorization.substring(7);
     const decodedToken = await auth.verifyIdToken(token);
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
+    // This service function checks for sufficient credits and throws an error if not found.
     await deductCredit(userId, 1);
 
     const { projectIdea, prompt } = validation.data;
