@@ -1,4 +1,3 @@
-
 // src/app/api/purchase-request/route.ts
 import { NextResponse } from 'next/server';
 import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';

@@ -2,8 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser } from '@/lib/db/queries';
-import { auth as adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/admin';
+import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
@@ -118,7 +117,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   try {
     const targetUserId = params.id;
 
-    const sessionCookie = a(req.cookies.get('__session')?.value);
+    const sessionCookie = (await cookies()).get('__session')?.value;
     if (!sessionCookie) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

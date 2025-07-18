@@ -4,9 +4,27 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/admin';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { updateUserCredits } from '@/lib/db/queries';
+import { getUserProfile } from '@/lib/db/queries';
+// Helper to verify admin role
+async function verifyAdmin(request: Request) {
+    const authorization = request.headers.get('Authorization');
+    if (!authorization?.startsWith('Bearer ')) {
+        return { authorized: false, message: 'Unauthorized' };
+    }
+    const token = authorization.substring(7);
+    
+    try {
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
+        const user = await getUserProfile(decodedToken.uid);
+        if (user?.role !== 'admin') {
+            return { authorized: false, message: 'Forbidden', adminId: null };
+        }
+        return { authorized: true, adminId: decodedToken.uid };
+    } catch (error) {
+        return { authorized: false, message: 'Unauthorized', adminId: null };
+    }
+}
 
-// This would be a protected route, only accessible by admins.
-// For now, we are simulating the admin role check.
 
 const verifyPaymentSchema = z.object({
   transactionId: z.string(),
@@ -18,12 +36,10 @@ const verifyPaymentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    // In a real app, you'd verify the requester is an admin
-    // const token = request.headers.get('Authorization')?.split(' ')[1];
-    // const decodedToken = await adminAuth.verifyIdToken(token);
-    // if (decodedToken.role !== 'admin') {
-    //   return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    // }
+    const adminCheck = await verifyAdmin(request);
+    if (!adminCheck.authorized) {
+        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+    }
 
     const body = await request.json();
     const validation = verifyPaymentSchema.safeParse(body);
@@ -37,21 +53,15 @@ export async function POST(request: Request) {
     const transactionRef = adminDb.collection('transactions').doc(transactionId);
 
     if (status === 'verified') {
-      // Use a transaction to ensure atomicity
       await adminDb.runTransaction(async (t) => {
-        // 1. Update the user's credit balance
         const userRef = adminDb.collection('users').doc(userId);
-        const userDoc = await t.get(userRef);
-        if (!userDoc.exists) throw new Error('User not found');
-        const newBalance = (userDoc.data()?.credits || 0) + creditsToGrant;
-        t.update(userRef, { credits: newBalance });
+        t.update(userRef, { credits: adminDb.FieldValue.increment(creditsToGrant) });
 
-        // 2. Update the transaction status
         t.update(transactionRef, {
           status: 'verified',
           adminNotes: adminNotes || 'Payment verified and credits granted.',
           verifiedAt: new Date().toISOString(),
-          // verifiedBy: decodedToken.uid
+          verifiedBy: adminCheck.adminId
         });
       });
 
@@ -60,6 +70,7 @@ export async function POST(request: Request) {
         status: 'rejected',
         adminNotes: adminNotes || 'Payment could not be verified.',
         verifiedAt: new Date().toISOString(),
+        verifiedBy: adminCheck.adminId,
       });
     }
 
