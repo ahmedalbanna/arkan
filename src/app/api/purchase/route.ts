@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { updateUserCredits } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-
+import { cookies } from 'next/headers';
 const purchaseSchema = z.object({
   planId: z.string().min(1),
   credits: z.coerce.number().int().positive(),
@@ -11,7 +11,7 @@ const purchaseSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const sessionCookie = request.cookies.get('__session')?.value;
+    const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }

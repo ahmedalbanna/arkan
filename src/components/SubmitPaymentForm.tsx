@@ -1,6 +1,5 @@
 
 'use client';
-
 import { useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
@@ -30,10 +29,10 @@ type FormValues = z.infer<typeof formSchema>;
 export default function SubmitPaymentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { firebaseUser } = useAuth(); // Fix: Access user from AuthContext
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const planId = searchParams.get('planId');
   const planName = searchParams.get('planName');
   const planCredits = searchParams.get('credits');
@@ -43,50 +42,50 @@ export default function SubmitPaymentForm() {
   });
 
   const onSubmit = async (data: FormValues) => {
-    if (!planId || !planCredits || !user) {
-        toast({
-            title: 'Error',
-            description: 'Missing required information. Please go back to the pricing page and select a plan.',
-            variant: 'destructive',
-        });
-        return;
+    if (!planId || !planCredits || !firebaseUser) {
+      toast({
+        title: 'Error',
+        description: 'Missing required information. Please go back to the pricing page and select a plan.',
+        variant: 'destructive',
+      });
+      return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     const formData = new FormData();
     formData.append('file', data.file);
-    formData.append('userId', user.uid);
+    formData.append('userId', firebaseUser.uid);
     formData.append('planId', planId);
     formData.append('credits', planCredits);
-    formData.append('userName', user.displayName || 'N/A');
-    formData.append('userEmail', user.email || 'N/A');
+    formData.append('userName', firebaseUser.displayName || 'N/A');
+    formData.append('userEmail', firebaseUser.email || 'N/A');
 
     try {
-        const response = await fetch('/api/purchase-request', {
-            method: 'POST',
-            body: formData,
-        });
+      const response = await fetch('/api/purchase-request', {
+        method: 'POST',
+        body: formData,
+      });
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Failed to submit request.');
-        }
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to submit request.');
+      }
 
-        toast({
-            title: 'Request Submitted',
-            description: 'Your payment proof has been uploaded. An admin will review it shortly.',
-        });
-        router.push('/generate');
+      toast({
+        title: 'Request Submitted',
+        description: 'Your payment proof has been uploaded. An admin will review it shortly.',
+      });
+      router.push('/generate');
 
     } catch (error: any) {
-        toast({
-            title: 'Submission Failed',
-            description: error.message,
-            variant: 'destructive',
-        });
+      toast({
+        title: 'Submission Failed',
+        description: error.message,
+        variant: 'destructive',
+      });
     } finally {
-        setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -101,7 +100,7 @@ export default function SubmitPaymentForm() {
           <p><strong>Bank Name:</strong> Arkan National Bank</p>
           <p><strong>Account Holder:</strong> Arkan Professional Platform</p>
           <p><strong>IBAN:</strong> SA03 8000 0000 6080 1016 7519</p>
-          <p><strong>Reference:</strong> Your User ID ({user?.uid || 'Please log in'})</p>
+          <p><strong>Reference:</strong> Your User ID ({firebaseUser?.uid || 'Please log in'})</p>
         </CardContent>
       </Card>
       <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -112,30 +111,30 @@ export default function SubmitPaymentForm() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-                <Label htmlFor="file">Proof of Payment</Label>
-                <Controller
-                    name="file"
-                    control={form.control}
-                    render={({ field: { onChange, onBlur, name, ref } }) => (
-                        <Input
-                            id="file"
-                            type="file"
-                            accept="image/jpeg,image/png,application/pdf"
-                            onChange={(e) => onChange(e.target.files?.[0])}
-                            onBlur={onBlur}
-                            name={name}
-                            ref={ref}
-                            className="file:text-primary file:font-semibold"
-                        />
-                    )}
-                />
-                {form.formState.errors.file && <p className="text-sm text-destructive">{form.formState.errors.file.message}</p>}
+              <Label htmlFor="file">Proof of Payment</Label>
+              <Controller
+                name="file"
+                control={form.control}
+                render={({ field: { onChange, onBlur, name, ref } }) => (
+                  <Input
+                    id="file"
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={(e) => onChange(e.target.files?.[0])}
+                    onBlur={onBlur}
+                    name={name}
+                    ref={ref}
+                    className="file:text-primary file:font-semibold"
+                  />
+                )}
+              />
+              {form.formState.errors.file && <p className="text-sm text-destructive">{form.formState.errors.file.message}</p>}
             </div>
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isSubmitting} className="w-full">
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                Submit for Verification
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              Submit for Verification
             </Button>
           </CardFooter>
         </Card>
