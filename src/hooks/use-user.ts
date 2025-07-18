@@ -9,23 +9,10 @@ import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
+import { fetchUserProfile } from '@/services/user-service';
 
 
 // --- Query Functions ---
-
-export async function fetchUserProfile(userId: string): Promise<UserProfile | null> {
-  if (!userId) {
-    return null;
-  }
-  const response = await fetch(`/api/users/${userId}`);
-  if (!response.ok) {
-    if (response.status === 404) {
-      return null;
-    }
-    throw new Error('Failed to fetch user profile');
-  }
-  return response.json();
-}
 
 async function loginUser(credentials: LoginCredentials) {
   const response = await fetch('/api/auth/login', {

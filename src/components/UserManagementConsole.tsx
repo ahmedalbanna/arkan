@@ -19,7 +19,7 @@ import { Pencil, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfile } from '@/hooks/use-user';
+import { fetchUserProfile } from '@/services/user-service';
 
 
 const USERS_PER_PAGE = 10;
