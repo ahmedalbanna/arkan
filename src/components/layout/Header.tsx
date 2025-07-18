@@ -20,11 +20,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
-  const { userProfile, isLoading, firebaseUser } = useAuth();
-  const logoutMutation = useLogout();
+  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth(); // Get firebaseUser, userProfile, and loading state
+  const logoutMutation = useLogout(); // Use the useLogout mutation hook
   const [isClient, setIsClient] = useState(false);
 
-  // Ensure client-side rendering for hooks
+  // This prevents hydration mismatches by ensuring the component only renders on the client
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -37,8 +37,7 @@ export function Header() {
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
   ];
-
-  // These might be admin-only links, you'll need to add logic to check userProfile.role or similar
+  
   const adminLinks = [
     { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
@@ -63,17 +62,14 @@ export function Header() {
         </Link>
       </Button>
     ));
-
+    
   // Handle logout
   const handleLogout = async () => {
     await logoutMutation.mutate(); // Trigger the logout mutation
   };
 
-  // Don't render until client-side is ready if needed for hooks
-  if (!isClient && typeof window !== 'undefined') {
-    return null; // Or a loading placeholder
-  }
-
+  // The condition `!isClient || isLoadingAuth` ensures we show a skeleton until client has mounted and auth state is determined.
+  const showSkeleton = !isClient || isLoadingAuth;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -90,8 +86,12 @@ export function Header() {
               <SheetTitle className="sr-only">{t('header.openMenu')}</SheetTitle>
               <nav className="flex flex-col gap-4 pt-8">
                 {renderNavLinks(navLinks, true)}
-                <div className="my-4 border-t"></div>
-                {renderNavLinks(adminLinks, true)}
+                {userProfile?.role === 'admin' && (
+                  <>
+                    <div className="my-4 border-t"></div>
+                    {renderNavLinks(adminLinks, true)}
+                  </>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
@@ -106,7 +106,7 @@ export function Header() {
         </nav>
 
         <div className="flex-1 flex justify-end items-center gap-2">
-          {(!isClient || isLoading) ? (
+          {showSkeleton ? (
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-20" />
               <Skeleton className="h-8 w-8 rounded-full" />
@@ -134,6 +134,15 @@ export function Header() {
                       Profile
                     </Link>
                   </DropdownMenuItem>
+                  {userProfile.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/manage-users">
+                            <Users className="mr-2 h-4 w-4" />
+                            Manage Users
+                        </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logoutMutation.mutate()} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
