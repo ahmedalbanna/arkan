@@ -17,7 +17,10 @@
     "pptxTemplates": "PPTX Templates",
     "pdfToMarkdown": "PDF to Markdown",
     "manageUsers": "Manage Users",
-    "managePayments": "Manage Payments"
+    "managePayments": "Manage Payments",
+    "handwriting": "Text to Handwriting",
+    "admin": "Admin",
+    "logout": "Logout"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
@@ -35,18 +38,81 @@
     "feature3Title": "Powerful Management",
     "feature3Desc": "Control users, AI agents, and export templates with ease."
   },
-  "summarizer": {
-    "pageTitle": "AI Project Summarizer",
-    "pageSubtitle": "Enter a detailed description of your project, and the AI will generate a professional summary highlighting key aspects and technologies used.",
-    "formTitle": "Project Description",
-    "formDescription": "Paste your project description here. The more detailed the description, the better the summary.",
-    "formPlaceholder": "Example: I built a task management app using FlutterFlow and Firebase. The app features a simple UI and advanced features like smart reminders and weekly reports...",
-    "submitButton": "Generate Summary",
-    "submitButtonLoading": "Generating...",
-    "errorDisabled": "This agent has been disabled.",
-    "errorGeneral": "An error occurred while generating the summary. Please try again.",
-    "generatedTitle": "Generated Summary",
-    "detectedTech": "Discovered Technologies"
+  "login": {
+    "pageTitle": "Welcome Back",
+    "pageSubtitle": "Sign in to access your projects and continue creating."
+  },
+  "signup": {
+    "pageTitle": "Create Your Account",
+    "pageSubtitle": "Join Arkan today and start building with AI.",
+    "formTitle": "Sign Up",
+    "formDescription": "Enter your details to create a new account.",
+    "nameLabel": "Name",
+    "namePlaceholder": "Your Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submitButton": "Create Account",
+    "loginPrompt": "Already have an account?",
+    "loginLink": "Sign in",
+    "errorToastTitle": "Signup Error"
+  },
+  "profile": {
+    "creditsLabel": "AI Credits",
+    "joinedLabel": "Joined",
+    "bioLabel": "Bio"
+  },
+  "manageUsers": {
+    "pageTitle": "User Management",
+    "pageSubtitle": "Oversee, edit, and manage all users on the platform.",
+    "cardTitle": "All Users",
+    "errorLoading": "Failed to load users.",
+    "tableHeadName": "Name",
+    "tableHeadEmail": "Email",
+    "tableHeadRole": "Role",
+    "tableHeadCredits": "Credits",
+    "tableHeadJoined": "Joined",
+    "tableHeadActions": "Actions",
+    "editUserSr": "Edit User",
+    "previousButton": "Previous",
+    "pageLabel": "Page",
+    "nextButton": "Next"
+  },
+  "roles": {
+    "user": "User",
+    "admin": "Admin"
+  },
+  "editUser": {
+    "pageTitle": "Edit User",
+    "pageSubtitle": "Modify the details for {userName}.",
+    "cardTitle": "User Details",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "bioLabel": "Bio",
+    "creditsLabel": "AI Credits",
+    "saveButton": "Save Changes",
+    "savingButton": "Saving...",
+    "dangerZoneTitle": "Danger Zone",
+    "dangerZoneDescription": "Deleting a user is permanent and cannot be undone. All their data will be deleted.",
+    "deleteUserButton": "Delete User",
+    "deleteDialogTitle": "Are you absolutely sure?",
+    "deleteDialogDescription": "This action cannot be undone. This will permanently delete the user.",
+    "cancelButton": "Cancel",
+    "deleteConfirmButton": "Yes, delete user",
+    "successToastTitle": "Success",
+    "successToastDescription": "User has been updated successfully.",
+    "errorToastTitle": "Update Error",
+    "deleteErrorToastTitle": "Delete Error"
+  },
+  "agentManager": {
+    "pageSubtitle": "Control the AI agents available on the platform and enable or disable their functionality.",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "goToTool": "Go to Tool",
+    "editButton": "Edit",
+    "errorLoading": "Failed to load agent configurations."
+  },
+  "manageTemplates": {
+    "pageSubtitle": "Customize the look and feel of exported DOCX documents."
   },
   "reportGenerator": {
     "pageTitle": "Full Document Generation",
@@ -95,6 +161,19 @@
     "generateButton": "Generate",
     "errorInsufficientCredits": "Insufficient credits. Please top-up your account."
   },
+  "summarizer": {
+    "pageTitle": "AI Project Summarizer",
+    "pageSubtitle": "Enter a detailed description of your project, and the AI will generate a professional summary highlighting key aspects and technologies used.",
+    "formTitle": "Project Description",
+    "formDescription": "Paste your project description here. The more detailed the description, the better the summary.",
+    "formPlaceholder": "Example: I built a task management app using FlutterFlow and Firebase. The app features a simple UI and advanced features like smart reminders and weekly reports...",
+    "submitButton": "Generate Summary",
+    "submitButtonLoading": "Generating...",
+    "errorDisabled": "This agent has been disabled.",
+    "errorGeneral": "An error occurred while generating the summary. Please try again.",
+    "generatedTitle": "Generated Summary",
+    "detectedTech": "Discovered Technologies"
+  },
   "agentEditor": {
     "pageTitle": "Edit Agent",
     "pageSubtitle": "Update the name and prompt for this AI agent.",
@@ -123,10 +202,6 @@
   "pptxTemplates": {
     "pageTitle": "Manage Presentation Templates",
     "pageSubtitle": "Customize the appearance of exported PPTX presentations."
-  },
-  "manageUsers": {
-    "pageTitle": "User Management",
-    "pageSubtitle": "Oversee, edit, and manage all users on the platform."
   },
   "submitPayment": {
     "pageTitle": "Submit Proof of Payment",

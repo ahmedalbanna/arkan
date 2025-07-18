@@ -15,9 +15,12 @@
     "credits": "رصيد",
     "pricing": "الأسعار",
     "pptxTemplates": "قوالب العروض",
-    "pdfToMarkdown": "تحويل PDF إلى ماركداون",
+    "pdfToMarkdown": "تحويل PDF",
     "manageUsers": "إدارة المستخدمين",
-    "managePayments": "إدارة المدفوعات"
+    "managePayments": "إدارة المدفوعات",
+    "handwriting": "تحويل النص لخط يد",
+    "admin": "الإدارة",
+    "logout": "تسجيل الخروج"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
@@ -35,130 +38,80 @@
     "feature3Title": "إدارة قوية",
     "feature3Desc": "تحكم في المستخدمين ووكلاء الذكاء الاصطناعي وقوالب التصدير بسهولة."
   },
-  "summarizer": {
-    "pageTitle": "تلخيص المشاريع بالذكاء الاصطناعي",
-    "pageSubtitle": "أدخل وصفًا تفصيليًا لمشروعك، وسيقوم الذكاء الاصطناعي بتوليد ملخص احترافي يسلط الضوء على الجوانب الرئيسية والتقنيات المستخدمة.",
-    "formTitle": "وصف المشروع",
-    "formDescription": "الصق وصف مشروعك هنا. كلما كان الوصف أكثر تفصيلاً، كان الملخص أفضل.",
-    "formPlaceholder": "مثال: قمت ببناء تطبيق لإدارة المهام باستخدام FlutterFlow وFirebase. يتميز التطبيق بواجهة مستخدم بسيطة وميزات متقدمة مثل التذكيرات الذكية والتقارير الأسبوعية...",
-    "submitButton": "توليد الملخص",
-    "submitButtonLoading": "جاري التلخيص...",
-    "errorDisabled": "تم تعطيل هذا الوكيل.",
-    "errorGeneral": "حدث خطأ أثناء توليد الملخص. يرجى المحاولة مرة أخرى.",
-    "generatedTitle": "الملخص المولد",
-    "detectedTech": "التقنيات المكتشفة"
+  "login": {
+    "pageTitle": "أهلاً بعودتك",
+    "pageSubtitle": "سجل الدخول للوصول إلى مشاريعك ومواصلة الإبداع."
   },
-  "reportGenerator": {
-    "pageTitle": "توليد المستندات الكاملة",
-    "pageSubtitle": "ابدأ بفكرة، قم بتوليد مقترح مشروع كامل، ثم قم بتوليد كل قسم من التقرير النهائي بشكل فردي.",
-    "step1Title": "الخطوة 1: توليد مقترح المشروع",
-    "step1Desc": "اكتب وصفًا موجزًا لفكرة مشروعك. كلما كانت الفكرة أوضح، كان الاقتراح أفضل.",
-    "step1Placeholder": "مثال: نظام إدارة علاقات العملاء (CRM) لتحسين كفاءة المبيعات وخدمة العملاء.",
-    "step1Button": "توليد المقترح",
-    "step1ButtonLoading": "جاري التوليد...",
-    "step1Error": "حدث خطأ أثناء توليد المقترح. يرجى المحاولة مرة أخرى.",
-    "step2Title": "الخطوة 2: مراجعة المقترح (JSON)",
-    "step2Desc": "هذا هو الإدخال الخام لوكلاء الذكاء الاصطناعي. يمكنك تعديله إذا لزم الأمر.",
-    "step3Title": "الخطوة 3: أدوات التوليد",
-    "step3Desc": "حدد قسمًا أو مخططًا لتوليده. يمكنك تعديل الموجه لكل عنصر.",
-    "actionsTitle": "الإجراءات",
-    "actionsDesc": "صدّر مخرجاتك أو ابدأ جلسة جديدة.",
-    "exportProposal": "تصدير المقترح",
-    "exportReport": "تصدير التقرير",
-    "newSession": "جلسة جديدة",
-    "generationSuccess": "تم التوليد بنجاح!",
-    "generationSuccessDesc": "تم بنجاح توليد \"{item}\". يمكنك عرضه أدناه.",
-    "generationFailed": "فشل التوليد!",
-    "proposalDetailsTitle": "تفاصيل المقترح المولدة (قابلة للتعديل)",
-    "tool_tab_prompt": "تعديل الموجه",
-    "tool_tab_controls": "التحكم في المخرجات",
-    "tool_tab_context": "السياق",
-    "tool_prompt_label": "الموجه",
-    "tool_formality_label": "الرسمية",
-    "tool_formality_informal": "غير رسمي",
-    "tool_formality_balanced": "متوازن",
-    "tool_formality_formal": "رسمي جداً",
-    "tool_tone_label": "النبرة",
-    "tool_tone_placeholder": "اختر نبرة",
-    "tool_tone_professional": "احترافي",
-    "tool_tone_academic": "أكاديمي",
-    "tool_tone_casual": "عادي",
-    "tool_tone_persuasive": "مقنع",
-    "tool_word_count_label": "عدد الكلمات (تقريبي)",
-    "tool_word_count_placeholder": "مثال: 300",
-    "tool_instruction_preview": "معاينة التعليمات:",
-    "tool_instruction_none": "لا توجد تعليمات إضافية.",
-    "tool_context_label": "تضمين سياق من عناصر أخرى",
-    "tool_context_desc": "حدد الأقسام أو المخططات الأخرى التي تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
-    "tool_context_sections": "الأقسام",
-    "tool_context_diagrams": "المخططات",
-    "generateButton": "توليد",
-    "errorInsufficientCredits": "الرصيد غير كاف. يرجى شحن حسابك."
+  "signup": {
+    "pageTitle": "أنشئ حسابك",
+    "pageSubtitle": "انضم إلى أركان اليوم وابدأ البناء بالذكاء الاصطناعي.",
+    "formTitle": "التسجيل",
+    "formDescription": "أدخل بياناتك لإنشاء حساب جديد.",
+    "nameLabel": "الاسم",
+    "namePlaceholder": "اسمك الكامل",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "submitButton": "إنشاء حساب",
+    "loginPrompt": "لديك حساب بالفعل؟",
+    "loginLink": "سجل الدخول",
+    "errorToastTitle": "خطأ في التسجيل"
   },
-  "agentEditor": {
-    "pageTitle": "تعديل الوكيل",
-    "pageSubtitle": "قم بتحديث اسم ووصف وكيل الذكاء الاصطناعي.",
-    "idLabel": "المعرف",
-    "categoryLabel": "الفئة",
-    "nameLabel": "اسم الوكيل",
-    "basePromptLabel": "موجه الأوامر الأساسي",
-    "promptLabel": "موجه الأوامر",
-    "complexPromptNote": "أنت تقوم بتعديل الجزء الأساسي من الموجه فقط. يتم إدارة الإرشادات المحددة في أداة إنشاء التقارير.",
-    "saveButton": "حفظ التغييرات",
-    "errorLoading": "فشل تحميل إعدادات الوكيل."
-  },
-  "managePayments": {
-    "pageTitle": "إدارة طلبات الدفع",
-    "pageSubtitle": "مراجعة ومعالجة طلبات الدفع المعلقة من المستخدمين.",
-    "errorLoading": "فشل تحميل طلبات الدفع",
-    "noPending": "لا توجد طلبات دفع معلقة.",
-    "userLabel": "المستخدم",
-    "amountLabel": "المبلغ",
-    "creditsLabel": "الرصيد",
-    "viewProofButton": "عرض الإثبات",
-    "notesPlaceholder": "إضافة ملاحظات تحقق (اختياري)...",
-    "approveButton": "موافقة",
-    "declineButton": "رفض"
-  },
-  "pptxTemplates": {
-    "pageTitle": "إدارة قوالب العروض التقديمية",
-    "pageSubtitle": "قم بتخصيص مظهر العروض التقديمية المصدرة (PPTX)."
+  "profile": {
+    "creditsLabel": "رصيد الذكاء الاصطناعي",
+    "joinedLabel": "تاريخ الانضمام",
+    "bioLabel": "نبذة تعريفية"
   },
   "manageUsers": {
     "pageTitle": "إدارة المستخدمين",
-    "pageSubtitle": "الإشراف على جميع المستخدمين في المنصة وتعديلهم وإدارتهم."
+    "pageSubtitle": "الإشراف على جميع المستخدمين في المنصة وتعديلهم وإدارتهم.",
+    "cardTitle": "جميع المستخدمين",
+    "errorLoading": "فشل تحميل المستخدمين.",
+    "tableHeadName": "الاسم",
+    "tableHeadEmail": "البريد الإلكتروني",
+    "tableHeadRole": "الدور",
+    "tableHeadCredits": "الرصيد",
+    "tableHeadJoined": "تاريخ الانضمام",
+    "tableHeadActions": "إجراءات",
+    "editUserSr": "تعديل المستخدم",
+    "previousButton": "السابق",
+    "pageLabel": "صفحة",
+    "nextButton": "التالي"
   },
-  "submitPayment": {
-    "pageTitle": "إرسال إثبات الدفع",
-    "pageSubtitle": "يرجى إتمام التحويل البنكي ورفع إيصال الدفع أدناه.",
-    "bankDetailsTitle": "تفاصيل التحويل البنكي",
-    "bankDetailsDescription": "يرجى تحويل المبلغ المطلوب إلى الحساب أدناه.",
-    "bankNameLabel": "اسم البنك",
-    "accountHolderLabel": "صاحب الحساب",
-    "ibanLabel": "آيبان",
-    "referenceLabel": "المرجع",
-    "yourUserIdLabel": "معرف المستخدم الخاص بك",
-    "pleaseLogin": "يرجى تسجيل الدخول",
-    "uploadReceiptTitle": "رفع الإيصال",
-    "selectedPlanDescription": "لقد اخترت خطة {planName}.",
-    "proofLabel": "إثبات الدفع",
-    "submitButton": "إرسال للتحقق",
-    "successTitle": "تم إرسال الطلب",
-    "successDescription": "تم رفع إثبات الدفع الخاص بك. سيقوم المسؤول بمراجعته قريبًا.",
-    "errorTitle": "فشل الإرسال",
-    "missingInfoErrorTitle": "خطأ",
-    "missingInfoErrorDescription": "معلومات مطلوبة غير موجودة. يرجى العودة إلى صفحة الأسعار واختيار خطة."
+  "roles": {
+    "user": "مستخدم",
+    "admin": "مسؤول"
   },
-  "pdfToMarkdown": {
-    "pageTitle": "تحويل PDF إلى Markdown",
-    "pageSubtitle": "ارفع ملف PDF، ودع الذكاء الاصطناعي يستخرج ويعيد تنسيق المحتوى إلى Markdown نظيف."
+  "editUser": {
+    "pageTitle": "تعديل المستخدم",
+    "pageSubtitle": "تعديل تفاصيل {userName}.",
+    "cardTitle": "تفاصيل المستخدم",
+    "nameLabel": "الاسم",
+    "emailLabel": "البريد الإلكتروني",
+    "bioLabel": "نبذة تعريفية",
+    "creditsLabel": "رصيد الذكاء الاصطناعي",
+    "saveButton": "حفظ التغييرات",
+    "savingButton": "جارٍ الحفظ...",
+    "dangerZoneTitle": "منطقة الخطر",
+    "dangerZoneDescription": "حذف المستخدم إجراء دائم ولا يمكن التراجع عنه. سيتم حذف جميع بياناتهم.",
+    "deleteUserButton": "حذف المستخدم",
+    "deleteDialogTitle": "هل أنت متأكد تماماً؟",
+    "deleteDialogDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف المستخدم بشكل دائم.",
+    "cancelButton": "إلغاء",
+    "deleteConfirmButton": "نعم، احذف المستخدم",
+    "successToastTitle": "نجاح",
+    "successToastDescription": "تم تحديث المستخدم بنجاح.",
+    "errorToastTitle": "خطأ في التحديث",
+    "deleteErrorToastTitle": "خطأ في الحذف"
   },
-  "pricing": {
-    "pageTitle": "اختر خطتك",
-    "pageSubtitle": "اختر باقة الرصيد المثالية لدعم سير عملك المدعوم بالذكاء الاصطناعي.",
-    "mostPopular": "الأكثر شيوعاً",
-    "oneTime": "دفعة واحدة",
-    "aiCredits": "رصيد ذكاء اصطناعي",
-    "selectPlanButton": "اختر الخطة"
+  "agentManager": {
+    "pageSubtitle": "تحكم في وكلاء الذكاء الاصطناعي المتاحين في المنصة وقم بتفعيل أو تعطيل وظائفهم.",
+    "enabled": "مُفعّل",
+    "disabled": "مُعطّل",
+    "goToTool": "الذهاب إلى الأداة",
+    "editButton": "تعديل",
+    "errorLoading": "فشل تحميل إعدادات الوكيل."
+  },
+  "manageTemplates": {
+    "pageSubtitle": "قم بتخصيص مظهر وشكل مستندات DOCX المصدرة."
   }
 }

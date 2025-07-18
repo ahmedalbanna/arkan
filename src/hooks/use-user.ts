@@ -10,14 +10,13 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
-import { User } from '@/lib/types'; // Assuming you have a User type
+import { User } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext';
 
 
 // --- Query Functions ---
 
 async function loginUser(credentials: LoginCredentials) {
-  // Login now happens on the client using the Firebase SDK directly.
-  // This will trigger onAuthStateChanged, which then sets the session cookie.
   try {
     const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
     return userCredential.user;
@@ -30,9 +29,7 @@ async function loginUser(credentials: LoginCredentials) {
 }
 
 async function logoutUser() {
-    // We must sign out the client SDK first
     await signOut(auth);
-    // Then clear the server session cookie
     const response = await fetch('/api/auth/logout', { method: 'POST' });
     if (!response.ok) {
         const errorData = await response.json();
@@ -50,7 +47,6 @@ async function signupUser(credentials: SignupCredentials) {
 
     if (!response.ok) {
         const errorData = await response.json();
-        // The signup API route returns structured errors, so we pass them along
         throw errorData;
     }
     return response.json();
@@ -86,21 +82,24 @@ export function useUserProfile(userId: string) {
 export function useLogin() {
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { refetchUser } = useAuth();
 
     return useMutation({
         mutationFn: loginUser,
-        onSuccess: () => {
-            toast({
-                title: 'Login Successful',
-                description: "You've been successfully signed in.",
-            });
-            // Invalidate queries to refetch user-specific data after redirect
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            router.push('/generate');
-            router.refresh(); // Force a refresh to ensure layout server component re-renders
+        onSuccess: (user) => {
+            if (user) {
+              // After successful login, refetch user data to ensure context is updated
+              refetchUser(); 
+              queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
+              router.push('/generate');
+              router.refresh();
+              toast({
+                  title: 'Login Successful',
+                  description: "You've been successfully signed in.",
+              });
+            }
         },
         onError: (error: Error) => {
-            // The error message is now set directly from the client-side catch block
             toast({
                 title: 'Login Error',
                 description: error.message,
@@ -117,9 +116,8 @@ export function useLogout() {
     return useMutation({
         mutationFn: logoutUser,
         onSuccess: () => {
-            queryClient.clear(); // Clear all cached data on logout
+            queryClient.clear();
             router.push('/login');
-            // onAuthStateChanged in AuthContext will handle setting user to null
         },
         onError: (error: Error) => {
             toast({
@@ -144,8 +142,6 @@ export function useSignup() {
             router.push('/login');
         },
         onError: (error: any) => {
-            // This hook's consumer (SignupForm) is responsible for displaying the specific error details.
-            // We don't show a generic toast here because the form handles field and form-level errors.
             console.error("Signup mutation error:", error);
         }
     });

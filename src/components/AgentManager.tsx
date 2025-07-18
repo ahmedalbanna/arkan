@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, Pencil, Loader2, AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function AgentSkeleton() {
   return (
@@ -38,10 +39,10 @@ function AgentSkeleton() {
 
 
 function AgentCard({ agent }: { agent: Agent }) {
+  const { t } = useLocalization();
   const { id, name, description, category, isEnabled, pageUrl } = agent;
   const updateAgentMutation = useUpdateAgent();
   
-  // Find the original agent config from the local file to get the valid icon component
   const localAgentConfig = AGENTS.find(a => a.id === id);
   const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
 
@@ -69,7 +70,7 @@ function AgentCard({ agent }: { agent: Agent }) {
               disabled={updateAgentMutation.isPending}
               aria-label={`Enable ${name}`}
             />
-            <Label htmlFor={`switch-${id}`}>{isEnabled ? 'مُفعّل' : 'مُعطّل'}</Label>
+            <Label htmlFor={`switch-${id}`}>{isEnabled ? t('agentManager.enabled') : t('agentManager.disabled')}</Label>
           </div>
         </div>
       </CardHeader>
@@ -79,14 +80,14 @@ function AgentCard({ agent }: { agent: Agent }) {
       <CardFooter className="justify-between">
         <Button asChild variant="ghost" className="font-headline">
           <Link href={pageUrl}>
-            الذهاب إلى الأداة
-            <ExternalLink className="mr-2 h-4 w-4" />
+            {t('agentManager.goToTool')}
+            <ExternalLink className="mx-2 rtl:mx-0 rtl:mr-2 h-4 w-4" />
           </Link>
         </Button>
         <Button asChild variant="outline" size="sm" className="font-headline">
           <Link href={`/manage-agents/${id}/edit`}>
-            <Pencil className="ml-2 h-4 w-4" />
-            تعديل
+            <Pencil className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
+            {t('agentManager.editButton')}
           </Link>
         </Button>
       </CardFooter>
@@ -95,6 +96,7 @@ function AgentCard({ agent }: { agent: Agent }) {
 }
 
 export default function AgentManager() {
+  const { t } = useLocalization();
   const { agents, isLoaded, isError } = useAgents();
 
   if (!isLoaded) {
@@ -112,7 +114,7 @@ export default function AgentManager() {
     return (
         <Card className="p-8 text-center text-destructive">
             <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-            <p>Failed to load agent configurations.</p>
+            <p>{t('agentManager.errorLoading')}</p>
         </Card>
     );
   }

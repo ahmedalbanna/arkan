@@ -15,17 +15,16 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Pencil, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUserProfile } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
-
+import { useLocalization } from '@/context/LocalizationContext';
 
 const USERS_PER_PAGE = 10;
 
-// This query function now uses the page number to fetch a specific "page" of users.
 async function fetchUsers(page: number): Promise<UserProfile[]> {
     const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`);
     if (!response.ok) {
@@ -35,16 +34,17 @@ async function fetchUsers(page: number): Promise<UserProfile[]> {
 }
 
 function UserTableSkeleton() {
+    const { t } = useLocalization();
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Credits</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
+                    <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
+                    <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
+                    <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
+                    <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
+                    <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -65,13 +65,13 @@ function UserTableSkeleton() {
 
 export default function UserManagementConsole() {
   const [page, setPage] = useState(1);
+  const { t } = useLocalization();
   const queryClient = useQueryClient();
 
-  // The query key now uses the factory and includes the page number.
   const { data: users, isLoading, isError, isFetching } = useQuery({
       queryKey: userKeys.list(page),
       queryFn: () => fetchUsers(page),
-      placeholderData: (previousData) => previousData, // Keep showing old data while fetching new page
+      placeholderData: (previousData) => previousData,
   });
 
   const prefetchUser = async (userId: string) => {
@@ -86,7 +86,7 @@ export default function UserManagementConsole() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                    <span>All Users</span>
+                    <span>{t('manageUsers.cardTitle')}</span>
                     <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </CardTitle>
             </CardHeader>
@@ -101,7 +101,8 @@ export default function UserManagementConsole() {
     return (
         <Card>
             <CardContent className="p-8 text-center text-destructive">
-                Failed to load users.
+                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+                {t('manageUsers.errorLoading')}
             </CardContent>
         </Card>
     )
@@ -111,7 +112,7 @@ export default function UserManagementConsole() {
     <Card>
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
-            <span>All Users</span>
+            <span>{t('manageUsers.cardTitle')}</span>
             {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
         </CardTitle>
       </CardHeader>
@@ -120,12 +121,12 @@ export default function UserManagementConsole() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Credits</TableHead>
-                  <TableHead>Joined</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
+                  <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
+                  <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
+                  <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
+                  <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
+                  <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -135,7 +136,7 @@ export default function UserManagementConsole() {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role}
+                        {t(`roles.${user.role}`)}
                       </Badge>
                     </TableCell>
                     <TableCell>{user.credits}</TableCell>
@@ -144,7 +145,7 @@ export default function UserManagementConsole() {
                       <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
                         <Link href={`/manage-users/${user.id}/edit`}>
                           <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit User</span>
+                          <span className="sr-only">{t('manageUsers.editUserSr')}</span>
                         </Link>
                       </Button>
                     </TableCell>
@@ -160,18 +161,18 @@ export default function UserManagementConsole() {
                 onClick={() => setPage(p => Math.max(p - 1, 1))}
                 disabled={page === 1 || isFetching}
             >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Previous
+                <ChevronLeft className="mr-2 rtl:mr-0 rtl:ml-2 h-4 w-4" />
+                {t('manageUsers.previousButton')}
             </Button>
-            <span className="text-sm font-medium">Page {page}</span>
+            <span className="text-sm font-medium">{t('manageUsers.pageLabel')} {page}</span>
             <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setPage(p => p + 1)}
                 disabled={!users || users.length < USERS_PER_PAGE || isFetching}
             >
-                Next
-                <ChevronRight className="ml-2 h-4 w-4" />
+                {t('manageUsers.nextButton')}
+                <ChevronRight className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
             </Button>
         </div>
       </CardContent>

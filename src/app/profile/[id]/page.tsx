@@ -1,4 +1,5 @@
 
+'use client';
 import { getUserProfile } from '@/lib/db/queries';
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -6,10 +7,40 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Mail, Gem, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useUserProfile } from '@/hooks/use-user';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function ProfilePage(props: { params: Promise<{ id: string }> }) {
-  const params = await props.params;
-  const user = await getUserProfile(params.id);
+function ProfileSkeleton() {
+    return (
+        <Card>
+            <CardHeader className="text-center">
+                <Skeleton className="w-24 h-24 rounded-full mx-auto mb-4" />
+                <Skeleton className="h-8 w-48 mx-auto" />
+                <Skeleton className="h-6 w-56 mx-auto mt-2" />
+            </CardHeader>
+            <CardContent className="mt-4 space-y-6">
+                <Skeleton className="h-12 w-full" />
+                <div className="space-y-4">
+                    <Skeleton className="h-10 w-3/4" />
+                    <Skeleton className="h-10 w-4/5" />
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+export default function ProfilePage({ params }: { params: { id: string } }) {
+  const { t } = useLocalization();
+  const { data: user, isLoading } = useUserProfile(params.id);
+
+  if (isLoading) {
+    return (
+        <div className="container mx-auto max-w-2xl px-4 py-12">
+            <ProfileSkeleton />
+        </div>
+    );
+  }
 
   if (!user) {
     notFound();
@@ -32,7 +63,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
            <div className="p-4 rounded-lg bg-muted border flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Gem className="h-5 w-5 text-primary" />
-                    <span className="font-semibold">AI Credits</span>
+                    <span className="font-semibold">{t('profile.creditsLabel')}</span>
                 </div>
                 <Badge variant="secondary" className="text-lg">{user.credits}</Badge>
            </div>
@@ -41,7 +72,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
              <div className="flex items-start gap-3">
                <Calendar className="h-5 w-5 mt-1 text-muted-foreground" />
                <div>
-                 <h4 className="font-semibold">Joined</h4>
+                 <h4 className="font-semibold">{t('profile.joinedLabel')}</h4>
                  <p className="text-muted-foreground">{format(new Date(user.createdAt), 'MMMM d, yyyy')}</p>
                </div>
              </div>
@@ -50,7 +81,7 @@ export default async function ProfilePage(props: { params: Promise<{ id: string 
                  <div className="flex items-start gap-3">
                    <Mail className="h-5 w-5 mt-1 text-muted-foreground" />
                    <div>
-                     <h4 className="font-semibold">Bio</h4>
+                     <h4 className="font-semibold">{t('profile.bioLabel')}</h4>
                      <p className="text-muted-foreground">{user.bio}</p>
                    </div>
                  </div>

@@ -17,7 +17,7 @@ import { AlertCircle } from 'lucide-react';
 import { useSignup } from '@/hooks/use-user';
 import type { SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -27,6 +27,7 @@ const formSchema = z.object({
 
 export default function SignupForm() {
   const router = useRouter();
+  const { t } = useLocalization();
   const { toast } = useToast();
   const signupMutation = useSignup();
 
@@ -39,32 +40,28 @@ export default function SignupForm() {
     },
   });
   
-  // Set form errors from mutation error
   useEffect(() => {
     const errorData = signupMutation.error as any;
     if (errorData?.error) {
       const fieldErrors = errorData.error;
-      // Set field-specific errors
       if (fieldErrors.name) form.setError('name', { message: fieldErrors.name[0] });
       if (fieldErrors.email) form.setError('email', { message: fieldErrors.email[0] });
       if (fieldErrors.password) form.setError('password', { message: fieldErrors.password[0] });
       
-      // Display form-level errors in a toast for consistency
       if (fieldErrors._form) {
         toast({
-          title: 'Signup Error',
+          title: t('signup.errorToastTitle'),
           description: fieldErrors._form[0],
           variant: 'destructive',
         });
       }
     }
-  }, [signupMutation.error, form, toast]);
+  }, [signupMutation.error, form, toast, t]);
 
   function onSubmit(values: SignupCredentials) {
     signupMutation.mutate(values);
   }
 
-  // This is used for rendering the inline alert component for form-level errors
   const formLevelError = (signupMutation.error as any)?.error?._form?.[0];
 
   return (
@@ -72,14 +69,14 @@ export default function SignupForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">Sign Up</CardTitle>
-            <CardDescription>Enter your details to create a new account.</CardDescription>
+            <CardTitle className="font-headline text-2xl">{t('signup.formTitle')}</CardTitle>
+            <CardDescription>{t('signup.formDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {formLevelError && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Signup Error</AlertTitle>
+                    <AlertTitle>{t('signup.errorToastTitle')}</AlertTitle>
                     <AlertDescription>{formLevelError}</AlertDescription>
                 </Alert>
             )}
@@ -88,9 +85,9 @@ export default function SignupForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('signup.nameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your Name" {...field} disabled={signupMutation.isPending} />
+                    <Input placeholder={t('signup.namePlaceholder')} {...field} disabled={signupMutation.isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -101,7 +98,7 @@ export default function SignupForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('signup.emailLabel')}</FormLabel>
                   <FormControl>
                     <Input placeholder="name@example.com" {...field} disabled={signupMutation.isPending} />
                   </FormControl>
@@ -114,7 +111,7 @@ export default function SignupForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t('signup.passwordLabel')}</FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" {...field} disabled={signupMutation.isPending} />
                   </FormControl>
@@ -126,12 +123,12 @@ export default function SignupForm() {
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full font-headline" disabled={signupMutation.isPending}>
               {signupMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              {t('signup.submitButton')}
             </Button>
              <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
+              {t('signup.loginPrompt')}{' '}
               <Link href="/login" className="font-semibold text-primary hover:underline">
-                Sign in
+                {t('signup.loginLink')}
               </Link>
             </p>
           </CardFooter>
