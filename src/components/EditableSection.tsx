@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -85,13 +85,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 body: JSON.stringify({ textToManipulate: currentContent, command }),
             });
 
+            const result = await response.json();
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to manipulate text.");
+                const isCreditError = result.message && result.message.toLowerCase().includes('credit');
+                const title = isCreditError ? 'Insufficient Credits' : 'AI Action Failed';
+                throw new Error(result.message || "An unexpected error occurred.");
             }
 
-            const result: ManipulateTextOutput = await response.json();
-            setAiSuggestion(result.rewrittenText);
+            setAiSuggestion((result as ManipulateTextOutput).rewrittenText);
             queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
         } catch (error: any) {
             console.error("AI action failed:", error);
@@ -142,7 +143,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
         setIsEditorPopoverOpen(false);
     };
-
 
     const renderEditableContent = () => {
         if (aiSuggestion !== null) {
