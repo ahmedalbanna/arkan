@@ -61,9 +61,10 @@ export default function SubmitPaymentForm() {
     formData.append('userEmail', firebaseUser.email || 'N/A');
 
     try {
+      // This API route will be enhanced later to handle file uploads and Firestore writes
       const response = await fetch('/api/purchase-request', {
         method: 'POST',
-        body: formData,
+        body: formData, // Sending FormData directly
       });
 
       if (!response.ok) {
