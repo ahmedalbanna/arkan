@@ -13,7 +13,7 @@ import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { auth as adminAuth } from '@/lib/firebase/admin';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
     const token = authorization.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
     
     const body = await request.json();

@@ -72,7 +72,7 @@ const generateInstructionText = (controls: any): string => {
 async function generateReport(variables: any): Promise<any> {
     const response = await fetch('/api/generate-report', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
         body: JSON.stringify(variables),
     });
     if (!response.ok) {
@@ -82,10 +82,11 @@ async function generateReport(variables: any): Promise<any> {
     return response.json();
 }
 // Helper function to upload a PDF
-async function uploadPdf(formData: FormData): Promise<{ markdown: string }> {
-    const response = await fetch('/api/pdf-to-markdown', {
+async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
+     const response = await fetch('/api/pdf-to-markdown', {
         method: 'POST',
-        body: formData,
+        headers: { 'Authorization': `Bearer ${variables.token}` },
+        body: variables.formData,
     });
     if (!response.ok) {
         const error = await response.json();
@@ -98,7 +99,7 @@ export const GenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
@@ -154,7 +155,7 @@ export const GenerationTools = () => {
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
-            const file = variables.get('file') as File;
+            const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
             queryClient.invalidateQueries({ queryKey: ['user'] });
             toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
@@ -180,12 +181,13 @@ export const GenerationTools = () => {
     };
 
     // Handle single section generation
-    const onGenerateSection = (section: SectionName) => {
-        if (!user) {
+    const onGenerateSection = async (section: SectionName) => {
+        if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         };
         
+        const token = await firebaseUser.getIdToken();
         const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: false };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
@@ -204,31 +206,35 @@ export const GenerationTools = () => {
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
+            token,
         };
         setActiveMutationKey(section);
         reportMutation.mutate(body);
     };
     
     // Handle full report generation
-    const onGenerateFullReport = () => {
-        if (!user) {
+    const onGenerateFullReport = async () => {
+        if (!firebaseUser) {
              toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         }
+        const token = await firebaseUser.getIdToken();
         const body = {
             proposal,
             templateId: selectedReportTemplateId,
+            token,
             // We can pass a global context selection for the full report if needed
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportMutation.mutate(body);
     };
 
-    const onPdfUpload = () => {
-        if (!pdfFile) return;
+    const onPdfUpload = async () => {
+        if (!pdfFile || !firebaseUser) return;
+        const token = await firebaseUser.getIdToken();
         const formData = new FormData();
         formData.append('file', pdfFile);
-        pdfMutation.mutate(formData);
+        pdfMutation.mutate({ formData, token });
     };
 
     if (!agentsLoaded) {
