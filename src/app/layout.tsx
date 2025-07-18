@@ -2,6 +2,7 @@
 import type { Metadata } from 'next';
 import { Poppins, PT_Sans, Cairo, Indie_Flower } from 'next/font/google';
 import './globals.css';
+import '@/css/fonts.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/Header';
 import { Toaster } from '@/components/ui/toaster';
@@ -20,29 +21,29 @@ export const metadata: Metadata = {
   description: 'Showcase your work, discover talent, and interact with a community of professionals.',
 };
 
-const fontBody = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-body',
-});
+// const fontBody = PT_Sans({
+//   subsets: ['latin'],
+//   weight: ['400', '700'],
+//   variable: '--font-body',
+// });
 
-const fontHeadline = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
-  variable: '--font-headline',
-});
+// const fontHeadline = Poppins({
+//   subsets: ['latin'],
+//   weight: ['400', '600', '700'],
+//   variable: '--font-headline',
+// });
 
-const fontSans = Cairo({
-  subsets: ['arabic', 'latin'],
-  weight: ['400', '700'],
-  variable: '--font-sans',
-});
+// const fontSans = Cairo({
+//   subsets: ['arabic', 'latin'],
+//   weight: ['400', '700'],
+//   variable: '--font-sans',
+// });
 
-const fontHandwriting = Indie_Flower({
-    subsets: ['latin'],
-    weight: ['400'],
-    variable: '--font-handwriting',
-})
+// const fontHandwriting = Indie_Flower({
+//     subsets: ['latin'],
+//     weight: ['400'],
+//     variable: '--font-handwriting',
+// })
 
 // List of public paths that do not require authentication
 const PUBLIC_PATHS = ['/login', '/signup'];
@@ -88,7 +89,7 @@ export default async function RootLayout({
   await checkAuth(pathname, sessionCookie);
 
   return (
-    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable, fontHandwriting.variable)} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
       <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
         <ThemeProvider
           attribute="class"

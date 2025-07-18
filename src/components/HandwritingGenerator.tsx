@@ -10,22 +10,27 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, RefreshCw } from 'lucide-react';
 import { Handwriting } from '@/lib/handwriting.js';
-
+const HANDWRITING_FONTS = [
+  { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
+  { name: 'Caveat', value: "'Caveat', cursive" },
+  { name: 'Liu Jian Mao Cao', value: "'Liu Jian Mao Cao', cursive" },
+  { name: 'Indie Flower', value: "'Indie Flower', cursive" },
+  { name: 'Rabiohead', value: "'rabiohead', cursive" },
+  { name: "Saurabh's Hand", value: "'Saurabh-Hand', cursive" },
+];
 export default function HandwritingGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [text, setText] = useState('This is a sample text to get you started.');
   const [fontSize, setFontSize] = useState(30);
+  const [fontFamily, setFontFamily] = useState(HANDWRITING_FONTS[0].value);
   const [fontColor, setFontColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [handwriting, setHandwriting] = useState<any>(null);
 
+  
   useEffect(() => {
     if (canvasRef.current) {
-      const hw = new Handwriting(canvasRef.current, {
-        font: {
-          family: 'var(--font-handwriting)',
-        },
-      });
+      const hw = new Handwriting(canvasRef.current);
       setHandwriting(hw);
     }
   }, []);
@@ -33,11 +38,12 @@ export default function HandwritingGenerator() {
   useEffect(() => {
     if (handwriting) {
       handwriting.setText(text);
+      handwriting.setFontFamily(fontFamily);
       handwriting.setFontSize(fontSize);
       handwriting.setFontColor(fontColor);
       handwriting.draw();
     }
-  }, [handwriting, text, fontSize, fontColor]);
+  }, [handwriting, text, fontSize, fontColor, fontFamily]);
 
   useEffect(() => {
     if (handwriting) {
@@ -91,13 +97,19 @@ export default function HandwritingGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="font-size">Font Size</Label>
-              <Input
-                id="font-size"
-                type="number"
-                value={fontSize}
-                onChange={(e) => setFontSize(Number(e.target.value))}
-              />
+                <Label htmlFor="font-family">Font</Label>
+                <Select value={fontFamily} onValueChange={setFontFamily}>
+                    <SelectTrigger id="font-family">
+                        <SelectValue placeholder="Select a font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {HANDWRITING_FONTS.map(font => (
+                            <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                                {font.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="font-color">Font Color</Label>
