@@ -79,17 +79,17 @@ export function Header() {
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">{t('header.openMenu')}</span>
+                <span className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm">
-              <SheetTitle className="sr-only">{t('header.openMenu')}</SheetTitle>
+              <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
               <nav className="flex flex-col gap-4 pt-8">
-                {renderNavLinks(navLinks, true)}
+                {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
                 {userProfile?.role === 'admin' && (
                   <>
                     <div className="my-4 border-t"></div>
-                    {renderNavLinks(adminLinks, true)}
+                    {isClient ? renderNavLinks(adminLinks, true) : <Skeleton className="h-10 w-full" />}
                   </>
                 )}
               </nav>
@@ -99,11 +99,11 @@ export function Header() {
 
         <div className="flex-1 flex justify-center md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-            {t('header.title')}
+            {isClient ? t('header.title') : <Skeleton className="h-6 w-20" />}
           </Link>
         </div>
         <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
-          {renderNavLinks(navLinks)}
+          {isClient ? renderNavLinks(navLinks) : <Skeleton className="h-10 w-48" />}
         </nav>
 
         <div className="flex-1 flex justify-end items-center gap-2">
@@ -117,7 +117,7 @@ export function Header() {
               <Button variant="outline" asChild>
                 <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
                   <Gem className="h-4 w-4" />
-                  <span>{userProfile.credits} {t('header.credits')}</span>
+                  <span>{userProfile.credits} {isClient && t('header.credits')}</span>
                 </Link>
               </Button>
               <DropdownMenu>
