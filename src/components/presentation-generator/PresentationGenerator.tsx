@@ -18,11 +18,14 @@ import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
-async function generatePresentation(variables: any): Promise<GeneratePresentationOutput> {
+async function generatePresentation(variables: { body: any, token: string }): Promise<GeneratePresentationOutput> {
     const response = await fetch('/api/generate-presentation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(variables),
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`
+        },
+        body: JSON.stringify(variables.body),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -32,7 +35,7 @@ async function generatePresentation(variables: any): Promise<GeneratePresentatio
 }
 
 export default function PresentationGenerator() {
-    const { user } = useAuth();
+    const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const {
         proposal,
@@ -58,6 +61,15 @@ export default function PresentationGenerator() {
             toast({ title: 'Presentation Generation Failed', description: error.message, variant: 'destructive' });
         }
     });
+
+    const onGenerate = async (body: any) => {
+        if (!firebaseUser) {
+            toast({ title: "Authentication Error", description: "You must be logged in to generate a presentation.", variant: "destructive" });
+            return;
+        }
+        const token = await firebaseUser.getIdToken();
+        mutation.mutate({ body, token });
+    };
 
     if (!proposal) {
         return (
@@ -146,7 +158,7 @@ export default function PresentationGenerator() {
                 <PresentationGenerationTools
                     isDisabled={!proposal || mutation.isPending}
                     isGenerating={mutation.isPending}
-                    onGenerate={mutation.mutate}
+                    onGenerate={onGenerate}
                 />
             </div>
         </div>
