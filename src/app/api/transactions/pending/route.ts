@@ -4,7 +4,7 @@ import { getPendingTransactions } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 
-// Helper to verify admin role
+// Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
