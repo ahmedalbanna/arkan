@@ -9,8 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Banknote, FileText, Loader2, UploadCloud } from 'lucide-react';
+import { Banknote, Loader2, UploadCloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
@@ -29,7 +28,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function SubmitPaymentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { firebaseUser } = useAuth(); // Fix: Access user from AuthContext
+  const { firebaseUser } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
