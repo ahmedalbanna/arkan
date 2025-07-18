@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-
+import { cookies } from 'next/headers';
 // Helper to verify admin role
-async function verifyAdmin(request: Request) {
-    const sessionCookie = request.cookies.get('__session')?.value;
+async function verifyAdmin() {
+    const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {
         return { authorized: false, message: 'Unauthorized' };
     }
