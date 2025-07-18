@@ -112,7 +112,29 @@
     "errorLoading": "Failed to load agent configurations."
   },
   "manageTemplates": {
-    "pageSubtitle": "Customize the look and feel of exported DOCX documents."
+    "pageSubtitle": "Customize the look and feel of exported DOCX documents.",
+    "generalStyles": "General Styles",
+    "headingStyles": "Heading Styles",
+    "fontFamily": "Font Family",
+    "fontSize": "Font Size (pt)",
+    "fontColor": "Font Color",
+    "bold": "Bold",
+    "headingLevel": "Heading {level}",
+    "saveButton": "Save Template"
+  },
+  "templates": {
+    "modern": {
+      "name": "Modern",
+      "description": "A clean, contemporary design using sans-serif fonts and blue headings."
+    },
+    "classic": {
+      "name": "Classic",
+      "description": "A formal, traditional design using Times New Roman for headings and text."
+    },
+    "academic": {
+      "name": "Academic",
+      "description": "A design suitable for academic reports and research, with double line spacing and Garamond font."
+    }
   },
   "reportGenerator": {
     "pageTitle": "Full Document Generation",

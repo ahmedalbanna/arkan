@@ -129,23 +129,23 @@ const academicStyles: IStylesOptions = {
 
 export const templates: Record<TemplateKey, Template> = {
     modern: {
-        name: 'حديث (Modern)',
+        name: 'templates.modern.name',
         styles: modernStyles,
-        description: 'تصميم نظيف وعصري يستخدم خطوط sans-serif وألوان زرقاء للعناوين.',
+        description: 'templates.modern.description',
         imageUrl: 'https://placehold.co/400x565.png',
         dataAiHint: 'document template',
     },
     classic: {
-        name: 'كلاسيكي (Classic)',
+        name: 'templates.classic.name',
         styles: classicStyles,
-        description: 'تصميم رسمي وتقليدي يستخدم خط Times New Roman للعناوين والنصوص.',
+        description: 'templates.classic.description',
         imageUrl: 'https://placehold.co/400x565.png',
         dataAiHint: 'classic document',
     },
     academic: {
-        name: 'أكاديمي (Academic)',
+        name: 'templates.academic.name',
         styles: academicStyles,
-        description: 'تصميم مناسب للتقارير والأبحاث الأكاديمية، مع تباعد أسطر مزدوج وخط Garamond.',
+        description: 'templates.academic.description',
         imageUrl: 'https://placehold.co/400x565.png',
         dataAiHint: 'academic paper',
     },

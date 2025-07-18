@@ -112,7 +112,101 @@
     "errorLoading": "فشل تحميل إعدادات الوكيل."
   },
   "manageTemplates": {
-    "pageSubtitle": "قم بتخصيص مظهر وشكل مستندات DOCX المصدرة."
+    "pageSubtitle": "قم بتخصيص مظهر وشكل مستندات DOCX المصدرة.",
+    "generalStyles": "الأنماط العامة",
+    "headingStyles": "أنماط العناوين",
+    "fontFamily": "نوع الخط",
+    "fontSize": "حجم الخط (نقطة)",
+    "fontColor": "لون الخط",
+    "bold": "عريض",
+    "headingLevel": "عنوان {level}",
+    "saveButton": "حفظ القالب"
+  },
+  "templates": {
+    "modern": {
+      "name": "حديث",
+      "description": "تصميم نظيف وعصري يستخدم خطوط sans-serif وألوان زرقاء للعناوين."
+    },
+    "classic": {
+      "name": "كلاسيكي",
+      "description": "تصميم رسمي وتقليدي يستخدم خط Times New Roman للعناوين والنصوص."
+    },
+    "academic": {
+      "name": "أكاديمي",
+      "description": "تصميم مناسب للتقارير والأبحاث الأكاديمية، مع تباعد أسطر مزدوج وخط Garamond."
+    }
+  },
+  "reportGenerator": {
+    "pageTitle": "Full Document Generation",
+    "pageSubtitle": "Start with an idea, generate a full project proposal, then generate each section of the final report individually.",
+    "step1Title": "Step 1: Generate Project Proposal",
+    "step1Desc": "Write a brief description of your project idea. The clearer the idea, the better the proposal.",
+    "step1Placeholder": "e.g., A customer relationship management (CRM) system to improve sales efficiency and customer service.",
+    "step1Button": "Generate Proposal",
+    "step1ButtonLoading": "Generating...",
+    "step1Error": "An error occurred while generating the proposal. Please try again.",
+    "step2Title": "Step 2: Review Proposal (JSON)",
+    "step2Desc": "This is the raw input for the AI agents. You can modify it if needed.",
+    "step3Title": "Step 3: Generation Tools",
+    "step3Desc": "Select a section or diagram to generate. You can edit the prompt for each item.",
+    "actionsTitle": "Actions",
+    "actionsDesc": "Export your outputs or start a new session.",
+    "exportProposal": "Export Proposal",
+    "exportReport": "Export Report",
+    "newSession": "New Session",
+    "generationSuccess": "Generation Successful!",
+    "generationSuccessDesc": "Successfully generated \"{item}\". You can view it below.",
+    "generationFailed": "Generation Failed!",
+    "proposalDetailsTitle": "Generated Proposal Details (Editable)",
+    "tool_tab_prompt": "Edit Prompt",
+    "tool_tab_controls": "Control Output",
+    "tool_tab_context": "Context",
+    "tool_prompt_label": "Prompt",
+    "tool_formality_label": "Formality",
+    "tool_formality_informal": "Informal",
+    "tool_formality_balanced": "Balanced",
+    "tool_formality_formal": "Very Formal",
+    "tool_tone_label": "Tone",
+    "tool_tone_placeholder": "Select a tone",
+    "tool_tone_professional": "Professional",
+    "tool_tone_academic": "Academic",
+    "tool_tone_casual": "Casual",
+    "tool_tone_persuasive": "Persuasive",
+    "tool_word_count_label": "Word Count (approx.)",
+    "tool_word_count_placeholder": "e.g., 300",
+    "tool_instruction_preview": "Instruction Preview:",
+    "tool_instruction_none": "No additional instructions.",
+    "tool_context_label": "Include Context from Other Items",
+    "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
+    "tool_context_sections": "Sections",
+    "tool_context_diagrams": "Diagrams",
+    "generateButton": "Generate",
+    "errorInsufficientCredits": "Insufficient credits. Please top-up your account."
+  },
+  "summarizer": {
+    "pageTitle": "AI Project Summarizer",
+    "pageSubtitle": "Enter a detailed description of your project, and the AI will generate a professional summary highlighting key aspects and technologies used.",
+    "formTitle": "Project Description",
+    "formDescription": "Paste your project description here. The more detailed the description, the better the summary.",
+    "formPlaceholder": "Example: I built a task management app using FlutterFlow and Firebase. The app features a simple UI and advanced features like smart reminders and weekly reports...",
+    "submitButton": "Generate Summary",
+    "submitButtonLoading": "Generating...",
+    "errorDisabled": "This agent has been disabled.",
+    "errorGeneral": "An error occurred while generating the summary. Please try again.",
+    "generatedTitle": "Generated Summary",
+    "detectedTech": "Discovered Technologies"
+  },
+  "agentEditor": {
+    "pageTitle": "Edit Agent",
+    "pageSubtitle": "Update the name and prompt for this AI agent.",
+    "idLabel": "ID",
+    "categoryLabel": "Category",
+    "nameLabel": "Agent Name",
+    "basePromptLabel": "Base Prompt",
+    "promptLabel": "Prompt",
+    "complexPromptNote": "You are only editing the base part of the prompt. Specific guidelines are managed in the report builder.",
+    "saveButton": "Save Changes",
+    "errorLoading": "Failed to load agent configuration."
   },
   "managePayments": {
     "pageTitle": "إدارة طلبات الدفع",
@@ -126,5 +220,42 @@
     "notesPlaceholder": "إضافة ملاحظات التحقق (اختياري)...",
     "approveButton": "موافقة",
     "declineButton": "رفض"
+  },
+  "pptxTemplates": {
+    "pageTitle": "Manage Presentation Templates",
+    "pageSubtitle": "Customize the appearance of exported PPTX presentations."
+  },
+  "submitPayment": {
+    "pageTitle": "Submit Proof of Payment",
+    "pageSubtitle": "Please complete the bank transfer and upload your receipt below.",
+    "bankDetailsTitle": "Bank Transfer Details",
+    "bankDetailsDescription": "Please transfer the required amount to the account below.",
+    "bankNameLabel": "Bank Name",
+    "accountHolderLabel": "Account Holder",
+    "ibanLabel": "IBAN",
+    "referenceLabel": "Reference",
+    "yourUserIdLabel": "Your User ID",
+    "pleaseLogin": "Please log in",
+    "uploadReceiptTitle": "Upload Receipt",
+    "selectedPlanDescription": "You have selected the {planName} plan.",
+    "proofLabel": "Proof of Payment",
+    "submitButton": "Submit for Verification",
+    "successTitle": "Request Submitted",
+    "successDescription": "Your payment proof has been uploaded. An admin will review it shortly.",
+    "errorTitle": "Submission Failed",
+    "missingInfoErrorTitle": "Error",
+    "missingInfoErrorDescription": "Missing required information. Please go back to the pricing page and select a plan."
+  },
+  "pdfToMarkdown": {
+    "pageTitle": "PDF to Markdown Converter",
+    "pageSubtitle": "Upload a PDF, and let the AI extract and reformat the content into clean markdown."
+  },
+  "pricing": {
+    "pageTitle": "Choose Your Plan",
+    "pageSubtitle": "Select the perfect credit package to power your AI-driven workflows.",
+    "mostPopular": "Most Popular",
+    "oneTime": "one-time",
+    "aiCredits": "AI Credits",
+    "selectPlanButton": "Select Plan"
   }
 }

@@ -10,11 +10,13 @@ import { Loader2, Save } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import Image from 'next/image';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
 export default function TemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
+  const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(templateKey, path, value);
@@ -43,13 +45,13 @@ export default function TemplateManager() {
         return (
           <Card key={key} className="flex flex-col">
             <CardHeader>
-              <CardTitle className="font-headline">{template.name}</CardTitle>
-              <CardDescription>{template.description}</CardDescription>
+              <CardTitle className="font-headline">{t(template.name)}</CardTitle>
+              <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
               <Image
                 src={template.imageUrl}
-                alt={`${template.name} preview`}
+                alt={`${t(template.name)} preview`}
                 width={400}
                 height={565}
                 className="w-full h-auto rounded-md border"
@@ -57,11 +59,11 @@ export default function TemplateManager() {
               />
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="general">
-                  <AccordionTrigger>General Styles</AccordionTrigger>
+                  <AccordionTrigger>{t('manageTemplates.generalStyles')}</AccordionTrigger>
                   <AccordionContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>Font Family</Label>
+                        <Label>{t('manageTemplates.fontFamily')}</Label>
                         <select
                           value={(styles?.document?.run?.font as any)?.name || ''}  // Type assertion and nullish coalescing
                           onChange={(e) => handleStyleChange(key, 'document.run.font.name', e.target.value)}
@@ -72,7 +74,7 @@ export default function TemplateManager() {
 
                       </div>
                       <div className="space-y-2">
-                        <Label>Font Size (pt)</Label>
+                        <Label>{t('manageTemplates.fontSize')}</Label>
                         <Input
                           type="number"
                           value={Number(styles?.document?.run?.size || 0) / 2}
@@ -81,7 +83,7 @@ export default function TemplateManager() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label>Font Color</Label>
+                      <Label>{t('manageTemplates.fontColor')}</Label>
                       <div className="flex items-center gap-2">
                         <Input
                           type="color"
@@ -100,14 +102,14 @@ export default function TemplateManager() {
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="headings">
-                  <AccordionTrigger>Heading Styles</AccordionTrigger>
+                  <AccordionTrigger>{t('manageTemplates.headingStyles')}</AccordionTrigger>
                   <AccordionContent className="space-y-6">
                     {[1, 2, 3].map(level => (
                       <div key={level} className="space-y-3 p-2 border-l-2">
-                        <h4 className="font-semibold">Heading {level}</h4>
+                        <h4 className="font-semibold">{t('manageTemplates.headingLevel', { level })}</h4>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label>Font Size (pt)</Label>
+                            <Label>{t('manageTemplates.fontSize')}</Label>
                             <Input
                               type="number"
                               value={Number((styles as any)?.[`heading${level}`]?.run?.size || 0) / 2}
@@ -115,7 +117,7 @@ export default function TemplateManager() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Bold</Label>
+                            <Label>{t('manageTemplates.bold')}</Label>
                             <input
                               type="checkbox"
                               className="w-5 h-5 block"
@@ -126,7 +128,7 @@ export default function TemplateManager() {
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <Label>Font Color</Label>
+                          <Label>{t('manageTemplates.fontColor')}</Label>
                           <div className="flex items-center gap-2">
                             <Input
                               type="color"
@@ -153,7 +155,7 @@ export default function TemplateManager() {
             <CardFooter>
               <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Save Template
+                {t('manageTemplates.saveButton')}
               </Button>
             </CardFooter>
           </Card>
