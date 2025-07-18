@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { Loader2, Download, Copy, Check, Share2, RefreshCw } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface DiagramViewerProps {
     title: string;
@@ -28,6 +29,7 @@ export default function DiagramViewer({
     onCodeChange,
     onUpdate
 }: DiagramViewerProps) {
+    const { t } = useLocalization();
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const hasChanges = onCodeChange && plantUmlCode !== (localStorage.getItem(`puml-${title}`) || '');
@@ -81,7 +83,7 @@ export default function DiagramViewer({
                                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent><p>Download Image</p></TooltipContent>
+                            <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
                     <TooltipProvider>
@@ -91,7 +93,7 @@ export default function DiagramViewer({
                                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent><p>{isCopied ? 'Copied!' : 'Copy Code'}</p></TooltipContent>
+                            <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
                     <TooltipProvider>
@@ -103,7 +105,7 @@ export default function DiagramViewer({
                                     </a>
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent><p>Open Online Renderer</p></TooltipContent>
+                            <TooltipContent><p>{t('builder.diagramGenerator.tooltips.openRenderer')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
                 </div>
@@ -115,10 +117,9 @@ export default function DiagramViewer({
                     disabled={isUpdating}
                     >
                     {isUpdating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
-                    Update Diagram
+                    {t('builder.diagramGenerator.updateDiagram')}
                 </Button>
             )}
         </div>
     );
 }
-

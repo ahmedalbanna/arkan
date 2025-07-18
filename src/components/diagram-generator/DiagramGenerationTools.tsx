@@ -25,6 +25,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateClassDiagramOutput } from '@/ai/flows/generate-class-diagram';
 import type { GuidelineState } from '@/hooks/useBuilderStore';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
@@ -78,6 +79,7 @@ async function uploadPdf(variables: {formData: FormData, token: string}): Promis
 }
 
 export const DiagramGenerationTools = () => {
+    const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
@@ -110,11 +112,11 @@ export const DiagramGenerationTools = () => {
             const diagramKey = variables.body.diagramToGenerate;
             setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: `Diagram "${diagramConfig[diagramKey].title}" generated successfully!` });
+            toast({ title: t('builder.diagramGenerator.toasts.success', { title: t(diagramConfig[diagramKey].title) }) });
             setActiveMutationKey(null);
         },
         onError: (error: Error, variables) => {
-            toast({ title: `Failed to generate "${diagramConfig[variables.body.diagramToGenerate].title}"`, description: error.message, variant: "destructive" });
+            toast({ title: t('builder.diagramGenerator.toasts.failed', { title: t(diagramConfig[variables.body.diagramToGenerate].title) }), description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -125,10 +127,10 @@ export const DiagramGenerationTools = () => {
             const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
+            toast({ title: t('builder.reportGenerator.toasts.contextAdded'), description: t('builder.reportGenerator.toasts.contextAddedDesc', { fileName: file.name }) });
         },
         onError: (error: Error) => {
-            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+            toast({ title: t('builder.reportGenerator.toasts.uploadFailed'), description: error.message, variant: "destructive" });
         },
     });
     // Check if anything is generating
@@ -148,7 +150,7 @@ export const DiagramGenerationTools = () => {
     // Handle diagram generation
     const onGenerateDiagram = async (diagramType: DiagramType) => {
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
             return;
         }
 
@@ -184,14 +186,14 @@ export const DiagramGenerationTools = () => {
 
 
     if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>Loading Tools...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
     
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">Generation Tools</CardTitle>
-                <CardDescription>Configure and generate diagrams.</CardDescription>
+                <CardTitle className="font-headline">{t('builder.diagramGenerator.toolsTitle')}</CardTitle>
+                <CardDescription>{t('builder.diagramGenerator.toolsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
@@ -209,18 +211,18 @@ export const DiagramGenerationTools = () => {
                             <AccordionItem value={key} key={key}>
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                     <div className="flex items-center gap-2">
-                                        <Icon className="h-4 w-4" /> {title}
+                                        <Icon className="h-4 w-4" /> {t(title)}
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">
                                     <Tabs defaultValue="prompt" className="w-full">
                                         <TabsList className="grid w-full grid-cols-2">
-                                            <TabsTrigger value="prompt">Prompt</TabsTrigger>
-                                            <TabsTrigger value="context">Context</TabsTrigger>
+                                            <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                            <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
                                             <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.basePrompt')}</Label>
                                                 <div className="p-3 rounded-md border bg-muted text-xs">
                                                     <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                                                 </div>
@@ -228,7 +230,7 @@ export const DiagramGenerationTools = () => {
 
                                             {hasGuidelines && (
                                                 <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.guidelines')}</Label>
                                                     <div className="space-y-2 p-3 rounded-md border">
                                                         {promptConfig.guidelines!.map((guideline, index) => (
                                                             <div key={index} className="flex items-start gap-2">
@@ -247,7 +249,7 @@ export const DiagramGenerationTools = () => {
                                             )}
 
                                             <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.customGuidelines')}</Label>
                                                 {guidelineState[key]?.custom.map((custom, index) => (
                                                     <div key={index} className="flex items-center gap-2 text-sm">
                                                         <span>- {custom}</span>
@@ -258,7 +260,7 @@ export const DiagramGenerationTools = () => {
                                                 ))}
                                                 <div className="flex gap-2">
                                                     <Input
-                                                        placeholder="Add a custom guideline..."
+                                                        placeholder={t('builder.diagramGenerator.addGuidelinePlaceholder')}
                                                         value={customGuidelineInput[key] || ''}
                                                         onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
@@ -275,7 +277,7 @@ export const DiagramGenerationTools = () => {
                                             <div className="space-y-4 pr-4">
                                                     {/* Context selection UI for other sections */}
                                                     <div className="space-y-2">
-                                                        <Label className="font-semibold">Contextual Sections</Label>
+                                                        <Label className="font-semibold">{t('builder.diagramGenerator.contextSections')}</Label>
                                                         {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                 <Checkbox
@@ -286,19 +288,19 @@ export const DiagramGenerationTools = () => {
                                                                 <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
                                                                     <div className="flex items-center gap-2">
                                                                         <BookCheck className="h-4 w-4" />
-                                                                        {sectionConfig[contextKey].title}
+                                                                        {t(sectionConfig[contextKey].title)}
                                                                     </div>
                                                                 </Label>
                                                             </div>
                                                         ))}
                                                         {Object.keys(sections).length === 0 && (
-                                                          <p className="text-xs text-muted-foreground">No sections generated yet.</p>
+                                                          <p className="text-xs text-muted-foreground">{t('builder.diagramGenerator.noSections')}</p>
                                                         )}
                                                     </div>
                                                     {/* Context selection UI for diagrams */}
                                                     {Object.keys(diagrams || {}).length > 0 && (
                                                       <div className="space-y-2 pt-2 border-t">
-                                                          <Label className="font-semibold">Contextual Diagrams</Label>
+                                                          <Label className="font-semibold">{t('builder.diagramGenerator.contextDiagrams')}</Label>
                                                           {orderedDiagrams.filter(dKey => dKey !== key && diagrams?.[dKey]).map(contextKey => (
                                                               <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                   <Checkbox
@@ -309,7 +311,7 @@ export const DiagramGenerationTools = () => {
                                                                   <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
                                                                       <div className="flex items-center gap-2">
                                                                           <GitGraph className="h-4 w-4" />
-                                                                          {diagramConfig[contextKey].title}
+                                                                          {t(diagramConfig[contextKey].title)}
                                                                       </div>
                                                                   </Label>
                                                               </div>
@@ -319,7 +321,7 @@ export const DiagramGenerationTools = () => {
                                                      {/* Context selection UI for external file */}
                                                     {externalContext && (
                                                         <div className="space-y-2 pt-2 border-t">
-                                                            <Label className="font-semibold">External Context</Label>
+                                                            <Label className="font-semibold">{t('builder.diagramGenerator.externalContext')}</Label>
                                                                 <div className="flex items-center space-x-2">
                                                                     <Checkbox
                                                                         id={`context-external-${key}`}
@@ -345,10 +347,10 @@ export const DiagramGenerationTools = () => {
                                             onClick={() => onGenerateDiagram(key as DiagramType)}
                                             disabled={isAnythingGenerating || !agent?.isEnabled}
                                             className="font-headline"
-                                            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+                                            title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.diagramGenerator.generateButton', { title: t(title) })}
                                         >
                                             {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                            Generate
+                                            {t('builder.diagramGenerator.generateButton')}
                                         </Button>
                                     </div>
                                 </AccordionContent>
@@ -357,7 +359,7 @@ export const DiagramGenerationTools = () => {
                     })}
                 </Accordion>
                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">External Context</h3>
+                    <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
                     {externalContext ? (
                         <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
                            <div className="flex items-center gap-2 truncate">
@@ -367,7 +369,7 @@ export const DiagramGenerationTools = () => {
                            <div className="flex items-center">
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" title={t('builder.reportGenerator.viewContent')}>
                                             <Eye className="h-4 w-4" />
                                         </Button>
                                     </DialogTrigger>
@@ -380,7 +382,7 @@ export const DiagramGenerationTools = () => {
                                         </ScrollArea>
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title={t('builder.reportGenerator.removeFile')}>
                                     <X className="h-4 w-4" />
                                 </Button>
                            </div>
@@ -390,7 +392,7 @@ export const DiagramGenerationTools = () => {
                             <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
                             <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || pdfMutation.isPending} className="w-full">
                                 {pdfMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                                Upload & Process PDF
+                                {t('builder.reportGenerator.uploadButton')}
                             </Button>
                         </div>
                     )}

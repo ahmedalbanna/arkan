@@ -236,6 +236,8 @@
       "newSessionDesc": "All content has been cleared.",
       "authError": "You must be logged in to perform this action.",
       "generationFailed": "Generation Failed",
+      "generationSuccess": "Generation Successful",
+      "generationSuccessDesc": "{item} has been successfully generated.",
       "insufficientCredits": "Insufficient credits. Please purchase more."
     },
     "proposalGenerator": {
@@ -354,6 +356,16 @@
       "no_other_sections": "No other sections generated yet.",
       "no_diagrams": "No diagrams generated yet.",
       "context_external": "External Context",
+      "sections": {
+        "introduction": "Introduction",
+        "literatureReview": "Literature Review",
+        "systemAnalysis": "System Analysis",
+        "designStrategy": "Design Strategy",
+        "systemDesign": "System Design",
+        "systemProgramming": "System Programming",
+        "systemTesting": "System Testing",
+        "conclusion": "Conclusion"
+      },
       "toasts": {
         "evaluationComplete": "Evaluation Complete!",
         "evaluationFailed": "Evaluation Failed",
@@ -376,6 +388,7 @@
       "title": "Generated Diagrams",
       "description": "Review, edit, and update your generated diagrams below.",
       "emptyState": "Your generated diagrams will appear here in an accordion.",
+      "toolsLoading": "Loading Tools...",
       "toolsTitle": "Generation Tools",
       "toolsDesc": "Configure and generate diagrams.",
       "basePrompt": "Base Prompt",
@@ -390,6 +403,21 @@
       "generateButton": "Generate",
       "disabledTooltip": "This agent is disabled",
       "updateDiagram": "Update Diagram",
+      "diagrams": {
+        "useCase": "Use Case Diagram",
+        "class": "Class Diagram",
+        "sequence": "Sequence Diagram",
+        "activity": "Activity Diagram",
+        "component": "Component Diagram",
+        "archimate": "ArchiMate Diagram",
+        "er": "ER Diagram"
+      },
+      "toasts": {
+        "success": "\"{title}\" generated successfully!",
+        "failed": "Failed to generate \"{title}\"",
+        "updateSuccess": "Diagram updated successfully!",
+        "updateFailed": "Diagram Update Failed"
+      },
       "tooltips": {
         "download": "Download Image",
         "copy": "Copy Code",

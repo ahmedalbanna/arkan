@@ -236,6 +236,8 @@
       "newSessionDesc": "تم مسح كل المحتوى.",
       "authError": "يجب عليك تسجيل الدخول لتنفيذ هذا الإجراء.",
       "generationFailed": "فشل الإنشاء",
+      "generationSuccess": "نجح الإنشاء",
+      "generationSuccessDesc": "تم إنشاء {item} بنجاح.",
       "insufficientCredits": "رصيد غير كاف. يرجى شراء المزيد من الرصيد."
     },
     "proposalGenerator": {
@@ -354,6 +356,16 @@
       "no_other_sections": "لم يتم إنشاء أقسام أخرى بعد.",
       "no_diagrams": "لم يتم إنشاء رسوم بعد.",
       "context_external": "سياق خارجي",
+      "sections": {
+        "introduction": "المقدمة",
+        "literatureReview": "مراجعة الأدبيات",
+        "systemAnalysis": "تحليل النظام",
+        "designStrategy": "استراتيجية التصميم",
+        "systemDesign": "تصميم النظام",
+        "systemProgramming": "برمجة النظام",
+        "systemTesting": "اختبار النظام",
+        "conclusion": "الخاتمة"
+      },
       "toasts": {
         "evaluationComplete": "اكتمل التقييم!",
         "evaluationFailed": "فشل التقييم",
@@ -376,6 +388,7 @@
       "title": "الرسوم البيانية التي تم إنشاؤها",
       "description": "راجع، عدّل، وحدّث الرسوم البيانية التي تم إنشاؤها أدناه.",
       "emptyState": "ستظهر الرسوم البيانية التي تم إنشاؤها هنا في أكورديون.",
+      "toolsLoading": "جارٍ تحميل الأدوات...",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDesc": "كوّن وأنشئ الرسوم البيانية.",
       "basePrompt": "الطلب الأساسي",
@@ -390,6 +403,21 @@
       "generateButton": "إنشاء",
       "disabledTooltip": "هذا الوكيل معطّل",
       "updateDiagram": "تحديث الرسم البياني",
+      "diagrams": {
+        "useCase": "رسم بياني لحالة الاستخدام",
+        "class": "رسم بياني للفئات",
+        "sequence": "رسم بياني تسلسلي",
+        "activity": "رسم بياني للأنشطة",
+        "component": "رسم بياني للمكونات",
+        "archimate": "رسم بياني ArchiMate",
+        "er": "رسم بياني ER"
+      },
+      "toasts": {
+        "success": "تم إنشاء \"{title}\" بنجاح!",
+        "failed": "فشل إنشاء \"{title}\"",
+        "updateSuccess": "تم تحديث الرسم البياني بنجاح!",
+        "updateFailed": "فشل تحديث الرسم البياني"
+      },
       "tooltips": {
         "download": "تنزيل الصورة",
         "copy": "نسخ الكود",

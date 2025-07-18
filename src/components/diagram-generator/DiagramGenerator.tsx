@@ -14,6 +14,7 @@ import type { DiagramType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -43,6 +44,7 @@ async function updateDiagram(variables: { plantUmlCode: string, token: string })
 }
 
 export default function DiagramGenerator() {
+    const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     const {
         proposal,
@@ -61,16 +63,16 @@ export default function DiagramGenerator() {
                 setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
             }
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: `Diagram updated successfully!` });
+            toast({ title: t('builder.diagramGenerator.toasts.updateSuccess') });
         },
         onError: (error: Error) => {
-            toast({ title: 'Diagram Update Failed', description: error.message, variant: "destructive" });
+            toast({ title: t('builder.diagramGenerator.toasts.updateFailed'), description: error.message, variant: "destructive" });
         },
     });
 
     const handleUpdateDiagram = async (plantUmlCode: string) => {
         if (!firebaseUser) {
-            toast({ title: 'Authentication Error', description: 'You must be logged in to update a diagram.', variant: 'destructive' });
+            toast({ title: t('builder.toasts.authError'), description: 'You must be logged in to update a diagram.', variant: 'destructive' });
             return;
         }
         const token = await firebaseUser.getIdToken();
@@ -82,8 +84,8 @@ export default function DiagramGenerator() {
           <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
                   <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                  <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
-                  <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+                  <h3 className="text-lg font-semibold">{t('builder.diagramGenerator.noProposal')}</h3>
+                  <p>{t('builder.diagramGenerator.noProposalDesc')}</p>
               </div>
           </Card>
       )
@@ -98,9 +100,9 @@ export default function DiagramGenerator() {
             <div className="lg:col-span-8 overflow-y-auto pr-2">
                  <Card className="h-full">
                     <CardHeader>
-                        <CardTitle className="font-headline">Generated Diagrams</CardTitle>
+                        <CardTitle className="font-headline">{t('builder.diagramGenerator.title')}</CardTitle>
                          <CardDescription>
-                            Review, edit, and update your generated diagrams below.
+                            {t('builder.diagramGenerator.description')}
                          </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -114,12 +116,12 @@ export default function DiagramGenerator() {
                                       <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
                                          <div className="flex items-center">
                                               <Icon className="mr-2 h-5 w-5 text-primary" />
-                                              {diagramConfig[key].title}
+                                              {t(diagramConfig[key].title)}
                                          </div>
                                       </AccordionTrigger>
                                       <AccordionContent className="p-4 border-t">
                                         <DiagramViewer
-                                            title={diagramConfig[key].title}
+                                            title={t(diagramConfig[key].title)}
                                             imageUrl={diagramData.imageUrl}
                                             plantUmlCode={diagramData.plantUmlCode}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
@@ -136,7 +138,7 @@ export default function DiagramGenerator() {
                             <div className="flex items-center justify-center h-full min-h-[400px]">
                                 <div className="text-center text-muted-foreground p-8">
                                     <GitGraph className="w-16 h-16 mx-auto mb-4" />
-                                    <p>Your generated diagrams will appear here in an accordion.</p>
+                                    <p>{t('builder.diagramGenerator.emptyState')}</p>
                                 </div>
                             </div>
                         )}
