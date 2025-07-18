@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare, Languages } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -19,6 +19,8 @@ import { Pluggable } from 'unified';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ManipulateTextOutput } from '@/ai/schemas';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useTranslate } from '@/hooks/use-translation';
 
 interface EditableSectionProps {
     sectionKey: SectionName;
@@ -43,11 +45,15 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
-    const [isProcessingAi, setIsProcessingAi] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
+    const { t, locale } = useLocalization();
+    const translateMutation = useTranslate();
+
+    const isProcessingAi = translateMutation.isPending;
+
 
     useEffect(() => {
         if (!isEditing && aiSuggestion === null) {
@@ -69,7 +75,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     const handleAiAction = async (command: string) => {
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to use AI actions.", variant: "destructive" });
+            toast({ title: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
         setIsProcessingAi(true);
@@ -88,17 +94,16 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             const result = await response.json();
             if (!response.ok) {
                 const isCreditError = result.message && result.message.toLowerCase().includes('credit');
-                const title = isCreditError ? 'Insufficient Credits' : 'AI Action Failed';
+                const title = isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed');
                 throw new Error(result.message || "An unexpected error occurred.");
             }
 
             setAiSuggestion((result as ManipulateTextOutput).rewrittenText);
             queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
         } catch (error: any) {
-            console.error("AI action failed:", error);
             const isCreditError = error.message && error.message.toLowerCase().includes('credit');
             toast({
-                title: isCreditError ? 'Insufficient Credits' : 'AI Action Failed',
+                title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
                 description: error.message || "An unexpected error occurred.",
                 variant: "destructive",
             });
@@ -106,6 +111,28 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             setIsProcessingAi(false);
             setIsAiPopoverOpen(false);
         }
+    };
+    
+    const handleTranslate = async () => {
+        if (!firebaseUser) return;
+        translateMutation.mutate({ 
+            text: String(currentContent),
+            targetLang: locale === 'en' ? 'ar' : 'en' 
+        }, {
+            onSuccess: (data) => {
+                setAiSuggestion(data.translatedText);
+                toast({ title: t('builder.editableSection.toasts.translateSuccess') });
+            },
+            onError: (error) => {
+                const isCreditError = error.message.toLowerCase().includes('credit');
+                toast({ 
+                    title: t('builder.editableSection.toasts.translateFailed'), 
+                    description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
+                    variant: 'destructive' 
+                });
+            },
+            onSettled: () => setIsAiPopoverOpen(false),
+        });
     };
 
     const handleAcceptSuggestion = () => {
@@ -121,14 +148,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     
     const handleCopyMarkdown = () => {
         navigator.clipboard.writeText(content);
-        toast({ title: 'Copied as Markdown' });
+        toast({ title: t('builder.editableSection.toasts.copiedMd') });
         setIsEditorPopoverOpen(false);
     };
 
     const handleCopyText = () => {
         const text = contentRef.current?.innerText || '';
         navigator.clipboard.writeText(text);
-        toast({ title: 'Copied as Plain Text' });
+        toast({ title: t('builder.editableSection.toasts.copiedText') });
         setIsEditorPopoverOpen(false);
     };
     
@@ -148,7 +175,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         if (aiSuggestion !== null) {
             return (
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
-                    <p className="text-xs font-semibold text-accent-foreground mb-2">AI SUGGESTION</p>
+                    <p className="text-xs font-semibold text-accent-foreground mb-2">{t('builder.editableSection.aiSuggestion')}</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
                         <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
                             {aiSuggestion}
@@ -158,11 +185,11 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     <div className="flex justify-end gap-2 mt-2">
                         <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
                             <X className="mr-2 h-4 w-4" />
-                            Reject
+                            {t('builder.editableSection.reject')}
                         </Button>
                         <Button variant="secondary" size="sm" onClick={handleAcceptSuggestion}>
                             <Check className="mr-2 h-4 w-4" />
-                            Accept
+                            {t('builder.editableSection.accept')}
                         </Button>
                     </div>
                 </div>
@@ -212,7 +239,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
-                                title="AI Actions"
+                                title={t('builder.editableSection.tooltips.aiActions')}
                             >
                                 <Wand2 className="h-4 w-4" />
                             </Button>
@@ -225,16 +252,19 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                             ) : (
                                 <div className="grid gap-1">
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                        <BookText className="mr-2 h-4 w-4" /> Summarize
+                                        <BookText className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.summarize')}
                                     </Button>
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                        <Maximize className="mr-2 h-4 w-4" /> Expand
+                                        <Maximize className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.expand')}
                                     </Button>
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                        <PenLine className="mr-2 h-4 w-4" /> Rewrite
+                                        <PenLine className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.rewrite')}
                                     </Button>
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
-                                        <SpellCheck className="mr-2 h-4 w-4" /> Check Grammar
+                                        <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.checkGrammar')}
+                                    </Button>
+                                    <Button variant="ghost" className="justify-start" onClick={handleTranslate}>
+                                        <Languages className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.translate')}
                                     </Button>
                                 </div>
                             )}
@@ -246,7 +276,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6"
-                                title="Editor Options"
+                                title={t('builder.editableSection.tooltips.editorOptions')}
                             >
                                 <MoreVertical className="h-4 w-4" />
                             </Button>
@@ -254,16 +284,16 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                         <PopoverContent className="w-56 p-2">
                             <div className="grid gap-1">
                                 <Button variant="ghost" className="justify-start" onClick={handleCopyMarkdown}>
-                                    <Copy className="mr-2 h-4 w-4" /> Copy Markdown
+                                    <Copy className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.copyMd')}
                                 </Button>
                                 <Button variant="ghost" className="justify-start" onClick={handleCopyText}>
-                                    <FileText className="mr-2 h-4 w-4" /> Copy Plain Text
+                                    <FileText className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.copyText')}
                                 </Button>
                                 <Button variant="ghost" className="justify-start" onClick={handleExportDocx}>
-                                    <FileDown className="mr-2 h-4 w-4" /> Download DOCX
+                                    <FileDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.downloadDocx')}
                                 </Button>
                                 <Button variant="ghost" className="justify-start" onClick={handleExportPdf}>
-                                    <FileDown className="mr-2 h-4 w-4" /> Download PDF
+                                    <FileDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.downloadPdf')}
                                 </Button>
                             </div>
                         </PopoverContent>

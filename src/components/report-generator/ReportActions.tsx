@@ -3,8 +3,8 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Loader2 } from 'lucide-react';
-import { type TemplateKey } from '@/lib/docx-styles';
+import { FileText, Languages, Loader2 } from 'lucide-react';
+import type { TemplateKey } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,7 +15,12 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
-export const ReportActions = () => {
+interface ReportActionsProps {
+    onTranslateAll: () => void;
+    isTranslating: boolean;
+}
+
+export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsProps) => {
   const { t } = useLocalization();
   const { proposal, sections, diagrams } = useBuilderStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
@@ -48,12 +53,12 @@ export const ReportActions = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">{t('reportGenerator.actionsTitle')}</CardTitle>
-        <CardDescription>Export your generated report.</CardDescription>
+        <CardTitle className="font-headline">{t('builder.reportGenerator.actionsTitle')}</CardTitle>
+        <CardDescription>{t('builder.reportGenerator.actionsDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-            <Label htmlFor="docx-template-select">DOCX Template</Label>
+            <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
             {docxLoaded ? (
               <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange}>
                   <SelectTrigger id="docx-template-select">
@@ -67,13 +72,15 @@ export const ReportActions = () => {
               </Select>
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
-        <Button onClick={handleExportReportDOCX} disabled={!hasContent} className="w-full font-headline">
+        <Button onClick={handleExportReportDOCX} disabled={!hasContent || isTranslating} className="w-full font-headline">
           <FileText className="mr-2 h-4 w-4" />
-          {t('reportGenerator.exportReport')}
+          {t('builder.reportGenerator.exportReport')}
+        </Button>
+         <Button onClick={onTranslateAll} disabled={isTranslating || !hasContent} variant="secondary" className="w-full font-headline">
+            {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+            {t('builder.reportGenerator.translateAll')}
         </Button>
       </CardContent>
     </Card>
   );
 };
-
-    

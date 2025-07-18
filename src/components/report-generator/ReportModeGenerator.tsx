@@ -8,8 +8,10 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './ReportGenerationTools';
 import { EvaluationTools } from '../EvaluationTools';
 import { Card } from '@/components/ui/card';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export default function ReportGenerator() {
+    const { t } = useLocalization();
     const {
         proposal,
         handleSectionUpdate,
@@ -20,8 +22,8 @@ export default function ReportGenerator() {
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
                 <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                <h3 className="text-lg font-semibold">No Proposal Loaded</h3>
-                <p>Please generate a proposal in "Proposal Mode" first, or upload a project file.</p>
+                <h3 className="text-lg font-semibold">{t('builder.reportGenerator.noProposal')}</h3>
+                <p>{t('builder.reportGenerator.noProposalDesc')}</p>
             </div>
         </Card>
     )

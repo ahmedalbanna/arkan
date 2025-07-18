@@ -50,6 +50,7 @@ interface ReportResultsProps {
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const { sections } = useBuilderStore();
+  const { t } = useLocalization();
   
   const hasContent = Object.values(sections).some(s => !!s);
   
@@ -58,8 +59,8 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
                 <FileText className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">Report Content Will Appear Here</h3>
-                <p>Use the Generation Tools to create sections for your report.</p>
+                <h3 className="text-lg font-semibold">{t('builder.reportGenerator.emptyStateTitle')}</h3>
+                <p>{t('builder.reportGenerator.emptyStateDesc')}</p>
             </div>
         </Card>
     )
@@ -69,7 +70,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-           <CardTitle className="font-headline text-xl mb-4 p-1">Report Content</CardTitle>
+           <CardTitle className="font-headline text-xl mb-4 p-1">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="p-4 space-y-4">
           <Accordion type="multiple" className="w-full space-y-4">
