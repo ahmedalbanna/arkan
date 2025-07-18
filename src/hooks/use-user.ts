@@ -8,7 +8,7 @@ import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/typ
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
 import { User } from '@/lib/types'; // Assuming you have a User type
 
@@ -16,17 +16,17 @@ import { User } from '@/lib/types'; // Assuming you have a User type
 // --- Query Functions ---
 
 async function loginUser(credentials: LoginCredentials) {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(credentials),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Login failed. Please try again.');
+  // Login now happens on the client using the Firebase SDK directly.
+  // This will trigger onAuthStateChanged, which then sets the session cookie.
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+    return userCredential.user;
+  } catch (error: any) {
+    if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        throw new Error("Invalid email or password.");
+    }
+    throw new Error(error.message || 'Login failed. Please try again.');
   }
-  return response.json();
 }
 
 async function logoutUser() {
@@ -100,6 +100,7 @@ export function useLogin() {
             router.refresh(); // Force a refresh to ensure layout server component re-renders
         },
         onError: (error: Error) => {
+            // The error message is now set directly from the client-side catch block
             toast({
                 title: 'Login Error',
                 description: error.message,
