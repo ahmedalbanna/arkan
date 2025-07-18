@@ -2,7 +2,7 @@
 'use client';
 
 import { useAgents, useUpdateAgent } from '@/hooks/use-agents';
-import { type Agent } from '@/lib/agents';
+import { AGENTS, type Agent } from '@/lib/agents';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -38,8 +38,13 @@ function AgentSkeleton() {
 
 
 function AgentCard({ agent }: { agent: Agent }) {
-  const { id, name, description, category, icon: Icon, isEnabled, pageUrl } = agent;
+  const { id, name, description, category, isEnabled, pageUrl } = agent;
   const updateAgentMutation = useUpdateAgent();
+  
+  // Find the original agent config from the local file to get the valid icon component
+  const localAgentConfig = AGENTS.find(a => a.id === id);
+  const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
+
 
   const handleToggle = (checked: boolean) => {
     updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
