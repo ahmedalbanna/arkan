@@ -5,7 +5,7 @@ import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 // Helper to verify admin role
-async function verifyAdmin() {
+async function verifyAdmin(request: Request) {
     const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {
         return { authorized: false, message: 'Unauthorized' };

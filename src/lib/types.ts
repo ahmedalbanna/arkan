@@ -22,9 +22,8 @@ export interface PricingPlan {
 }
 
 export interface LoginCredentials {
-    email: string;
-    password?: string; // Optional for phone auth
-    phone?: string;    // Optional for email auth
+  email: string;
+  password: string;
 }
 
 export interface SignupCredentials {
