@@ -1,0 +1,70 @@
+
+'use server';
+/**
+ * @fileOverview AI agents for analyzing and solving exams from markdown.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
+
+// Schema for the output of the analysis agent
+export const AnalyzedExamSchema = z.object({
+  subject: z.string().describe('The main subject of the exam (e.g., "Physics", "History", "Calculus").'),
+  specialty: z.string().describe('The specific specialty within the subject (e.g., "Quantum Mechanics", "World War II", "Differential Equations").'),
+  structuredExam: z.string().describe('The original exam content, restructured and cleaned up in Markdown format for clarity and better processing.'),
+});
+export type AnalyzedExam = z.infer<typeof AnalyzedExamSchema>;
+
+// Schema for the output of the solving agent
+export const SolvedExamSchema = z.object({
+  solution: z.string().describe('A detailed, well-structured solution to the exam questions, formatted in Markdown.'),
+});
+export type SolvedExam = z.infer<typeof SolvedExamSchema>;
+
+
+// 1. Analyze Exam Flow
+const AnalyzeExamInputSchema = z.object({
+  markdownContent: z.string(),
+});
+
+export async function analyzeExam(input: z.infer<typeof AnalyzeExamInputSchema>): Promise<AnalyzedExam> {
+  const analysisPrompt = ai.definePrompt({
+    name: 'analyzeExamPrompt',
+    input: { schema: AnalyzeExamInputSchema },
+    output: { schema: AnalyzedExamSchema },
+    prompt: `You are an expert academic analyst. Your task is to analyze the following exam content provided in Markdown.
+    
+    1.  Identify the main **subject** and specific **specialty**.
+    2.  Review the entire exam and re-format it into a clean, well-structured **Markdown document**. Ensure questions, sub-questions, and options are clearly organized using headings, lists, and other appropriate markdown elements.
+    
+    Exam Content:
+    ---
+    {{{markdownContent}}}
+    ---
+    `,
+  });
+
+  const { output } = await analysisPrompt(input);
+  return output!;
+}
+
+// 2. Solve Exam Flow
+export async function solveExam(input: AnalyzedExam): Promise<SolvedExam> {
+  const solvePrompt = ai.definePrompt({
+    name: 'solveExamPrompt',
+    input: { schema: AnalyzedExamSchema },
+    output: { schema: SolvedExamSchema },
+    prompt: `You are an expert tutor specializing in **{{{subject}}}** with a deep knowledge of **{{{specialty}}}**.
+    
+    Your task is to provide a comprehensive and accurate solution to the following exam. Present the solution in a clear, well-structured Markdown format. For each question, provide a detailed answer, showing steps or reasoning where applicable.
+    
+    Exam Questions:
+    ---
+    {{{structuredExam}}}
+    ---
+    `,
+  });
+
+  const { output } = await solvePrompt(input);
+  return output!;
+}

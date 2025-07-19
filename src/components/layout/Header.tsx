@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -36,6 +36,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
+    { href: '/exam-solver', label: t('header.examSolver'), icon: FileQuestion },
   ];
   
   const adminLinks = [

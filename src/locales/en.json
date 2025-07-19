@@ -20,7 +20,8 @@
     "managePayments": "Manage Payments",
     "handwriting": "Text to Handwriting",
     "admin": "Admin",
-    "logout": "Logout"
+    "logout": "Logout",
+    "examSolver": "Exam Solver"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
@@ -530,6 +531,28 @@
         "copiedText": "Copied as Plain Text",
         "translateSuccess": "Translation Complete!",
         "translateFailed": "Translation Failed"
+      }
+    },
+    "examSolver": {
+      "pageTitle": "AI Exam Solver",
+      "pageSubtitle": "Upload an exam, and let the AI analyze and solve it for you.",
+      "uploadCardTitle": "Step 1: Upload Exam PDF",
+      "uploadCardDescription": "The system will parse the PDF, convert it to Markdown, and analyze its contents.",
+      "uploadAndAnalyzeButton": "Upload & Analyze",
+      "analysisCardTitle": "Step 2: Analyzed Exam",
+      "analysisCardDescription": "Review the structured exam content. Click solve when ready.",
+      "solveButton": "Solve Exam",
+      "solutionCardTitle": "Step 3: Exam Solution",
+      "solutionCardDescription": "The AI-generated solution is displayed below.",
+      "solvingInProgress": "Solving in progress... The AI is working on the solution.",
+      "solutionPlaceholder": "The solution will appear here after the exam is solved.",
+      "toasts": {
+        "invalidFile": "Invalid file type. Please upload a PDF.",
+        "authError": "Authentication Error. Please log in.",
+        "errorTitle": "An Error Occurred",
+        "analysisSuccess": "Exam analyzed successfully!",
+        "analysisMissing": "No analyzed exam found. Please upload and analyze an exam first.",
+        "solvingSuccess": "Exam solved successfully!"
       }
     }
   }

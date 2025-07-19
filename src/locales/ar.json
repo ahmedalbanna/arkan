@@ -20,7 +20,8 @@
     "managePayments": "إدارة المدفوعات",
     "handwriting": "تحويل النص لخط يد",
     "admin": "الإدارة",
-    "logout": "تسجيل الخروج"
+    "logout": "تسجيل الخروج",
+    "examSolver": "حل الامتحانات"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
@@ -530,6 +531,28 @@
         "copiedText": "تم نسخ النص العادي",
         "translateSuccess": "اكتملت الترجمة!",
         "translateFailed": "فشلت الترجمة"
+      }
+    },
+    "examSolver": {
+      "pageTitle": "حل الامتحانات بالذكاء الاصطناعي",
+      "pageSubtitle": "ارفع امتحانًا، ودع الذكاء الاصطناعي يحلله ويحله لك.",
+      "uploadCardTitle": "الخطوة ١: رفع ملف الامتحان (PDF)",
+      "uploadCardDescription": "سيقوم النظام بتحليل ملف PDF، وتحويله إلى Markdown، ثم تحليل محتوياته.",
+      "uploadAndAnalyzeButton": "رفع وتحليل",
+      "analysisCardTitle": "الخطوة ٢: الامتحان المحلل",
+      "analysisCardDescription": "راجع محتوى الامتحان المنظم. اضغط على \"حل الامتحان\" عندما تكون جاهزًا.",
+      "solveButton": "حل الامتحان",
+      "solutionCardTitle": "الخطوة ٣: حل الامتحان",
+      "solutionCardDescription": "الحل الذي تم إنشاؤه بواسطة الذكاء الاصطناعي معروض أدناه.",
+      "solvingInProgress": "جارٍ الحل... يعمل الذكاء الاصطناعي على الحل.",
+      "solutionPlaceholder": "سيظهر الحل هنا بعد حل الامتحان.",
+      "toasts": {
+        "invalidFile": "نوع الملف غير صالح. يرجى رفع ملف PDF.",
+        "authError": "خطأ في المصادقة. يرجى تسجيل الدخول.",
+        "errorTitle": "حدث خطأ",
+        "analysisSuccess": "تم تحليل الامتحان بنجاح!",
+        "analysisMissing": "لم يتم العثور على امتحان محلل. يرجى رفع وتحليل امتحان أولاً.",
+        "solvingSuccess": "تم حل الامتحان بنجاح!"
       }
     }
   }
