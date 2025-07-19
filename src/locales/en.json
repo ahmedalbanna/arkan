@@ -103,6 +103,18 @@
     "errorToastTitle": "Update Error",
     "deleteErrorToastTitle": "Delete Error"
   },
+  "agentEditor": {
+    "pageTitle": "Edit Agent",
+    "pageSubtitle": "Fine-tune the agent's prompt and configuration.",
+    "errorLoading": "Failed to load agent configuration.",
+    "idLabel": "ID",
+    "categoryLabel": "Category",
+    "nameLabel": "Agent Name",
+    "basePromptLabel": "Base Prompt",
+    "promptLabel": "Prompt",
+    "complexPromptNote": "This is a complex prompt. Only the base prompt is editable here.",
+    "saveButton": "Save Changes"
+  },
   "agentManager": {
     "pageSubtitle": "Control the AI agents available on the platform and enable or disable their functionality.",
     "enabled": "Enabled",

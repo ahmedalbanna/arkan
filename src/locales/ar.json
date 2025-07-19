@@ -103,6 +103,18 @@
     "errorToastTitle": "خطأ في التحديث",
     "deleteErrorToastTitle": "خطأ في الحذف"
   },
+  "agentEditor": {
+    "pageTitle": "تعديل الوكيل",
+    "pageSubtitle": "اضبط طلب الوكيل وإعداداته.",
+    "errorLoading": "فشل تحميل إعدادات الوكيل.",
+    "idLabel": "المعرّف",
+    "categoryLabel": "الفئة",
+    "nameLabel": "اسم الوكيل",
+    "basePromptLabel": "الطلب الأساسي",
+    "promptLabel": "الطلب",
+    "complexPromptNote": "هذا طلب معقد. يمكن تعديل الطلب الأساسي فقط هنا.",
+    "saveButton": "حفظ التغييرات"
+  },
   "agentManager": {
     "pageSubtitle": "تحكم في وكلاء الذكاء الاصطناعي المتاحين في المنصة وقم بتفعيل أو تعطيل وظائفهم.",
     "enabled": "مُفعّل",

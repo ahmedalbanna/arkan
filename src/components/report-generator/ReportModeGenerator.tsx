@@ -9,13 +9,22 @@ import { GenerationTools } from './ReportGenerationTools';
 import { EvaluationTools } from '../EvaluationTools';
 import { Card } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useTranslate } from '@/hooks/use-translation';
+import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { SectionName } from '@/ai/schemas';
 
 export default function ReportGenerator() {
-    const { t } = useLocalization();
+    const { t, locale } = useLocalization();
     const {
         proposal,
+        sections,
         handleSectionUpdate,
+        setSection,
     } = useBuilderStore();
+    const translateMutation = useTranslate();
+    const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+
 
   if (!proposal) {
     return (
@@ -29,6 +38,40 @@ export default function ReportGenerator() {
     )
   }
 
+  const handleTranslateAll = async () => {
+    setIsTranslatingAll(true);
+    toast({
+        title: t('builder.reportGenerator.toasts.translateAllStarted'),
+        description: t('builder.reportGenerator.toasts.translateAllStartedDesc'),
+    });
+
+    const targetLang = locale === 'en' ? 'ar' : 'en';
+    const sectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
+    
+    const translationPromises = sectionKeys.map(key => {
+        const content = sections[key]!;
+        return translateMutation.mutateAsync({ text: content, targetLang })
+            .then(result => ({ key, content: result.translatedText }))
+            .catch(error => ({ key, error }));
+    });
+
+    const results = await Promise.all(translationPromises);
+    
+    results.forEach(result => {
+        if ('content' in result) {
+            setSection(result.key, result.content);
+        } else {
+            console.error(`Failed to translate section ${result.key}:`, result.error);
+        }
+    });
+
+    setIsTranslatingAll(false);
+    toast({
+        title: t('builder.reportGenerator.toasts.translateAllSuccess'),
+        description: t('builder.reportGenerator.toasts.translateAllSuccessDesc'),
+    });
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
       {/* Left Column -> Now the main results view */}
@@ -38,7 +81,7 @@ export default function ReportGenerator() {
 
       {/* Right Column -> All tools */}
       <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-        <ReportActions />
+        <ReportActions onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
         <GenerationTools />
         <EvaluationTools />
       </div>
