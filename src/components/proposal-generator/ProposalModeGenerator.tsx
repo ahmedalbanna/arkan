@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, FileText, Download, FileJson } from 'lucide-react';
+import { Loader2, FileText, Download, FileJson, Languages } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
@@ -19,6 +19,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
 import { templates as proposalTemplates } from '@/lib/proposal-templates';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useTranslate } from '@/hooks/use-translation';
+import { useState } from 'react';
+
 
 function ProposalSkeleton() {
     return (
@@ -70,10 +73,13 @@ async function generateProposal(variables: { projectIdea: string; prompt: string
 
 export function ProposalModeGenerator() {
     const { toast } = useToast();
-    const { t } = useLocalization();
+    const { t, locale } = useLocalization();
     const { templates: docxTemplates } = useDocxStyles();
     const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
+    const translateMutation = useTranslate();
+    const [isTranslating, setIsTranslating] = useState(false);
+
 
     const {
         proposal,
@@ -134,6 +140,65 @@ export function ProposalModeGenerator() {
         mutation.mutate({ projectIdea, prompt: fullPrompt, token });
     };
 
+    const handleTranslateProposal = async () => {
+        if (!proposal || !firebaseUser) return;
+        
+        setIsTranslating(true);
+        toast({
+            title: t('builder.proposalGenerator.toasts.translateAllStarted'),
+            description: t('builder.proposalGenerator.toasts.translateAllStartedDesc'),
+        });
+        
+        const targetLang = locale === 'en' ? 'ar' : 'en';
+        
+        const deepTranslate = async (obj: any): Promise<any> => {
+            if (typeof obj === 'string') {
+                try {
+                    const result = await translateMutation.mutateAsync({ text: obj, targetLang });
+                    return result.translatedText;
+                } catch (e) {
+                    console.warn(`Translation failed for text: "${obj}"`, e);
+                    return obj; // Return original text on failure
+                }
+            }
+            if (Array.isArray(obj)) {
+                return Promise.all(obj.map(item => deepTranslate(item)));
+            }
+            if (typeof obj === 'object' && obj !== null) {
+                const newObj: { [key: string]: any } = {};
+                for (const key in obj) {
+                    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                        // Skip non-translatable fields
+                        if (['startDate', 'endDate', 'durationWeeks', 'totalAmount', 'cost', 'currency'].includes(key)) {
+                            newObj[key] = obj[key];
+                        } else {
+                            newObj[key] = await deepTranslate(obj[key]);
+                        }
+                    }
+                }
+                return newObj;
+            }
+            return obj;
+        };
+
+        try {
+            const translatedProposal = await deepTranslate(proposal);
+            setProposal(translatedProposal);
+            toast({
+                title: t('builder.proposalGenerator.toasts.translateAllSuccess'),
+                description: t('builder.proposalGenerator.toasts.translateAllSuccessDesc'),
+            });
+        } catch (error: any) {
+            toast({
+                title: t('builder.proposalGenerator.toasts.translateAllFailed'),
+                description: error.message || t('builder.proposalGenerator.toasts.translateAllFailedDesc'),
+                variant: 'destructive'
+            });
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
 
     return (
         <form onSubmit={handleSubmit}>
@@ -171,6 +236,10 @@ export function ProposalModeGenerator() {
                                     <CardDescription>{t('builder.proposalGenerator.generatedDescription')}</CardDescription>
                                 </div>
                                 <div className="flex gap-2">
+                                     <Button variant="outline" type="button" onClick={handleTranslateProposal} disabled={isTranslating}>
+                                        {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                                        {t('builder.proposalGenerator.translateAllButton')}
+                                    </Button>
                                     <Button variant="outline" type="button" onClick={handleExportJson}>
                                         <FileJson className="mr-2 h-4 w-4" />
                                         {t('builder.proposalGenerator.exportJson')}

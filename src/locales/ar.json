@@ -259,6 +259,7 @@
       "generatedDescription": "راجع وعدّل التفاصيل التي تم إنشاؤها أدناه.",
       "exportJson": ".json",
       "exportDocx": "DOCX",
+      "translateAllButton": "ترجمة المقترح",
       "emptyState": "سيظهر مقترح مشروعك الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDescription": "صقل تعليمات الذكاء الاصطناعي.",
@@ -267,7 +268,15 @@
       "basePromptLabel": "الطلب الأساسي",
       "customGuidelinesLabel": "إرشادات مخصصة",
       "customGuidelinePlaceholder": "أضف إرشادًا مخصصًا...",
-      "generateButton": "إنشاء المقترح"
+      "generateButton": "إنشاء المقترح",
+      "toasts": {
+        "translateAllStarted": "بدء الترجمة الجماعية",
+        "translateAllStartedDesc": "جارٍ ترجمة جميع حقول المقترح. قد يستغرق هذا بعض الوقت...",
+        "translateAllSuccess": "اكتملت الترجمة",
+        "translateAllSuccessDesc": "تمت ترجمة المقترح بنجاح.",
+        "translateAllFailed": "فشلت الترجمة",
+        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة المقترح."
+      }
     },
     "proposalViewer": {
       "category": "الفئة",

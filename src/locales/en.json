@@ -259,6 +259,7 @@
       "generatedDescription": "Review and edit the generated details below.",
       "exportJson": ".json",
       "exportDocx": "DOCX",
+      "translateAllButton": "Translate Proposal",
       "emptyState": "Your generated project proposal will appear here.",
       "toolsTitle": "Generation Tools",
       "toolsDescription": "Refine the AI's instructions.",
@@ -267,7 +268,15 @@
       "basePromptLabel": "Base Prompt",
       "customGuidelinesLabel": "Custom Guidelines",
       "customGuidelinePlaceholder": "Add a custom guideline...",
-      "generateButton": "Generate Proposal"
+      "generateButton": "Generate Proposal",
+      "toasts": {
+        "translateAllStarted": "Bulk Translation Started",
+        "translateAllStartedDesc": "Translating all proposal fields. This may take a moment...",
+        "translateAllSuccess": "Translation Complete",
+        "translateAllSuccessDesc": "The proposal has been successfully translated.",
+        "translateAllFailed": "Translation Failed",
+        "translateAllFailedDesc": "An error occurred while translating the proposal."
+      }
     },
     "proposalViewer": {
       "category": "Category",
