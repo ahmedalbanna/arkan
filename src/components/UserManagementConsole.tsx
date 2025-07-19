@@ -74,10 +74,12 @@ export default function UserManagementConsole() {
       placeholderData: (previousData) => previousData,
   });
 
+  // Prefetch user profile on hover for a smoother navigation experience
   const prefetchUser = async (userId: string) => {
     await queryClient.prefetchQuery({
         queryKey: userKeys.profile(userId),
         queryFn: () => fetchUserProfile(userId),
+        staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
     });
   }
 

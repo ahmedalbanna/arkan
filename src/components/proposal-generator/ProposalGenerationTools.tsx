@@ -48,6 +48,7 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
+    // Select only the state needed for this component
     const {
         selectedTemplate,
         handleTemplateChange,
@@ -56,7 +57,16 @@ export const ProposalGenerationTools = ({
         handleRemoveCustomGuideline,
         customGuidelineInput,
         setCustomGuidelineInput,
-    } = useBuilderStore();
+    } = useBuilderStore(state => ({
+        selectedTemplate: state.selectedTemplate,
+        handleTemplateChange: state.handleTemplateChange,
+        customGuidelines: state.customGuidelines,
+        handleAddCustomGuideline: state.handleAddCustomGuideline,
+        handleRemoveCustomGuideline: state.handleRemoveCustomGuideline,
+        customGuidelineInput: state.customGuidelineInput,
+        setCustomGuidelineInput: state.setCustomGuidelineInput,
+    }));
+
 
     const currentTemplate = proposalTemplates[selectedTemplate];
 

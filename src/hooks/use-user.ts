@@ -74,7 +74,7 @@ export function useUserProfile(userId: string) {
   return useQuery({
     queryKey: userKeys.profile(userId),
     queryFn: () => fetchUserProfile(userId),
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5, // Cache user data for 5 minutes
     enabled: !!userId,
   });
 }
@@ -89,7 +89,7 @@ export function useLogin() {
         onSuccess: (user) => {
             if (user) {
               // After successful login, refetch user data to ensure context is updated
-              refetchUser(); 
+              refetchUser();
               queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
               router.push('/generate');
               router.refresh();

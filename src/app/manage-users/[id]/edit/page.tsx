@@ -2,16 +2,39 @@
 'use client';
 
 import EditUserForm from '@/components/EditUserForm';
-import { getUserProfile } from '@/lib/db/queries';
+import { useUserProfile } from '@/hooks/use-user';
 import { notFound } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// This is a server component that fetches initial data, but the form it renders is a client component
-export default async function EditUserPage({ params }: { params: { id: string } }) {
-  const user = await getUserProfile(params.id);
+function EditUserPageSkeleton() {
+  return (
+    <div className="container mx-auto max-w-2xl px-4 py-12">
+      <div className="text-center mb-12">
+        <Skeleton className="w-10 h-10 rounded-full mx-auto" />
+        <Skeleton className="h-10 w-64 mx-auto mt-4" />
+        <Skeleton className="h-6 w-80 mx-auto mt-2" />
+      </div>
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+    </div>
+  )
+}
 
-  if (!user) {
+// This is now a fully client component to use the useUserProfile hook
+export default function EditUserPage({ params }: { params: { id: string } }) {
+  const { data: user, isLoading, isError } = useUserProfile(params.id);
+
+  if (isLoading) {
+    return <EditUserPageSkeleton />;
+  }
+
+  if (isError || !user) {
     notFound();
   }
   

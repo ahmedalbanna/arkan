@@ -80,7 +80,7 @@ export function ProposalModeGenerator() {
     const translateMutation = useTranslate();
     const [isTranslating, setIsTranslating] = useState(false);
 
-
+    // Efficiently select only the state and actions needed by this component
     const {
         proposal,
         projectIdea,
@@ -89,7 +89,16 @@ export function ProposalModeGenerator() {
         setProposal,
         selectedTemplate,
         customGuidelines,
-    } = useBuilderStore();
+    } = useBuilderStore(state => ({
+        proposal: state.proposal,
+        projectIdea: state.projectIdea,
+        setProjectIdea: state.setProjectIdea,
+        handleProposalUpdate: state.handleProposalUpdate,
+        setProposal: state.setProposal,
+        selectedTemplate: state.selectedTemplate,
+        customGuidelines: state.customGuidelines,
+    }));
+
 
     const mutation = useMutation({
         mutationFn: generateProposal,
