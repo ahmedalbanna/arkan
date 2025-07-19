@@ -27,8 +27,8 @@ function EditUserPageSkeleton() {
 }
 
 // This is now a fully client component to use the useUserProfile hook
-export default function EditUserPage({ params }: { params: { id: string } }) {
-  const { data: user, isLoading, isError } = useUserProfile(params.id);
+export default function EditUserPage({ params: { id } }: { params: { id: string } }) {
+  const { data: user, isLoading, isError } = useUserProfile(id);
 
   if (isLoading) {
     return <EditUserPageSkeleton />;
