@@ -51,4 +51,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'An unexpected error occurred while evaluating the report.' }, { status: 500 });
   }
 }
-

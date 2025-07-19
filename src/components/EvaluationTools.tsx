@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function evaluateReport(variables: { body: any; token: string }): Promise<EvaluateReportOutput> {
     const response = await fetch('/api/evaluate-report', {
@@ -33,6 +34,7 @@ async function evaluateReport(variables: { body: any; token: string }): Promise<
 export const EvaluationTools = () => {
     const { proposal, sections, diagrams, evaluation, setEvaluation } = useBuilderStore();
     const { firebaseUser } = useAuth();
+    const { t } = useLocalization();
     const { toast } = useToast();
     const queryClient = useQueryClient();
 
@@ -45,10 +47,10 @@ export const EvaluationTools = () => {
         onSuccess: (data) => {
             setEvaluation(data);
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: 'Evaluation Complete!' });
+            toast({ title: t('builder.reportGenerator.toasts.evaluationComplete') });
         },
         onError: (error: Error) => {
-            toast({ title: 'Evaluation Failed', description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.reportGenerator.toasts.evaluationFailed'), description: error.message, variant: 'destructive' });
         }
     });
 
@@ -90,7 +92,7 @@ export const EvaluationTools = () => {
                 .join('\n');
             setCriteria(extractedCriteria);
             queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
-            toast({ title: 'File Processed', description: 'Criteria extracted from PDF.' });
+            toast({ title: t('builder.reportGenerator.toasts.fileProcessed'), description: t('builder.reportGenerator.toasts.fileProcessedDesc') });
         } catch (error: any) {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
         } finally {
@@ -101,11 +103,11 @@ export const EvaluationTools = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to evaluate a report.", variant: 'destructive' });
+            toast({ title: t('builder.toasts.authError'), description: "You must be logged in to evaluate a report.", variant: 'destructive' });
             return;
         }
         if (!criteria.trim()) {
-            toast({ title: "Evaluation Skipped", description: "Please provide acceptance criteria.", variant: 'destructive' });
+            toast({ title: t('builder.reportGenerator.toasts.evaluationSkipped'), description: t('builder.reportGenerator.toasts.evaluationSkippedDesc'), variant: 'destructive' });
             return;
         }
 
@@ -135,14 +137,14 @@ export const EvaluationTools = () => {
     <form onSubmit={handleSubmit}>
         <Card className={mutation.isPending ? 'opacity-50 pointer-events-none' : ''}>
         <CardHeader>
-            <CardTitle className="font-headline">Acceptance Criteria & Evaluation</CardTitle>
-            <CardDescription>Define criteria to evaluate the report's quality.</CardDescription>
+            <CardTitle className="font-headline">{t('builder.reportGenerator.evaluationTitle')}</CardTitle>
+            <CardDescription>{t('builder.reportGenerator.evaluationDesc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="space-y-2">
                 <Textarea
                     name="acceptanceCriteria"
-                    placeholder="Enter each criterion on a new line..."
+                    placeholder={t('builder.reportGenerator.criteriaPlaceholder')}
                     rows={6}
                     value={criteria}
                     onChange={(e) => setCriteria(e.target.value)}
@@ -154,21 +156,21 @@ export const EvaluationTools = () => {
                     <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isUploading} className="text-xs" />
                     <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isUploading}>
                         {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4"/>}
-                        Process
+                        {t('builder.reportGenerator.processPdf')}
                     </Button>
                 </div>
             </div>
             
             {evaluation && !mutation.isPending && (
             <div className="space-y-4 pt-4 border-t">
-                <h4 className="font-semibold">Evaluation Result</h4>
+                <h4 className="font-semibold">{t('builder.reportGenerator.evaluationResult')}</h4>
                 <div className="flex items-center gap-4 p-4 rounded-lg bg-muted">
                     <div className={getScoreColor(evaluation.evaluationScore)}>
                         {getScoreIcon(evaluation.evaluationScore)}
                     </div>
                     <div className="flex-grow">
                         <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-medium">Quality Score</span>
+                            <span className="text-sm font-medium">{t('builder.reportGenerator.qualityScore')}</span>
                             <span className={`font-bold text-lg ${getScoreColor(evaluation.evaluationScore)}`}>
                                 {evaluation.evaluationScore} / 100
                             </span>
@@ -195,7 +197,7 @@ export const EvaluationTools = () => {
                 className="w-full font-headline"
             >
             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-            Evaluate Report
+            {t('builder.reportGenerator.evaluateReport')}
             </Button>
         </CardFooter>
         </Card>
