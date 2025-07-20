@@ -14,6 +14,7 @@ import { generateConclusion } from '@/ai/flows/generate-conclusion';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -49,12 +50,12 @@ const constructPrompt = (agent: any, data: z.infer<typeof generateReportSchema>)
   } else {
     fullPrompt = agentPrompt.base;
     if (guidelines && guidelines.length > 0) {
-      fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+      fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
     }
   }
 
   if (instructionText) {
-    fullPrompt += `\n\nAdditionally, please adhere to the following constraints for your response:\n${instructionText}`;
+    fullPrompt += `\\n\\nAdditionally, please adhere to the following constraints for your response:\\n${instructionText}`;
   }
 
   const contextContent = [];
@@ -65,16 +66,16 @@ const constructPrompt = (agent: any, data: z.infer<typeof generateReportSchema>)
   if (otherSections && Object.keys(otherSections).length > 0) {
     contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
     for (const [sectionName, content] of Object.entries(otherSections)) {
-      contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+      contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
     }
   }
   if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
     contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
     for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
-      contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+      contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
     }
   }
-  const contextString = contextContent.join('\n\n');
+  const contextString = contextContent.join('\\n\\n');
 
   fullPrompt += `
     
@@ -135,12 +136,16 @@ export async function POST(request: Request) {
         
         const prompt = constructPrompt(agent, currentContext);
         
-        const result = await agentInfo.flow({
+        const agentInput = {
           proposal,
           otherSections: currentContext.otherSections,
           otherDiagrams,
           prompt,
-        });
+        };
+        const result = await agentInfo.flow(agentInput);
+
+        // Log this individual generation
+        await logGeneration({ agentId, userId, input: agentInput, output: result });
 
         const content = Object.values(result)[0] as string;
         generatedSections[sectionKey] = content;
@@ -173,6 +178,9 @@ export async function POST(request: Request) {
       };
 
       const result = await agentInfo.flow(agentInput);
+
+      await logGeneration({ agentId: agent.id, userId, input: agentInput, output: result });
+
       return NextResponse.json(result, { status: 200 });
     }
 

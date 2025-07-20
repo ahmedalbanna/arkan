@@ -13,6 +13,7 @@ import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -124,7 +125,7 @@ export async function POST(request: Request) {
     } else {
         fullPrompt = agentPrompt.base;
         if (guidelines && guidelines.length > 0) {
-            fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+            fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
         }
     }
 
@@ -136,16 +137,16 @@ export async function POST(request: Request) {
     if (otherSections && Object.keys(otherSections).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
         for (const [sectionName, content] of Object.entries(otherSections)) {
-            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+            contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
         }
     }
     if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
         contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
         for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
-            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+            contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
         }
     }
-    const contextString = contextContent.join('\n\n');
+    const contextString = contextContent.join('\\n\\n');
 
     fullPrompt += `
     
@@ -168,11 +169,22 @@ ${JSON.stringify(proposal, null, 2)}
     const result = await agentInfo.flow(agentInput);
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-
-    return NextResponse.json({
+    
+    const finalOutput = {
       plantUmlCode: result.plantUmlCode,
       imageUrl: imageUrl,
-    }, { status: 200 });
+    };
+
+    // Log the successful generation
+    await logGeneration({
+        agentId: agent.id,
+        userId,
+        input: agentInput,
+        output: finalOutput,
+    });
+
+
+    return NextResponse.json(finalOutput, { status: 200 });
 
   } catch (error) {
     console.error(`Error generating diagram:`, error);

@@ -5,6 +5,7 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { AGENTS } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const generateProposalSchema = z.object({
   projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
@@ -41,9 +42,19 @@ export async function POST(request: Request) {
     // Use the prompt from the request if provided, otherwise fall back to the agent's default.
     const finalPrompt = prompt || (typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base);
 
-    const result = await generateProposal({
+    const agentInput = {
       projectIdea,
       prompt: finalPrompt,
+    };
+
+    const result = await generateProposal(agentInput);
+
+    // Log the successful generation
+    await logGeneration({
+        agentId: proposalAgent.id,
+        userId,
+        input: agentInput,
+        output: result,
     });
 
     return NextResponse.json(result, { status: 200 });

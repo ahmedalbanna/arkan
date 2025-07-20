@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const generateCodeSchema = z.object({
   prompt: z.string().min(10, { message: 'Prompt must be at least 10 characters long.' }),
@@ -30,7 +31,16 @@ export async function POST(request: Request) {
 
     await deductCredit(userId, 1);
 
-    const result = await generateCode(validation.data);
+    const agentInput = validation.data;
+    const result = await generateCode(agentInput);
+
+    await logGeneration({
+        agentId: 'generate-code', // Assuming a static ID for this agent
+        userId,
+        input: agentInput,
+        output: result,
+    });
+
     return NextResponse.json(result, { status: 200 });
 
   } catch (error) {

@@ -7,6 +7,7 @@ import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/a
 import type { AgentPrompt } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const ApiGeneratePresentationSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
 
     // Add guidelines to the prompt
     if (guidelines && guidelines.length > 0) {
-        fullPrompt += '\n\n' + guidelines.map(g => `- ${g}`).join('\n');
+        fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
     }
 
     const contextContent = [];
@@ -62,16 +63,16 @@ export async function POST(request: Request) {
     if (sections && Object.keys(sections).length > 0) {
         contextContent.push('--- REPORT SECTIONS ---');
         for (const [sectionName, content] of Object.entries(sections)) {
-            contextContent.push(`--- Section: ${sectionName} ---\n${content}\n---`);
+            contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
         }
     }
     if (diagrams && Object.keys(diagrams).length > 0) {
         contextContent.push('--- DIAGRAMS (PlantUML) ---');
         for (const [diagramType, diagramCode] of Object.entries(diagrams)) {
-            contextContent.push(`--- Diagram: ${diagramType} ---\n${diagramCode}\n---`);
+            contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
         }
     }
-    const contextString = contextContent.join('\n\n');
+    const contextString = contextContent.join('\\n\\n');
 
     fullPrompt += `
 
@@ -86,12 +87,21 @@ ${contextString || 'No additional context provided.'}
 `;
     // --- End of prompt construction ---
 
-
-    const result = await generatePresentation({
+    const agentInput = {
       proposal,
       sections,
       diagrams,
       prompt: fullPrompt, // Pass the fully constructed prompt
+    };
+
+    const result = await generatePresentation(agentInput);
+    
+    // Log the successful generation
+    await logGeneration({
+        agentId: presentationAgent.id,
+        userId,
+        input: agentInput,
+        output: result,
     });
 
     return NextResponse.json(result, { status: 200 });

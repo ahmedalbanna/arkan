@@ -5,6 +5,7 @@ import { evaluateReport } from '@/ai/flows/evaluate-report';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const evaluateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -30,11 +31,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    // Call the AI flow first
-    const result = await evaluateReport(validation.data);
+    const agentInput = validation.data;
+    const result = await evaluateReport(agentInput);
 
     // Only deduct credit after a successful generation
     await deductCredit(userId, 1);
+    
+    // Log the successful generation
+    await logGeneration({
+        agentId: 'evaluate-report',
+        userId,
+        input: agentInput,
+        output: result,
+    });
     
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
