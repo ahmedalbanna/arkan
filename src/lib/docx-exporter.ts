@@ -7,7 +7,7 @@ import type { Root, PhrasingContent, List } from 'mdast';
 import { sectionConfig, diagramConfig } from './report-config';
 import { templates, type TemplateKey } from './docx-styles';
 
-async function createDocxParagraphs(markdown: string) {
+export async function createDocxParagraphs(markdown: string) {
     const { unified } = await import('unified');
     const { default: remarkParse } = await import('remark-parse');
     const { default: remarkGfm } = await import('remark-gfm');
