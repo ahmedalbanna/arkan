@@ -6,14 +6,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, UploadCloud, AlertCircle, Sparkles, Wand2 } from 'lucide-react';
+import { Loader2, UploadCloud, AlertCircle, Sparkles, Wand2, History, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { AnalyzedExam, SolvedExam } from '@/ai/flows/exam-solver';
+import type { AnalyzedExam, SolvedExam } from '@/ai/flows/exam-solver.shared';
+import { useExamSolverStore } from '@/hooks/useExamSolverStore';
+import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from 'date-fns';
 
 type ExamSolverStage = 'idle' | 'parsing' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
 
@@ -56,10 +59,21 @@ export default function ExamSolver() {
   const { firebaseUser, refetchUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const [stage, setStage] = useState<ExamSolverStage>('idle');
+  const { 
+    stage, 
+    analyzedExam, 
+    solvedExam, 
+    history,
+    setStage,
+    setAnalyzedExam,
+    setSolvedExam,
+    addSolvedExamToHistory,
+    clearHistory,
+    loadFromHistory,
+    currentHistoryId,
+  } = useExamSolverStore();
+  
   const [file, setFile] = useState<File | null>(null);
-  const [analyzedExam, setAnalyzedExam] = useState<AnalyzedExam | null>(null);
-  const [solvedExam, setSolvedExam] = useState<SolvedExam | null>(null);
 
   const parseMutation = useMutation({ mutationFn: (vars: { formData: FormData, token: string }) => parsePdf(vars.formData, vars.token) });
   const analyzeMutation = useMutation({ mutationFn: (vars: { markdown: string, token: string }) => analyzeExam(vars.markdown, vars.token) });
@@ -82,20 +96,18 @@ export default function ExamSolver() {
     }
     const token = await firebaseUser.getIdToken();
 
-    // Step 1: Parse PDF
     setStage('parsing');
     const formData = new FormData();
     formData.append('file', file);
     try {
       const parsedData = await parseMutation.mutateAsync({ formData, token });
-      refetchUser(); // Update credits after successful parsing
+      refetchUser();
 
-      // Step 2: Analyze Exam
       setStage('analyzing');
       const analysisData = await analyzeMutation.mutateAsync({ markdown: parsedData.markdown, token });
       setAnalyzedExam(analysisData);
       setStage('readyToSolve');
-      refetchUser(); // Update credits after successful analysis
+      refetchUser();
       toast({ title: t('examSolver.toasts.analysisSuccess') });
     } catch (error: any) {
       toast({ title: t('examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
@@ -113,8 +125,9 @@ export default function ExamSolver() {
     try {
       const solvedData = await solveMutation.mutateAsync({ analyzedExam, token });
       setSolvedExam(solvedData);
+      addSolvedExamToHistory(analyzedExam, solvedData);
       setStage('solved');
-      refetchUser(); // Update credits after solving
+      refetchUser();
       toast({ title: t('examSolver.toasts.solvingSuccess') });
     } catch (error: any) {
       toast({ title: t('examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
@@ -125,9 +138,50 @@ export default function ExamSolver() {
   const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Left Column */}
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Left Column - History & Controls */}
+       <div className="lg:col-span-3 space-y-6">
+         <Card>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="flex items-center gap-2">
+                  <History className="w-5 h-5" /> {t('examSolver.historyTitle')}
+                </CardTitle>
+                <Button variant="ghost" size="icon" onClick={clearHistory} disabled={history.length === 0} title={t('examSolver.clearHistoryTooltip')}>
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+              <CardDescription>{t('examSolver.historyDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-48">
+                {history.length > 0 ? (
+                  <div className="space-y-2 pr-2">
+                    {history.map(item => (
+                       <Button
+                        key={item.id}
+                        variant="ghost"
+                        onClick={() => loadFromHistory(item.id)}
+                        className={cn(
+                            "w-full h-auto justify-start text-left p-2",
+                            currentHistoryId === item.id && "bg-muted"
+                        )}
+                      >
+                         <div className="flex flex-col">
+                            <span className="font-semibold truncate">{item.analyzedExam.specialty}</span>
+                             <span className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(item.id), { addSuffix: true })}
+                            </span>
+                         </div>
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center p-4">{t('examSolver.historyEmpty')}</p>
+                )}
+              </ScrollArea>
+            </CardContent>
+         </Card>
         <Card>
           <CardHeader>
             <CardTitle>{t('examSolver.uploadCardTitle')}</CardTitle>
@@ -147,15 +201,18 @@ export default function ExamSolver() {
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {analyzedExam && (
-          <Card>
+      {/* Middle Column - Exam */}
+      <div className="lg:col-span-4">
+        {analyzedExam ? (
+          <Card className="h-full">
             <CardHeader>
               <CardTitle>{t('examSolver.analysisCardTitle')}</CardTitle>
-              <CardDescription>{t('examSolver.analysisCardDescription')}</CardDescription>
+              <CardDescription>{analyzedExam.subject} - {analyzedExam.specialty}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ScrollArea className="h-[400px] p-1">
+              <ScrollArea className="h-[calc(100vh-400px)] p-1">
                 <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown>
               </ScrollArea>
               {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
@@ -170,11 +227,18 @@ export default function ExamSolver() {
               )}
             </CardContent>
           </Card>
+        ) : (
+            <Card className="min-h-[calc(100vh-250px)] flex items-center justify-center">
+                 <div className="text-center text-muted-foreground p-8">
+                     <AlertCircle className="h-12 w-12 mb-4 mx-auto" />
+                     <p>{t('examSolver.analysisPlaceholder')}</p>
+                 </div>
+            </Card>
         )}
       </div>
 
-      {/* Right Column */}
-      <div>
+      {/* Right Column - Solution */}
+      <div className="lg:col-span-5">
         <Card className="min-h-[calc(100vh-250px)]">
           <CardHeader>
             <CardTitle>{t('examSolver.solutionCardTitle')}</CardTitle>
