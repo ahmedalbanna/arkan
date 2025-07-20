@@ -1,4 +1,3 @@
-
 /**
  * Query Key Factories for React Query
  * 
@@ -34,4 +33,9 @@ export const generationLogKeys = {
     all: ['generation-logs'] as const,
     lists: () => [...generationLogKeys.all, 'list'] as const,
     list: (filters: { page: number; limit: number; agentId?: string; userId?: string; }) => [...generationLogKeys.lists(), filters] as const,
+}
+
+export const adminKeys = {
+  all: ['admin'] as const,
+  dashboardStats: () => [...adminKeys.all, 'dashboard-stats'] as const,
 }

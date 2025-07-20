@@ -1,4 +1,3 @@
-
 {
   "header": {
     "title": "أركان",
@@ -23,6 +22,19 @@
     "logout": "تسجيل الخروج",
     "examSolver": "حل الامتحانات",
     "homeworkSolver": "حل الواجبات"
+  },
+  "adminDashboard": {
+    "pageTitle": "لوحة التحكم",
+    "pageSubtitle": "نظرة عامة على نشاط المنصة والمقاييس الرئيسية.",
+    "totalUsers": "إجمالي المستخدمين",
+    "totalGenerations": "إجمالي التوليدات",
+    "pendingPayments": "المدفوعات المعلقة",
+    "agentUsageTitle": "استخدام الوكلاء",
+    "recentActivityTitle": "النشاط الأخير",
+    "generationBy": "توليد بواسطة",
+    "usedAgent": "استخدم الوكيل:",
+    "noActivity": "لا يوجد نشاط حديث.",
+    "errorLoading": "فشل تحميل إحصائيات لوحة التحكم"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."

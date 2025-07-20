@@ -1,4 +1,3 @@
-
 {
   "header": {
     "title": "Arkan",
@@ -23,6 +22,19 @@
     "logout": "Logout",
     "examSolver": "Exam Solver",
     "homeworkSolver": "Homework Solver"
+  },
+  "adminDashboard": {
+    "pageTitle": "Analytics Dashboard",
+    "pageSubtitle": "An overview of platform activity and key metrics.",
+    "totalUsers": "Total Users",
+    "totalGenerations": "Total Generations",
+    "pendingPayments": "Pending Payments",
+    "agentUsageTitle": "Agent Usage",
+    "recentActivityTitle": "Recent Activity",
+    "generationBy": "Generation by",
+    "usedAgent": "used agent:",
+    "noActivity": "No recent activity.",
+    "errorLoading": "Failed to load dashboard statistics."
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
