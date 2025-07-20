@@ -13,10 +13,10 @@ export default function ExamSolverPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <FileQuestion className="w-10 h-10" />
-          {t('examSolver.pageTitle')}
+          {t('builder.examSolver.pageTitle')}
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          {t('examSolver.pageSubtitle')}
+          {t('builder.examSolver.pageSubtitle')}
         </p>
       </div>
       <ExamSolver />

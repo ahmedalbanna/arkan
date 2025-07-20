@@ -61,11 +61,11 @@ export default function ExamSolver() {
   const { firebaseUser, refetchUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const { 
-    stage, 
-    analyzedExam, 
+  const {
+    stage,
+    analyzedExam,
     solvedExam,
-    originalFile, 
+    originalFile,
     history,
     setStage,
     setAnalyzedExam,
@@ -76,7 +76,7 @@ export default function ExamSolver() {
     loadFromHistory,
     currentHistoryId,
   } = useExamSolverStore();
-  
+
   const parseMutation = useMutation({ mutationFn: (vars: { formData: FormData, token: string }) => parsePdf(vars.formData, vars.token) });
   const analyzeMutation = useMutation({ mutationFn: (vars: { markdown: string, token: string }) => analyzeExam(vars.markdown, vars.token) });
   const solveMutation = useMutation({ mutationFn: (vars: { analyzedExam: AnalyzedExam, token: string }) => solveExam(vars.analyzedExam, vars.token) });
@@ -86,14 +86,14 @@ export default function ExamSolver() {
     if (selectedFile && selectedFile.type === 'application/pdf') {
       await setOriginalFile(selectedFile);
     } else {
-      toast({ title: t('examSolver.toasts.invalidFile'), variant: 'destructive' });
+      toast({ title: t('builder.examSolver.toasts.invalidFile'), variant: 'destructive' });
       await setOriginalFile(null);
     }
   };
 
   const handleUploadAndAnalyze = async () => {
     if (!originalFile || !firebaseUser) {
-      toast({ title: t('examSolver.toasts.authError'), variant: 'destructive' });
+      toast({ title: t('builder.examSolver.toasts.authError'), variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
@@ -112,16 +112,16 @@ export default function ExamSolver() {
       setAnalyzedExam(analysisData);
       setStage('readyToSolve');
       refetchUser();
-      toast({ title: t('examSolver.toasts.analysisSuccess') });
+      toast({ title: t('builder.examSolver.toasts.analysisSuccess') });
     } catch (error: any) {
-      toast({ title: t('examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+      toast({ title: t('builder.examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
       setStage('idle');
     }
   };
 
   const handleSolveExam = async () => {
     if (!analyzedExam || !firebaseUser || !originalFile) {
-        toast({ title: t('examSolver.toasts.analysisMissing'), variant: 'destructive' });
+      toast({ title: t('builder.examSolver.toasts.analysisMissing'), variant: 'destructive' });
         return;
     }
     const token = await firebaseUser.getIdToken();
@@ -132,9 +132,9 @@ export default function ExamSolver() {
       addSolvedExamToHistory(analyzedExam, solvedData, originalFile);
       setStage('solved');
       refetchUser();
-      toast({ title: t('examSolver.toasts.solvingSuccess') });
+      toast({ title: t('builder.examSolver.toasts.solvingSuccess') });
     } catch (error: any) {
-      toast({ title: t('examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+      toast({ title: t('builder.examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
       setStage('readyToSolve');
     }
   };
@@ -159,13 +159,13 @@ export default function ExamSolver() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="flex items-center gap-2">
-                  <History className="w-5 h-5" /> {t('examSolver.historyTitle')}
+                <History className="w-5 h-5" /> {t('builder.examSolver.historyTitle')}
                 </CardTitle>
                 <Button variant="ghost" size="icon" onClick={clearHistory} disabled={history.length === 0} title={t('examSolver.clearHistoryTooltip')}>
                     <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
-              <CardDescription>{t('examSolver.historyDescription')}</CardDescription>
+            <CardDescription>{t('builder.examSolver.historyDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
               <ScrollArea className="h-48">
@@ -198,8 +198,8 @@ export default function ExamSolver() {
          </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{t('examSolver.uploadCardTitle')}</CardTitle>
-            <CardDescription>{t('examSolver.uploadCardDescription')}</CardDescription>
+            <CardTitle>{t('builder.examSolver.uploadCardTitle')}</CardTitle>
+            <CardDescription>{t('builder.examSolver.uploadCardDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2">
@@ -210,7 +210,7 @@ export default function ExamSolver() {
                 ) : (
                   <UploadCloud className="mr-2 h-4 w-4" />
                 )}
-                {t('examSolver.uploadAndAnalyzeButton')}
+                {t('builder.examSolver.uploadAndAnalyzeButton')}
               </Button>
             </div>
           </CardContent>
@@ -222,7 +222,7 @@ export default function ExamSolver() {
         {analyzedExam ? (
           <Card className="h-full flex flex-col">
             <CardHeader>
-              <CardTitle>{t('examSolver.analysisCardTitle')}</CardTitle>
+              <CardTitle>{t('builder.examSolver.analysisCardTitle')}</CardTitle>
               <CardDescription>{analyzedExam.subject} - {analyzedExam.specialty}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow flex flex-col">
@@ -236,7 +236,7 @@ export default function ExamSolver() {
                   ) : (
                     <Wand2 className="mr-2 h-4 w-4" />
                   )}
-                  {t('examSolver.solveButton')}
+                  {t('builder.examSolver.solveButton')}
                 </Button>
               )}
             </CardContent>
@@ -245,7 +245,7 @@ export default function ExamSolver() {
             <Card className="min-h-[calc(100vh-250px)] flex items-center justify-center">
                  <div className="text-center text-muted-foreground p-8">
                      <AlertCircle className="h-12 w-12 mb-4 mx-auto" />
-                     <p>{t('examSolver.analysisPlaceholder')}</p>
+                <p>{t('builder.examSolver.analysisPlaceholder')}</p>
                  </div>
             </Card>
         )}
@@ -256,7 +256,7 @@ export default function ExamSolver() {
         <Card className="min-h-[calc(100vh-250px)] flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-center">
-                <CardTitle>{t('examSolver.solutionCardTitle')}</CardTitle>
+              <CardTitle>{t('builder.examSolver.solutionCardTitle')}</CardTitle>
                 {solvedExam && (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -281,13 +281,13 @@ export default function ExamSolver() {
                     </DropdownMenu>
                 )}
             </div>
-            <CardDescription>{t('examSolver.solutionCardDescription')}</CardDescription>
+            <CardDescription>{t('builder.examSolver.solutionCardDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
             {isProcessing && stage === 'solving' && (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <Loader2 className="h-12 w-12 animate-spin mb-4" />
-                <p>{t('examSolver.solvingInProgress')}</p>
+                <p>{t('builder.examSolver.solvingInProgress')}</p>
               </div>
             )}
             {solvedExam ? (
@@ -297,7 +297,7 @@ export default function ExamSolver() {
             ) : stage !== 'solving' && (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <AlertCircle className="h-12 w-12 mb-4" />
-                <p>{t('examSolver.solutionPlaceholder')}</p>
+                  <p>{t('builder.examSolver.solutionPlaceholder')}</p>
               </div>
             )}
           </CardContent>

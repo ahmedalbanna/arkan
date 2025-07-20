@@ -41,7 +41,7 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
     const agentIdSuffix = `generate-${itemKey}-section`;
     const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
     const currentGuidelineState = guidelineState[itemKey];
-    
+
     if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
 
     const promptConfig = agent.prompt as AgentPrompt;
@@ -186,18 +186,18 @@ export const GenerationTools = () => {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         };
-        
+
         const token = await firebaseUser.getIdToken();
         const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: false };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
-        
+
         const otherDiagrams = Object.entries(selection.diagrams)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
 
-        
+
         const body = {
             proposal: proposal,
             sectionToGenerate: section,
@@ -211,7 +211,7 @@ export const GenerationTools = () => {
         setActiveMutationKey(section);
         reportMutation.mutate(body);
     };
-    
+
     // Handle full report generation
     const onGenerateFullReport = async () => {
         if (!firebaseUser) {
@@ -241,8 +241,8 @@ export const GenerationTools = () => {
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
-                    <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
+                    <CardTitle className="font-headline">{t('builder.reportGenerator.step3Title')}</CardTitle>
+                    <CardDescription>{t('builder.reportGenerator.step3Desc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-10 w-full" />
@@ -252,22 +252,22 @@ export const GenerationTools = () => {
             </Card>
         );
     }
-    
+
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
     const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">{t('reportGenerator.step3Title')}</CardTitle>
-                <CardDescription>{t('reportGenerator.step3Desc')}</CardDescription>
+                <CardTitle className="font-headline">{t('builder.reportGenerator.step3Title')}</CardTitle>
+                <CardDescription>{t('builder.reportGenerator.step3Desc')}</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-2 mb-4">
-                    <Label htmlFor="report-template-select">Report Template</Label>
+                    <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
                     <Select value={selectedReportTemplateId} onValueChange={(val) => setSelectedReportTemplateId(val)}>
                         <SelectTrigger id="report-template-select">
-                            <SelectValue placeholder="Select a template" />
+                            <SelectValue placeholder={t('builder.reportGenerator.Select_template')} />
                         </SelectTrigger>
                         <SelectContent>
                             {REPORT_GENERATION_TEMPLATES.map(template => (
@@ -280,7 +280,7 @@ export const GenerationTools = () => {
 
                 <Button onClick={onGenerateFullReport} className="w-full mb-4 font-headline">
                     {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                    Generate Full Report
+                    {t('builder.reportGenerator.GenerateFullReport')}
                 </Button>
 
                 <Accordion type="multiple" className="w-full space-y-1">
@@ -298,19 +298,19 @@ export const GenerationTools = () => {
                             <AccordionItem value={key} key={key}>
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                     <div className="flex items-center gap-2">
-                                        <Icon className="h-4 w-4" /> {title}
+                                        <Icon className="h-4 w-4" /> {t(`${title}`)}
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">
                                     <Tabs defaultValue="prompt" className="w-full">
                                         <TabsList className="grid w-full grid-cols-3">
-                                            <TabsTrigger value="prompt">{t('reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                            <TabsTrigger value="controls">{t('reportGenerator.tool_tab_controls')}</TabsTrigger>
-                                            <TabsTrigger value="context">{t('reportGenerator.tool_tab_context')}</TabsTrigger>
+                                            <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                            <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
+                                            <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
                                             <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">{t('reportGenerator.tool_prompt_label')}</Label>
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
                                                 <div className="p-3 rounded-md border bg-muted text-xs">
                                                     <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                                                 </div>
@@ -318,7 +318,7 @@ export const GenerationTools = () => {
 
                                             {hasGuidelines && (
                                                 <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold text-muted-foreground">Guidelines</Label>
+                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
                                                     <div className="space-y-2 p-3 rounded-md border">
                                                         {promptConfig.guidelines!.map((guideline, index) => (
                                                             <div key={index} className="flex items-start gap-2">
@@ -337,7 +337,7 @@ export const GenerationTools = () => {
                                             )}
 
                                             <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">Custom Guidelines</Label>
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
                                                 {guidelineState[key]?.custom.map((custom, index) => (
                                                     <div key={index} className="flex items-center gap-2 text-sm">
                                                         <span>- {custom}</span>
@@ -348,7 +348,7 @@ export const GenerationTools = () => {
                                                 ))}
                                                 <div className="flex gap-2">
                                                     <Input
-                                                        placeholder="Add a custom guideline..."
+                                                        placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
                                                         value={customGuidelineInput[key] || ''}
                                                         onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
@@ -359,32 +359,32 @@ export const GenerationTools = () => {
                                                 </div>
                                             </div>
                                         </TabsContent>
-                                        
+
                                         <TabsContent value="controls" className="pt-4">
                                             <div className="space-y-6">
                                                 <div className="space-y-3">
-                                                    <Label htmlFor={`formality-${key}`}>{t('reportGenerator.tool_formality_label')}</Label>
+                                                    <Label htmlFor={`formality-${key}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
                                                     <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
                                                     <div className="flex justify-between text-xs text-muted-foreground">
-                                                        <span>{t('reportGenerator.tool_formality_informal')}</span>
-                                                        <span>{t('reportGenerator.tool_formality_balanced')}</span>
-                                                        <span>{t('reportGenerator.tool_formality_formal')}</span>
+                                                        <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
+                                                        <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
+                                                        <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label htmlFor={`tone-${key}`}>{t('reportGenerator.tool_tone_label')}</Label>
+                                                    <Label htmlFor={`tone-${key}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
                                                     <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
                                                         <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="professional">{t('reportGenerator.tool_tone_professional')}</SelectItem>
-                                                            <SelectItem value="academic">{t('reportGenerator.tool_tone_academic')}</SelectItem>
-                                                            <SelectItem value="casual">{t('reportGenerator.tool_tone_casual')}</SelectItem>
-                                                            <SelectItem value="persuasive">{t('reportGenerator.tool_tone_persuasive')}</SelectItem>
+                                                            <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
+                                                            <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
+                                                            <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
+                                                            <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <Label htmlFor={`wordCount-${key}`}>{t('reportGenerator.tool_word_count_label')}</Label>
+                                                    <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                                                     <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
                                                 </div>
                                             </div>
@@ -394,7 +394,7 @@ export const GenerationTools = () => {
                                                 <div className="space-y-4 pr-4">
                                                     {/* Context selection UI for other sections */}
                                                     <div className="space-y-2">
-                                                        <Label className="font-semibold">Contextual Sections</Label>
+                                                        <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
                                                         {orderedSections.filter(sKey => sKey !== key && sections[sKey]).map(contextKey => (
                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                 <Checkbox
@@ -411,13 +411,13 @@ export const GenerationTools = () => {
                                                             </div>
                                                         ))}
                                                         {orderedSections.filter(sKey => sKey !==key && !sections[sKey]).length === orderedSections.length -1 && (
-                                                          <p className="text-xs text-muted-foreground">No other sections generated yet.</p>
+                                                            <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.noOtherSections')}</p>
                                                         )}
                                                     </div>
                                                     {/* Context selection UI for diagrams */}
                                                     {Object.keys(diagrams || {}).length > 0 && (
                                                       <div className="space-y-2 pt-2 border-t">
-                                                          <Label className="font-semibold">Contextual Diagrams</Label>
+                                                            <Label className="font-semibold">{t('builder.reportGenerator.contextualSections')}</Label>
                                                           {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
                                                               <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                   <Checkbox
@@ -438,7 +438,7 @@ export const GenerationTools = () => {
                                                     {/* Context selection UI for external file */}
                                                     {externalContext && (
                                                         <div className="space-y-2 pt-2 border-t">
-                                                            <Label className="font-semibold">External Context</Label>
+                                                            <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
                                                             <div className="flex items-center space-x-2">
                                                                 <Checkbox
                                                                     id={`context-external-${key}`}
@@ -467,7 +467,7 @@ export const GenerationTools = () => {
                                             title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
                                         >
                                             {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                            {`${t('generateButton')} ${title}`}
+                                            {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
                                         </Button>
                                     </div>
                                 </AccordionContent>
@@ -476,7 +476,7 @@ export const GenerationTools = () => {
                     })}
                 </Accordion>
                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">External Context</h3>
+                    <h3 className="text-sm font-semibold mb-2">{t('builder.reportGenerator.externalContext')}</h3>
                     {externalContext ? (
                         <div className="space-y-2">
                              <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
