@@ -1,5 +1,6 @@
 
-'use client';
+'use client';;
+import { use } from "react";
 
 import EditUserForm from '@/components/EditUserForm';
 import { useUserProfile } from '@/hooks/use-user';
@@ -27,7 +28,8 @@ function EditUserPageSkeleton() {
 }
 
 // This is now a fully client component to use the useUserProfile hook
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage(props: { params: Promise<{ id: string }> }) {
+  const params = use(props.params);
   const { id } = params;
   const { data: user, isLoading, isError } = useUserProfile(id);
 
@@ -38,7 +40,7 @@ export default function EditUserPage({ params }: { params: { id: string } }) {
   if (isError || !user) {
     notFound();
   }
-  
+
   return (
     <div className="container mx-auto max-w-2xl px-4 py-12">
       <HeaderSection userName={user.name} />
