@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, UploadCloud, AlertCircle, Sparkles, Wand2, History, Trash2 } from 'lucide-react';
+import { Loader2, UploadCloud, AlertCircle, Sparkles, Wand2, History, Trash2, Download, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,6 +17,8 @@ import type { AnalyzedExam, SolvedExam } from '@/ai/flows/exam-solver.shared';
 import { useExamSolverStore } from '@/hooks/useExamSolverStore';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { exportExamAsDocx, exportExamAsPdf } from '@/lib/exam-exporter';
 
 type ExamSolverStage = 'idle' | 'parsing' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
 
@@ -62,43 +64,45 @@ export default function ExamSolver() {
   const { 
     stage, 
     analyzedExam, 
-    solvedExam, 
+    solvedExam,
+    originalFile, 
     history,
     setStage,
     setAnalyzedExam,
     setSolvedExam,
+    setOriginalFile,
     addSolvedExamToHistory,
     clearHistory,
     loadFromHistory,
     currentHistoryId,
   } = useExamSolverStore();
   
-  const [file, setFile] = useState<File | null>(null);
-
   const parseMutation = useMutation({ mutationFn: (vars: { formData: FormData, token: string }) => parsePdf(vars.formData, vars.token) });
   const analyzeMutation = useMutation({ mutationFn: (vars: { markdown: string, token: string }) => analyzeExam(vars.markdown, vars.token) });
   const solveMutation = useMutation({ mutationFn: (vars: { analyzedExam: AnalyzedExam, token: string }) => solveExam(vars.analyzedExam, vars.token) });
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type === 'application/pdf') {
-      setFile(selectedFile);
+      await setOriginalFile(selectedFile);
     } else {
       toast({ title: t('examSolver.toasts.invalidFile'), variant: 'destructive' });
-      setFile(null);
+      await setOriginalFile(null);
     }
   };
 
   const handleUploadAndAnalyze = async () => {
-    if (!file || !firebaseUser) {
+    if (!originalFile || !firebaseUser) {
       toast({ title: t('examSolver.toasts.authError'), variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
 
     setStage('parsing');
+    const fileBlob = await (await fetch(originalFile.dataUrl)).blob();
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', fileBlob, originalFile.name);
+
     try {
       const parsedData = await parseMutation.mutateAsync({ formData, token });
       refetchUser();
@@ -116,7 +120,7 @@ export default function ExamSolver() {
   };
 
   const handleSolveExam = async () => {
-    if (!analyzedExam || !firebaseUser) {
+    if (!analyzedExam || !firebaseUser || !originalFile) {
         toast({ title: t('examSolver.toasts.analysisMissing'), variant: 'destructive' });
         return;
     }
@@ -125,7 +129,7 @@ export default function ExamSolver() {
     try {
       const solvedData = await solveMutation.mutateAsync({ analyzedExam, token });
       setSolvedExam(solvedData);
-      addSolvedExamToHistory(analyzedExam, solvedData);
+      addSolvedExamToHistory(analyzedExam, solvedData, originalFile);
       setStage('solved');
       refetchUser();
       toast({ title: t('examSolver.toasts.solvingSuccess') });
@@ -133,6 +137,16 @@ export default function ExamSolver() {
       toast({ title: t('examSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
       setStage('readyToSolve');
     }
+  };
+
+  const handleDownloadOriginal = () => {
+    if (!originalFile) return;
+    const link = document.createElement('a');
+    link.href = originalFile.dataUrl;
+    link.download = originalFile.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
@@ -190,7 +204,7 @@ export default function ExamSolver() {
           <CardContent>
             <div className="flex gap-2">
               <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={isProcessing} />
-              <Button onClick={handleUploadAndAnalyze} disabled={!file || isProcessing}>
+              <Button onClick={handleUploadAndAnalyze} disabled={!originalFile || isProcessing}>
                 {stage === 'parsing' || stage === 'analyzing' ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -206,13 +220,13 @@ export default function ExamSolver() {
       {/* Middle Column - Exam */}
       <div className="lg:col-span-4">
         {analyzedExam ? (
-          <Card className="h-full">
+          <Card className="h-full flex flex-col">
             <CardHeader>
               <CardTitle>{t('examSolver.analysisCardTitle')}</CardTitle>
               <CardDescription>{analyzedExam.subject} - {analyzedExam.specialty}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[calc(100vh-400px)] p-1">
+            <CardContent className="flex-grow flex flex-col">
+              <ScrollArea className="flex-grow p-1">
                 <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown>
               </ScrollArea>
               {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
@@ -239,12 +253,37 @@ export default function ExamSolver() {
 
       {/* Right Column - Solution */}
       <div className="lg:col-span-5">
-        <Card className="min-h-[calc(100vh-250px)]">
+        <Card className="min-h-[calc(100vh-250px)] flex flex-col">
           <CardHeader>
-            <CardTitle>{t('examSolver.solutionCardTitle')}</CardTitle>
+            <div className="flex justify-between items-center">
+                <CardTitle>{t('examSolver.solutionCardTitle')}</CardTitle>
+                {solvedExam && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                                <Download className="mr-2 h-4 w-4" />
+                                Download
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => exportExamAsDocx(analyzedExam!, solvedExam, 'modern')}>
+                               <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => exportExamAsPdf(analyzedExam!, solvedExam)}>
+                                <FileDown className="mr-2 h-4 w-4" /> Export as PDF
+                            </DropdownMenuItem>
+                             {originalFile && (
+                                <DropdownMenuItem onClick={handleDownloadOriginal}>
+                                    <FileDown className="mr-2 h-4 w-4" /> Download Original PDF
+                                </DropdownMenuItem>
+                             )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
+            </div>
             <CardDescription>{t('examSolver.solutionCardDescription')}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-grow">
             {isProcessing && stage === 'solving' && (
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                 <Loader2 className="h-12 w-12 animate-spin mb-4" />
