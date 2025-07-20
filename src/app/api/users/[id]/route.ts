@@ -3,35 +3,31 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser, updateUserByAdmin } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/admin';
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
+        return { authorized: false, message: 'Unauthorized', isSelf: false, isAdmin: false };
     }
     const token = authHeader.substring(7);
 
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const requesterId = decodedToken.uid;
-
-        // Allow if the requester is the user they are trying to access
-        if (requesterId === targetUserId) {
-            return { authorized: true, userId: requesterId };
-        }
-
-        // Allow if the requester is an admin
+        
         const requesterProfile = await getUserProfile(requesterId);
-        if (requesterProfile?.role === 'admin') {
-            return { authorized: true, userId: requesterId };
+        const isAdmin = requesterProfile?.role === 'admin';
+        const isSelf = requesterId === targetUserId;
+
+        if (isAdmin || isSelf) {
+            return { authorized: true, userId: requesterId, isSelf, isAdmin };
         }
 
         // If neither, forbid access
-        return { authorized: false, message: 'Forbidden' };
+        return { authorized: false, message: 'Forbidden', isSelf: false, isAdmin: false };
     } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
+        return { authorized: false, message: 'Unauthorized', isSelf: false, isAdmin: false };
     }
 }
 
@@ -63,9 +59,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
 // PUT /api/users/[id]
 const updateUserSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  avatarUrl: z.string().url().optional(),
-  bio: z.string().optional(),
+  bio: z.string().max(300, "Bio cannot exceed 300 characters.").optional(),
+  // Admin-only fields
   credits: z.coerce.number().int().optional(),
+  role: z.enum(['user', 'admin']).optional(),
   hasCompletedOnboarding: z.boolean().optional(),
 });
 
@@ -81,9 +78,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ message: accessCheck.message }, { status: 403 });
         }
         
-        const isSelfEdit = accessCheck.userId === userId;
-        const isAdmin = (await getUserProfile(accessCheck.userId!))?.role === 'admin';
-
         const user = await getUserProfile(userId);
         if (!user) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
@@ -96,27 +90,33 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        // Admins can update credits, users cannot
-        if (validation.data.credits !== undefined && !isAdmin) {
-             return NextResponse.json({ message: 'Forbidden: Only admins can update credits.' }, { status: 403 });
+        // Only admins can update certain fields
+        if ((validation.data.credits !== undefined || validation.data.role !== undefined) && !accessCheck.isAdmin) {
+             return NextResponse.json({ message: 'Forbidden: You do not have permission to update credits or roles.' }, { status: 403 });
         }
 
-        if (isSelfEdit) {
-            const { name, avatarUrl, bio, hasCompletedOnboarding } = validation.data;
-             await updateUser(userId, {
-                name: name ?? user.name,
-                profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
-                bio: bio ?? user.bio ?? undefined,
-                hasCompletedOnboarding: hasCompletedOnboarding ?? user.hasCompletedOnboarding ?? undefined,
-            });
-        } else if (isAdmin) {
-             await updateUserByAdmin(userId, validation.data);
+        let updatedData;
+
+        if (accessCheck.isAdmin && !accessCheck.isSelf) {
+            // Admin editing another user
+            updatedData = await updateUserByAdmin(userId, validation.data);
         } else {
-             return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+            // User editing their own profile (or admin editing their own)
+            const { name, bio, hasCompletedOnboarding } = validation.data;
+            const selfUpdatePayload: Partial<UserProfile> = {
+                name: name ?? user.name,
+                bio: bio ?? user.bio,
+                hasCompletedOnboarding: hasCompletedOnboarding ?? user.hasCompletedOnboarding,
+            };
+            // If admin is editing themselves, they can also change their own credits/role
+            if (accessCheck.isAdmin) {
+                if (validation.data.credits !== undefined) selfUpdatePayload.credits = validation.data.credits;
+                if (validation.data.role !== undefined) selfUpdatePayload.role = validation.data.role;
+            }
+             updatedData = await updateUser(userId, selfUpdatePayload);
         }
        
-        const updatedUser = await getUserProfile(userId);
-        return NextResponse.json(updatedUser, { status: 200 });
+        return NextResponse.json(updatedData, { status: 200 });
 
     } catch (error) {
         console.error(`Error updating user ${params.id}:`, error);

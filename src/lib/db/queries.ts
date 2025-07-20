@@ -63,11 +63,15 @@ export async function getPaginatedUsers({ page, limit }: { page: number; limit: 
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
 }
 
-export async function updateUser(userId: string, data: Partial<Omit<UserProfile, 'id' | 'email' | 'role' | 'credits'>>) {
-    await adminDb.collection('users').doc(userId).update({
+export async function updateUser(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
+    const updatePayload = {
         ...data,
         updatedAt: new Date().toISOString(),
-    });
+    };
+    await adminDb.collection('users').doc(userId).update(updatePayload);
+    const updatedUser = await getUserProfile(userId);
+    if (!updatedUser) throw new Error("Failed to refetch updated user profile.");
+    return updatedUser;
 }
 
 export async function updateUserCredits(userId: string, creditsToAdd: number): Promise<number> {
@@ -107,11 +111,15 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
     });
 }
 
-export async function updateUserByAdmin(userId: string, data: Partial<Omit<UserProfile, 'id'>>) {
-  await adminDb.collection('users').doc(userId).update({
+export async function updateUserByAdmin(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
+  const updatePayload = {
       ...data,
       updatedAt: new Date().toISOString()
-  });
+  };
+  await adminDb.collection('users').doc(userId).update(updatePayload);
+  const updatedUser = await getUserProfile(userId);
+  if (!updatedUser) throw new Error("Failed to refetch updated user profile.");
+  return updatedUser;
 }
 
 export async function deleteUser(userId: string) {
