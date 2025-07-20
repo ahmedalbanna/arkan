@@ -22,14 +22,12 @@ function EditAgentPageSkeleton() {
   );
 }
 
-
-export default function EditAgentPage({ params }: { params: { id: string } }) {
+function EditAgentPageContent({ agentId }: { agentId: string }) {
   const { t } = useLocalization();
-  const { id: agentId } = params;
   const { data: agent, isLoading, isError } = useAgent(agentId);
 
   if (isLoading) {
-    return <EditAgentPageSkeleton />; 
+    return <EditAgentPageSkeleton />;
   }
 
   if (isError) {
@@ -68,4 +66,9 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
       <AgentEditor agentId={agentId} initialData={agent} />
     </div>
   );
+}
+
+// This is the main export, acting as a Server Component wrapper.
+export default function EditAgentPage({ params }: { params: { id: string } }) {
+  return <EditAgentPageContent agentId={params.id} />;
 }
