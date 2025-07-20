@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAgent, useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentPrompt, AgentData } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,15 +43,22 @@ function AgentEditorSkeleton() {
   )
 }
 
+interface AgentEditorProps {
+  agentId: string;
+  initialData?: Agent; // Make initialData optional
+}
 
-export default function AgentEditor({ agentId }: { agentId: string }) {
+export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useLocalization();
-  const { data: agent, isLoading: isLoaded, isError } = useAgent(agentId);
+  const { data: agentFromHook, isLoading: isLoaded, isError } = useAgent(agentId);
+
+  const agent = initialData || agentFromHook; // Use initialData if available, otherwise use data from hook
+
   const updateAgentMutation = useUpdateAgent();
 
-  const [name, setName] = useState('');
+  const [name, setName] = useState(agent?.name || '');
   const [prompt, setPrompt] = useState('');
 
   useEffect(() => {
@@ -66,29 +72,29 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
       }
     }
   }, [agent]);
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    updateAgentMutation.mutate({ 
-        agentId, 
-        payload: { name, prompt } 
+    updateAgentMutation.mutate({
+      agentId,
+      payload: { name, prompt }
     }, {
-        onSuccess: () => {
-            router.push('/manage-agents');
-        }
+      onSuccess: () => {
+        router.push('/manage-agents');
+      }
     });
   };
 
-  if (!isLoaded) {
+  if (isLoaded && !initialData) { // Show skeleton only when initially loading and no initial data is provided
     return <AgentEditorSkeleton />;
   }
-  
+
   if (isError || !agent) {
     return (
-         <Card className="p-8 text-center text-destructive">
-            <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-            <p>{t('agentEditor.errorLoading')}</p>
-        </Card>
+      <Card className="p-8 text-center text-destructive">
+        <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+        <p>{t('agentEditor.errorLoading')}</p>
+      </Card>
     )
   }
 
@@ -99,7 +105,8 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <agent.icon className="w-8 h-8 text-primary" />
+            {/* Check if agent.icon is a valid React component before rendering */}
+            {agent.icon && <agent.icon className="w-8 h-8 text-primary" />}
             <div>
               <CardTitle className="font-headline">{agent.name}</CardTitle>
               <CardDescription>
@@ -123,7 +130,7 @@ export default function AgentEditor({ agentId }: { agentId: string }) {
             <Label htmlFor="agent-prompt">
               {isComplexPrompt ? t('agentEditor.basePromptLabel') : t('agentEditor.promptLabel')}
             </Label>
-             {isComplexPrompt && (
+            {isComplexPrompt && (
               <p className="text-xs text-muted-foreground">
                 {t('agentEditor.complexPromptNote')}
               </p>
