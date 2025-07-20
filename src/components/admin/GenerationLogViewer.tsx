@@ -17,7 +17,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
-import ReactJson from 'react-json-view';
+import ReactJson from '@microlink/react-json-view';
 import { useTheme } from 'next-themes';
 import { AGENTS } from '@/lib/agents';
 import { useDebounce } from '@/hooks/use-debounce';
