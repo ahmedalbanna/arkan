@@ -12,8 +12,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import OnboardingGuide from '@/components/OnboardingGuide';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAgents } from '@/hooks/use-agents';
-import type { Agent } from '@/lib/agents';
+import { useFeatures } from '@/hooks/use-features';
+import type { Feature } from '@/hooks/use-features';
+
 
 const LoadingSkeleton = () => (
   <div className="space-y-4">
@@ -60,23 +61,13 @@ async function markOnboardingComplete(userId: string, token: string) {
     return response.json();
 }
 
-// Map tabs to their primary controlling agent ID
-const tabAgentMap = {
-    proposal: 'generate-proposal-report',
-    report: 'generate-introduction-section', // If this is enabled, the section is likely enabled
-    diagram: 'generate-use-case-diagram', // Check one of the diagram agents
-    code: 'generate-code',
-    presentation: 'generate-presentation',
-};
-
-
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
   const proposal = useBuilderStore(s => s.proposal);
   const { t } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
-  const { agents, isLoaded: agentsLoaded } = useAgents();
+  const { features, isLoaded: featuresLoaded } = useFeatures();
 
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -112,13 +103,20 @@ function GeneratePageContent() {
       }
   };
 
-  const isAgentEnabled = (agentId: string) => {
-      if (!agentsLoaded) return false; // Default to not enabled while loading
-      const agent = agents.find(a => a.id === agentId);
-      return agent?.isEnabled ?? false;
+  const isFeatureEnabled = (featureId: string) => {
+      if (!featuresLoaded) return false;
+      const feature = features.find(f => f.id === featureId);
+      return feature?.isEnabled ?? false;
   };
   
-  const enabledTabs = Object.keys(tabAgentMap).filter(tabKey => isAgentEnabled(tabAgentMap[tabKey as keyof typeof tabAgentMap]));
+  const enabledTabs = [
+      { id: 'proposal', enabled: isFeatureEnabled('proposal') },
+      { id: 'report', enabled: isFeatureEnabled('report') },
+      { id: 'diagram', enabled: isFeatureEnabled('diagram') },
+      { id: 'code', enabled: isFeatureEnabled('code') },
+      { id: 'presentation', enabled: isFeatureEnabled('presentation') },
+  ].filter(tab => tab.enabled).map(tab => tab.id);
+
   
   // If the current active tab is no longer enabled, switch to the first available one
   useEffect(() => {
@@ -127,7 +125,7 @@ function GeneratePageContent() {
     } else if (enabledTabs.length === 0) {
       setActiveTab(''); // No tabs are active
     }
-  }, [enabledTabs, activeTab]);
+  }, [features, activeTab]);
 
   return (
     <>
@@ -137,32 +135,32 @@ function GeneratePageContent() {
           <SessionActions />
         </div>
         <div className="flex flex-col flex-grow">
-            {!agentsLoaded ? (
+            {!featuresLoaded ? (
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
                     <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${Math.max(1, enabledTabs.length)}, 1fr)` }}>
-                        {isAgentEnabled(tabAgentMap.proposal) && (
+                        {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
                             </TabsTrigger>
                         )}
-                        {isAgentEnabled(tabAgentMap.report) && (
+                        {isFeatureEnabled('report') && (
                             <TabsTrigger value="report" className="gap-2" disabled={!proposal}>
                                 <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
                             </TabsTrigger>
                         )}
-                        {isAgentEnabled(tabAgentMap.diagram) && (
+                        {isFeatureEnabled('diagram') && (
                             <TabsTrigger value="diagram" className="gap-2" disabled={!proposal}>
                                 <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                             </TabsTrigger>
                         )}
-                        {isAgentEnabled(tabAgentMap.code) && (
+                        {isFeatureEnabled('code') && (
                             <TabsTrigger value="code" className="gap-2">
                                 <Laptop className="h-4 w-4" /> {t('builder.tabs.code')}
                             </TabsTrigger>
                         )}
-                        {isAgentEnabled(tabAgentMap.presentation) && (
+                        {isFeatureEnabled('presentation') && (
                              <TabsTrigger value="presentation" className="gap-2" disabled={!proposal}>
                                 <Presentation className="h-4 w-4" /> {t('builder.tabs.presentation')}
                             </TabsTrigger>

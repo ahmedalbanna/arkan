@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users } from "lucide-react";
+import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users, SlidersHorizontal } from "lucide-react";
 import { useLocalization } from "@/context/LocalizationContext";
 
 function AdminLayoutSkeleton() {
@@ -39,6 +39,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     const adminNavLinks = [
         { href: '/admin/dashboard', label: t('adminDashboard.pageTitle'), icon: LayoutDashboard },
         { href: '/manage-users', label: t('header.manageUsers'), icon: Users },
+        { href: '/manage-features', label: t('header.manageFeatures'), icon: SlidersHorizontal },
         { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
         { href: '/manage-payments', label: t('header.managePayments'), icon: CreditCard },
         { href: '/manage-generations', label: t('header.activityHistory'), icon: History },

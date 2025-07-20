@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "Arkan",
@@ -9,6 +10,7 @@
     "exportTemplates": "Export Templates",
     "activityHistory": "Activity History",
     "agentManager": "Manage Agents",
+    "manageFeatures": "Manage Features",
     "profile": "Profile",
     "openMenu": "Open Menu",
     "credits": "Credits",
@@ -154,6 +156,14 @@
     "successToastDescription": "User has been updated successfully.",
     "errorToastTitle": "Update Error",
     "deleteErrorToastTitle": "Delete Error"
+  },
+  "manageFeatures": {
+    "pageTitle": "Feature Management",
+    "pageSubtitle": "Enable or disable the main features of the Builder page for all users.",
+    "cardTitle": "Builder Features",
+    "errorLoading": "Failed to load features.",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
   },
   "agentEditor": {
     "pageTitle": "Edit Agent",
