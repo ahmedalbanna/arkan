@@ -75,6 +75,31 @@
     "joinedLabel": "Joined",
     "bioLabel": "Bio"
   },
+  "team": {
+    "manageTeams": "Manage Teams",
+    "manageTeamsSubtitle": "Create and manage your collaborative teams.",
+    "createTeamTitle": "Create a New Team",
+    "createTeamDescription": "Give your new team a name to get started.",
+    "teamNameLabel": "Team Name",
+    "teamNamePlaceholder": "e.g., Q4 Project Team",
+    "createButton": "Create Team",
+    "createSuccessTitle": "Team Created",
+    "createSuccessDescription": "Your new team has been successfully created.",
+    "createErrorTitle": "Creation Failed",
+    "errorLoading": "Failed to load team data.",
+    "noTeams": "You are not a part of any teams yet. Create one to start collaborating!",
+    "memberCount": "{count} Members",
+    "members": "Members",
+    "inviteNewMember": "Invite New Member",
+    "emailPlaceholder": "member@example.com",
+    "inviteSuccessTitle": "Invitation Sent",
+    "inviteSuccessDescription": "An invitation has been sent to {email}.",
+    "inviteErrorTitle": "Invitation Failed",
+    "roles": {
+      "owner": "Owner",
+      "member": "Member"
+    }
+  },
   "manageUsers": {
     "pageTitle": "User Management",
     "pageSubtitle": "Oversee, edit, and manage all users on the platform.",

@@ -75,6 +75,31 @@
     "joinedLabel": "تاريخ الانضمام",
     "bioLabel": "نبذة تعريفية"
   },
+  "team": {
+    "manageTeams": "إدارة الفرق",
+    "manageTeamsSubtitle": "أنشئ وأدر فرق العمل التعاونية الخاصة بك.",
+    "createTeamTitle": "إنشاء فريق جديد",
+    "createTeamDescription": "أعط فريقك الجديد اسمًا للبدء.",
+    "teamNameLabel": "اسم الفريق",
+    "teamNamePlaceholder": "مثال: فريق مشروع الربع الرابع",
+    "createButton": "إنشاء فريق",
+    "createSuccessTitle": "تم إنشاء الفريق",
+    "createSuccessDescription": "تم إنشاء فريقك الجديد بنجاح.",
+    "createErrorTitle": "فشل الإنشاء",
+    "errorLoading": "فشل في تحميل بيانات الفريق.",
+    "noTeams": "أنت لست عضواً في أي فريق بعد. أنشئ واحداً لبدء التعاون!",
+    "memberCount": "{count} أعضاء",
+    "members": "الأعضاء",
+    "inviteNewMember": "دعوة عضو جديد",
+    "emailPlaceholder": "member@example.com",
+    "inviteSuccessTitle": "تم إرسال الدعوة",
+    "inviteSuccessDescription": "تم إرسال دعوة إلى {email}.",
+    "inviteErrorTitle": "فشل إرسال الدعوة",
+    "roles": {
+      "owner": "مالك",
+      "member": "عضو"
+    }
+  },
   "manageUsers": {
     "pageTitle": "إدارة المستخدمين",
     "pageSubtitle": "الإشراف على جميع المستخدمين في المنصة وتعديلهم وإدارتهم.",

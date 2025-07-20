@@ -152,6 +152,12 @@ export function Header() {
                     </Link>
                   </DropdownMenuItem>
                    <DropdownMenuItem asChild>
+                    <Link href="/team/manage">
+                      <Users className="mr-2 h-4 w-4" />
+                      Manage Team
+                    </Link>
+                  </DropdownMenuItem>
+                   <DropdownMenuItem asChild>
                     <Link href="/handwriting">
                       <PencilLine className="mr-2 h-4 w-4" />
                       Handwriting

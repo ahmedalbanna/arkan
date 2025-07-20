@@ -11,9 +11,24 @@ export interface UserProfile {
   role: 'user' | 'admin';
   createdAt: string; // Storing as ISO string
   updatedAt: string; // Storing as ISO string
+  teams?: string[]; // Array of team IDs
   bio?: string;
   profilePictureUrl?: string;
   hasCompletedOnboarding?: boolean;
+}
+
+export interface Team {
+    id: string;
+    name: string;
+    ownerId: string;
+    createdAt: string;
+}
+
+export interface TeamMember {
+    userId: string;
+    teamId: string;
+    role: 'owner' | 'member';
+    joinedAt: string;
 }
 
 export interface TransactionData {
@@ -149,4 +164,71 @@ export async function getPendingTransactions(): Promise<TransactionData[]> {
     }
 
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
+}
+
+
+// --- Team Queries ---
+
+export async function getUserTeams(userId: string) {
+    const userProfile = await getUserProfile(userId);
+    if (!userProfile?.teams || userProfile.teams.length === 0) {
+        return [];
+    }
+
+    const teamPromises = userProfile.teams.map(async (teamId) => {
+        const teamDoc = await adminDb.collection('teams').doc(teamId).get();
+        if (!teamDoc.exists) return null;
+        
+        const teamData = { id: teamDoc.id, ...teamDoc.data() } as Team;
+
+        const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
+        const memberIds = membersSnapshot.docs.map(doc => doc.id);
+        const memberProfiles = await adminDb.collection('users').where(admin.firestore.FieldPath.documentId(), 'in', memberIds).get();
+
+        const membersWithProfiles = membersSnapshot.docs.map(memberDoc => {
+            const memberData = memberDoc.data() as TeamMember;
+            const profileDoc = memberProfiles.docs.find(p => p.id === memberData.userId);
+            const profileData = profileDoc?.data();
+            return {
+                ...memberData,
+                name: profileData?.name || 'Unknown User',
+                email: profileData?.email || 'N/A',
+                profilePictureUrl: profileData?.profilePictureUrl || ''
+            };
+        });
+
+        return { ...teamData, members: membersWithProfiles };
+    });
+
+    const teams = await Promise.all(teamPromises);
+    return teams.filter(team => team !== null);
+}
+
+
+export async function createTeamForUser(userId: string, teamName: string): Promise<Team> {
+  const teamRef = adminDb.collection('teams').doc();
+  const userRef = adminDb.collection('users').doc(userId);
+  
+  const newTeam: Team = {
+      id: teamRef.id,
+      name: teamName,
+      ownerId: userId,
+      createdAt: new Date().toISOString(),
+  };
+
+  const newMember: TeamMember = {
+      userId,
+      teamId: teamRef.id,
+      role: 'owner',
+      joinedAt: new Date().toISOString(),
+  };
+
+  const batch = adminDb.batch();
+  batch.set(teamRef, newTeam);
+  batch.set(teamRef.collection('members').doc(userId), newMember);
+  batch.update(userRef, { teams: FieldValue.arrayUnion(teamRef.id) });
+
+  await batch.commit();
+
+  return newTeam;
 }
