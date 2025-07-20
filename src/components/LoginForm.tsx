@@ -34,11 +34,24 @@ export default function LoginForm() {
       password: '',
     },
   });
-
+  
   // Display form-level errors from the mutation in an alert
   const formLevelError = loginMutation.error?.message;
 
+  useEffect(() => {
+    if(loginMutation.isError && loginMutation.error) {
+        if (loginMutation.error.message.includes("Invalid email or password")) {
+            form.setError("root.serverError", {
+                type: "manual",
+                message: loginMutation.error.message
+            });
+        }
+    }
+  }, [loginMutation.isError, loginMutation.error, form]);
+
+
   function onSubmit(values: LoginCredentials) {
+    form.clearErrors("root.serverError");
     loginMutation.mutate(values);
   }
 
@@ -51,11 +64,11 @@ export default function LoginForm() {
             <CardDescription>Enter your credentials to access your account.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-             {formLevelError && (
+             {form.formState.errors.root?.serverError && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Login Error</AlertTitle>
-                    <AlertDescription>{formLevelError}</AlertDescription>
+                    <AlertDescription>{form.formState.errors.root.serverError.message}</AlertDescription>
                 </Alert>
             )}
             <FormField

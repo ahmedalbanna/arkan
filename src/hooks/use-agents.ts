@@ -66,7 +66,7 @@ async function updateAgentApi(
 export function useAgents() {
     const { firebaseUser } = useAuth();
 
-    const { data: agents, isLoading: isLoaded, isError } = useQuery({
+    const { data: agents, isLoading, isError } = useQuery({
         queryKey: agentKeys.lists(),
         queryFn: async () => {
             const token = await firebaseUser?.getIdToken();
@@ -80,7 +80,7 @@ export function useAgents() {
         return agents?.find(agent => agent.id === id);
     };
 
-    return { agents: agents || [], isLoaded: !isLoaded, isError, getAgent };
+    return { agents: agents || [], isLoaded: !isLoading, isError, getAgent };
 }
 
 type UseAgentOptions = Omit<UseQueryOptions<Agent | null, Error>, 'queryKey' | 'queryFn' | 'enabled'>;

@@ -84,11 +84,15 @@ export function useLogin() {
             }
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Login Error',
-                description: error.message,
-                variant: 'destructive',
-            });
+            // Specific UI error handling is now done within the LoginForm component
+            // We still keep a general toast for unexpected errors
+            if (!error.message.includes("Invalid email or password")) {
+                toast({
+                    title: 'Login Error',
+                    description: error.message,
+                    variant: 'destructive',
+                });
+            }
         }
     });
 }
@@ -102,6 +106,10 @@ export function useLogout() {
         onSuccess: () => {
             queryClient.clear();
             router.push('/login');
+            toast({
+                title: 'Logged Out',
+                description: 'You have been successfully signed out.',
+            });
         },
         onError: (error: Error) => {
             toast({
@@ -127,6 +135,17 @@ export function useSignup() {
         },
         onError: (error: any) => {
             console.error("Signup mutation error:", error);
+             // Error handling is now primarily managed in the SignupForm component
+             // to set form-specific errors. A toast is still useful for general errors.
+            if (error.error && !error.error._form) {
+                // Do nothing if it's a field-specific error
+            } else {
+                 toast({
+                    title: 'Signup Failed',
+                    description: error.error?._form?.[0] || 'An unexpected error occurred. Please try again.',
+                    variant: 'destructive'
+                });
+            }
         }
     });
 }

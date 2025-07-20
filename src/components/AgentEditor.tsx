@@ -46,20 +46,13 @@ function AgentEditorSkeleton() {
 
 interface AgentEditorProps {
   agentId: string;
-  initialData?: Agent; // Make initialData optional
 }
 
-export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
+function AgentEditorContent({ agentId }: { agentId: string }) {
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useLocalization();
-  // We use the hook here primarily to get fresh data if initialData isn't passed,
-  // but rely on initialData for the first render to avoid flicker.
-  const { data: agentFromHook, isLoading, isError } = useAgent(agentId, {
-    enabled: !initialData && !!agentId // Only fetch if no initial data is provided
-  });
-
-  const agent = initialData || agentFromHook;
+  const { data: agent, isLoading, isError } = useAgent(agentId);
 
   const updateAgentMutation = useUpdateAgent();
 
@@ -90,15 +83,10 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     });
   };
 
-  if (isLoading && !initialData) {
+  if (isLoading) {
     return <AgentEditorSkeleton />;
   }
   
-  // This case handles when agentId is not available yet, showing a skeleton.
-  if (!agentId) {
-    return <AgentEditorSkeleton />;
-  }
-
   if (isError || !agent) {
     return (
       <Card className="p-8 text-center text-destructive">
@@ -168,4 +156,10 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       </Card>
     </form>
   );
+}
+
+
+// This is the main export, acting as a Server Component wrapper.
+export default function EditAgentPage({ params }: { params: { id: string } }) {
+  return <AgentEditorContent agentId={params.id} />;
 }
