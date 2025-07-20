@@ -79,6 +79,19 @@
     "pageLabel": "صفحة",
     "nextButton": "التالي"
   },
+  "manageGenerations": {
+    "pageTitle": "سجل التوليدات",
+    "pageSubtitle": "استعراض وتحليل جميع الأنشطة التي قام بها وكلاء الذكاء الاصطناعي.",
+    "cardTitle": "سجل التوليدات",
+    "errorLoading": "فشل تحميل سجلات التوليد.",
+    "agent": "الوكيل",
+    "user": "المستخدم",
+    "date": "التاريخ",
+    "actions": "إجراءات",
+    "filterAgentPlaceholder": "تصفية حسب معرف الوكيل...",
+    "filterUserPlaceholder": "تصفية حسب معرف المستخدم...",
+    "noResults": "لم يتم العثور على سجلات تطابق معايير التصفية."
+  },
   "roles": {
     "user": "مستخدم",
     "admin": "مسؤول"

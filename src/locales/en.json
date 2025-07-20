@@ -79,6 +79,19 @@
     "pageLabel": "Page",
     "nextButton": "Next"
   },
+  "manageGenerations": {
+    "pageTitle": "Generation Logs",
+    "pageSubtitle": "Review and analyze all activities performed by AI agents.",
+    "cardTitle": "Generation Log",
+    "errorLoading": "Failed to load generation logs.",
+    "agent": "Agent",
+    "user": "User",
+    "date": "Date",
+    "actions": "Actions",
+    "filterAgentPlaceholder": "Filter by agent ID...",
+    "filterUserPlaceholder": "Filter by user ID...",
+    "noResults": "No logs found matching the filter criteria."
+  },
   "roles": {
     "user": "User",
     "admin": "Admin"

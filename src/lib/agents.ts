@@ -1,5 +1,5 @@
 
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -16,7 +16,7 @@ export interface AgentData {
   id: string;
   name: string;
   description: string;
-  category: 'Content Generation' | 'Proposal Generation' | 'Report Generation' | 'Diagram Generation' | 'Presentation Generation' | 'Code Generation';
+  category: 'Content Generation' | 'Proposal Generation' | 'Report Generation' | 'Diagram Generation' | 'Presentation Generation' | 'Code Generation' | 'Admin Tools';
   pageUrl: string;
   isEnabled: boolean;
   prompt: AgentPrompt | string; // Can be simple string or complex object
@@ -401,5 +401,15 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Use PlantUML's ER diagram syntax (e.g., `entity \"Name\" { ... }`, `User }o--|| Project`).", isDefault: true },
         ]
     }
+  },
+  {
+    id: 'activity-history',
+    name: 'Activity History',
+    description: 'View the logs of all agent generations for administrative review.',
+    category: 'Admin Tools',
+    icon: History,
+    pageUrl: '/manage-generations',
+    isEnabled: true, // Typically for admins only, controlled by UI
+    prompt: ''
   },
 ];
