@@ -20,17 +20,11 @@ export async function analyzeExam(input: z.infer<typeof AnalyzeExamInputSchema>)
     throw new Error(`Invalid input for analyzeExam: ${validation.error.message}`);
   }
 
-  // Formatting markdown from validation.data
-  const formattedMarkdown = `
-Exam Content:
----
-${validation.data.markdownContent}
----
-`;
+
 
   const analysisPrompt = ai.definePrompt({
     name: 'analyzeExamPrompt',
-    input: { schema: z.object({ markdownContent: z.string() }) },  // Use a schema that matches the formatted input
+    input: { schema: AnalyzeExamInputSchema },  // Use a schema that matches the formatted input
     output: { schema: AnalyzedExamSchema },
     prompt: `You are an expert academic analyst. Your task is to analyze the following exam content provided in Markdown.
 
@@ -44,7 +38,7 @@ ${validation.data.markdownContent}
     `,
   });
 
-  const { output } = await analysisPrompt({ markdownContent: formattedMarkdown }); // Pass the formatted markdown
+  const { output } = await analysisPrompt(validation.data); // Pass the formatted markdown
   return output!;
 }
 
