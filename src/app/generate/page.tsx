@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, BookCheck, FileQuestion } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SessionActions } from '@/components/SessionActions';
 import { Footer } from '@/components/layout/Footer';
