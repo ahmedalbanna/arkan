@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -5,6 +6,8 @@ import { toast } from '@/hooks/use-toast';
 import { agentKeys } from '@/lib/query-keys';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { useAuth } from '@/context/AuthContext';
+import { UseQueryOptions } from '@tanstack/react-query';
+
 
 // --- API Service Functions ---
 
@@ -80,9 +83,11 @@ export function useAgents() {
     return { agents: agents || [], isLoaded: !isLoaded, isError, getAgent };
 }
 
-export function useAgent(agentId: string) {
+type UseAgentOptions = Omit<UseQueryOptions<Agent | null, Error>, 'queryKey' | 'queryFn' | 'enabled'>;
+
+export function useAgent(agentId: string, options?: UseAgentOptions) {
     const { firebaseUser } = useAuth();
-    return useQuery({
+    return useQuery<Agent | null, Error>({
         queryKey: agentKeys.detail(agentId),
         queryFn: async () => {
             const token = await firebaseUser?.getIdToken();
@@ -90,8 +95,10 @@ export function useAgent(agentId: string) {
             return fetchAgent(agentId, token);
         },
         enabled: !!firebaseUser && !!agentId,
+        ...options, // Spread additional options like `enabled`
     });
 }
+
 
 export function useUpdateAgent() {
     const queryClient = useQueryClient();

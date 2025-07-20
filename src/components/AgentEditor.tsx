@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -52,9 +53,13 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useLocalization();
-  const { data: agentFromHook, isLoading: isLoaded, isError } = useAgent(agentId);
+  // We use the hook here primarily to get fresh data if initialData isn't passed,
+  // but rely on initialData for the first render to avoid flicker.
+  const { data: agentFromHook, isLoading, isError } = useAgent(agentId, {
+    enabled: !initialData && !!agentId // Only fetch if no initial data is provided
+  });
 
-  const agent = initialData || agentFromHook; // Use initialData if available, otherwise use data from hook
+  const agent = initialData || agentFromHook;
 
   const updateAgentMutation = useUpdateAgent();
 
@@ -85,7 +90,12 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     });
   };
 
-  if (isLoaded && !initialData) { // Show skeleton only when initially loading and no initial data is provided
+  if (isLoading && !initialData) {
+    return <AgentEditorSkeleton />;
+  }
+  
+  // This case handles when agentId is not available yet, showing a skeleton.
+  if (!agentId) {
     return <AgentEditorSkeleton />;
   }
 
@@ -105,7 +115,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            {/* Check if agent.icon is a valid React component before rendering */}
             {agent.icon && <agent.icon className="w-8 h-8 text-primary" />}
             <div>
               <CardTitle className="font-headline">{agent.name}</CardTitle>
@@ -149,9 +158,9 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         <CardFooter className="justify-end">
           <Button type="submit" disabled={updateAgentMutation.isPending || !name || !prompt} className="font-headline">
             {updateAgentMutation.isPending ? (
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
-              <Save className="ml-2 h-4 w-4" />
+              <Save className="mr-2 h-4 w-4" />
             )}
             {t('agentEditor.saveButton')}
           </Button>
