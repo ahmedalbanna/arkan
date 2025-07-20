@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
 import { fetchGenerationLogs } from '@/services/generation-log-service';
@@ -20,6 +20,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import ReactJson from 'react-json-view';
 import { useTheme } from 'next-themes';
 import { AGENTS } from '@/lib/agents';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const LOGS_PER_PAGE = 15;
 
@@ -95,25 +96,26 @@ export default function GenerationLogViewer() {
     const [page, setPage] = useState(1);
     const [agentIdFilter, setAgentIdFilter] = useState('');
     const [userIdFilter, setUserIdFilter] = useState('');
+    const debouncedAgentId = useDebounce(agentIdFilter, 500);
+    const debouncedUserId = useDebounce(userIdFilter, 500);
+
     const { firebaseUser, isLoading: authLoading } = useAuth();
     
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedAgentId, debouncedUserId]);
+
     const { data, isLoading, isError, error, isFetching } = useQuery({
-        queryKey: generationLogKeys.list({ page, limit: LOGS_PER_PAGE, agentId: agentIdFilter, userId: userIdFilter }),
+        queryKey: generationLogKeys.list({ page, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId }),
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchGenerationLogs({ token, page, limit: LOGS_PER_PAGE, agentId: agentIdFilter, userId: userIdFilter });
+            return fetchGenerationLogs({ token, page, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId });
         },
         enabled: !!firebaseUser,
         placeholderData: (previousData) => previousData,
     });
 
-    const agentOptions = AGENTS.map(agent => ({ value: agent.id, label: agent.name }));
-
-    const handleFilterChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
-        setter(e.target.value);
-        setPage(1); // Reset to first page on filter change
-    };
 
     if (authLoading || isLoading) {
         return (
@@ -148,7 +150,7 @@ export default function GenerationLogViewer() {
                         <Input 
                             placeholder={t('manageGenerations.filterAgentPlaceholder')} 
                             value={agentIdFilter} 
-                            onChange={handleFilterChange(setAgentIdFilter)}
+                            onChange={(e) => setAgentIdFilter(e.target.value)}
                             className="pl-10"
                         />
                     </div>
@@ -157,7 +159,7 @@ export default function GenerationLogViewer() {
                         <Input 
                             placeholder={t('manageGenerations.filterUserPlaceholder')}
                             value={userIdFilter} 
-                            onChange={handleFilterChange(setUserIdFilter)}
+                            onChange={(e) => setUserIdFilter(e.target.value)}
                             className="pl-10"
                         />
                     </div>
