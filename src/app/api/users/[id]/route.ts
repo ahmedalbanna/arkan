@@ -1,35 +1,20 @@
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/admin';
-import { cookies } from 'next/headers';
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
-    const sessionCookie = (await cookies()).get("__session")?.value;
-    if (!sessionCookie) {
-        // Fallback to Authorization header for API clients
-        const authHeader = request.headers.get('Authorization');
-        if (authHeader?.startsWith('Bearer ')) {
-            const token = authHeader.substring(7);
-            try {
-                 const decodedToken = await adminAuth.verifyIdToken(token, true);
-                 const requesterId = decodedToken.uid;
-                 if (requesterId === targetUserId) return { authorized: true, userId: requesterId };
-                 
-                 const requesterProfile = await getUserProfile(requesterId);
-                 if (requesterProfile?.role === 'admin') return { authorized: true, userId: requesterId };
-
-                 return { authorized: false, message: 'Forbidden' };
-            } catch (e) {
-                return { authorized: false, message: 'Unauthorized' };
-            }
-        }
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
     }
+    const token = authHeader.substring(7);
+
     try {
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
         const requesterId = decodedToken.uid;
 
         // Allow if the requester is the user they are trying to access
@@ -51,10 +36,9 @@ async function verifyAccess(request: Request, targetUserId: string) {
 }
 
 // GET /api/users/[id]
-export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
+export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
-        const { id: userId } = await params;  // Destructure id after params is resolved
+        const userId = params.id;
         if (!userId) {
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }
@@ -70,10 +54,11 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         }
         return NextResponse.json(user, { status: 200 });
     } catch (error) {
-        console.error(`Error fetching user ${params.id}:`, error);  //Keep original param for logging
+        console.error(`Error fetching user ${params.id}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
+
 
 // PUT /api/users/[id]
 const updateUserSchema = z.object({
@@ -83,19 +68,18 @@ const updateUserSchema = z.object({
   credits: z.coerce.number().int().optional(),
 });
 
-export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
         const userId = params.id;
         if (!userId) {
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }
         const accessCheck = await verifyAccess(request, userId);
-        if (!accessCheck.authorized || accessCheck.userId !== userId) { // For now, only user can edit themselves. Admin edits are separate
-            return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
+        // Only the user themselves can edit their own profile via this route.
+        if (!accessCheck.authorized || accessCheck.userId !== userId) {
+            return NextResponse.json({ message: 'Forbidden: You can only edit your own profile.' }, { status: 403 });
         }
 
-        // Check if user exists first
         const user = await getUserProfile(userId);
         if (!user) {
             return NextResponse.json({ message: 'User not found.' }, { status: 404 });
@@ -110,21 +94,17 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
 
         const { name, avatarUrl, bio } = validation.data;
 
-        // Handle profile update
-        if (name || avatarUrl || bio) {
-            await updateUser(userId, {
-                name: name ?? user.name,
-                profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
-                bio: bio ?? user.bio ?? undefined,
-            });
-        }
+        await updateUser(userId, {
+            name: name ?? user.name,
+            profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
+            bio: bio ?? user.bio ?? undefined,
+        });
 
         const updatedUser = await getUserProfile(userId);
-
         return NextResponse.json(updatedUser, { status: 200 });
 
     } catch (error) {
-        console.error(`Error updating user ${params.id}:`, error); // Keep original param for logging
+        console.error(`Error updating user ${params.id}:`, error);
         if (error instanceof Error) {
             return NextResponse.json({ message: error.message }, { status: 500 });
         }
@@ -132,12 +112,10 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     }
 }
 
-export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
-    const params = await props.params;
+
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
     try {
         const targetUserId = params.id;
-
-        // Use Authorization header for auth
         const authHeader = req.headers.get('Authorization');
         if (!authHeader?.startsWith('Bearer ')) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -152,7 +130,6 @@ export async function DELETE(req: Request, props: { params: Promise<{ id: string
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        // Perform the action (delete the user)
         await adminAuth.deleteUser(targetUserId);
         await adminDb.collection('users').doc(targetUserId).delete();
 

@@ -1,6 +1,5 @@
 
-'use client';;
-import { use } from "react";
+'use client';
 
 import EditUserForm from '@/components/EditUserForm';
 import { useUserProfile } from '@/hooks/use-user';
@@ -8,6 +7,9 @@ import { notFound } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
+import { useEffect } from 'react';
+
 
 function EditUserPageSkeleton() {
   return (
@@ -27,26 +29,30 @@ function EditUserPageSkeleton() {
   )
 }
 
-// This is now a fully client component to use the useUserProfile hook
-export default function EditUserPage(props: { params: Promise<{ id: string }> }) {
-  const params = use(props.params);
-  const { id } = params;
-  const { data: user, isLoading, isError } = useUserProfile(id);
+function EditUserPageContent({ userId }: { userId: string }) {
+    const { data: user, isLoading, isError } = useUserProfile(userId);
+    const { firebaseUser, isLoading: authIsLoading } = useAuth();
+    
+    useEffect(() => {
+        if (!isLoading && !authIsLoading && user?.id !== firebaseUser?.uid && user?.role !== 'admin') {
+          // notFound();
+        }
+    }, [user, firebaseUser, isLoading, authIsLoading]);
 
-  if (isLoading) {
-    return <EditUserPageSkeleton />;
-  }
+    if (isLoading || authIsLoading) {
+      return <EditUserPageSkeleton />;
+    }
 
-  if (isError || !user) {
-    notFound();
-  }
+    if (isError || !user) {
+      notFound();
+    }
 
-  return (
-    <div className="container mx-auto max-w-2xl px-4 py-12">
-      <HeaderSection userName={user.name} />
-      <EditUserForm user={user} />
-    </div>
-  );
+    return (
+        <div className="container mx-auto max-w-2xl px-4 py-12">
+            <HeaderSection userName={user.name} />
+            <EditUserForm user={user} />
+        </div>
+    );
 }
 
 // Client component to handle localization
@@ -59,8 +65,13 @@ function HeaderSection({ userName }: { userName: string }) {
         {t('editUser.pageTitle')}
       </h1>
       <p className="text-lg text-muted-foreground mt-2">
-        {t('editUser.pageSubtitle').replace('{userName}', userName)}
+        {t('editUser.pageSubtitle', { userName })}
       </p>
     </div>
   )
+}
+
+
+export default function EditUserPage({ params }: { params: { id: string } }) {
+    return <EditUserPageContent userId={params.id} />
 }

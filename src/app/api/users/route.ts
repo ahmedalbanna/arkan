@@ -3,15 +3,17 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
-import { cookies } from 'next/headers';
+
 // Helper to verify admin role
 async function verifyAdmin(request: Request) {
-    const sessionCookie = (await cookies()).get("__session")?.value;
-    if (!sessionCookie) {
+    const authHeader = request.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
     }
+    const token = authHeader.substring(7);
+
     try {
-        const decodedToken = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
         const user = await getUserProfile(decodedToken.uid);
         if (user?.role !== 'admin') {
             return { authorized: false, message: 'Forbidden' };

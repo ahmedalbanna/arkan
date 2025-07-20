@@ -22,11 +22,16 @@ import { userKeys } from '@/lib/query-keys';
 import { fetchUserProfile } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/AuthContext';
 
 const USERS_PER_PAGE = 10;
 
-async function fetchUsers(page: number): Promise<UserProfile[]> {
-    const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`);
+async function fetchUsers(page: number, token: string): Promise<UserProfile[]> {
+    const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch users');
     }
@@ -67,15 +72,24 @@ export default function UserManagementConsole() {
   const [page, setPage] = useState(1);
   const { t } = useLocalization();
   const queryClient = useQueryClient();
+  const { firebaseUser, isLoading: authIsLoading } = useAuth();
+
 
   const { data: users, isLoading, isError, isFetching } = useQuery({
       queryKey: userKeys.list(page),
-      queryFn: () => fetchUsers(page),
+      queryFn: async () => {
+          if (!firebaseUser) throw new Error("User not authenticated");
+          const token = await firebaseUser.getIdToken();
+          return fetchUsers(page, token);
+      },
       placeholderData: (previousData) => previousData,
+      staleTime: 1000 * 60, // 1 minute
+      enabled: !!firebaseUser
   });
 
   // Prefetch user profile on hover for a smoother navigation experience
   const prefetchUser = async (userId: string) => {
+    if (!firebaseUser) return;
     await queryClient.prefetchQuery({
         queryKey: userKeys.profile(userId),
         queryFn: () => fetchUserProfile(userId),
@@ -83,7 +97,7 @@ export default function UserManagementConsole() {
     });
   }
 
-  if (isLoading) {
+  if (authIsLoading || isLoading) {
     return (
         <Card>
             <CardHeader>

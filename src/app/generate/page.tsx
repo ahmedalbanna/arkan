@@ -5,19 +5,41 @@ import { useState } from 'react';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph, BookCheck, FileQuestion } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SessionActions } from '@/components/SessionActions';
-import { Footer } from '@/components/layout/Footer';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
 
 // Lazy load components
 import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const LoadingSkeleton = () => (
+  <div className="space-y-4">
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-[calc(100vh-300px)] w-full" />
+  </div>
+);
 
 
-const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { ssr: false });
-const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), { ssr: false });
-const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), { ssr: false });
-const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), { ssr: false });
-const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), { ssr: false });
+const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
 
 
 function GeneratePageContent() {
