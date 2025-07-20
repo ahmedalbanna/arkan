@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
-import { User } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 
 
@@ -49,21 +48,6 @@ async function signupUser(credentials: SignupCredentials) {
         const errorData = await response.json();
         throw errorData;
     }
-    return response.json();
-}
-
-async function purchasePlan(plan: PricingPlan): Promise<{ newBalance: number }> {
-    const response = await fetch('/api/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Purchase failed');
-    }
-
     return response.json();
 }
 
@@ -144,27 +128,5 @@ export function useSignup() {
         onError: (error: any) => {
             console.error("Signup mutation error:", error);
         }
-    });
-}
-
-export function usePurchaseCredits() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: purchasePlan,
-        onSuccess: (data, plan) => {
-            queryClient.invalidateQueries({ queryKey: userKeys.all });
-            toast({
-                title: 'Purchase Successful!',
-                description: `You are now on the ${plan.name} plan.`,
-            });
-        },
-        onError: (error: Error) => {
-            toast({
-                title: 'Purchase Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
-        },
     });
 }

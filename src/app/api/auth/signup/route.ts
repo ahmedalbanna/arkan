@@ -4,6 +4,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { UserRole } from '@/lib/types';
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -33,12 +34,12 @@ export async function POST(req: Request) {
         name,
         email,
         credits: 10, // Assign some starting credits
-        role: 'user', // Assign the default role
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         bio: '',
         profilePictureUrl: '',
-        role: 'user' as UserRole, // Assign a default role, e.g., 'user'
+        role: 'user' as UserRole,
+        hasCompletedOnboarding: false, // Add onboarding flag
     };
 
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);

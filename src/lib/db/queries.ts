@@ -13,6 +13,7 @@ export interface UserProfile {
   updatedAt: string; // Storing as ISO string
   bio?: string;
   profilePictureUrl?: string;
+  hasCompletedOnboarding?: boolean;
 }
 
 export interface TransactionData {
@@ -62,11 +63,7 @@ export async function getPaginatedUsers({ page, limit }: { page: number; limit: 
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
 }
 
-export async function updateUser(userId: string, data: {
-    name: string;
-    profilePictureUrl?: string;
-    bio?: string;
-}) {
+export async function updateUser(userId: string, data: Partial<Omit<UserProfile, 'id' | 'email' | 'role' | 'credits'>>) {
     await adminDb.collection('users').doc(userId).update({
         ...data,
         updatedAt: new Date().toISOString(),

@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getUserProfile, updateUser } from '@/lib/db/queries';
+import { getUserProfile, updateUser, updateUserByAdmin } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/admin';
 
@@ -66,6 +66,7 @@ const updateUserSchema = z.object({
   avatarUrl: z.string().url().optional(),
   bio: z.string().optional(),
   credits: z.coerce.number().int().optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
 });
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
@@ -75,10 +76,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }
         const accessCheck = await verifyAccess(request, userId);
-        // Only the user themselves can edit their own profile via this route.
-        if (!accessCheck.authorized || accessCheck.userId !== userId) {
-            return NextResponse.json({ message: 'Forbidden: You can only edit your own profile.' }, { status: 403 });
+        
+        if (!accessCheck.authorized) {
+            return NextResponse.json({ message: accessCheck.message }, { status: 403 });
         }
+        
+        const isSelfEdit = accessCheck.userId === userId;
+        const isAdmin = (await getUserProfile(accessCheck.userId!))?.role === 'admin';
 
         const user = await getUserProfile(userId);
         if (!user) {
@@ -92,14 +96,25 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { name, avatarUrl, bio } = validation.data;
+        // Admins can update credits, users cannot
+        if (validation.data.credits !== undefined && !isAdmin) {
+             return NextResponse.json({ message: 'Forbidden: Only admins can update credits.' }, { status: 403 });
+        }
 
-        await updateUser(userId, {
-            name: name ?? user.name,
-            profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
-            bio: bio ?? user.bio ?? undefined,
-        });
-
+        if (isSelfEdit) {
+            const { name, avatarUrl, bio, hasCompletedOnboarding } = validation.data;
+             await updateUser(userId, {
+                name: name ?? user.name,
+                profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
+                bio: bio ?? user.bio ?? undefined,
+                hasCompletedOnboarding: hasCompletedOnboarding ?? user.hasCompletedOnboarding ?? undefined,
+            });
+        } else if (isAdmin) {
+             await updateUserByAdmin(userId, validation.data);
+        } else {
+             return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+        }
+       
         const updatedUser = await getUserProfile(userId);
         return NextResponse.json(updatedUser, { status: 200 });
 
