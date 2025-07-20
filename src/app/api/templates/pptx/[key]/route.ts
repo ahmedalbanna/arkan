@@ -31,12 +31,13 @@ const updatePptxTemplateSchema = z.object({
 });
 
 
-export async function PUT(request: Request, { params }: { params: { key: string } }) {
+export async function PUT(request: Request, props: { params: Promise<{ key: string }> }) {
+    const params = await props.params;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
     }
-    
+
     const { key } = params;
     if (!key) {
         return NextResponse.json({ message: 'Template key is required.' }, { status: 400 });

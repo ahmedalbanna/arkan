@@ -77,11 +77,11 @@ export default async function RootLayout({
 }>) {
   
   // We need to get the current path to check if it's protected
-  const headersList = headers();
+  const headersList = await headers();
   const pathname = (await headersList).get('x-next-pathname') || '/';
   
   // Get the session cookie value here, at the top level
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const sessionCookie = (await cookieStore).get('__session')?.value;
 
 

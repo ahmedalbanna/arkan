@@ -51,7 +51,8 @@ async function verifyAccess(request: Request, targetUserId: string) {
 }
 
 // GET /api/users/[id]
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
     try {
         const { id: userId } = await params;  // Destructure id after params is resolved
         if (!userId) {
@@ -82,81 +83,83 @@ const updateUserSchema = z.object({
   credits: z.coerce.number().int().optional(),
 });
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-  try {
-      const userId = params.id;
-      if (!userId) {
-          return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
-      }
-      const accessCheck = await verifyAccess(request, userId);
-      if (!accessCheck.authorized || accessCheck.userId !== userId) { // For now, only user can edit themselves. Admin edits are separate
-          return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
-      }
+export async function PUT(request: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const userId = params.id;
+        if (!userId) {
+            return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+        }
+        const accessCheck = await verifyAccess(request, userId);
+        if (!accessCheck.authorized || accessCheck.userId !== userId) { // For now, only user can edit themselves. Admin edits are separate
+            return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
+        }
 
-      // Check if user exists first
-      const user = await getUserProfile(userId);
-      if (!user) {
-          return NextResponse.json({ message: 'User not found.' }, { status: 404 });
-      }
+        // Check if user exists first
+        const user = await getUserProfile(userId);
+        if (!user) {
+            return NextResponse.json({ message: 'User not found.' }, { status: 404 });
+        }
 
-      const body = await request.json();
-      const validation = updateUserSchema.safeParse(body);
+        const body = await request.json();
+        const validation = updateUserSchema.safeParse(body);
 
-      if (!validation.success) {
-          return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
-      }
+        if (!validation.success) {
+            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
 
-      const { name, avatarUrl, bio } = validation.data;
+        const { name, avatarUrl, bio } = validation.data;
 
-      // Handle profile update
-      if (name || avatarUrl || bio) {
-          await updateUser(userId, {
-              name: name ?? user.name,
-              profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
-              bio: bio ?? user.bio ?? undefined,
-          });
-      }
+        // Handle profile update
+        if (name || avatarUrl || bio) {
+            await updateUser(userId, {
+                name: name ?? user.name,
+                profilePictureUrl: avatarUrl ?? user.profilePictureUrl ?? undefined,
+                bio: bio ?? user.bio ?? undefined,
+            });
+        }
 
-      const updatedUser = await getUserProfile(userId);
+        const updatedUser = await getUserProfile(userId);
 
-      return NextResponse.json(updatedUser, { status: 200 });
+        return NextResponse.json(updatedUser, { status: 200 });
 
-  } catch (error) {
-      console.error(`Error updating user ${params.id}:`, error); // Keep original param for logging
-      if (error instanceof Error) {
-          return NextResponse.json({ message: error.message }, { status: 500 });
-      }
-      return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
-  }
+    } catch (error) {
+        console.error(`Error updating user ${params.id}:`, error); // Keep original param for logging
+        if (error instanceof Error) {
+            return NextResponse.json({ message: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-  try {
-      const targetUserId = params.id;
+export async function DELETE(req: Request, props: { params: Promise<{ id: string }> }) {
+    const params = await props.params;
+    try {
+        const targetUserId = params.id;
 
-      // Use Authorization header for auth
-      const authHeader = req.headers.get('Authorization');
-      if (!authHeader?.startsWith('Bearer ')) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-      const token = authHeader.substring(7);
+        // Use Authorization header for auth
+        const authHeader = req.headers.get('Authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const token = authHeader.substring(7);
 
-      const decodedToken = await adminAuth.verifyIdToken(token, true);
-      const requesterId = decodedToken.uid;
+        const decodedToken = await adminAuth.verifyIdToken(token, true);
+        const requesterId = decodedToken.uid;
 
-      const requesterProfile = await getUserProfile(requesterId);
-      if (requesterProfile?.role !== 'admin') {
-          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+        const requesterProfile = await getUserProfile(requesterId);
+        if (requesterProfile?.role !== 'admin') {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
-      // Perform the action (delete the user)
-      await adminAuth.deleteUser(targetUserId);
-      await adminDb.collection('users').doc(targetUserId).delete();
+        // Perform the action (delete the user)
+        await adminAuth.deleteUser(targetUserId);
+        await adminDb.collection('users').doc(targetUserId).delete();
 
-      return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
+        return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
 
-  } catch (error: any) {
-      console.error("Error deleting user:", error);
-      return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
-  }
+    } catch (error: any) {
+        console.error("Error deleting user:", error);
+        return NextResponse.json({ error: error.message || "An error occurred" }, { status: 500 });
+    }
 }
