@@ -1,9 +1,9 @@
 
 'use client';
 
-import SettingsManager from '@/components/admin/SettingsManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Settings } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AdminSettingsPage() {
   const { t } = useLocalization();
@@ -19,7 +19,17 @@ export default function AdminSettingsPage() {
           {t('adminSettings.pageSubtitle')}
         </p>
       </div>
-      <SettingsManager />
+      <Card>
+        <CardHeader>
+            <CardTitle>Settings</CardTitle>
+            <CardDescription>
+                Application-wide settings will be managed here in the future. The data sync feature has been removed as it is no longer necessary with the current architecture.
+            </CardDescription>
+        </CardHeader>
+        <CardContent>
+            <p className="text-sm text-muted-foreground">No settings are currently available.</p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

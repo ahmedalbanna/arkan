@@ -239,13 +239,22 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
 
 // --- Agent Queries ---
 export async function getAgent(agentId: string): Promise<AgentData | null> {
-    const agentDoc = await adminDb.collection('agents').doc(agentId).get();
-    
-    if (agentDoc.exists) {
-        return agentDoc.data() as AgentData;
+    try {
+        const agentDoc = await adminDb.collection('agents').doc(agentId).get();
+        
+        if (agentDoc.exists) {
+            return agentDoc.data() as AgentData;
+        }
+        
+        // Fallback to default if not in DB, which is useful during development
+        // or if seeding hasn't occurred.
+        const defaultAgent = defaultAgents.find(a => a.id === agentId);
+        return defaultAgent || null;
+
+    } catch (error) {
+        console.error(`Error fetching agent configuration for '${agentId}':`, error);
+        // Fallback to local config on error to ensure app stability
+        const defaultAgent = defaultAgents.find(a => a.id === agentId);
+        return defaultAgent || null;
     }
-    
-    // Fallback to default if not in DB
-    const defaultAgent = defaultAgents.find(a => a.id === agentId);
-    return defaultAgent || null;
 }
