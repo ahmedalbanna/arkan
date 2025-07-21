@@ -1,12 +1,14 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, use } from 'react';
+import { useFormState } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { UserProfile } from '@/lib/db/queries';
+import { handleUpdateUser, handleDeleteUser } from '@/app/manage-users/actions';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,9 +32,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
 import Link from 'next/link';
 import { useSendPasswordReset } from '@/hooks/use-user';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -44,23 +46,7 @@ const editUserSchema = z.object({
 
 type EditUserFormValues = z.infer<typeof editUserSchema>;
 
-// The async function for the mutation
-async function updateUser(variables: { userId: string; data: EditUserFormValues; token: string }) {
-    const response = await fetch(`/api/users/${variables.userId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update user');
-    }
-    return response.json();
-}
-
+// The async function for deleting a user (for the client-side mutation)
 async function deleteUserApi(variables: { userId: string, token: string }) {
      const response = await fetch(`/api/users/${variables.userId}`, {
         method: 'DELETE',
@@ -80,9 +66,11 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   const { toast } = useToast();
   const { t } = useLocalization();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const { firebaseUser, userProfile: currentUserProfile } = useAuth();
   
+  const [updateState, updateFormAction] = useFormState(handleUpdateUser, { errors: {} });
+  const [deleteState, deleteFormAction] = useFormState(handleDeleteUser, { error: null });
+
   const form = useForm<EditUserFormValues>({
       resolver: zodResolver(editUserSchema),
       defaultValues: {
@@ -93,42 +81,36 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
         role: user.role,
       }
   });
-  
-  const updateUserMutation = useMutation({
-      mutationFn: updateUser,
-      onSuccess: (updatedUser) => {
-          queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-          queryClient.setQueryData(userKeys.profile(user.id), updatedUser);
-          toast({ title: t('editUser.successToastTitle'), description: t('editUser.successToastDescription') });
-      },
-      onError: (error: Error) => {
-          toast({
-            title: t('editUser.errorToastTitle'),
-            description: error.message,
-            variant: 'destructive',
-          });
-      }
-  });
 
+  // Handle form state from server actions
+  useEffect(() => {
+    if (updateState.success) {
+      toast({ title: t('editUser.successToastTitle'), description: updateState.message });
+    }
+    if (updateState.errors?._form) {
+      toast({ title: t('editUser.errorToastTitle'), description: updateState.errors._form, variant: 'destructive' });
+    }
+  }, [updateState, t, toast]);
+
+  useEffect(() => {
+    if (deleteState?.error) {
+      toast({ title: t('editUser.deleteErrorToastTitle'), description: deleteState.error, variant: 'destructive' });
+    }
+  }, [deleteState, toast, t]);
+  
+  // This mutation is kept for client-side actions that don't fit Server Actions well, like deletion with optimistic UI
   const deleteUserMutation = useMutation({
       mutationFn: deleteUserApi,
       onSuccess: () => {
           toast({ title: "User Deleted", description: `User ${user.name} has been successfully deleted.`});
-          queryClient.invalidateQueries({ queryKey: userKeys.lists() });
           router.push('/admin/manage-users');
       },
       onError: (error: Error) => {
            toast({ title: t('editUser.deleteErrorToastTitle'), description: error.message, variant: 'destructive' });
       }
   });
-
+  
   const passwordResetMutation = useSendPasswordReset();
-
-  const onSubmit = async (data: EditUserFormValues) => {
-      if (!firebaseUser) return;
-      const token = await firebaseUser.getIdToken();
-      updateUserMutation.mutate({ userId: user.id, data, token });
-  };
 
   const onDelete = async () => {
     if (!firebaseUser) return;
@@ -141,12 +123,13 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   };
 
   const isAdmin = currentUserProfile?.role === 'admin';
-  const isPending = updateUserMutation.isPending || deleteUserMutation.isPending || passwordResetMutation.isPending;
+  const isPending = deleteUserMutation.isPending || passwordResetMutation.isPending;
 
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form action={updateFormAction}>
+            <input type="hidden" name="userId" value={user.id} />
             <Card>
             <CardHeader>
                 <CardTitle className="font-headline text-2xl">{t('editUser.cardTitle')}</CardTitle>
@@ -207,20 +190,30 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                         </FormItem>
                     )}
                 />
+                 <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Role</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={!isAdmin || isPending}>
+                            <FormControl>
+                                <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
             </CardContent>
             <CardFooter className="justify-between">
                  <Button type="submit" disabled={isPending} className="font-headline">
-                    {updateUserMutation.isPending ? (
-                        <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('editUser.savingButton')}
-                        </>
-                    ) : (
-                        <>
-                        <Save className="mr-2 h-4 w-4" />
-                        {t('editUser.saveButton')}
-                        </>
-                    )}
+                    <Save className="mr-2 h-4 w-4" />
+                    {t('editUser.saveButton')}
                 </Button>
                  <Button asChild variant="outline">
                     <Link href="/admin/manage-users">

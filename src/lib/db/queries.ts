@@ -34,6 +34,10 @@ export interface TeamMember {
     teamId: string;
     role: 'owner' | 'member';
     joinedAt: string;
+    // Denormalized fields for efficiency
+    name: string;
+    email: string;
+    profilePictureUrl?: string;
 }
 
 export interface TransactionData {
@@ -118,7 +122,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
         const currentCredits = userDoc.data()?.credits ?? 0;
         
         if (currentCredits < creditsToDeduct) {
-            throw new Error("Insufficient credits");
+            throw new Error("Insufficient credits. Please purchase more credits to continue.");
         }
         
         const newBalance = currentCredits - creditsToDeduct;
@@ -156,17 +160,23 @@ export async function createTransaction(data: Omit<TransactionData, 'createdAt' 
     return { id: transactionRef.id };
 }
 
-export async function getPendingTransactions(): Promise<TransactionData[]> {
-    const snapshot = await adminDb.collection('transactions')
+export async function getPendingTransactions(limit: number, lastVisibleId?: string): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
+    let query = adminDb.collection('transactions')
         .where('status', '==', 'pending')
         .orderBy('createdAt', 'asc')
-        .get();
-    
-    if (snapshot.empty) {
-        return [];
-    }
+        .limit(limit + 1); // Fetch one extra to check for next page
 
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
+    if (lastVisibleId) {
+        const lastDoc = await adminDb.collection('transactions').doc(lastVisibleId).get();
+        query = query.startAfter(lastDoc);
+    }
+    
+    const snapshot = await query.get();
+    
+    const transactions = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
+    const hasNextPage = snapshot.docs.length > limit;
+
+    return { transactions, hasNextPage };
 }
 
 
@@ -185,27 +195,9 @@ export async function getUserTeams(userId: string) {
         const teamData = { id: teamDoc.id, ...teamDoc.data() } as Team;
 
         const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
-        const memberIds = membersSnapshot.docs.map(doc => doc.id);
-        
-        if (memberIds.length === 0) {
-            return { ...teamData, members: [] };
-        }
+        const members = membersSnapshot.docs.map(doc => doc.data() as TeamMember);
 
-        const memberProfiles = await adminDb.collection('users').where(FieldValue.documentId(), 'in', memberIds).get();
-
-        const membersWithProfiles = membersSnapshot.docs.map(memberDoc => {
-            const memberData = memberDoc.data() as TeamMember;
-            const profileDoc = memberProfiles.docs.find(p => p.id === memberData.userId);
-            const profileData = profileDoc?.data();
-            return {
-                ...memberData,
-                name: profileData?.name || 'Unknown User',
-                email: profileData?.email || 'N/A',
-                profilePictureUrl: profileData?.profilePictureUrl || ''
-            };
-        });
-
-        return { ...teamData, members: membersWithProfiles };
+        return { ...teamData, members };
     });
 
     const teams = await Promise.all(teamPromises);
@@ -216,6 +208,8 @@ export async function getUserTeams(userId: string) {
 export async function createTeamForUser(userId: string, teamName: string): Promise<Team> {
   const teamRef = adminDb.collection('teams').doc();
   const userRef = adminDb.collection('users').doc(userId);
+  const userProfile = await getUserProfile(userId);
+  if (!userProfile) throw new Error("User not found.");
   
   const newTeam: Omit<Team, 'id'> = {
       name: teamName,
@@ -228,6 +222,9 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
       teamId: teamRef.id,
       role: 'owner',
       joinedAt: new Date().toISOString(),
+      name: userProfile.name,
+      email: userProfile.email,
+      profilePictureUrl: userProfile.profilePictureUrl || ''
   };
 
   const batch = adminDb.batch();

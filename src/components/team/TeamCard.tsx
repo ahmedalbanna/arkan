@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -19,7 +20,7 @@ export function TeamCard({ team }: TeamCardProps) {
     const { t } = useLocalization();
 
     const isOwner = useMemo(() => team.ownerId === firebaseUser?.uid, [team, firebaseUser]);
-    const members = team.members.sort((a, b) => a.name.localeCompare(b.name));
+    const members = useMemo(() => team.members.sort((a, b) => a.name.localeCompare(b.name)), [team.members]);
 
     return (
         <AccordionItem value={team.id} className="border rounded-lg bg-card">

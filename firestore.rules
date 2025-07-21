@@ -1,54 +1,93 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if the user is an admin
-    function isAdmin() {
-      // Get the user's profile from the 'users' collection using their UID
-      // and check if their role is 'admin'.
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    
+    // Helper function to check if a user is an admin
+    function isAdmin(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'admin';
+    }
+    
+    // Helper function to check if a user is the owner of a document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
 
-    // Helper function to check if the request is from a logged-in user
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // Rules for the 'users' collection
+    // --- Users Collection ---
     match /users/{userId} {
-      // Any authenticated user can create their own profile document.
-      allow create: if isSignedIn();
+      // Anyone can create their own user profile document during signup
+      allow create: if request.auth.uid == userId;
+      // Any authenticated user can read any other user's profile (for profile pages)
+      allow get: if request.auth != null;
+      // A user can update their own profile, or an admin can update any profile
+      allow update: if isOwner(userId) || isAdmin(request.auth.uid);
+      // Only admins can delete users
+      allow delete: if isAdmin(request.auth.uid);
+      // Admins can list all users
+      allow list: if isAdmin(request.auth.uid);
+    }
 
-      // Only the user themselves or an admin can read the user's profile.
-      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    // --- Transactions Collection ---
+    match /transactions/{transactionId} {
+      // Any authenticated user can create a transaction (submit payment proof)
+      allow create: if request.auth != null;
+      // Only admins can read, update (verify/reject), or delete transactions
+      allow read, update, delete, list: if isAdmin(request.auth.uid);
+    }
+    
+    // --- Features Collection ---
+    match /features/{featureId} {
+      // All authenticated users can read feature flags
+      allow get, list: if request.auth != null;
+      // Only admins can update (enable/disable) features
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
+    
+    // --- Agents Collection ---
+    match /agents/{agentId} {
+      // Only admins can manage agents
+      allow read, list, create, update, delete: if isAdmin(request.auth.uid);
+    }
+    
+    // --- Agent Generations (Logs) ---
+    match /agent_generations/{generationId} {
+        // Authenticated users can create logs (when they generate content)
+        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+        // Only admins can read the logs
+        allow read, list, delete: if isAdmin(request.auth.uid);
+    }
+    
+    // --- Teams Collection ---
+    match /teams/{teamId} {
+      // Authenticated users can create teams
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
       
-      // The user can update their own profile, but not change their role or credits.
-      // Admins can update any field.
-      allow update: if isSignedIn() && 
-                    ((request.auth.uid == userId && !('role' in request.resource.data) && !('credits' in request.resource.data)) || isAdmin());
-
-      // Only admins can delete users.
-      allow delete: if isAdmin();
+      // Any member of the team can read team details
+      allow get: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid)).data.role in ['owner', 'member'];
+      
+      // Only the team owner can update or delete the team
+      allow update, delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid;
+      
+      // --- Team Members Subcollection ---
+      match /members/{userId} {
+          // The owner can add new members
+          allow create: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid;
+          // Any team member can view other members
+          allow read, list: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid)).data.role in ['owner', 'member'];
+          // Only the owner can remove members (except themselves)
+          allow delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid && request.auth.uid != userId;
+      }
     }
+    
+    // --- Templates ---
+    match /templates/{docId} {
+      // Everyone can read templates
+      allow get, list: if true;
 
-    // Rules for collections that are only accessible by admins
-    match /{collection}/{docId} {
-      // Admins have full access to these collections.
-      allow read, write, delete: if isAdmin() &&
-                                  (collection == 'agents' || 
-                                   collection == 'features' || 
-                                   collection == 'transactions' ||
-                                   collection == 'agent_generations');
-    }
-
-    // Rules for the 'templates' collection and its subcollections
-    match /templates/{docId}/{subcollection}/{templateKey} {
-        // Any authenticated user can read templates (e.g., for exporting).
-        allow read: if isSignedIn();
-        // Only admins can write (create/update/delete) templates.
-        allow write: if isAdmin();
+      match /{subCollection}/{templateId} {
+        // Admins can manage templates
+        allow read, list, create, update, delete: if isAdmin(request.auth.uid);
+      }
     }
   }
 }

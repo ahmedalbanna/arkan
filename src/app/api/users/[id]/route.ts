@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getUserProfile, updateUser, updateUserByAdmin } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { UserRole } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
@@ -57,76 +58,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 
-// PUT /api/users/[id]
-const updateUserSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  bio: z.string().max(300, "Bio cannot exceed 300 characters.").optional(),
-  // Admin-only fields
-  credits: z.coerce.number().int().optional(),
-  role: z.enum(['user', 'admin']).optional(),
-  hasCompletedOnboarding: z.boolean().optional(),
-});
-
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    try {
-        const userId = params.id;
-        if (!userId) {
-            return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
-        }
-        const accessCheck = await verifyAccess(request, userId);
-        
-        if (!accessCheck.authorized) {
-            return NextResponse.json({ message: accessCheck.message }, { status: 403 });
-        }
-        
-        const user = await getUserProfile(userId);
-        if (!user) {
-            return NextResponse.json({ message: 'User not found.' }, { status: 404 });
-        }
-
-        const body = await request.json();
-        const validation = updateUserSchema.safeParse(body);
-
-        if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
-        }
-
-        // Only admins can update certain fields
-        if ((validation.data.credits !== undefined || validation.data.role !== undefined) && !accessCheck.isAdmin) {
-             return NextResponse.json({ message: 'Forbidden: You do not have permission to update credits or roles.' }, { status: 403 });
-        }
-
-        let updatedData;
-
-        if (accessCheck.isAdmin && !accessCheck.isSelf) {
-            // Admin editing another user
-            updatedData = await updateUserByAdmin(userId, validation.data);
-        } else {
-            // User editing their own profile (or admin editing their own)
-            const { name, bio, hasCompletedOnboarding } = validation.data;
-            const selfUpdatePayload: Partial<UserProfile> = {
-                name: name ?? user.name,
-                bio: bio ?? user.bio,
-                hasCompletedOnboarding: hasCompletedOnboarding ?? user.hasCompletedOnboarding,
-            };
-            // If admin is editing themselves, they can also change their own credits/role
-            if (accessCheck.isAdmin) {
-                if (validation.data.credits !== undefined) selfUpdatePayload.credits = validation.data.credits;
-                if (validation.data.role !== undefined) selfUpdatePayload.role = validation.data.role;
-            }
-             updatedData = await updateUser(userId, selfUpdatePayload);
-        }
-       
-        return NextResponse.json(updatedData, { status: 200 });
-
-    } catch (error) {
-        console.error(`Error updating user ${params.id}:`, error);
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
-    }
-}
+// PUT is no longer used for form submissions, which now use a Server Action.
+// This endpoint can be kept for other API-based updates or removed if not needed.
+// For now, we will leave it but note that the primary edit form does not use it.
 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
@@ -148,6 +82,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
         await adminAuth.deleteUser(targetUserId);
         await adminDb.collection('users').doc(targetUserId).delete();
+        
+        revalidatePath('/admin/manage-users');
 
         return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
 

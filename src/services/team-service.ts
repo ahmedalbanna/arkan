@@ -2,10 +2,9 @@
 'use client';
 
 import { Team, TeamMember } from '@/lib/db/queries';
-import { useAuth } from '@/context/AuthContext';
 
 export interface TeamWithMembers extends Team {
-    members: (TeamMember & { name: string; email: string; profilePictureUrl?: string; })[];
+    members: TeamMember[];
 }
 
 export async function fetchUserTeams(token: string): Promise<TeamWithMembers[]> {
