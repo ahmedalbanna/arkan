@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "arkan-docudec"
+    "default": "docudec"
   },
   "targets": {},
   "etags": {}
