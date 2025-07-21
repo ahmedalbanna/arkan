@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -22,7 +24,9 @@ interface ReportActionsProps {
 
 export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsProps) => {
   const { t } = useLocalization();
-  const { proposal, sections, diagrams } = useBuilderStore();
+  const { proposal } = useBuilderStore();
+  const { sections } = useReportStore();
+  const { diagrams } = useDiagramStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
 
