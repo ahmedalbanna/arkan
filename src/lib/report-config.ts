@@ -13,7 +13,7 @@ export const sectionConfig: { [key in SectionName]: { title: string; icon: React
 };
 
 export const diagramConfig: { [key in DiagramType]: { title: string; icon: React.ElementType, agentId: string; } } = {
-    useCase: { title: "builder.diagramGenerator.diagrams.useCase", icon: GitGraph, agentId: "generate-use-case-diagram" },
+    'use-case': { title: "builder.diagramGenerator.diagrams.useCase", icon: GitGraph, agentId: "generate-use-case-diagram" },
     class: { title: "builder.diagramGenerator.diagrams.class", icon: GitGraph, agentId: "generate-class-diagram" },
     sequence: { title: "builder.diagramGenerator.diagrams.sequence", icon: GitGraph, agentId: "generate-sequence-diagram" },
     activity: { title: "builder.diagramGenerator.diagrams.activity", icon: GitGraph, agentId: "generate-activity-diagram" },
