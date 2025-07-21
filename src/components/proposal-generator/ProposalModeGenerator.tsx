@@ -211,9 +211,9 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]">
                 {/* Left Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">{t('builder.proposalGenerator.title')}</CardTitle>
@@ -236,31 +236,31 @@ export function ProposalModeGenerator() {
                 </div>
 
                 {/* Center Column */}
-                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
                     {proposal ? (
                          <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
+                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div className="space-y-1.5">
                                     <CardTitle className="font-headline">{t('builder.proposalGenerator.generatedTitle')}</CardTitle>
                                     <CardDescription>{t('builder.proposalGenerator.generatedDescription')}</CardDescription>
                                 </div>
-                                <div className="flex gap-2">
-                                     <Button variant="outline" type="button" onClick={handleTranslateProposal} disabled={isTranslating}>
+                                <div className="flex gap-2 flex-wrap">
+                                     <Button variant="outline" type="button" size="sm" onClick={handleTranslateProposal} disabled={isTranslating}>
                                         {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                                         {t('builder.proposalGenerator.translateAllButton')}
                                     </Button>
-                                    <Button variant="outline" type="button" onClick={handleExportJson}>
+                                    <Button variant="outline" type="button" size="sm" onClick={handleExportJson}>
                                         <FileJson className="mr-2 h-4 w-4" />
                                         {t('builder.proposalGenerator.exportJson')}
                                     </Button>
-                                    <Button variant="outline" type="button" onClick={handleExportDocx}>
+                                    <Button variant="outline" type="button" size="sm" onClick={handleExportDocx}>
                                         <Download className="mr-2 h-4 w-4" />
                                         {t('builder.proposalGenerator.exportDocx')}
                                     </Button>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="h-[calc(100vh-310px)] overflow-y-auto pr-4">
+                                <div className="lg:h-[calc(100vh-310px)] overflow-y-auto pr-4">
                                    <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
                                 </div>
                             </CardContent>
@@ -278,7 +278,7 @@ export function ProposalModeGenerator() {
                 </div>
 
                  {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                     <ProposalGenerationTools
                         isDisabled={!projectIdea || mutation.isPending}
                         isGenerating={mutation.isPending}
