@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -54,6 +55,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
+        const userProfile = userDoc.data();
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
@@ -61,31 +63,24 @@ export async function POST(request: Request, { params }: { params: { id: string 
             return NextResponse.json({ message: 'User is already a member of this team.' }, { status: 409 });
         }
 
-        // Add user to the team
+        // Add user to the team with denormalized data
         const newMember: TeamMember = {
             userId: userId,
             teamId: teamId,
             role: 'member',
-            joinedAt: new Date().toISOString()
+            joinedAt: new Date().toISOString(),
+            name: userProfile.name || 'Unknown User', // Denormalized field
+            email: userProfile.email || 'N/A', // Denormalized field
+            profilePictureUrl: userProfile.profilePictureUrl || '', // Denormalized field
         };
         await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).set(newMember);
         
         // Add team to user's profile
         await adminDb.collection('users').doc(userId).update({
-            teams: admin.firestore.FieldValue.arrayUnion(teamId)
+            teams: FieldValue.arrayUnion(teamId)
         });
-
-        // Get full member data to return
-        const userProfile = await getUserProfile(userId);
-        if (!userProfile) throw new Error("Could not retrieve new member's profile.");
-
-        const memberDataWithProfile = {
-            ...newMember,
-            name: userProfile.name,
-            email: userProfile.email,
-        };
-
-        return NextResponse.json(memberDataWithProfile, { status: 201 });
+        
+        return NextResponse.json(newMember, { status: 201 });
         
     } catch (error) {
         console.error(`Error inviting member to team ${teamId}:`, error);
