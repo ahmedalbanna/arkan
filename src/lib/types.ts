@@ -1,5 +1,8 @@
-import type { ProjectProposal, DiagramType, SectionName, PresentationSlide } from '@/ai/schemas';
+
+'use client';
+
 import { z } from 'zod';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from '@/ai/schemas';
 
 export type UserRole = 'user' | 'admin' | 'editor' | 'guest'; // Define possible roles
 export interface User {
@@ -48,7 +51,7 @@ export interface PaymentRequest {
 // Represents the full state of a user's work session
 export const ProjectStateSchema = z.object({
     projectIdea: z.string().optional(),
-    proposal: ProjectProposalSchema.nullable(),
+    proposal: z.lazy(() => ProjectProposalSchema).nullable(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
     diagrams: z.record(DiagramTypeSchema, z.object({ plantUmlCode: z.string(), imageUrl: z.string() })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
