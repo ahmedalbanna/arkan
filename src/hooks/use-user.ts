@@ -86,6 +86,23 @@ async function sendPasswordResetEmailApi(userId: string, token: string) {
     return response.json();
 }
 
+async function purchaseCreditsApi(plan: PricingPlan, token: string): Promise<{ newBalance: number }> {
+    const response = await fetch('/api/purchase', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Purchase failed.');
+    }
+    return response.json();
+}
+
 
 // --- Custom Hooks ---
 
@@ -343,4 +360,31 @@ export function usePhoneSignIn() {
     };
 
     return { sendOtp, verifyOtp, isLoading, error };
+}
+
+export function usePurchaseCredits() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (plan: PricingPlan) => {
+            if (!firebaseUser) throw new Error("User not authenticated.");
+            const token = await firebaseUser.getIdToken();
+            return purchaseCreditsApi(plan, token);
+        },
+        onSuccess: (data, plan) => {
+            queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser!.uid) });
+            toast({
+                title: 'Purchase Successful!',
+                description: `Successfully purchased ${plan.credits} credits. New balance: ${data.newBalance}.`,
+            });
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Purchase Failed',
+                description: error.message,
+                variant: 'destructive',
+            });
+        },
+    });
 }
