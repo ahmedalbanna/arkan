@@ -4,7 +4,7 @@
 import AgentEditor from '@/components/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AlertCircle, Pencil } from 'lucide-react';
-import React from 'react';
+import React, { use } from 'react';
 import { useAgent } from '@/hooks/use-agents';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -46,7 +46,8 @@ function EditAgentPageSkeleton() {
 }
 
 // This is the main export, which is a Client Component.
-export default function EditAgentPage({ params }: { params: { id: string } }) {
+export default function EditAgentPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise);
   const { t } = useLocalization();
   const { data: agent, isLoading, isError } = useAgent(params.id);
 
