@@ -85,11 +85,13 @@ export const SessionActions = () => {
         reader.onload = (e) => {
             try {
                 const content = e.target?.result as string;
-                const parsedState = JSON.parse(content);
+                // Decode from Base64
+                const decodedJson = atob(content);
+                const parsedState = JSON.parse(decodedJson);
                 store.loadState(parsedState);
             } catch (error) {
                 console.error('Failed to load project file:', error);
-                toast({ title: 'Load Failed', description: 'The selected file could not be read.', variant: 'destructive' });
+                toast({ title: 'Load Failed', description: 'The selected file could not be read or is corrupted.', variant: 'destructive' });
             }
         };
         reader.readAsText(file);
@@ -101,8 +103,11 @@ export const SessionActions = () => {
     
     const handleSaveProjectFile = () => {
         if (!store.proposal) return;
-        const blob = new Blob([JSON.stringify(store.getFullState(), null, 2)], { type: 'application/json;charset=utf-8' });
-        saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`);
+        const jsonString = JSON.stringify(store.getFullState());
+        // Encode to Base64
+        const encodedData = btoa(jsonString);
+        const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
+        saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.arkan`);
     }
 
     const handleSaveAs = () => {
@@ -131,7 +136,7 @@ export const SessionActions = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={onFileChange}
-                    accept=".json"
+                    accept=".arkan"
                     className="hidden"
                 />
                  <Tooltip>
@@ -164,7 +169,7 @@ export const SessionActions = () => {
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
-                        <p>Download as .json file</p>
+                        <p>Download as .arkan file</p>
                     </TooltipContent>
                 </Tooltip>
                 
@@ -226,5 +231,3 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 }
-
-    
