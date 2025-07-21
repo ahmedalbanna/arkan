@@ -96,7 +96,7 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[625px]">
+      <DialogContent className="sm:max-w-[625px] w-[90vw] max-w-[90vw] md:w-full rounded-lg">
         <DialogHeader>
           <Image
             src={currentStep.image}
@@ -116,8 +116,8 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
             </DialogDescription>
           </div>
         </DialogHeader>
-        <DialogFooter className="p-6 pt-0 flex justify-between w-full">
-          <div className="flex items-center gap-2">
+        <DialogFooter className="p-6 pt-0 flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center w-full gap-4">
+          <div className="flex items-center gap-2 self-center sm:self-auto">
             {steps.map((_, i) => (
               <div
                 key={i}
@@ -125,14 +125,14 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
               />
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-between sm:justify-end w-full sm:w-auto">
             {step > 0 && (
-              <Button variant="outline" onClick={handlePrev}>
+              <Button variant="outline" onClick={handlePrev} className="flex-1 sm:flex-none">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
             )}
-            <Button onClick={handleNext}>
+            <Button onClick={handleNext} className="flex-1 sm:flex-none">
               {step === steps.length - 1 ? 'Finish' : 'Next'}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
