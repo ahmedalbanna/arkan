@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -115,17 +115,25 @@ export default function LoginForm() {
                 <Separator className="my-2" />
                 <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">OR</span>
             </div>
-
-            <Button
-                type="button"
-                variant="outline"
-                className="w-full"
-                onClick={() => googleSignInMutation.mutate()}
-                disabled={isPending}
-            >
-                {googleSignInMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148-118.2H248v-73.6h236.3c2.4 12.4 3.7 26.5 3.7 41.6z"></path></svg>}
-                Sign in with Google
-            </Button>
+            
+            <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-2">
+                <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => googleSignInMutation.mutate()}
+                    disabled={isPending}
+                >
+                    {googleSignInMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148-118.2H248v-73.6h236.3c2.4 12.4 3.7 26.5 3.7 41.6z"></path></svg>}
+                    Sign in with Google
+                </Button>
+                <Button asChild type="button" variant="outline" className="w-full" disabled={isPending}>
+                    <Link href="/phone-auth">
+                        <Phone className="mr-2 h-4 w-4" />
+                        Sign in with Phone
+                    </Link>
+                </Button>
+            </div>
 
             <p className="text-sm text-muted-foreground">
               Don't have an account?{' '}

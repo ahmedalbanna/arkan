@@ -17,20 +17,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Handles setting/clearing the session cookie via our API route
-async function manageSessionCookie(user: FirebaseUser | null) {
+// Handles setting/clearing the session cookie and ensuring user profile exists
+async function manageSessionAndProfile(user: FirebaseUser | null) {
   if (user) {
     const idToken = await user.getIdToken(true);
+    // Set session cookie
     await fetch('/api/auth/session', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken }),
     });
 
-    // On Google sign-in, ensure a user profile exists in Firestore.
-    // This is a good place to handle it centrally.
+    // Ensure a user profile exists in Firestore.
+    // This is a good place to handle it centrally for all auth methods.
     const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -40,14 +39,16 @@ async function manageSessionCookie(user: FirebaseUser | null) {
         body: JSON.stringify({ 
             uid: user.uid, 
             email: user.email, 
-            name: user.displayName 
+            name: user.displayName,
+            phoneNumber: user.phoneNumber,
         })
     });
     if (!response.ok) {
-        console.error("Failed to create or verify user profile on Google sign-in.");
+        console.error("Failed to create or verify user profile on sign-in.");
     }
 
   } else {
+    // Clear session cookie
     await fetch('/api/auth/session', {
       method: 'DELETE',
     });
@@ -69,7 +70,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
-      await manageSessionCookie(user);
+      await manageSessionAndProfile(user);
       setIsLoading(false);
     });
 

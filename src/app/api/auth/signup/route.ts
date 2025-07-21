@@ -13,25 +13,26 @@ const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
 
-// Separate schema for Google sign-ups, which don't have a password
-const googleSignupSchema = z.object({
+// Separate schema for provider-based sign-ups (Google, Phone)
+const providerSignupSchema = z.object({
     uid: z.string(),
-    email: z.string().email(),
-    name: z.string(),
+    email: z.string().email().optional().nullable(),
+    name: z.string().optional().nullable(),
+    phoneNumber: z.string().optional().nullable(),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     
-    // Check if this is a Google sign-up request
+    // Check if this is a provider-based sign-up/sign-in request
     if (body.uid) {
-        const validation = googleSignupSchema.safeParse(body);
+        const validation = providerSignupSchema.safeParse(body);
         if (!validation.success) {
              return NextResponse.json({ error: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const { uid, email, name } = validation.data;
+        const { uid, email, name, phoneNumber } = validation.data;
         
         const existingProfile = await getUserProfile(uid);
         if (existingProfile) {
@@ -39,8 +40,9 @@ export async function POST(req: Request) {
         }
 
         const newUserProfile = {
-            name,
-            email,
+            name: name || `User ${uid.slice(0, 6)}`, // Default name if not provided
+            email: email || '', // Email can be null for phone auth
+            phoneNumber: phoneNumber || '',
             credits: 10,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -72,6 +74,7 @@ export async function POST(req: Request) {
         const newUserProfile = {
             name,
             email,
+            phoneNumber: '',
             credits: 10,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

@@ -8,9 +8,19 @@ import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/typ
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { 
+    signInWithEmailAndPassword, 
+    signOut, 
+    sendPasswordResetEmail, 
+    GoogleAuthProvider, 
+    signInWithPopup,
+    RecaptchaVerifier,
+    signInWithPhoneNumber,
+    ConfirmationResult
+} from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
 import { useAuth } from '@/context/AuthContext';
+import { useState, useCallback, useEffect } from 'react';
 
 
 // --- Query Functions ---
@@ -31,12 +41,7 @@ async function signInWithGoogle() {
     const provider = new GoogleAuthProvider();
     try {
         const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        
-        // This is a client-side check. We will rely on the AuthProvider to handle profile creation.
-        // A more robust solution might involve an API call to ensure the profile exists or is created.
-        
-        return user;
+        return result.user;
     } catch (error: any) {
         throw new Error(error.message || "Google Sign-In failed.");
     }
@@ -260,4 +265,77 @@ export function useForgotPassword() {
             });
         }
     });
+}
+
+
+export function usePhoneSignIn() {
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const { refetchUser } = useAuth();
+
+    const setupRecaptcha = useCallback(() => {
+        if (!auth) return;
+        try {
+            // Check if a verifier already exists
+            if ((window as any).recaptchaVerifier) {
+                (window as any).recaptchaVerifier.clear();
+            }
+            (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'invisible',
+            });
+        } catch(e) {
+            console.error("Recaptcha setup error", e);
+            setError("Failed to initialize verification. Please refresh the page.");
+        }
+    }, []);
+
+    useEffect(() => {
+        // Setup reCAPTCHA on component mount
+        setupRecaptcha();
+    }, [setupRecaptcha]);
+    
+    const sendOtp = async (phoneNumber: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const appVerifier = (window as any).recaptchaVerifier;
+            const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
+            toast({ title: 'Code Sent', description: 'A verification code has been sent to your phone.' });
+            return confirmationResult;
+        } catch (e: any) {
+            console.error("Error sending OTP:", e);
+            setError(e.message || "Failed to send OTP. Please check the number and try again.");
+            return null;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const verifyOtp = async (confirmationResult: ConfirmationResult, otp: string) => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const userCredential = await confirmationResult.confirm(otp);
+            const user = userCredential.user;
+            if (user) {
+                refetchUser();
+                queryClient.invalidateQueries({ queryKey: userKeys.all });
+                router.push('/generate');
+                router.refresh();
+                toast({
+                    title: 'Sign-In Successful',
+                    description: 'Welcome!',
+                });
+            }
+        } catch (e: any) {
+             console.error("Error verifying OTP:", e);
+            setError(e.message || "Failed to verify OTP. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return { sendOtp, verifyOtp, isLoading, error };
 }
