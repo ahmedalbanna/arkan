@@ -55,7 +55,6 @@ function EditUserPageContent({ userId }: { userId: string }) {
     );
 }
 
-// Client component to handle localization
 function HeaderSection({ userName }: { userName: string }) {
   const { t } = useLocalization();
   return (
@@ -72,7 +71,7 @@ function HeaderSection({ userName }: { userName: string }) {
 }
 
 
-export default function EditUserPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+export default function EditUserPage({ params: paramsPromise }: { params: { id: string } }) {
     const params = use(paramsPromise);
     return <EditUserPageContent userId={params.id} />
 }

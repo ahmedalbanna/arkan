@@ -1,6 +1,4 @@
 
-'use client';
-
 import AgentEditor from '@/components/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AlertCircle, Pencil } from 'lucide-react';
@@ -46,6 +44,7 @@ function EditAgentPageSkeleton() {
 }
 
 function EditAgentPageContent({ agentId }: { agentId: string }) {
+  'use client';
   const { t } = useLocalization();
   const { data: agent, isLoading, isError } = useAgent(agentId);
 

@@ -1,6 +1,4 @@
 
-'use client';
-
 import EditUserForm from '@/components/EditUserForm';
 import { useUserProfile } from '@/hooks/use-user';
 import { notFound } from 'next/navigation';
@@ -30,6 +28,8 @@ function EditUserPageSkeleton() {
 }
 
 function EditUserPageContent({ userId }: { userId: string }) {
+    'use client';
+
     const { data: user, isLoading, isError } = useUserProfile(userId);
     const { firebaseUser, isLoading: authIsLoading } = useAuth();
     
@@ -55,7 +55,6 @@ function EditUserPageContent({ userId }: { userId: string }) {
     );
 }
 
-// Client component to handle localization
 function HeaderSection({ userName }: { userName: string }) {
   const { t } = useLocalization();
   return (
