@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -14,6 +15,7 @@ import { useLogout } from '@/hooks/use-user';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '../ui/scroll-area';
 
 
 export function Header() {
@@ -22,6 +24,7 @@ export function Header() {
   const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();  
   const logoutMutation = useLogout(); // Use the useLogout mutation hook
   const [isClient, setIsClient] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // This prevents hydration mismatches by ensuring the component only renders on the client
   useEffect(() => {
@@ -48,6 +51,10 @@ export function Header() {
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
   ];
+  
+  const handleLinkClick = () => {
+    setIsSheetOpen(false);
+  };
 
   const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
     links.map((link) => (
@@ -59,6 +66,7 @@ export function Header() {
           'font-headline',
           isMobile && 'w-full justify-start text-lg py-6'
         )}
+        onClick={isMobile ? handleLinkClick : undefined}
       >
         <Link href={link.href}>
           {isMobile && <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />}
@@ -79,37 +87,40 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4">
         <div className="md:hidden">
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm">
-              <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
-              <nav className="flex flex-col gap-4 pt-8">
-                {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
-                {userProfile?.role === 'admin' && (
-                  <>
-                    <div className="my-4 border-t"></div>
-                    {adminLinks.map((link) => ( // Render admin links as buttons in the mobile menu
-                      <Button
-                        key={link.href}
-                        asChild
-                        variant="ghost"
-                        className="font-headline w-full justify-start text-lg py-6"
-                      >
-                        <Link href={link.href}>
-                          <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
-                          {link.label}
-                        </Link>
-                      </Button>
-                    ))}
-                  </>
-                )}
-              </nav>
-            </SheetContent>
+            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm flex flex-col">
+                <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
+                <ScrollArea className="flex-grow mt-8">
+                  <nav className="flex flex-col gap-4 pr-6">
+                    {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
+                    {userProfile?.role === 'admin' && (
+                      <>
+                        <div className="my-4 border-t"></div>
+                        {adminLinks.map((link) => (
+                          <Button
+                            key={link.href}
+                            asChild
+                            variant="ghost"
+                            className="font-headline w-full justify-start text-lg py-6"
+                            onClick={handleLinkClick}
+                          >
+                            <Link href={link.href}>
+                              <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
+                              {link.label}
+                            </Link>
+                          </Button>
+                        ))}
+                      </>
+                    )}
+                  </nav>
+                </ScrollArea>
+              </SheetContent>
           </Sheet>
         </div>
 
