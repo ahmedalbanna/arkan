@@ -14,12 +14,12 @@ import type { AgentPrompt } from '@/lib/agents';
 // Define a generic input schema that can be used by all diagram generation flows.
 const GenerateDiagramInputSchema = z.object({
   proposal: ProjectProposalSchema,
+  diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
   externalContextContent: z.string().optional().describe("Content from an external document to use as additional context."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional instructions for generation (e.g., tone, formality)."),
-  diagramType: DiagramTypeSchema.describe("The type of diagram to generate."),
 });
 export type GenerateDiagramInput = z.infer<typeof GenerateDiagramInputSchema>;
 
@@ -30,10 +30,10 @@ export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
-    const agentId = `generate-${input.diagramType}-diagram`;
+    const agentId = `generate-${input.diagramToGenerate}-diagram`;
     const agent = await getAgent(agentId);
     if (!agent) {
-        throw new Error(`Agent configuration for diagram type '${input.diagramType}' not found.`);
+        throw new Error(`Agent configuration for diagram type '${input.diagramToGenerate}' not found.`);
     }
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
@@ -41,7 +41,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
 
     const diagramPrompt = ai.definePrompt({
-        name: `${input.diagramType}DiagramPrompt`,
+        name: `${input.diagramToGenerate}DiagramPrompt`,
         input: { schema: GenerateDiagramInputSchema },
         output: { schema: GenerateDiagramOutputSchema },
         prompt: `${basePrompt}

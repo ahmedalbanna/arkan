@@ -16,6 +16,7 @@ const generateDiagramSchema = z.object({
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(), 
   externalContextContent: z.string().optional(),
+  instructionText: z.string().optional(),
 });
 
 // Helper function to encode PlantUML for URL
@@ -78,10 +79,7 @@ export async function POST(request: Request) {
     
     await deductCredit(userId, 1);
 
-    const agentInput = {
-      ...validation.data,
-      diagramType: validation.data.diagramToGenerate, // Pass diagram type for the flow
-    };
+    const agentInput = validation.data;
 
     const result = await generateDiagram(agentInput);
 
