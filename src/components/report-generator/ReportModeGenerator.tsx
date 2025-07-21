@@ -49,7 +49,7 @@ export default function ReportGenerator() {
         description: t('builder.reportGenerator.toasts.translateAllStartedDesc'),
     });
 
-    const targetLang = locale === 'en' ? 'ar' : 'en';
+    const targetLang = locale === 'en' ? 'Arabic' : 'English';
     const sectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
     
     const translationPromises = sectionKeys.map(key => {
