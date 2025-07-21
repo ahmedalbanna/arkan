@@ -12,12 +12,16 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { AgentPromptSchema } from '@/lib/agents';
+
 
 const GenerateIntroductionInputSchema = z.object({
   proposal: ProjectProposalSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  prompt: z.string().describe("The full prompt to use for generating the introduction, including context.")
+  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF) to use as additional context."),
+  agent: AgentPromptSchema.describe("The agent configuration, including the base prompt and guidelines."),
+  instructionText: z.string().optional().describe("Additional specific instructions for the generation."),
 });
 export type GenerateIntroductionInput = z.infer<typeof GenerateIntroductionInputSchema>;
 
@@ -41,7 +45,51 @@ const generateIntroductionFlow = ai.defineFlow(
       name: 'generateIntroductionPrompt',
       input: { schema: GenerateIntroductionInputSchema },
       output: { schema: GenerateIntroductionOutputSchema },
-      prompt: input.prompt, // Use the fully composed prompt passed from the API layer
+      prompt: `{{{agent.base}}}
+
+{{#if agent.guidelines}}
+--- Guidelines ---
+{{#each agent.guidelines}}
+- {{{this}}}
+{{/each}}
+{{/if}}
+
+{{#if instructionText}}
+--- Additional Instructions ---
+{{{instructionText}}}
+{{/if}}
+
+--- Context from Project ---
+
+{{#if externalContextContent}}
+--- ADDITIONAL EXTERNAL CONTEXT ---
+{{{externalContextContent}}}
+---
+{{/if}}
+
+{{#if otherSections}}
+--- PREVIOUSLY GENERATED SECTIONS ---
+{{#each otherSections}}
+--- Section: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if otherDiagrams}}
+--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
+{{#each otherDiagrams}}
+--- Diagram: {{@key}} ---
+{{{this}}}
+---
+{{/each}}
+{{/if}}
+
+--- Main Input: Project Proposal ---
+\`\`\`json
+{{{jsonEncode proposal}}}
+\`\`\`
+`,
     });
 
     const { output } = await generateIntroductionPrompt(input);

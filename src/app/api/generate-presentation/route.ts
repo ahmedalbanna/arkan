@@ -6,7 +6,7 @@ import { AGENTS } from '@/lib/agents';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import type { AgentPrompt } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { auth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const ApiGeneratePresentationSchema = z.object({
@@ -15,7 +15,7 @@ const ApiGeneratePresentationSchema = z.object({
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
   externalContextContent: z.string().optional(),
-  templateId: z.string().optional(), // Added templateId
+  templateId: z.string(),
 });
 
 
@@ -38,65 +38,34 @@ export async function POST(request: Request) {
     
     await deductCredit(userId, 1);
 
-    const presentationAgent = AGENTS.find(a => a.id === 'generate-presentation');
-    // Updated validation: Check for agent existence and if the prompt is an object with a 'base' property.
+    const { proposal, sections, diagrams, guidelines, externalContextContent, templateId } = validation.data;
+
+    const templateDoc = await adminDb.collection('templates').doc('presentation').collection('items').doc(templateId).get();
+    if (!templateDoc.exists) {
+        return NextResponse.json({ message: 'Presentation template not found.' }, { status: 404 });
+    }
+    const templateData = templateDoc.data();
+    const presentationAgent = AGENTS.find(a => a.id === templateData?.primaryAgentId);
+
     if (!presentationAgent || typeof presentationAgent.prompt !== 'object' || !('base' in (presentationAgent.prompt as AgentPrompt))) {
       return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
     }
 
-    const { proposal, sections, diagrams, guidelines, externalContextContent } = validation.data;
     const agentPrompt = presentationAgent.prompt as AgentPrompt;
-
-    // --- Server-side prompt construction ---
-    let fullPrompt = agentPrompt.base;
-
-    // Add guidelines to the prompt
-    if (guidelines && guidelines.length > 0) {
-        fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
-    }
-
-    const contextContent = [];
-    if (externalContextContent) {
-        contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
-        contextContent.push(externalContextContent);
-    }
-    if (sections && Object.keys(sections).length > 0) {
-        contextContent.push('--- REPORT SECTIONS ---');
-        for (const [sectionName, content] of Object.entries(sections)) {
-            contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
-        }
-    }
-    if (diagrams && Object.keys(diagrams).length > 0) {
-        contextContent.push('--- DIAGRAMS (PlantUML) ---');
-        for (const [diagramType, diagramCode] of Object.entries(diagrams)) {
-            contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
-        }
-    }
-    const contextString = contextContent.join('\\n\\n');
-
-    fullPrompt += `
-
---- Main Input: Project Proposal ---
-\`\`\`json
-${JSON.stringify(proposal, null, 2)}
-\`\`\`
-
---- Additional Context (Optional) ---
-${contextString || 'No additional context provided.'}
----
-`;
-    // --- End of prompt construction ---
-
+    
     const agentInput = {
       proposal,
       sections,
       diagrams,
-      prompt: fullPrompt, // Pass the fully constructed prompt
+      externalContextContent,
+      agent: {
+        base: agentPrompt.base,
+        guidelines: guidelines || [],
+      },
     };
 
     const result = await generatePresentation(agentInput);
     
-    // Log the successful generation
     await logGeneration({
         agentId: presentationAgent.id,
         userId,
@@ -110,6 +79,9 @@ ${contextString || 'No additional context provided.'}
     if (error instanceof Error) {
         if (error.message.includes("Unauthorized") || error.message.includes("token")) {
             return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+        if (error.message.includes("credit")) {
+            return NextResponse.json({ message: error.message }, { status: 402 });
         }
         return NextResponse.json({ message: error.message }, { status: 500 });
     }

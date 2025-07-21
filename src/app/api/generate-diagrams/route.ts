@@ -20,10 +20,7 @@ const generateDiagramSchema = z.object({
   diagramToGenerate: DiagramTypeSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  // Client now sends selected guidelines instead of a full prompt
   guidelines: z.array(z.string()).optional(), 
-  intent: z.string().optional(),
-  plantUmlCode: z.string().optional(),
   externalContextContent: z.string().optional(),
 });
 
@@ -81,31 +78,23 @@ export async function POST(request: Request) {
     const userId = decodedToken.uid;
     
     const body = await request.json();
-    // Loosen schema for render-only intent
-    const validation = generateDiagramSchema.partial().safeParse(body);
+    
+    if (body.intent === 'update_diagram') {
+      if (!body.plantUmlCode) {
+          return NextResponse.json({ message: 'PlantUML code is required for an update.'}, { status: 400 });
+      }
+      const imageUrl = await getPlantUmlImageUrl(body.plantUmlCode);
+      return NextResponse.json({ plantUmlCode: body.plantUmlCode, imageUrl }, { status: 200 });
+    }
 
+    const validation = generateDiagramSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
-
-    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, intent, plantUmlCode, externalContextContent } = validation.data;
-
-    // The intent 'update_diagram' just re-renders PlantUML and should not cost credits.
-    if (intent === 'update_diagram') {
-        if (!plantUmlCode) {
-            return NextResponse.json({ message: 'PlantUML code is required for an update.'}, { status: 400 });
-        }
-        const imageUrl = await getPlantUmlImageUrl(plantUmlCode);
-        return NextResponse.json({ plantUmlCode, imageUrl }, { status: 200 });
-    }
     
-    // Deduct credit for new diagram generation.
     await deductCredit(userId, 1);
 
-    if (!proposal || !diagramToGenerate) {
-        return NextResponse.json({ message: 'Proposal and diagram type are required for generation.' }, { status: 400 });
-    }
-
+    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, externalContextContent } = validation.data;
 
     const agentInfo = diagramAgentMap[diagramToGenerate];
     if (!agentInfo) {
@@ -117,53 +106,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
     }
     
-    // --- Server-side prompt construction ---
-    let fullPrompt = '';
-    const agentPrompt = agent.prompt as AgentPrompt;
-    if (typeof agentPrompt === 'string') {
-        fullPrompt = agentPrompt;
-    } else {
-        fullPrompt = agentPrompt.base;
-        if (guidelines && guidelines.length > 0) {
-            fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
-        }
-    }
-
-    const contextContent = [];
-    if (externalContextContent) {
-        contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
-        contextContent.push(externalContextContent);
-    }
-    if (otherSections && Object.keys(otherSections).length > 0) {
-        contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
-        for (const [sectionName, content] of Object.entries(otherSections)) {
-            contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
-        }
-    }
-    if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
-        contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
-        for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
-            contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
-        }
-    }
-    const contextString = contextContent.join('\\n\\n');
-
-    fullPrompt += `
-    
-${contextString}
-
---- Main Input: Project Proposal ---
-\`\`\`json
-${JSON.stringify(proposal, null, 2)}
-\`\`\`
-`;
-    // --- End of prompt construction ---
-
     const agentInput = {
       proposal,
       otherSections: otherSections || {},
       otherDiagrams: otherDiagrams || {},
-      prompt: fullPrompt,
+      agent: {
+        base: (agent.prompt as AgentPrompt).base,
+        guidelines: guidelines || [],
+      },
+      externalContextContent,
     };
 
     const result = await agentInfo.flow(agentInput);
@@ -175,7 +126,6 @@ ${JSON.stringify(proposal, null, 2)}
       imageUrl: imageUrl,
     };
 
-    // Log the successful generation
     await logGeneration({
         agentId: agent.id,
         userId,
@@ -191,6 +141,9 @@ ${JSON.stringify(proposal, null, 2)}
     if (error instanceof Error) {
         if (error.message.includes("Unauthorized") || error.message.includes("token")) {
             return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+         if (error.message.includes("credit")) {
+            return NextResponse.json({ message: error.message }, { status: 402 });
         }
         return NextResponse.json({ message: error.message }, { status: 500 });
     }

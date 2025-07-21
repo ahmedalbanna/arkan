@@ -11,20 +11,23 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { deductCredit } from '@/services/credit-service';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const generateReportSchema = z.object({
   proposal: ProjectProposalSchema,
-  sectionToGenerate: SectionNameSchema.optional(), // Optional for full report
-  templateId: z.string().optional(), // For full report generation
+  sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
   instructionText: z.string().optional(),
   externalContextContent: z.string().optional(),
+});
+
+const generateFullReportSchema = z.object({
+    proposal: ProjectProposalSchema,
+    templateId: z.string(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -36,57 +39,6 @@ const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> 
   systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming-section' },
   systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing-section' },
   conclusion: { flow: generateConclusion, agentId: 'generate-conclusion-section' },
-};
-
-// Helper function to construct a prompt
-const constructPrompt = (agent: any, data: z.infer<typeof generateReportSchema>) => {
-  const { proposal, otherSections, otherDiagrams, guidelines, instructionText, externalContextContent } = data;
-
-  let fullPrompt = '';
-  const agentPrompt = agent.prompt as AgentPrompt;
-
-  if (typeof agentPrompt === 'string') {
-    fullPrompt = agentPrompt;
-  } else {
-    fullPrompt = agentPrompt.base;
-    if (guidelines && guidelines.length > 0) {
-      fullPrompt += '\\n\\n' + guidelines.map(g => `- ${g}`).join('\\n');
-    }
-  }
-
-  if (instructionText) {
-    fullPrompt += `\\n\\nAdditionally, please adhere to the following constraints for your response:\\n${instructionText}`;
-  }
-
-  const contextContent = [];
-  if (externalContextContent) {
-    contextContent.push('--- ADDITIONAL EXTERNAL CONTEXT ---');
-    contextContent.push(externalContextContent);
-  }
-  if (otherSections && Object.keys(otherSections).length > 0) {
-    contextContent.push('--- PREVIOUSLY GENERATED SECTIONS ---');
-    for (const [sectionName, content] of Object.entries(otherSections)) {
-      contextContent.push(`--- Section: ${sectionName} ---\\n${content}\\n---`);
-    }
-  }
-  if (otherDiagrams && Object.keys(otherDiagrams).length > 0) {
-    contextContent.push('--- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---');
-    for (const [diagramType, diagramCode] of Object.entries(otherDiagrams)) {
-      contextContent.push(`--- Diagram: ${diagramType} ---\\n${diagramCode}\\n---`);
-    }
-  }
-  const contextString = contextContent.join('\\n\\n');
-
-  fullPrompt += `
-    
-${contextString}
-
---- Main Input: Project Proposal ---
-\`\`\`json
-${JSON.stringify(proposal, null, 2)}
-\`\`\`
-`;
-  return fullPrompt;
 };
 
 
@@ -101,96 +53,94 @@ export async function POST(request: Request) {
     const userId = decodedToken.uid;
     
     const body = await request.json();
-    const validation = generateReportSchema.safeParse(body);
-
-    if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
-    }
-
-    const { proposal, sectionToGenerate, templateId, otherSections, otherDiagrams, externalContextContent } = validation.data;
 
     // Handle full report generation
-    if (templateId) {
-      const template = REPORT_GENERATION_TEMPLATES.find(t => t.id === templateId);
-      if (!template) {
-        return NextResponse.json({ message: 'Invalid report template ID.' }, { status: 400 });
-      }
+    const fullReportValidation = generateFullReportSchema.safeParse(body);
+    if (fullReportValidation.success) {
+        const { proposal, templateId } = fullReportValidation.data;
 
-      await deductCredit(userId, template.agentIds.length); // Deduct credits for the full report
+        const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
+        if (!templateDoc.exists) {
+             return NextResponse.json({ message: 'Invalid report template ID.' }, { status: 400 });
+        }
+        const template = templateDoc.data() as any;
 
-      const generatedSections: { [key in SectionName]?: string } = {};
+        await deductCredit(userId, template.agentIds.length);
+
+        const generatedSections: { [key in SectionName]?: string } = {};
       
-      for (const agentId of template.agentIds) {
-        const agent = AGENTS.find(a => a.id === agentId);
-        const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName | undefined;
+        for (const agentId of template.agentIds) {
+            const agent = AGENTS.find(a => a.id === agentId);
+            const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName | undefined;
+    
+            if (!agent || !sectionKey) continue;
+            
+            const agentInfo = sectionAgentMap[sectionKey];
+            if (!agentInfo) continue;
 
-        if (!agent || !sectionKey) continue;
-        
-        const agentInfo = sectionAgentMap[sectionKey];
-        if (!agentInfo) continue;
+             const agentInput = {
+                proposal,
+                otherSections: generatedSections, // Pass already generated sections as context
+                agent: {
+                    base: (agent.prompt as AgentPrompt).base,
+                    guidelines: (agent.prompt as AgentPrompt).guidelines?.map(g => g.text),
+                }
+            };
 
-        const currentContext = {
-          ...validation.data,
-          otherSections: { ...otherSections, ...generatedSections },
-        };
-        
-        const prompt = constructPrompt(agent, currentContext);
+            const result = await agentInfo.flow(agentInput);
+            await logGeneration({ agentId, userId, input: agentInput, output: result });
+    
+            const content = Object.values(result)[0] as string;
+            generatedSections[sectionKey] = content;
+        }
+        return NextResponse.json({ sections: generatedSections }, { status: 200 });
+    }
+
+    // Handle single section generation
+    const singleSectionValidation = generateReportSchema.safeParse(body);
+    if (singleSectionValidation.success) {
+        await deductCredit(userId, 1);
+        const { proposal, sectionToGenerate, otherSections, otherDiagrams, guidelines, instructionText, externalContextContent } = singleSectionValidation.data;
+
+        const agentInfo = sectionAgentMap[sectionToGenerate];
+        if (!agentInfo) {
+            return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
+        }
+        const agent = AGENTS.find(a => a.id === agentInfo.agentId);
+        if (!agent) {
+             return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
+        }
         
         const agentInput = {
           proposal,
-          otherSections: currentContext.otherSections,
-          otherDiagrams,
-          prompt,
+          otherSections: otherSections || {},
+          otherDiagrams: otherDiagrams || {},
+          agent: {
+              base: (agent.prompt as AgentPrompt).base,
+              guidelines: guidelines || [],
+          },
+          instructionText,
+          externalContextContent,
         };
+  
         const result = await agentInfo.flow(agentInput);
-
-        // Log this individual generation
-        await logGeneration({ agentId, userId, input: agentInput, output: result });
-
-        const content = Object.values(result)[0] as string;
-        generatedSections[sectionKey] = content;
-      }
-      return NextResponse.json({ sections: generatedSections }, { status: 200 });
+        await logGeneration({ agentId: agent.id, userId, input: agentInput, output: result });
+  
+        return NextResponse.json(result, { status: 200 });
     }
 
-
-    // Handle single section generation
-    if (sectionToGenerate) {
-      await deductCredit(userId, 1); // Deduct 1 credit for a single section
-      
-      const agentInfo = sectionAgentMap[sectionToGenerate];
-      if (!agentInfo) {
-        return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
-      }
-
-      const agent = AGENTS.find(a => a.id === agentInfo.agentId);
-      if (!agent) {
-        return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
-      }
-
-      const prompt = constructPrompt(agent, validation.data);
-
-      const agentInput = {
-        proposal,
-        otherSections: otherSections || {},
-        otherDiagrams: otherDiagrams || {},
-        prompt: prompt,
-      };
-
-      const result = await agentInfo.flow(agentInput);
-
-      await logGeneration({ agentId: agent.id, userId, input: agentInput, output: result });
-
-      return NextResponse.json(result, { status: 200 });
-    }
-
-    return NextResponse.json({ message: 'Invalid request. Must provide either sectionToGenerate or templateId.' }, { status: 400 });
+    // If neither validation passes
+    const errors = singleSectionValidation.error.flatten().fieldErrors;
+    return NextResponse.json({ errors, message: 'Invalid request body.' }, { status: 400 });
 
   } catch (error) {
     console.error(`Error generating report:`, error);
     if (error instanceof Error) {
         if (error.message.includes("Unauthorized") || error.message.includes("token")) {
             return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+         if (error.message.includes("credit")) {
+            return NextResponse.json({ message: error.message }, { status: 402 }); // Payment Required
         }
         return NextResponse.json({ message: error.message }, { status: 500 });
     }
