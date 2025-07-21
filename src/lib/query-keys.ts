@@ -55,3 +55,10 @@ export const adminKeys = {
   all: ['admin'] as const,
   dashboardStats: () => [...adminKeys.all, 'dashboard-stats'] as const,
 }
+
+export const templateKeys = {
+    all: ['templates'] as const,
+    proposals: () => [...templateKeys.all, 'proposal'] as const,
+    reports: () => [...templateKeys.all, 'report'] as const,
+    presentations: () => [...templateKeys.all, 'presentation'] as const,
+}

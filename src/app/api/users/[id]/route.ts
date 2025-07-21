@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser, updateUserByAdmin } from '@/lib/db/queries';
 import { auth as adminAuth } from '@/lib/firebase/admin';
+import { UserRole } from '@/lib/types';
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
