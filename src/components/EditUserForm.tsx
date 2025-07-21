@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, Trash2, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Save, Trash2, AlertCircle, ArrowLeft, MailQuestion } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import Link from 'next/link';
+import { useSendPasswordReset } from '@/hooks/use-user';
 
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -121,6 +122,8 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
       }
   });
 
+  const passwordResetMutation = useSendPasswordReset();
+
   const onSubmit = async (data: EditUserFormValues) => {
       if (!firebaseUser) return;
       const token = await firebaseUser.getIdToken();
@@ -132,9 +135,13 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
     const token = await firebaseUser.getIdToken();
     deleteUserMutation.mutate({ userId: user.id, token });
   };
+  
+  const onPasswordReset = () => {
+    passwordResetMutation.mutate(user.id);
+  };
 
   const isAdmin = currentUserProfile?.role === 'admin';
-  const isPending = updateUserMutation.isPending || deleteUserMutation.isPending;
+  const isPending = updateUserMutation.isPending || deleteUserMutation.isPending || passwordResetMutation.isPending;
 
   return (
     <>
@@ -226,34 +233,42 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
         </form>
       </Form>
       
-      {isAdmin && user.id !== firebaseUser?.uid && (
+      {isAdmin && (
          <div className="mt-8 pt-6 border-t border-destructive/20">
             <h3 className="text-lg font-semibold text-destructive">{t('editUser.dangerZoneTitle')}</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4">
             {t('editUser.dangerZoneDescription')}
             </p>
-            <AlertDialog>
-            <AlertDialogTrigger asChild>
-                <Button variant="destructive" type="button" disabled={isPending}>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {t('editUser.deleteUserButton')}
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={onPasswordReset} disabled={isPending}>
+                    {passwordResetMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MailQuestion className="mr-2 h-4 w-4" />}
+                    Send Password Reset
                 </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                <AlertDialogTitle>{t('editUser.deleteDialogTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                    {t('editUser.deleteDialogDescription')}
-                </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={onDelete} disabled={deleteUserMutation.isPending}>
-                     {deleteUserMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
-                </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-            </AlertDialog>
+                {user.id !== firebaseUser?.uid && (
+                    <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive" type="button" disabled={isPending}>
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t('editUser.deleteUserButton')}
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle>{t('editUser.deleteDialogTitle')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('editUser.deleteDialogDescription')}
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={onDelete} disabled={deleteUserMutation.isPending}>
+                            {deleteUserMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
+                        </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                    </AlertDialog>
+                )}
+            </div>
         </div>
       )}
     </>

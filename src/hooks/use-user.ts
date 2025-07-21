@@ -51,6 +51,20 @@ async function signupUser(credentials: SignupCredentials) {
     return response.json();
 }
 
+async function sendPasswordResetEmailApi(userId: string, token: string) {
+    const response = await fetch(`/api/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to send password reset email.');
+    }
+    return response.json();
+}
+
 
 // --- Custom Hooks ---
 
@@ -147,5 +161,29 @@ export function useSignup() {
                 });
             }
         }
+    });
+}
+
+export function useSendPasswordReset() {
+    const { firebaseUser } = useAuth();
+    return useMutation({
+        mutationFn: async (userId: string) => {
+            if (!firebaseUser) throw new Error("Admin not authenticated.");
+            const token = await firebaseUser.getIdToken();
+            return sendPasswordResetEmailApi(userId, token);
+        },
+        onSuccess: (data) => {
+            toast({
+                title: "Password Reset Sent",
+                description: data.message,
+            });
+        },
+        onError: (error: Error) => {
+            toast({
+                title: "Error Sending Reset Email",
+                description: error.message,
+                variant: 'destructive',
+            });
+        },
     });
 }
