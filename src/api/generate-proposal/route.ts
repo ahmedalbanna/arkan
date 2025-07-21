@@ -68,6 +68,9 @@ export async function POST(request: Request) {
         if (error.message.includes("Unauthorized") || error.message.includes("token")) {
             return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
         }
+         if (error.message.includes("credit")) {
+            return NextResponse.json({ message: error.message }, { status: 402 });
+        }
         return NextResponse.json({ message: error.message }, { status: 500 });
     }
     return NextResponse.json({ message: 'An unexpected error occurred while generating the proposal.' }, { status: 500 });

@@ -14,6 +14,9 @@ import {
   SectionNameSchema,
   PresentationSlideSchema,
 } from '@/ai/schemas';
+import { getAgent } from '@/lib/db/queries';
+import type { AgentPrompt } from '@/lib/agents';
+
 
 const GeneratePresentationInputSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -42,9 +45,10 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
-    const agent = AGENTS.find(a => a.id === 'generate-presentation');
+    const agent = await getAgent('generate-presentation');
     if (!agent) throw new Error("Presentation agent configuration not found.");
-    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
 
     const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
 
@@ -77,7 +81,7 @@ const generatePresentationFlow = ai.defineFlow(
 {{/if}}
 {{#if diagrams}}
 --- DIAGRAMS (PlantUML) ---
-{{#each otherDiagrams}}
+{{#each diagrams}}
 --- Diagram: {{@key}} ---
 {{{this}}}
 ---
@@ -95,5 +99,3 @@ ${stringifiedProposal}
     return output!;
   }
 );
-// Import must be at the bottom to avoid circular dependency issues
-import { AGENTS } from '@/lib/agents';

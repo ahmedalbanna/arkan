@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { getAgent } from '@/lib/db/queries';
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
 import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
@@ -73,9 +74,10 @@ export async function POST(request: Request) {
         const generatedSections: { [key in SectionName]?: string } = {};
       
         for (const agentId of template.agentIds) {
+            const agent = await getAgent(agentId);
             const sectionKey = (Object.keys(sectionAgentMap) as SectionName[]).find(key => sectionAgentMap[key].agentId === agentId);
     
-            if (!sectionKey) continue;
+            if (!agent || !sectionKey) continue;
             
             const agentInfo = sectionAgentMap[sectionKey];
 
@@ -111,7 +113,7 @@ export async function POST(request: Request) {
     }
 
     // If neither validation passes, return a validation error
-    return NextResponse.json({ errors: singleSectionValidation.error.flatten().fieldErrors, message: 'Invalid request body.' }, { status: 400 });
+    return NextResponse.json({ errors: fullReportValidation.error?.flatten().fieldErrors || singleSectionValidation.error?.flatten().fieldErrors, message: 'Invalid request body.' }, { status: 400 });
 
   } catch (error) {
     console.error(`Error generating report:`, error);
