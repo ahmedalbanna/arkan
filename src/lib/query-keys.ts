@@ -1,4 +1,3 @@
-
 /**
  * Query Key Factories for React Query
  * 
@@ -61,4 +60,11 @@ export const templateKeys = {
     proposals: () => [...templateKeys.all, 'proposal'] as const,
     reports: () => [...templateKeys.all, 'report'] as const,
     presentations: () => [...templateKeys.all, 'presentation'] as const,
+}
+
+export const projectKeys = {
+    all: ['projects'] as const,
+    lists: () => [...projectKeys.all, 'list'] as const,
+    details: () => [...projectKeys.all, 'detail'] as const,
+    detail: (projectId: string) => [...projectKeys.details(), projectId] as const,
 }

@@ -1,5 +1,6 @@
+import type { ProjectProposal, DiagramType, SectionName, PresentationSlide } from '@/ai/schemas';
+import { z } from 'zod';
 
-import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 export type UserRole = 'user' | 'admin' | 'editor' | 'guest'; // Define possible roles
 export interface User {
   id: string;
@@ -42,4 +43,24 @@ export interface PaymentRequest {
   paymentProofUrl: string;
   status: 'pending' | 'approved' | 'rejected'; // Add other statuses as needed
   createdAt: string; // ISO 8601 date string
+}
+
+// Represents the full state of a user's work session
+export const ProjectStateSchema = z.object({
+    projectIdea: z.string().optional(),
+    proposal: ProjectProposalSchema.nullable(),
+    sections: z.record(SectionNameSchema, z.string()).optional(),
+    diagrams: z.record(DiagramTypeSchema, z.object({ plantUmlCode: z.string(), imageUrl: z.string() })).optional(),
+    presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
+});
+
+export type ProjectState = z.infer<typeof ProjectStateSchema>;
+
+// Represents a project document saved in Firestore
+export interface SavedProject extends ProjectState {
+    id: string;
+    userId: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { create } from 'zustand';
@@ -9,10 +8,12 @@ import { useReportStore } from './useReportStore';
 import { useDiagramStore } from './useDiagramStore';
 import { usePresentationStore } from './usePresentationStore';
 import { useCodeGeneratorStore } from './useCodeGeneratorStore';
+import type { ProjectState } from '@/lib/types';
 
 export interface BuilderState {
   projectIdea: string;
   proposal: ProjectProposal | null;
+  currentProjectId: string | null; // To track if we are editing a saved project
   // UI States for proposal generation
   selectedTemplateId: string;
   customGuidelines: string[];
@@ -22,8 +23,10 @@ export interface BuilderState {
 interface BuilderActions {
     // Basic Actions
     newSession: () => void;
-    loadState: (state: Partial<BuilderState & ReturnType<typeof useReportStore.getState> & ReturnType<typeof useDiagramStore.getState> & ReturnType<typeof usePresentationStore.getState> & ReturnType<typeof useCodeGeneratorStore.getState>>) => void;
+    loadState: (state: ProjectState & { id?: string }) => void;
     setProjectIdea: (idea: string) => void;
+    setCurrentProjectId: (id: string | null) => void;
+    getFullState: () => ProjectState;
     // Proposal Actions
     setProposal: (proposal: ProjectProposal | null) => void;
     handleProposalUpdate: (path: string, value: any) => void;
@@ -37,6 +40,7 @@ interface BuilderActions {
 const initialState: BuilderState = {
   projectIdea: '',
   proposal: null,
+  currentProjectId: null,
   selectedTemplateId: 'default-software',
   customGuidelines: [],
   customGuidelineInput: '',
@@ -59,23 +63,35 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         toast({ title: 'New Session Started', description: 'All content has been cleared.' });
       },
       loadState: (newState) => {
-        const { proposal } = newState;
-        if(proposal) set({ proposal });
+        set({
+            projectIdea: newState.projectIdea || '',
+            proposal: newState.proposal || null,
+            currentProjectId: newState.id || null, // Set the current project ID
+        });
         
         // Load state for other stores if present
-        useReportStore.getState().loadState(newState as any);
-        useDiagramStore.getState().loadState(newState as any);
-        usePresentationStore.getState().loadState(newState as any);
-        useCodeGeneratorStore.getState().loadState(newState as any);
-
-        toast({ title: 'Project Loaded', description: `Successfully loaded "${proposal?.title || 'project'}".` });
+        useReportStore.getState().loadState(newState);
+        useDiagramStore.getState().loadState(newState);
+        usePresentationStore.getState().loadState(newState);
+        
+        toast({ title: 'Project Loaded', description: `Successfully loaded "${newState.proposal?.title || 'project'}".` });
       },
+      getFullState: () => ({
+        projectIdea: get().projectIdea,
+        proposal: get().proposal,
+        sections: useReportStore.getState().sections,
+        diagrams: useDiagramStore.getState().diagrams,
+        presentation: usePresentationStore.getState().presentation,
+      }),
       setProjectIdea: (idea) => set({ projectIdea: idea }),
+      setCurrentProjectId: (id) => set({ currentProjectId: id }),
       
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
         set({
           proposal,
+          // When a new proposal is generated, it's not a saved project yet.
+          currentProjectId: null,
         });
         // Clear downstream states when a new proposal is set
         useReportStore.getState().newSession();
@@ -111,11 +127,28 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     {
       name: 'arkan-builder-state',
       storage: createJSONStorage(() => localStorage),
-      // Only persist user-generated content, not transient UI state
+      // Only persist user-generated content, not transient UI state like project ID
       partialize: (state) => ({
         projectIdea: state.projectIdea,
         proposal: state.proposal,
+        currentProjectId: state.currentProjectId,
+        // Persist other stores
+        sections: useReportStore.getState().sections,
+        diagrams: useDiagramStore.getState().diagrams,
+        presentation: usePresentationStore.getState().presentation,
+        codeGenerator: useCodeGeneratorStore.getState(),
       }),
+      // Custom merge function to handle loading from storage
+      merge: (persistedState: any, currentState) => {
+        const merged: any = { ...currentState, ...persistedState };
+        // Now, we need to hydrate the other stores from the persisted state
+        // This is a bit of a trick to make all stores persist under one key
+        useReportStore.getState().loadState(persistedState);
+        useDiagramStore.getState().loadState(persistedState);
+        usePresentationStore.getState().loadState(persistedState);
+        useCodeGeneratorStore.getState().loadState(persistedState);
+        return merged;
+      },
     }
   )
 );

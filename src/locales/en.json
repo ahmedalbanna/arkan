@@ -1,9 +1,8 @@
-
 {
   "header": {
     "title": "Arkan",
     "home": "Home",
-    "projects": "Projects",
+    "projects": "My Projects",
     "summarize": "AI Summarizer",
     "generateDocs": "Builder",
     "generateCode": "Generate Code",
