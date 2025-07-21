@@ -8,6 +8,7 @@ import type {
   ToastActionElement,
   ToastProps,
 } from "@/components/ui/toast"
+import { useSound } from "./use-sound"
 
 const TOAST_LIMIT = 3 // Increased limit
 const TOAST_REMOVE_DELAY = 5000 // Reduced delay
@@ -143,8 +144,16 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast({ ...props }: Toast) {
+// This is a separate function to be called from the hook, so we can use hooks inside it.
+function showToast(props: Toast, playSound: (sound: 'success' | 'error') => void) {
   const id = genId()
+
+  // Play sound based on variant
+  if (props.variant === "destructive") {
+    playSound('error');
+  } else {
+    playSound('success');
+  }
 
   const update = (props: ToasterToast) =>
     dispatch({
@@ -174,6 +183,7 @@ function toast({ ...props }: Toast) {
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
+  const { playSound } = useSound(); // Use our new sound hook
 
   React.useEffect(() => {
     listeners.push(setState)
@@ -187,9 +197,9 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: (props: Toast) => showToast(props, playSound),
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, toast }
+export { useToast, showToast as toast }
