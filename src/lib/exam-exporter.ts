@@ -1,11 +1,11 @@
 
 'use client';
 
-import { Document, Packer, Paragraph, HeadingLevel, TextRun, SectionType } from 'docx';
+import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { AnalyzedExam, SolvedExam } from '@/ai/flows/exam-solver.shared';
 import { templates, type TemplateKey } from './docx-styles';
-import { createDocxParagraphs } from './docx-exporter'; // Re-use the markdown-to-docx logic
+import { createDocxParagraphs } from './docx-exporter';
 
 async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
     try {
@@ -29,18 +29,21 @@ export async function exportExamAsDocx(
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
-    const questionsParagraphs = await createDocxParagraphs(analyzedExam.structuredExam);
-    const solutionParagraphs = await createDocxParagraphs(solvedExam.solution);
+    const docxContent = [];
+
+    for (const pair of solvedExam.solutions) {
+        docxContent.push(...await createDocxParagraphs(pair.question));
+        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote"}));
+        docxContent.push(...await createDocxParagraphs(pair.solution));
+        docxContent.push(new Paragraph({ text: "" })); // Add a spacer
+    }
 
     const doc = new Document({
         styles,
         sections: [{
             children: [
-                new Paragraph({ text: `Exam: ${analyzedExam.subject} - ${analyzedExam.specialty}`, style: 'Title' }),
-                new Paragraph({ text: "Questions", heading: HeadingLevel.HEADING_1, spacing: { before: 400 } }),
-                ...questionsParagraphs,
-                new Paragraph({ text: "Solution", heading: HeadingLevel.HEADING_1, pageBreakBefore: true, spacing: { before: 400 } }),
-                ...solutionParagraphs,
+                new Paragraph({ text: `Exam Solution: ${analyzedExam.subject} - ${analyzedExam.specialty}`, style: 'Title' }),
+                ...docxContent,
             ]
         }]
     });
@@ -56,18 +59,20 @@ export async function exportExamAsPdf(
     const { jsPDF } = await import('jspdf');
     const { default: html2canvas } = await import('html2canvas');
 
-    // Create a temporary, hidden element to render the markdown for PDF export
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
-    container.style.width = '800px'; // A4-like width
+    container.style.width = '800px';
     container.style.padding = '20px';
     container.style.fontFamily = 'sans-serif';
+    container.className = 'prose dark:prose-invert';
 
-    const questionsHtml = `<h1>Questions</h1>${analyzedExam.structuredExam.replace(/\n/g, '<br>')}`;
-    const solutionHtml = `<h1>Solution</h1>${solvedExam.solution.replace(/\n/g, '<br>')}`;
-    container.innerHTML = `${questionsHtml}<br style="page-break-before: always;">${solutionHtml}`;
+    let htmlContent = `<h1>Exam Solution: ${analyzedExam.subject} - ${analyzedExam.specialty}</h1>`;
+    solvedExam.solutions.forEach(pair => {
+        htmlContent += `<div>${pair.question.replace(/\n/g, '<br>')}</div><br><strong>Solution:</strong><div>${pair.solution.replace(/\n/g, '<br>')}</div><hr>`;
+    });
 
+    container.innerHTML = htmlContent;
     document.body.appendChild(container);
 
     const canvas = await html2canvas(container, {

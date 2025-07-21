@@ -14,17 +14,14 @@ const AnalyzeExamInputSchema = z.object({
 });
 
 export async function analyzeExam(input: z.infer<typeof AnalyzeExamInputSchema>): Promise<AnalyzedExam> {
-  // Input validation within the flow:
   const validation = AnalyzeExamInputSchema.safeParse(input);
   if (!validation.success) {
     throw new Error(`Invalid input for analyzeExam: ${validation.error.message}`);
   }
 
-
-
   const analysisPrompt = ai.definePrompt({
     name: 'analyzeExamPrompt',
-    input: { schema: AnalyzeExamInputSchema },  // Use a schema that matches the formatted input
+    input: { schema: AnalyzeExamInputSchema },
     output: { schema: AnalyzedExamSchema },
     prompt: `You are an expert academic analyst. Your task is to analyze the following exam content provided in Markdown.
 
@@ -38,13 +35,12 @@ export async function analyzeExam(input: z.infer<typeof AnalyzeExamInputSchema>)
     `,
   });
 
-  const { output } = await analysisPrompt(validation.data); // Pass the formatted markdown
+  const { output } = await analysisPrompt(validation.data);
   return output!;
 }
 
 // 2. Solve Exam Flow
 export async function solveExam(input: AnalyzedExam): Promise<SolvedExam> {
-  // Input validation within the flow:
   const validation = AnalyzedExamSchema.safeParse(input);
   if (!validation.success) {
     throw new Error(`Invalid input for solveExam: ${validation.error.message}`);
@@ -56,7 +52,13 @@ export async function solveExam(input: AnalyzedExam): Promise<SolvedExam> {
     output: { schema: SolvedExamSchema },
     prompt: `You are an expert tutor specializing in **{{{subject}}}** with a deep knowledge of **{{{specialty}}}**.
 
-    Your task is to provide a comprehensive and accurate solution to the following exam. Present the solution in a clear, well-structured Markdown format. For each question, provide a detailed answer, showing steps or reasoning where applicable.
+    Your task is to provide a comprehensive and accurate solution to the following exam.
+    
+    For each question in the provided exam, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
+    
+    - For each question, provide a step-by-step solution.
+    - Format all mathematical equations and steps clearly using Markdown.
+    - Ensure your final output is an array of objects, where each object contains a 'question' and its corresponding 'solution'.
 
     Exam Questions:
     ---

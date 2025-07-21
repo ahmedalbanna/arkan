@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Schema for the output of the analysis agent
 export const AnalyzedExamSchema = z.object({
   subject: z.string().describe('The main subject of the exam (e.g., "Physics", "History", "Calculus").'),
   specialty: z.string().describe('The specific specialty within the subject (e.g., "Quantum Mechanics", "World War II", "Differential Equations").'),
@@ -8,8 +7,12 @@ export const AnalyzedExamSchema = z.object({
 });
 export type AnalyzedExam = z.infer<typeof AnalyzedExamSchema>;
 
-// Schema for the output of the solving agent
+export const QuestionAnswerPairSchema = z.object({
+  question: z.string().describe("The original question from the exam."),
+  solution: z.string().describe("A detailed, well-structured solution to the question, formatted in Markdown."),
+});
+
 export const SolvedExamSchema = z.object({
-  solution: z.string().describe('A detailed, well-structured solution to the exam questions, formatted in Markdown.'),
+  solutions: z.array(QuestionAnswerPairSchema).describe("An array of question and solution pairs."),
 });
 export type SolvedExam = z.infer<typeof SolvedExamSchema>;
