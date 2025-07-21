@@ -50,6 +50,16 @@ Original Text:
     });
 
     const { output } = await prompt({ text, targetLang });
-    return output!;
+    if (!output) {
+      return { translatedText: '' };
+    }
+    
+    // Clean the output to remove unwanted formatting
+    const cleanedText = output.translatedText
+      .replace(/^---/gm, '') // Remove --- from start
+      .replace(/---$/gm, '')  // Remove --- from end
+      .trim();              // Remove leading/trailing whitespace
+
+    return { translatedText: cleanedText };
   }
 );
