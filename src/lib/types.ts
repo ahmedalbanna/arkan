@@ -2,7 +2,7 @@
 'use client';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectProposal, SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectProposal, SectionName, DiagramType, PresentationSlide } from '@/ai/schemas';
 
 export type UserRole = 'user' | 'admin' | 'editor' | 'guest'; // Define possible roles
 export interface User {
@@ -71,4 +71,10 @@ export interface SavedProject extends ProjectState {
     name: string;
     createdAt: string;
     updatedAt: string;
+}
+
+export interface HistoryEntry{
+  id: string;
+  name: string;
+  createdAt: string;
 }
