@@ -2,14 +2,12 @@
 'use client';
 
 export interface ProposalTemplate {
-    id: string; // Add ID to the interface
+    id: string;
     name: string;
     description: string;
     prompt: string;
     guidelines?: string[];
 }
-
-export type ProposalTemplateKey = 'default' | 'agile' | 'marketing';
 
 const basePrompt = `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
 
@@ -22,7 +20,7 @@ Project Idea: {{{projectIdea}}}`;
 
 export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
     {
-        id: 'default',
+        id: 'default-software',
         name: 'Default Software Proposal',
         description: 'A standard, comprehensive template for software development projects.',
         prompt: basePrompt,
@@ -33,9 +31,9 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
         ]
     },
     {
-        id: 'agile',
+        id: 'agile-project',
         name: 'Agile Project Proposal',
-        description: 'A template focused on Agile methodologies, with iterative phases.',
+        description: 'A template focused on Agile methodologies, with iterative phases and flexible scope.',
         prompt: basePrompt,
         guidelines: [
             "The methodology must be explicitly defined as Agile, using frameworks like Scrum or Kanban.",
@@ -44,7 +42,7 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
         ]
     },
     {
-        id: 'marketing',
+        id: 'marketing-campaign',
         name: 'Marketing Campaign Brief',
         description: 'A template tailored for planning and proposing a marketing campaign.',
         prompt: `You are an expert marketing strategist. A user will provide you with a product or service idea. Your task is to generate a comprehensive marketing campaign proposal (brief).
