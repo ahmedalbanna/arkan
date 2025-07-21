@@ -157,7 +157,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     
     const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
-    if (!agentsLoaded || !agent || presentationTemplatesLoading) {
+    if (!agentsLoaded || !agent || presentationTemplatesLoading || !selectedTemplate) {
         return (
             <Card>
                 <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
@@ -374,7 +374,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         onClick={handleGenerateClick}
                         disabled={isDisabled || isGenerating}
                         className="font-headline w-full"
-                        title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.presentationGenerator.generateButton')}
+                        title={t('builder.presentationGenerator.generateButton')}
                     >
                         {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                         {t('builder.presentationGenerator.generateButton')}
