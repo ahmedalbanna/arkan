@@ -15,6 +15,19 @@ export async function fetchProjects(token: string): Promise<SavedProject[]> {
     return await response.json();
 }
 
+// Fetch a single project by its ID
+export async function fetchProject(projectId: string, token: string): Promise<SavedProject> {
+    if (!token) throw new Error("User not authenticated");
+    const response = await fetch(`/api/projects/${projectId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        if(response.status === 404) throw new Error("Project not found.");
+        throw new Error('Failed to fetch project');
+    }
+    return await response.json();
+}
+
 // Create a new project
 export async function createProject(data: ProjectState, token: string): Promise<SavedProject> {
     if (!token) throw new Error("User not authenticated");

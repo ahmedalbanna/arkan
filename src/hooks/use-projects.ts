@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import type { SavedProject, ProjectState } from '@/lib/types';
 import { 
     fetchProjects as fetchProjectsApi,
+    fetchProject as fetchProjectApi,
     createProject, 
     deleteProject, 
     updateProject 
@@ -26,6 +27,20 @@ export function useProjects() {
         enabled: !!firebaseUser,
     });
 }
+
+export function useProject(projectId: string) {
+    const { firebaseUser } = useAuth();
+    return useQuery<SavedProject>({
+        queryKey: projectKeys.detail(projectId),
+        queryFn: async () => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await firebaseUser.getIdToken();
+            return fetchProjectApi(projectId, token);
+        },
+        enabled: !!firebaseUser && !!projectId,
+    });
+}
+
 
 export function useSaveProject() {
     const queryClient = useQueryClient();

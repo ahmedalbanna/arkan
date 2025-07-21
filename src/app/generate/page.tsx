@@ -16,6 +16,7 @@ import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 import { useAutosave } from '@/hooks/use-autosave';
+import { useProject } from '@/hooks/use-projects';
 
 
 const LoadingSkeleton = () => (
@@ -63,10 +64,24 @@ async function markOnboardingComplete(userId: string, token: string) {
     return response.json();
 }
 
+function ProjectLoader() {
+    const { currentProjectId, loadState } = useBuilderStore();
+    const { data: projectData, isSuccess } = useProject(currentProjectId!);
+
+    useEffect(() => {
+        if (isSuccess && projectData) {
+            loadState(projectData);
+        }
+    }, [isSuccess, projectData, loadState]);
+
+    return null; // This component does not render anything
+}
+
+
 function GeneratePageContent() {
   useAutosave(); // Activate the autosave hook
   const [activeTab, setActiveTab] = useState("proposal");
-  const proposal = useBuilderStore(s => s.proposal);
+  const { proposal, currentProjectId } = useBuilderStore();
   const { t } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
@@ -132,6 +147,7 @@ function GeneratePageContent() {
 
   return (
     <>
+      {currentProjectId && <ProjectLoader />}
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
         <div className="flex justify-end items-center mb-4">
