@@ -14,19 +14,19 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
         <div className="flex flex-col">
             <section className="py-20 md:py-32 bg-card">
                 <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline font-bold text-primary mb-4">
                         {t('home.heroTitle')}
                     </h1>
                     <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
                         {t('home.heroSubtitle')}
                     </p>
-                    <div className="flex justify-center gap-4">
-                        <Button asChild size="lg" className="font-headline">
+                    <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <Button asChild size="lg" className="font-headline w-full sm:w-auto">
                             <Link href="/generate">
                                 {t('home.exploreProjects')} <ArrowLeft className="mr-2 rtl:mr-0 rtl:ml-2" />
                             </Link>
                         </Button>
-                        <Button asChild size="lg" variant="secondary" className="font-headline">
+                        <Button asChild size="lg" variant="secondary" className="font-headline w-full sm:w-auto">
                             <Link href="/generate">{t('home.trySummarizer')}</Link>
                         </Button>
                     </div>
@@ -35,7 +35,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
 
             <section className="py-16 md:py-24 bg-background">
                 <div className="container mx-auto px-4">
-                    <div className="grid md:grid-cols-3 gap-12 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
                         <div className="flex flex-col items-center">
                             <div className="p-4 bg-primary/10 rounded-full mb-4">
                                 <FileSpreadsheet className="w-12 h-12 text-primary" />
