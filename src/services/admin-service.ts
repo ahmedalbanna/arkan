@@ -23,5 +23,5 @@ export async function fetchDashboardStats(token: string): Promise<DashboardStats
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch dashboard stats');
     }
-    return response.json();
+    return await response.json();
 }

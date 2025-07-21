@@ -113,7 +113,7 @@ export async function updateUserCredits(userId: string, creditsToAdd: number): P
 export async function deductUserCredits(userId: string, creditsToDeduct: number): Promise<number> {
     const userRef = adminDb.collection('users').doc(userId);
 
-    return adminDb.runTransaction(async (transaction) => {
+    return await adminDb.runTransaction(async (transaction) => {
         const userDoc = await transaction.get(userRef);
         if (!userDoc.exists) {
             throw new Error("User not found");

@@ -58,7 +58,7 @@ async function deleteUserApi(variables: { userId: string, token: string }) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete user');
     }
-    return response.json();
+    return await response.json();
 }
 
 

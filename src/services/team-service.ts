@@ -17,7 +17,7 @@ export async function fetchUserTeams(token: string): Promise<TeamWithMembers[]> 
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch teams');
     }
-    return response.json();
+    return await response.json();
 }
 
 export async function createTeam({ name, token }: { name: string, token: string }): Promise<Team> {
@@ -35,7 +35,7 @@ export async function createTeam({ name, token }: { name: string, token: string 
         const error = await response.json();
         throw new Error(error.message || 'Failed to create team');
     }
-    return response.json();
+    return await response.json();
 }
 
 export async function inviteMember({ teamId, email, token }: { teamId: string, email: string, token: string }) {
@@ -54,5 +54,5 @@ export async function inviteMember({ teamId, email, token }: { teamId: string, e
         const error = await response.json();
         throw new Error(error.message || 'Failed to invite member');
     }
-    return response.json();
+    return await response.json();
 }

@@ -72,12 +72,12 @@ export default async function RootLayout({
 }>) {
   
   // We need to get the current path to check if it's protected
-  const headersList = await headers();
-  const pathname = (await headersList).get('x-next-pathname') || '/';
+  const headersList = headers();
+  const pathname = headersList.get('x-next-pathname') || '/';
   
   // Get the session cookie value here, at the top level
-  const cookieStore = await cookies();
-  const sessionCookie = (await cookieStore).get('__session')?.value;
+  const cookieStore = cookies();
+  const sessionCookie = cookieStore.get('__session')?.value;
 
 
   // Run the server-side authentication check for protected routes

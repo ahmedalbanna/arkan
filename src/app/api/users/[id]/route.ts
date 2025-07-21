@@ -36,7 +36,7 @@ async function verifyAccess(request: Request, targetUserId: string) {
 // GET /api/users/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
-        const { id: userId } = await params; // Await params and destructure the id
+        const { id: userId } = params; 
         if (!userId) {
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }

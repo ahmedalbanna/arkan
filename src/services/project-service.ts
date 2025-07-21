@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { SavedProject, ProjectState } from "@/lib/types";
@@ -11,7 +12,7 @@ export async function fetchProjects(token: string): Promise<SavedProject[]> {
     if (!response.ok) {
         throw new Error('Failed to fetch projects');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Create a new project
@@ -28,7 +29,7 @@ export async function createProject(data: ProjectState, token: string): Promise<
     if (!response.ok) {
         throw new Error('Failed to save project');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Update an existing project
@@ -45,7 +46,7 @@ export async function updateProject(projectId: string, data: ProjectState, token
     if (!response.ok) {
         throw new Error('Failed to update project');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Delete a project
@@ -58,5 +59,5 @@ export async function deleteProject(projectId: string, token: string): Promise<{
     if (!response.ok) {
         throw new Error('Failed to delete project');
     }
-    return response.json();
+    return await response.json();
 }

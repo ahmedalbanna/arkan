@@ -28,5 +28,5 @@ export async function getPendingTransactions(params: FetchPendingTransactionsPar
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch pending transactions');
     }
-    return response.json();
+    return await response.json();
 }

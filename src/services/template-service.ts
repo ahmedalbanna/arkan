@@ -32,7 +32,7 @@ export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
     if (!response.ok) {
         throw new Error('Failed to fetch proposal templates');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Update Proposal Template
@@ -49,7 +49,7 @@ export async function updateProposalTemplate(id: string, data: Partial<ProposalT
         const error = await response.json();
         throw new Error(error.message || 'Failed to update proposal template');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Fetch Report Templates
@@ -58,7 +58,7 @@ export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]
     if (!response.ok) {
         throw new Error('Failed to fetch report templates');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Update Report Template
@@ -75,7 +75,7 @@ export async function updateReportTemplate(id: string, data: Partial<ReportGener
         const error = await response.json();
         throw new Error(error.message || 'Failed to update report template');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Fetch Presentation Templates
@@ -84,7 +84,7 @@ export async function fetchPresentationTemplates(): Promise<PresentationGenerati
     if (!response.ok) {
         throw new Error('Failed to fetch presentation templates');
     }
-    return response.json();
+    return await response.json();
 }
 
 // Update Presentation Template
@@ -101,5 +101,5 @@ export async function updatePresentationTemplate(id: string, data: Partial<Prese
         const error = await response.json();
         throw new Error(error.message || 'Failed to update presentation template');
     }
-    return response.json();
+    return await response.json();
 }

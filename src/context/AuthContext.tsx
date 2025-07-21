@@ -31,7 +31,7 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
 
     // Ensure a user profile exists in Firestore.
     // This is a good place to handle it centrally for all auth methods.
-    const response = await fetch('/api/auth/signup', {
+    await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -44,9 +44,6 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
             phoneNumber: user.phoneNumber,
         })
     });
-    if (!response.ok) {
-        console.error("Failed to create or verify user profile on sign-in.");
-    }
 
   } else {
     // Clear session cookie
@@ -67,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     queryFn: async () => {
         if (!firebaseUser) return null;
         const token = await firebaseUser.getIdToken();
-        return fetchUserProfile(firebaseUser.uid, token);
+        return await fetchUserProfile(firebaseUser.uid, token);
     },
     enabled: !!firebaseUser, // Only fetch if firebaseUser exists
     staleTime: 1000 * 60 * 5, // 5 minutes
@@ -85,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await manageSessionAndProfile(user);
       if (user) {
         // Invalidate and refetch immediately on auth change
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
+        await queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
       } else {
         // Clear all queries on logout
         queryClient.clear();

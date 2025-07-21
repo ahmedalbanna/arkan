@@ -43,5 +43,5 @@ export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ lo
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch generation logs');
     }
-    return response.json();
+    return await response.json();
 }

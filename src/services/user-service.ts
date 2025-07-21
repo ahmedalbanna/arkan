@@ -21,5 +21,5 @@ export async function fetchUserProfile(userId: string, token: string): Promise<U
     const errorData = await response.json().catch(() => ({ message: 'Failed to fetch user profile' }));
     throw new Error(errorData.message || 'Failed to fetch user profile');
   }
-  return response.json();
+  return await response.json();
 }
