@@ -201,7 +201,7 @@ export default function ExamSolver() {
             <Loader2 className="h-12 w-12 animate-spin mb-4" />
             <p>{t('builder.examSolver.solvingInProgress')}</p>
           </div>
-        ) : solvedExam ? (
+        ) : solvedExam && Array.isArray(solvedExam.solutions) ? (
           <ScrollArea className="h-[calc(100vh-350px)] p-1">
               <div className="prose dark:prose-invert max-w-none space-y-6">
                 {solvedExam.solutions.map((pair, index) => (
