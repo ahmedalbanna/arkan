@@ -7,17 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2, FileText, Download, FileJson, Languages } from 'lucide-react';
 import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
-import { exportProposalAsDocx } from '@/lib/docx-exporter';
-import { useDocxStyles } from '@/hooks/use-docx-styles';
-import { TemplateKey } from '@/lib/docx-styles';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { saveAs } from 'file-saver';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { ProposalActions } from './ProposalActions';
 
 function ProposalSkeleton() {
     return (
@@ -86,7 +83,6 @@ async function translateProposal(variables: { proposal: ProjectProposal, targetL
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { t, locale } = useLocalization();
-    const { templates: docxTemplates } = useDocxStyles();
     const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
     
@@ -131,20 +127,6 @@ export function ProposalModeGenerator() {
             });
         }
     });
-
-    const handleExportDocx = () => {
-        if(proposal) {
-            const templateKey: TemplateKey = Object.keys(docxTemplates)[0] as TemplateKey || 'modern';
-            exportProposalAsDocx(proposal, templateKey);
-        }
-    }
-    
-    const handleExportJson = () => {
-        if (!proposal) return;
-        const blob = new Blob([JSON.stringify({ proposal: proposal }, null, 2)], { type: 'application/json;charset=utf-8' });
-        const fileName = `${proposal.title.replace(/[\s\W]/g, '_') || 'arkan_proposal'}.json`;
-        saveAs(blob, fileName);
-    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -216,14 +198,6 @@ export function ProposalModeGenerator() {
                                         {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                                         {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
                                     </Button>
-                                    <Button variant="outline" type="button" size="sm" onClick={handleExportJson}>
-                                        <FileJson className="mr-2 h-4 w-4" />
-                                        {t('builder.proposalGenerator.exportJson')}
-                                    </Button>
-                                    <Button variant="outline" type="button" size="sm" onClick={handleExportDocx}>
-                                        <Download className="mr-2 h-4 w-4" />
-                                        {t('builder.proposalGenerator.exportDocx')}
-                                    </Button>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -250,6 +224,9 @@ export function ProposalModeGenerator() {
                         isDisabled={!projectIdea || generationMutation.isPending}
                         isGenerating={generationMutation.isPending}
                     />
+                    {proposal && (
+                        <ProposalActions isGenerating={generationMutation.isPending} />
+                    )}
                 </div>
 
             </div>
