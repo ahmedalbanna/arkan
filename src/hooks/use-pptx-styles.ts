@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { type PptxTemplate, type PptxTemplateKey, type PptxStyleOptions } from '@/lib/pptx-styles';
 
-const PPTX_TEMPLATES_QUERY_KEY = 'pptx-templates';
+export const PPTX_TEMPLATES_QUERY_KEY = 'pptx-templates';
 
 
 // --- API Service Functions ---
@@ -16,7 +16,7 @@ async function fetchPptxTemplates(): Promise<Record<PptxTemplateKey, PptxTemplat
     if (!response.ok) {
         throw new Error('Failed to fetch PPTX templates');
     }
-    return response.json();
+    return await response.json();
 }
 
 async function updatePptxTemplateApi({ key, styles }: { key: PptxTemplateKey, styles: PptxStyleOptions }, token: string) {
@@ -31,6 +31,22 @@ async function updatePptxTemplateApi({ key, styles }: { key: PptxTemplateKey, st
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update PPTX template');
+    }
+    return response.json();
+}
+
+async function refreshTemplateImageApi(variables: {templateType: 'pptx', templateId: string, prompt: string}, token: string) {
+    const response = await fetch('/api/templates/refresh-image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(variables)
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to refresh image');
     }
     return response.json();
 }
@@ -104,4 +120,32 @@ export function usePptxStyles() {
     };
 
   return { templates: templates || {} as Record<PptxTemplateKey, PptxTemplate>, isLoaded: !isLoading, updateStyle, saveChanges, isSaving: mutation.isPending };
+}
+
+
+export function useRefreshPptxTemplateImage() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (variables: { templateId: string; prompt: string }) => {
+      if (!firebaseUser) throw new Error("User not authenticated.");
+      const token = await firebaseUser.getIdToken();
+      return refreshTemplateImageApi({ ...variables, templateType: 'pptx' }, token);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [PPTX_TEMPLATES_QUERY_KEY] });
+      toast({
+        title: "Preview Refreshed",
+        description: `The preview image for "${data.name}" has been updated.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Image Refresh Failed",
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 }

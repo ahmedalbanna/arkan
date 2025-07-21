@@ -1,21 +1,22 @@
 
 'use client';
 
-import { useDocxStyles } from '@/hooks/use-docx-styles';
+import { useDocxStyles, useRefreshTemplateImage } from '@/hooks/use-docx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, RefreshCw } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import DynamicImage from '../DynamicImage';
+import Image from 'next/image';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
 export default function DocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
+  const refreshImageMutation = useRefreshTemplateImage('docx');
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
@@ -49,13 +50,24 @@ export default function DocxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-              <DynamicImage
-                alt={`${t(template.name)} preview`}
-                width={400}
-                height={565}
-                className="w-full h-auto rounded-md border"
-                data-ai-hint={template.dataAiHint}
-              />
+              <div className="relative">
+                <Image
+                  src={template.imageUrl || `https://placehold.co/400x565.png`}
+                  alt={`${t(template.name)} preview`}
+                  width={400}
+                  height={565}
+                  className="w-full h-auto rounded-md border"
+                />
+                 <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2"
+                    onClick={() => refreshImageMutation.mutate({ templateId: key, prompt: template.dataAiHint })}
+                    disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key}
+                  >
+                    {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                </Button>
+              </div>
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="general">
                   <AccordionTrigger>{t('manageTemplates.generalStyles')}</AccordionTrigger>

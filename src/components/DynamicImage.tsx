@@ -34,6 +34,8 @@ const imageQueryFn = async (prompt: string, token: string | null) => {
     return data.imageUrl;
 };
 
+// IMPORTANT: This component is now deprecated for template previews, which use a stored imageUrl.
+// It is kept for other potential dynamic image needs in the application.
 export default function DynamicImage({ alt, 'data-ai-hint': dataAiHint, ...props }: DynamicImageProps) {
   const { firebaseUser } = useAuth();
   const [authToken, setAuthToken] = useState<string | null>(null);

@@ -15,7 +15,7 @@ async function fetchDocxTemplates(): Promise<Record<TemplateKey, Template>> {
     if (!response.ok) {
         throw new Error('Failed to fetch DOCX templates');
     }
-    return response.json();
+    return await response.json();
 }
 
 async function updateDocxTemplateApi({ key, styles }: { key: TemplateKey, styles: any }, token: string) {
@@ -30,6 +30,22 @@ async function updateDocxTemplateApi({ key, styles }: { key: TemplateKey, styles
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update DOCX template');
+    }
+    return response.json();
+}
+
+async function refreshTemplateImageApi(variables: {templateType: string, templateId: string, prompt: string}, token: string) {
+    const response = await fetch('/api/templates/refresh-image', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(variables)
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to refresh image');
     }
     return response.json();
 }
@@ -98,4 +114,32 @@ export function useDocxStyles() {
 
 
   return { templates, isLoaded: !isLoaded, updateStyle, saveChanges, isSaving: mutation.isPending };
+}
+
+export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation({
+    mutationFn: async (variables: { templateId: string; prompt: string }) => {
+      if (!firebaseUser) throw new Error("User not authenticated.");
+      const token = await firebaseUser.getIdToken();
+      return refreshTemplateImageApi({ ...variables, templateType }, token);
+    },
+    onSuccess: (data, variables) => {
+      const queryKey = templateType === 'docx' ? DOCX_TEMPLATES_QUERY_KEY : 'pptx-templates';
+      queryClient.invalidateQueries({ queryKey: [queryKey] });
+      toast({
+        title: "Preview Refreshed",
+        description: `The preview image for "${data.name}" has been updated.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Image Refresh Failed",
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
 }

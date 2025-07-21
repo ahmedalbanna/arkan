@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -24,6 +25,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.plantuml.com',
         port: '',
         pathname: '/plantuml/**',
+      },
+       {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+        port: '',
+        pathname: '/**',
       },
     ],
   },

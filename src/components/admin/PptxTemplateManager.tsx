@@ -1,15 +1,15 @@
 
 'use client';
 
-import { usePptxStyles } from '@/hooks/use-pptx-styles';
+import { usePptxStyles, useRefreshPptxTemplateImage } from '@/hooks/use-pptx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, RefreshCw } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import DynamicImage from '../DynamicImage';
+import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
@@ -39,6 +39,7 @@ function PptxTemplateSkeleton() {
 
 export default function PptxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
+  const refreshImageMutation = useRefreshPptxTemplateImage();
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
@@ -76,13 +77,24 @@ export default function PptxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-               <DynamicImage
+               <div className="relative">
+                <Image
+                  src={template.imageUrl || 'https://placehold.co/400x225.png'}
                   alt={`${t(template.name)} preview`}
                   width={400}
                   height={225}
                   className="w-full h-auto rounded-md border"
-                  data-ai-hint={template.dataAiHint}
                 />
+                 <Button
+                    size="sm"
+                    variant="secondary"
+                    className="absolute top-2 right-2"
+                    onClick={() => refreshImageMutation.mutate({ templateId: key, prompt: template.dataAiHint })}
+                    disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key}
+                  >
+                    {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                </Button>
+               </div>
               <Accordion type="multiple" className="w-full" defaultValue={['general']}>
                 <AccordionItem value="general">
                   <AccordionTrigger>{t('pptxTemplates.generalStyles')}</AccordionTrigger>
