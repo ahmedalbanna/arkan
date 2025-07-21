@@ -49,15 +49,20 @@ export interface PaymentRequest {
 }
 
 // Represents the full state of a user's work session
-export const ProjectStateSchema = z.object({
-    projectIdea: z.string().optional(),
-    proposal: z.lazy(() => ProjectProposalSchema).nullable(),
-    sections: z.record(SectionNameSchema, z.string()).optional(),
-    diagrams: z.record(DiagramTypeSchema, z.object({ plantUmlCode: z.string(), imageUrl: z.string() })).optional(),
-    presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
-});
-
-export type ProjectState = z.infer<typeof ProjectStateSchema>;
+// NOTE: The Zod schema for this has been moved to `src/lib/project-state-schema.ts`
+// to avoid circular dependency issues with server-side modules.
+export interface ProjectState {
+    projectIdea?: string;
+    proposal: ProjectProposal | null;
+    sections?: { [key in SectionName]?: string };
+    diagrams?: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
+    presentation?: { history: PresentationHistoryEntry[] };
+}
+export interface PresentationHistoryEntry {
+    id: string;
+    name: string;
+    slides: PresentationSlide[];
+}
 
 // Represents a project document saved in Firestore
 export interface SavedProject extends ProjectState {

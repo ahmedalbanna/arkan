@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
-import { ProjectStateSchema } from '@/lib/types';
+import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { revalidatePath } from 'next/cache';
 
 // GET /api/projects - Fetches all projects for the authenticated user
