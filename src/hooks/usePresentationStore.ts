@@ -20,6 +20,7 @@ interface PresentationActions {
     newSession: () => void;
     loadState: (state: Partial<PresentationState>) => void;
     addPresentationToHistory: (entry: PresentationHistoryEntry) => void;
+    replacePresentationInHistory: (entry: PresentationHistoryEntry) => void;
     setActivePresentationId: (id: string | null) => void;
     updatePresentationSlide: (slideIndex: number, field: 'title' | 'content', value: string, contentIndex?: number) => void;
 }
@@ -45,6 +46,18 @@ export const usePresentationStore = create<PresentationState & PresentationActio
               presentation: { history: [entry, ...(state.presentation?.history || [])] },
               activePresentationId: entry.id
           }));
+      },
+      replacePresentationInHistory: (updatedEntry) => {
+        set(state => {
+            const { presentation } = state;
+            if (!presentation) return {};
+
+            const history = presentation.history.map(entry => 
+                entry.id === updatedEntry.id ? updatedEntry : entry
+            );
+            
+            return { presentation: { ...presentation, history } };
+        });
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       updatePresentationSlide: (slideIndex, field, value, contentIndex) => {
