@@ -1,14 +1,51 @@
 
 // src/app/api/pdf-to-markdown/route.ts
 import { NextResponse } from 'next/server';
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs'; // Import as a library
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { rewriteToMarkdown } from '@/ai/flows/rewrite-to-markdown';
+import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
 
-// This is a temporary solution for a stateless API route.
-// In a real app, you'd get the user ID from the session/token.
-const HARDCODED_USER_ID = 'user-1';
+// Set the worker source for pdfjs-dist
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+
+async function extractContentFromPdf(fileBuffer: Uint8Array): Promise<{ text: string; images: string[] }> {
+    const pdfDocument = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
+    let fullText = '';
+    const imagePromises: Promise<string>[] = [];
+
+    for (let i = 1; i <= pdfDocument.numPages; i++) {
+        const page = await pdfDocument.getPage(i);
+        const textContent = await page.getTextContent();
+        fullText += textContent.items.map((item: any) => item.str).join(' ') + '\n\n';
+
+        // Render page to canvas to get an image
+        const viewport = page.getViewport({ scale: 1.5 });
+        const canvas = new OffscreenCanvas(viewport.width, viewport.height);
+        const context = canvas.getContext('2d');
+        if (context) {
+            const renderContext = {
+                canvasContext: context,
+                viewport: viewport,
+            };
+            await page.render(renderContext).promise;
+            const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
+            const reader = new FileReader();
+
+            const dataUrlPromise = new Promise<string>((resolve, reject) => {
+                reader.onloadend = () => resolve(reader.result as string);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+            imagePromises.push(dataUrlPromise);
+        }
+         page.cleanup();
+    }
+    const pageImages = await Promise.all(imagePromises);
+    return { text: fullText, images: pageImages };
+}
+
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +58,7 @@ export async function POST(request: Request) {
     const userId = decodedToken.uid;
 
     const formData = await request.formData();
-    const file = formData.get('file') as File; // Get the file using the name 'file' from the frontend FormData
+    const file = formData.get('file') as File;
 
     if (!file) {
       return NextResponse.json({ message: 'No file uploaded.' }, { status: 400 });
@@ -31,35 +68,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Invalid file type. Only PDF is allowed.' }, { status: 400 });
     }
 
-    await deductCredit(userId, 1);
-
-    // Read the file into an ArrayBuffer
     const fileArrayBuffer = await file.arrayBuffer();
     const fileUint8Array = new Uint8Array(fileArrayBuffer);
+    
+    // Credit deduction for the more complex operation
+    await deductCredit(userId, 2);
 
-    // --- Change starts here ---
-    // Set the worker source globally for pdfjs-dist
-    // This path might need adjustment based on your project's build output
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
-    // --- Change ends here ---
+    const { text, images } = await extractContentFromPdf(fileUint8Array);
 
-    // Load the PDF document
-    const pdfDocument = await pdfjsLib.getDocument({ data: fileUint8Array }).promise;
-
-    let rawText = '';
-    // Iterate over each page and extract text
-    for (let i = 1; i <= pdfDocument.numPages; i++) {
-      const page = await pdfDocument.getPage(i);
-      const textContent = await page.getTextContent();
-      rawText += textContent.items.map((item: any) => item.str).join(' ') + '\n'; // Join text items and add newline per page
-    }
-
-    if (!rawText || rawText.trim().length < 20) {
-        return NextResponse.json({ message: 'Could not extract sufficient text from the PDF.' }, { status: 400 });
+    if (images.length === 0) {
+        return NextResponse.json({ message: 'Could not extract any content from the PDF.' }, { status: 400 });
     }
     
-    // Rewrite text to markdown using AI
-    const result = await rewriteToMarkdown({ rawText });
+    // Use the new multi-modal flow
+    const result = await rewriteDocumentToMarkdown({ extractedText: text, pageImages: images });
 
     return NextResponse.json({ markdown: result.markdown }, { status: 200 });
 
@@ -74,3 +96,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
   }
 }
+
+    

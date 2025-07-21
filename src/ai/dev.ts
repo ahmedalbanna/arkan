@@ -29,3 +29,6 @@ import '@/ai/flows/evaluate-report.ts';
 import '@/ai/flows/translate-text.ts';
 import '@/ai/flows/exam-solver.ts';
 import '@/ai/flows/homework-solver.ts';
+import '@/ai/flows/rewrite-document-to-markdown.ts';
+
+    
