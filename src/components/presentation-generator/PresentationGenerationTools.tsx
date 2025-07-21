@@ -29,7 +29,7 @@ import type { DiagramType, SectionName } from '@/ai/schemas';
 import type { GuidelineState } from '@/hooks/useReportStore';
 import { usePresentationTemplates } from '@/hooks/use-templates';
 import { useLocalization } from '@/context/LocalizationContext';
-
+import { Skeleton } from '../ui/skeleton';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
@@ -155,16 +155,21 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         onGenerate(body);
     }
     
+    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
-    if (!agentsLoaded || !agent) {
-        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+    if (!agentsLoaded || !agent || presentationTemplatesLoading) {
+        return (
+            <Card>
+                <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
+                <CardContent><Loader2 className="animate-spin" /></CardContent>
+            </Card>
+        );
     }
 
     const promptConfig = agent.prompt as AgentPrompt;
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState.presentation;
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
-    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
 
     return (
