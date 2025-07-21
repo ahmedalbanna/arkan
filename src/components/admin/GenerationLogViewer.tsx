@@ -17,10 +17,12 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
-import ReactJson from '@microlink/react-json-view';
 import { useTheme } from 'next-themes';
 import { AGENTS } from '@/lib/agents';
 import { useDebounce } from '@/hooks/use-debounce';
+import dynamic from 'next/dynamic';
+
+const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 const LOGS_PER_PAGE = 15;
 
