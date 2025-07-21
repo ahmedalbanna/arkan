@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
@@ -23,6 +23,7 @@ import { fetchUserProfile } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
+import { CreateUserDialog } from './admin/CreateUserDialog';
 
 const USERS_PER_PAGE = 10;
 
@@ -90,6 +91,7 @@ export default function UserManagementConsole() {
   // Prefetch user profile on hover for a smoother navigation experience
   const prefetchUser = async (userId: string) => {
     if (!firebaseUser) return;
+    const token = await firebaseUser.getIdToken();
     await queryClient.prefetchQuery({
         queryKey: userKeys.profile(userId),
         queryFn: () => fetchUserProfile(userId),
@@ -127,10 +129,13 @@ export default function UserManagementConsole() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-            <span>{t('manageUsers.cardTitle')}</span>
-            {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
-        </CardTitle>
+        <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+                <span>{t('manageUsers.cardTitle')}</span>
+                 {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+            </CardTitle>
+            <CreateUserDialog />
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border rounded-lg">
