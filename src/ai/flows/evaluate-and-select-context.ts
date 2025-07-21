@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, SectionName } from '@/ai/schemas';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 
 // Define the input schema for the context evaluation flow

@@ -407,7 +407,7 @@ export const GenerationTools = () => {
                                                                 <Checkbox
                                                                     id={`context-section-${key}-${contextKey}`}
                                                                     checked={!!currentSelection.sections[contextKey]}
-                                                                    onCheckedChange={(checked) => toggleContextSelection(key, 'sections', contextKey, !!checked)}
+                                                                    onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'sections', contextKey, !!checked)}
                                                                 />
                                                                 <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
                                                                     <div className="flex items-center gap-2">
