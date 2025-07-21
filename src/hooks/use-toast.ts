@@ -144,11 +144,11 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
-// This is a separate function to be called from the hook, so we can use hooks inside it.
-function showToast(props: Toast, playSound: (sound: 'success' | 'error') => void) {
+let playSound: (sound: 'success' | 'error') => void = () => {};
+
+const toast = (props: Toast) => {
   const id = genId()
 
-  // Play sound based on variant
   if (props.variant === "destructive") {
     playSound('error');
   } else {
@@ -183,7 +183,11 @@ function showToast(props: Toast, playSound: (sound: 'success' | 'error') => void
 
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
-  const { playSound } = useSound(); // Use our new sound hook
+  const soundHook = useSound();
+  
+  // Assign the playSound function from the hook to the module-level variable
+  // This ensures that when toast() is called, it has access to the correct function.
+  playSound = soundHook.playSound;
 
   React.useEffect(() => {
     listeners.push(setState)
@@ -197,9 +201,9 @@ function useToast() {
 
   return {
     ...state,
-    toast: (props: Toast) => showToast(props, playSound),
+    toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
 
-export { useToast, showToast as toast }
+export { useToast, toast }
