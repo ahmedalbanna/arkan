@@ -12,18 +12,21 @@ import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
+import { usePresentationStore } from '@/hooks/usePresentationStore';
 
 interface PresentationActionsProps {
-  slides?: PresentationSlide[];
   isGenerating: boolean;
 }
 
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
-export const PresentationActions = ({ slides, isGenerating }: PresentationActionsProps) => {
+export const PresentationActions = ({ isGenerating }: PresentationActionsProps) => {
   const { t } = useLocalization();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
   const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
+
+  const { presentation, activePresentationId } = usePresentationStore();
+  const slides = presentation?.history.find(p => p.id === activePresentationId)?.slides;
 
   useEffect(() => {
     const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
