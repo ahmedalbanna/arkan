@@ -15,6 +15,7 @@ export interface BuilderState {
   projectIdea: string;
   proposal: ProjectProposal | null;
   currentProjectId: string | null; // To track if we are editing a saved project
+  hasUnsavedChanges: boolean; // To track if a save is needed
   // UI States for proposal generation
   selectedTemplateId: string;
   customGuidelines: string[];
@@ -27,6 +28,7 @@ interface BuilderActions {
     loadState: (state: ProjectState & { id?: string }) => void;
     setProjectIdea: (idea: string) => void;
     setCurrentProjectId: (id: string | null) => void;
+    setHasUnsavedChanges: (status: boolean) => void;
     getFullState: () => ProjectState;
     // Proposal Actions
     setProposal: (proposal: ProjectProposal | null) => void;
@@ -42,6 +44,7 @@ const initialState: BuilderState = {
   projectIdea: '',
   proposal: null,
   currentProjectId: null,
+  hasUnsavedChanges: false,
   selectedTemplateId: 'default-software',
   customGuidelines: [],
   customGuidelineInput: '',
@@ -68,6 +71,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
             projectIdea: newState.projectIdea || '',
             proposal: newState.proposal || null,
             currentProjectId: newState.id || null, // Set the current project ID
+            hasUnsavedChanges: false, // Loading a project means it's saved
         });
         
         // Load state for other stores if present
@@ -84,8 +88,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
       }),
-      setProjectIdea: (idea) => set({ projectIdea: idea }),
+      setProjectIdea: (idea) => set({ projectIdea: idea, hasUnsavedChanges: true }),
       setCurrentProjectId: (id) => set({ currentProjectId: id }),
+      setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
       
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
@@ -93,6 +98,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           proposal,
           // When a new proposal is generated, it's not a saved project yet.
           currentProjectId: null,
+          hasUnsavedChanges: true,
         });
         // Clear downstream states when a new proposal is set
         useReportStore.getState().newSession();
@@ -107,7 +113,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           const keys = path.split('.');
           for (let i = 0; i < keys.length - 1; i++) { current = current[keys[i]]; }
           current[keys[keys.length - 1]] = value;
-          set({ proposal: newProposal });
+          set({ proposal: newProposal, hasUnsavedChanges: true });
       },
       
       // --- UI STATE ACTIONS ---
@@ -118,21 +124,26 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           if (newGuideline) {
               set({
                   customGuidelines: [...customGuidelines, newGuideline],
-                  customGuidelineInput: ''
+                  customGuidelineInput: '',
+                  hasUnsavedChanges: true,
               });
           }
       },
-      removeCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
+      removeCustomGuideline: (index) => set(state => ({ 
+        customGuidelines: state.customGuidelines.filter((_, i) => i !== index),
+        hasUnsavedChanges: true,
+      })),
       setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
       name: 'arkan-builder-state',
       storage: createJSONStorage(() => localStorage),
-      // Only persist user-generated content, not transient UI state like project ID
+      // Only persist user-generated content, not transient UI state
       partialize: (state) => ({
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
+        hasUnsavedChanges: state.hasUnsavedChanges, // Keep this to track across sessions
         // Persist other stores
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
@@ -153,3 +164,5 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     }
   )
 );
+
+    

@@ -1,7 +1,8 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Upload, Save, FileDown, DiscAlbum } from 'lucide-react';
+import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
@@ -29,6 +30,38 @@ import {
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
+function SaveStatus() {
+    const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
+    const saveProjectMutation = useSaveProject();
+    const updateProjectMutation = useUpdateProject();
+    const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
+
+    if (isSaving) {
+        return (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Saving...</span>
+            </div>
+        );
+    }
+    
+    if (hasUnsavedChanges) {
+        return (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CloudOff className="h-4 w-4" />
+                <span>Unsaved changes</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex items-center gap-2 text-sm text-green-600">
+            <CheckCircle className="h-4 w-4" />
+            <span>All changes saved</span>
+        </div>
+    )
+}
+
 export const SessionActions = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
@@ -37,9 +70,8 @@ export const SessionActions = () => {
 
     const store = useBuilderStore();
     const saveProjectMutation = useSaveProject();
-    const updateProjectMutation = useUpdateProject();
     
-    const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
+    const isSaving = saveProjectMutation.isPending;
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -73,30 +105,23 @@ export const SessionActions = () => {
         saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.json`);
     }
 
-    const handleSave = () => {
-        if (!store.proposal) {
-            toast({ title: "Cannot Save", description: "Please generate a proposal first.", variant: 'destructive' });
-            return;
-        }
-
-        const projectData = store.getFullState();
-
-        if (store.currentProjectId) {
-            // Update existing project
-            updateProjectMutation.mutate({ projectId: store.currentProjectId, data: projectData });
-        } else {
-            // Save new project
-            saveProjectMutation.mutate({ ...projectData, name: store.proposal.title });
-        }
-    }
-
     const handleSaveAs = () => {
         if (!store.proposal) {
             toast({ title: "Cannot Save", description: "Please generate a proposal first.", variant: 'destructive' });
             return;
         }
         const projectData = store.getFullState();
-        saveProjectMutation.mutate({ ...projectData, name: saveAsName || store.proposal.title });
+        // Create a new project with a new name, but don't change the current project ID
+        const saveData = { ...projectData, name: saveAsName || store.proposal.title };
+        saveProjectMutation.mutate(saveData, {
+            // Overwrite onSuccess to not change the current project context
+            onSuccess: (newProject) => {
+                 toast({
+                    title: 'Project Saved As New',
+                    description: `A new project "${newProject.name}" has been created.`,
+                });
+            }
+        });
     }
 
     return (
@@ -142,18 +167,9 @@ export const SessionActions = () => {
                         <p>Download as .json file</p>
                     </TooltipContent>
                 </Tooltip>
-
-                 <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleSave}
-                    disabled={!store.proposal || isSaving}
-                    className="h-8 w-8 md:w-auto md:px-3"
-                >
-                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    <span className="hidden md:inline ml-2">Save</span>
-                </Button>
                 
+                <SaveStatus />
+
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                          <Button
@@ -210,3 +226,5 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 }
+
+    

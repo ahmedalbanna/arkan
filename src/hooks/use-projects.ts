@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -6,6 +7,7 @@ import { projectKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import type { SavedProject, ProjectState } from '@/lib/types';
 import { 
+    fetchProjects as fetchProjectsApi,
     createProject, 
     deleteProject, 
     updateProject 
@@ -19,7 +21,7 @@ export function useProjects() {
         queryFn: async () => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchProjects(token);
+            return fetchProjectsApi(token);
         },
         enabled: !!firebaseUser,
     });
@@ -29,6 +31,7 @@ export function useSaveProject() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     const setCurrentProjectId = useBuilderStore(state => state.setCurrentProjectId);
+    const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
 
     return useMutation({
         mutationFn: async (data: ProjectState & { name: string }) => {
@@ -39,6 +42,7 @@ export function useSaveProject() {
         onSuccess: (newProject) => {
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             setCurrentProjectId(newProject.id); // Set the ID in the store for subsequent saves
+            setHasUnsavedChanges(false);
             toast({
                 title: 'Project Saved',
                 description: `"${newProject.name}" has been successfully saved.`,
@@ -58,6 +62,7 @@ export function useSaveProject() {
 export function useUpdateProject() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
+    const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
 
     return useMutation({
         mutationFn: async (variables: { projectId: string; data: ProjectState }) => {
@@ -68,6 +73,7 @@ export function useUpdateProject() {
         onSuccess: (updatedProject) => {
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
             queryClient.invalidateQueries({ queryKey: projectKeys.detail(updatedProject.id) });
+            setHasUnsavedChanges(false);
             toast({
                 title: 'Project Updated',
                 description: `"${updatedProject.name}" has been successfully updated.`,
@@ -110,3 +116,5 @@ export function useDeleteProject() {
         }
     });
 }
+
+    

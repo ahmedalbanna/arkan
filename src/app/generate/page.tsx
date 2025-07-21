@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
+import { useAutosave } from '@/hooks/use-autosave';
 
 
 const LoadingSkeleton = () => (
@@ -63,6 +64,7 @@ async function markOnboardingComplete(userId: string, token: string) {
 }
 
 function GeneratePageContent() {
+  useAutosave(); // Activate the autosave hook
   const [activeTab, setActiveTab] = useState("proposal");
   const proposal = useBuilderStore(s => s.proposal);
   const { t } = useLocalization();
@@ -203,3 +205,5 @@ export default function GeneratePage() {
         <GeneratePageContent />
     )
 }
+
+    
