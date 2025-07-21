@@ -1,6 +1,72 @@
+// src/lib/db/seed-templates.ts
+import { adminDb } from '@/lib/firebase/admin';
+import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
+import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-generation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/presentation-generation-templates';
 
-// This file is now deprecated as seeding is handled automatically by the API endpoints.
-// It is kept for reference but is no longer used by the application.
-// You may safely delete this file.
-console.log("This seeding script is deprecated. Seeding is now handled automatically by the API.");
-process.exit(0);
+async function seed() {
+    console.log("Starting template seeding process...");
+    const batch = adminDb.batch();
+
+    try {
+        // --- DOCX Templates ---
+        console.log("Preparing to seed DOCX templates...");
+        const docxCollection = adminDb.collection('templates').doc('docx').collection('styles');
+        (Object.keys(defaultDocxTemplates) as DocxTemplateKey[]).forEach(key => {
+            const template = defaultDocxTemplates[key];
+            const docRef = docxCollection.doc(key);
+            batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+        });
+        console.log(`${Object.keys(defaultDocxTemplates).length} DOCX templates added to batch.`);
+
+        // --- PPTX Templates ---
+        console.log("Preparing to seed PPTX templates...");
+        const pptxCollection = adminDb.collection('templates').doc('pptx').collection('styles');
+        (Object.keys(defaultPptxTemplates) as PptxTemplateKey[]).forEach(key => {
+            const template = defaultPptxTemplates[key];
+            const docRef = pptxCollection.doc(key);
+            batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+        });
+        console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
+        
+        // --- Proposal Templates ---
+        console.log("Preparing to seed Proposal templates...");
+        const proposalCollection = adminDb.collection('templates').doc('proposal').collection('items');
+        defaultProposalTemplates.forEach(template => {
+            const docRef = proposalCollection.doc(template.id);
+            batch.set(docRef, template);
+        });
+        console.log(`${defaultProposalTemplates.length} Proposal templates added to batch.`);
+
+        // --- Report Templates ---
+        console.log("Preparing to seed Report templates...");
+        const reportCollection = adminDb.collection('templates').doc('report').collection('items');
+        defaultReportTemplates.forEach(template => {
+            const docRef = reportCollection.doc(template.id);
+            batch.set(docRef, template);
+        });
+        console.log(`${defaultReportTemplates.length} Report templates added to batch.`);
+
+        // --- Presentation Templates ---
+        console.log("Preparing to seed Presentation templates...");
+        const presentationCollection = adminDb.collection('templates').doc('presentation').collection('items');
+        defaultPresentationTemplates.forEach(template => {
+            const docRef = presentationCollection.doc(template.id);
+            batch.set(docRef, template);
+        });
+        console.log(`${defaultPresentationTemplates.length} Presentation templates added to batch.`);
+
+
+        // Commit all changes at once
+        await batch.commit();
+        console.log("All templates have been successfully seeded to Firestore!");
+
+    } catch (error) {
+        console.error("Error during template seeding:", error);
+        process.exit(1);
+    }
+}
+
+seed();
