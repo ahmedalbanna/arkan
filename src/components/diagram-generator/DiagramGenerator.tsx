@@ -94,10 +94,10 @@ export default function DiagramGenerator() {
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
 
             {/* Center Column */}
-            <div className="lg:col-span-8 overflow-y-auto pr-2">
+            <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">
                  <Card className="h-full">
                     <CardHeader>
                         <CardTitle className="font-headline">{t('builder.diagramGenerator.title')}</CardTitle>
@@ -147,7 +147,7 @@ export default function DiagramGenerator() {
             </div>
 
             {/* Right Column */}
-            <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <DiagramGenerationTools />
             </div>
         </div>
