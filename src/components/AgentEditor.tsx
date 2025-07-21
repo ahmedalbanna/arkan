@@ -4,13 +4,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent } from '@/lib/agents';
+import { type Agent, AGENTS } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 interface AgentEditorProps {
@@ -27,8 +27,9 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const [name, setName] = useState(initialData.name || '');
   const [prompt, setPrompt] = useState('');
 
-  // Assign the icon to a variable with a capital letter
-  const Icon = initialData.icon;
+  // Find the static agent config to get the non-configurable parts like the icon
+  const staticAgentConfig = AGENTS.find(a => a.id === agentId);
+  const Icon = staticAgentConfig ? staticAgentConfig.icon : AlertCircle;
 
   useEffect(() => {
     if (initialData) {
@@ -61,7 +62,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            {Icon && <Icon className="w-8 h-8 text-primary" />}
+            <Icon className="w-8 h-8 text-primary" />
             <div>
               <CardTitle className="font-headline">{initialData.name}</CardTitle>
               <CardDescription>
