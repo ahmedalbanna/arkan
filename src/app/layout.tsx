@@ -1,7 +1,7 @@
 
 
 import type { Metadata } from 'next';
-import { Poppins, PT_Sans, Cairo } from 'next/font/google';
+import { Poppins, PT_Sans, Cairo, Almarai } from 'next/font/google';
 import './globals.css';
 import '@/css/fonts.css';
 import { cn } from '@/lib/utils';
@@ -35,8 +35,8 @@ const fontHeadline = Poppins({
   variable: '--font-headline',
 });
 
-const fontSans = Cairo({
-  subsets: ['arabic', 'latin'],
+const fontSans = Almarai({
+  subsets: ['arabic'],
   weight: ['400', '700'],
   variable: '--font-sans',
 });

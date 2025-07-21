@@ -1,4 +1,5 @@
 
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -13,7 +14,7 @@ export default {
       fontFamily: {
         body: ['PT Sans', 'sans-serif'],
         headline: ['Poppins', 'sans-serif'],
-        sans: ['Cairo', 'sans-serif'],
+        sans: ['Almarai', 'Cairo', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
