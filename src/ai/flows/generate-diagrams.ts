@@ -8,7 +8,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
-import { AGENTS } from '@/lib/agents';
+import { getAgent } from '@/lib/db/queries';
+import type { AgentPrompt } from '@/lib/agents';
 
 // Define a generic input schema that can be used by all diagram generation flows.
 const GenerateDiagramInputSchema = z.object({
@@ -29,11 +30,13 @@ export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
-    const agent = AGENTS.find(a => a.id === `generate-${input.diagramType}-diagram`);
+    const agentId = `generate-${input.diagramType}-diagram`;
+    const agent = await getAgent(agentId);
     if (!agent) {
         throw new Error(`Agent configuration for diagram type '${input.diagramType}' not found.`);
     }
-    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
 
     const diagramPrompt = ai.definePrompt({
         name: `${input.diagramType}DiagramPrompt`,

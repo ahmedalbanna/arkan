@@ -5,7 +5,6 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { type ProjectProposal } from '@/ai/schemas';
 import { toast } from '@/hooks/use-toast';
-import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
 import { useReportStore } from './useReportStore';
 import { useDiagramStore } from './useDiagramStore';
 import { usePresentationStore } from './usePresentationStore';
@@ -14,10 +13,10 @@ import { useCodeGeneratorStore } from './useCodeGeneratorStore';
 export interface BuilderState {
   projectIdea: string;
   proposal: ProjectProposal | null;
-  // UI States
-  selectedTemplate: ProposalTemplateKey;
+  // UI States for proposal generation
+  selectedTemplateId: string;
   customGuidelines: string[];
-  customGuidelineInput: Record<string, string>;
+  customGuidelineInput: string;
 }
 
 interface BuilderActions {
@@ -29,18 +28,18 @@ interface BuilderActions {
     setProposal: (proposal: ProjectProposal | null) => void;
     handleProposalUpdate: (path: string, value: any) => void;
     // UI State Actions
-    handleTemplateChange: (key: ProposalTemplateKey) => void;
-    handleAddCustomGuideline: () => void;
-    handleRemoveCustomGuideline: (index: number) => void;
+    setSelectedTemplateId: (id: string) => void;
+    addCustomGuideline: () => void;
+    removeCustomGuideline: (index: number) => void;
     setCustomGuidelineInput: (value: string) => void;
 }
 
 const initialState: BuilderState = {
   projectIdea: '',
   proposal: null,
-  selectedTemplate: 'default',
+  selectedTemplateId: 'default',
   customGuidelines: [],
-  customGuidelineInput: {},
+  customGuidelineInput: '',
 };
 
 
@@ -95,19 +94,19 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       
       // --- UI STATE ACTIONS ---
-      handleTemplateChange: (key) => set({ selectedTemplate: key }),
-      handleAddCustomGuideline: () => {
+      setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
+      addCustomGuideline: () => {
           const { customGuidelines, customGuidelineInput } = get();
-          const newGuideline = customGuidelineInput['proposal']?.trim();
+          const newGuideline = customGuidelineInput.trim();
           if (newGuideline) {
               set({
                   customGuidelines: [...customGuidelines, newGuideline],
-                  customGuidelineInput: { ...customGuidelineInput, 'proposal': '' }
+                  customGuidelineInput: ''
               });
           }
       },
-      handleRemoveCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
-      setCustomGuidelineInput: (value) => set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, 'proposal': value }})),
+      removeCustomGuideline: (index) => set(state => ({ customGuidelines: state.customGuidelines.filter((_, i) => i !== index) })),
+      setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
       name: 'arkan-builder-state',
@@ -116,7 +115,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       partialize: (state) => ({
         projectIdea: state.projectIdea,
         proposal: state.proposal,
-        // The child stores will handle their own persistence
       }),
     }
   )

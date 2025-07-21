@@ -17,7 +17,6 @@ import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
-import { templates as proposalTemplates } from '@/lib/proposal-templates';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { useState } from 'react';
@@ -54,14 +53,14 @@ function ProposalSkeleton() {
 }
 
 // The async function for the mutation
-async function generateProposal(variables: { projectIdea: string; prompt: string; token: string; }): Promise<ProjectProposal> {
+async function generateProposal(variables: { body: any; token: string; }): Promise<ProjectProposal> {
     const response = await fetch('/api/generate-proposal', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${variables.token}` 
         },
-        body: JSON.stringify({ projectIdea: variables.projectIdea, prompt: variables.prompt })
+        body: JSON.stringify(variables.body)
     });
     if (!response.ok) {
         const error = await response.json();
@@ -80,24 +79,15 @@ export function ProposalModeGenerator() {
     const translateMutation = useTranslate();
     const [isTranslating, setIsTranslating] = useState(false);
 
-    // Efficiently select only the state and actions needed by this component
     const {
         proposal,
         projectIdea,
         setProjectIdea,
         handleProposalUpdate,
         setProposal,
-        selectedTemplate,
+        selectedTemplateId,
         customGuidelines,
-    } = useBuilderStore(state => ({
-        proposal: state.proposal,
-        projectIdea: state.projectIdea,
-        setProjectIdea: state.setProjectIdea,
-        handleProposalUpdate: state.handleProposalUpdate,
-        setProposal: state.setProposal,
-        selectedTemplate: state.selectedTemplate,
-        customGuidelines: state.customGuidelines,
-    }));
+    } = useBuilderStore();
 
 
     const mutation = useMutation({
@@ -139,14 +129,13 @@ export function ProposalModeGenerator() {
             return;
         }
 
-        const currentTemplate = proposalTemplates[selectedTemplate];
-        let fullPrompt = currentTemplate.prompt;
-        const allGuidelines = [...(currentTemplate.guidelines || []), ...customGuidelines];
-        if (allGuidelines.length > 0) {
-            fullPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + allGuidelines.map(g => `- ${g}`).join('\n');
+        const body = {
+            projectIdea,
+            templateId: selectedTemplateId,
+            customGuidelines,
         }
 
-        mutation.mutate({ projectIdea, prompt: fullPrompt, token });
+        mutation.mutate({ body, token });
     };
 
     const handleTranslateProposal = async () => {

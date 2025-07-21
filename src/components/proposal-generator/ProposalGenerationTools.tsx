@@ -13,8 +13,8 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useProposalTemplates } from '@/hooks/use-templates';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -48,29 +48,35 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
-    // Select only the state needed for this component
+    const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
+
     const {
-        selectedTemplate,
-        handleTemplateChange,
+        selectedTemplateId,
+        setSelectedTemplateId,
         customGuidelines,
-        handleAddCustomGuideline,
-        handleRemoveCustomGuideline,
+        addCustomGuideline,
+        removeCustomGuideline,
         customGuidelineInput,
         setCustomGuidelineInput,
     } = useBuilderStore(state => ({
-        selectedTemplate: state.selectedTemplate,
-        handleTemplateChange: state.handleTemplateChange,
+        selectedTemplateId: state.selectedTemplateId,
+        setSelectedTemplateId: state.setSelectedTemplateId,
         customGuidelines: state.customGuidelines,
-        handleAddCustomGuideline: state.handleAddCustomGuideline,
-        handleRemoveCustomGuideline: state.handleRemoveCustomGuideline,
+        addCustomGuideline: state.addCustomGuideline,
+        removeCustomGuideline: state.removeCustomGuideline,
         customGuidelineInput: state.customGuidelineInput,
         setCustomGuidelineInput: state.setCustomGuidelineInput,
     }));
 
 
-    const currentTemplate = proposalTemplates[selectedTemplate];
+    const currentTemplate = templates?.find(t => t.id === selectedTemplateId);
+    
+    const handleAddGuideline = () => {
+        addCustomGuideline();
+    }
 
-    if (!currentTemplate) {
+
+    if (templatesLoading) {
         return <Card><CardHeader><CardTitle>Loading Templates...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
 
@@ -83,13 +89,13 @@ export const ProposalGenerationTools = ({
             <CardContent>
                  <div className="space-y-2 mb-4">
                     <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
-                    <Select value={selectedTemplate} onValueChange={(value) => handleTemplateChange(value as ProposalTemplateKey)}>
+                    <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
                         <SelectTrigger id="proposal-template">
                             <SelectValue placeholder="Select a template" />
                         </SelectTrigger>
                         <SelectContent>
-                            {Object.entries(proposalTemplates).map(([key, template]) => (
-                                <SelectItem key={key} value={key}>{template.name}</SelectItem>
+                            {templates?.map(template => (
+                                <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -105,7 +111,7 @@ export const ProposalGenerationTools = ({
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.basePromptLabel')}</Label>
                                 <div className="p-3 rounded-md border bg-muted text-xs">
-                                    <ReactMarkdown components={markdownComponents}>{currentTemplate.prompt}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{currentTemplate?.prompt || 'Loading...'}</ReactMarkdown>
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -113,7 +119,7 @@ export const ProposalGenerationTools = ({
                                 {customGuidelines.map((custom, index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">
                                         <span>- {custom}</span>
-                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuideline(index)}>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)}>
                                             <Trash2 className="h-3 w-3 text-destructive" />
                                         </Button>
                                     </div>
@@ -121,11 +127,11 @@ export const ProposalGenerationTools = ({
                                 <div className="flex gap-2">
                                     <Input
                                         placeholder={t('builder.proposalGenerator.customGuidelinePlaceholder')}
-                                        value={customGuidelineInput['proposal'] || ''}
+                                        value={customGuidelineInput}
                                         onChange={(e) => setCustomGuidelineInput(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuideline())}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
                                     />
-                                    <Button type="button" variant="secondary" onClick={handleAddCustomGuideline}>
+                                    <Button type="button" variant="secondary" onClick={handleAddGuideline}>
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </div>

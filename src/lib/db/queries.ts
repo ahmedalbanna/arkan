@@ -1,9 +1,12 @@
+
 // This file is now intended for Firebase queries.
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
 'use server';
 import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import type { Agent, AgentData } from '@/lib/agents';
+import { AGENTS as defaultAgents } from '@/lib/agents';
 
 export interface UserProfile {
   id: string;
@@ -235,4 +238,17 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
   await batch.commit();
 
   return { id: teamRef.id, ...newTeam };
+}
+
+// --- Agent Queries ---
+export async function getAgent(agentId: string): Promise<AgentData | null> {
+    const agentDoc = await adminDb.collection('agents').doc(agentId).get();
+    
+    if (agentDoc.exists) {
+        return agentDoc.data() as AgentData;
+    }
+    
+    // Fallback to default if not in DB
+    const defaultAgent = defaultAgents.find(a => a.id === agentId);
+    return defaultAgent || null;
 }

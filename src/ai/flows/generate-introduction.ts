@@ -12,6 +12,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { getAgent } from '@/lib/db/queries';
+import type { AgentPrompt } from '@/lib/agents';
 
 const GenerateIntroductionInputSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -39,9 +41,10 @@ const generateIntroductionFlow = ai.defineFlow(
     outputSchema: GenerateIntroductionOutputSchema,
   },
   async (input) => {
-    const agent = AGENTS.find(a => a.id === 'generate-introduction-section');
-    if (!agent) throw new Error("Agent configuration not found.");
-    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+    const agent = await getAgent('generate-introduction-section');
+    if (!agent) throw new Error("Agent configuration not found for 'generate-introduction-section'.");
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
 
     const generateIntroductionPrompt = ai.definePrompt({
       name: 'generateIntroductionPrompt',
@@ -98,5 +101,3 @@ const generateIntroductionFlow = ai.defineFlow(
     return output!;
   }
 );
-// This import must be at the bottom to avoid circular dependency issues
-import { AGENTS } from '@/lib/agents';

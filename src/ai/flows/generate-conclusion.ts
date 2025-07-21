@@ -9,6 +9,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { getAgent } from '@/lib/db/queries';
+import type { AgentPrompt } from '@/lib/agents';
 
 const GenerateConclusionInputSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -37,9 +39,10 @@ const generateConclusionFlow = ai.defineFlow(
     outputSchema: GenerateConclusionOutputSchema,
   },
   async (input) => {
-    const agent = AGENTS.find(a => a.id === 'generate-conclusion-section');
-    if (!agent) throw new Error("Agent configuration not found.");
-    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+    const agent = await getAgent('generate-conclusion-section');
+    if (!agent) throw new Error("Agent configuration not found for 'generate-conclusion-section'.");
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
 
     const prompt = ai.definePrompt({
       name: 'generateConclusionPrompt',
@@ -93,4 +96,3 @@ const generateConclusionFlow = ai.defineFlow(
     return output!;
   }
 );
-import { AGENTS } from '@/lib/agents';

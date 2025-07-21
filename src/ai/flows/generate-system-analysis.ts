@@ -9,6 +9,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { getAgent } from '@/lib/db/queries';
+import type { AgentPrompt } from '@/lib/agents';
 
 const GenerateSystemAnalysisInputSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -36,9 +38,10 @@ const generateSystemAnalysisFlow = ai.defineFlow(
     outputSchema: GenerateSystemAnalysisOutputSchema,
   },
   async (input) => {
-    const agent = AGENTS.find(a => a.id === 'generate-system-analysis-section');
-    if (!agent) throw new Error("Agent configuration not found.");
-    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+    const agent = await getAgent('generate-system-analysis-section');
+    if (!agent) throw new Error("Agent configuration not found for 'generate-system-analysis-section'.");
+    const agentPrompt = agent.prompt as AgentPrompt;
+    const basePrompt = agentPrompt.base;
 
     const prompt = ai.definePrompt({
       name: 'generateSystemAnalysisPrompt',
@@ -91,4 +94,3 @@ const generateSystemAnalysisFlow = ai.defineFlow(
     return output!;
   }
 );
-import { AGENTS } from '@/lib/agents';
