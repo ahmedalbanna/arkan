@@ -94,9 +94,9 @@ const generateIntroductionFlow = ai.defineFlow(
 {{/if}}
 
 --- Main Input: Project Proposal ---
-```json
+\`\`\`json
 ${stringifiedProposal}
-```
+\`\`\`
 `,
     });
 
