@@ -70,7 +70,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                   </SelectTrigger>
                   <SelectContent>
                       {Object.entries(docxTemplates).map(([key, template]) => (
-                          <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                          <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
                       ))}
                   </SelectContent>
               </Select>

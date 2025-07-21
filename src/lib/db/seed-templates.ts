@@ -4,9 +4,11 @@ import { adminDb } from '@/lib/firebase/admin';
 import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { templates as docxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as pptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 
 async function seedTemplates() {
-  console.log('Starting to seed generation templates into Firestore...');
+  console.log('Starting to seed all templates into Firestore...');
 
   const templatesRef = adminDb.collection('templates');
 
@@ -43,6 +45,30 @@ async function seedTemplates() {
     });
     await presentationBatch.commit();
     console.log('Presentation templates seeded successfully.');
+
+    // Seed DOCX Style Templates
+    const docxBatch = adminDb.batch();
+    const docxCollection = templatesRef.doc('docx').collection('styles');
+    console.log(`Seeding ${Object.keys(docxTemplates).length} DOCX style templates...`);
+    (Object.keys(docxTemplates) as DocxTemplateKey[]).forEach(key => {
+        const template = docxTemplates[key];
+        const docRef = docxCollection.doc(key);
+        docxBatch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+    });
+    await docxBatch.commit();
+    console.log('DOCX style templates seeded successfully.');
+
+    // Seed PPTX Style Templates
+    const pptxBatch = adminDb.batch();
+    const pptxCollection = templatesRef.doc('pptx').collection('styles');
+    console.log(`Seeding ${Object.keys(pptxTemplates).length} PPTX style templates...`);
+    (Object.keys(pptxTemplates) as PptxTemplateKey[]).forEach(key => {
+        const template = pptxTemplates[key];
+        const docRef = pptxCollection.doc(key);
+        pptxBatch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
+    });
+    await pptxBatch.commit();
+    console.log('PPTX style templates seeded successfully.');
 
 
     console.log('All templates have been seeded.');

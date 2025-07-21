@@ -99,4 +99,3 @@ export function useDocxStyles() {
 
   return { templates, isLoaded: !isLoaded, updateStyle, saveChanges, isSaving: mutation.isPending };
 }
-
