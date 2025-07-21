@@ -85,8 +85,8 @@ export const SessionActions = () => {
         reader.onload = (e) => {
             try {
                 const content = e.target?.result as string;
-                // Decode from Base64
-                const decodedJson = atob(content);
+                // Decode from Base64 with Unicode support
+                const decodedJson = decodeURIComponent(escape(atob(content)));
                 const parsedState = JSON.parse(decodedJson);
                 store.loadState(parsedState);
             } catch (error) {
@@ -104,8 +104,8 @@ export const SessionActions = () => {
     const handleSaveProjectFile = () => {
         if (!store.proposal) return;
         const jsonString = JSON.stringify(store.getFullState());
-        // Encode to Base64
-        const encodedData = btoa(jsonString);
+        // Encode to Base64 with Unicode support
+        const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.arkan`);
     }
@@ -116,7 +116,7 @@ export const SessionActions = () => {
             return;
         }
         const projectData = store.getFullState();
-        // Create a new project with a new name, but don't change the current project ID
+        // Create a new project with a new name, but don't change the current project context
         const saveData = { ...projectData, name: saveAsName || store.proposal.title };
         saveProjectMutation.mutate(saveData, {
             // Overwrite onSuccess to not change the current project context
