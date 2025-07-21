@@ -81,7 +81,7 @@ async function generateReport(variables: any): Promise<any> {
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate report');
     }
-    return response.json();
+    return await response.json();
 }
 // Helper function to upload a PDF
 async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
@@ -94,7 +94,7 @@ async function uploadPdf(variables: {formData: FormData, token: string}): Promis
         const error = await response.json();
         throw new Error(error.message || 'Failed to process PDF');
     }
-    return response.json();
+    return await response.json();
 }
 
 export const GenerationTools = () => {
