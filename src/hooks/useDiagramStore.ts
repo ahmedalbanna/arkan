@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { type DiagramType } from '@/ai/schemas';
+import { useBuilderStore } from './useBuilderStore';
 
 export interface DiagramData {
     plantUmlCode: string;
@@ -27,8 +28,7 @@ const initialState: DiagramState = {
 
 
 export const useDiagramStore = create<DiagramState & DiagramActions>()(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
       ...initialState,
       newSession: () => set(initialState),
       loadState: (newState) => {
@@ -43,6 +43,7 @@ export const useDiagramStore = create<DiagramState & DiagramActions>()(
             [key]: data,
           },
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleDiagramCodeUpdate: (key, code) => {
           set(state => {
@@ -56,12 +57,8 @@ export const useDiagramStore = create<DiagramState & DiagramActions>()(
                       }
                   }
               }
-          })
+          });
+          useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-    }),
-    {
-      name: 'arkan-diagram-store',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+    })
 );

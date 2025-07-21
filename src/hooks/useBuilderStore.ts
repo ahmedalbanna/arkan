@@ -150,7 +150,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
-        hasUnsavedChanges: state.hasUnsavedChanges, // Keep this to track across sessions
+        // Don't persist hasUnsavedChanges directly, it's a runtime flag
+        // hasUnsavedChanges: state.hasUnsavedChanges, 
+
         // Persist other stores
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
@@ -167,7 +169,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().loadState(persistedState);
         usePresentationStore.getState().loadState(persistedState);
         useCodeGeneratorStore.getState().loadState(persistedState);
-        return merged;
+        return { ...merged, hasUnsavedChanges: false }; // Always start a session as "saved"
       },
     }
   )

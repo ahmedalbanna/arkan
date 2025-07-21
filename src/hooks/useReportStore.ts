@@ -8,6 +8,7 @@ import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { sectionConfig } from '@/lib/report-config';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { useBuilderStore } from './useBuilderStore';
 
 // Type definitions
 export interface GuidelineState {
@@ -92,8 +93,7 @@ const initialState: ReportState = {
 
 
 export const useReportStore = create<ReportState & ReportActions>()(
-  persist(
-    (set, get) => ({
+  (set, get) => ({
       ...initialState,
       newSession: () => set(initialState),
       loadState: (newState) => {
@@ -101,11 +101,26 @@ export const useReportStore = create<ReportState & ReportActions>()(
         if (newState.evaluation) set({ evaluation: newState.evaluation });
         if (newState.externalContext) set({ externalContext: newState.externalContext });
       },
-      setSection: (key, content) => set(state => ({ sections: { ...state.sections, [key]: content } })),
-      setAllSections: (sections) => set({ sections }),
-      setEvaluation: (evaluation) => set({ evaluation }),
-      setExternalContext: (fileName, content) => set({ externalContext: { fileName, content } }),
-      removeExternalContext: () => set({ externalContext: null }),
+      setSection: (key, content) => {
+        set(state => ({ sections: { ...state.sections, [key]: content } }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setAllSections: (sections) => {
+        set({ sections });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setEvaluation: (evaluation) => {
+        set({ evaluation });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setExternalContext: (fileName, content) => {
+        set({ externalContext: { fileName, content } });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      removeExternalContext: () => {
+        set({ externalContext: null });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
       handleControlChange: (section, control, value) => {
         set(state => ({
             controlState: {
@@ -113,11 +128,11 @@ export const useReportStore = create<ReportState & ReportActions>()(
                 [section]: { ...state.controlState[section], [control]: value }
             }
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleGuidelineToggle: (itemKey, index, checked) => {
         set(state => {
             const newGuidelineState = { ...state.guidelineState };
-            // Ensure the state for the itemKey exists before trying to modify it
             if (!newGuidelineState[itemKey]) {
                 const agent = AGENTS.find(a => a.id.replace('generate-', '').replace('-section', '').replace('-diagram', '') === itemKey);
                 const prompt = agent?.prompt as AgentPrompt;
@@ -129,6 +144,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
             newGuidelineState[itemKey].checked[index] = checked;
             return { guidelineState: newGuidelineState };
         });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       setCustomGuidelineInputForItem: (itemKey, value) => {
         set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } }));
@@ -146,6 +162,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
                   guidelineState: newGuidelines,
                   customGuidelineInput: { ...customGuidelineInput, [itemKey]: '' }
               });
+              useBuilderStore.getState().setHasUnsavedChanges(true);
           }
       },
       handleRemoveCustomGuidelineForItem: (itemKey, index) => {
@@ -156,6 +173,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
               }
               return { guidelineState: newGuidelines };
           });
+          useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
         set(state => {
@@ -170,18 +188,15 @@ export const useReportStore = create<ReportState & ReportActions>()(
             }
             return { contextSelection: newSelection };
         });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      setSelectedReportTemplateId: (id: string) => set({ selectedReportTemplateId: id }),
-      setSelectedPresentationTemplateId: (id: string) => set({ selectedPresentationTemplateId: id }),
-    }),
-    {
-      name: 'arkan-report-store',
-      storage: createJSONStorage(() => localStorage),
-       partialize: (state) => ({
-        sections: state.sections,
-        evaluation: state.evaluation,
-        externalContext: state.externalContext,
-      }),
-    }
-  )
+      setSelectedReportTemplateId: (id: string) => {
+        set({ selectedReportTemplateId: id });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setSelectedPresentationTemplateId: (id: string) => {
+        set({ selectedPresentationTemplateId: id });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+    })
 );

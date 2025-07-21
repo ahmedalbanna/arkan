@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { type PresentationSlide } from '@/ai/schemas';
+import { useBuilderStore } from './useBuilderStore';
 
 export interface PresentationHistoryEntry {
     id: string;
@@ -32,7 +33,6 @@ const initialState: PresentationState = {
 
 
 export const usePresentationStore = create<PresentationState & PresentationActions>()(
-  persist(
     (set, get) => ({
       ...initialState,
       newSession: () => set(initialState),
@@ -46,6 +46,7 @@ export const usePresentationStore = create<PresentationState & PresentationActio
               presentation: { history: [entry, ...(state.presentation?.history || [])] },
               activePresentationId: entry.id
           }));
+          useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       replacePresentationInHistory: (updatedEntry) => {
         set(state => {
@@ -58,6 +59,7 @@ export const usePresentationStore = create<PresentationState & PresentationActio
             
             return { presentation: { ...presentation, history } };
         });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
       updatePresentationSlide: (slideIndex, field, value, contentIndex) => {
@@ -84,11 +86,7 @@ export const usePresentationStore = create<PresentationState & PresentationActio
 
             return { presentation: { ...presentation, history } };
         });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
-    }),
-    {
-      name: 'arkan-presentation-store',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+    })
 );
