@@ -214,7 +214,7 @@ export function ProposalModeGenerator() {
                                 <div className="flex gap-2 flex-wrap">
                                      <Button variant="outline" type="button" size="sm" onClick={handleTranslateProposal} disabled={translateMutation.isPending}>
                                         {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-                                        {t('builder.proposalGenerator.translateAllButton')}
+                                        {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
                                     </Button>
                                     <Button variant="outline" type="button" size="sm" onClick={handleExportJson}>
                                         <FileJson className="mr-2 h-4 w-4" />
