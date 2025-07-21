@@ -11,9 +11,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['PT Sans', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
-        sans: ['Almarai', 'Cairo', 'sans-serif'],
+        body: ['var(--font-body)', 'var(--font-pt-sans)', 'sans-serif'],
+        headline: ['var(--font-headline)', 'var(--font-poppins)', 'sans-serif'],
+        sans: ['var(--font-almarai)', 'var(--font-cairo)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

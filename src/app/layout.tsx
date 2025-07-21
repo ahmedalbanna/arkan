@@ -26,20 +26,26 @@ export const metadata: Metadata = {
 const fontBody = PT_Sans({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-body',
+  variable: '--font-pt-sans',
 });
 
 const fontHeadline = Poppins({
   subsets: ['latin'],
   weight: ['400', '600', '700'],
-  variable: '--font-headline',
+  variable: '--font-poppins',
 });
 
-const fontSans = Almarai({
+const fontAlmarai = Almarai({
   subsets: ['arabic'],
   weight: ['400', '700'],
-  variable: '--font-sans',
+  variable: '--font-almarai',
 });
+
+const fontCairo = Cairo({
+    subsets: ['arabic'],
+    weight: ['400', '700'],
+    variable: '--font-cairo'
+})
 
 // List of public paths that do not require authentication
 const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password'];
@@ -85,7 +91,7 @@ export default async function RootLayout({
   await checkAuth(pathname, sessionCookie);
 
   return (
-    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontSans.variable)} suppressHydrationWarning>
+    <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable)} suppressHydrationWarning>
       <body className={cn('font-body antialiased min-h-screen  flex flex-col')}>
         <ThemeProvider
           attribute="class"
