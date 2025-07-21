@@ -22,9 +22,12 @@ import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import type { DiagramType, SectionName, PresentationHistoryEntry } from '@/ai/schemas';
-import type { GuidelineState } from '@/hooks/useBuilderStore';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { usePresentationStore } from '@/hooks/usePresentationStore';
+import type { DiagramType, SectionName } from '@/ai/schemas';
+import type { GuidelineState } from '@/hooks/useReportStore';
+import { usePresentationTemplates } from '@/hooks/use-templates';
 import { useLocalization } from '@/context/LocalizationContext';
 
 
@@ -67,32 +70,30 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         onGenerate,
     } = props;
 
+    const { proposal } = useBuilderStore();
+    const { sections } = useReportStore();
+    const { diagrams } = useDiagramStore();
+    const {
+        presentation,
+        activePresentationId,
+    } = usePresentationStore();
+
     const { 
-        proposal,
-        sections,
-        diagrams,
         externalContext,
         guidelineState,
         customGuidelineInput,
-        presentation,
-        activePresentationId,
         contextSelection,
-        selectedPresentationTemplateId, // New state
-        setSelectedPresentationTemplateId, // New action
+        selectedPresentationTemplateId,
+        setSelectedPresentationTemplateId,
         toggleContextSelection,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
-     } = useBuilderStore(state => ({
-        proposal: state.proposal,
-        sections: state.sections,
-        diagrams: state.diagrams,
+     } = useReportStore(state => ({
         externalContext: state.externalContext,
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
-        presentation: state.presentation,
-        activePresentationId: state.activePresentationId,
         contextSelection: state.contextSelection,
         selectedPresentationTemplateId: state.selectedPresentationTemplateId,
         setSelectedPresentationTemplateId: state.setSelectedPresentationTemplateId,
@@ -105,6 +106,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
+    const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
+
     const [selectedPptxTemplate, setSelectedPptxTemplate] = React.useState<PptxTemplateKey>('modern');
 
     const agent = agents.find(a => a.id === presentationConfig.presentation.agentId);
@@ -161,7 +164,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState.presentation;
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
-    const selectedTemplate = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === selectedPresentationTemplateId);
+    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
 
     return (
@@ -201,16 +204,18 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 <CardContent>
                     <div className="space-y-2 mb-4">
                         <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
-                        <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
-                            <SelectTrigger id="presentation-template-select">
-                                <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {PRESENTATION_GENERATION_TEMPLATES.map(template => (
-                                    <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        {presentationTemplatesLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
+                            <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
+                                <SelectTrigger id="presentation-template-select">
+                                    <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {presentationTemplates?.map(template => (
+                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
                         <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
                     </div>
 
@@ -260,7 +265,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             {currentGuidelineState?.custom.map((custom, index) => (
                                                 <div key={index} className="flex items-center gap-2 text-sm">
                                                     <span>- {custom}</span>
-                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
+                                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem('presentation', index)}>
                                                         <Trash2 className="h-3 w-3 text-destructive" />
                                                     </Button>
                                                 </div>

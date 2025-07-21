@@ -18,6 +18,13 @@ export interface ReportGenerationTemplate {
     agentIds: string[];
 }
 
+export interface PresentationGenerationTemplate {
+    id: string;
+    name: string;
+    description: string;
+    primaryAgentId: string;
+    relevantReportSectionIds?: string[];
+}
 
 // Fetch Proposal Templates
 export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
@@ -67,6 +74,32 @@ export async function updateReportTemplate(id: string, data: Partial<ReportGener
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update report template');
+    }
+    return response.json();
+}
+
+// Fetch Presentation Templates
+export async function fetchPresentationTemplates(): Promise<PresentationGenerationTemplate[]> {
+    const response = await fetch('/api/templates/presentation');
+    if (!response.ok) {
+        throw new Error('Failed to fetch presentation templates');
+    }
+    return response.json();
+}
+
+// Update Presentation Template
+export async function updatePresentationTemplate(id: string, data: Partial<PresentationGenerationTemplate>, token: string): Promise<PresentationGenerationTemplate> {
+    const response = await fetch(`/api/templates/presentation/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update presentation template');
     }
     return response.json();
 }
