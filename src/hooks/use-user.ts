@@ -8,7 +8,7 @@ import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/typ
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
 import { useAuth } from '@/context/AuthContext';
 
@@ -185,5 +185,34 @@ export function useSendPasswordReset() {
                 variant: 'destructive',
             });
         },
+    });
+}
+
+export function useForgotPassword() {
+    return useMutation({
+        mutationFn: async (email: string) => {
+            try {
+                await sendPasswordResetEmail(auth, email);
+                return { success: true };
+            } catch (error: any) {
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') {
+                    throw new Error('No user found with this email address.');
+                }
+                throw new Error(error.message || 'Failed to send password reset email.');
+            }
+        },
+        onSuccess: () => {
+            toast({
+                title: 'Password Reset Email Sent',
+                description: 'Please check your inbox to reset your password.',
+            });
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Error',
+                description: error.message,
+                variant: 'destructive',
+            });
+        }
     });
 }

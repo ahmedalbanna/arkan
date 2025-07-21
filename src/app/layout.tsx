@@ -1,4 +1,5 @@
 
+
 import type { Metadata } from 'next';
 import { Poppins, PT_Sans, Cairo, Indie_Flower } from 'next/font/google';
 import './globals.css';
@@ -46,7 +47,7 @@ const fontHandwriting = Indie_Flower({
 })
 
 // List of public paths that do not require authentication
-const PUBLIC_PATHS = ['/login', '/signup'];
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password'];
 
 // This function runs on the server for every request
 async function checkAuth(pathname: string, sessionCookieValue: string | undefined) {
