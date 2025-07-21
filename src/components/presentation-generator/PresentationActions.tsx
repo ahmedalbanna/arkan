@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface PresentationActionsProps {
   slides?: PresentationSlide[];
@@ -20,6 +21,7 @@ interface PresentationActionsProps {
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
 export const PresentationActions = ({ slides, isGenerating }: PresentationActionsProps) => {
+  const { t } = useLocalization();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
   const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
 
@@ -43,20 +45,20 @@ export const PresentationActions = ({ slides, isGenerating }: PresentationAction
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Actions</CardTitle>
-        <CardDescription>Export your generated presentation.</CardDescription>
+        <CardTitle className="font-headline">{t('builder.presentationGenerator.actionsTitle')}</CardTitle>
+        <CardDescription>{t('builder.presentationGenerator.actionsDesc')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-            <Label htmlFor="pptx-template-select">PPTX Template</Label>
+            <Label htmlFor="pptx-template-select">{t('builder.presentationGenerator.exportStyleLabel')}</Label>
             {pptxLoaded ? (
               <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange}>
                   <SelectTrigger id="pptx-template-select">
-                      <SelectValue placeholder="Select a template" />
+                      <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                       {Object.entries(pptxTemplates).map(([key, template]) => (
-                          <SelectItem key={key} value={key}>{(template as any).name}</SelectItem>
+                          <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
                       ))}
                   </SelectContent>
               </Select>
@@ -64,7 +66,7 @@ export const PresentationActions = ({ slides, isGenerating }: PresentationAction
         </div>
         <Button onClick={handleExportPresentation} disabled={isGenerating || !slides || slides.length === 0} className="w-full font-headline">
           <Presentation className="mr-2 h-4 w-4" />
-          Export Presentation
+          {t('builder.presentationGenerator.exportButton')}
         </Button>
       </CardContent>
     </Card>
