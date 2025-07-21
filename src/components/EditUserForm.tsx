@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, Trash2, AlertCircle } from 'lucide-react';
+import { Loader2, Save, Trash2, AlertCircle, ArrowLeft } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
+import Link from 'next/link';
 
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -200,7 +201,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                     )}
                 />
             </CardContent>
-            <CardFooter>
+            <CardFooter className="justify-between">
                  <Button type="submit" disabled={isPending} className="font-headline">
                     {updateUserMutation.isPending ? (
                         <>
@@ -213,6 +214,12 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                         {t('editUser.saveButton')}
                         </>
                     )}
+                </Button>
+                 <Button asChild variant="outline">
+                    <Link href="/manage-users">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Back to Manage Users
+                    </Link>
                 </Button>
             </CardFooter>
             </Card>
@@ -252,4 +259,3 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
     </>
   );
 }
-
