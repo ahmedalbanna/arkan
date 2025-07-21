@@ -16,6 +16,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
+import { usePresentationStore } from '@/hooks/usePresentationStore';
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
@@ -39,13 +40,13 @@ export default function PresentationGenerator() {
     const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
+    const { proposal } = useBuilderStore();
     const {
-        proposal,
         presentation,
         activePresentationId,
         addPresentationToHistory,
         setActivePresentationId,
-    } = useBuilderStore();
+    } = usePresentationStore();
 
     const mutation = useMutation({
         mutationFn: generatePresentation,
