@@ -38,17 +38,19 @@ export function ProjectCard({ project }: ProjectCardProps) {
     const handleDeleteProject = () => {
         deleteProjectMutation.mutate(project.id);
     }
+    
+    const projectTitle = project.name || project.proposal?.title || 'Untitled Project';
 
     return (
         <Card className="flex flex-col">
             <CardHeader>
                 <div className="flex justify-between items-start gap-2">
-                    <CardTitle className="font-headline text-lg truncate" title={project.name}>
-                        {project.name}
+                    <CardTitle className="font-headline text-lg truncate" title={projectTitle}>
+                        {projectTitle}
                     </CardTitle>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={deleteProjectMutation.isPending}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id}>
                                {deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id ? <Loader2 className="h-4 w-4 animate-spin" /> :  <Trash2 className="h-4 w-4 text-destructive" />}
                             </Button>
                         </AlertDialogTrigger>
@@ -57,7 +59,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This action cannot be undone. This will permanently delete your project
-                                    "{project.name}".
+                                    "{projectTitle}".
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -73,7 +75,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {project.projectIdea || 'No description available.'}
+                    {project.projectIdea || project.proposal?.objective || 'No description available.'}
                 </p>
             </CardContent>
             <CardFooter>

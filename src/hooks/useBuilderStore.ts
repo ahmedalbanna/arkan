@@ -12,6 +12,7 @@ import { useCodeGeneratorStore } from './useCodeGeneratorStore';
 import type { ProjectState } from '@/lib/types';
 
 export interface BuilderState {
+  name?: string;
   projectIdea: string;
   proposal: ProjectProposal | null;
   currentProjectId: string | null; // To track if we are editing a saved project
@@ -41,6 +42,7 @@ interface BuilderActions {
 }
 
 const initialState: BuilderState = {
+  name: undefined,
   projectIdea: '',
   proposal: null,
   currentProjectId: null,
@@ -68,6 +70,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
       loadState: (newState) => {
         set({
+            name: newState.name,
             projectIdea: newState.projectIdea || '',
             proposal: newState.proposal || null,
             currentProjectId: newState.id || null, // Set the current project ID
@@ -79,9 +82,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
         
-        toast({ title: 'Project Loaded', description: `Successfully loaded "${newState.proposal?.title || 'project'}".` });
+        toast({ title: 'Project Loaded', description: `Successfully loaded "${newState.name || newState.proposal?.title || 'project'}".` });
       },
       getFullState: () => ({
+        name: get().name,
         projectIdea: get().projectIdea,
         proposal: get().proposal,
         sections: useReportStore.getState().sections,
@@ -97,6 +101,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setProposal: (proposal) => {
         set({
           proposal,
+          name: proposal?.title,
           // When a new proposal is generated, it's not a saved project yet.
           currentProjectId: null,
           hasUnsavedChanges: true,
@@ -141,6 +146,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       storage: createJSONStorage(() => localStorage),
       // Only persist user-generated content, not transient UI state
       partialize: (state) => ({
+        name: state.name,
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,

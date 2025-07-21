@@ -40,7 +40,7 @@ export function useAutosave() {
         return;
       }
       
-      const saveData = { ...projectData, name: projectData.proposal.title };
+      const saveData = { ...projectData, name: projectData.name || projectData.proposal.title };
 
       if (store.currentProjectId) {
         // Update existing project
@@ -58,5 +58,3 @@ export function useAutosave() {
       isSaving
     ]);
 }
-
-    

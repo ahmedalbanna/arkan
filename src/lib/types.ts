@@ -52,6 +52,7 @@ export interface PaymentRequest {
 // NOTE: The Zod schema for this has been moved to `src/lib/project-state-schema.ts`
 // to avoid circular dependency issues with server-side modules.
 export interface ProjectState {
+    name?: string;
     projectIdea?: string;
     proposal: ProjectProposal | null;
     sections?: { [key in SectionName]?: string };

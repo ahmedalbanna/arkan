@@ -4,6 +4,7 @@ import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, Presentati
 // This schema is defined in a separate, server-only file to prevent circular dependencies
 // that can occur when client and server modules import from the same files (e.g., types.ts and schemas.ts).
 export const ProjectStateSchema = z.object({
+    name: z.string().optional(),
     projectIdea: z.string().optional(),
     proposal: z.lazy(() => ProjectProposalSchema).nullable(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
