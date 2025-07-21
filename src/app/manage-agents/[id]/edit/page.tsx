@@ -6,7 +6,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { AlertCircle, Pencil } from 'lucide-react';
 import React, { use } from 'react';
 import { useAgent } from '@/hooks/use-agents';
-import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function EditAgentPageSkeleton() {
