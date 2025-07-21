@@ -44,7 +44,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         { href: '/manage-payments', label: t('header.managePayments'), icon: CreditCard },
         { href: '/manage-generations', label: t('header.activityHistory'), icon: History },
         { href: '/admin/manage-generation-templates', label: 'Generation Templates', icon: PencilRuler },
-        { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
+        { href: '/admin/manage-templates', label: t('header.exportTemplates'), icon: Palette },
         { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
         { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
     ];
