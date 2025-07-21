@@ -29,8 +29,10 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
-import type { GuidelineState } from '@/hooks/useBuilderStore';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
+import type { GuidelineState } from '@/hooks/useReportStore';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -103,10 +105,13 @@ export const GenerationTools = () => {
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
+    const { proposal } = useBuilderStore();
+    const { diagrams } = useDiagramStore();
+
+    // Use the correct store for report-related state
     const {
-        proposal,
         sections,
-        diagrams,
+        evaluation,
         externalContext,
         controlState,
         guidelineState,
@@ -116,6 +121,7 @@ export const GenerationTools = () => {
         setSelectedReportTemplateId,
         setSection,
         setAllSections,
+        setEvaluation,
         setExternalContext,
         removeExternalContext,
         handleControlChange,
@@ -124,7 +130,8 @@ export const GenerationTools = () => {
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
-    } = useBuilderStore();
+    } = useReportStore();
+
     // State for PDF upload
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
