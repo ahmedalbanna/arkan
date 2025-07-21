@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { presentationConfig, sectionConfig, diagramConfig } from '@/lib/report-config';
@@ -16,7 +17,6 @@ import type { Agent, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
@@ -61,6 +61,34 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
     guidelines.push(...currentGuidelineState.custom);
     return guidelines;
 };
+
+function ToolsSkeleton() {
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+                <CardFooter>
+                    <Skeleton className="h-10 w-full" />
+                </CardFooter>
+            </Card>
+        </div>
+    )
+}
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
@@ -111,7 +139,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const [selectedPptxTemplate, setSelectedPptxTemplate] = React.useState<PptxTemplateKey>('modern');
 
     const agent = agents.find(a => a.id === presentationConfig.presentation.agentId);
-
+    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
+    
     const presentations = presentation?.history || [];
     const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams || {}).length > 0;
 
@@ -154,16 +183,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         };
         onGenerate(body);
     }
-    
-    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
-    if (!agentsLoaded || !agent || presentationTemplatesLoading || !selectedTemplate) {
-        return (
-            <Card>
-                <CardHeader><Skeleton className="h-6 w-3/4" /></CardHeader>
-                <CardContent><Loader2 className="animate-spin" /></CardContent>
-            </Card>
-        );
+    if (!agentsLoaded || presentationTemplatesLoading || !agent || !selectedTemplate) {
+        return <ToolsSkeleton />;
     }
 
     const promptConfig = agent.prompt as AgentPrompt;
