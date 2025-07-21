@@ -1,5 +1,5 @@
 import { db } from './index';
-import { users, agents, features, docxTemplates, pptxTemplates } from './schema';
+import { users, teams, teamMembers, transactions, agentGenerations, agents, features, docxTemplates, pptxTemplates } from './schema';
 import { AGENTS as defaultAgents } from '@/lib/agents';
 import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
@@ -44,6 +44,10 @@ async function seed() {
         // Clear existing data
         console.log("Clearing existing data...");
         tx.delete(users).run();
+        tx.delete(teams).run();
+        tx.delete(teamMembers).run();
+        tx.delete(transactions).run();
+        tx.delete(agentGenerations).run();
         tx.delete(agents).run();
         tx.delete(features).run();
         tx.delete(docxTemplates).run();
