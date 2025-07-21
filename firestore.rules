@@ -1,59 +1,54 @@
-firestore
+
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is logged in
-    function isAuthenticated() {
-      return request.auth != null;
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      // Get the user's profile from the 'users' collection using their UID
+      // and check if their role is 'admin'.
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
-    // Helper function to get the user's role from their profile document
-    function getUserRole(userId) {
-      // Ensure the user document exists and has a role field
-      return get(/databases/$(database)/documents/users/$(userId)).data.role;
+    // Helper function to check if the request is from a logged-in user
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     // Rules for the 'users' collection
     match /users/{userId} {
-      // Allow a logged-in user to read their OWN profile
-      allow read: if isAuthenticated() && request.auth.uid == userId;
+      // Any authenticated user can create their own profile document.
+      allow create: if isSignedIn();
 
-      // Allow logged-in admins to read ALL user profiles
-      allow read: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+      // Only the user themselves or an admin can read the user's profile.
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      // The user can update their own profile, but not change their role or credits.
+      // Admins can update any field.
+      allow update: if isSignedIn() && 
+                    ((request.auth.uid == userId && !('role' in request.resource.data) && !('credits' in request.resource.data)) || isAdmin());
 
-      // Allow a logged-in user to update their OWN profile
-      // Prevent users from changing their role or adding/removing critical fields
-      allow write: if isAuthenticated()
-                   && request.auth.uid == userId
-                   && request.resource.data.keys().hasAll(['name', 'email', 'bio', 'profilePictureUrl', 'credits', 'createdAt', 'updatedAt', 'role']) // Ensure all expected fields are present
-                   && request.resource.data.size() == 8 // Ensure no extra fields are added (adjust number based on your UserProfile interface size)
-                   && request.resource.data.role == resource.data.role; // Prevent changing role
-
-      // Allow logged-in admins to update ANY user profile (including role)
-      allow write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
-
-
-      // Prevent client-side creation of user documents. Signup is handled via API.
-      allow create: if false;
+      // Only admins can delete users.
+      allow delete: if isAdmin();
     }
 
-    // Rules for a hypothetical 'transactions' collection
-    // Adjust collection name if yours is different
-    match /transactions/{transactionId} {
-      // Only allow logged-in admins to read transaction data
-      allow read: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
-
-      // Only allow logged-in admins to create or update transactions.
-      // Transaction processing (creation/verification/rejection) should happen via secure server-side logic.
-      allow write: if isAuthenticated() && getUserRole(request.auth.uid) == 'admin';
+    // Rules for collections that are only accessible by admins
+    match /{collection}/{docId} {
+      // Admins have full access to these collections.
+      allow read, write, delete: if isAdmin() &&
+                                  (collection == 'agents' || 
+                                   collection == 'features' || 
+                                   collection == 'transactions' ||
+                                   collection == 'agent_generations');
     }
 
-    // Default rule: Deny all access to any other documents or collections
-    // unless explicitly allowed by a more specific rule above.
-    match /{document=**} {
-      allow read, write: if false;
+    // Rules for the 'templates' collection and its subcollections
+    match /templates/{docId}/{subcollection}/{templateKey} {
+        // Any authenticated user can read templates (e.g., for exporting).
+        allow read: if isSignedIn();
+        // Only admins can write (create/update/delete) templates.
+        allow write: if isAdmin();
     }
   }
 }
