@@ -63,6 +63,10 @@ export default function PptxTemplateManager() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {(Object.keys(templates) as PptxTemplateKey[]).map((key) => {
         const template = templates[key];
+        // Ensure template and its styles are defined before rendering
+        if (!template || !template.styles) {
+          return <PptxTemplateSkeleton key={key} />;
+        }
         const styles = template.styles;
 
         return (
