@@ -23,7 +23,17 @@
     "admin": "Admin",
     "logout": "Logout",
     "examSolver": "Exam Solver",
-    "homeworkSolver": "Homework Solver"
+    "homeworkSolver": "Homework Solver",
+    "adminSettings": "Settings"
+  },
+  "adminSettings": {
+    "pageSubtitle": "Manage application-wide settings and data operations.",
+    "dataSyncTitle": "Data Synchronization",
+    "dataSyncDescription": "Manually trigger a one-way synchronization from Firestore to the local SQLite database.",
+    "dataSyncWarning": "This process will overwrite any local changes in the SQLite database with the current data from Firestore. This action is irreversible.",
+    "triggerSyncButton": "Trigger Firestore to SQLite Sync",
+    "syncSuccessTitle": "Synchronization Started",
+    "syncErrorTitle": "Synchronization Failed"
   },
   "adminDashboard": {
     "pageTitle": "Analytics Dashboard",

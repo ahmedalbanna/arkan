@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -50,6 +50,7 @@ export function Header() {
     { href: '/manage-generations', label: t('header.activityHistory'), icon: History },
     { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
     { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
+    { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
   ];
   
   const handleLinkClick = () => {

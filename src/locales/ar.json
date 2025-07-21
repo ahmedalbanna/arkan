@@ -23,7 +23,17 @@
     "admin": "الإدارة",
     "logout": "تسجيل الخروج",
     "examSolver": "حل الامتحانات",
-    "homeworkSolver": "حل الواجبات"
+    "homeworkSolver": "حل الواجبات",
+    "adminSettings": "الإعدادات"
+  },
+  "adminSettings": {
+    "pageSubtitle": "إدارة الإعدادات العامة للتطبيق وعمليات البيانات.",
+    "dataSyncTitle": "مزامنة البيانات",
+    "dataSyncDescription": "قم بتشغيل مزامنة يدوية أحادية الاتجاه من Firestore إلى قاعدة بيانات SQLite المحلية.",
+    "dataSyncWarning": "ستقوم هذه العملية بالكتابة فوق أي تغييرات محلية في قاعدة بيانات SQLite بالبيانات الحالية من Firestore. هذا الإجراء لا يمكن التراجع عنه.",
+    "triggerSyncButton": "تشغيل مزامنة Firestore إلى SQLite",
+    "syncSuccessTitle": "بدأت المزامنة",
+    "syncErrorTitle": "فشلت المزامنة"
   },
   "adminDashboard": {
     "pageTitle": "لوحة التحكم",

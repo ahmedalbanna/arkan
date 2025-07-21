@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users, SlidersHorizontal } from "lucide-react";
+import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users, SlidersHorizontal, Settings } from "lucide-react";
 import { useLocalization } from "@/context/LocalizationContext";
 
 function AdminLayoutSkeleton() {
@@ -45,6 +45,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         { href: '/manage-generations', label: t('header.activityHistory'), icon: History },
         { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
         { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
+        { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
     ];
     
     // Once loading is finished, check the role.
