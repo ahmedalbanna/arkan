@@ -221,7 +221,7 @@ export default function HomeworkSolver() {
                 <History className="w-5 h-5" /> {t('builder.homeworkSolver.historyTitle')}
                 </CardTitle>
                 <Button variant="ghost" size="icon" onClick={clearHistory} disabled={history.length === 0} title={t('homeworkSolver.clearHistoryTooltip')}>
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 w-4" />
                 </Button>
             </div>
             <CardDescription>{t('builder.homeworkSolver.historyDescription')}</CardDescription>
