@@ -89,9 +89,9 @@ export default function PresentationGenerator() {
     const activePresentation = presentations.find(p => p.id === activePresentationId);
     
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
             {/* Left Column */}
-            <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+            <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <Card>
                     <CardHeader>
                         <CardTitle className="font-headline flex items-center gap-2">
@@ -138,7 +138,7 @@ export default function PresentationGenerator() {
 
 
             {/* Center Column */}
-            <div className="lg:col-span-5 overflow-y-auto pr-2">
+            <div className="lg:col-span-5 lg:overflow-y-auto lg:pr-2">
                 {activePresentation?.slides && activePresentation.slides.length > 0 ? (
                     <DynamicPresentationViewer
                         key={activePresentation.id}
@@ -156,7 +156,7 @@ export default function PresentationGenerator() {
             </div>
 
             {/* Right Column */}
-            <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <PresentationGenerationTools
                     isDisabled={!proposal || mutation.isPending}
                     isGenerating={mutation.isPending}
