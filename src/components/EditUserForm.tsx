@@ -115,7 +115,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
       onSuccess: () => {
           toast({ title: "User Deleted", description: `User ${user.name} has been successfully deleted.`});
           queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-          router.push('/manage-users');
+          router.push('/admin/manage-users');
       },
       onError: (error: Error) => {
            toast({ title: t('editUser.deleteErrorToastTitle'), description: error.message, variant: 'destructive' });
@@ -223,7 +223,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                     )}
                 </Button>
                  <Button asChild variant="outline">
-                    <Link href="/manage-users">
+                    <Link href="/admin/manage-users">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Manage Users
                     </Link>

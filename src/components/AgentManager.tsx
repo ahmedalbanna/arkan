@@ -85,7 +85,7 @@ function AgentCard({ agent }: { agent: Agent }) {
           </Link>
         </Button>
         <Button asChild variant="outline" size="sm" className="font-headline">
-          <Link href={`/manage-agents/${id}/edit`}>
+          <Link href={`/admin/manage-agents/${id}/edit`}>
             <Pencil className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
             {t('agentManager.editButton')}
           </Link>

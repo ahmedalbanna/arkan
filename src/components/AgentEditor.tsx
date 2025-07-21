@@ -51,7 +51,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       payload: { name, prompt }
     }, {
       onSuccess: () => {
-        router.push('/manage-agents');
+        router.push('/admin/manage-agents');
       }
     });
   };
@@ -113,7 +113,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
             {t('agentEditor.saveButton')}
           </Button>
           <Button asChild variant="outline">
-            <Link href="/manage-agents">
+            <Link href="/admin/manage-agents">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Return to Manage Agents
             </Link>

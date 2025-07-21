@@ -94,7 +94,7 @@ export default function UserManagementConsole() {
     const token = await firebaseUser.getIdToken();
     await queryClient.prefetchQuery({
         queryKey: userKeys.profile(userId),
-        queryFn: () => fetchUserProfile(userId),
+        queryFn: () => fetchUserProfile(userId, token),
         staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
     });
   }
@@ -164,7 +164,7 @@ export default function UserManagementConsole() {
                     <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
                     <TableCell className="text-right">
                       <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
-                        <Link href={`/manage-users/${user.id}/edit`}>
+                        <Link href={`/admin/manage-users/${user.id}/edit`}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">{t('manageUsers.editUserSr')}</span>
                         </Link>
