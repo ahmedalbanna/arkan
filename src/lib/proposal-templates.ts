@@ -1,6 +1,4 @@
 
-'use client';
-
 export interface ProposalTemplate {
     id: string;
     name: string;
