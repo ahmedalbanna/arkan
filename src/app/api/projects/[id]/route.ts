@@ -20,7 +20,7 @@ async function verifyProjectOwner(request: Request, projectId: string) {
         return { authorized: false, message: 'Project not found' };
     }
     const project = projectDoc.data();
-    
+
     if (project?.userId !== requesterId) {
         return { authorized: false, message: 'Forbidden: You do not own this project' };
     }
@@ -65,9 +65,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             ...validation.data,
             updatedAt: new Date().toISOString()
         };
-        
+
         await adminDb.collection('projects').doc(params.id).update(updateData);
-        
+
         revalidatePath('/projects');
 
         return NextResponse.json({ id: params.id, ...updateData }, { status: 200 });

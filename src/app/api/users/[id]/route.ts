@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getUserProfile, updateUser, updateUserByAdmin } from '@/lib/db/queries';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { UserRole } from '@/lib/types';
 import { revalidatePath } from 'next/cache';
 
@@ -17,7 +17,7 @@ async function verifyAccess(request: Request, targetUserId: string) {
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const requesterId = decodedToken.uid;
-        
+
         const requesterProfile = await getUserProfile(requesterId);
         const isAdmin = requesterProfile?.role === 'admin';
         const isSelf = requesterId === targetUserId;
@@ -36,7 +36,7 @@ async function verifyAccess(request: Request, targetUserId: string) {
 // GET /api/users/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
-        const userId = params.id;
+        const { id: userId } = await params; // Await params and destructure the id
         if (!userId) {
             return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
         }
@@ -82,7 +82,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
 
         await adminAuth.deleteUser(targetUserId);
         await adminDb.collection('users').doc(targetUserId).delete();
-        
+
         revalidatePath('/admin/manage-users');
 
         return NextResponse.json({ message: `User ${targetUserId} deleted successfully` });
