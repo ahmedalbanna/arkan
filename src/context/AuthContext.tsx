@@ -2,11 +2,12 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useUserProfile } from '@/hooks/use-user';
+import { fetchUserProfile } from '@/services/user-service';
 import type { UserProfile } from '@/lib/db/queries';
+import { userKeys } from '@/lib/query-keys';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -57,38 +58,49 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authIsLoading, setAuthIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const { data: userProfileData, isLoading: isProfileLoading, refetch } = useUserProfile(firebaseUser?.uid ?? '');
-
-  const userProfile = userProfileData ?? null;
+  // Use React Query to fetch the user profile
+  const { data: userProfile, isLoading: isProfileLoading, refetch } = useQuery<UserProfile | null>({
+    queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
+    queryFn: async () => {
+        if (!firebaseUser) return null;
+        const token = await firebaseUser.getIdToken();
+        return fetchUserProfile(firebaseUser.uid, token);
+    },
+    enabled: !!firebaseUser, // Only fetch if firebaseUser exists
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   const refetchUser = useCallback(() => {
-    refetch();
-  }, [refetch]);
+    if(firebaseUser?.uid) {
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+    }
+  }, [firebaseUser, queryClient]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
       await manageSessionAndProfile(user);
-      setIsLoading(false);
+      if (user) {
+        // Invalidate and refetch immediately on auth change
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.uid) });
+      } else {
+        // Clear all queries on logout
+        queryClient.clear();
+      }
+      setAuthIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (firebaseUser?.uid) {
-      refetchUser();
-    }
-  }, [firebaseUser, refetchUser]);
-
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider value={{ 
         firebaseUser, 
-        userProfile,
-        isLoading: isLoading || (!!firebaseUser && isProfileLoading),
+        userProfile: userProfile ?? null,
+        isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
         refetchUser
     }}>
       {children}

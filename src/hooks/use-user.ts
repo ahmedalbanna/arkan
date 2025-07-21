@@ -18,7 +18,7 @@ import {
     signInWithPhoneNumber,
     ConfirmationResult
 } from 'firebase/auth';
-import { fetchUserProfile } from '@/services/user-service';
+import { fetchUserProfile as fetchUserProfileApi } from '@/services/user-service';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useCallback, useEffect } from 'react';
 
@@ -90,11 +90,16 @@ async function sendPasswordResetEmailApi(userId: string, token: string) {
 // --- Custom Hooks ---
 
 export function useUserProfile(userId: string) {
+  const { firebaseUser } = useAuth(); // We need this to get the auth token
   return useQuery({
     queryKey: userKeys.profile(userId),
-    queryFn: () => fetchUserProfile(userId),
+    queryFn: async () => {
+        if (!firebaseUser) return null;
+        const token = await firebaseUser.getIdToken();
+        return fetchUserProfileApi(userId, token);
+    },
     staleTime: 1000 * 60 * 5, // Cache user data for 5 minutes
-    enabled: !!userId,
+    enabled: !!userId && !!firebaseUser, // Only run if both userId and firebaseUser are available
   });
 }
 
