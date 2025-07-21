@@ -1,6 +1,3 @@
-
-'use server';
-
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from '@/ai/schemas';
 
