@@ -41,7 +41,7 @@ export interface ReportState {
 
 interface ReportActions {
     newSession: () => void;
-    loadState: (state: Partial<ReportState>) => void;
+    loadState: (state: Partial<ReportState & { externalContext: ExternalContext | null }>) => void;
     setSection: (key: SectionName, content: string) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
@@ -99,6 +99,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
       loadState: (newState) => {
         if (newState.sections) set({ sections: newState.sections });
         if (newState.evaluation) set({ evaluation: newState.evaluation });
+        if (newState.externalContext) set({ externalContext: newState.externalContext });
       },
       setSection: (key, content) => set(state => ({ sections: { ...state.sections, [key]: content } })),
       setAllSections: (sections) => set({ sections }),

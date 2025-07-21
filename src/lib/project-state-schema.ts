@@ -9,4 +9,8 @@ export const ProjectStateSchema = z.object({
     sections: z.record(SectionNameSchema, z.string()).optional(),
     diagrams: z.record(DiagramTypeSchema, z.object({ plantUmlCode: z.string(), imageUrl: z.string() })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
+    externalContext: z.object({
+        fileName: z.string(),
+        content: z.string(),
+    }).nullable().optional(),
 });

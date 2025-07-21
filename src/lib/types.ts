@@ -57,6 +57,7 @@ export interface ProjectState {
     sections?: { [key in SectionName]?: string };
     diagrams?: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } };
     presentation?: { history: PresentationHistoryEntry[] };
+    externalContext?: { fileName: string; content: string; } | null;
 }
 export interface PresentationHistoryEntry {
     id: string;

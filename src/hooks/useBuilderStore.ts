@@ -87,6 +87,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
+        externalContext: useReportStore.getState().externalContext,
       }),
       setProjectIdea: (idea) => set({ projectIdea: idea, hasUnsavedChanges: true }),
       setCurrentProjectId: (id) => set({ currentProjectId: id }),
@@ -149,6 +150,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
+        externalContext: useReportStore.getState().externalContext,
       }),
       // Custom merge function to handle loading from storage
       merge: (persistedState: any, currentState) => {
@@ -164,5 +166,3 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     }
   )
 );
-
-    
