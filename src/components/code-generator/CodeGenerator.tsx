@@ -174,7 +174,7 @@ export default function CodeGenerator() {
          <div className={cn(
             "w-full rounded-md border bg-white overflow-hidden",
             !srcDoc && "flex items-center justify-center bg-muted",
-            isDialog ? "h-full" : "h-[60vh]"
+            isDialog ? "h-full" : "h-[60vh] lg:h-full"
         )}>
             {srcDoc ? (
                 <iframe
@@ -206,9 +206,9 @@ export default function CodeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
                 {/* Left Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                     {(codeState.html || codeState.css || codeState.javascript) && (
                         <Card>
                             <CardHeader className="flex-row items-center justify-between">
@@ -241,7 +241,7 @@ export default function CodeGenerator() {
                 </div>
 
                 {/* Center Column */}
-                <div className="lg:col-span-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
                     <Card className="h-full">
                         <CardHeader>
                             <div className="flex justify-between items-center">
@@ -268,7 +268,7 @@ export default function CodeGenerator() {
                 </div>
 
                 {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">{t('builder.codeGenerator.toolsTitle')}</CardTitle>
