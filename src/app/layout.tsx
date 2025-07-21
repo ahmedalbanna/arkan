@@ -16,6 +16,7 @@ import QueryProvider from '@/components/QueryProvider';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth as adminAuth } from '@/lib/firebase/admin';
+import { NextResponse } from 'next/server'; // Assuming you're using NextResponse
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -70,13 +71,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  
+
   // We need to get the current path to check if it's protected
-  const headersList = headers();
+  const headersList = await headers();
   const pathname = headersList.get('x-next-pathname') || '/';
-  
+
   // Get the session cookie value here, at the top level
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const sessionCookie = cookieStore.get('__session')?.value;
 
 

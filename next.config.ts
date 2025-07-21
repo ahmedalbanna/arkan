@@ -3,7 +3,7 @@ import type {NextConfig} from 'next';
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    prefetchInRender: true,
+    // prefetchInRender: true,
   },
   typescript: {
     ignoreBuildErrors: true,
