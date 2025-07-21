@@ -8,13 +8,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, FileText, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProposalTemplates } from '@/hooks/use-templates';
+import { Skeleton } from '../ui/skeleton';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -48,7 +49,7 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
-    const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
+    const { data: templates, isLoading: templatesLoading, isError } = useProposalTemplates();
 
     const {
         selectedTemplateId,
@@ -77,7 +78,32 @@ export const ProposalGenerationTools = ({
 
 
     if (templatesLoading) {
-        return <Card><CardHeader><CardTitle>Loading Templates...</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+        return (
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+        );
+    }
+    
+    if (isError) {
+         return (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Error</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center justify-center text-center text-destructive">
+                    <AlertCircle className="h-8 w-8 mb-2" />
+                    <p>Failed to load proposal templates.</p>
+                </CardContent>
+            </Card>
+        );
     }
 
     return (
