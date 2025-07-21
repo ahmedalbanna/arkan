@@ -44,6 +44,21 @@ export default function PresentationViewer({ activePresentation }: PresentationV
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
+  // Add a guard clause to handle cases where activePresentation might be undefined.
+  if (!activePresentation) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('builder.presentationGenerator.viewerTitle')}</CardTitle>
+          <CardDescription>{t('builder.presentationGenerator.viewerDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-center py-8">{t('builder.presentationGenerator.historyEmpty')}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const slides = activePresentation.slides;
 
   useEffect(() => {

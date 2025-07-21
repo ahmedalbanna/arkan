@@ -7,7 +7,7 @@ import { Loader2, Presentation, AlertCircle, History } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { lazy } from 'react';
+import { lazy, Suspense } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -17,6 +17,21 @@ import { toast } from '@/hooks/use-toast';
 import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { Skeleton } from '../ui/skeleton';
+
+function ViewerSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-8 w-1/2" />
+                <Skeleton className="h-4 w-1/4" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-64 w-full" />
+            </CardContent>
+        </Card>
+    );
+}
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
@@ -140,20 +155,22 @@ export default function PresentationGenerator() {
 
             {/* Center Column */}
             <div className="lg:col-span-5 lg:overflow-y-auto lg:pr-2">
-                {activePresentation?.slides && activePresentation.slides.length > 0 ? (
-                    <DynamicPresentationViewer
-                        key={activePresentation.id}
-                        slides={activePresentation.slides}
-                    />
-                ) : (
-                    <Card className="flex items-center justify-center h-full min-h-[300px]">
-                        <div className="text-center text-muted-foreground p-8">
-                            <Presentation className="w-16 h-16 mx-auto mb-4" />
-                            <p>{t('builder.presentationGenerator.viewerEmpty')}</p>
-                            {mutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
-                        </div>
-                    </Card>
-                )}
+                <Suspense fallback={<ViewerSkeleton />}>
+                    {activePresentation ? (
+                        <DynamicPresentationViewer
+                            key={activePresentation.id}
+                            activePresentation={activePresentation}
+                        />
+                    ) : (
+                        <Card className="flex items-center justify-center h-full min-h-[300px]">
+                            <div className="text-center text-muted-foreground p-8">
+                                <Presentation className="w-16 h-16 mx-auto mb-4" />
+                                <p>{t('builder.presentationGenerator.viewerEmpty')}</p>
+                                {mutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                            </div>
+                        </Card>
+                    )}
+                </Suspense>
             </div>
 
             {/* Right Column */}
