@@ -10,7 +10,7 @@ import {
     type ProposalTemplate,
     type ReportGenerationTemplate,
 } from '@/services/template-service';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 
 
