@@ -43,6 +43,8 @@ const generateSystemTestingFlow = ai.defineFlow(
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'generateSystemTestingPrompt',
       input: { schema: GenerateSystemTestingInputSchema },
@@ -86,7 +88,7 @@ const generateSystemTestingFlow = ai.defineFlow(
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `,
     });

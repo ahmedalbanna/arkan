@@ -43,6 +43,8 @@ const generateSystemAnalysisFlow = ai.defineFlow(
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'generateSystemAnalysisPrompt',
       input: { schema: GenerateSystemAnalysisInputSchema },
@@ -86,7 +88,7 @@ const generateSystemAnalysisFlow = ai.defineFlow(
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `,
     });

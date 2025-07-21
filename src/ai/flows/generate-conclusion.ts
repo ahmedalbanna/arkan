@@ -44,6 +44,8 @@ const generateConclusionFlow = ai.defineFlow(
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'generateConclusionPrompt',
       input: { schema: GenerateConclusionInputSchema },
@@ -87,7 +89,7 @@ const generateConclusionFlow = ai.defineFlow(
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `,
     });

@@ -46,6 +46,8 @@ const generatePresentationFlow = ai.defineFlow(
     if (!agent) throw new Error("Presentation agent configuration not found.");
     const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
       input: { schema: GeneratePresentationInputSchema },
@@ -75,7 +77,7 @@ const generatePresentationFlow = ai.defineFlow(
 {{/if}}
 {{#if diagrams}}
 --- DIAGRAMS (PlantUML) ---
-{{#each diagrams}}
+{{#each otherDiagrams}}
 --- Diagram: {{@key}} ---
 {{{this}}}
 ---
@@ -84,7 +86,7 @@ const generatePresentationFlow = ai.defineFlow(
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `,
     });

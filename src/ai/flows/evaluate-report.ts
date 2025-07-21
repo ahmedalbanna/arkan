@@ -38,6 +38,9 @@ const evaluateReportFlow = ai.defineFlow(
     outputSchema: EvaluateReportOutputSchema,
   },
   async (input) => {
+
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'evaluateReportPrompt',
       input: { schema: EvaluateReportInputSchema },
@@ -61,7 +64,7 @@ Your evaluation must be objective and thorough.
 ---
 **Project Proposal (for context):**
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 ---
 **Report Sections:**

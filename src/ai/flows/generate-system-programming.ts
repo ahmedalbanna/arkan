@@ -43,6 +43,8 @@ const generateSystemProgrammingFlow = ai.defineFlow(
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const prompt = ai.definePrompt({
       name: 'generateSystemProgrammingPrompt',
       input: { schema: GenerateSystemProgrammingInputSchema },
@@ -86,7 +88,7 @@ const generateSystemProgrammingFlow = ai.defineFlow(
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `,
     });

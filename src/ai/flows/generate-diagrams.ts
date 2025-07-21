@@ -38,6 +38,8 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
+    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+
     const diagramPrompt = ai.definePrompt({
         name: `${input.diagramType}DiagramPrompt`,
         input: { schema: GenerateDiagramInputSchema },
@@ -80,7 +82,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 
 --- Main Input: Project Proposal ---
 \`\`\`json
-{{{jsonEncode proposal}}}
+${stringifiedProposal}
 \`\`\`
 `
     });
