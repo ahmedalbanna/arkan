@@ -11,10 +11,12 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
+import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ReportGenerationTemplate } from '@/services/template-service';
+import { getUserProfile } from '@/lib/db/queries';
 
 // Schema for generating a single section
 const generateSectionSchema = z.object({
@@ -31,7 +33,8 @@ const generateSectionSchema = z.object({
 const generateFullReportSchema = z.object({
     proposal: ProjectProposalSchema,
     templateId: z.string(),
-    // We can add context here later if needed for full report generation
+    existingSections: z.record(SectionNameSchema, z.string()).optional(),
+    existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -61,7 +64,7 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, templateId } = fullReportValidation.data;
+        const { proposal, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
@@ -69,29 +72,50 @@ export async function POST(request: Request) {
         }
         const template = templateDoc.data() as ReportGenerationTemplate;
 
-        await deductCredit(userId, template.agentIds.length);
+        // Determine which sections are missing
+        const sectionsToGenerate = template.agentIds
+            .map(agentId => (Object.keys(sectionAgentMap) as SectionName[]).find(key => sectionAgentMap[key].agentId === agentId))
+            .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !existingSections[sectionKey]);
+        
+        if (sectionsToGenerate.length === 0) {
+            return NextResponse.json({ sections: existingSections, message: "All report sections have already been generated." }, { status: 200 });
+        }
+        
+        // Check user credits before proceeding
+        const userProfile = await getUserProfile(userId);
+        if (!userProfile || userProfile.credits < sectionsToGenerate.length) {
+            return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
+        }
+        
+        // Call the new evaluation agent to get the optimal configuration
+        const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
+        const evalResult = await evaluateAndSelectContext(evalInput);
+        
+        // Deduct credits for all sections at once
+        await deductCredit(userId, sectionsToGenerate.length);
 
-        const generatedSections: { [key in SectionName]?: string } = {};
+        const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
-        for (const agentId of template.agentIds) {
-            const agent = await getAgent(agentId);
-            const sectionKey = (Object.keys(sectionAgentMap) as SectionName[]).find(key => sectionAgentMap[key].agentId === agentId);
-    
-            if (!agent || !sectionKey) continue;
+        for (const config of evalResult.configs) {
+            const agentInfo = sectionAgentMap[config.section];
             
-            const agentInfo = sectionAgentMap[sectionKey];
-
-             const agentInput = {
+            const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
+            
+            const agentInput = {
                 proposal,
-                otherSections: generatedSections, // Pass already generated sections as context
-             };
+                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key] }), {}),
+                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
+                guidelines: config.guidelines,
+                instructionText,
+            };
 
             const result = await agentInfo.flow(agentInput);
-            await logGeneration({ agentId, userId, input: agentInput, output: result });
+            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
     
             const content = Object.values(result)[0] as string;
-            generatedSections[sectionKey] = content;
+            generatedSections[config.section] = content;
         }
+
         return NextResponse.json({ sections: generatedSections }, { status: 200 });
     }
 

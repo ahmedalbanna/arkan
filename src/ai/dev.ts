@@ -25,5 +25,6 @@ import '@/ai/flows/exam-solver.ts';
 import '@/ai/flows/homework-solver.ts';
 import '@/ai/flows/rewrite-document-to-markdown.ts';
 import '@/ai/flows/generate-image.ts';
+import '@/ai/flows/evaluate-and-select-context.ts';
 
     
