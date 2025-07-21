@@ -55,7 +55,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
-        const userProfile = userDoc.data();
+        const userProfile = await getUserProfile(userId);
+
+        if (!userProfile) {
+            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
+        }
+
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
