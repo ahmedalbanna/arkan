@@ -2,18 +2,43 @@
 // src/app/api/pdf-to-markdown/route.ts
 import { NextResponse } from 'next/server';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
-import { rewriteToMarkdown } from '@/ai/flows/rewrite-to-markdown';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { deductCredit } from '@/services/credit-service';
 import { auth } from '@/lib/firebase/admin';
+import * as canvas from 'canvas';
 
 // Set the worker source for pdfjs-dist
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+
+class NodeCanvasFactory {
+    create(width: number, height: number) {
+      const canv = canvas.createCanvas(width, height);
+      const context = canv.getContext('2d');
+      return {
+        canvas: canv,
+        context,
+      };
+    }
+  
+    reset(canvasAndContext: { canvas: any; context: any; }, width: number, height: number) {
+      canvasAndContext.canvas.width = width;
+      canvasAndContext.canvas.height = height;
+    }
+  
+    destroy(canvasAndContext: { canvas: any; context: any; }) {
+      canvasAndContext.canvas.width = 0;
+      canvasAndContext.canvas.height = 0;
+      canvasAndContext.canvas = null;
+      canvasAndContext.context = null;
+    }
+  }
+
 
 async function extractContentFromPdf(fileBuffer: Uint8Array): Promise<{ text: string; images: string[] }> {
     const pdfDocument = await pdfjsLib.getDocument({ data: fileBuffer }).promise;
     let fullText = '';
     const imagePromises: Promise<string>[] = [];
+    const canvasFactory = new NodeCanvasFactory();
 
     for (let i = 1; i <= pdfDocument.numPages; i++) {
         const page = await pdfDocument.getPage(i);
@@ -22,25 +47,19 @@ async function extractContentFromPdf(fileBuffer: Uint8Array): Promise<{ text: st
 
         // Render page to canvas to get an image
         const viewport = page.getViewport({ scale: 1.5 });
-        const canvas = new OffscreenCanvas(viewport.width, viewport.height);
-        const context = canvas.getContext('2d');
-        if (context) {
-            const renderContext = {
-                canvasContext: context,
-                viewport: viewport,
-            };
-            await page.render(renderContext).promise;
-            const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.8 });
-            const reader = new FileReader();
+        const canvasAndContext = canvasFactory.create(viewport.width, viewport.height);
+        
+        const renderContext = {
+            canvasContext: canvasAndContext.context,
+            viewport: viewport,
+            canvasFactory: canvasFactory,
+        };
+        await page.render(renderContext).promise;
+        const dataUrl = (canvasAndContext.canvas as any).toDataURL('image/jpeg', 0.8);
+        imagePromises.push(Promise.resolve(dataUrl));
 
-            const dataUrlPromise = new Promise<string>((resolve, reject) => {
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-            imagePromises.push(dataUrlPromise);
-        }
-         page.cleanup();
+        page.cleanup();
+        canvasFactory.destroy(canvasAndContext);
     }
     const pageImages = await Promise.all(imagePromises);
     return { text: fullText, images: pageImages };
@@ -96,5 +115,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
   }
 }
-
-    
