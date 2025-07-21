@@ -1,0 +1,205 @@
+
+'use client';
+
+import { useState, useEffect } from 'react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SessionActions } from '@/components/SessionActions';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useLocalization } from '@/context/LocalizationContext';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+import OnboardingGuide from '@/components/OnboardingGuide';
+import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useFeatures } from '@/hooks/use-features';
+import type { Feature } from '@/hooks/use-features';
+import { cn } from '@/lib/utils';
+
+
+const LoadingSkeleton = () => (
+  <div className="space-y-4">
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-[calc(100vh-300px)] w-full" />
+  </div>
+);
+
+
+const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), { 
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+
+
+async function markOnboardingComplete(userId: string, token: string) {
+    const response = await fetch(`/api/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ hasCompletedOnboarding: true })
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update onboarding status');
+    }
+    return response.json();
+}
+
+function GeneratePageContent() {
+  const [activeTab, setActiveTab] = useState("proposal");
+  const proposal = useBuilderStore(s => s.proposal);
+  const { t } = useLocalization();
+  const { firebaseUser, userProfile, refetchUser } = useAuth();
+  const queryClient = useQueryClient();
+  const { features, isLoaded: featuresLoaded } = useFeatures();
+
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    // Show the onboarding guide if the user profile is loaded and the flag is false
+    if (userProfile && !userProfile.hasCompletedOnboarding) {
+        setShowOnboarding(true);
+    }
+  }, [userProfile]);
+
+
+  const onboardingMutation = useMutation({
+    mutationFn: async () => {
+        if (!firebaseUser) throw new Error("User not authenticated");
+        const token = await firebaseUser.getIdToken();
+        return markOnboardingComplete(firebaseUser.uid, token);
+    },
+    onSuccess: () => {
+        // Invalidate user query to refetch the updated profile
+        queryClient.invalidateQueries({ queryKey: ['user', firebaseUser?.uid] });
+        refetchUser();
+    },
+    onError: (error: Error) => {
+        console.error("Failed to mark onboarding as complete:", error);
+    }
+  });
+
+
+  const handleOnboardingComplete = () => {
+      setShowOnboarding(false);
+      if (userProfile && !userProfile.hasCompletedOnboarding) {
+        onboardingMutation.mutate();
+      }
+  };
+
+  const isFeatureEnabled = (featureId: string) => {
+      if (!featuresLoaded) return false;
+      const feature = features.find(f => f.id === featureId);
+      return feature?.isEnabled ?? false;
+  };
+  
+  const enabledTabs = [
+      { id: 'proposal', enabled: isFeatureEnabled('proposal') },
+      { id: 'report', enabled: isFeatureEnabled('report') },
+      { id: 'diagram', enabled: isFeatureEnabled('diagram') },
+      { id: 'code', enabled: isFeatureEnabled('code') },
+      { id: 'presentation', enabled: isFeatureEnabled('presentation') },
+  ].filter(tab => tab.enabled).map(tab => tab.id);
+
+  
+  // If the current active tab is no longer enabled, switch to the first available one
+  useEffect(() => {
+    if (!enabledTabs.includes(activeTab) && enabledTabs.length > 0) {
+      setActiveTab(enabledTabs[0]);
+    } else if (enabledTabs.length === 0) {
+      setActiveTab(''); // No tabs are active
+    }
+  }, [features, activeTab, enabledTabs]);
+
+  return (
+    <>
+      <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
+      <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
+        <div className="flex justify-end items-center mb-4">
+          <SessionActions />
+        </div>
+        <div className="flex flex-col flex-grow">
+            {!featuresLoaded ? (
+                <LoadingSkeleton />
+            ) : (
+                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
+                    <TabsList className={cn(
+                        "grid w-full h-auto",
+                        enabledTabs.length <= 3 && "grid-cols-1 sm:grid-cols-3",
+                        enabledTabs.length === 4 && "grid-cols-2 sm:grid-cols-4",
+                        enabledTabs.length >= 5 && "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"
+                    )}>
+                        {isFeatureEnabled('proposal') && (
+                            <TabsTrigger value="proposal" className="gap-2">
+                                <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
+                            </TabsTrigger>
+                        )}
+                        {isFeatureEnabled('report') && (
+                            <TabsTrigger value="report" className="gap-2" disabled={!proposal}>
+                                <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
+                            </TabsTrigger>
+                        )}
+                        {isFeatureEnabled('diagram') && (
+                            <TabsTrigger value="diagram" className="gap-2" disabled={!proposal}>
+                                <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
+                            </TabsTrigger>
+                        )}
+                        {isFeatureEnabled('code') && (
+                            <TabsTrigger value="code" className="gap-2">
+                                <Laptop className="h-4 w-4" /> {t('builder.tabs.code')}
+                            </TabsTrigger>
+                        )}
+                        {isFeatureEnabled('presentation') && (
+                             <TabsTrigger value="presentation" className="gap-2" disabled={!proposal}>
+                                <Presentation className="h-4 w-4" /> {t('builder.tabs.presentation')}
+                            </TabsTrigger>
+                        )}
+                    </TabsList>
+                    
+                    <div className="w-full flex-grow mt-4">
+                        <TabsContent value="proposal" className="h-full">
+                            {activeTab === 'proposal' && <ProposalModeGenerator />}
+                        </TabsContent>
+                        <TabsContent value="report" className="h-full">
+                            {activeTab === 'report' && <ReportGenerator />}
+                        </TabsContent>
+                        <TabsContent value="diagram" className="h-full">
+                            {activeTab === 'diagram' && <DiagramGenerator />}
+                        </TabsContent>
+                        <TabsContent value="code" className="h-full">
+                            {activeTab === 'code' && <CodeGenerator />}
+                        </TabsContent>
+                        <TabsContent value="presentation" className="h-full">
+                            {activeTab === 'presentation' && <PresentationGenerator />}
+                        </TabsContent>
+                    </div>
+                 </Tabs>
+            )}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function GeneratePage() {
+    return (
+        <GeneratePageContent />
+    )
+}

@@ -8,6 +8,13 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 
 export const SessionActions = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,42 +82,65 @@ export const SessionActions = () => {
     }
 
     return (
-        <div className="flex items-center gap-2">
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={onFileChange}
-                accept=".json"
-                className="hidden"
-            />
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={handleUploadClick}
-                title={t('builder.tooltips.uploadProject')}
-            >
-                <Upload className="mr-2 h-4 w-4" />
-                {t('builder.buttons.uploadProject')}
-            </Button>
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSaveProjectFile}
-                disabled={!proposal}
-                title={t('builder.tooltips.downloadProject')}
-            >
-                <Download className="mr-2 h-4 w-4" />
-                {t('builder.buttons.downloadProject')}
-            </Button>
-            <Button
-                variant="destructive"
-                size="sm"
-                onClick={newSession}
-                title={t('builder.tooltips.newSession')}
-            >
-                <Trash2 className="mr-2 h-4 w-4" />
-                {t('builder.buttons.newSession')}
-            </Button>
-        </div>
+        <TooltipProvider>
+            <div className="flex items-center gap-2">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={onFileChange}
+                    accept=".json"
+                    className="hidden"
+                />
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                       <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleUploadClick}
+                            className="h-8 w-8 md:w-auto md:px-3"
+                        >
+                            <Upload className="h-4 w-4" />
+                            <span className="hidden md:inline ml-2">{t('builder.buttons.uploadProject')}</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="md:hidden">
+                        <p>{t('builder.tooltips.uploadProject')}</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={handleSaveProjectFile}
+                            disabled={!proposal}
+                             className="h-8 w-8 md:w-auto md:px-3"
+                        >
+                            <Download className="h-4 w-4" />
+                             <span className="hidden md:inline ml-2">{t('builder.buttons.downloadProject')}</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="md:hidden">
+                        <p>{t('builder.tooltips.downloadProject')}</p>
+                    </TooltipContent>
+                </Tooltip>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                       <Button
+                            variant="destructive"
+                             size="icon"
+                            onClick={newSession}
+                            className="h-8 w-8 md:w-auto md:px-3"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                             <span className="hidden md:inline ml-2">{t('builder.buttons.newSession')}</span>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent className="md:hidden">
+                        <p>{t('builder.tooltips.newSession')}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </div>
+        </TooltipProvider>
     );
 }
