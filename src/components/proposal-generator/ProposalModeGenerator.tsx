@@ -140,6 +140,7 @@ export function ProposalModeGenerator() {
             projectIdea,
             templateId: selectedTemplateId,
             customGuidelines,
+            locale,
         }
         generationMutation.mutate({ body, token });
     };
@@ -153,7 +154,7 @@ export function ProposalModeGenerator() {
         });
         
         const token = await firebaseUser.getIdToken();
-        const targetLang = locale === 'en' ? 'ar' : 'en';
+        const targetLang = locale === 'en' ? 'Arabic' : 'English';
         translateMutation.mutate({ proposal, targetLang, token });
     };
 

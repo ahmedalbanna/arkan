@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -98,7 +98,7 @@ async function uploadPdf(variables: {formData: FormData, token: string}): Promis
 }
 
 export const GenerationTools = () => {
-    const { t } = useLocalization();
+    const { t, locale } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
@@ -213,6 +213,7 @@ export const GenerationTools = () => {
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
+            locale,
             token,
         };
         setActiveMutationKey(section);
@@ -229,8 +230,10 @@ export const GenerationTools = () => {
         const body = {
             proposal,
             templateId: selectedReportTemplateId,
+            existingSections: sections,
+            existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+            locale,
             token,
-            // We can pass a global context selection for the full report if needed
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportMutation.mutate(body);
