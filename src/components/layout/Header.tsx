@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -186,8 +187,8 @@ export function Header() {
 
                   {userProfile.role === 'admin' && (
                     <>
-                      <DropdownMenuSeparator /> {/* Separator before admin links */}
-                      <DropdownMenuLabel>Admin</DropdownMenuLabel> {/* Label for admin section */}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
                       {adminLinks.map((link) => (
                         <DropdownMenuItem key={link.href} asChild>
                           <Link href={link.href}>
