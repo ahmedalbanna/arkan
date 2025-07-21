@@ -15,6 +15,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -46,12 +47,12 @@ async function updateDiagram(variables: { plantUmlCode: string, token: string })
 export default function DiagramGenerator() {
     const { t } = useLocalization();
     const { firebaseUser } = useAuth();
+    const { proposal } = useBuilderStore();
     const {
-        proposal,
         diagrams,
         handleDiagramCodeUpdate,
         setDiagram,
-    } = useBuilderStore();
+    } = useDiagramStore();
     
     const queryClient = useQueryClient();
     const mutation = useMutation({

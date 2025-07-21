@@ -24,8 +24,10 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateClassDiagramOutput } from '@/ai/flows/generate-class-diagram';
-import type { GuidelineState } from '@/hooks/useBuilderStore';
+import type { GuidelineState } from '@/hooks/useReportStore';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 const orderedSections = SectionNameSchema.options;
@@ -86,15 +88,15 @@ export const DiagramGenerationTools = () => {
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
+    const { proposal } = useBuilderStore();
+    const { sections } = useReportStore();
+    const { diagrams, setDiagram } = useDiagramStore();
+
     const {
-        proposal,
-        diagrams,
-        sections,
         externalContext,
         guidelineState,
         customGuidelineInput,
         contextSelection,
-        setDiagram,
         setExternalContext,
         removeExternalContext,
         handleGuidelineToggle,
@@ -102,10 +104,10 @@ export const DiagramGenerationTools = () => {
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
-    } = useBuilderStore();
-    // State for PDF upload
+    } = useReportStore();
+    
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
-    // Handle diagram generation
+    
     const diagramMutation = useMutation({
         mutationFn: generateDiagram,
         onSuccess: (data, variables) => {
@@ -120,7 +122,7 @@ export const DiagramGenerationTools = () => {
             setActiveMutationKey(null);
         },
     });
-    // Handle PDF upload
+    
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
@@ -133,10 +135,10 @@ export const DiagramGenerationTools = () => {
             toast({ title: t('builder.reportGenerator.toasts.uploadFailed'), description: error.message, variant: "destructive" });
         },
     });
-    // Check if anything is generating
+    
     const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating;
-    // Handle file upload
+    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -147,7 +149,7 @@ export const DiagramGenerationTools = () => {
             }
         }
     };
-    // Handle diagram generation
+    
     const onGenerateDiagram = async (diagramType: DiagramType) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});

@@ -3,13 +3,9 @@
 
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import { type ProjectProposal, type SectionName, type DiagramType, type PresentationSlide, SectionNameSchema, DiagramTypeSchema } from '@/ai/schemas';
-import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
+import { type ProjectProposal } from '@/ai/schemas';
 import { toast } from '@/hooks/use-toast';
-import { AGENTS } from '@/lib/agents';
-import type { AgentPrompt } from '@/lib/agents';
 import { type ProposalTemplateKey, templates as proposalTemplates } from '@/lib/proposal-templates';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 import { useReportStore } from './useReportStore';
 import { useDiagramStore } from './useDiagramStore';
 import { usePresentationStore } from './usePresentationStore';
@@ -27,7 +23,7 @@ export interface BuilderState {
 interface BuilderActions {
     // Basic Actions
     newSession: () => void;
-    loadState: (state: Partial<BuilderState>) => void;
+    loadState: (state: Partial<BuilderState & ReturnType<typeof useReportStore.getState> & ReturnType<typeof useDiagramStore.getState> & ReturnType<typeof usePresentationStore.getState> & ReturnType<typeof useCodeGeneratorStore.getState>>) => void;
     setProjectIdea: (idea: string) => void;
     // Proposal Actions
     setProposal: (proposal: ProjectProposal | null) => void;
@@ -120,6 +116,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       partialize: (state) => ({
         projectIdea: state.projectIdea,
         proposal: state.proposal,
+        // The child stores will handle their own persistence
       }),
     }
   )
