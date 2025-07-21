@@ -20,22 +20,22 @@ export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
 
 const modern: PptxStyleOptions = {
     background: { color: "FFFFFF" },
-    title: { fontFace: "Calibri", fontSize: 28, bold: true, color: "363636" },
-    body: { fontFace: "Calibri", fontSize: 18, color: "4f4f4f" },
+    title: { fontFace: "Calibri", fontSize: 28, bold: true, color: "363636", align: 'left' },
+    body: { fontFace: "Calibri", fontSize: 18, color: "4f4f4f", align: 'left' },
     bullet: { type: 'bullet' },
 };
 
 const dark: PptxStyleOptions = {
     background: { color: "262626" },
-    title: { fontFace: "Helvetica", fontSize: 32, bold: true, color: "FFFFFF" },
-    body: { fontFace: "Helvetica", fontSize: 18, color: "F1F1F1" },
+    title: { fontFace: "Helvetica", fontSize: 32, bold: true, color: "FFFFFF", align: 'center' },
+    body: { fontFace: "Helvetica", fontSize: 18, color: "F1F1F1", align: 'left' },
     bullet: { type: 'bullet' },
 };
 
 const professional: PptxStyleOptions = {
     background: { color: "F4F7F9" },
-    title: { fontFace: "Garamond", fontSize: 30, bold: false, color: "003366" },
-    body: { fontFace: "Garamond", fontSize: 16, color: "333333" },
+    title: { fontFace: "Garamond", fontSize: 30, bold: false, color: "003366", align: 'left' },
+    body: { fontFace: "Garamond", fontSize: 16, color: "333333", align: 'left' },
     bullet: { type: 'bullet' },
 };
 
