@@ -3,46 +3,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAgent, useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentData } from '@/lib/agents';
+import { useUpdateAgent } from '@/hooks/use-agents';
+import type { Agent } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, AlertCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Loader2, Save } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-
-function AgentEditorSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Skeleton className="w-8 h-8 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-32" />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-40 w-full" />
-        </div>
-      </CardContent>
-      <CardFooter className="justify-end">
-        <Skeleton className="h-10 w-32" />
-      </CardFooter>
-    </Card>
-  )
-}
 
 interface AgentEditorProps {
   agentId: string;
@@ -51,13 +20,15 @@ interface AgentEditorProps {
 
 export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const { t } = useLocalization();
   
   const updateAgentMutation = useUpdateAgent();
 
   const [name, setName] = useState(initialData.name || '');
   const [prompt, setPrompt] = useState('');
+
+  // Assign the icon to a variable with a capital letter
+  const Icon = initialData.icon;
 
   useEffect(() => {
     if (initialData) {
@@ -90,7 +61,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            {initialData.icon && <initialData.icon className="w-8 h-8 text-primary" />}
+            {Icon && <Icon className="w-8 h-8 text-primary" />}
             <div>
               <CardTitle className="font-headline">{initialData.name}</CardTitle>
               <CardDescription>
