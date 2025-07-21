@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { GenerateClassDiagramOutput } from '@/ai/flows/generate-class-diagram';
+import type { GenerateDiagramOutput } from '@/ai/flows/generate-diagrams';
 import type { GuidelineState } from '@/hooks/useReportStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
@@ -54,7 +54,7 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
     return guidelines;
 };
 
-async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateClassDiagramOutput & { imageUrl: string }> {
+async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateDiagramOutput & { imageUrl: string }> {
     const response = await fetch('/api/generate-diagrams', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
@@ -128,7 +128,7 @@ export const DiagramGenerationTools = () => {
         onSuccess: (data, variables) => {
             const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
-            queryClient.invalidateQueries({ queryKey: ['user'] });
+            queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
             toast({ title: t('builder.reportGenerator.toasts.contextAdded'), description: t('builder.reportGenerator.toasts.contextAddedDesc', { fileName: file.name }) });
         },
         onError: (error: Error) => {
@@ -223,13 +223,6 @@ export const DiagramGenerationTools = () => {
                                             <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.basePrompt')}</Label>
-                                                <div className="p-3 rounded-md border bg-muted text-xs">
-                                                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                                                </div>
-                                            </div>
-
                                             {hasGuidelines && (
                                                 <div className="space-y-2">
                                                     <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.guidelines')}</Label>

@@ -12,16 +12,14 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
-import { AgentPromptSchema } from '@/lib/agents';
-
 
 const GenerateIntroductionInputSchema = z.object({
   proposal: ProjectProposalSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
   externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF) to use as additional context."),
-  agent: AgentPromptSchema.describe("The agent configuration, including the base prompt and guidelines."),
-  instructionText: z.string().optional().describe("Additional specific instructions for the generation."),
+  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
+  instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
 });
 export type GenerateIntroductionInput = z.infer<typeof GenerateIntroductionInputSchema>;
 
@@ -41,15 +39,19 @@ const generateIntroductionFlow = ai.defineFlow(
     outputSchema: GenerateIntroductionOutputSchema,
   },
   async (input) => {
+    const agent = AGENTS.find(a => a.id === 'generate-introduction-section');
+    if (!agent) throw new Error("Agent configuration not found.");
+    const basePrompt = typeof agent.prompt === 'string' ? agent.prompt : agent.prompt.base;
+
     const generateIntroductionPrompt = ai.definePrompt({
       name: 'generateIntroductionPrompt',
       input: { schema: GenerateIntroductionInputSchema },
       output: { schema: GenerateIntroductionOutputSchema },
-      prompt: `{{{agent.base}}}
+      prompt: `${basePrompt}
 
-{{#if agent.guidelines}}
+{{#if guidelines}}
 --- Guidelines ---
-{{#each agent.guidelines}}
+{{#each guidelines}}
 - {{{this}}}
 {{/each}}
 {{/if}}
@@ -96,3 +98,5 @@ const generateIntroductionFlow = ai.defineFlow(
     return output!;
   }
 );
+// This import must be at the bottom to avoid circular dependency issues
+import { AGENTS } from '@/lib/agents';

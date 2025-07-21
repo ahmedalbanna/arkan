@@ -2,9 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { AGENTS } from '@/lib/agents';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
-import type { AgentPrompt } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
 import { auth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
@@ -37,37 +35,13 @@ export async function POST(request: Request) {
     }
     
     await deductCredit(userId, 1);
-
-    const { proposal, sections, diagrams, guidelines, externalContextContent, templateId } = validation.data;
-
-    const templateDoc = await adminDb.collection('templates').doc('presentation').collection('items').doc(templateId).get();
-    if (!templateDoc.exists) {
-        return NextResponse.json({ message: 'Presentation template not found.' }, { status: 404 });
-    }
-    const templateData = templateDoc.data();
-    const presentationAgent = AGENTS.find(a => a.id === templateData?.primaryAgentId);
-
-    if (!presentationAgent || typeof presentationAgent.prompt !== 'object' || !('base' in (presentationAgent.prompt as AgentPrompt))) {
-      return NextResponse.json({ message: 'Presentation generation agent not configured properly.' }, { status: 500 });
-    }
-
-    const agentPrompt = presentationAgent.prompt as AgentPrompt;
     
-    const agentInput = {
-      proposal,
-      sections,
-      diagrams,
-      externalContextContent,
-      agent: {
-        base: agentPrompt.base,
-        guidelines: guidelines || [],
-      },
-    };
+    const agentInput = validation.data;
 
     const result = await generatePresentation(agentInput);
     
     await logGeneration({
-        agentId: presentationAgent.id,
+        agentId: 'generate-presentation',
         userId,
         input: agentInput,
         output: result,

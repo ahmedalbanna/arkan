@@ -1,20 +1,14 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type DiagramType } from '@/ai/schemas';
-import { AGENTS, type AgentPrompt } from '@/lib/agents';
-import { generateUseCaseDiagram } from '@/ai/flows/generate-use-case-diagram';
-import { generateClassDiagram } from '@/ai/flows/generate-class-diagram';
-import { generateSequenceDiagram } from '@/ai/flows/generate-sequence-diagram';
-import { generateActivityDiagram } from '@/ai/flows/generate-activity-diagram';
-import { generateComponentDiagram } from '@/ai/flows/generate-component-diagram';
-import { generateArchimateDiagram } from '@/ai/flows/generate-archimate-diagram';
-import { generateErDiagram } from '@/ai/flows/generate-er-diagram';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
+// Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema,
   diagramToGenerate: DiagramTypeSchema,
@@ -57,16 +51,6 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
   return `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
 }
 
-const diagramAgentMap: Record<DiagramType, { flow: Function; agentId: string }> = {
-  useCase: { flow: generateUseCaseDiagram, agentId: 'generate-use-case-diagram' },
-  class: { flow: generateClassDiagram, agentId: 'generate-class-diagram' },
-  sequence: { flow: generateSequenceDiagram, agentId: 'generate-sequence-diagram' },
-  activity: { flow: generateActivityDiagram, agentId: 'generate-activity-diagram' },
-  component: { flow: generateComponentDiagram, agentId: 'generate-component-diagram' },
-  archimate: { flow: generateArchimateDiagram, agentId: 'generate-archimate-diagram' },
-  er: { flow: generateErDiagram, agentId: 'generate-er-diagram' },
-};
-
 export async function POST(request: Request) {
   try {
     const authorization = request.headers.get('Authorization');
@@ -94,30 +78,12 @@ export async function POST(request: Request) {
     
     await deductCredit(userId, 1);
 
-    const { proposal, diagramToGenerate, otherSections, otherDiagrams, guidelines, externalContextContent } = validation.data;
-
-    const agentInfo = diagramAgentMap[diagramToGenerate];
-    if (!agentInfo) {
-      return NextResponse.json({ message: 'Unknown diagram type requested.' }, { status: 400 });
-    }
-
-    const agent = AGENTS.find(a => a.id === agentInfo.agentId);
-    if (!agent) {
-      return NextResponse.json({ message: `Agent for diagram '${diagramToGenerate}' not configured.` }, { status: 500 });
-    }
-    
     const agentInput = {
-      proposal,
-      otherSections: otherSections || {},
-      otherDiagrams: otherDiagrams || {},
-      agent: {
-        base: (agent.prompt as AgentPrompt).base,
-        guidelines: guidelines || [],
-      },
-      externalContextContent,
+      ...validation.data,
+      diagramType: validation.data.diagramToGenerate, // Pass diagram type for the flow
     };
 
-    const result = await agentInfo.flow(agentInput);
+    const result = await generateDiagram(agentInput);
 
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
     
@@ -127,7 +93,7 @@ export async function POST(request: Request) {
     };
 
     await logGeneration({
-        agentId: agent.id,
+        agentId: `generate-${validation.data.diagramToGenerate}-diagram`,
         userId,
         input: agentInput,
         output: finalOutput,

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
-import { AGENTS, type AgentPrompt } from '@/lib/agents';
+import { AGENTS } from '@/lib/agents';
 import { generateIntroduction } from '@/ai/flows/generate-introduction';
 import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
 import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
@@ -12,10 +12,12 @@ import { generateSystemProgramming } from '@/ai/flows/generate-system-programmin
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
 import { deductCredit } from '@/services/credit-service';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { auth as adminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
+import { sectionConfig } from '@/lib/report-config';
 
-const generateReportSchema = z.object({
+// Schema for generating a single section
+const generateSectionSchema = z.object({
   proposal: ProjectProposalSchema,
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
@@ -25,6 +27,7 @@ const generateReportSchema = z.object({
   externalContextContent: z.string().optional(),
 });
 
+// Schema for generating a full report based on a template
 const generateFullReportSchema = z.object({
     proposal: ProjectProposalSchema,
     templateId: z.string(),
@@ -54,7 +57,7 @@ export async function POST(request: Request) {
     
     const body = await request.json();
 
-    // Handle full report generation
+    // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
         const { proposal, templateId } = fullReportValidation.data;
@@ -81,11 +84,9 @@ export async function POST(request: Request) {
              const agentInput = {
                 proposal,
                 otherSections: generatedSections, // Pass already generated sections as context
-                agent: {
-                    base: (agent.prompt as AgentPrompt).base,
-                    guidelines: (agent.prompt as AgentPrompt).guidelines?.map(g => g.text),
-                }
-            };
+                // For full report generation, we don't pass granular guidelines from the UI.
+                // It relies on the default agent configurations.
+             };
 
             const result = await agentInfo.flow(agentInput);
             await logGeneration({ agentId, userId, input: agentInput, output: result });
@@ -96,42 +97,25 @@ export async function POST(request: Request) {
         return NextResponse.json({ sections: generatedSections }, { status: 200 });
     }
 
-    // Handle single section generation
-    const singleSectionValidation = generateReportSchema.safeParse(body);
+    // Check if it's a single section generation request
+    const singleSectionValidation = generateSectionSchema.safeParse(body);
     if (singleSectionValidation.success) {
         await deductCredit(userId, 1);
-        const { proposal, sectionToGenerate, otherSections, otherDiagrams, guidelines, instructionText, externalContextContent } = singleSectionValidation.data;
+        const agentInput = singleSectionValidation.data;
+        const agentInfo = sectionAgentMap[agentInput.sectionToGenerate];
 
-        const agentInfo = sectionAgentMap[sectionToGenerate];
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
-        const agent = AGENTS.find(a => a.id === agentInfo.agentId);
-        if (!agent) {
-             return NextResponse.json({ message: `Agent for section '${sectionToGenerate}' not configured.` }, { status: 500 });
-        }
         
-        const agentInput = {
-          proposal,
-          otherSections: otherSections || {},
-          otherDiagrams: otherDiagrams || {},
-          agent: {
-              base: (agent.prompt as AgentPrompt).base,
-              guidelines: guidelines || [],
-          },
-          instructionText,
-          externalContextContent,
-        };
-  
         const result = await agentInfo.flow(agentInput);
-        await logGeneration({ agentId: agent.id, userId, input: agentInput, output: result });
+        await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
   
         return NextResponse.json(result, { status: 200 });
     }
 
-    // If neither validation passes
-    const errors = singleSectionValidation.error.flatten().fieldErrors;
-    return NextResponse.json({ errors, message: 'Invalid request body.' }, { status: 400 });
+    // If neither validation passes, return a validation error
+    return NextResponse.json({ errors: singleSectionValidation.error.flatten().fieldErrors, message: 'Invalid request body.' }, { status: 400 });
 
   } catch (error) {
     console.error(`Error generating report:`, error);
@@ -147,3 +131,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'An unexpected error occurred while generating the report.' }, { status: 500 });
   }
 }
+
+// Import must be at the bottom to avoid circular dependency with other files that might use this one.
+import { adminDb } from '@/lib/firebase/admin';
