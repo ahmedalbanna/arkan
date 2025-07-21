@@ -2,14 +2,15 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateProposal } from '@/ai/flows/generate-proposal';
-import { AGENTS } from '@/lib/agents';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { auth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
+import type { ProposalTemplate } from '@/services/template-service';
 
 const generateProposalSchema = z.object({
   projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
-  prompt: z.string().optional(), // Prompt is now optional, but will be sent by the hook
+  templateId: z.string(),
+  customGuidelines: z.array(z.string()).optional(),
 });
 
 export async function POST(request: Request) {
@@ -29,18 +30,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    // This service function checks for sufficient credits and throws an error if not found.
     await deductCredit(userId, 1);
 
-    const { projectIdea, prompt } = validation.data;
+    const { projectIdea, templateId, customGuidelines } = validation.data;
 
-    const proposalAgent = AGENTS.find(a => a.id === 'generate-proposal-report');
-    if (!proposalAgent) {
-      return NextResponse.json({ message: 'Proposal generation agent not configured.' }, { status: 500 });
+    const templateDoc = await adminDb.collection('templates').doc('proposal').collection('items').doc(templateId).get();
+    if (!templateDoc.exists) {
+      return NextResponse.json({ message: 'Proposal template not found.' }, { status: 400 });
     }
+    const template = templateDoc.data() as ProposalTemplate;
 
-    // Use the prompt from the request if provided, otherwise fall back to the agent's default.
-    const finalPrompt = prompt || (typeof proposalAgent.prompt === 'string' ? proposalAgent.prompt : proposalAgent.prompt.base);
+    const finalGuidelines = [...(template.guidelines || []), ...(customGuidelines || [])];
+    
+    let finalPrompt = template.prompt;
+    if (finalGuidelines.length > 0) {
+        finalPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + finalGuidelines.map(g => `- ${g}`).join('\n');
+    }
 
     const agentInput = {
       projectIdea,
@@ -49,11 +54,10 @@ export async function POST(request: Request) {
 
     const result = await generateProposal(agentInput);
 
-    // Log the successful generation
     await logGeneration({
-        agentId: proposalAgent.id,
+        agentId: 'generate-proposal-report', // Agent ID for logging
         userId,
-        input: agentInput,
+        input: { projectIdea, templateId, customGuidelines }, // Log the user-facing input
         output: result,
     });
 
@@ -63,6 +67,9 @@ export async function POST(request: Request) {
     if (error instanceof Error) {
         if (error.message.includes("Unauthorized") || error.message.includes("token")) {
             return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
+        }
+        if (error.message.includes("credit")) {
+            return NextResponse.json({ message: error.message }, { status: 402 });
         }
         return NextResponse.json({ message: error.message }, { status: 500 });
     }

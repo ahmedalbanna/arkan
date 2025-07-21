@@ -37,7 +37,7 @@ interface BuilderActions {
 const initialState: BuilderState = {
   projectIdea: '',
   proposal: null,
-  selectedTemplateId: 'default',
+  selectedTemplateId: 'default-software',
   customGuidelines: [],
   customGuidelineInput: '',
 };
