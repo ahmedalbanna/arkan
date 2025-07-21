@@ -52,7 +52,7 @@ function set(obj: any, path: string, value: any) {
 // --- Custom Hooks ---
 
 export function usePptxStyles() {
-    const { data: templates, isLoading: isLoaded } = useQuery<Record<PptxTemplateKey, PptxTemplate>>({
+    const { data: templates, isLoading } = useQuery<Record<PptxTemplateKey, PptxTemplate>>({
         queryKey: [PPTX_TEMPLATES_QUERY_KEY],
         queryFn: fetchPptxTemplates,
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -103,5 +103,5 @@ export function usePptxStyles() {
         }
     };
 
-  return { templates: templates || {} as Record<PptxTemplateKey, PptxTemplate>, isLoaded: !isLoaded, updateStyle, saveChanges, isSaving: mutation.isPending };
+  return { templates: templates || {} as Record<PptxTemplateKey, PptxTemplate>, isLoaded: !isLoading, updateStyle, saveChanges, isSaving: mutation.isPending };
 }
