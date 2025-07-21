@@ -116,6 +116,15 @@ export const useReportStore = create<ReportState & ReportActions>()(
       handleGuidelineToggle: (itemKey, index, checked) => {
         set(state => {
             const newGuidelineState = { ...state.guidelineState };
+            // Ensure the state for the itemKey exists before trying to modify it
+            if (!newGuidelineState[itemKey]) {
+                const agent = AGENTS.find(a => a.id.replace('generate-', '').replace('-section', '').replace('-diagram', '') === itemKey);
+                const prompt = agent?.prompt as AgentPrompt;
+                newGuidelineState[itemKey] = {
+                    checked: prompt?.guidelines?.map(g => g.isDefault) || [],
+                    custom: [],
+                };
+            }
             newGuidelineState[itemKey].checked[index] = checked;
             return { guidelineState: newGuidelineState };
         });
@@ -128,6 +137,9 @@ export const useReportStore = create<ReportState & ReportActions>()(
           const newGuideline = customGuidelineInput[itemKey]?.trim();
           if (newGuideline) {
               const newGuidelines = { ...guidelineState };
+              if (!newGuidelines[itemKey]) {
+                newGuidelines[itemKey] = { checked: [], custom: [] };
+              }
               newGuidelines[itemKey].custom.push(newGuideline);
               set({
                   guidelineState: newGuidelines,
@@ -138,13 +150,15 @@ export const useReportStore = create<ReportState & ReportActions>()(
       handleRemoveCustomGuidelineForItem: (itemKey, index) => {
           set(state => {
               const newGuidelines = { ...state.guidelineState };
-              newGuidelines[itemKey].custom.splice(index, 1);
+              if (newGuidelines[itemKey]) {
+                  newGuidelines[itemKey].custom.splice(index, 1);
+              }
               return { guidelineState: newGuidelines };
           });
       },
       toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
         set(state => {
-            const newSelection = { ...state.contextSelection };
+            const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
             if (!newSelection[itemKey]) {
                 newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: false };
             }
