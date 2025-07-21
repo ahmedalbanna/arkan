@@ -139,7 +139,7 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${Math.max(1, enabledTabs.length)}, 1fr)` }}>
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
@@ -167,21 +167,21 @@ function GeneratePageContent() {
                         )}
                     </TabsList>
                     
-                    <div className="w-full flex-grow">
+                    <div className="w-full flex-grow mt-4">
                         <TabsContent value="proposal" className="h-full">
-                        {activeTab === 'proposal' && <ProposalModeGenerator />}
+                            {activeTab === 'proposal' && <ProposalModeGenerator />}
                         </TabsContent>
                         <TabsContent value="report" className="h-full">
-                        {activeTab === 'report' && <ReportGenerator />}
+                            {activeTab === 'report' && <ReportGenerator />}
                         </TabsContent>
                         <TabsContent value="diagram" className="h-full">
-                        {activeTab === 'diagram' && <DiagramGenerator />}
+                            {activeTab === 'diagram' && <DiagramGenerator />}
                         </TabsContent>
                         <TabsContent value="code" className="h-full">
-                        {activeTab === 'code' && <CodeGenerator />}
+                            {activeTab === 'code' && <CodeGenerator />}
                         </TabsContent>
                         <TabsContent value="presentation" className="h-full">
-                        {activeTab === 'presentation' && <PresentationGenerator />}
+                            {activeTab === 'presentation' && <PresentationGenerator />}
                         </TabsContent>
                     </div>
                  </Tabs>
