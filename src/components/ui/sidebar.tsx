@@ -561,20 +561,8 @@ const SidebarMenuButton = React.forwardRef<
     const pathname = usePathname();
     const { isMobile, state } = useSidebar();
     
-    // Determine if the link is active
     const isActive = isActiveProp ?? (href ? pathname.startsWith(href) : false);
 
-    const buttonContent = (
-      <Comp
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
-    );
-    
     const Comp = href ? NextLink : asChild ? Slot : "button";
 
     const button = (
