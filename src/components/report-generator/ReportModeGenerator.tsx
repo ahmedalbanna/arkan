@@ -13,17 +13,21 @@ import { useTranslate } from '@/hooks/use-translation';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { SectionName } from '@/ai/schemas';
+import { useReportStore } from '@/hooks/useReportStore';
 
 export default function ReportGenerator() {
     const { t, locale } = useLocalization();
+    const { proposal } = useBuilderStore();
     const {
-        proposal,
         sections,
-        handleSectionUpdate,
         setSection,
-    } = useBuilderStore();
+    } = useReportStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
+
+  const handleSectionUpdate = (key: SectionName, value: string) => {
+    setSection(key, value);
+  };
 
 
   if (!proposal) {

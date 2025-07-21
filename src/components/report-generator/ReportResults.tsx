@@ -9,7 +9,7 @@ import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
 import { Loader2, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useReportStore } from '@/hooks/useReportStore';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -49,10 +49,10 @@ interface ReportResultsProps {
 }
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
-  const { sections } = useBuilderStore();
+  const { sections } = useReportStore();
   const { t } = useLocalization();
   
-  const hasContent = Object.values(sections).some(s => !!s);
+  const hasContent = sections && Object.values(sections).some(s => !!s);
   
   if (!hasContent) {
     return (
@@ -84,7 +84,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                 <EditableSection
                   key={key}
                   sectionKey={key}
-                  title={title}
+                  title={t(title)}
                   icon={Icon}
                   content={content!}
                   onUpdate={onSectionUpdate}
