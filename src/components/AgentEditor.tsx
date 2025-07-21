@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, AlertCircle } from 'lucide-react';
+import { Loader2, Save, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import Link from 'next/link';
 
 interface AgentEditorProps {
   agentId: string;
@@ -62,7 +63,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <Icon className="w-8 h-8 text-primary" />
+            {Icon && <Icon className="w-8 h-8 text-primary" />}
             <div>
               <CardTitle className="font-headline">{initialData.name}</CardTitle>
               <CardDescription>
@@ -102,7 +103,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
             />
           </div>
         </CardContent>
-        <CardFooter className="justify-end">
+        <CardFooter className="justify-between">
           <Button type="submit" disabled={updateAgentMutation.isPending || !name || !prompt} className="font-headline">
             {updateAgentMutation.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -110,6 +111,12 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
               <Save className="mr-2 h-4 w-4" />
             )}
             {t('agentEditor.saveButton')}
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/manage-agents">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Return to Manage Agents
+            </Link>
           </Button>
         </CardFooter>
       </Card>
