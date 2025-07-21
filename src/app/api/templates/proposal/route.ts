@@ -11,12 +11,14 @@ export async function GET(request: Request) {
         let snapshot = await collectionRef.get();
 
         if (snapshot.empty) {
+            console.log('No proposal templates found in Firestore, seeding...');
             const batch = adminDb.batch();
             defaultTemplates.forEach((template) => {
                 const docRef = collectionRef.doc(template.id);
                 batch.set(docRef, template);
             });
             await batch.commit();
+            console.log('Proposal templates seeded successfully.');
             snapshot = await collectionRef.get();
         }
         

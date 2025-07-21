@@ -12,6 +12,7 @@ export async function GET(request: Request) {
 
         // Lazy seeding: If no templates exist, populate them from the default config.
         if (snapshot.empty) {
+            console.log('No DOCX templates found in Firestore, seeding...');
             const batch = adminDb.batch();
             (Object.keys(defaultTemplates) as TemplateKey[]).forEach(key => {
                 const template = defaultTemplates[key];
@@ -19,6 +20,7 @@ export async function GET(request: Request) {
                 batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
             });
             await batch.commit();
+            console.log('DOCX templates seeded successfully.');
             snapshot = await stylesCollection.get(); // Re-fetch after seeding
         }
         
