@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight, Lightbulb, PartyPopper } from 'lucide-react';
-import Image from 'next/image';
+import DynamicImage from './DynamicImage';
 
 interface OnboardingGuideProps {
   isOpen: boolean;
@@ -27,49 +27,41 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
     {
       title: 'Welcome to Arkan!',
       description: "Let's take a quick tour to see how you can use AI to build amazing things.",
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'welcome illustration'
     },
     {
       title: '1. Proposal Mode',
       description: 'Start by describing your project idea. Our AI will generate a complete, professional proposal with objectives, timelines, and budgets.',
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'document idea'
     },
     {
       title: '2. Document Generator',
       description: 'Expand your proposal into a full-fledged report. Generate sections like introductions, system analysis, and conclusions with a single click.',
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'report generation'
     },
     {
       title: '3. Diagram Generator',
       description: 'Visualize your system. Create class diagrams, use cases, sequence diagrams, and more using simple text descriptions.',
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'flowchart diagram'
     },
     {
       title: '4. Code Generator',
       description: "Need a UI component? Describe what you want, and the AI will generate the HTML, CSS, and JavaScript for you.",
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'code editor'
     },
     {
       title: '5. Presentation Mode',
       description: 'Turn your generated content into a professional slide deck instantly, ready for your next big presentation.',
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'presentation slide'
     },
     {
       title: 'Your AI Credits',
       description: "Keep an eye on your credit balance in the top right corner. Most AI generations cost credits, so manage them wisely!",
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'coin balance'
     },
     {
       title: "You're All Set!",
       description: "You're ready to start creating. Dive in and explore the power of Arkan's AI toolkit.",
-      image: 'https://placehold.co/600x400.png',
       dataAiHint: 'rocket launch'
     },
   ], []);
@@ -98,13 +90,12 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[625px] w-[90vw] max-w-[90vw] md:w-full rounded-lg">
         <DialogHeader>
-          <Image
-            src={currentStep.image}
+          <DynamicImage
+            data-ai-hint={currentStep.dataAiHint}
             alt={currentStep.title}
             width={600}
             height={400}
             className="w-full h-auto rounded-t-lg aspect-video object-cover"
-            data-ai-hint={currentStep.dataAiHint}
           />
           <div className="p-6">
             <DialogTitle className="text-2xl font-headline flex items-center gap-2">

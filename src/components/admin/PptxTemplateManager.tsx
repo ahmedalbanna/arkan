@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import Image from 'next/image';
+import DynamicImage from '../DynamicImage';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
@@ -72,8 +72,7 @@ export default function PptxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-               <Image
-                  src={template.imageUrl}
+               <DynamicImage
                   alt={`${t(template.name)} preview`}
                   width={400}
                   height={225}

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import Image from 'next/image';
+import DynamicImage from '../DynamicImage';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
@@ -49,8 +49,7 @@ export default function DocxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-              <Image
-                src={template.imageUrl}
+              <DynamicImage
                 alt={`${t(template.name)} preview`}
                 width={400}
                 height={565}
