@@ -2,6 +2,7 @@
 'use client';
 
 export interface ProposalTemplate {
+    id: string; // Add ID to the interface
     name: string;
     description: string;
     prompt: string;
@@ -19,8 +20,9 @@ IMPORTANT: For all fields that contain descriptive text (like 'objective', 'meth
 Project Idea: {{{projectIdea}}}`;
 
 
-export const templates: Record<ProposalTemplateKey, ProposalTemplate> = {
-    default: {
+export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
+    {
+        id: 'default',
         name: 'Default Software Proposal',
         description: 'A standard, comprehensive template for software development projects.',
         prompt: basePrompt,
@@ -30,7 +32,8 @@ export const templates: Record<ProposalTemplateKey, ProposalTemplate> = {
             "Risks should consider technical challenges, scope creep, and resource availability."
         ]
     },
-    agile: {
+    {
+        id: 'agile',
         name: 'Agile Project Proposal',
         description: 'A template focused on Agile methodologies, with iterative phases.',
         prompt: basePrompt,
@@ -40,7 +43,8 @@ export const templates: Record<ProposalTemplateKey, ProposalTemplate> = {
             "Success criteria should emphasize continuous delivery, stakeholder feedback, and adaptability to change."
         ]
     },
-    marketing: {
+    {
+        id: 'marketing',
         name: 'Marketing Campaign Brief',
         description: 'A template tailored for planning and proposing a marketing campaign.',
         prompt: `You are an expert marketing strategist. A user will provide you with a product or service idea. Your task is to generate a comprehensive marketing campaign proposal (brief).
@@ -54,4 +58,4 @@ Project Idea: {{{projectIdea}}}`,
             "Risks should focus on market competition, ad performance, and brand reputation."
         ]
     }
-};
+];

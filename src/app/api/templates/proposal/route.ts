@@ -2,7 +2,7 @@
 // src/app/api/templates/proposal/route.ts
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
-import { templates as defaultTemplates } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/proposal-templates';
 
 // This endpoint is public for now, but could be restricted
 export async function GET(request: Request) {
@@ -12,9 +12,9 @@ export async function GET(request: Request) {
 
         if (snapshot.empty) {
             const batch = adminDb.batch();
-            Object.entries(defaultTemplates).forEach(([key, template]) => {
-                const docRef = collectionRef.doc(key);
-                batch.set(docRef, { ...template, id: key });
+            defaultTemplates.forEach((template) => {
+                const docRef = collectionRef.doc(template.id);
+                batch.set(docRef, template);
             });
             await batch.commit();
             snapshot = await collectionRef.get();
