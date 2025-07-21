@@ -144,8 +144,8 @@ export default function GenerationLogViewer() {
                     <span>{t('manageGenerations.cardTitle')}</span>
                     {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
                 </CardTitle>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                    <div className="relative">
+                <div className="flex flex-col md:flex-row gap-4 pt-4">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                             placeholder={t('manageGenerations.filterAgentPlaceholder')} 
@@ -154,7 +154,7 @@ export default function GenerationLogViewer() {
                             className="pl-10"
                         />
                     </div>
-                     <div className="relative">
+                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                             placeholder={t('manageGenerations.filterUserPlaceholder')}
