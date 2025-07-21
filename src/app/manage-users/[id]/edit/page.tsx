@@ -8,7 +8,7 @@ import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, use } from 'react';
 
 
 function EditUserPageSkeleton() {
@@ -72,6 +72,7 @@ function HeaderSection({ userName }: { userName: string }) {
 }
 
 
-export default function EditUserPage({ params }: { params: { id: string } }) {
+export default function EditUserPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+    const params = use(paramsPromise);
     return <EditUserPageContent userId={params.id} />
 }

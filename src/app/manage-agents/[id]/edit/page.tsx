@@ -4,7 +4,7 @@
 import AgentEditor from '@/components/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AlertCircle, Pencil } from 'lucide-react';
-import React from 'react';
+import React, { use } from 'react';
 import { useAgent } from '@/hooks/use-agents';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -69,6 +69,7 @@ function EditAgentPageContent({ agentId }: { agentId: string }) {
 }
 
 // This is the main export, acting as a Server Component wrapper.
-export default function EditAgentPage({ params }: { params: { id: string } }) {
+export default function EditAgentPage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise);
   return <EditAgentPageContent agentId={params.id} />;
 }
