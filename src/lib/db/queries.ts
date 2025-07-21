@@ -1,6 +1,8 @@
-
+// This file is now intended for Firebase queries.
+// The SQLite setup is separate and not used by the live application.
+// We will restore the original Firebase-based queries.
 'use server';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export interface UserProfile {
@@ -138,9 +140,7 @@ export async function updateUserByAdmin(userId: string, data: Partial<UserProfil
 }
 
 export async function deleteUser(userId: string) {
-    // Note: This only deletes the Firestore record. For a full deletion,
-    // you would also need to call `adminAuth.deleteUser(userId)` and delete
-    // any associated data in Storage or other services.
+    await adminAuth.deleteUser(userId);
     await adminDb.collection('users').doc(userId).delete();
 }
 
@@ -183,7 +183,12 @@ export async function getUserTeams(userId: string) {
 
         const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
         const memberIds = membersSnapshot.docs.map(doc => doc.id);
-        const memberProfiles = await adminDb.collection('users').where(admin.firestore.FieldPath.documentId(), 'in', memberIds).get();
+        
+        if (memberIds.length === 0) {
+            return { ...teamData, members: [] };
+        }
+
+        const memberProfiles = await adminDb.collection('users').where(FieldValue.documentId(), 'in', memberIds).get();
 
         const membersWithProfiles = membersSnapshot.docs.map(memberDoc => {
             const memberData = memberDoc.data() as TeamMember;
@@ -209,8 +214,7 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
   const teamRef = adminDb.collection('teams').doc();
   const userRef = adminDb.collection('users').doc(userId);
   
-  const newTeam: Team = {
-      id: teamRef.id,
+  const newTeam: Omit<Team, 'id'> = {
       name: teamName,
       ownerId: userId,
       createdAt: new Date().toISOString(),
@@ -230,5 +234,5 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
 
   await batch.commit();
 
-  return newTeam;
+  return { id: teamRef.id, ...newTeam };
 }

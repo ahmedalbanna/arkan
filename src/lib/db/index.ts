@@ -1,2 +1,6 @@
-// This file is no longer needed for the Firestore implementation and can be removed.
-// The Firebase Admin SDK initialization is now in /src/lib/firebase/admin.ts
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import Database from 'better-sqlite3';
+import * as schema from './schema';
+
+const sqlite = new Database('sqlite.db');
+export const db = drizzle(sqlite, { schema });
