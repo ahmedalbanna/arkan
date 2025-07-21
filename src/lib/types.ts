@@ -2,7 +2,7 @@
 'use client';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectProposal, SectionName } from '@/ai/schemas';
 
 export type UserRole = 'user' | 'admin' | 'editor' | 'guest'; // Define possible roles
 export interface User {
