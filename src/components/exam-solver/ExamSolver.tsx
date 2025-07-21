@@ -19,6 +19,8 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { exportExamAsDocx, exportExamAsPdf } from '@/lib/exam-exporter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 
 type ExamSolverStage = 'idle' | 'parsing' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
 
@@ -151,10 +153,95 @@ export default function ExamSolver() {
 
   const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
 
+  const analysisPanel = (
+    analyzedExam ? (
+      <Card className="h-full flex flex-col">
+        <CardHeader>
+          <CardTitle>{t('builder.examSolver.analysisCardTitle')}</CardTitle>
+          <CardDescription>{analyzedExam.subject} - {analyzedExam.specialty}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow flex flex-col">
+          <ScrollArea className="flex-grow p-1">
+            <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown>
+          </ScrollArea>
+          {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
+            <Button onClick={handleSolveExam} disabled={stage !== 'readyToSolve'} className="mt-4 w-full">
+              {stage === 'solving' ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Wand2 className="mr-2 h-4 w-4" />
+              )}
+              {t('builder.examSolver.solveButton')}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    ) : (
+        <Card className="min-h-[calc(100vh-250px)] flex items-center justify-center">
+             <div className="text-center text-muted-foreground p-8">
+                 <AlertCircle className="h-12 w-12 mb-4 mx-auto" />
+            <p>{t('builder.examSolver.analysisPlaceholder')}</p>
+             </div>
+        </Card>
+    )
+  );
+
+  const solutionPanel = (
+     <Card className="min-h-[calc(100vh-250px)] flex flex-col">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>{t('builder.examSolver.solutionCardTitle')}</CardTitle>
+            {solvedExam && (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            <Download className="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => exportExamAsDocx(analyzedExam!, solvedExam, 'modern')}>
+                           <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => exportExamAsPdf(analyzedExam!, solvedExam)}>
+                            <FileDown className="mr-2 h-4 w-4" /> Export as PDF
+                        </DropdownMenuItem>
+                         {originalFile && (
+                            <DropdownMenuItem onClick={handleDownloadOriginal}>
+                                <FileDown className="mr-2 h-4 w-4" /> Download Original PDF
+                            </DropdownMenuItem>
+                         )}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
+        </div>
+        <CardDescription>{t('builder.examSolver.solutionCardDescription')}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        {isProcessing && stage === 'solving' && (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <Loader2 className="h-12 w-12 animate-spin mb-4" />
+            <p>{t('builder.examSolver.solvingInProgress')}</p>
+          </div>
+        )}
+        {solvedExam ? (
+          <ScrollArea className="h-[calc(100vh-350px)] p-1">
+            <ReactMarkdown components={markdownComponents}>{solvedExam.solution}</ReactMarkdown>
+          </ScrollArea>
+        ) : stage !== 'solving' && (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <AlertCircle className="h-12 w-12 mb-4" />
+              <p>{t('builder.examSolver.solutionPlaceholder')}</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      {/* Left Column - History & Controls */}
-       <div className="lg:col-span-3 space-y-6">
+      {/* --- DESKTOP VIEW --- */}
+      <div className="hidden lg:block lg:col-span-3 space-y-6">
          <Card>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -217,91 +304,93 @@ export default function ExamSolver() {
         </Card>
       </div>
 
-      {/* Middle Column - Exam */}
-      <div className="lg:col-span-4">
-        {analyzedExam ? (
-          <Card className="h-full flex flex-col">
-            <CardHeader>
-              <CardTitle>{t('builder.examSolver.analysisCardTitle')}</CardTitle>
-              <CardDescription>{analyzedExam.subject} - {analyzedExam.specialty}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-grow flex flex-col">
-              <ScrollArea className="flex-grow p-1">
-                <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown>
-              </ScrollArea>
-              {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-                <Button onClick={handleSolveExam} disabled={stage !== 'readyToSolve'} className="mt-4 w-full">
-                  {stage === 'solving' ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Wand2 className="mr-2 h-4 w-4" />
-                  )}
-                  {t('builder.examSolver.solveButton')}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-            <Card className="min-h-[calc(100vh-250px)] flex items-center justify-center">
-                 <div className="text-center text-muted-foreground p-8">
-                     <AlertCircle className="h-12 w-12 mb-4 mx-auto" />
-                <p>{t('builder.examSolver.analysisPlaceholder')}</p>
-                 </div>
-            </Card>
-        )}
+      <div className="hidden lg:block lg:col-span-4">
+        {analysisPanel}
       </div>
 
-      {/* Right Column - Solution */}
-      <div className="lg:col-span-5">
-        <Card className="min-h-[calc(100vh-250px)] flex flex-col">
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>{t('builder.examSolver.solutionCardTitle')}</CardTitle>
-                {solvedExam && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="sm">
-                                <Download className="mr-2 h-4 w-4" />
-                                Download
+      <div className="hidden lg:block lg:col-span-5">
+        {solutionPanel}
+      </div>
+
+      {/* --- MOBILE VIEW --- */}
+      <div className="block lg:hidden col-span-1">
+          <Tabs defaultValue="upload" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="upload">Upload</TabsTrigger>
+                <TabsTrigger value="exam">Exam</TabsTrigger>
+                <TabsTrigger value="solution">Solution</TabsTrigger>
+            </TabsList>
+             <TabsContent value="upload" className="mt-4">
+                 <div className="space-y-6">
+                    <Card>
+                        <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="flex items-center gap-2">
+                            <History className="w-5 h-5" /> {t('builder.examSolver.historyTitle')}
+                            </CardTitle>
+                            <Button variant="ghost" size="icon" onClick={clearHistory} disabled={history.length === 0} title={t('examSolver.clearHistoryTooltip')}>
+                                <Trash2 className="w-4 h-4" />
                             </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem onClick={() => exportExamAsDocx(analyzedExam!, solvedExam, 'modern')}>
-                               <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => exportExamAsPdf(analyzedExam!, solvedExam)}>
-                                <FileDown className="mr-2 h-4 w-4" /> Export as PDF
-                            </DropdownMenuItem>
-                             {originalFile && (
-                                <DropdownMenuItem onClick={handleDownloadOriginal}>
-                                    <FileDown className="mr-2 h-4 w-4" /> Download Original PDF
-                                </DropdownMenuItem>
-                             )}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
-            </div>
-            <CardDescription>{t('builder.examSolver.solutionCardDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="flex-grow">
-            {isProcessing && stage === 'solving' && (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Loader2 className="h-12 w-12 animate-spin mb-4" />
-                <p>{t('builder.examSolver.solvingInProgress')}</p>
-              </div>
-            )}
-            {solvedExam ? (
-              <ScrollArea className="h-[calc(100vh-350px)] p-1">
-                <ReactMarkdown components={markdownComponents}>{solvedExam.solution}</ReactMarkdown>
-              </ScrollArea>
-            ) : stage !== 'solving' && (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <AlertCircle className="h-12 w-12 mb-4" />
-                  <p>{t('builder.examSolver.solutionPlaceholder')}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        </div>
+                        <CardDescription>{t('builder.examSolver.historyDescription')}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                        <ScrollArea className="h-48">
+                            {history.length > 0 ? (
+                            <div className="space-y-2 pr-2">
+                                {history.map(item => (
+                                <Button
+                                    key={item.id}
+                                    variant="ghost"
+                                    onClick={() => loadFromHistory(item.id)}
+                                    className={cn(
+                                        "w-full h-auto justify-start text-left p-2",
+                                        currentHistoryId === item.id && "bg-muted"
+                                    )}
+                                >
+                                    <div className="flex flex-col">
+                                        <span className="font-semibold truncate">{item.analyzedExam.specialty}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {formatDistanceToNow(new Date(item.id), { addSuffix: true })}
+                                        </span>
+                                    </div>
+                                </Button>
+                                ))}
+                            </div>
+                            ) : (
+                            <p className="text-sm text-muted-foreground text-center p-4">{t('examSolver.historyEmpty')}</p>
+                            )}
+                        </ScrollArea>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                    <CardHeader>
+                        <CardTitle>{t('builder.examSolver.uploadCardTitle')}</CardTitle>
+                        <CardDescription>{t('builder.examSolver.uploadCardDescription')}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex gap-2">
+                        <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={isProcessing} />
+                        <Button onClick={handleUploadAndAnalyze} disabled={!originalFile || isProcessing}>
+                            {stage === 'parsing' || stage === 'analyzing' ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                            <UploadCloud className="mr-2 h-4 w-4" />
+                            )}
+                            {t('builder.examSolver.uploadAndAnalyzeButton')}
+                        </Button>
+                        </div>
+                    </CardContent>
+                    </Card>
+                 </div>
+            </TabsContent>
+            <TabsContent value="exam" className="mt-4">
+                {analysisPanel}
+            </TabsContent>
+            <TabsContent value="solution" className="mt-4">
+                {solutionPanel}
+            </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
