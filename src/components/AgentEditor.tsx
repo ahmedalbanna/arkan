@@ -46,30 +46,30 @@ function AgentEditorSkeleton() {
 
 interface AgentEditorProps {
   agentId: string;
+  initialData: Agent;
 }
 
-function AgentEditorContent({ agentId }: { agentId: string }) {
+export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { t } = useLocalization();
-  const { data: agent, isLoading, isError } = useAgent(agentId);
-
+  
   const updateAgentMutation = useUpdateAgent();
 
-  const [name, setName] = useState(agent?.name || '');
+  const [name, setName] = useState(initialData.name || '');
   const [prompt, setPrompt] = useState('');
 
   useEffect(() => {
-    if (agent) {
-      setName(agent.name);
-      const agentPrompt = agent.prompt;
+    if (initialData) {
+      setName(initialData.name);
+      const agentPrompt = initialData.prompt;
       if (typeof agentPrompt === 'string') {
         setPrompt(agentPrompt);
       } else if (typeof agentPrompt === 'object' && agentPrompt.base) {
         setPrompt(agentPrompt.base);
       }
     }
-  }, [agent]);
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,31 +83,18 @@ function AgentEditorContent({ agentId }: { agentId: string }) {
     });
   };
 
-  if (isLoading) {
-    return <AgentEditorSkeleton />;
-  }
-  
-  if (isError || !agent) {
-    return (
-      <Card className="p-8 text-center text-destructive">
-        <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-        <p>{t('agentEditor.errorLoading')}</p>
-      </Card>
-    )
-  }
-
-  const isComplexPrompt = typeof agent.prompt === 'object' && agent.prompt !== null && 'guidelines' in agent.prompt;
+  const isComplexPrompt = typeof initialData.prompt === 'object' && initialData.prompt !== null && 'guidelines' in initialData.prompt;
 
   return (
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            {agent.icon && <agent.icon className="w-8 h-8 text-primary" />}
+            {initialData.icon && <initialData.icon className="w-8 h-8 text-primary" />}
             <div>
-              <CardTitle className="font-headline">{agent.name}</CardTitle>
+              <CardTitle className="font-headline">{initialData.name}</CardTitle>
               <CardDescription>
-                {t('agentEditor.idLabel')}: {agent.id} | {t('agentEditor.categoryLabel')}: {agent.category}
+                {t('agentEditor.idLabel')}: {initialData.id} | {t('agentEditor.categoryLabel')}: {initialData.category}
               </CardDescription>
             </div>
           </div>
@@ -156,10 +143,4 @@ function AgentEditorContent({ agentId }: { agentId: string }) {
       </Card>
     </form>
   );
-}
-
-
-// This is the main export, acting as a Server Component wrapper.
-export default function EditAgentPage({ params }: { params: { id: string } }) {
-  return <AgentEditorContent agentId={params.id} />;
 }

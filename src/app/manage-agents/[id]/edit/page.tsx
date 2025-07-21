@@ -17,7 +17,30 @@ function EditAgentPageSkeleton() {
         <Skeleton className="h-8 w-48 mt-4 mx-auto" />
         <Skeleton className="h-6 w-64 mt-2 mx-auto" />
       </div>
-      <AgentEditor agentId="" />
+      <Card>
+      <CardHeader>
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-8 h-8 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </CardContent>
+      <CardFooter className="justify-end">
+        <Skeleton className="h-10 w-32" />
+      </CardFooter>
+    </Card>
     </div>
   );
 }
