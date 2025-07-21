@@ -28,6 +28,25 @@ async function manageSessionCookie(user: FirebaseUser | null) {
       },
       body: JSON.stringify({ idToken }),
     });
+
+    // On Google sign-in, ensure a user profile exists in Firestore.
+    // This is a good place to handle it centrally.
+    const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}` // Pass token for verification
+        },
+        body: JSON.stringify({ 
+            uid: user.uid, 
+            email: user.email, 
+            name: user.displayName 
+        })
+    });
+    if (!response.ok) {
+        console.error("Failed to create or verify user profile on Google sign-in.");
+    }
+
   } else {
     await fetch('/api/auth/session', {
       method: 'DELETE',
@@ -48,11 +67,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [refetch]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
- console.log('onAuthStateChanged fired:', user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setFirebaseUser(user);
+      await manageSessionCookie(user);
       setIsLoading(false);
-      manageSessionCookie(user);
     });
 
     return () => unsubscribe();

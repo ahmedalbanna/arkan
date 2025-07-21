@@ -14,10 +14,11 @@ import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { useSignup } from '@/hooks/use-user';
+import { useSignup, useGoogleSignIn } from '@/hooks/use-user';
 import type { SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Separator } from './ui/separator';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -30,6 +31,7 @@ export default function SignupForm() {
   const { t } = useLocalization();
   const { toast } = useToast();
   const signupMutation = useSignup();
+  const googleSignInMutation = useGoogleSignIn();
 
   const form = useForm<SignupCredentials>({
     resolver: zodResolver(formSchema),
@@ -62,6 +64,7 @@ export default function SignupForm() {
     signupMutation.mutate(values);
   }
 
+  const isPending = signupMutation.isPending || googleSignInMutation.isPending;
   const formLevelError = (signupMutation.error as any)?.error?._form?.[0];
 
   return (
@@ -87,7 +90,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>{t('signup.nameLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t('signup.namePlaceholder')} {...field} disabled={signupMutation.isPending} />
+                    <Input placeholder={t('signup.namePlaceholder')} {...field} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,7 +103,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>{t('signup.emailLabel')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} disabled={signupMutation.isPending} />
+                    <Input placeholder="name@example.com" {...field} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -113,7 +116,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>{t('signup.passwordLabel')}</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} disabled={signupMutation.isPending} />
+                    <Input type="password" placeholder="••••••••" {...field} disabled={isPending} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,9 +124,23 @@ export default function SignupForm() {
             />
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full font-headline" disabled={signupMutation.isPending}>
+            <Button type="submit" className="w-full font-headline" disabled={isPending}>
               {signupMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('signup.submitButton')}
+            </Button>
+             <div className="relative w-full">
+                <Separator className="my-2" />
+                <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-2 text-xs text-muted-foreground">OR</span>
+            </div>
+            <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => googleSignInMutation.mutate()}
+                disabled={isPending}
+            >
+                {googleSignInMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148-118.2H248v-73.6h236.3c2.4 12.4 3.7 26.5 3.7 41.6z"></path></svg>}
+                Sign up with Google
             </Button>
              <p className="text-sm text-muted-foreground">
               {t('signup.loginPrompt')}{' '}

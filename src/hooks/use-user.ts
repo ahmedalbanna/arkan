@@ -8,7 +8,7 @@ import type { PricingPlan, LoginCredentials, SignupCredentials } from '@/lib/typ
 import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, signOut, sendPasswordResetEmail, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { fetchUserProfile } from '@/services/user-service';
 import { useAuth } from '@/context/AuthContext';
 
@@ -26,6 +26,22 @@ async function loginUser(credentials: LoginCredentials) {
     throw new Error(error.message || 'Login failed. Please try again.');
   }
 }
+
+async function signInWithGoogle() {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        
+        // This is a client-side check. We will rely on the AuthProvider to handle profile creation.
+        // A more robust solution might involve an API call to ensure the profile exists or is created.
+        
+        return user;
+    } catch (error: any) {
+        throw new Error(error.message || "Google Sign-In failed.");
+    }
+}
+
 
 async function logoutUser() {
     await signOut(auth);
@@ -107,6 +123,35 @@ export function useLogin() {
                     variant: 'destructive',
                 });
             }
+        }
+    });
+}
+
+export function useGoogleSignIn() {
+    const router = useRouter();
+    const queryClient = useQueryClient();
+    const { refetchUser } = useAuth();
+
+    return useMutation({
+        mutationFn: signInWithGoogle,
+        onSuccess: (user) => {
+            if (user) {
+                refetchUser();
+                queryClient.invalidateQueries({ queryKey: userKeys.all });
+                router.push('/generate');
+                router.refresh();
+                toast({
+                    title: 'Sign-In Successful',
+                    description: `Welcome, ${user.displayName}!`,
+                });
+            }
+        },
+        onError: (error: Error) => {
+            toast({
+                title: 'Sign-In Failed',
+                description: error.message,
+                variant: 'destructive',
+            });
         }
     });
 }
