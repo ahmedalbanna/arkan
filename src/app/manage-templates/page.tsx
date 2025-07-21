@@ -1,7 +1,7 @@
 
 'use client';
 
-import TemplateManager from '@/components/TemplateManager';
+import DocxTemplateManager from '@/components/admin/DocxTemplateManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Palette } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export default function ManageTemplatesPage() {
           {t('manageTemplates.pageSubtitle')}
         </p>
       </div>
-      <TemplateManager />
+      <DocxTemplateManager />
     </div>
   );
 }

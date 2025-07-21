@@ -7,7 +7,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users, SlidersHorizontal, Settings } from "lucide-react";
+import { Bot, CreditCard, History, LayoutDashboard, Palette, FileImage, Users, SlidersHorizontal, Settings, PencilRuler } from "lucide-react";
 import { useLocalization } from "@/context/LocalizationContext";
 
 function AdminLayoutSkeleton() {
@@ -43,6 +43,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         { href: '/manage-agents', label: t('header.agentManager'), icon: Bot },
         { href: '/manage-payments', label: t('header.managePayments'), icon: CreditCard },
         { href: '/manage-generations', label: t('header.activityHistory'), icon: History },
+        { href: '/admin/manage-generation-templates', label: 'Generation Templates', icon: PencilRuler },
         { href: '/manage-templates', label: t('header.exportTemplates'), icon: Palette },
         { href: '/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
         { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
@@ -72,7 +73,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
              <div className="border-b mb-6">
                 <nav className="flex items-center gap-2 sm:gap-4 -mb-px overflow-x-auto">
                     {adminNavLinks.map(link => {
-                        const isActive = pathname === link.href;
+                        const isActive = pathname.startsWith(link.href);
                         return (
                             <Link
                                 key={link.href}
