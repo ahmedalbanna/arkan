@@ -26,21 +26,29 @@ export async function exportHomeworkAsDocx(
     solvedHomework: SolvedHomework,
     templateKey: TemplateKey = 'modern'
 ) {
+    if (!solvedHomework.solutions) {
+        console.error("No solutions to export.");
+        return;
+    }
+
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
-    const questionsParagraphs = await createDocxParagraphs(analyzedHomework.structuredQuestions);
-    const solutionParagraphs = await createDocxParagraphs(solvedHomework.solution);
+    const docxContent = [];
+
+    for (const pair of solvedHomework.solutions) {
+        docxContent.push(...await createDocxParagraphs(pair.question));
+        docxContent.push(new Paragraph({ text: "Solution:", style: "IntenseQuote"}));
+        docxContent.push(...await createDocxParagraphs(pair.solution));
+        docxContent.push(new Paragraph({ text: "" })); // Add a spacer
+    }
 
     const doc = new Document({
         styles,
         sections: [{
             children: [
-                new Paragraph({ text: `Homework: ${analyzedHomework.subject} - ${analyzedHomework.title}`, style: 'Title' }),
-                new Paragraph({ text: "Questions", heading: HeadingLevel.HEADING_1, spacing: { before: 400 } }),
-                ...questionsParagraphs,
-                new Paragraph({ text: "Solution", heading: HeadingLevel.HEADING_1, pageBreakBefore: true, spacing: { before: 400 } }),
-                ...solutionParagraphs,
+                new Paragraph({ text: `Homework Solution: ${analyzedHomework.subject} - ${analyzedHomework.title}`, style: 'Title' }),
+                ...docxContent,
             ]
         }]
     });
@@ -53,6 +61,10 @@ export async function exportHomeworkAsPdf(
     analyzedHomework: AnalyzedHomework,
     solvedHomework: SolvedHomework
 ) {
+     if (!solvedHomework.solutions) {
+        console.error("No solutions to export.");
+        return;
+    }
     const { jsPDF } = await import('jspdf');
     const { default: html2canvas } = await import('html2canvas');
 
@@ -62,11 +74,14 @@ export async function exportHomeworkAsPdf(
     container.style.width = '800px';
     container.style.padding = '20px';
     container.style.fontFamily = 'sans-serif';
+    container.className = 'prose dark:prose-invert';
 
-    const questionsHtml = `<h1>Questions: ${analyzedHomework.title}</h1>${analyzedHomework.structuredQuestions.replace(/\n/g, '<br>')}`;
-    const solutionHtml = `<h1>Solution</h1>${solvedHomework.solution.replace(/\n/g, '<br>')}`;
-    container.innerHTML = `${questionsHtml}<br style="page-break-before: always;">${solutionHtml}`;
+    let htmlContent = `<h1>Homework Solution: ${analyzedHomework.title}</h1>`;
+    solvedHomework.solutions.forEach(pair => {
+        htmlContent += `<div>${pair.question.replace(/\n/g, '<br>')}</div><br><strong>Solution:</strong><div>${pair.solution.replace(/\n/g, '<br>')}</div><hr>`;
+    });
 
+    container.innerHTML = htmlContent;
     document.body.appendChild(container);
 
     const canvas = await html2canvas(container, {

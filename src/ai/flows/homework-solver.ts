@@ -54,7 +54,13 @@ export async function solveHomework(input: AnalyzedHomework): Promise<SolvedHome
     output: { schema: SolvedHomeworkSchema },
     prompt: `You are an expert tutor specializing in **{{{subject}}}**.
 
-    Your task is to provide a comprehensive and accurate solution to the following homework assignment titled **"{{{title}}}"**. Present the solution in a clear, well-structured Markdown format. For each question, provide a detailed answer, showing all necessary steps, reasoning, or explanations.
+    Your task is to provide a comprehensive and accurate solution to the following homework assignment titled **"{{{title}}}"**.
+    
+    For each question in the provided homework, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
+    
+    - For each question, provide a step-by-step solution.
+    - Format all mathematical equations and steps clearly using Markdown.
+    - Ensure your final output is an array of objects, where each object contains a 'question' and its corresponding 'solution'.
 
     Homework Questions:
     ---

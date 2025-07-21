@@ -67,11 +67,11 @@ export const useHomeworkSolverStore = create<HomeworkSolverState & HomeworkSolve
       setSolvedHomework: (solution) => set({ solvedHomework: solution, stage: solution ? 'solved' : 'readyToSolve' }),
       setOriginalFile: async (file) => {
         if (!file) {
-            set({ originalFile: null });
+            set({ originalFile: null, stage: 'idle', analyzedHomework: null, solvedHomework: null });
             return;
         }
         const dataUrl = await fileToDataUrl(file);
-        set({ originalFile: { name: file.name, type: file.type, dataUrl } });
+        set({ originalFile: { name: file.name, type: file.type, dataUrl }, stage: 'idle', analyzedHomework: null, solvedHomework: null });
       },
       addSolvedHomeworkToHistory: (analyzedHomework, solvedHomework, originalFile) => {
         const newEntry: HomeworkHistoryEntry = {
@@ -97,14 +97,20 @@ export const useHomeworkSolverStore = create<HomeworkSolverState & HomeworkSolve
           });
         }
       },
-      clearHistory: () => set({ history: [] }),
-      resetCurrent: () => set({
-        stage: 'idle',
-        analyzedHomework: null,
-        solvedHomework: null,
-        originalFile: null,
-        currentHistoryId: null,
-      }),
+      clearHistory: () => {
+        set({ history: [], currentHistoryId: null });
+        get().resetCurrent();
+      },
+      resetCurrent: () => {
+          // Reset all state except for history
+          set({
+            stage: 'idle',
+            analyzedHomework: null,
+            solvedHomework: null,
+            originalFile: null,
+            currentHistoryId: null,
+          });
+      },
     }),
     {
       name: 'arkan-homework-solver-state', // Name for the localStorage item
