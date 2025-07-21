@@ -24,8 +24,72 @@
     "logout": "Logout",
     "examSolver": "Exam Solver",
     "homeworkSolver": "Homework Solver",
-    "adminSettings": "Settings"
+    "adminSettings": "Settings",
+    "documentation": "Documentation"
   },
+  "docs": {
+    "pageTitle": "Application Documentation",
+    "pageSubtitle": "Learn how to use all the features Arkan has to offer.",
+    "navigationTitle": "Features",
+    "howToUse": "How to Use",
+    "proposalGenerator": {
+        "title": "Proposal Generator",
+        "description": "The Proposal Generator is the starting point for your projects. Describe your idea in a few sentences, and our AI will create a comprehensive, professional project proposal.",
+        "step1": "Navigate to the 'Builder' and select the 'Proposal Mode' tab.",
+        "step2": "Enter a clear description of your project idea into the text area.",
+        "step3": "Click 'Generate Proposal' and review the structured output, which you can edit directly."
+    },
+    "reportGenerator": {
+        "title": "Report Generator",
+        "description": "Once you have a proposal, the Report Generator can build out a full document, section by section, based on the proposal's context.",
+        "step1": "Ensure a proposal is loaded in the 'Proposal Mode' tab.",
+        "step2": "In the 'Document Generator' tab, open the accordion for the section you want to generate (e.g., Introduction, System Analysis).",
+        "step3": "Adjust any guidelines or controls for the AI.",
+        "step4": "Click the 'Generate' button for that section and watch the content appear."
+    },
+    "diagramGenerator": {
+        "title": "Diagram Generator",
+        "description": "Visualize your system's architecture, user flows, and database schemas with AI-powered PlantUML diagramming.",
+        "step1": "In the 'Diagram Generator' tab, select the type of diagram you wish to create (e.g., Use Case, Class, Sequence).",
+        "step2": "Provide additional context by selecting relevant report sections or other diagrams.",
+        "step3": "Click 'Generate' to produce the PlantUML code and a preview image."
+    },
+    "codeGenerator": {
+        "title": "Code Generator",
+        "description": "Need a UI component? Describe it in plain language, and the Code Generator will provide you with the HTML, CSS, and JavaScript.",
+        "step1": "Go to the 'Code Generator' tab.",
+        "step2": "Write a clear prompt describing the component, its appearance, and its behavior (e.g., 'A responsive login form with a show/hide password button')."
+    },
+    "presentationGenerator": {
+        "title": "Presentation Generator",
+        "description": "Instantly convert your project proposal and report sections into a professional slide deck.",
+        "step1": "After generating a proposal and some report content, switch to the 'Presentation Mode' tab.",
+        "step2": "Select which report sections you want to include as context for the presentation.",
+        "step3": "Click 'Generate Presentation' to create a full set of slides with titles, bullet points, and speaker notes."
+    },
+    "examSolver": {
+        "title": "Exam Solver",
+        "description": "Upload an exam in PDF format, and let the AI analyze the questions and provide detailed solutions.",
+        "step1": "Navigate to the 'Exam Solver' page from the header.",
+        "step2": "Upload a PDF file containing the exam questions.",
+        "step3": "The AI will first analyze and structure the exam, then you can click 'Solve Exam' to generate the answers."
+    },
+    "homeworkSolver": {
+        "title": "Homework Solver",
+        "description": "Similar to the Exam Solver, this tool helps you tackle homework assignments by providing step-by-step solutions.",
+        "step1": "Go to the 'Homework Solver' page.",
+        "step2": "Upload your homework assignment as a PDF.",
+        "step3": "Let the AI analyze the questions and then generate the solutions for your review."
+    },
+    "admin": {
+        "title": "Admin Panel",
+        "description": "The admin panel provides a comprehensive suite of tools for managing the entire application.",
+        "step1": "Access the admin panel via the user dropdown menu in the header (visible only to admin accounts).",
+        "step2": "Use 'Manage Users' to view, edit, or delete user accounts and adjust their credit balances.",
+        "step3": "Use 'Manage Agents' and 'Manage Templates' to configure the behavior and output of the AI generation tools.",
+        "step4": "Review 'Activity History' to monitor all AI generations across the platform."
+    }
+},
   "adminSettings": {
     "pageSubtitle": "Manage application-wide settings and data operations.",
     "dataSyncTitle": "Data Synchronization",
