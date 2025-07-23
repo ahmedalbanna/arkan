@@ -12,7 +12,6 @@ const generateProposalSchema = z.object({
   projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
   templateId: z.string(),
   customGuidelines: z.array(z.string()).optional(),
-  locale: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -34,7 +33,7 @@ export async function POST(request: Request) {
 
     await deductCredit(userId, 1);
 
-    const { projectIdea, templateId, customGuidelines, locale } = validation.data;
+    const { projectIdea, templateId, customGuidelines } = validation.data;
 
     const templateDoc = await adminDb.collection('templates').doc('proposal').collection('items').doc(templateId).get();
     if (!templateDoc.exists) {
@@ -63,13 +62,6 @@ export async function POST(request: Request) {
         output: result,
     });
     
-    // If locale is Arabic, translate the result before sending it back
-    if (locale === 'ar') {
-        await deductCredit(userId, 2); // Additional cost for translation
-        result = await translateProposal({ proposal: result, targetLang: 'Arabic' });
-    }
-
-
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error('Error generating proposal:', error);

@@ -28,7 +28,6 @@ const generateSectionSchema = z.object({
   guidelines: z.array(z.string()).optional(),
   instructionText: z.string().optional(),
   externalContextContent: z.string().optional(),
-  locale: z.string().optional(),
 });
 
 // Schema for generating a full report based on a template
@@ -37,7 +36,6 @@ const generateFullReportSchema = z.object({
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-    locale: z.string().optional(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -67,7 +65,7 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, templateId, existingSections = {}, existingDiagrams = {}, locale } = fullReportValidation.data;
+        const { proposal, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
@@ -86,9 +84,6 @@ export async function POST(request: Request) {
         
         // Calculate total credits needed
         let totalCreditsNeeded = sectionsToGenerate.length;
-        if (locale === 'ar') {
-            totalCreditsNeeded += sectionsToGenerate.length; // 1 extra credit per section for translation
-        }
 
         const userProfile = await getUserProfile(userId);
         if (!userProfile || userProfile.credits < totalCreditsNeeded) {
@@ -118,13 +113,7 @@ export async function POST(request: Request) {
             const result = await agentInfo.flow(agentInput);
             let content = Object.values(result)[0] as string;
 
-            // Translate if locale is Arabic
-            if (locale === 'ar') {
-                const translatedResult = await translateText({ text: content, targetLang: 'Arabic' });
-                content = translatedResult.translatedText;
-            }
-
-            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { ...result, translatedContent: locale === 'ar' ? content : undefined } });
+            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { ...result } });
     
             generatedSections[config.section] = content;
         }
@@ -137,10 +126,8 @@ export async function POST(request: Request) {
     if (singleSectionValidation.success) {
         
         const agentInput = singleSectionValidation.data;
-        const { locale } = agentInput;
 
         let creditsToDeduct = 1;
-        if (locale === 'ar') creditsToDeduct = 2; // 1 for generation, 1 for translation
         
         await deductCredit(userId, creditsToDeduct);
 
@@ -152,13 +139,6 @@ export async function POST(request: Request) {
         
         let result = await agentInfo.flow(agentInput);
         
-        // Translate if locale is Arabic
-        if (locale === 'ar') {
-            const contentToTranslate = Object.values(result)[0] as string;
-            const translatedResult = await translateText({ text: contentToTranslate, targetLang: 'Arabic' });
-            result = { [Object.keys(result)[0]]: translatedResult.translatedText };
-        }
-
         await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
   
         return NextResponse.json(result, { status: 200 });

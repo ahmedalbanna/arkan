@@ -213,7 +213,6 @@ export const GenerationTools = () => {
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
-            locale,
             token,
         };
         setActiveMutationKey(section);
@@ -232,7 +231,6 @@ export const GenerationTools = () => {
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            locale,
             token,
         };
         setActiveMutationKey(selectedReportTemplateId);

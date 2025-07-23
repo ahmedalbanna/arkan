@@ -140,7 +140,6 @@ export function ProposalModeGenerator() {
             projectIdea,
             templateId: selectedTemplateId,
             customGuidelines,
-            locale,
         }
         generationMutation.mutate({ body, token });
     };
