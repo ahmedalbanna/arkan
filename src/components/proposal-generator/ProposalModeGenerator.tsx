@@ -90,7 +90,6 @@ export function ProposalModeGenerator() {
     const {
         proposal,
         projectIdea,
-        setProjectIdea,
         handleProposalUpdate,
         setProposal,
         selectedTemplateId,
@@ -163,7 +162,7 @@ export function ProposalModeGenerator() {
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {/* Left Column */}
-                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
+                <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                     <ProposalGenerationTools
                         isDisabled={!projectIdea || generationMutation.isPending}
                         isGenerating={generationMutation.isPending}
@@ -178,8 +177,8 @@ export function ProposalModeGenerator() {
                 </div>
 
 
-                {/* Center Column */}
-                <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
+                {/* Right Column */}
+                <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">
                     {proposal ? (
                          <Card>
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -209,30 +208,6 @@ export function ProposalModeGenerator() {
                         </Card>
                     )}
                 </div>
-
-                 {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">{t('builder.proposalGenerator.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Textarea
-                                name="projectIdea"
-                                placeholder={t('builder.proposalGenerator.placeholder')}
-                                rows={8}
-                                required
-                                value={projectIdea || ''}
-                                onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={generationMutation.isPending}
-                            />
-                            {generationMutation.isError && (
-                                <p className="text-sm font-medium text-destructive mt-2">{generationMutation.error.message}</p>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-
             </div>
         </form>
     );
