@@ -1,8 +1,7 @@
 
 'use client';
 
-import { useEffect, use } from 'react';
-import { useFormState } from 'react-dom';
+import { useEffect, use, useActionState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +39,7 @@ const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address'),
   bio: z.string().max(300, 'Bio must be 300 characters or less').optional(),
-  credits: z.coerce.number().int().min(0, 'Credits cannot be negative'),
+  credits: z.coerce.number().int('Credits must be an integer').min(0, 'Credits cannot be negative'),
   role: z.enum(['user', 'admin']),
 });
 
@@ -68,8 +67,8 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   const router = useRouter();
   const { firebaseUser, userProfile: currentUserProfile } = useAuth();
   
-  const [updateState, updateFormAction] = useFormState(handleUpdateUser, { errors: {} });
-  const [deleteState, deleteFormAction] = useFormState(handleDeleteUser, { error: null });
+  const [updateState, updateFormAction] = useActionState(handleUpdateUser, { errors: {} });
+  const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: null });
 
   const form = useForm<EditUserFormValues>({
       resolver: zodResolver(editUserSchema),
