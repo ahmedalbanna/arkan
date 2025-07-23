@@ -78,7 +78,7 @@ export async function POST(request: Request) {
             .filter((sectionKey): sectionKey is SectionName => !!sectionKey);
         
         if (sectionsToGenerate.length === 0) {
-            return NextResponse.json({ sections: existingSections, message: "This template has no sections to generate." }, { status: 200 });
+            return NextResponse.json({ sections: {}, message: "This template has no sections to generate." }, { status: 200 });
         }
         
         // Check user credits before proceeding
@@ -88,13 +88,13 @@ export async function POST(request: Request) {
         }
         
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
+        const evalInput = { proposal, existingSections: {}, existingDiagrams, sectionsToGenerate };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
         await deductCredit(userId, sectionsToGenerate.length);
 
-        const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
+        const generatedSections: { [key in SectionName]?: string } = {};
       
         for (const config of evalResult.configs) {
             const agentInfo = sectionAgentMap[config.section];
