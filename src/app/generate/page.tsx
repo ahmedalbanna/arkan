@@ -64,30 +64,18 @@ async function markOnboardingComplete(userId: string, token: string) {
     return response.json();
 }
 
-function ProjectLoader() {
-    const { currentProjectId, loadState } = useBuilderStore();
-    const { data: projectData, isSuccess } = useProject(currentProjectId!);
-
-    useEffect(() => {
-        if (isSuccess && projectData) {
-            loadState(projectData);
-        }
-    }, [isSuccess, projectData, loadState]);
-
-    return null; // This component does not render anything
-}
-
-
 function GeneratePageContent() {
   useAutosave(); // Activate the autosave hook
   const [activeTab, setActiveTab] = useState("proposal");
-  const { proposal, currentProjectId } = useBuilderStore();
+  const { proposal, currentProjectId, loadState } = useBuilderStore();
   const { t } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
   const { features, isLoaded: featuresLoaded } = useFeatures();
+  const { data: projectData, isSuccess } = useProject(currentProjectId!);
 
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasLoadedProject, setHasLoadedProject] = useState(false);
 
   useEffect(() => {
     // Show the onboarding guide if the user profile is loaded and the flag is false
@@ -95,6 +83,14 @@ function GeneratePageContent() {
         setShowOnboarding(true);
     }
   }, [userProfile]);
+
+  // Effect to load project data into the store once it's fetched
+  useEffect(() => {
+      if (isSuccess && projectData && !hasLoadedProject) {
+          loadState(projectData);
+          setHasLoadedProject(true); // Mark as loaded to prevent re-loading
+      }
+  }, [isSuccess, projectData, loadState, hasLoadedProject]);
 
 
   const onboardingMutation = useMutation({
@@ -147,7 +143,6 @@ function GeneratePageContent() {
 
   return (
     <>
-      {currentProjectId && <ProjectLoader />}
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
         <div className="flex justify-end items-center mb-4">
@@ -221,5 +216,3 @@ export default function GeneratePage() {
         <GeneratePageContent />
     )
 }
-
-
