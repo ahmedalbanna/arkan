@@ -145,9 +145,6 @@ export const GenerationTools = () => {
 
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
-    const singleSectionMutation = useMutation({ mutationFn: generateSingleSection });
-    const fullReportMutation = useMutation({ mutationFn: generateFullReport });
-    
     const handleGenerationResult = (data: any, variables: any) => {
         if (variables.templateId) { // Full report was generated
             setAllSections(data.sections);
@@ -156,7 +153,7 @@ export const GenerationTools = () => {
             const sectionKey = variables.sectionToGenerate;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
-            toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
+            toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
         }
         queryClient.invalidateQueries({ queryKey: ['user'] });
         setActiveMutationKey(null);
@@ -168,11 +165,16 @@ export const GenerationTools = () => {
         setActiveMutationKey(null);
     };
 
-    singleSectionMutation.options.onSuccess = handleGenerationResult;
-    singleSectionMutation.options.onError = handleGenerationError;
-    fullReportMutation.options.onSuccess = handleGenerationResult;
-    fullReportMutation.options.onError = handleGenerationError;
-
+    const singleSectionMutation = useMutation({
+        mutationFn: generateSingleSection,
+        onSuccess: handleGenerationResult,
+        onError: handleGenerationError
+    });
+    const fullReportMutation = useMutation({
+        mutationFn: generateFullReport,
+        onSuccess: handleGenerationResult,
+        onError: handleGenerationError
+    });
 
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
@@ -180,10 +182,10 @@ export const GenerationTools = () => {
             const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: "Context Added", description: `Successfully processed ${file.name}.` });
+            toast({ title: t('builder.reportGenerator.toasts.contextAdded'), description: t('builder.reportGenerator.toasts.contextAddedDesc', { fileName: file.name }) });
         },
         onError: (error: Error) => {
-            toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
+            toast({ title: t('builder.reportGenerator.toasts.uploadFailed'), description: error.message, variant: "destructive" });
         },
     });
 
@@ -203,7 +205,7 @@ export const GenerationTools = () => {
     
     const onGenerateSection = async (section: SectionName) => {
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
             return;
         };
 
@@ -425,7 +427,7 @@ export const GenerationTools = () => {
                                                                 <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
                                                                     <div className="flex items-center gap-2">
                                                                         <BookCheck className="h-4 w-4" />
-                                                                        {sectionConfig[contextKey].title}
+                                                                        {t(sectionConfig[contextKey].title)}
                                                                     </div>
                                                                 </Label>
                                                             </div>
@@ -448,7 +450,7 @@ export const GenerationTools = () => {
                                                                   <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
                                                                       <div className="flex items-center gap-2">
                                                                           <GitGraph className="h-4 w-4" />
-                                                                          {diagramConfig[contextKey].title}
+                                                                          {t(diagramConfig[contextKey].title)}
                                                                       </div>
                                                                   </Label>
                                                               </div>
@@ -484,7 +486,7 @@ export const GenerationTools = () => {
                                             onClick={() => onGenerateSection(key)}
                                             disabled={isAnythingGenerating || !agent?.isEnabled}
                                             className="font-headline"
-                                            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${title}`}
+                                            title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${t(title)}`}
                                         >
                                             {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                             {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
