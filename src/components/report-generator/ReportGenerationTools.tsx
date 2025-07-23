@@ -70,11 +70,11 @@ const generateInstructionText = (controls: any): string => {
     return instructions.join('\n');
 };
 
-async function generateSingleSection(variables: any): Promise<any> {
+async function generateReportApi(variables: any): Promise<any> {
     const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-        body: JSON.stringify(variables),
+        body: JSON.stringify(variables.body),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -83,18 +83,6 @@ async function generateSingleSection(variables: any): Promise<any> {
     return await response.json();
 }
 
-async function generateFullReport(variables: any): Promise<any> {
-    const response = await fetch('/api/generate-full-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-        body: JSON.stringify(variables),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate full report');
-    }
-    return await response.json();
-}
 
 async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
      const response = await fetch('/api/pdf-to-markdown', {
@@ -146,11 +134,11 @@ export const GenerationTools = () => {
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
     const handleGenerationResult = (data: any, variables: any) => {
-        if (variables.templateId) { // Full report was generated
+        if (variables.body.templateId) { // Full report was generated
             setAllSections(data.sections);
             toast({ title: `Full report generated successfully!` });
         } else { // Single section
-            const sectionKey = variables.sectionToGenerate;
+            const sectionKey = variables.body.sectionToGenerate;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
             toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
@@ -160,21 +148,17 @@ export const GenerationTools = () => {
     };
 
     const handleGenerationError = (error: Error, variables: any) => {
-        const item = variables.templateId || variables.sectionToGenerate;
+        const item = variables.body.templateId || variables.body.sectionToGenerate;
         toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
         setActiveMutationKey(null);
     };
+    
+    const reportGenerationMutation = useMutation({
+        mutationFn: generateReportApi,
+        onSuccess: handleGenerationResult,
+        onError: handleGenerationError
+    });
 
-    const singleSectionMutation = useMutation({
-        mutationFn: generateSingleSection,
-        onSuccess: handleGenerationResult,
-        onError: handleGenerationError
-    });
-    const fullReportMutation = useMutation({
-        mutationFn: generateFullReport,
-        onSuccess: handleGenerationResult,
-        onError: handleGenerationError
-    });
 
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
@@ -189,7 +173,7 @@ export const GenerationTools = () => {
         },
     });
 
-    const isAnythingGenerating = singleSectionMutation.isPending || fullReportMutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.isPending;
     const isDisabled = isAnythingGenerating;
     
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,10 +212,9 @@ export const GenerationTools = () => {
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContextContent: selection.externalContext ? externalContext?.content : undefined,
-            token,
         };
         setActiveMutationKey(section);
-        singleSectionMutation.mutate(body);
+        reportGenerationMutation.mutate({ body, token });
     };
 
     const onGenerateFullReport = async () => {
@@ -245,10 +228,9 @@ export const GenerationTools = () => {
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            token,
         };
         setActiveMutationKey(selectedReportTemplateId);
-        fullReportMutation.mutate(body);
+        reportGenerationMutation.mutate({ body, token });
     };
 
     const onPdfUpload = async () => {
