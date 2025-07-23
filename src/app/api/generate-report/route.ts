@@ -33,8 +33,6 @@ const generateSectionSchema = z.object({
 const generateFullReportSchema = z.object({
     proposal: ProjectProposalSchema,
     templateId: z.string(),
-    existingSections: z.record(SectionNameSchema, z.string()).optional(),
-    existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
 });
 
 const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
@@ -64,7 +62,7 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
+        const { proposal, templateId } = fullReportValidation.data;
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
@@ -88,7 +86,7 @@ export async function POST(request: Request) {
         }
         
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, existingSections: {}, existingDiagrams, sectionsToGenerate };
+        const evalInput = { proposal, existingSections: {}, sectionsToGenerate, existingDiagrams: {} };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
@@ -104,7 +102,7 @@ export async function POST(request: Request) {
             const agentInput = {
                 proposal,
                 otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key] }), {}),
-                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
+                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: (body.diagrams || {})[key] }), {}),
                 guidelines: config.guidelines,
                 instructionText,
             };

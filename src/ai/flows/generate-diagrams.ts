@@ -41,7 +41,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
 
     const diagramPrompt = ai.definePrompt({
-        name: `${input.diagramToGenerate}DiagramPrompt`,
+        name: `generate-${input.diagramToGenerate}-diagram-prompt`,
         input: { schema: GenerateDiagramInputSchema },
         output: { schema: GenerateDiagramOutputSchema },
         prompt: `${basePrompt}
