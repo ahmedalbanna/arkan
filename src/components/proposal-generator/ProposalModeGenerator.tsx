@@ -61,7 +61,7 @@ async function generateProposal(variables: { body: any; token: string; }): Promi
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate proposal');
     }
-    return response.json();
+    return await response.json();
 }
 
 async function translateProposal(variables: { proposal: ProjectProposal, targetLang: string, token: string }): Promise<ProjectProposal> {
@@ -77,7 +77,7 @@ async function translateProposal(variables: { proposal: ProjectProposal, targetL
         const error = await response.json();
         throw new Error(error.message || 'Failed to translate proposal');
     }
-    return response.json();
+    return await response.json();
 }
 
 
@@ -169,7 +169,11 @@ export function ProposalModeGenerator() {
                         isGenerating={generationMutation.isPending}
                     />
                     {proposal && (
-                        <ProposalActions isGenerating={generationMutation.isPending} />
+                        <ProposalActions 
+                            isGenerating={generationMutation.isPending}
+                            isTranslating={translateMutation.isPending}
+                            onTranslate={handleTranslateProposal}
+                        />
                     )}
                 </div>
 
@@ -187,27 +191,9 @@ export function ProposalModeGenerator() {
                                         <EditableField value={proposal.category} path="category" onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
                                     </CardDescription>
                                 </div>
-                                <div className="flex gap-2 flex-wrap">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" disabled={translateMutation.isPending}>
-                                                {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-                                                Translate Proposal
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem onClick={() => handleTranslateProposal('en')} disabled={translateMutation.isPending}>
-                                                Translate to English
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleTranslateProposal('ar')} disabled={translateMutation.isPending}>
-                                                Translate to Arabic
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="lg:h-[calc(100vh-310px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                <div className="lg:h-[calc(100vh-270px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                                    <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
                                 </div>
                             </CardContent>
@@ -236,7 +222,7 @@ export function ProposalModeGenerator() {
                                 placeholder={t('builder.proposalGenerator.placeholder')}
                                 rows={8}
                                 required
-                                value={projectIdea[locale] || ''}
+                                value={projectIdea || ''}
                                 onChange={(e) => setProjectIdea(e.target.value)}
                                 disabled={generationMutation.isPending}
                             />

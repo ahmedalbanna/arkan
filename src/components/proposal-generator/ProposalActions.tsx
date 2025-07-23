@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download } from 'lucide-react';
+import { Download, Languages, Loader2 } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -12,14 +12,17 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 interface ProposalActionsProps {
     isGenerating: boolean;
+    isTranslating: boolean;
+    onTranslate: (targetLang: 'en' | 'ar') => void;
 }
 
-export const ProposalActions = ({ isGenerating }: ProposalActionsProps) => {
+export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: ProposalActionsProps) => {
   const { t } = useLocalization();
   const { proposal } = useBuilderStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
@@ -65,10 +68,28 @@ export const ProposalActions = ({ isGenerating }: ProposalActionsProps) => {
               </Select>
             ) : <p>Loading templates...</p> }
         </div>
-        <Button onClick={handleExportDocx} disabled={isGenerating || !proposal} className="w-full font-headline">
-          <Download className="mr-2 h-4 w-4" />
-          {t('builder.proposalGenerator.exportDocx')}
-        </Button>
+        <div className='flex flex-col space-y-2'>
+            <Button onClick={handleExportDocx} disabled={isGenerating || !proposal} className="w-full font-headline">
+              <Download className="mr-2 h-4 w-4" />
+              {t('builder.proposalGenerator.exportDocx')}
+            </Button>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" className='w-full' disabled={isTranslating}>
+                        {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                        {t('builder.proposalGenerator.translateAllButton')}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => onTranslate('en')} disabled={isTranslating}>
+                        Translate to English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onTranslate('ar')} disabled={isTranslating}>
+                        Translate to Arabic
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </CardContent>
     </Card>
   );
