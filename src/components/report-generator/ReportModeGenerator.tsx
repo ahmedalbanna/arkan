@@ -77,16 +77,20 @@ export default function ReportGenerator() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Left Column -> Now the main results view */}
-      <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
-        <ReportActions onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
+      {/* Left Column: Generation Tools */}
+      <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
         <GenerationTools />
-        <EvaluationTools />
       </div>
 
-      {/* Right Column -> All tools */}
-      <div className="lg:col-span-8 overflow-y-auto pr-2">
+      {/* Center Column: Report Results */}
+      <div className="lg:col-span-6 overflow-y-auto pr-2">
         <ReportResults onSectionUpdate={handleSectionUpdate} />
+      </div>
+
+       {/* Right Column: Actions & Evaluation */}
+       <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
+        <ReportActions onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
+        <EvaluationTools />
       </div>
     </div>
   );
