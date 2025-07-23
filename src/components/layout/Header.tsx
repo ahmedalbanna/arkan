@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -184,21 +183,6 @@ export function Header() {
                       PDF to Markdown
                     </Link>
                   </DropdownMenuItem>
-
-                  {userProfile.role === 'admin' && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuLabel>Admin</DropdownMenuLabel>
-                      {adminLinks.map((link) => (
-                        <DropdownMenuItem key={link.href} asChild>
-                          <Link href={link.href}>
-                            <link.icon className="mr-2 h-4 w-4" />
-                            {link.label}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </>
-                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />

@@ -1,4 +1,3 @@
-
 // This file is now intended for Firebase queries.
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
