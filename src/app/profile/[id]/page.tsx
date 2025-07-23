@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useUserProfile } from '@/hooks/use-user';
 import { Skeleton } from '@/components/ui/skeleton';
+import { use } from 'react';
 
 function ProfileSkeleton() {
     return (
@@ -94,7 +95,8 @@ function ProfilePageContent({ userId }: { userId: string }) {
   );
 }
 
-
-export default function ProfilePage({ params }: { params: { id: string } }) {
-    return <ProfilePageContent userId={params.id} />;
+// This is the main export, which is a Client Component wrapper.
+export default function ProfilePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
+  const params = use(paramsPromise);
+  return <ProfilePageContent userId={params.id} />;
 }
