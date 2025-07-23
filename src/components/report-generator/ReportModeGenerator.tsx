@@ -42,14 +42,13 @@ export default function ReportGenerator() {
     )
   }
 
-  const handleTranslateAll = async () => {
+  const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
     setIsTranslatingAll(true);
     toast({
         title: t('builder.reportGenerator.toasts.translateAllStarted'),
         description: t('builder.reportGenerator.toasts.translateAllStartedDesc'),
     });
 
-    const targetLang = locale === 'en' ? 'Arabic' : 'English';
     const sectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
 
     const translationPromises = sectionKeys.map(key => {

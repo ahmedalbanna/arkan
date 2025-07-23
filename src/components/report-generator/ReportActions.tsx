@@ -14,11 +14,12 @@ import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 interface ReportActionsProps {
-    onTranslateAll: () => void;
+    onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
 }
 
@@ -76,14 +77,28 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
               </Select>
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
-        <Button onClick={handleExportReportDOCX} disabled={!hasContent || isTranslating} className="w-full font-headline">
-          <FileText className="mr-2 h-4 w-4" />
-          {t('builder.reportGenerator.exportReport')}
-        </Button>
-         <Button onClick={onTranslateAll} disabled={isTranslating || !hasContent} variant="secondary" className="w-full font-headline">
-            {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-            {t('builder.reportGenerator.translateAll')}
-        </Button>
+        <div className="flex flex-col space-y-2">
+            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isTranslating} className="w-full font-headline">
+              <FileText className="mr-2 h-4 w-4" />
+              {t('builder.reportGenerator.exportReport')}
+            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" className='w-full' disabled={isTranslating || !hasContent}>
+                        {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                        {t('builder.reportGenerator.translateAll')}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => onTranslateAll('en')} disabled={isTranslating}>
+                        Translate to English
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onTranslateAll('ar')} disabled={isTranslating}>
+                        Translate to Arabic
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+        </div>
       </CardContent>
     </Card>
   );
