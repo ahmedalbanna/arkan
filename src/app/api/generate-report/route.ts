@@ -12,7 +12,6 @@ import { generateSystemProgramming } from '@/ai/flows/generate-system-programmin
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
-import { translateText } from '@/ai/flows/translate-text';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
@@ -82,18 +81,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ sections: existingSections, message: "All report sections have already been generated." }, { status: 200 });
         }
         
-        // Calculate total credits needed
-        let totalCreditsNeeded = sectionsToGenerate.length;
-
+        // Check user credits before proceeding
         const userProfile = await getUserProfile(userId);
-        if (!userProfile || userProfile.credits < totalCreditsNeeded) {
-            return NextResponse.json({ message: `Insufficient credits. You need ${totalCreditsNeeded} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
+        if (!userProfile || userProfile.credits < sectionsToGenerate.length) {
+            return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
         }
         
+        // Call the new evaluation agent to get the optimal configuration
         const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
-        await deductCredit(userId, totalCreditsNeeded);
+        // Deduct credits for all sections at once
+        await deductCredit(userId, sectionsToGenerate.length);
 
         const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
@@ -111,10 +110,9 @@ export async function POST(request: Request) {
             };
 
             const result = await agentInfo.flow(agentInput);
-            let content = Object.values(result)[0] as string;
-
-            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { ...result } });
+            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
     
+            const content = Object.values(result)[0] as string;
             generatedSections[config.section] = content;
         }
 
@@ -124,21 +122,15 @@ export async function POST(request: Request) {
     // Check if it's a single section generation request
     const singleSectionValidation = generateSectionSchema.safeParse(body);
     if (singleSectionValidation.success) {
-        
+        await deductCredit(userId, 1);
         const agentInput = singleSectionValidation.data;
-
-        let creditsToDeduct = 1;
-        
-        await deductCredit(userId, creditsToDeduct);
-
         const agentInfo = sectionAgentMap[agentInput.sectionToGenerate];
 
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
         
-        let result = await agentInfo.flow(agentInput);
-        
+        const result = await agentInfo.flow(agentInput);
         await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
   
         return NextResponse.json(result, { status: 200 });

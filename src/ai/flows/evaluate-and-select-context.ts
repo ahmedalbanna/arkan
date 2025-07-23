@@ -114,7 +114,7 @@ ${JSON.stringify(proposal, null, 2)}
 
 **Existing Diagrams (PlantUML):**
 {{#if existingDiagrams}}
-{{#each existingDiagrams}}
+{{#each otherDiagrams}}
 --- Diagram: {{@key}} ---
 {{{this}}}
 ---
