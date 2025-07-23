@@ -85,38 +85,35 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
         }
         
+        const generatedSections: { [key in SectionName]?: string } = {};
+        const existingDiagrams = body.diagrams || {};
+
         // Call the evaluation agent to get the optimal configuration
-        const evalInput = { proposal, existingSections: {}, sectionsToGenerate, existingDiagrams: {} };
+        const evalInput = { proposal, existingSections: {}, sectionsToGenerate, existingDiagrams };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
         await deductCredit(userId, sectionsToGenerate.length);
-
-        const generationPromises = evalResult.configs.map(async (config) => {
+      
+        for (const config of evalResult.configs) {
             const agentInfo = sectionAgentMap[config.section];
             const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
             
+            // Context now includes sections generated in this same run
             const agentInput = {
                 proposal,
-                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: (body.sections || {})[key] }), {}),
-                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: (body.diagrams || {})[key] }), {}),
+                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key] }), {}),
+                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
                 guidelines: config.guidelines,
                 instructionText,
             };
 
             const result = await agentInfo.flow(agentInput);
             await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
-            
+    
             const content = Object.values(result)[0] as string;
-            return { section: config.section, content };
-        });
-
-        const results = await Promise.all(generationPromises);
-
-        const generatedSections = results.reduce((acc, result) => {
-            acc[result.section] = result.content;
-            return acc;
-        }, {} as { [key in SectionName]?: string });
+            generatedSections[config.section] = content;
+        }
 
         return NextResponse.json({ sections: generatedSections }, { status: 200 });
     }
