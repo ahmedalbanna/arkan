@@ -23,15 +23,27 @@ export default function HandwritingGenerator() {
   const [text, setText] = useState('This is a sample text to get you started.');
   const [fontSize, setFontSize] = useState(30);
   const [fontFamily, setFontFamily] = useState(HANDWRITING_FONTS[0].value);
+  const [fontWeight, setFontWeight] = useState(400);
+  const [lineHeight, setLineHeight] = useState(45.2);
   const [fontColor, setFontColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
   const [handwriting, setHandwriting] = useState<any>(null);
 
-  
+
   useEffect(() => {
     if (canvasRef.current) {
       const hw = new Handwriting(canvasRef.current);
       setHandwriting(hw);
+
+      const resizeObserver = new ResizeObserver(() => {
+        hw.updateCanvasSize();  // Update on container resize
+        hw.draw(); // Redraw after resizing.
+      });
+      if (canvasRef.current?.parentNode instanceof Element) {
+        resizeObserver.observe(canvasRef.current.parentNode);
+      }
+
+      return () => resizeObserver.disconnect(); // Cleanup observer
     }
   }, []);
 
@@ -40,10 +52,12 @@ export default function HandwritingGenerator() {
       handwriting.setText(text);
       handwriting.setFontFamily(fontFamily);
       handwriting.setFontSize(fontSize);
+      handwriting.setFontWeight(fontWeight);
+      handwriting.setLineHeight(lineHeight);
       handwriting.setFontColor(fontColor);
       handwriting.draw();
     }
-  }, [handwriting, text, fontSize, fontColor, fontFamily]);
+  }, [handwriting, text, fontSize, fontWeight, lineHeight, fontColor, fontFamily]);
 
   useEffect(() => {
     if (handwriting) {
@@ -60,7 +74,7 @@ export default function HandwritingGenerator() {
       link.click();
     }
   };
-  
+
   const handleRedraw = () => {
     if(handwriting) {
         handwriting.draw();
@@ -73,10 +87,14 @@ export default function HandwritingGenerator() {
         <Card>
           <CardHeader>
             <CardTitle className="font-headline">Handwriting Output</CardTitle>
-            <CardDescription>The generated handwriting will appear here. Click Redraw for a new variation.</CardDescription>
+            <CardDescription>
+              The generated handwriting will appear here. Click Redraw for a new variation.
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <canvas ref={canvasRef} width="800" height="1000" className="w-full border rounded-md"></canvas>
+            <div className="w-full border rounded-md">
+              <canvas ref={canvasRef} width="800" height="1000"></canvas>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -103,13 +121,43 @@ export default function HandwritingGenerator() {
                         <SelectValue placeholder="Select a font" />
                     </SelectTrigger>
                     <SelectContent>
-                        {HANDWRITING_FONTS.map(font => (
+                        {HANDWRITING_FONTS.map((font) => (
                             <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
                                 {font.name}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="font-size">Font Size</Label>
+              <Input
+                id="font-size"
+                type="number"
+                value={fontSize}
+                onChange={(e) => setFontSize(Number(e.target.value))}
+              />
+            </div>
+            {/* Added Font Weight Input */}
+            <div className="space-y-2">
+              <Label htmlFor="font-weight">Font Weight</Label>
+              <Input
+                id="font-weight"
+                type="number"
+                value={fontWeight}
+                onChange={(e) => setFontWeight(Number(e.target.value))}
+              />
+            </div>
+            {/* Added Line Height Input */}
+            <div className="space-y-2">
+              <Label htmlFor="line-height">Line Height</Label>
+              <Input
+                id="line-height"
+                type="number"
+                step="0.1"
+                value={lineHeight}
+                onChange={(e) => setLineHeight(Number(e.target.value))}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="font-color">Font Color</Label>
