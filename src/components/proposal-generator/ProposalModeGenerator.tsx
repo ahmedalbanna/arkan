@@ -15,6 +15,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 function ProposalSkeleton() {
     return (
@@ -145,7 +146,7 @@ export function ProposalModeGenerator() {
         generationMutation.mutate({ body, token });
     };
 
-    const handleTranslateProposal = async () => {
+    const handleTranslateProposal = async (targetLang: 'en' | 'ar') => {
         if (!proposal || !firebaseUser) return;
 
         toast({
@@ -154,7 +155,6 @@ export function ProposalModeGenerator() {
         });
 
         const token = await firebaseUser.getIdToken();
-        const targetLang = locale === 'en' ? 'Arabic' : 'English';
         translateMutation.mutate({ proposal, targetLang, token });
     };
 
@@ -180,19 +180,35 @@ export function ProposalModeGenerator() {
                          <Card>
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div className="space-y-1.5">
-                                    <CardTitle className="font-headline">{t('builder.proposalGenerator.generatedTitle')}</CardTitle>
-                                    <CardDescription>{t('builder.proposalGenerator.generatedDescription')}</CardDescription>
+                                    <CardTitle className="font-headline text-2xl text-primary">
+                                        <EditableField value={proposal.title} path="title" onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
+                                    </CardTitle>
+                                    <CardDescription>
+                                        <EditableField value={proposal.category} path="category" onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
+                                    </CardDescription>
                                 </div>
                                 <div className="flex gap-2 flex-wrap">
-                                     <Button variant="outline" type="button" size="sm" onClick={handleTranslateProposal} disabled={translateMutation.isPending}>
-                                        {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-                                        {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
-                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm" disabled={translateMutation.isPending}>
+                                                {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                                                Translate Proposal
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem onClick={() => handleTranslateProposal('en')} disabled={translateMutation.isPending}>
+                                                Translate to English
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleTranslateProposal('ar')} disabled={translateMutation.isPending}>
+                                                Translate to Arabic
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="lg:h-[calc(100vh-310px)] overflow-y-auto pr-4">
-                                   <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} />
+                                <div className="lg:h-[calc(100vh-310px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                   <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
                                 </div>
                             </CardContent>
                         </Card>
@@ -220,7 +236,7 @@ export function ProposalModeGenerator() {
                                 placeholder={t('builder.proposalGenerator.placeholder')}
                                 rows={8}
                                 required
-                                value={projectIdea}
+                                value={projectIdea[locale] || ''}
                                 onChange={(e) => setProjectIdea(e.target.value)}
                                 disabled={generationMutation.isPending}
                             />
