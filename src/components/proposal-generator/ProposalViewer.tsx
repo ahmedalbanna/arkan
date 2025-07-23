@@ -35,7 +35,7 @@ interface EditableFieldProps {
     readOnly?: boolean;
 }
 
-const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '', readOnly = false }) => {
+export const EditableField: React.FC<EditableFieldProps> = ({ value, path, onUpdate, multiline = false, type = 'text', className = '', readOnly = false }) => {
     const { t } = useLocalization();
     const [isEditing, setIsEditing] = useState(false);
     const [currentValue, setCurrentValue] = useState(value);
