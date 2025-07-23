@@ -158,17 +158,24 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <ProposalGenerationTools
                         isDisabled={!projectIdea || generationMutation.isPending}
                         isGenerating={generationMutation.isPending}
                     />
+                    {proposal && (
+                        <ProposalActions 
+                            isGenerating={generationMutation.isPending}
+                            isTranslating={translateMutation.isPending}
+                            onTranslate={handleTranslateProposal}
+                        />
+                    )}
                 </div>
 
-                {/* Center Column */}
-                 <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
+                {/* Right Column */}
+                 <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-2">
                     {proposal ? (
                          <Card>
                             <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -196,17 +203,6 @@ export function ProposalModeGenerator() {
                                 <p>{t('builder.proposalGenerator.emptyState')}</p>
                             </div>
                         </Card>
-                    )}
-                </div>
-
-                {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    {proposal && (
-                        <ProposalActions 
-                            isGenerating={generationMutation.isPending}
-                            isTranslating={translateMutation.isPending}
-                            onTranslate={handleTranslateProposal}
-                        />
                     )}
                 </div>
             </div>
