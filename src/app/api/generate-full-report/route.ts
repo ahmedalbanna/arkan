@@ -10,7 +10,6 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
-import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
@@ -73,40 +72,26 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
     }
     
-    const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
-    const evalResult = await evaluateAndSelectContext(evalInput);
-    
     await deductCredit(userId, sectionsToGenerate.length);
 
-    const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
+    const generatedSections: { [key in SectionName]?: string } = {};
+    const contextSections: { [key in SectionName]?: string } = {};
   
-    for (const config of evalResult.configs) {
-        const agentInfo = sectionAgentMap[config.section];
-        
-        const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
-        
-        const contextSections = { ...existingSections };
-        if (config.context.sections) {
-          for(const sectionKey of config.context.sections) {
-            if(generatedSections[sectionKey]) {
-                contextSections[sectionKey] = generatedSections[sectionKey];
-            }
-          }
-        }
+    for (const sectionKey of sectionsToGenerate) {
+        const agentInfo = sectionAgentMap[sectionKey];
         
         const agentInput = {
             proposal,
             otherSections: contextSections,
-            otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
-            guidelines: config.guidelines,
-            instructionText,
+            otherDiagrams: existingDiagrams,
         };
 
         const result = await agentInfo.flow(agentInput);
         await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
 
         const content = Object.values(result)[0] as string;
-        generatedSections[config.section] = content;
+        generatedSections[sectionKey] = content;
+        contextSections[sectionKey] = content;
     }
 
     return NextResponse.json({ sections: generatedSections }, { status: 200 });
