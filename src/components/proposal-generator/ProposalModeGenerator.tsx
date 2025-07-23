@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, FileText, Download, FileJson, Languages } from 'lucide-react';
-import ProposalViewer from './ProposalViewer';
+import ProposalViewer, { EditableField } from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
