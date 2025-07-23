@@ -2,9 +2,9 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
 import { featureKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 export interface Feature {
     id: string;
@@ -89,11 +89,7 @@ export function useUpdateFeature() {
             if (context?.previousFeatures) {
                 queryClient.setQueryData(featureKeys.lists(), context.previousFeatures);
             }
-            toast({
-                title: 'Update Failed',
-                description: err.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(err, 'Update Feature Failed');
         },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: featureKeys.lists() });

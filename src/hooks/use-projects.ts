@@ -14,6 +14,7 @@ import {
     updateProject 
 } from '@/services/project-service';
 import { useBuilderStore } from './useBuilderStore';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
@@ -25,6 +26,11 @@ export function useProjects() {
             return fetchProjectsApi(token);
         },
         enabled: !!firebaseUser,
+        meta: { // Add this meta property
+        onError: (error: Error) => {
+            handleErrorUtility(error, 'Failed to fetch projects');
+            },
+        }
     });
 }
 
@@ -38,6 +44,11 @@ export function useProject(projectId: string) {
             return fetchProjectApi(projectId, token);
         },
         enabled: !!firebaseUser && !!projectId,
+        meta: { // Add this meta property
+        onError: (error: Error) => {
+            handleErrorUtility(error, 'Failed to fetch project');
+            }
+        }
     });
 }
 
@@ -64,11 +75,7 @@ export function useSaveProject() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Save Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Save Failed');
         }
     });
 }
@@ -95,11 +102,7 @@ export function useUpdateProject() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Update Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Update Failed');
         }
     });
 }
@@ -123,11 +126,7 @@ export function useDeleteProject() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Delete Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Delete Failed');
         }
     });
 }

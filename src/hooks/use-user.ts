@@ -21,6 +21,7 @@ import {
 import { fetchUserProfile as fetchUserProfileApi } from '@/services/user-service';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useCallback, useEffect } from 'react';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 
 // --- Query Functions ---
@@ -144,11 +145,7 @@ export function useLogin() {
             // Specific UI error handling is now done within the LoginForm component
             // We still keep a general toast for unexpected errors
             if (!error.message.includes("Invalid email or password")) {
-                toast({
-                    title: 'Login Error',
-                    description: error.message,
-                    variant: 'destructive',
-                });
+                handleErrorUtility(error, 'Login Error');
             }
         }
     });
@@ -174,11 +171,7 @@ export function useGoogleSignIn() {
             }
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Sign-In Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Sign-In Failed');
         }
     });
 }
@@ -198,11 +191,7 @@ export function useLogout() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Logout Error',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Logout Error');
         }
     });
 }
@@ -226,11 +215,7 @@ export function useSignup() {
             if (error.error && !error.error._form) {
                 // Do nothing if it's a field-specific error
             } else {
-                 toast({
-                    title: 'Signup Failed',
-                    description: error.error?._form?.[0] || 'An unexpected error occurred. Please try again.',
-                    variant: 'destructive'
-                });
+                 handleErrorUtility(error, 'Signup Failed');
             }
         }
     });
@@ -251,11 +236,7 @@ export function useSendPasswordReset() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: "Error Sending Reset Email",
-                description: error.message,
-                variant: 'destructive',
-            });
+             handleErrorUtility(error, "Error Sending Reset Email");
         },
     });
 }
@@ -280,11 +261,7 @@ export function useForgotPassword() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Error',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Error');
         }
     });
 }
@@ -328,7 +305,7 @@ export function usePhoneSignIn() {
             return confirmationResult;
         } catch (e: any) {
             console.error("Error sending OTP:", e);
-            setError(e.message || "Failed to send OTP. Please check the number and try again.");
+            handleErrorUtility(e, 'Failed to send OTP');
             return null;
         } finally {
             setIsLoading(false);
@@ -353,7 +330,7 @@ export function usePhoneSignIn() {
             }
         } catch (e: any) {
              console.error("Error verifying OTP:", e);
-            setError(e.message || "Failed to verify OTP. Please try again.");
+             handleErrorUtility(e, 'Failed to verify OTP');
         } finally {
             setIsLoading(false);
         }
@@ -380,11 +357,7 @@ export function usePurchaseCredits() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Purchase Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Purchase Failed');
         },
     });
 }

@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Template, TemplateKey } from '@/lib/docx-styles';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 const DOCX_TEMPLATES_QUERY_KEY = 'docx-templates';
 
@@ -59,6 +60,11 @@ export function useDocxStyles() {
       queryFn: fetchDocxTemplates,
       staleTime: 1000 * 60 * 5, // 5 minutes
       refetchOnWindowFocus: false,
+      meta: { // Add this meta property
+      onError: (error: Error) => {
+          handleErrorUtility(error, 'Failed to fetch DOCX templates');
+          },
+      }
   });
 
   const queryClient = useQueryClient();
@@ -81,11 +87,7 @@ export function useDocxStyles() {
           });
       },
       onError: (error: Error) => {
-          toast({
-              title: "Update Failed",
-              description: error.message,
-              variant: 'destructive',
-          });
+          handleErrorUtility(error, 'Update DOCX Template Failed');
       }
   });
 
@@ -135,11 +137,7 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Image Refresh Failed",
-        description: error.message,
-        variant: 'destructive',
-      });
+      handleErrorUtility(error, 'Image Refresh Failed');
     },
   });
 }

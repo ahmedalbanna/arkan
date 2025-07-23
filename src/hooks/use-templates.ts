@@ -15,6 +15,7 @@ import {
 } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 
 export const templateKeys = {
@@ -30,7 +31,10 @@ export function useProposalTemplates() {
         queryKey: templateKeys.proposals(),
         queryFn: fetchProposalTemplates,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        enabled: !!firebaseUser
+        enabled: !!firebaseUser,
+        onError: (error: Error) => {
+            handleErrorUtility(error, 'Failed to fetch proposal templates');
+        }
     });
 }
 
@@ -40,7 +44,10 @@ export function useReportTemplates() {
         queryKey: templateKeys.reports(),
         queryFn: fetchReportTemplates,
         staleTime: 1000 * 60 * 5,
-        enabled: !!firebaseUser
+        enabled: !!firebaseUser,
+         onError: (error: Error) => {
+            handleErrorUtility(error, 'Failed to fetch report templates');
+        }
     });
 }
 
@@ -50,7 +57,10 @@ export function usePresentationTemplates() {
         queryKey: templateKeys.presentations(),
         queryFn: fetchPresentationTemplates,
         staleTime: 1000 * 60 * 5,
-        enabled: !!firebaseUser
+        enabled: !!firebaseUser,
+         onError: (error: Error) => {
+            handleErrorUtility(error, 'Failed to fetch presentation templates');
+        }
     });
 }
 
@@ -73,11 +83,7 @@ export function useUpdateProposalTemplate() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Update Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Update Proposal Template Failed');
         }
     });
 }
@@ -101,11 +107,7 @@ export function useUpdateReportTemplate() {
             });
         },
         onError: (error: Error) => {
-             toast({
-                title: 'Update Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+             handleErrorUtility(error, 'Update Report Template Failed');
         }
     });
 }
@@ -128,11 +130,7 @@ export function useUpdatePresentationTemplate() {
             });
         },
         onError: (error: Error) => {
-             toast({
-                title: 'Update Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+             handleErrorUtility(error, 'Update Presentation Template Failed');
         }
     });
 }

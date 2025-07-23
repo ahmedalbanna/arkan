@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { type PptxTemplate, type PptxTemplateKey, type PptxStyleOptions } from '@/lib/pptx-styles';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 export const PPTX_TEMPLATES_QUERY_KEY = 'pptx-templates';
 
@@ -73,6 +74,11 @@ export function usePptxStyles() {
         queryFn: fetchPptxTemplates,
         staleTime: 1000 * 60 * 5, // 5 minutes
         refetchOnWindowFocus: false,
+        meta:{
+            onError: (error: Error) => {
+                handleErrorUtility(error, 'Failed to fetch PPTX templates');
+            }
+        }
     });
 
     const queryClient = useQueryClient();
@@ -95,11 +101,7 @@ export function usePptxStyles() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: "Update Failed",
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Update PPTX Template Failed');
         }
     });
 
@@ -141,11 +143,7 @@ export function useRefreshPptxTemplateImage() {
       });
     },
     onError: (error: Error) => {
-      toast({
-        title: "Image Refresh Failed",
-        description: error.message,
-        variant: 'destructive',
-      });
+      handleErrorUtility(error, 'Image Refresh Failed');
     },
   });
 }

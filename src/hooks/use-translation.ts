@@ -4,6 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import type { TranslateTextOutput } from '@/ai/flows/translate-text';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 interface TranslateVariables {
   text: string;
@@ -46,5 +47,8 @@ export function useTranslate() {
         queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
       }
     },
+    onError: (error: Error) => {
+        handleErrorUtility(error, 'Translation Failed');
+    }
   });
 }

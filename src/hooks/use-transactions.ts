@@ -2,9 +2,9 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 interface VerifyPaymentVariables {
     transactionId: string;
@@ -51,11 +51,7 @@ export function useVerifyPayment() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Verification Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Verification Failed');
         }
     });
 }

@@ -7,6 +7,7 @@ import { agentKeys } from '@/lib/query-keys';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { useAuth } from '@/context/AuthContext';
 import { UseQueryOptions } from '@tanstack/react-query';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 
 // --- API Service Functions ---
@@ -121,11 +122,7 @@ export function useUpdateAgent() {
             });
         },
         onError: (error: Error) => {
-            toast({
-                title: 'Update Failed',
-                description: error.message,
-                variant: 'destructive',
-            });
+            handleErrorUtility(error, 'Update Agent Failed');
         }
     });
 }
