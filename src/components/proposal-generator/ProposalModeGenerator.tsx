@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Languages } from 'lucide-react';
+import { Loader2, Languages, FileText } from 'lucide-react';
 import ProposalViewer, { EditableField } from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
