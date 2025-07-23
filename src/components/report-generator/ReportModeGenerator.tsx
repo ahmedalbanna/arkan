@@ -51,7 +51,7 @@ export default function ReportGenerator() {
 
     const targetLang = locale === 'en' ? 'Arabic' : 'English';
     const sectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
-    
+
     const translationPromises = sectionKeys.map(key => {
         const content = sections[key]!;
         return translateMutation.mutateAsync({ text: content, targetLang })
@@ -60,7 +60,7 @@ export default function ReportGenerator() {
     });
 
     const results = await Promise.all(translationPromises);
-    
+
     results.forEach(result => {
         if ('content' in result) {
             setSection(result.key, result.content);
@@ -77,17 +77,17 @@ export default function ReportGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Left Column -> Now the main results view */}
-      <div className="lg:col-span-8 overflow-y-auto pr-2">
-        <ReportResults onSectionUpdate={handleSectionUpdate} />
-      </div>
-
-      {/* Right Column -> All tools */}
       <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
         <ReportActions onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
         <GenerationTools />
         <EvaluationTools />
+      </div>
+
+      {/* Right Column -> All tools */}
+      <div className="lg:col-span-8 overflow-y-auto pr-2">
+        <ReportResults onSectionUpdate={handleSectionUpdate} />
       </div>
     </div>
   );

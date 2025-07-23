@@ -38,7 +38,7 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 async function generatePresentation(variables: { body: any, token: string }): Promise<GeneratePresentationOutput> {
     const response = await fetch('/api/generate-presentation', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${variables.token}`
         },
@@ -52,7 +52,7 @@ async function generatePresentation(variables: { body: any, token: string }): Pr
 }
 
 export default function PresentationGenerator() {
-    const { t } = useLocalization();
+    const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const { proposal } = useBuilderStore();
@@ -103,53 +103,16 @@ export default function PresentationGenerator() {
 
     const presentations = presentation?.history || [];
     const activePresentation = presentations.find(p => p.id === activePresentationId);
-    
+
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {/* Left Column */}
-            <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-headline flex items-center gap-2">
-                           <History className="w-6 h-6" />
-                           {t('builder.presentationGenerator.historyTitle')}
-                        </CardTitle>
-                        <CardDescription>{t('builder.presentationGenerator.historyDesc')}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ScrollArea className="h-96">
-                             {presentations.length > 0 ? (
-                                <div className="space-y-2">
-                                    {presentations.map(p => {
-                                         const isValidDate = p.id && !isNaN(new Date(p.id).getTime());
-                                         return (
-                                             <Button
-                                                 key={p.id}
-                                                 variant="ghost"
-                                                 onClick={() => setActivePresentationId(p.id)}
-                                                 className={cn(
-                                                     "w-full h-auto justify-start text-left p-2",
-                                                     activePresentation?.id === p.id && "bg-muted"
-                                                 )}
-                                             >
-                                                 <div className="flex flex-col">
-                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
-                                                    {isValidDate && (
-                                                         <span className="text-xs text-muted-foreground">
-                                                            {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
-                                                        </span>
-                                                    )}
-                                                 </div>
-                                             </Button>
-                                         )
-                                    })}
-                                </div>
-                             ) : (
-                                <p className="text-sm text-muted-foreground text-center">{t('builder.presentationGenerator.historyEmpty')}</p>
-                             )}
-                        </ScrollArea>
-                    </CardContent>
-                </Card>
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
+                <PresentationGenerationTools
+                    isDisabled={!proposal || mutation.isPending}
+                    isGenerating={mutation.isPending}
+                    onGenerate={onGenerate}
+                />
             </div>
 
 
@@ -174,12 +137,49 @@ export default function PresentationGenerator() {
             </div>
 
             {/* Right Column */}
-            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
-                <PresentationGenerationTools
-                    isDisabled={!proposal || mutation.isPending}
-                    isGenerating={mutation.isPending}
-                    onGenerate={onGenerate}
-                />
+            <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                            <History className="w-6 h-6" />
+                            {t('builder.presentationGenerator.historyTitle')}
+                        </CardTitle>
+                        <CardDescription>{t('builder.presentationGenerator.historyDesc')}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-96">
+                            {presentations.length > 0 ? (
+                                <div className="space-y-2">
+                                    {presentations.map(p => {
+                                        const isValidDate = p.id && !isNaN(new Date(p.id).getTime());
+                                        return (
+                                            <Button
+                                                key={p.id}
+                                                variant="ghost"
+                                                onClick={() => setActivePresentationId(p.id)}
+                                                className={cn(
+                                                    "w-full h-auto justify-start text-left p-2",
+                                                    activePresentation?.id === p.id && "bg-muted"
+                                                )}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
+                                                    {isValidDate && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </Button>
+                                        )
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center">{t('builder.presentationGenerator.historyEmpty')}</p>
+                            )}
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

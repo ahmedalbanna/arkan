@@ -54,7 +54,7 @@ const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
     const agent = agents.find(a => a.id === 'generate-presentation');
     const currentGuidelineState = guidelineState[itemKey];
-    
+
     if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
 
     const promptConfig = agent.prompt as AgentPrompt;
@@ -100,8 +100,8 @@ function ToolsSkeleton() {
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
-    const { 
-        isDisabled, 
+    const {
+        isDisabled,
         isGenerating,
         onGenerate,
     } = props;
@@ -114,7 +114,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         activePresentationId,
     } = usePresentationStore();
 
-    const { 
+    const {
         externalContext,
         guidelineState,
         customGuidelineInput,
@@ -142,20 +142,20 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
-    
+
     const agent = agents.find(a => a.id === 'generate-presentation');
     const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
-    
+
     const presentations = presentation?.history || [];
     const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams || {}).length > 0;
-    
+
     const handleGenerateClick = () => {
         const selection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
 
         const selectedSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
-        
+
         const selectedDiagrams = Object.entries(selection.diagrams)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});

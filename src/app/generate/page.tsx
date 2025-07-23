@@ -27,23 +27,23 @@ const LoadingSkeleton = () => (
 );
 
 
-const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), { 
+const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), { 
+const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), { 
+const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), { 
+const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), { 
+const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -126,7 +126,7 @@ function GeneratePageContent() {
       const feature = features.find(f => f.id === featureId);
       return feature?.isEnabled ?? false;
   };
-  
+
   const enabledTabs = [
       { id: 'proposal', enabled: isFeatureEnabled('proposal') },
       { id: 'report', enabled: isFeatureEnabled('report') },
@@ -135,7 +135,7 @@ function GeneratePageContent() {
       { id: 'presentation', enabled: isFeatureEnabled('presentation') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
 
-  
+
   // If the current active tab is no longer enabled, switch to the first available one
   useEffect(() => {
     if (!enabledTabs.includes(activeTab) && enabledTabs.length > 0) {
@@ -190,7 +190,7 @@ function GeneratePageContent() {
                             </TabsTrigger>
                         )}
                     </TabsList>
-                    
+
                     <div className="w-full flex-grow mt-4">
                         <TabsContent value="proposal" className="h-full">
                             {activeTab === 'proposal' && <ProposalModeGenerator />}
@@ -222,4 +222,4 @@ export default function GeneratePage() {
     )
 }
 
-    
+

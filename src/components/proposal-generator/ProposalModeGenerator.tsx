@@ -50,9 +50,9 @@ function ProposalSkeleton() {
 async function generateProposal(variables: { body: any; token: string; }): Promise<ProjectProposal> {
     const response = await fetch('/api/generate-proposal', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}` 
+            'Authorization': `Bearer ${variables.token}`
         },
         body: JSON.stringify(variables.body)
     });
@@ -85,7 +85,7 @@ export function ProposalModeGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
-    
+
     const {
         proposal,
         projectIdea,
@@ -108,7 +108,7 @@ export function ProposalModeGenerator() {
             toast({ title: t('builder.toasts.generationFailed'), description: error.message, variant: 'destructive' });
         }
     });
-    
+
     const translateMutation = useMutation({
         mutationFn: translateProposal,
         onSuccess: (data) => {
@@ -147,12 +147,12 @@ export function ProposalModeGenerator() {
 
     const handleTranslateProposal = async () => {
         if (!proposal || !firebaseUser) return;
-        
+
         toast({
             title: t('builder.proposalGenerator.toasts.translateAllStarted'),
             description: t('builder.proposalGenerator.toasts.translateAllStartedDesc'),
         });
-        
+
         const token = await firebaseUser.getIdToken();
         const targetLang = locale === 'en' ? 'Arabic' : 'English';
         translateMutation.mutate({ proposal, targetLang, token });
@@ -161,29 +161,18 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">{t('builder.proposalGenerator.title')}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                             <Textarea
-                                name="projectIdea"
-                                placeholder={t('builder.proposalGenerator.placeholder')}
-                                rows={8}
-                                required
-                                value={projectIdea}
-                                onChange={(e) => setProjectIdea(e.target.value)}
-                                disabled={generationMutation.isPending}
-                            />
-                            {generationMutation.isError && (
-                                <p className="text-sm font-medium text-destructive mt-2">{generationMutation.error.message}</p>
-                            )}
-                        </CardContent>
-                    </Card>
+                    <ProposalGenerationTools
+                        isDisabled={!projectIdea || generationMutation.isPending}
+                        isGenerating={generationMutation.isPending}
+                    />
+                    {proposal && (
+                        <ProposalActions isGenerating={generationMutation.isPending} />
+                    )}
                 </div>
+
 
                 {/* Center Column */}
                 <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
@@ -221,13 +210,25 @@ export function ProposalModeGenerator() {
 
                  {/* Right Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    <ProposalGenerationTools
-                        isDisabled={!projectIdea || generationMutation.isPending}
-                        isGenerating={generationMutation.isPending}
-                    />
-                    {proposal && (
-                        <ProposalActions isGenerating={generationMutation.isPending} />
-                    )}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="font-headline">{t('builder.proposalGenerator.title')}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Textarea
+                                name="projectIdea"
+                                placeholder={t('builder.proposalGenerator.placeholder')}
+                                rows={8}
+                                required
+                                value={projectIdea}
+                                onChange={(e) => setProjectIdea(e.target.value)}
+                                disabled={generationMutation.isPending}
+                            />
+                            {generationMutation.isError && (
+                                <p className="text-sm font-medium text-destructive mt-2">{generationMutation.error.message}</p>
+                            )}
+                        </CardContent>
+                    </Card>
                 </div>
 
             </div>
