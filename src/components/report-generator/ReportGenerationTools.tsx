@@ -28,7 +28,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
@@ -70,8 +69,8 @@ const generateInstructionText = (controls: any): string => {
     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     return instructions.join('\n');
 };
-// Helper function to generate a section or a full report
-async function generateReport(variables: any): Promise<any> {
+
+async function generateSingleSection(variables: any): Promise<any> {
     const response = await fetch('/api/generate-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
@@ -79,11 +78,24 @@ async function generateReport(variables: any): Promise<any> {
     });
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to generate report');
+        throw new Error(error.message || 'Failed to generate report section');
     }
     return await response.json();
 }
-// Helper function to upload a PDF
+
+async function generateFullReport(variables: any): Promise<any> {
+    const response = await fetch('/api/generate-full-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate full report');
+    }
+    return await response.json();
+}
+
 async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
      const response = await fetch('/api/pdf-to-markdown', {
         method: 'POST',
@@ -108,7 +120,6 @@ export const GenerationTools = () => {
     const { proposal } = useBuilderStore();
     const { diagrams } = useDiagramStore();
 
-    // Use the correct store for report-related state
     const {
         sections,
         evaluation,
@@ -132,33 +143,37 @@ export const GenerationTools = () => {
         toggleContextSelection,
     } = useReportStore();
 
-    // State for PDF upload
     const [pdfFile, setPdfFile] = React.useState<File | null>(null);
 
-    // Handle section/report generation
-    const reportMutation = useMutation({
-        mutationFn: generateReport,
-        onSuccess: (data, variables) => {
-            if (variables.templateId) { // Full report was generated
-                setAllSections(data.sections);
-                toast({ title: `Full report generated successfully!` });
-            } else { // Single section
-                const sectionKey = variables.sectionToGenerate;
-                const content = Object.values(data)[0] as string;
-                setSection(sectionKey, content);
-                toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
-            }
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            setActiveMutationKey(null);
-        },
-        onError: (error: Error, variables) => {
-            const item = variables.templateId || variables.sectionToGenerate;
-            toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
-            setActiveMutationKey(null);
-        },
-    });
+    const singleSectionMutation = useMutation({ mutationFn: generateSingleSection });
+    const fullReportMutation = useMutation({ mutationFn: generateFullReport });
+    
+    const handleGenerationResult = (data: any, variables: any) => {
+        if (variables.templateId) { // Full report was generated
+            setAllSections(data.sections);
+            toast({ title: `Full report generated successfully!` });
+        } else { // Single section
+            const sectionKey = variables.sectionToGenerate;
+            const content = Object.values(data)[0] as string;
+            setSection(sectionKey, content);
+            toast({ title: `Section "${sectionConfig[sectionKey].title}" generated successfully!` });
+        }
+        queryClient.invalidateQueries({ queryKey: ['user'] });
+        setActiveMutationKey(null);
+    };
 
-    // Handle PDF upload
+    const handleGenerationError = (error: Error, variables: any) => {
+        const item = variables.templateId || variables.sectionToGenerate;
+        toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
+        setActiveMutationKey(null);
+    };
+
+    singleSectionMutation.options.onSuccess = handleGenerationResult;
+    singleSectionMutation.options.onError = handleGenerationError;
+    fullReportMutation.options.onSuccess = handleGenerationResult;
+    fullReportMutation.options.onError = handleGenerationError;
+
+
     const pdfMutation = useMutation({
         mutationFn: uploadPdf,
         onSuccess: (data, variables) => {
@@ -171,11 +186,10 @@ export const GenerationTools = () => {
             toast({ title: "Upload Failed", description: error.message, variant: "destructive" });
         },
     });
-    // Check if anything is generating
-    const isAnythingGenerating = reportMutation.isPending;
-    const isDisabled = isAnythingGenerating;
 
-    // Handle file upload
+    const isAnythingGenerating = singleSectionMutation.isPending || fullReportMutation.isPending;
+    const isDisabled = isAnythingGenerating;
+    
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
@@ -186,8 +200,7 @@ export const GenerationTools = () => {
             }
         }
     };
-
-    // Handle single section generation
+    
     const onGenerateSection = async (section: SectionName) => {
         if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
@@ -216,10 +229,9 @@ export const GenerationTools = () => {
             token,
         };
         setActiveMutationKey(section);
-        reportMutation.mutate(body);
+        singleSectionMutation.mutate(body);
     };
 
-    // Handle full report generation
     const onGenerateFullReport = async () => {
         if (!firebaseUser) {
              toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
@@ -234,7 +246,7 @@ export const GenerationTools = () => {
             token,
         };
         setActiveMutationKey(selectedReportTemplateId);
-        reportMutation.mutate(body);
+        fullReportMutation.mutate(body);
     };
 
     const onPdfUpload = async () => {
