@@ -105,8 +105,13 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set(state => ({ sections: { ...state.sections, [key]: content } }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      setAllSections: (sections) => {
-        set({ sections });
+      setAllSections: (newSections) => {
+        set(state => ({
+            sections: {
+                ...state.sections,
+                ...newSections
+            }
+        }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       setEvaluation: (evaluation) => {
