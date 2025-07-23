@@ -16,7 +16,7 @@ const TranslateTextInputSchema = z.object({
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
 const TranslateTextOutputSchema = z.object({
-  translatedText: z.string().describe('The resulting translated text.'),
+  translatedText: z.string().describe('The resulting translated text, with original markdown formatting preserved.'),
 });
 export type TranslateTextOutput = z.infer<typeof TranslateTextOutputSchema>;
 
@@ -38,11 +38,16 @@ const translateTextFlow = ai.defineFlow(
       name: 'translateTextPrompt',
       input: { schema: TranslateTextInputSchema },
       output: { schema: TranslateTextOutputSchema },
-      prompt: `You are an expert translator. A user has provided text to be translated. Your task is to translate it to the specified target language and return only the translated text.
+      prompt: `You are an expert translator. Your task is to translate the given text into the specified target language while perfectly preserving all markdown formatting.
 
-Target Language: {{{targetLang}}}
+**CRITICAL INSTRUCTIONS:**
+1.  **Preserve Markdown**: You MUST maintain the original markdown structure. Headings (e.g., '#', '##'), lists (e.g., '-', '1.'), bold text (e.g., '**text**'), italics, and any other markdown syntax must be kept intact in the translated output.
+2.  **Translate ONLY Content**: Only translate the textual content within the markdown. Do not translate markdown syntax.
+3.  **Return Only Translated Text**: Your final output should only be the translated text with its preserved markdown. Do not add any conversational text or explanations.
 
-Original Text:
+**Target Language:** {{{targetLang}}}
+
+**Original Text with Markdown:**
 ---
 {{{text}}}
 ---
@@ -53,13 +58,7 @@ Original Text:
     if (!output) {
       return { translatedText: '' };
     }
-    
-    // Clean the output to remove unwanted formatting
-    const cleanedText = output.translatedText
-      .replace(/^---/gm, '') // Remove --- from start
-      .replace(/---$/gm, '')  // Remove --- from end
-      .trim();              // Remove leading/trailing whitespace
 
-    return { translatedText: cleanedText };
+    return { translatedText: output.translatedText };
   }
 );
