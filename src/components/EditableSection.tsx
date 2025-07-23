@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { SectionName } from '@/ai/schemas';
 import { Textarea } from '@/components/ui/textarea';
@@ -17,8 +18,8 @@ import dynamic from 'next/dynamic';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 import { Pluggable } from 'unified';
 import { useAuth } from '@/context/AuthContext';
-import { useQueryClient } from '@tanstack/react-query';
-import type { ManipulateTextOutput } from '@/ai/schemas';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 
@@ -29,6 +30,24 @@ interface EditableSectionProps {
     content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
 }
+
+// API call function for text manipulation
+async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
+    const response = await fetch('/api/manipulate-text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify(variables.data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to manipulate text');
+    }
+    return response.json();
+}
+
 
 // Dynamically import react-markdown and remark-gfm
 const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
@@ -52,8 +71,27 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const { t, locale } = useLocalization();
     const translateMutation = useTranslate();
 
-    const isProcessingAi = translateMutation.isPending;
+    const manipulateMutation = useMutation({
+        mutationFn: manipulateTextApi,
+        onSuccess: (data) => {
+            setAiSuggestion(data.rewrittenText);
+            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser?.uid] });
+            toast({ title: "Suggestion Ready", description: "The AI has provided a suggestion." });
+        },
+        onError: (error: Error) => {
+            const isCreditError = error.message.toLowerCase().includes('credit');
+            toast({ 
+                title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
+                description: error.message,
+                variant: "destructive" 
+            });
+        },
+        onSettled: () => {
+            setIsAiPopoverOpen(false);
+        }
+    });
 
+    const isProcessingAi = translateMutation.isPending || manipulateMutation.isPending;
 
     useEffect(() => {
         if (!isEditing && aiSuggestion === null) {
@@ -78,39 +116,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             toast({ title: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
-        setIsProcessingAi(true);
         setAiSuggestion(null);
-        try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/manipulate-text', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ textToManipulate: currentContent, command }),
-            });
-
-            const result = await response.json();
-            if (!response.ok) {
-                const isCreditError = result.message && result.message.toLowerCase().includes('credit');
-                const title = isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed');
-                throw new Error(result.message || "An unexpected error occurred.");
-            }
-
-            setAiSuggestion((result as ManipulateTextOutput).rewrittenText);
-            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
-        } catch (error: any) {
-            const isCreditError = error.message && error.message.toLowerCase().includes('credit');
-            toast({
-                title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
-                description: error.message || "An unexpected error occurred.",
-                variant: "destructive",
-            });
-        } finally {
-            setIsProcessingAi(false);
-            setIsAiPopoverOpen(false);
-        }
+        const token = await firebaseUser.getIdToken();
+        const data = { textToManipulate: currentContent, command };
+        manipulateMutation.mutate({ data, token });
     };
     
     const handleTranslate = async () => {
