@@ -10,6 +10,13 @@ import { useDiagramStore } from './useDiagramStore';
 import { usePresentationStore } from './usePresentationStore';
 import { useCodeGeneratorStore } from './useCodeGeneratorStore';
 import type { ProjectState } from '@/lib/types';
+import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+
+/**
+ * Zustand store for managing the core state of the project builder.
+ * This store handles the fundamental project data like the idea and the generated proposal,
+ * and orchestrates the state of other, more specific stores.
+ */
 
 export interface BuilderState {
   name?: string;
@@ -47,7 +54,7 @@ const initialState: BuilderState = {
   proposal: null,
   currentProjectId: null,
   hasUnsavedChanges: false,
-  selectedTemplateId: 'default-software',
+  selectedTemplateId: PROPOSAL_TEMPLATES[0].id,
   customGuidelines: [],
   customGuidelineInput: '',
 };

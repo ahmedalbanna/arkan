@@ -1,76 +1,22 @@
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { agentKeys } from '@/lib/query-keys';
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import type { Agent, UpdateAgentPayload, UpdateAgentVariables } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
 import { UseQueryOptions } from '@tanstack/react-query';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { fetchAgent, fetchAgents, updateAgent as updateAgentApi } from '@/services/agent-service';
 
-
-// --- API Service Functions ---
-
-async function fetchAgents(token: string): Promise<Agent[]> {
-    const response = await fetch('/api/agents', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch agents');
-    }
-    return response.json();
-}
-
-async function fetchAgent(agentId: string, token: string): Promise<Agent | null> {
-    if (!agentId) return null;
-    const response = await fetch(`/api/agents/${agentId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        if(response.status === 404) return null;
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch agent');
-    }
-    return response.json();
-}
-
-interface UpdateAgentPayload {
-    name?: string;
-    prompt?: string;
-    isEnabled?: boolean;
-}
-
-async function updateAgentApi(
-    { agentId, payload }: { agentId: string; payload: UpdateAgentPayload },
-    token: string
-) {
-    const response = await fetch(`/api/agents/${agentId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update agent.');
-    }
-    return response.json();
-}
-
-// Define type for mutation variables
-interface UpdateAgentVariables {
-    agentId: string;
-    payload: UpdateAgentPayload;
-}
-
-// --- Custom Hooks ---
-
+/**
+ * Custom hook to fetch the list of all AI agents.
+ * Caches the data and provides loading and error states.
+ * Requires admin authentication.
+ *
+ * @returns An object containing the list of agents, loading status, and error status.
+ */
 export function useAgents() {
     const { firebaseUser } = useAuth();
 
@@ -81,8 +27,17 @@ export function useAgents() {
             return fetchAgents(token);
         },
         enabled: !!firebaseUser,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        meta: {
+            onError: (error: Error) => handleErrorUtility(error, 'Failed to fetch agents'),
+        }
     });
 
+    /**
+     * Finds and returns a single agent from the cached list by its ID.
+     * @param id The ID of the agent to find.
+     * @returns The agent object if found, otherwise undefined.
+     */
     const getAgent = (id: string): Agent | undefined => {
         return agents?.find(agent => agent.id === id);
     };
@@ -92,6 +47,12 @@ export function useAgents() {
 
 type UseAgentOptions = Omit<UseQueryOptions<Agent | null, Error>, 'queryKey' | 'queryFn' | 'enabled'>;
 
+/**
+ * Custom hook to fetch a single agent by its ID.
+ * @param agentId The ID of the agent to fetch.
+ * @param options Optional React Query options to override defaults.
+ * @returns The result of the useQuery hook.
+ */
 export function useAgent(agentId: string, options?: UseAgentOptions) {
     const { firebaseUser } = useAuth();
     return useQuery<Agent | null, Error>({
@@ -101,11 +62,19 @@ export function useAgent(agentId: string, options?: UseAgentOptions) {
             return fetchAgent(agentId, token);
         },
         enabled: !!firebaseUser && !!agentId,
-        ...options, // Spread additional options like `enabled`
+        ...options,
+        meta: {
+            onError: (error: Error) => handleErrorUtility(error, `Failed to fetch agent ${agentId}`),
+        }
     });
 }
 
 
+/**
+ * Custom mutation hook to update an agent's configuration.
+ * Handles API calls, cache invalidation, and provides user feedback.
+ * @returns The result of the useMutation hook.
+ */
 export function useUpdateAgent() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();

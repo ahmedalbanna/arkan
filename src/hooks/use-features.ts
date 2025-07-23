@@ -1,78 +1,49 @@
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { featureKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/lib/types';
+import { fetchFeatures as fetchFeaturesApi, updateFeature as updateFeatureApi } from '@/services/feature-service';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
-export interface Feature {
-    id: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-}
-
-// --- API Service Functions ---
-
-async function fetchFeatures(): Promise<Feature[]> {
-    const response = await fetch('/api/features');
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch features');
-    }
-    return response.json();
-}
-
-interface UpdateFeaturePayload {
-    isEnabled: boolean;
-}
-
-async function updateFeatureApi(
-    { featureId, payload }: { featureId: string; payload: UpdateFeaturePayload },
-    token: string
-) {
-    const response = await fetch(`/api/features/${featureId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update feature.');
-    }
-    return response.json();
-}
-
-// --- Custom Hooks ---
-
+/**
+ * Custom hook to fetch all feature flags.
+ * Caches the data and returns the current state of all features.
+ *
+ * @returns An object containing the list of features, loading status, and error status.
+ */
 export function useFeatures() {
-    const { firebaseUser } = useAuth();
     const { data: features, isLoading, isError } = useQuery<Feature[]>({
         queryKey: featureKeys.lists(),
-        queryFn: fetchFeatures,
+        queryFn: fetchFeaturesApi,
         staleTime: 1000 * 60 * 5, // 5 minutes
+        meta: {
+            onError: (error: Error) => handleErrorUtility(error, 'Failed to fetch features'),
+        }
     });
 
     return { features: features || [], isLoaded: !isLoading, isError };
 }
 
+/**
+ * Custom mutation hook to update a feature flag.
+ * Implements an optimistic update for a seamless UI experience.
+ *
+ * @returns The result of the useMutation hook.
+ */
 export function useUpdateFeature() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: async (variables: { featureId: string; payload: UpdateFeaturePayload }) => {
-            const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error("User not authenticated");
+    return useMutation<Feature, Error, UpdateFeatureVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return updateFeatureApi(variables, token);
         },
+        // Optimistic update for a better user experience
         onMutate: async (newData) => {
-            // Optimistic update
             await queryClient.cancelQueries({ queryKey: featureKeys.lists() });
             const previousFeatures = queryClient.getQueryData<Feature[]>(featureKeys.lists());
             if (previousFeatures) {
@@ -85,8 +56,8 @@ export function useUpdateFeature() {
             return { previousFeatures };
         },
         onError: (err, newData, context) => {
-            // Rollback on error
             if (context?.previousFeatures) {
+                // Rollback on error
                 queryClient.setQueryData(featureKeys.lists(), context.previousFeatures);
             }
             handleErrorUtility(err, 'Update Feature Failed');

@@ -3,33 +3,17 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import type { TranslateTextOutput } from '@/ai/flows/translate-text';
+import type { TranslateTextOutput, TranslateVariables } from '@/lib/types';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { translateText as translateTextApi } from '@/services/translation-service';
 
-interface TranslateVariables {
-  text: string;
-  targetLang: string;
-}
-
-async function translateTextApi(variables: TranslateVariables, token: string): Promise<TranslateTextOutput> {
-  const response = await fetch('/api/translate', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(variables),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Translation failed');
-  }
-
-  return response.json();
-}
-
+/**
+ * Custom mutation hook for translating text using an AI flow.
+ * Handles API calls, authentication, and credit deduction feedback.
+ *
+ * @returns The result of the useMutation hook.
+ */
 export function useTranslate() {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
@@ -42,7 +26,7 @@ export function useTranslate() {
     onSuccess: () => {
       // Invalidate user query to refetch credits after successful translation
       if (firebaseUser) {
-        queryClient.invalidateQueries({ queryKey: ['user', firebaseUser.uid] });
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
       }
     },
     onError: (error: Error) => {
