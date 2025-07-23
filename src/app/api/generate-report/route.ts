@@ -72,13 +72,13 @@ export async function POST(request: Request) {
         }
         const template = templateDoc.data() as ReportGenerationTemplate;
 
-        // Determine which sections are missing
+        // Determine which sections to generate based on the template
         const sectionsToGenerate = template.agentIds
             .map(agentId => (Object.keys(sectionAgentMap) as SectionName[]).find(key => sectionAgentMap[key].agentId === agentId))
-            .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !existingSections[sectionKey]);
+            .filter((sectionKey): sectionKey is SectionName => !!sectionKey);
         
         if (sectionsToGenerate.length === 0) {
-            return NextResponse.json({ sections: existingSections, message: "All report sections have already been generated." }, { status: 200 });
+            return NextResponse.json({ sections: existingSections, message: "This template has no sections to generate." }, { status: 200 });
         }
         
         // Check user credits before proceeding
