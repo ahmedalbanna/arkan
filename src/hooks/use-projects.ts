@@ -15,14 +15,22 @@ import {
 } from '@/services/project-service';
 import { useBuilderStore } from './useBuilderStore';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+
+// Define types for mutation variables
+interface UpdateProjectVariables {
+    projectId: string;
+    data: ProjectState;
+}
+
+type SaveProjectVariables = ProjectState & { name: string };
 
 export function useProjects() {
     const { firebaseUser } = useAuth();
     return useQuery<SavedProject[]>({
         queryKey: projectKeys.lists(),
         queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getAuthenticatedToken(firebaseUser);
             return fetchProjectsApi(token);
         },
         enabled: !!firebaseUser,
@@ -39,8 +47,7 @@ export function useProject(projectId: string) {
     return useQuery<SavedProject>({
         queryKey: projectKeys.detail(projectId),
         queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+            const token = await getAuthenticatedToken(firebaseUser);
             return fetchProjectApi(projectId, token);
         },
         enabled: !!firebaseUser && !!projectId,
@@ -59,10 +66,9 @@ export function useSaveProject() {
     const setCurrentProjectId = useBuilderStore(state => state.setCurrentProjectId);
     const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
 
-    return useMutation({
-        mutationFn: async (data: ProjectState & { name: string }) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+    return useMutation<SavedProject, Error, SaveProjectVariables>({
+        mutationFn: async (data) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return createProject(data, token);
         },
         onSuccess: (newProject) => {
@@ -86,10 +92,9 @@ export function useUpdateProject() {
     const { firebaseUser } = useAuth();
     const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
 
-    return useMutation({
-        mutationFn: async (variables: { projectId: string; data: ProjectState }) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
+    return useMutation<SavedProject, Error, UpdateProjectVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return updateProject(variables.projectId, variables.data, token);
         },
         onSuccess: (updatedProject) => {
@@ -112,11 +117,10 @@ export function useDeleteProject() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: async (projectId: string) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return deleteProject(projectId, token);
+    return useMutation<void, Error, string>({
+        mutationFn: async (projectId) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            await deleteProject(projectId, token);
         },
         onSuccess: (_, projectId) => {
             queryClient.invalidateQueries({ queryKey: projectKeys.lists() });

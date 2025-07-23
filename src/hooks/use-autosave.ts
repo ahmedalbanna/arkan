@@ -6,7 +6,7 @@ import { useBuilderStore } from './useBuilderStore';
 import { useSaveProject, useUpdateProject } from './use-projects';
 import { useDebounce } from './use-debounce';
 
-const AUTOSAVE_DELAY = 2000; // 2 seconds
+const AUTOSAVE_DELAY = 60000; // 1 minuts
 
 export function useAutosave() {
   const store = useBuilderStore();

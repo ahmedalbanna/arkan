@@ -112,3 +112,5 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+export type { FirebaseUser };

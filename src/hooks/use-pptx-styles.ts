@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { type PptxTemplate, type PptxTemplateKey, type PptxStyleOptions } from '@/lib/pptx-styles';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 export const PPTX_TEMPLATES_QUERY_KEY = 'pptx-templates';
 
@@ -52,6 +53,17 @@ async function refreshTemplateImageApi(variables: {templateType: 'pptx', templat
     return response.json();
 }
 
+// Define types for mutation variables
+interface UpdatePptxTemplateVariables {
+    key: PptxTemplateKey;
+    styles: PptxStyleOptions;
+}
+
+interface RefreshTemplateImageVariables {
+    templateId: string;
+    prompt: string;
+}
+
 // Helper to set nested property
 function set(obj: any, path: string, value: any) {
   const keys = path.split('.');
@@ -84,10 +96,9 @@ export function usePptxStyles() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    const mutation = useMutation({
-        mutationFn: async (variables: { key: PptxTemplateKey; styles: PptxStyleOptions }) => {
-            if (!firebaseUser) throw new Error("User not authenticated.");
-            const token = await firebaseUser.getIdToken();
+    const mutation = useMutation<any, Error, UpdatePptxTemplateVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return updatePptxTemplateApi(variables, token);
         },
         onSuccess: (data, variables) => {
@@ -129,10 +140,9 @@ export function useRefreshPptxTemplateImage() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation({
-    mutationFn: async (variables: { templateId: string; prompt: string }) => {
-      if (!firebaseUser) throw new Error("User not authenticated.");
-      const token = await firebaseUser.getIdToken();
+  return useMutation<any, Error, RefreshTemplateImageVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
       return refreshTemplateImageApi({ ...variables, templateType: 'pptx' }, token);
     },
     onSuccess: (data) => {

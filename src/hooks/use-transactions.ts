@@ -5,6 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import { toast } from './use-toast';
 
 interface VerifyPaymentVariables {
     transactionId: string;
@@ -34,10 +36,9 @@ export function useVerifyPayment() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: async (variables: VerifyPaymentVariables) => {
-            if (!firebaseUser) throw new Error("Admin not authenticated.");
-            const token = await firebaseUser.getIdToken();
+    return useMutation<any, Error, VerifyPaymentVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return verifyPayment(variables, token);
         },
         onSuccess: (data, variables) => {

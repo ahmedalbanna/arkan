@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import type { TranslateTextOutput } from '@/ai/flows/translate-text';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 interface TranslateVariables {
   text: string;
@@ -33,12 +34,9 @@ export function useTranslate() {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (variables: TranslateVariables) => {
-      const token = await firebaseUser?.getIdToken();
-      if (!token) {
-        throw new Error('User is not authenticated.');
-      }
+  return useMutation<TranslateTextOutput, Error, TranslateVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
       return translateTextApi(variables, token);
     },
     onSuccess: () => {

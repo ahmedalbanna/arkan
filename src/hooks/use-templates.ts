@@ -16,6 +16,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 
 export const templateKeys = {
@@ -25,6 +26,12 @@ export const templateKeys = {
     presentations: () => [...templateKeys.all, 'presentation'] as const,
 }
 
+// Define generic type for update template variables
+interface UpdateTemplateVariables<T> {
+    templateId: string;
+    data: Partial<T>;
+}
+
 export function useProposalTemplates() {
     const { firebaseUser } = useAuth();
     return useQuery<ProposalTemplate[]>({
@@ -32,8 +39,10 @@ export function useProposalTemplates() {
         queryFn: fetchProposalTemplates,
         staleTime: 1000 * 60 * 5, // 5 minutes
         enabled: !!firebaseUser,
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Failed to fetch proposal templates');
+        meta:{
+            onError: (error: Error) => {
+                handleErrorUtility(error, 'Failed to fetch proposal templates');
+            }
         }
     });
 }
@@ -45,9 +54,11 @@ export function useReportTemplates() {
         queryFn: fetchReportTemplates,
         staleTime: 1000 * 60 * 5,
         enabled: !!firebaseUser,
-         onError: (error: Error) => {
-            handleErrorUtility(error, 'Failed to fetch report templates');
-        }
+         meta:{
+            onError: (error: Error) => {
+                handleErrorUtility(error, 'Failed to fetch report templates');
+            }
+         }
     });
 }
 
@@ -58,9 +69,11 @@ export function usePresentationTemplates() {
         queryFn: fetchPresentationTemplates,
         staleTime: 1000 * 60 * 5,
         enabled: !!firebaseUser,
-         onError: (error: Error) => {
-            handleErrorUtility(error, 'Failed to fetch presentation templates');
-        }
+         meta:{
+            onError: (error: Error) => {
+                handleErrorUtility(error, 'Failed to fetch presentation templates');
+            }
+         }
     });
 }
 
@@ -69,11 +82,10 @@ export function useUpdateProposalTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: (variables: { templateId: string; data: Partial<ProposalTemplate> }) => {
-            if (!firebaseUser) throw new Error("Not authenticated");
-            const tokenPromise = firebaseUser.getIdToken();
-            return tokenPromise.then(token => updateProposalTemplate(variables.templateId, variables.data, token));
+    return useMutation<ProposalTemplate, Error, UpdateTemplateVariables<ProposalTemplate>>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updateProposalTemplate(variables.templateId, variables.data, token);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
@@ -93,11 +105,10 @@ export function useUpdateReportTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     
-    return useMutation({
-        mutationFn: (variables: { templateId: string; data: Partial<ReportGenerationTemplate> }) => {
-            if (!firebaseUser) throw new Error("Not authenticated");
-            const tokenPromise = firebaseUser.getIdToken();
-            return tokenPromise.then(token => updateReportTemplate(variables.templateId, variables.data, token));
+    return useMutation<ReportGenerationTemplate, Error, UpdateTemplateVariables<ReportGenerationTemplate>>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updateReportTemplate(variables.templateId, variables.data, token);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
@@ -116,11 +127,10 @@ export function useUpdatePresentationTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     
-    return useMutation({
-        mutationFn: (variables: { templateId: string; data: Partial<PresentationGenerationTemplate> }) => {
-            if (!firebaseUser) throw new Error("Not authenticated");
-            const tokenPromise = firebaseUser.getIdToken();
-            return tokenPromise.then(token => updatePresentationTemplate(variables.templateId, variables.data, token));
+    return useMutation<PresentationGenerationTemplate, Error, UpdateTemplateVariables<PresentationGenerationTemplate>>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updatePresentationTemplate(variables.templateId, variables.data, token);
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });

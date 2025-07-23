@@ -8,6 +8,7 @@ import type { Agent, AgentPrompt } from '@/lib/agents';
 import { useAuth } from '@/context/AuthContext';
 import { UseQueryOptions } from '@tanstack/react-query';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 
 // --- API Service Functions ---
@@ -62,16 +63,21 @@ async function updateAgentApi(
     return response.json();
 }
 
+// Define type for mutation variables
+interface UpdateAgentVariables {
+    agentId: string;
+    payload: UpdateAgentPayload;
+}
+
 // --- Custom Hooks ---
 
 export function useAgents() {
     const { firebaseUser } = useAuth();
 
-    const { data: agents, isLoading, isError } = useQuery({
+    const { data: agents, isLoading, isError } = useQuery<Agent[]>({
         queryKey: agentKeys.lists(),
         queryFn: async () => {
-            const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error("User not authenticated");
+            const token = await getAuthenticatedToken(firebaseUser);
             return fetchAgents(token);
         },
         enabled: !!firebaseUser,
@@ -91,8 +97,7 @@ export function useAgent(agentId: string, options?: UseAgentOptions) {
     return useQuery<Agent | null, Error>({
         queryKey: agentKeys.detail(agentId),
         queryFn: async () => {
-            const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error("User not authenticated");
+            const token = await getAuthenticatedToken(firebaseUser);
             return fetchAgent(agentId, token);
         },
         enabled: !!firebaseUser && !!agentId,
@@ -105,10 +110,9 @@ export function useUpdateAgent() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation({
-        mutationFn: async (variables: { agentId: string; payload: UpdateAgentPayload }) => {
-            const token = await firebaseUser?.getIdToken();
-            if (!token) throw new Error("User not authenticated");
+    return useMutation<Agent, Error, UpdateAgentVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
             return updateAgentApi(variables, token);
         },
         onSuccess: (data, variables) => {

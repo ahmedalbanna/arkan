@@ -6,6 +6,7 @@ import type { Template, TemplateKey } from '@/lib/docx-styles';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 const DOCX_TEMPLATES_QUERY_KEY = 'docx-templates';
 
@@ -51,11 +52,21 @@ async function refreshTemplateImageApi(variables: {templateType: string, templat
     return response.json();
 }
 
+// Define types for mutation variables
+interface UpdateDocxTemplateVariables {
+    key: TemplateKey;
+    styles: any;
+}
+
+interface RefreshTemplateImageVariables {
+    templateId: string;
+    prompt: string;
+}
 
 // --- Custom Hooks ---
 
 export function useDocxStyles() {
-  const { data: templates, isLoading: isLoaded } = useQuery({
+  const { data: templates, isLoading: isLoaded } = useQuery<Record<TemplateKey, Template>>({
       queryKey: [DOCX_TEMPLATES_QUERY_KEY],
       queryFn: fetchDocxTemplates,
       staleTime: 1000 * 60 * 5, // 5 minutes
@@ -70,10 +81,9 @@ export function useDocxStyles() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  const mutation = useMutation({
-      mutationFn: async (variables: { key: TemplateKey; styles: any }) => {
-          if (!firebaseUser) throw new Error("User not authenticated.");
-          const token = await firebaseUser.getIdToken();
+  const mutation = useMutation<any, Error, UpdateDocxTemplateVariables>({
+      mutationFn: async (variables) => {
+          const token = await getAuthenticatedToken(firebaseUser);
           return updateDocxTemplateApi(variables, token);
       },
       onSuccess: (data, variables) => {
@@ -122,10 +132,9 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation({
-    mutationFn: async (variables: { templateId: string; prompt: string }) => {
-      if (!firebaseUser) throw new Error("User not authenticated.");
-      const token = await firebaseUser.getIdToken();
+  return useMutation<any, Error, RefreshTemplateImageVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
       return refreshTemplateImageApi({ ...variables, templateType }, token);
     },
     onSuccess: (data, variables) => {
