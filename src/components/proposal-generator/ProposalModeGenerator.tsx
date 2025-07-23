@@ -162,7 +162,7 @@ export function ProposalModeGenerator() {
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <ProposalGenerationTools
-                        isDisabled={!projectIdea || generationMutation.isPending}
+                        isDisabled={generationMutation.isPending}
                         isGenerating={generationMutation.isPending}
                     />
                     {proposal && (
