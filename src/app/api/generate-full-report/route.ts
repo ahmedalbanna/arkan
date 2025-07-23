@@ -10,6 +10,7 @@ import { generateSystemDesign } from '@/ai/flows/generate-system-design';
 import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
 import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
 import { generateConclusion } from '@/ai/flows/generate-conclusion';
+import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
