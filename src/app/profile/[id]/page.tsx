@@ -1,7 +1,6 @@
 
 'use client';
 
-import { use } from "react";
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -31,10 +30,7 @@ function ProfileSkeleton() {
     );
 }
 
-export default function ProfilePage({ params: paramsPromise }: { params: Promise<{ id: string }> }) {
-  const params = use(paramsPromise);
-  const { userId } = params;
-  
+function ProfilePageContent({ userId }: { userId: string }) {
   const { t } = useLocalization();
   const { data: user, isLoading } = useUserProfile(userId);
 
@@ -96,4 +92,9 @@ export default function ProfilePage({ params: paramsPromise }: { params: Promise
       </Card>
     </div>
   );
+}
+
+
+export default function ProfilePage({ params }: { params: { id: string } }) {
+    return <ProfilePageContent userId={params.id} />;
 }
