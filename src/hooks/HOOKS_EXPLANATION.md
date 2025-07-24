@@ -82,8 +82,7 @@ These stores manage global UI state that is not directly tied to the server.
 
 ## Utility Hooks
 
--   **`use-autosave.ts`**: Listens for changes in the `useBuilderStore` and triggers a debounced save/update operation to the database, providing a seamless autosave experience.
--   **`use-debounce.ts`**: A generic utility hook to delay the update of a value, used by `useAutosave`.
+-   **`use-debounce.ts`**: A generic utility hook to delay the update of a value.
 -   **`use-mobile.ts`**: A simple hook to detect if the user is on a mobile-sized screen.
 -   **`use-sound.ts`**: Manages playing UI sounds for feedback on actions like success or error.
 -   **`use-toast.ts`**: A provider and hook for the application-wide notification (toast) system.

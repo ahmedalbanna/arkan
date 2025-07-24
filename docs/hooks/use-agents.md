@@ -2,45 +2,28 @@ This code defines custom React hooks using TanStack Query to manage AI agent dat
 
 **1. Purpose**
 
-- The `use-agents.ts` file provides React hooks for fetching, caching, and updating AI agent data. It's likely part of an admin interface for managing the behavior of AI agents used in the application. The hooks use TanStack Query for efficient data fetching and caching and interact with a backend API to manage agent data.
+- The `use-agents.ts` file provides React hooks for fetching, caching, and updating AI agent data. It follows a clean architecture where the hook itself doesn't contain `fetch` logic. Instead, it calls functions from `src/services/agent-service.ts` to interact with the backend API.
 
 **2. Key Concepts**
 
-- **TanStack Query**: This library is used for data fetching, caching, and state management. The `useQuery` hook is used to fetch lists of agents or individual agent details, and `useMutation` is used for updating agent configurations.
-- **Backend API**: The hooks interact with a backend API (e.g., `/api/agents`) to fetch and update agent data.
-- **Authentication**: The `useAuth` hook (likely defined in `AuthContext.tsx`) provides access to the current Firebase user, which is used to obtain an authentication token for the API requests.
-- **Error Handling**: The `handleErrorUtility` function (likely defined elsewhere) is used to handle errors and display user-friendly messages.
-- **Query Keys**: The `agentKeys` object (likely defined in `src/lib/query-keys.ts`) provides a consistent way to define query keys for TanStack Query, making it easier to invalidate and refetch data.
+-   **Service Layer (`src/services/agent-service.ts`)**: This file contains the actual `fetch` calls to the backend API (e.g., `/api/agents`). It's responsible for the raw network communication.
+-   **Hook Layer (`src/hooks/use-agents.ts`)**: This file uses TanStack Query (`useQuery`, `useMutation`) to wrap the service functions. It manages the caching, state synchronization, and UI feedback (toasts, error handling).
+-   **Authentication (`src/lib/authUtils.ts`)**: The `getAuthenticatedToken` utility function is used within the hooks to get the current user's ID token, which is then passed to the service functions for authorized API requests.
+-   **Query Keys (`src/lib/query-keys.ts`)**: The `agentKeys` factory provides a consistent way to define query keys, which is crucial for caching and invalidation.
 
 **3. Key Functions and Hooks**
 
-- **`useAgents()`**: A React hook that fetches a list of all AI agents.
-    - It uses `useQuery` to fetch the data.
-    - It retrieves an authentication token using `getAuthenticatedToken(firebaseUser)`.
-    - It calls the `fetchAgents` API function (likely from `src/services/agent-service.ts`) to fetch the agent data from the backend.
-    - It caches the data for 5 minutes (`staleTime: 1000 * 60 * 5`).
-    - It includes a `getAgent` function to retrieve a single agent from the cached list by its ID.
-    - It uses `handleErrorUtility` to handle errors.
-- **`useAgent(agentId: string, options?: UseAgentOptions)`**: A React hook that fetches a single agent by its ID.
-    - It uses `useQuery` to fetch the data.
-    - It retrieves an authentication token using `getAuthenticatedToken(firebaseUser)`.
-    - It calls the `fetchAgent` API function (likely from `src/services/agent-service.ts`) to fetch the agent data from the backend.
-    - It uses `handleErrorUtility` to handle errors.
-- **`useUpdateAgent()`**: A React hook that updates an agent's configuration.
-    - It uses `useMutation` to handle the update operation.
-    - It retrieves an authentication token using `getAuthenticatedToken(firebaseUser)`.
-    - It calls the `updateAgentApi` function (likely from `src/services/agent-service.ts`) to send the update request to the backend.
-    - It invalidates the `agentKeys.lists()` and `agentKeys.detail(variables.agentId)` queries to refetch the updated data.
-    - It displays a success message using `toast` and handles errors using `handleErrorUtility`.
-
-**4. Code Structure and Workflow**
-
-1. **Fetching Agents**: The `useAgents` and `useAgent` hooks are used to fetch agent data from the backend API and cache it using TanStack Query.
-2. **Updating Agents**: The `useUpdateAgent` hook is used to update an agent's configuration. It sends the updated data to the backend API and invalidates the relevant queries to update the cache.
-3. **Authentication**: All API requests are authenticated using a Firebase user's ID token.
-4. **Error Handling**: The `handleErrorUtility` function is used to handle errors and display user-friendly messages.
-5. **UI Updates**: After a successful update, the `toast` function is used to display a success message.
+-   **`useAgents()`**: A React hook that fetches a list of all AI agents.
+    -   It uses `useQuery` to manage the data fetching lifecycle.
+    -   It calls the `fetchAgents` function from the agent service to get the data.
+    -   It caches the data for 5 minutes (`staleTime`).
+-   **`useAgent(agentId: string)`**: A React hook that fetches a single agent by its ID.
+    -   It uses `useQuery` and calls the `fetchAgent` service function.
+-   **`useUpdateAgent()`**: A React hook that provides a mutation for updating an agent's configuration.
+    -   It uses `useMutation` to handle the update operation.
+    -   It calls the `updateAgentApi` service function to send the update request.
+    -   On success, it invalidates the `agentKeys` queries to refetch the updated data and displays a success toast.
 
 **In summary:**
 
-The `use-agents.ts` file provides a set of React hooks for managing AI agent data. It leverages TanStack Query for efficient data fetching and caching, interacts with a backend API to manage agent data, and uses Firebase Authentication to secure the API requests. It provides a clean and consistent way to access and manipulate agent data within the application.
+The `use-agents.ts` file cleanly separates the concerns of data fetching and state management. The hooks provide a robust interface for components to interact with agent data, while the underlying services handle the direct API communication. This pattern makes the code more modular, testable, and easier to maintain.
