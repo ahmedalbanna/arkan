@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '..
 import Image from 'next/image';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
@@ -95,13 +96,15 @@ export default function DocxTemplateManager() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>{t('manageTemplates.fontFamily')}</Label>
-                        <select
-                          value={(styles?.document?.run?.font as any)?.name || ''}  // Type assertion and nullish coalescing
-                          onChange={(e) => handleStyleChange(key, 'document.run.font.name', e.target.value)}
-                          className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        <Select
+                          value={(styles?.document?.run?.font as any)?.name || ''}
+                          onValueChange={(value) => handleStyleChange(key, 'document.run.font.name', value)}
                         >
-                          {FONT_FACES.map(font => <option key={font} value={font}>{font}</option>)}
-                        </select>
+                            <SelectTrigger><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                {FONT_FACES.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
 
                       </div>
                       <div className="space-y-2">
