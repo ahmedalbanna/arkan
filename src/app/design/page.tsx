@@ -238,7 +238,81 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
   )
 }
 
-function PreviewPanel({ styles, content }: { styles: any, content: ProjectProposal | null }) {
+function DefaultSoftwarePreview({ styles, content }: { styles: any, content: ProjectProposal }) {
+    return (
+        <>
+            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Objective</h2>
+            <p className="whitespace-pre-wrap leading-relaxed">{content.objective}</p>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Timeline</h2>
+            <UiTable>
+                <TableHeader><TableRow><TableHead>Phase</TableHead><TableHead>Duration</TableHead></TableRow></TableHeader>
+                <TableBody>
+                    {content.timeline.phases.map((phase, index) => (
+                        <TableRow key={index}><TableCell>{phase.name}</TableCell><TableCell>{phase.durationWeeks} weeks</TableCell></TableRow>
+                    ))}
+                </TableBody>
+            </UiTable>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Budget ({content.budget.currency})</h2>
+            <UiTable>
+                <TableHeader><TableRow><TableHead>Item</TableHead><TableHead className="text-right">Cost</TableHead></TableRow></TableHeader>
+                <TableBody>
+                    {content.budget.breakdown.map((item, index) => (
+                        <TableRow key={index}><TableCell>{item.item}</TableCell><TableCell className="text-right">{item.cost.toLocaleString()}</TableCell></TableRow>
+                    ))}
+                    <TableRow className="font-bold bg-muted/50"><TableCell>Total</TableCell><TableCell className="text-right">{content.budget.totalAmount.toLocaleString()}</TableCell></TableRow>
+                </TableBody>
+            </UiTable>
+        </>
+    );
+}
+
+function AgileProjectPreview({ styles, content }: { styles: any, content: ProjectProposal }) {
+     return (
+        <>
+            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Project Goal</h2>
+            <p className="whitespace-pre-wrap leading-relaxed p-4 bg-accent/10 rounded-md">{content.objective}</p>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Sprint Plan</h2>
+            <p className="text-sm text-muted-foreground mb-2">Methodology: {content.methodology}</p>
+            <UiTable>
+                <TableHeader><TableRow><TableHead>Sprint</TableHead><TableHead>Focus</TableHead><TableHead>Duration</TableHead></TableRow></TableHeader>
+                <TableBody>
+                    {content.timeline.phases.map((phase, index) => (
+                        <TableRow key={index}><TableCell>{index + 1}</TableCell><TableCell>{phase.name}</TableCell><TableCell>{phase.durationWeeks} weeks</TableCell></TableRow>
+                    ))}
+                </TableBody>
+            </UiTable>
+             <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Success Criteria</h2>
+             <ul className="list-disc pl-5 space-y-1">
+                {content.success_criteria.map((item, i) => <li key={i}>{item}</li>)}
+             </ul>
+        </>
+    );
+}
+
+function MarketingCampaignPreview({ styles, content }: { styles: any, content: ProjectProposal }) {
+    return (
+        <>
+            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Campaign Objective</h2>
+            <p className="whitespace-pre-wrap leading-relaxed border-l-4 border-accent pl-4">{content.objective}</p>
+             <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Expected Outcomes</h2>
+             <div className="grid grid-cols-2 gap-4">
+                {content.expected_outcome.map((item, i) => (
+                    <Card key={i} className="p-4 bg-muted/50"><p className="font-semibold">{item}</p></Card>
+                ))}
+            </div>
+            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Primary Stakeholder</h2>
+            <p>{content.stakeholders[0].name} - {content.stakeholders[0].role}</p>
+        </>
+    );
+}
+
+function PreviewPanel({ styles, content, templateId }: { styles: any, content: ProjectProposal | null, templateId: string }) {
   if (!content) {
     return (
         <Card className="h-full min-h-[500px] lg:h-[calc(100vh-160px)] flex items-center justify-center">
@@ -247,6 +321,18 @@ function PreviewPanel({ styles, content }: { styles: any, content: ProjectPropos
             </CardContent>
         </Card>
     );
+  }
+  
+  const renderPreview = () => {
+      switch(templateId) {
+          case 'agile-project':
+              return <AgileProjectPreview styles={styles} content={content} />;
+          case 'marketing-campaign':
+              return <MarketingCampaignPreview styles={styles} content={content} />;
+          case 'default-software':
+          default:
+              return <DefaultSoftwarePreview styles={styles} content={content} />;
+      }
   }
 
   return (
@@ -257,55 +343,7 @@ function PreviewPanel({ styles, content }: { styles: any, content: ProjectPropos
       </CardHeader>
       <CardContent>
         <div className="w-full h-[calc(100vh-280px)] rounded-lg border-2 border-dashed bg-muted p-8 overflow-y-auto" style={{ fontFamily: styles.fontFamily, fontSize: styles.fontSize, color: styles.textColor }}>
-            {/* Title */}
-            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
-            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
-            
-            {/* Objective */}
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Objective</h2>
-            <p className="whitespace-pre-wrap leading-relaxed">{content.objective}</p>
-
-            {/* Timeline */}
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Timeline</h2>
-             <UiTable>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Phase</TableHead>
-                        <TableHead>Duration</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {content.timeline.phases.map((phase, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{phase.name}</TableCell>
-                            <TableCell>{phase.durationWeeks} weeks</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </UiTable>
-            
-             {/* Budget */}
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Budget ({content.budget.currency})</h2>
-            <UiTable>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Item</TableHead>
-                        <TableHead className="text-right">Cost</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {content.budget.breakdown.map((item, index) => (
-                        <TableRow key={index}>
-                            <TableCell>{item.item}</TableCell>
-                            <TableCell className="text-right">{item.cost.toLocaleString()}</TableCell>
-                        </TableRow>
-                    ))}
-                     <TableRow className="font-bold bg-muted/50">
-                        <TableCell>Total</TableCell>
-                        <TableCell className="text-right">{content.budget.totalAmount.toLocaleString()}</TableCell>
-                    </TableRow>
-                </TableBody>
-            </UiTable>
+           {renderPreview()}
         </div>
       </CardContent>
     </Card>
@@ -352,7 +390,7 @@ export default function DesignPage() {
                 />
             </div>
             <div className="lg:col-span-2">
-                <PreviewPanel styles={styles} content={content} />
+                <PreviewPanel styles={styles} content={content} templateId={selectedTemplateId} />
             </div>
         </div>
     </div>
