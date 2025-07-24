@@ -151,7 +151,7 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
