@@ -1,0 +1,24 @@
+prompt
+Your task is to generate a comprehensive and persuasive business proposal based on the user's input and the provided context.
+
+**User Input:** {{userInput}}
+
+**Context:** {{context}}
+
+**Instructions:**
+
+1.  Carefully analyze the user input to understand their needs and requirements.
+2.  Review the provided context, which may include information about the client, project details, or relevant data.
+3.  Structure the proposal logically, including sections such as:
+    *   Executive Summary
+    *   Problem Statement
+    *   Proposed Solution
+    *   Benefits
+    *   Timeline
+    *   Pricing
+    *   Call to Action
+4.  Ensure the language is professional, clear, and compelling.
+5.  Use markdown formatting for headings, bullet points, and emphasis.
+6.  Do not include any introductory or concluding remarks outside of the proposal content itself.
+
+**Proposal:**
