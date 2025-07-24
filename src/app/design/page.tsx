@@ -1,11 +1,12 @@
 
+
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Palette, GripVertical, FileText, Table, Image as ImageIcon, Download } from 'lucide-react';
+import { Palette, GripVertical, FileText, Table, Image as ImageIcon, Download, Eye, PenSquare } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -312,7 +313,9 @@ function MarketingCampaignPreview({ styles, content }: { styles: any, content: P
     );
 }
 
-function PreviewPanel({ styles, content, templateId }: { styles: any, content: ProjectProposal | null, templateId: string }) {
+function PreviewPanel({ styles, content, setContent, templateId }: { styles: any, content: ProjectProposal | null, setContent: React.Dispatch<React.SetStateAction<ProjectProposal | null>>, templateId: string }) {
+  const [viewMode, setViewMode] = useState<'preview' | 'editor'>('preview');
+
   if (!content) {
     return (
         <Card className="h-full min-h-[500px] lg:h-[calc(100vh-160px)] flex items-center justify-center">
@@ -335,16 +338,39 @@ function PreviewPanel({ styles, content, templateId }: { styles: any, content: P
       }
   }
 
+  const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      try {
+          const newContent = JSON.parse(e.target.value);
+          setContent(newContent);
+      } catch (error) {
+          // Could add a toast here for invalid JSON
+          console.error("Invalid JSON format");
+      }
+  }
+
   return (
     <Card className="h-full min-h-[500px] lg:h-[calc(100vh-160px)]">
-      <CardHeader>
-        <CardTitle>معاينة القالب</CardTitle>
-        <CardDescription>تعرض معاينة حية للقالب المحدد ، وتعرض كيف سيبدو مع البيانات المخصصة.</CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>معاينة القالب</CardTitle>
+            <CardDescription>تعرض معاينة حية للقالب المحدد ، وتعرض كيف سيبدو مع البيانات المخصصة.</CardDescription>
+        </div>
+        <Button variant="outline" size="icon" onClick={() => setViewMode(viewMode === 'preview' ? 'editor' : 'preview')}>
+            {viewMode === 'preview' ? <PenSquare className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="w-full h-[calc(100vh-280px)] rounded-lg border-2 border-dashed bg-muted p-8 overflow-y-auto" style={{ fontFamily: styles.fontFamily, fontSize: styles.fontSize, color: styles.textColor }}>
-           {renderPreview()}
-        </div>
+        {viewMode === 'preview' ? (
+            <div className="w-full h-[calc(100vh-280px)] rounded-lg border-2 border-dashed bg-muted p-8 overflow-y-auto" style={{ fontFamily: styles.fontFamily, fontSize: styles.fontSize, color: styles.textColor }}>
+               {renderPreview()}
+            </div>
+        ) : (
+            <Textarea
+                className="w-full h-[calc(100vh-280px)] font-mono text-xs"
+                value={JSON.stringify(content, null, 2)}
+                onChange={handleEditorChange}
+            />
+        )}
       </CardContent>
     </Card>
   )
@@ -390,7 +416,7 @@ export default function DesignPage() {
                 />
             </div>
             <div className="lg:col-span-2">
-                <PreviewPanel styles={styles} content={content} templateId={selectedTemplateId} />
+                <PreviewPanel styles={styles} content={content} setContent={setContent} templateId={selectedTemplateId} />
             </div>
         </div>
     </div>
