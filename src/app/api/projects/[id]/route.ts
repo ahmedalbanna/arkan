@@ -32,16 +32,17 @@ async function verifyProjectOwner(request: Request, projectId: string) {
 // GET a single project
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     try {
-        const accessCheck = await verifyProjectOwner(request, params.id);
+        const {id:projectId} = await params;
+        const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
         }
 
-        const projectDoc = await adminDb.collection('projects').doc(params.id).get();
+        const projectDoc = await adminDb.collection('projects').doc(projectId).get();
         // We already checked for existence in verifyProjectOwner
         return NextResponse.json({ id: projectDoc.id, ...projectDoc.data() }, { status: 200 });
     } catch (error) {
-        console.error(`Error fetching project ${params.id}:`, error);
+        console.error(`Error fetching project ${await params.id}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
@@ -50,7 +51,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
 // PUT (update) a project
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     try {
-        const accessCheck = await verifyProjectOwner(request, params.id);
+        const { id: projectId } = await params;
+        const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
         }
@@ -66,11 +68,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             updatedAt: new Date().toISOString()
         };
 
-        await adminDb.collection('projects').doc(params.id).update(updateData);
+        await adminDb.collection("projects").doc(projectId).update(updateData);
 
         revalidatePath('/projects');
 
-        return NextResponse.json({ id: params.id, ...updateData }, { status: 200 });
+        return NextResponse.json(
+          { id: projectId, ...updateData },
+          { status: 200 }
+        );
     } catch (error) {
         console.error(`Error updating project ${params.id}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
@@ -81,12 +86,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 // DELETE a project
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     try {
-        const accessCheck = await verifyProjectOwner(request, params.id);
+        const { id: projectId } = await params;
+        const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
         }
 
-        await adminDb.collection('projects').doc(params.id).delete();
+        await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');
 
         return NextResponse.json({ message: 'Project deleted successfully' }, { status: 200 });
