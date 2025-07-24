@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from '@/lib/utils';
 
 interface ProjectCardProps {
     project: SavedProject;
@@ -42,7 +43,10 @@ export function ProjectCard({ project }: ProjectCardProps) {
     const projectTitle = project.name || project.proposal?.title || 'Untitled Project';
 
     return (
-        <Card className="flex flex-col">
+        <Card className={cn(
+            "flex flex-col group transition-all duration-300 ease-in-out",
+            "hover:shadow-lg hover:-translate-y-1"
+        )}>
             <CardHeader>
                 <div className="flex justify-between items-start gap-2">
                     <CardTitle className="font-headline text-lg truncate" title={projectTitle}>

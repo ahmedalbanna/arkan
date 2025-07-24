@@ -7,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from '@/hooks/use-toast';
-import { verifyPayment as verifyPaymentApi } from '@/services/transaction-service'; // Corrected import path
+import { verifyPayment as verifyPaymentApi } from '@/services/transaction-service';
 import type { VerifyPaymentVariables } from '@/lib/types';
 
 

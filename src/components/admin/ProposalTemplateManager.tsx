@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '../ui/skeleton';
 
 const proposalTemplateSchema = z.object({
     id: z.string(),
@@ -26,6 +27,21 @@ const proposalTemplateSchema = z.object({
 });
 
 type ProposalFormValues = z.infer<typeof proposalTemplateSchema>;
+
+function ProposalTemplateSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </CardContent>
+        </Card>
+    )
+}
 
 function ProposalTemplateForm({ template, onSave, isSaving }: { template: ProposalTemplate, onSave: (data: ProposalFormValues) => void, isSaving: boolean }) {
     const form = useForm<ProposalFormValues>({
@@ -119,7 +135,7 @@ export function ProposalTemplateManager() {
         mutation.mutate({ template: data, token });
     };
 
-    if (isLoading) return <div><Loader2 className="animate-spin" /> Loading templates...</div>;
+    if (isLoading) return <ProposalTemplateSkeleton />
     if (isError) return <div>Error loading templates.</div>;
 
     return (

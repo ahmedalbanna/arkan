@@ -18,6 +18,7 @@ import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { AGENTS } from '@/lib/agents';
 import { Checkbox } from '../ui/checkbox';
+import { Skeleton } from '../ui/skeleton';
 
 const reportTemplateSchema = z.object({
   id: z.string(),
@@ -29,6 +30,22 @@ const reportTemplateSchema = z.object({
 type ReportFormValues = z.infer<typeof reportTemplateSchema>;
 
 const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
+
+
+function ReportTemplateSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </CardContent>
+        </Card>
+    )
+}
 
 function ReportTemplateForm({ template, onSave, isSaving }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean }) {
     const form = useForm<ReportFormValues>({
@@ -133,7 +150,7 @@ export function ReportTemplateManager() {
         mutation.mutate({ template: data, token });
     };
 
-    if (isLoading) return <div><Loader2 className="animate-spin" /> Loading templates...</div>;
+    if (isLoading) return <ReportTemplateSkeleton />;
     if (isError) return <div>Error loading templates.</div>;
 
     return (

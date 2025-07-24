@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "Arkan",
@@ -115,7 +116,10 @@
     "copyright": "© {year} Arkan. All rights reserved."
   },
   "home": {
-    "heroTitle": "Arkan: Your Platform for Professional Creativity",
+    "heroTitle": {
+      "main": "Arkan",
+      "animated": "Your Platform for Professional Creativity"
+    },
     "heroSubtitle": "Use powerful AI tools to generate documents, reports, code, and more.",
     "exploreProjects": "Start Generating",
     "trySummarizer": "Try Code Generator",

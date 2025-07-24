@@ -14,11 +14,11 @@ import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
 
 async function generateCode(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate-code', {
@@ -68,10 +68,13 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 export default function CodeGenerator() {
     const { t } = useLocalization();
     const { 
-        codeGenerator: codeState,
+        prompt,
+        html,
+        css,
+        javascript,
         setCodePrompt,
         setGeneratedCode,
-    } = useBuilderStore();
+    } = useCodeGeneratorStore();
     
     const { firebaseUser, refetchUser } = useAuth();
     const queryClient = useQueryClient();
@@ -99,17 +102,17 @@ export default function CodeGenerator() {
             setSrcDoc(`
                 <html>
                     <head>
-                        <style>${codeState.css || ''}</style>
+                        <style>${css || ''}</style>
                     </head>
                     <body>
-                        ${codeState.html || ''}
-                        <script>${codeState.javascript || ''}<\/script>
+                        ${html || ''}
+                        <script>${javascript || ''}<\/script>
                     </body>
                 </html>
             `);
         }, 300);
         return () => clearTimeout(timeout);
-    }, [codeState]);
+    }, [html, css, javascript]);
 
     const takeScreenshot = async () => {
         if (!iframeRef.current?.contentWindow) return;
@@ -148,12 +151,12 @@ export default function CodeGenerator() {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    ${codeState.html || ''}
+    ${html || ''}
     <script src="script.js"></script>
 </body>
 </html>`);
-            zip.file("style.css", codeState.css || "");
-            zip.file("script.js", codeState.javascript || "");
+            zip.file("style.css", css || "");
+            zip.file("script.js", javascript || "");
 
             const blob = await zip.generateAsync({ type: "blob" });
             saveAs(blob, "generated-code.zip");
@@ -201,7 +204,7 @@ export default function CodeGenerator() {
             return;
         }
         const token = await firebaseUser.getIdToken();
-        mutation.mutate({ prompt: codeState.prompt, token });
+        mutation.mutate({ prompt, token });
     };
 
     return (
@@ -209,7 +212,7 @@ export default function CodeGenerator() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    {(codeState.html || codeState.css || codeState.javascript) && (
+                    {(html || css || javascript) && (
                         <Card>
                             <CardHeader className="flex-row items-center justify-between">
                                 <CardTitle className="font-headline">{t('builder.codeGenerator.generatedCode')}</CardTitle>
@@ -226,13 +229,13 @@ export default function CodeGenerator() {
                                         <TabsTrigger value="javascript">JS</TabsTrigger>
                                     </TabsList>
                                     <TabsContent value="html" className="mt-4">
-                                        <CodeDisplay code={codeState.html || ''} language="html" />
+                                        <CodeDisplay code={html || ''} language="html" />
                                     </TabsContent>
                                     <TabsContent value="css" className="mt-4">
-                                        <CodeDisplay code={codeState.css || ''} language="css" />
+                                        <CodeDisplay code={css || ''} language="css" />
                                     </TabsContent>
                                     <TabsContent value="javascript" className="mt-4">
-                                        <CodeDisplay code={codeState.javascript || t('builder.codeGenerator.noJs')} language="javascript" />
+                                        <CodeDisplay code={javascript || t('builder.codeGenerator.noJs')} language="javascript" />
                                     </TabsContent>
                                 </Tabs>
                             </CardContent>
@@ -280,7 +283,7 @@ export default function CodeGenerator() {
                                 placeholder={t('builder.codeGenerator.promptPlaceholder')}
                                 rows={8}
                                 required
-                                value={codeState.prompt}
+                                value={prompt}
                                 onChange={(e) => setCodePrompt(e.target.value)}
                                 disabled={mutation.isPending}
                             />

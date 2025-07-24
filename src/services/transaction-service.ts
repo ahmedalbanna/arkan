@@ -2,6 +2,7 @@
 'use client';
 
 import type { TransactionData } from '@/lib/db/queries';
+import type { VerifyPaymentVariables } from '@/lib/types';
 
 interface FetchPendingTransactionsParams {
   token: string;
@@ -27,6 +28,26 @@ export async function getPendingTransactions(params: FetchPendingTransactionsPar
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch pending transactions');
+    }
+    return await response.json();
+}
+
+
+export async function verifyPayment(variables: VerifyPaymentVariables, token: string) {
+    if (!token) {
+        throw new Error("Authentication token is required.");
+    }
+    const response = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(variables),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to verify payment');
     }
     return await response.json();
 }

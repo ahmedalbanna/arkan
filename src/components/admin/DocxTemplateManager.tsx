@@ -11,8 +11,28 @@ import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import Image from 'next/image';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Skeleton } from '../ui/skeleton';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
+
+function DocxTemplateSkeleton() {
+    return (
+        <Card className="flex flex-col">
+            <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent className="flex-grow space-y-4">
+                <Skeleton className="w-full aspect-[400/565] rounded-md" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+            </CardContent>
+            <CardFooter>
+                <Skeleton className="h-10 w-32" />
+            </CardFooter>
+        </Card>
+    );
+}
 
 export default function DocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
@@ -30,9 +50,9 @@ export default function DocxTemplateManager() {
   if (!isLoaded) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
-        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
-        <Card><CardHeader><Loader2 className="animate-spin" /></CardHeader></Card>
+        <DocxTemplateSkeleton />
+        <DocxTemplateSkeleton />
+        <DocxTemplateSkeleton />
       </div>
     );
   }

@@ -17,6 +17,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
 import { AGENTS } from '@/lib/agents';
+import { Skeleton } from '../ui/skeleton';
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -29,6 +30,23 @@ const presentationTemplateSchema = z.object({
 type PresentationFormValues = z.infer<typeof presentationTemplateSchema>;
 
 const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
+
+
+function PresentationTemplateSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-3/4" />
+                <Skeleton className="h-4 w-full mt-2" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+            </CardContent>
+        </Card>
+    )
+}
+
 
 function PresentationTemplateForm({ template, onSave, isSaving }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean }) {
     const form = useForm<PresentationFormValues>({
@@ -124,7 +142,7 @@ export function PresentationTemplateManager() {
         mutation.mutate({ templateId: data.id, data });
     };
 
-    if (isLoading) return <div><Loader2 className="animate-spin" /> Loading templates...</div>;
+    if (isLoading) return <PresentationTemplateSkeleton />;
     if (isError) return <div>Error loading templates.</div>;
 
     return (
