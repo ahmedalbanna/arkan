@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCheck, BrainCircuit, CheckSquare, Image as ImageIcon, FileText, X } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCheck, BrainCircuit, CheckSquare, Image as ImageIcon, FileText, X, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -21,6 +21,8 @@ import { exportHomeworkAsDocx } from '@/lib/homework-exporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
+import { HomeworkHistoryEntry, saveHomeworkHistory, fetchHomeworkHistory, clearHomeworkHistory } from '@/services/homework-service';
+import { homeworkKeys } from '@/lib/query-keys';
 
 
 // API call to analyze the homework
@@ -76,7 +78,7 @@ export default function HomeworkSolver() {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
-
+  
   const {
     stage,
     analyzedHomework,
@@ -84,7 +86,6 @@ export default function HomeworkSolver() {
     curriculumContext,
     homeworkFiles,
     curriculumFiles,
-    history,
     setStage,
     setAnalyzedHomework,
     setSolvedHomework,
@@ -93,15 +94,42 @@ export default function HomeworkSolver() {
     setCurriculumFiles,
     removeHomeworkFile,
     removeCurriculumFile,
-    addSolvedHomeworkToHistory,
-    clearHistory,
     loadFromHistory,
     currentHistoryId,
     resetCurrent,
   } = useHomeworkSolverStore();
   
+  const { data: history = [], refetch: refetchHistory } = useQuery<HomeworkHistoryEntry[]>({
+    queryKey: homeworkKeys.history(firebaseUser?.uid),
+    queryFn: async () => {
+        if (!firebaseUser) return [];
+        const token = await firebaseUser.getIdToken();
+        return fetchHomeworkHistory(token);
+    },
+    enabled: !!firebaseUser
+  });
+
   const analyzeMutation = useMutation({ mutationFn: analyzeHomeworkApi });
   const solveMutation = useMutation({ mutationFn: solveHomeworkApi });
+  const saveHistoryMutation = useMutation({ mutationFn: saveHomeworkHistory, 
+    onSuccess: () => {
+        toast({ title: 'Session Saved', description: 'Your homework session has been saved to your history.' });
+        refetchHistory();
+    },
+    onError: (error: Error) => {
+        toast({ title: 'Error Saving Session', description: error.message, variant: 'destructive' });
+    }
+  });
+  const clearHistoryMutation = useMutation({ mutationFn: clearHomeworkHistory, 
+    onSuccess: () => {
+        toast({ title: 'History Cleared' });
+        refetchHistory();
+        resetCurrent();
+    },
+    onError: (error: Error) => {
+        toast({ title: 'Error Clearing History', description: error.message, variant: 'destructive' });
+    }
+  });
 
   const handleHomeworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHomeworkFiles(e.target.files);
@@ -123,7 +151,6 @@ export default function HomeworkSolver() {
         const curriculumBlobs = await Promise.all(curriculumFiles.map(f => fetch(f.dataUrl).then(res => res.blob())));
         const curriculumFileObjects = curriculumBlobs.map((blob, i) => new File([blob], curriculumFiles[i].name, { type: curriculumFiles[i].type }));
         
-        // Process curriculum and homework analysis in parallel
         const [curriculumText, analysisData] = await Promise.all([
             processCurriculumPdfs({ files: curriculumFileObjects, token }),
             analyzeMutation.mutateAsync({ 
@@ -132,7 +159,7 @@ export default function HomeworkSolver() {
             })
         ]);
         
-        refetchUser(); // Credits deducted for processing files
+        refetchUser();
         setCurriculumContext(curriculumText);
         setAnalyzedHomework(analysisData);
         setStage('readyToSolve');
@@ -153,7 +180,6 @@ export default function HomeworkSolver() {
     try {
       const solvedData = await solveMutation.mutateAsync({ analyzedHomework, curriculumContext, token });
       setSolvedHomework(solvedData);
-      addSolvedHomeworkToHistory(analyzedHomework, solvedData, homeworkFiles, curriculumFiles);
       setStage('solved');
       refetchUser();
       toast({ title: t('builder.homeworkSolver.toasts.solvingSuccess') });
@@ -162,7 +188,32 @@ export default function HomeworkSolver() {
       setStage('readyToSolve');
     }
   };
+
+  const handleSaveToHistory = async () => {
+    if (!analyzedHomework || !solvedHomework || !firebaseUser) {
+        toast({ title: 'Cannot Save', description: 'You must have an analyzed and solved homework to save it.', variant: 'destructive' });
+        return;
+    }
+    const token = await firebaseUser.getIdToken();
+
+    const homeworkFileObjects = await Promise.all(homeworkFiles.map(f => fetch(f.dataUrl).then(res => res.blob()).then(blob => new File([blob], f.name, { type: f.type }))));
+    const curriculumFileObjects = await Promise.all(curriculumFiles.map(f => fetch(f.dataUrl).then(res => res.blob()).then(blob => new File([blob], f.name, { type: f.type }))));
+
+    const formData = new FormData();
+    formData.append('analyzedHomework', JSON.stringify(analyzedHomework));
+    formData.append('solvedHomework', JSON.stringify(solvedHomework));
+    homeworkFileObjects.forEach(file => formData.append('homeworkFiles', file));
+    curriculumFileObjects.forEach(file => formData.append('curriculumFiles', file));
+    
+    saveHistoryMutation.mutate({ formData, token });
+  };
   
+  const handleClearHistory = async () => {
+    if (!firebaseUser) return;
+    const token = await firebaseUser.getIdToken();
+    clearHistoryMutation.mutate({ token });
+  }
+
   const isProcessing = ['analyzing', 'solving'].includes(stage);
 
   const analysisPanel = (
@@ -255,8 +306,8 @@ export default function HomeworkSolver() {
                 <CardTitle className="flex items-center gap-2">
                 <History className="w-5 h-5" /> {t('builder.homeworkSolver.historyTitle')}
                 </CardTitle>
-                <Button variant="ghost" size="icon" onClick={clearHistory} disabled={history.length === 0} title={t('homeworkSolver.clearHistoryTooltip')}>
-                    <Trash2 className="w-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={handleClearHistory} disabled={history.length === 0 || clearHistoryMutation.isPending} title={t('homeworkSolver.clearHistoryTooltip')}>
+                    {clearHistoryMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin"/> : <Trash2 className="w-4 h-4" />}
                 </Button>
             </div>
             <CardDescription>{t('builder.homeworkSolver.historyDescription')}</CardDescription>
@@ -269,7 +320,7 @@ export default function HomeworkSolver() {
                     <Button
                         key={item.id}
                         variant="ghost"
-                        onClick={() => loadFromHistory(item.id)}
+                        onClick={() => loadFromHistory(item)}
                         className={cn(
                             "w-full h-auto justify-start text-left p-2",
                             currentHistoryId === item.id && "bg-muted"
@@ -278,7 +329,7 @@ export default function HomeworkSolver() {
                         <div className="flex flex-col overflow-hidden">
                             <span className="font-semibold truncate">{item.analyzedHomework.title}</span>
                             <span className="text-xs text-muted-foreground">
-                                {formatDistanceToNow(new Date(item.id), { addSuffix: true })}
+                                {formatDistanceToNow(new Date(item.createdAt), { addSuffix: true })}
                             </span>
                         </div>
                     </Button>
@@ -328,7 +379,16 @@ export default function HomeworkSolver() {
                     Analyze
                 </Button>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex-col gap-2">
+                 <Button 
+                    onClick={handleSaveToHistory} 
+                    variant="secondary" 
+                    className="w-full"
+                    disabled={stage !== 'solved' || saveHistoryMutation.isPending}
+                 >
+                    {saveHistoryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    Save Session
+                </Button>
                  <Button onClick={resetCurrent} variant="outline" className="w-full">New Homework</Button>
             </CardFooter>
         </Card>
