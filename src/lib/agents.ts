@@ -61,7 +61,7 @@ Please analyze the following project description and provide the output in the r
 Description: {{{projectDescription}}}`
   },
   {
-    id: 'generate-proposal-report',
+    id: 'generate-proposal',
     name: 'Project Proposal Agent',
     description: 'Creates a comprehensive, professional project proposal from a single project idea, complete with timelines, budget, and risks.',
     category: 'Proposal Generation',
@@ -100,7 +100,7 @@ The introduction should be well-structured, engaging, and must include:`,
     }
   },
   {
-    id: 'generate-literature-review-section',
+    id: 'generate-literatureReview-section',
     name: 'Literature Review Agent',
     description: 'Generates an academic and technical literature review section for the project report.',
     category: 'Report Generation',
@@ -121,7 +121,7 @@ Your review should:`,
     }
   },
   {
-    id: 'generate-system-analysis-section',
+    id: 'generate-systemAnalysis-section',
     name: 'System Analysis Agent',
     description: 'Generates the system analysis section, including functional and non-functional requirements.',
     category: 'Report Generation',
@@ -142,7 +142,7 @@ Your analysis must cover:`,
     }
   },
   {
-    id: 'generate-design-strategy-section',
+    id: 'generate-designStrategy-section',
     name: 'Design Strategy Agent',
     description: 'Generates the design strategy section, focusing on user experience and user interface.',
     category: 'Report Generation',
@@ -163,7 +163,7 @@ This section should articulate:`,
     }
   },
   {
-    id: 'generate-system-design-section',
+    id: 'generate-systemDesign-section',
     name: 'System Design Agent',
     description: 'Generates the system design section, defining the architecture, data model, and components.',
     category: 'Report Generation',
@@ -184,7 +184,7 @@ This section must detail:`,
     }
   },
   {
-    id: 'generate-system-programming-section',
+    id: 'generate-systemProgramming-section',
     name: 'System Programming Agent',
     description: 'Generates the system programming and implementation section, defining workflow and standards.',
     category: 'Report Generation',
@@ -206,7 +206,7 @@ This section should outline:`,
     }
   },
   {
-    id: 'generate-system-testing-section',
+    id: 'generate-systemTesting-section',
     name: 'System Testing Agent',
     description: 'Generates the system testing section, defining the testing strategy, tools, and metrics.',
     category: 'Report Generation',

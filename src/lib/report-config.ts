@@ -3,12 +3,12 @@ import type { DiagramType, SectionName } from '@/ai/schemas';
 
 export const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
     introduction: { title: "builder.reportGenerator.sections.introduction", icon: BookMarked, agentId: "generate-introduction-section" },
-    literatureReview: { title: "builder.reportGenerator.sections.literatureReview", icon: Library, agentId: "generate-literature-review-section" },
-    systemAnalysis: { title: "builder.reportGenerator.sections.systemAnalysis", icon: Waypoints, agentId: "generate-system-analysis-section" },
-    designStrategy: { title: "builder.reportGenerator.sections.designStrategy", icon: BookText, agentId: "generate-design-strategy-section" },
-    systemDesign: { title: "builder.reportGenerator.sections.systemDesign", icon: Code, agentId: "generate-system-design-section" },
-    systemProgramming: { title: "builder.reportGenerator.sections.systemProgramming", icon: Code, agentId: "generate-system-programming-section" },
-    systemTesting: { title: "builder.reportGenerator.sections.systemTesting", icon: TestTube2, agentId: "generate-system-testing-section" },
+    literatureReview: { title: "builder.reportGenerator.sections.literatureReview", icon: Library, agentId: "generate-literatureReview-section" },
+    systemAnalysis: { title: "builder.reportGenerator.sections.systemAnalysis", icon: Waypoints, agentId: "generate-systemAnalysis-section" },
+    designStrategy: { title: "builder.reportGenerator.sections.designStrategy", icon: BookText, agentId: "generate-designStrategy-section" },
+    systemDesign: { title: "builder.reportGenerator.sections.systemDesign", icon: Code, agentId: "generate-systemDesign-section" },
+    systemProgramming: { title: "builder.reportGenerator.sections.systemProgramming", icon: Code, agentId: "generate-systemProgramming-section" },
+    systemTesting: { title: "builder.reportGenerator.sections.systemTesting", icon: TestTube2, agentId: "generate-systemTesting-section" },
     conclusion: { title: "builder.reportGenerator.sections.conclusion", icon: Flag, agentId: "generate-conclusion-section" },
 };
 

@@ -15,7 +15,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
-import { useAutosave } from '@/hooks/use-autosave';
 import { useProject } from '@/hooks/use-projects';
 
 
@@ -65,7 +64,6 @@ async function markOnboardingComplete(userId: string, token: string) {
 }
 
 function GeneratePageContent() {
-  useAutosave(); // Activate the autosave hook
   const [activeTab, setActiveTab] = useState("proposal");
   const { proposal, currentProjectId, loadState } = useBuilderStore();
   const { t } = useLocalization();

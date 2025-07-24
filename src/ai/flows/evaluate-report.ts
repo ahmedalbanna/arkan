@@ -12,8 +12,12 @@ import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/a
 
 const EvaluateReportInputSchema = z.object({
   proposal: ProjectProposalSchema.describe("The original project proposal."),
-  reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams."),
+  reportSections: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
+  }, "All keys must be a valid SectionName").describe("A map of all generated report sections."),
+  diagrams: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
+  }, "All keys must be a valid DiagramType").optional().describe("A map of all generated PlantUML diagrams."),
   acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against."),
 });
 

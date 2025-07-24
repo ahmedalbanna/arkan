@@ -8,7 +8,7 @@ let serviceAccount: admin.ServiceAccount;
 
 // Check if the environment variable is set and file exists
 if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    const serviceAccountPath = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    const serviceAccountPath = path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
     if (fs.existsSync(serviceAccountPath)) {
         serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
     } else {

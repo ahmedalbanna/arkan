@@ -24,6 +24,14 @@ export const SectionNameSchema = z.enum([
 ]);
 export type SectionName = z.infer<typeof SectionNameSchema>;
 
+export const AcademicContextSchema = z.object({
+  documentType: z.enum(['research-paper', 'thesis', 'essay', 'report', 'case-study']).describe('The type of academic document being generated.'),
+  subjectArea: z.string().describe('The main subject or field of study (e.g., Computer Science, Biology, History).'),
+  academicLevel: z.enum(['high-school', 'undergraduate', 'graduate', 'doctorate']).describe('The target academic level for the content.'),
+  citationStyle: z.enum(['apa', 'mla', 'chicago', 'ieee']).describe('The citation style to be used for references.'),
+});
+export type AcademicContext = z.infer<typeof AcademicContextSchema>;
+
 
 export const ProjectProposalSchema = z.object({
   category: z.string().describe("A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI')."),
@@ -63,6 +71,15 @@ export const ProjectProposalSchema = z.object({
 
 export type ProjectProposal = z.infer<typeof ProjectProposalSchema>;
 
+// A more flexible schema that allows for a structured proposal or any other object.
+// This is useful for flows that might receive different kinds of proposal-like objects.
+export const AnyProjectProposalSchema = z.union([
+  ProjectProposalSchema,
+  z.object({}).passthrough(), // Allows any object shape
+]);
+export type AnyProjectProposal = z.infer<typeof AnyProjectProposalSchema>;
+
+
 export const ManipulateTextInputSchema = z.object({
   textToManipulate: z.string().describe('The original text to be modified.'),
   command: z.string().describe('The instruction for how to modify the text (e.g., "summarize", "expand on this topic", "rewrite this to be more formal").'),
@@ -91,8 +108,12 @@ export type PresentationHistoryEntry = z.infer<typeof PresentationHistoryEntrySc
 
 export const GeneratePresentationInputSchema = z.object({
   proposal: ProjectProposalSchema,
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  sections: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
+  }, "All keys must be a valid SectionName").optional(),
+  diagrams: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
+  }, "All keys must be a valid DiagramType").optional(),
   prompt: z.string(),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;

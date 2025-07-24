@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
@@ -32,6 +30,8 @@ import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import type { GuidelineState } from '@/hooks/useReportStore';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
+import { Slider } from '../ui/slider';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -165,7 +165,7 @@ export const GenerationTools = () => {
         onSuccess: (data, variables) => {
             const file = variables.formData.get('file') as File;
             setExternalContext(file.name, data.markdown);
-            queryClient.invalidateQueries({ queryKey: ['user'] });
+            queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
             toast({ title: t('builder.reportGenerator.toasts.contextAdded'), description: t('builder.reportGenerator.toasts.contextAddedDesc', { fileName: file.name }) });
         },
         onError: (error: Error) => {
@@ -286,7 +286,7 @@ export const GenerationTools = () => {
                     {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                     {t('builder.reportGenerator.GenerateFullReport')}
                 </Button>
-
+                
                 <Accordion type="multiple" className="w-full space-y-1">
                     {availableSections.map((key) => {
                         const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);

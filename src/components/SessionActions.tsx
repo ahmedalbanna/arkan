@@ -70,8 +70,9 @@ export const SessionActions = () => {
 
     const store = useBuilderStore();
     const saveProjectMutation = useSaveProject();
+    const updateProjectMutation = useUpdateProject();
     
-    const isSaving = saveProjectMutation.isPending;
+    const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -108,6 +109,22 @@ export const SessionActions = () => {
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.arkan`);
+    }
+
+    const handleSave = () => {
+        if (!store.proposal) {
+            toast({ title: "Cannot Save", description: "Please generate a proposal first.", variant: 'destructive' });
+            return;
+        }
+
+        const projectData = store.getFullState();
+        const saveData = { ...projectData, name: store.name || store.proposal.title };
+
+        if (store.currentProjectId) {
+            updateProjectMutation.mutate({ projectId: store.currentProjectId, data: projectData });
+        } else {
+            saveProjectMutation.mutate(saveData);
+        }
     }
 
     const handleSaveAs = () => {
@@ -174,6 +191,17 @@ export const SessionActions = () => {
                 </Tooltip>
                 
                 <SaveStatus />
+
+                 <Button
+                    variant="default"
+                    size="icon"
+                    onClick={handleSave}
+                    disabled={!store.hasUnsavedChanges || isSaving}
+                    className="h-8 w-8 md:w-auto md:px-3"
+                >
+                    {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                     <span className="hidden md:inline ml-2">Save Project</span>
+                </Button>
 
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

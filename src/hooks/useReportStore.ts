@@ -64,6 +64,7 @@ const getDefaultGuidelineState = () => {
     AGENTS.forEach(agent => {
         const prompt = agent.prompt as AgentPrompt;
         if (prompt && prompt.guidelines) {
+            // Use the kebab-case agent ID to derive the key, removing the prefix and suffix
             const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
             state[itemKey] = {
                 checked: prompt.guidelines.map(g => g.isDefault),
@@ -140,7 +141,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set(state => {
             const newGuidelineState = { ...state.guidelineState };
             if (!newGuidelineState[itemKey]) {
-                const agent = AGENTS.find(a => a.id.replace('generate-', '').replace('-section', '').replace('-diagram', '') === itemKey);
+                const agent = AGENTS.find(a => a.id.includes(itemKey));
                 const prompt = agent?.prompt as AgentPrompt;
                 newGuidelineState[itemKey] = {
                     checked: prompt?.guidelines?.map(g => g.isDefault) || [],

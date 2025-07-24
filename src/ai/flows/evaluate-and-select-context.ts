@@ -15,8 +15,12 @@ import { AGENTS, type AgentPrompt } from '@/lib/agents';
 // Define the input schema for the context evaluation flow
 const EvaluateContextInputSchema = z.object({
   proposal: ProjectProposalSchema.describe("The original project proposal."),
-  existingSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections."),
-  existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams."),
+  existingSections: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
+  }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections."),
+  existingDiagrams: z.object({}).passthrough().refine(obj => {
+    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
+  }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
   sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
 });
 export type EvaluateContextInput = z.infer<typeof EvaluateContextInputSchema>;

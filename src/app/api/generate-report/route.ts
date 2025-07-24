@@ -2,20 +2,15 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
-import { generateIntroduction } from '@/ai/flows/generate-introduction';
-import { generateLiteratureReview } from '@/ai/flows/generate-literature-review';
-import { generateSystemAnalysis } from '@/ai/flows/generate-system-analysis';
-import { generateDesignStrategy } from '@/ai/flows/generate-design-strategy';
-import { generateSystemDesign } from '@/ai/flows/generate-system-design';
-import { generateSystemProgramming } from '@/ai/flows/generate-system-programming';
-import { generateSystemTesting } from '@/ai/flows/generate-system-testing';
-import { generateConclusion } from '@/ai/flows/generate-conclusion';
+import { getAgent } from '@/lib/db/queries';
+import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ReportGenerationTemplate } from '@/services/template-service';
 import { getUserProfile } from '@/lib/db/queries';
+import { sectionConfig } from '@/lib/report-config';
 
 // Schema for generating a single section
 const generateSectionSchema = z.object({
@@ -35,17 +30,6 @@ const generateFullReportSchema = z.object({
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
 });
-
-const sectionAgentMap: Record<SectionName, { flow: Function; agentId: string }> = {
-  introduction: { flow: generateIntroduction, agentId: 'generate-introduction-section' },
-  literatureReview: { flow: generateLiteratureReview, agentId: 'generate-literature-review-section' },
-  systemAnalysis: { flow: generateSystemAnalysis, agentId: 'generate-system-analysis-section' },
-  designStrategy: { flow: generateDesignStrategy, agentId: 'generate-design-strategy-section' },
-  systemDesign: { flow: generateSystemDesign, agentId: 'generate-system-design-section' },
-  systemProgramming: { flow: generateSystemProgramming, agentId: 'generate-system-programming-section' },
-  systemTesting: { flow: generateSystemTesting, agentId: 'generate-system-testing-section' },
-  conclusion: { flow: generateConclusion, agentId: 'generate-conclusion-section' },
-};
 
 
 export async function POST(request: Request) {
@@ -73,7 +57,7 @@ export async function POST(request: Request) {
 
         // Determine which sections are missing
         const sectionsToGenerate = template.agentIds
-            .map(agentId => (Object.keys(sectionAgentMap) as SectionName[]).find(key => sectionAgentMap[key].agentId === agentId))
+            .map(agentId => (Object.keys(sectionConfig) as SectionName[]).find(key => sectionConfig[key].agentId === agentId))
             .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !existingSections[sectionKey]);
         
         if (sectionsToGenerate.length === 0) {
@@ -96,23 +80,23 @@ export async function POST(request: Request) {
         const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
         for (const config of evalResult.configs) {
-            const agentInfo = sectionAgentMap[config.section];
+            const agentInfo = sectionConfig[config.section];
             
             const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
             
             const agentInput = {
                 proposal,
+                sectionToGenerate: config.section,
                 otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key] }), {}),
                 otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
                 guidelines: config.guidelines,
                 instructionText,
             };
 
-            const result = await agentInfo.flow(agentInput);
-            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
+            const result = await generateReportSection(agentInput);
+            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { [result.sectionName]: result.content } });
     
-            const content = Object.values(result)[0] as string;
-            generatedSections[config.section] = content;
+            generatedSections[result.sectionName] = result.content;
         }
 
         return NextResponse.json({ sections: generatedSections }, { status: 200 });
@@ -123,16 +107,24 @@ export async function POST(request: Request) {
     if (singleSectionValidation.success) {
         await deductCredit(userId, 1);
         const agentInput = singleSectionValidation.data;
-        const agentInfo = sectionAgentMap[agentInput.sectionToGenerate];
+        const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
         
-        const result = await agentInfo.flow(agentInput);
-        await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: result });
+        const result = await generateReportSection(agentInput);
+
+        const transformedOutput = { [result.sectionName]: result.content };
+        
+        await logGeneration({ 
+            agentId: agentInfo.agentId, 
+            userId, 
+            input: agentInput, 
+            output: transformedOutput 
+        });
   
-        return NextResponse.json(result, { status: 200 });
+        return NextResponse.json(transformedOutput, { status: 200 });
     }
 
     // If neither validation passes, return a validation error

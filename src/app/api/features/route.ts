@@ -1,14 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
-
-const defaultFeatures = [
-    { id: 'proposal', name: 'Proposal Mode', description: 'Allows users to generate full project proposals.', isEnabled: true },
-    { id: 'report', name: 'Report Generator', description: 'Allows users to generate report sections.', isEnabled: true },
-    { id: 'diagram', name: 'Diagram Generator', description: 'Allows users to generate various UML diagrams.', isEnabled: true },
-    { id: 'code', name: 'Code Generator', description: 'Allows users to generate HTML/CSS/JS components.', isEnabled: true },
-    { id: 'presentation', name: 'Presentation Generator', description: 'Allows users to generate PPTX presentations.', isEnabled: true },
-];
+import { defaultFeatures } from '@/lib/features';
 
 // GET /api/features - This endpoint is public for all authenticated users to check feature flags.
 export async function GET(request: Request) {

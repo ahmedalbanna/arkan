@@ -15,11 +15,11 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
         description: 'Generates a comprehensive technical report for software development projects, including analysis, design, programming, and testing sections.',
         agentIds: [
             'generate-introduction-section',
-            'generate-system-analysis-section',
-            'generate-design-strategy-section',
-            'generate-system-design-section',
-            'generate-system-programming-section',
-            'generate-system-testing-section',
+            'generate-systemAnalysis-section',
+            'generate-designStrategy-section',
+            'generate-systemDesign-section',
+            'generate-systemProgramming-section',
+            'generate-systemTesting-section',
             'generate-conclusion-section',
         ]
     },
@@ -28,10 +28,10 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
         name: 'Scientific Research Report',
         description: 'Generates a report structure suitable for academic or scientific projects, emphasizing literature review and analysis.',
         agentIds: [
-            'generate-introduction-section',
-            'generate-literature-review-section',
-            'generate-system-analysis-section',
-            'generate-system-testing-section',
+            'generate-introduction-Section',
+            'generate-literatureReview-section',
+            'generate-systemAnalysis-section',
+            'generate-systemTesting-section',
             'generate-conclusion-section',
         ]
     },
