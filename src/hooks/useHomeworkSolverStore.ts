@@ -16,7 +16,6 @@ export interface FileData {
 }
 
 export interface HomeworkSolverState {
-  stage: 'idle' | 'readyToSolve' | 'solved';
   analyzedHomework: AnalyzedHomework | null;
   solvedHomework: SolvedHomework | null;
   curriculumContext: string | null;
@@ -26,7 +25,6 @@ export interface HomeworkSolverState {
 }
 
 interface HomeworkSolverActions {
-  setStage: (stage: HomeworkSolverState['stage']) => void;
   setAnalyzedHomework: (homework: AnalyzedHomework | null) => void;
   setSolvedHomework: (solution: SolvedHomework | null) => void;
   setCurriculumContext: (context: string | null) => void;
@@ -39,7 +37,6 @@ interface HomeworkSolverActions {
 }
 
 const initialState: Omit<HomeworkSolverState, 'history'> = {
-  stage: "idle",
   analyzedHomework: null,
   solvedHomework: null,
   curriculumContext: null,
@@ -64,19 +61,15 @@ export const useHomeworkSolverStore = create<
   persist(
     (set, get) => ({
       ...initialState,
-      history: [], // History is now managed by React Query
-      setStage: (stage) => set({ stage }),
       setAnalyzedHomework: (homework) =>
         set({
           analyzedHomework: homework,
           solvedHomework: null,
-          stage: homework ? "readyToSolve" : "idle",
           currentHistoryId: null,
         }),
       setSolvedHomework: (solution) =>
         set({
           solvedHomework: solution,
-          stage: solution ? "solved" : "readyToSolve",
         }),
       setCurriculumContext: (context) => set({ curriculumContext: context }),
        setHomeworkFiles: async (files) => {
@@ -90,7 +83,7 @@ export const useHomeworkSolverStore = create<
             dataUrl: await fileToDataUrl(file),
         }));
         const fileData = await Promise.all(fileDataPromises);
-        set({ homeworkFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null, curriculumContext: null });
+        set({ homeworkFiles: fileData, analyzedHomework: null, solvedHomework: null, curriculumContext: null });
       },
       setCurriculumFiles: async (files) => {
          if (!files || files.length === 0) {
@@ -103,7 +96,7 @@ export const useHomeworkSolverStore = create<
             dataUrl: await fileToDataUrl(file),
         }));
         const fileData = await Promise.all(fileDataPromises);
-        set({ curriculumFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null, curriculumContext: null });
+        set({ curriculumFiles: fileData, analyzedHomework: null, solvedHomework: null, curriculumContext: null });
       },
       removeHomeworkFile: (index) => set(state => ({ homeworkFiles: state.homeworkFiles.filter((_, i) => i !== index) })),
       removeCurriculumFile: (index) => set(state => ({ curriculumFiles: state.curriculumFiles.filter((_, i) => i !== index) })),
@@ -123,7 +116,6 @@ export const useHomeworkSolverStore = create<
             solvedHomework: historyEntry.solvedHomework,
             homeworkFiles: hwFiles,
             curriculumFiles: curFiles,
-            stage: "solved",
             currentHistoryId: historyEntry.id,
             curriculumContext: null,
           });
