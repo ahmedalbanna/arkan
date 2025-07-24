@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 
+
 // API call to analyze the homework
 async function analyzeHomeworkApi(variables: { homeworkImageUris: string[], token: string }): Promise<AnalyzedHomework> {
   const response = await fetch('/api/homework-solver/analyze', {
@@ -56,7 +57,10 @@ async function processCurriculumPdfs(variables: { files: File[], token: string }
         headers: { 'Authorization': `Bearer ${variables.token}` },
         body: formData,
     });
-    if (!response.ok) throw new Error((await response.json()).message || 'Curriculum PDF processing failed.');
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Curriculum PDF processing failed.');
+    }
     const result = await response.json();
     return result.markdown;
 }
@@ -155,11 +159,42 @@ export default function HomeworkSolver() {
   
   const isProcessing = ['analyzing', 'solving'].includes(stage);
 
-  const mainContentPanel = (
-    <Card className="min-h-[calc(100vh-250px)] flex flex-col">
-       <CardHeader>
+  const analysisPanel = (
+    <Card className="h-full flex flex-col">
+        <CardHeader>
+            <CardTitle>{t('builder.homeworkSolver.analysisCardTitle')}</CardTitle>
+            <CardDescription>{analyzedHomework ? `${analyzedHomework.subject} - ${analyzedHomework.title}` : t('builder.homeworkSolver.analysisPlaceholder')}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex-grow flex flex-col">
+            <ScrollArea className="flex-grow p-1">
+                {stage === 'analyzing' ? (
+                     <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                        <Loader2 className="h-12 w-12 animate-spin mb-4" />
+                        <p>Analyzing homework and curriculum...</p>
+                    </div>
+                ) : analyzedHomework ? (
+                    <ReactMarkdown components={markdownComponents}>{analyzedHomework.structuredQuestions}</ReactMarkdown> 
+                ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground p-8">
+                        <BrainCircuit className="h-12 w-12 mb-4" />
+                    </div>
+                )}
+            </ScrollArea>
+            {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
+                <Button onClick={handleSolveHomework} disabled={stage !== 'readyToSolve'} className="mt-4 w-full">
+                    {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                    {t('builder.homeworkSolver.solveButton')}
+                </Button>
+            )}
+        </CardContent>
+    </Card>
+  );
+
+  const solutionPanel = (
+     <Card className="min-h-[calc(100vh-250px)] flex flex-col">
+      <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>{t('builder.homeworkSolver.solutionCardTitle')}</CardTitle>
+            <CardTitle>{t('builder.homeworkSolver.solutionCardTitle')}</CardTitle>
             {solvedHomework && (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -175,16 +210,16 @@ export default function HomeworkSolver() {
                 </DropdownMenu>
             )}
         </div>
-        <CardDescription>{analyzedHomework ? `${analyzedHomework.subject} - ${analyzedHomework.title}` : t('builder.homeworkSolver.solutionCardDescription')}</CardDescription>
+        <CardDescription>{t('builder.homeworkSolver.solutionCardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-          {stage === 'solving' ? (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Loader2 className="h-12 w-12 animate-spin mb-4" />
-                <p>{t('builder.homeworkSolver.solvingInProgress')}</p>
-              </div>
-          ) : solvedHomework?.solutions && Array.isArray(solvedHomework.solutions) ? (
-            <ScrollArea className="h-[calc(100vh-350px)] p-1">
+        {stage === 'solving' ? (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <Loader2 className="h-12 w-12 animate-spin mb-4" />
+            <p>{t('builder.homeworkSolver.solvingInProgress')}</p>
+          </div>
+        ) : solvedHomework && Array.isArray(solvedHomework.solutions) ? (
+          <ScrollArea className="h-[calc(100vh-350px)] p-1">
               <div className="prose dark:prose-invert max-w-none space-y-6">
                 {solvedHomework.solutions.map((pair, index) => (
                     <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
@@ -195,26 +230,14 @@ export default function HomeworkSolver() {
                     </div>
                 ))}
               </div>
-            </ScrollArea>
-          ) : analyzedHomework ? (
-            <ScrollArea className="h-[calc(100vh-350px)] p-1">
-                <ReactMarkdown components={markdownComponents}>{analyzedHomework.structuredQuestions}</ReactMarkdown>
-            </ScrollArea>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <BookCheck className="h-12 w-12 mb-4" />
-                <p>{t('builder.homeworkSolver.solutionPlaceholder')}</p>
-            </div>
-          )}
-      </CardContent>
-      {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-        <CardFooter>
-            <Button onClick={handleSolveHomework} disabled={stage !== 'readyToSolve'} className="w-full">
-                {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                {t('builder.homeworkSolver.solveButton')}
-            </Button>
-        </CardFooter>
+          </ScrollArea>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+            <CheckSquare className="h-12 w-12 mb-4" />
+              <p>{t('builder.homeworkSolver.solutionPlaceholder')}</p>
+          </div>
         )}
+      </CardContent>
     </Card>
   );
 
@@ -304,32 +327,39 @@ export default function HomeworkSolver() {
             </CardFooter>
         </Card>
     </div>
-  );
+  )
 
   return (
     <div>
         {/* --- DESKTOP VIEW --- */}
         <div className="hidden lg:grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-4">
+            <div className="lg:col-span-3">
                 {controlAndHistoryPanel}
             </div>
-            <div className="lg:col-span-8">
-                {mainContentPanel}
+            <div className="lg:col-span-4">
+                {analysisPanel}
+            </div>
+            <div className="lg:col-span-5">
+                {solutionPanel}
             </div>
         </div>
 
         {/* --- MOBILE VIEW --- */}
         <div className="block lg:hidden col-span-1">
             <Tabs defaultValue="upload" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="upload">Upload & History</TabsTrigger>
+                    <TabsTrigger value="exam">Exam</TabsTrigger>
                     <TabsTrigger value="solution">Solution</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="mt-4">
                     {controlAndHistoryPanel}
                 </TabsContent>
+                <TabsContent value="exam" className="mt-4">
+                    {analysisPanel}
+                </TabsContent>
                 <TabsContent value="solution" className="mt-4">
-                    {mainContentPanel}
+                    {solutionPanel}
                 </TabsContent>
             </Tabs>
         </div>
