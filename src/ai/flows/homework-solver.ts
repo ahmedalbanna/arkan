@@ -10,8 +10,8 @@ import { AnalyzedHomeworkSchema, AnalyzedHomework, SolvedHomeworkSchema, SolvedH
 
 // 1. Analyze Homework Flow
 const AnalyzeHomeworkInputSchema = z.object({
-  homeworkImageUri: z.string().describe("An image of the homework assignment, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
-  curriculumPdfUri: z.string().describe("The curriculum/textbook document as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
+  homeworkImageUris: z.array(z.string()).describe("A list of homework assignment images, as data URIs that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  curriculumPdfUris: z.array(z.string()).describe("A list of curriculum/textbook documents as data URIs that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
 });
 
 export async function analyzeHomework(input: z.infer<typeof AnalyzeHomeworkInputSchema>): Promise<AnalyzedHomework> {
@@ -24,21 +24,25 @@ export async function analyzeHomework(input: z.infer<typeof AnalyzeHomeworkInput
     name: 'analyzeHomeworkPrompt',
     input: { schema: AnalyzeHomeworkInputSchema },
     output: { schema: AnalyzedHomeworkSchema },
-    prompt: `You are an expert academic analyst. Your task is to analyze the provided homework image and curriculum PDF.
+    prompt: `You are an expert academic analyst. Your task is to analyze the provided homework images and curriculum PDFs.
 
-    1.  **Analyze the Homework Image**: Extract all questions from the image.
-    2.  **Analyze the Curriculum PDF**: Read the PDF and create a structured summary of its content. This will serve as the knowledge base for solving the homework.
-    3.  **Identify Subject and Title**: Based on both documents, determine the main subject and create a concise title for the assignment.
+    1.  **Analyze the Homework Images**: Extract all questions from all images provided.
+    2.  **Analyze the Curriculum PDFs**: Read all the PDFs and create a single, structured summary of their combined content. This will serve as the knowledge base for solving the homework.
+    3.  **Identify Subject and Title**: Based on all documents, determine the main subject and create a concise title for the assignment.
     4.  **Format Output**: Structure the extracted questions into a clean Markdown document.
 
-    Homework Image:
+    Homework Images:
     ---
-    {{media url=homeworkImageUri}}
+    {{#each homeworkImageUris}}
+    {{media url=this}}
+    {{/each}}
     ---
 
-    Curriculum PDF:
+    Curriculum PDFs:
     ---
-    {{media url=curriculumPdfUri}}
+    {{#each curriculumPdfUris}}
+    {{media url=this}}
+    {{/each}}
     ---
     `,
   });

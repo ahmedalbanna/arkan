@@ -8,8 +8,8 @@ import { deductCredit } from '@/services/credit-service';
 import { analyzeHomework } from '@/ai/flows/homework-solver';
 
 const analyzeSchema = z.object({
-  homeworkImageUri: z.string().url("A valid homework image data URI is required."),
-  curriculumPdfUri: z.string().url("A valid curriculum PDF data URI is required."),
+  homeworkImageUris: z.array(z.string().url("A valid homework image data URI is required.")).min(1, "At least one homework image is required."),
+  curriculumPdfUris: z.array(z.string().url("A valid curriculum PDF data URI is required.")).min(1, "At least one curriculum PDF is required."),
 });
 
 export async function POST(request: Request) {
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
     await deductCredit(decodedToken.uid, 2);
 
     const result = await analyzeHomework({ 
-        homeworkImageUri: validation.data.homeworkImageUri,
-        curriculumPdfUri: validation.data.curriculumPdfUri,
+        homeworkImageUris: validation.data.homeworkImageUris,
+        curriculumPdfUris: validation.data.curriculumPdfUris,
      });
 
     return NextResponse.json(result, { status: 200 });

@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, UploadCloud, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCheck, BrainCircuit, CheckSquare, Image as ImageIcon, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCheck, BrainCircuit, CheckSquare, Image as ImageIcon, FileText, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -19,14 +19,15 @@ import { formatDistanceToNow } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { exportHomeworkAsDocx } from '@/lib/homework-exporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { Label } from '../ui/label';
+import { Badge } from '../ui/badge';
 
 // API call to analyze the homework
-async function analyzeHomework(variables: { homeworkImageUri: string, curriculumPdfUri: string, token: string }): Promise<AnalyzedHomework> {
+async function analyzeHomework(variables: { homeworkImageUris: string[], curriculumPdfUris: string[], token: string }): Promise<AnalyzedHomework> {
   const response = await fetch('/api/homework-solver/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-    body: JSON.stringify({ homeworkImageUri: variables.homeworkImageUri, curriculumPdfUri: variables.curriculumPdfUri }),
+    body: JSON.stringify({ homeworkImageUris: variables.homeworkImageUris, curriculumPdfUris: variables.curriculumPdfUris }),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Homework analysis failed.');
   return response.json();
@@ -52,14 +53,16 @@ export default function HomeworkSolver() {
     stage,
     analyzedHomework,
     solvedHomework,
-    homeworkFile,
-    curriculumFile,
+    homeworkFiles,
+    curriculumFiles,
     history,
     setStage,
     setAnalyzedHomework,
     setSolvedHomework,
-    setHomeworkFile,
-    setCurriculumFile,
+    setHomeworkFiles,
+    setCurriculumFiles,
+    removeHomeworkFile,
+    removeCurriculumFile,
     addSolvedHomeworkToHistory,
     clearHistory,
     loadFromHistory,
@@ -71,16 +74,16 @@ export default function HomeworkSolver() {
   const solveMutation = useMutation({ mutationFn: (vars: { analyzedHomework: AnalyzedHomework, token: string }) => solveHomework(vars.analyzedHomework, vars.token) });
 
   const handleHomeworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHomeworkFile(e.target.files?.[0] || null);
+    setHomeworkFiles(e.target.files);
   };
   
   const handleCurriculumFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurriculumFile(e.target.files?.[0] || null);
+    setCurriculumFiles(e.target.files);
   };
 
   const handleAnalyzeHomework = async () => {
-    if (!homeworkFile || !curriculumFile || !firebaseUser) {
-      toast({ title: "Missing Files", description: "Please upload both a homework image and a curriculum PDF.", variant: 'destructive' });
+    if (homeworkFiles.length === 0 || curriculumFiles.length === 0 || !firebaseUser) {
+      toast({ title: "Missing Files or Auth", description: "Please upload homework images, curriculum PDFs, and ensure you are logged in.", variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
@@ -88,8 +91,8 @@ export default function HomeworkSolver() {
 
     try {
       const analysisData = await analyzeMutation.mutateAsync({ 
-          homeworkImageUri: homeworkFile.dataUrl, 
-          curriculumPdfUri: curriculumFile.dataUrl, 
+          homeworkImageUris: homeworkFiles.map(f => f.dataUrl), 
+          curriculumPdfUris: curriculumFiles.map(f => f.dataUrl), 
           token 
       });
       setAnalyzedHomework(analysisData);
@@ -103,7 +106,7 @@ export default function HomeworkSolver() {
   };
 
   const handleSolveHomework = async () => {
-    if (!analyzedHomework || !firebaseUser || !homeworkFile || !curriculumFile) {
+    if (!analyzedHomework || !firebaseUser || homeworkFiles.length === 0 || curriculumFiles.length === 0) {
       toast({ title: t('builder.homeworkSolver.toasts.analysisMissing'), variant: 'destructive' });
       return;
     }
@@ -112,7 +115,7 @@ export default function HomeworkSolver() {
     try {
       const solvedData = await solveMutation.mutateAsync({ analyzedHomework, token });
       setSolvedHomework(solvedData);
-      addSolvedHomeworkToHistory(analyzedHomework, solvedData, homeworkFile, curriculumFile);
+      addSolvedHomeworkToHistory(analyzedHomework, solvedData, homeworkFiles, curriculumFiles);
       setStage('solved');
       refetchUser();
       toast({ title: t('builder.homeworkSolver.toasts.solvingSuccess') });
@@ -236,22 +239,30 @@ export default function HomeworkSolver() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="homework-file">Homework File (Image)</Label>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 border rounded-md min-h-[40px]">
-                        <ImageIcon className="h-4 w-4" />
-                        <span>{homeworkFile?.name || 'No file selected'}</span>
-                    </div>
-                    <Input id="homework-file" type="file" accept="image/*" onChange={handleHomeworkFileChange} disabled={isProcessing} className="text-xs" />
+                    <Label htmlFor="homework-file">Homework File(s) (Images)</Label>
+                    <Input id="homework-file" type="file" accept="image/*" onChange={handleHomeworkFileChange} disabled={isProcessing} multiple className="text-xs" />
+                     <ScrollArea className="h-24 w-full rounded-md border p-2">
+                        {homeworkFiles.map((file, index) => (
+                           <Badge key={index} variant="secondary" className="mr-1 mb-1">
+                               {file.name}
+                               <Button variant="ghost" size="icon" className="h-4 w-4 ml-1" onClick={() => removeHomeworkFile(index)}><X className="h-3 w-3"/></Button>
+                           </Badge>
+                        ))}
+                     </ScrollArea>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="curriculum-file">Curriculum File (PDF)</Label>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground p-2 border rounded-md min-h-[40px]">
-                        <FileText className="h-4 w-4" />
-                        <span>{curriculumFile?.name || 'No file selected'}</span>
-                    </div>
-                    <Input id="curriculum-file" type="file" accept=".pdf" onChange={handleCurriculumFileChange} disabled={isProcessing} className="text-xs" />
+                    <Label htmlFor="curriculum-file">Curriculum File(s) (PDF)</Label>
+                    <Input id="curriculum-file" type="file" accept=".pdf" onChange={handleCurriculumFileChange} disabled={isProcessing} multiple className="text-xs" />
+                     <ScrollArea className="h-24 w-full rounded-md border p-2">
+                        {curriculumFiles.map((file, index) => (
+                           <Badge key={index} variant="secondary" className="mr-1 mb-1">
+                               {file.name}
+                               <Button variant="ghost" size="icon" className="h-4 w-4 ml-1" onClick={() => removeCurriculumFile(index)}><X className="h-3 w-3"/></Button>
+                           </Badge>
+                        ))}
+                     </ScrollArea>
                 </div>
-                <Button onClick={handleAnalyzeHomework} disabled={!homeworkFile || !curriculumFile || isProcessing || stage === 'solved'} className="w-full">
+                <Button onClick={handleAnalyzeHomework} disabled={homeworkFiles.length === 0 || curriculumFiles.length === 0 || isProcessing || stage === 'solved'} className="w-full">
                     {stage === 'analyzing' ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
