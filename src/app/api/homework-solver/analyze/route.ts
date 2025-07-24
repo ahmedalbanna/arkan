@@ -9,7 +9,6 @@ import { analyzeHomework } from '@/ai/flows/homework-solver';
 
 const analyzeSchema = z.object({
   homeworkImageUris: z.array(z.string().url("A valid homework image data URI is required.")).min(1, "At least one homework image is required."),
-  curriculumPdfUris: z.array(z.string().url("A valid curriculum PDF data URI is required.")).min(1, "At least one curriculum PDF is required."),
 });
 
 export async function POST(request: Request) {
@@ -27,12 +26,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    // Analysis is now a more complex task involving two documents
-    await deductCredit(decodedToken.uid, 2);
+    // This is now a simpler task, so credit cost is 1.
+    await deductCredit(decodedToken.uid, 1);
 
     const result = await analyzeHomework({ 
         homeworkImageUris: validation.data.homeworkImageUris,
-        curriculumPdfUris: validation.data.curriculumPdfUris,
      });
 
     return NextResponse.json(result, { status: 200 });

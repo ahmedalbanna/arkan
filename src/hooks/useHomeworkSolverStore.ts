@@ -33,6 +33,7 @@ export interface HomeworkSolverState {
   stage: HomeworkSolverStage;
   analyzedHomework: AnalyzedHomework | null;
   solvedHomework: SolvedHomework | null;
+  curriculumContext: string | null; // New field to hold processed curriculum text
   homeworkFiles: FileData[];
   curriculumFiles: FileData[];
   history: HomeworkHistoryEntry[];
@@ -43,6 +44,7 @@ interface HomeworkSolverActions {
   setStage: (stage: HomeworkSolverStage) => void;
   setAnalyzedHomework: (homework: AnalyzedHomework | null) => void;
   setSolvedHomework: (solution: SolvedHomework | null) => void;
+  setCurriculumContext: (context: string | null) => void;
   setHomeworkFiles: (files: FileList | null) => Promise<void>;
   setCurriculumFiles: (files: FileList | null) => Promise<void>;
   removeHomeworkFile: (index: number) => void;
@@ -62,6 +64,7 @@ const initialState: HomeworkSolverState = {
   stage: "idle",
   analyzedHomework: null,
   solvedHomework: null,
+  curriculumContext: null,
   homeworkFiles: [],
   curriculumFiles: [],
   history: [],
@@ -97,6 +100,7 @@ export const useHomeworkSolverStore = create<
           solvedHomework: solution,
           stage: solution ? "solved" : "readyToSolve",
         }),
+      setCurriculumContext: (context) => set({ curriculumContext: context }),
        setHomeworkFiles: async (files) => {
         if (!files || files.length === 0) {
           set({ homeworkFiles: [] });
@@ -108,7 +112,7 @@ export const useHomeworkSolverStore = create<
             dataUrl: await fileToDataUrl(file),
         }));
         const fileData = await Promise.all(fileDataPromises);
-        set({ homeworkFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null });
+        set({ homeworkFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null, curriculumContext: null });
       },
       setCurriculumFiles: async (files) => {
          if (!files || files.length === 0) {
@@ -121,7 +125,7 @@ export const useHomeworkSolverStore = create<
             dataUrl: await fileToDataUrl(file),
         }));
         const fileData = await Promise.all(fileDataPromises);
-        set({ curriculumFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null });
+        set({ curriculumFiles: fileData, stage: 'idle', analyzedHomework: null, solvedHomework: null, curriculumContext: null });
       },
       removeHomeworkFile: (index) => set(state => ({ homeworkFiles: state.homeworkFiles.filter((_, i) => i !== index) })),
       removeCurriculumFile: (index) => set(state => ({ curriculumFiles: state.curriculumFiles.filter((_, i) => i !== index) })),
@@ -148,6 +152,7 @@ export const useHomeworkSolverStore = create<
             curriculumFiles: historyEntry.curriculumFiles,
             stage: "solved",
             currentHistoryId: id,
+            curriculumContext: null, // This would need to be re-processed if we want to re-solve
           });
         }
       },
@@ -163,7 +168,7 @@ export const useHomeworkSolverStore = create<
       },
     }),
     {
-      name: "arkan-homework-solver-state-v3", // New name to avoid conflicts with old structure
+      name: "arkan-homework-solver-state-v4", // New name to avoid conflicts with old structure
       storage: createJSONStorage(() => localStorage),
        partialize: (state) => ({
         history: state.history,

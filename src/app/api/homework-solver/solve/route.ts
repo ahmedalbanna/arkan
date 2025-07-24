@@ -10,6 +10,7 @@ import { AnalyzedHomeworkSchema } from '@/ai/flows/homework-solver.shared';
 
 const solveSchema = z.object({
   analyzedHomework: AnalyzedHomeworkSchema,
+  curriculumContext: z.string().min(1, "Curriculum context cannot be empty."),
 });
 
 export async function POST(request: Request) {
@@ -27,10 +28,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
     
-    // Deduct a higher amount for solving
+    // Deduct credit for solving
     await deductCredit(decodedToken.uid, 2);
 
-    const result = await solveHomework(validation.data.analyzedHomework);
+    const result = await solveHomework({
+        analyzedHomework: validation.data.analyzedHomework,
+        curriculumContext: validation.data.curriculumContext
+    });
 
     return NextResponse.json(result, { status: 200 });
 

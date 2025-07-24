@@ -18,31 +18,49 @@ import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { exportHomeworkAsDocx } from '@/lib/homework-exporter';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
 
 // API call to analyze the homework
-async function analyzeHomework(variables: { homeworkImageUris: string[], curriculumPdfUris: string[], token: string }): Promise<AnalyzedHomework> {
+async function analyzeHomeworkApi(variables: { homeworkImageUris: string[], token: string }): Promise<AnalyzedHomework> {
   const response = await fetch('/api/homework-solver/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-    body: JSON.stringify({ homeworkImageUris: variables.homeworkImageUris, curriculumPdfUris: variables.curriculumPdfUris }),
+    body: JSON.stringify({ homeworkImageUris: variables.homeworkImageUris }),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Homework analysis failed.');
   return response.json();
 }
 
 // API call to solve the homework
-async function solveHomework(analyzedHomework: AnalyzedHomework, token: string): Promise<SolvedHomework> {
+async function solveHomeworkApi(variables: { analyzedHomework: AnalyzedHomework, curriculumContext: string, token: string }): Promise<SolvedHomework> {
   const response = await fetch('/api/homework-solver/solve', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify({ analyzedHomework }),
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
+    body: JSON.stringify({
+      analyzedHomework: variables.analyzedHomework,
+      curriculumContext: variables.curriculumContext
+    }),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Homework solving failed.');
   return response.json();
 }
+
+async function processCurriculumPdfs(variables: { files: File[], token: string }): Promise<string> {
+    const formData = new FormData();
+    variables.files.forEach(file => formData.append('file', file));
+
+    const response = await fetch('/api/pdf-to-markdown', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${variables.token}` },
+        body: formData,
+    });
+    if (!response.ok) throw new Error((await response.json()).message || 'Curriculum PDF processing failed.');
+    const result = await response.json();
+    return result.markdown;
+}
+
 
 export default function HomeworkSolver() {
   const { t } = useLocalization();
@@ -53,12 +71,14 @@ export default function HomeworkSolver() {
     stage,
     analyzedHomework,
     solvedHomework,
+    curriculumContext,
     homeworkFiles,
     curriculumFiles,
     history,
     setStage,
     setAnalyzedHomework,
     setSolvedHomework,
+    setCurriculumContext,
     setHomeworkFiles,
     setCurriculumFiles,
     removeHomeworkFile,
@@ -70,8 +90,8 @@ export default function HomeworkSolver() {
     resetCurrent,
   } = useHomeworkSolverStore();
   
-  const analyzeMutation = useMutation({ mutationFn: analyzeHomework });
-  const solveMutation = useMutation({ mutationFn: (vars: { analyzedHomework: AnalyzedHomework, token: string }) => solveHomework(vars.analyzedHomework, vars.token) });
+  const analyzeMutation = useMutation({ mutationFn: analyzeHomeworkApi });
+  const solveMutation = useMutation({ mutationFn: solveHomeworkApi });
 
   const handleHomeworkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHomeworkFiles(e.target.files);
@@ -90,15 +110,23 @@ export default function HomeworkSolver() {
     setStage('analyzing');
 
     try {
-      const analysisData = await analyzeMutation.mutateAsync({ 
-          homeworkImageUris: homeworkFiles.map(f => f.dataUrl), 
-          curriculumPdfUris: curriculumFiles.map(f => f.dataUrl), 
-          token 
-      });
-      setAnalyzedHomework(analysisData);
-      setStage('readyToSolve');
-      refetchUser();
-      toast({ title: t('builder.homeworkSolver.toasts.analysisSuccess') });
+        const curriculumBlobs = await Promise.all(curriculumFiles.map(f => fetch(f.dataUrl).then(res => res.blob())));
+        const curriculumFileObjects = curriculumBlobs.map((blob, i) => new File([blob], curriculumFiles[i].name, { type: curriculumFiles[i].type }));
+        
+        // Process curriculum and homework analysis in parallel
+        const [curriculumText, analysisData] = await Promise.all([
+            processCurriculumPdfs({ files: curriculumFileObjects, token }),
+            analyzeMutation.mutateAsync({ 
+                homeworkImageUris: homeworkFiles.map(f => f.dataUrl), 
+                token 
+            })
+        ]);
+        
+        setCurriculumContext(curriculumText);
+        setAnalyzedHomework(analysisData);
+        setStage('readyToSolve');
+        refetchUser(); // To update credits after processing
+        toast({ title: t('builder.homeworkSolver.toasts.analysisSuccess') });
     } catch (error: any) {
       toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
       setStage('idle');
@@ -106,14 +134,14 @@ export default function HomeworkSolver() {
   };
 
   const handleSolveHomework = async () => {
-    if (!analyzedHomework || !firebaseUser || homeworkFiles.length === 0 || curriculumFiles.length === 0) {
+    if (!analyzedHomework || !curriculumContext || !firebaseUser || homeworkFiles.length === 0 || curriculumFiles.length === 0) {
       toast({ title: t('builder.homeworkSolver.toasts.analysisMissing'), variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
     setStage('solving');
     try {
-      const solvedData = await solveMutation.mutateAsync({ analyzedHomework, token });
+      const solvedData = await solveMutation.mutateAsync({ analyzedHomework, curriculumContext, token });
       setSolvedHomework(solvedData);
       addSolvedHomeworkToHistory(analyzedHomework, solvedData, homeworkFiles, curriculumFiles);
       setStage('solved');
