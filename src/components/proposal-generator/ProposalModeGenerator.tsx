@@ -164,14 +164,9 @@ export function ProposalModeGenerator() {
                      <ProposalGenerationTools
                         isDisabled={generationMutation.isPending}
                         isGenerating={generationMutation.isPending}
+                        isTranslating={translateMutation.isPending}
+                        onTranslate={handleTranslateProposal}
                     />
-                    {proposal && (
-                        <ProposalActions 
-                            isGenerating={generationMutation.isPending}
-                            isTranslating={translateMutation.isPending}
-                            onTranslate={handleTranslateProposal}
-                        />
-                    )}
                 </div>
 
                 {/* Right Column */}

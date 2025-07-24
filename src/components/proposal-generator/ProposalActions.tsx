@@ -2,7 +2,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Languages, Loader2 } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
@@ -47,12 +46,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline">{t('builder.reportGenerator.actionsTitle')}</CardTitle>
-        <CardDescription>{t('builder.reportGenerator.actionsDesc')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
         <div className="space-y-2">
             <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
             {docxLoaded ? (
@@ -90,7 +84,6 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 };
