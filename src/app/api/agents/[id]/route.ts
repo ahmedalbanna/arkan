@@ -33,7 +33,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     try {
-        const agentDoc = await adminDb.collection('agents').doc(params.id).get();
+ const agentDoc = await adminDb.collection('agents').doc(params.id).get();
         if (!agentDoc.exists) {
             return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
         }
@@ -56,7 +56,8 @@ const updateAgentSchema = z.object({
   isEnabled: z.boolean().optional(),
 });
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, context: { params: { id: string } }) {
+    const { params } = context; // Destructure params
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
@@ -68,7 +69,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         if (!agentDoc.exists) {
             return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
         }
-        
+
         const body = await request.json();
         const validation = updateAgentSchema.safeParse(body);
 
@@ -81,7 +82,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         if (validation.data.name) updateData.name = validation.data.name;
         if (validation.data.isEnabled !== undefined) updateData.isEnabled = validation.data.isEnabled;
-        
+
         if (validation.data.prompt) {
             // Check if the prompt is simple or complex and update accordingly
             if (typeof currentAgentData?.prompt === 'object') {
@@ -90,11 +91,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                 updateData.prompt = validation.data.prompt;
             }
         }
-        
+
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
         const defaultAgent = AGENTS.find(a => a.id === params.id);
-        
+
         return NextResponse.json({ ...updatedDoc.data(), icon: defaultAgent?.icon }, { status: 200 });
 
     } catch (error) {
