@@ -12,7 +12,7 @@ async function verifyAdmin(request: Request) {
         return { authorized: false, message: 'Unauthorized' };
     }
     const token = authorization.substring(7);
-    
+
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const user = await getUserProfile(decodedToken.uid);
@@ -27,23 +27,24 @@ async function verifyAdmin(request: Request) {
 
 // GET /api/agents/[id]
 export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const { id: agentId } = await params;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
     }
 
     try {
- const agentDoc = await adminDb.collection('agents').doc(params.id).get();
+        const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
             return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
         }
-        
+
         const data = agentDoc.data();
-        const defaultAgent = AGENTS.find(a => a.id === params.id);
-        
+        const defaultAgent = AGENTS.find((a) => a.id === agentId);
+
         return NextResponse.json({ ...data, id: agentDoc.id, icon: defaultAgent?.icon }, { status: 200 });
     } catch (error) {
-        console.error(`Error fetching agent ${params.id}:`, error);
+        console.error(`Error fetching agent ${agentId}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
@@ -56,15 +57,15 @@ const updateAgentSchema = z.object({
   isEnabled: z.boolean().optional(),
 });
 
-export async function PUT(request: Request, context: { params: { id: string } }) {
-    const { params } = context; // Destructure params
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+    const { id: agentId } = await params;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
     }
 
     try {
-        const agentRef = adminDb.collection('agents').doc(params.id);
+        const agentRef = adminDb.collection('agents').doc(agentId);
         const agentDoc = await agentRef.get();
         if (!agentDoc.exists) {
             return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
@@ -94,12 +95,13 @@ export async function PUT(request: Request, context: { params: { id: string } })
 
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
-        const defaultAgent = AGENTS.find(a => a.id === params.id);
+
+        const defaultAgent = AGENTS.find(a => a.id === agentId);
 
         return NextResponse.json({ ...updatedDoc.data(), icon: defaultAgent?.icon }, { status: 200 });
 
     } catch (error) {
-        console.error(`Error updating agent ${params.id}:`, error);
+        console.error(`Error updating agent ${agentId}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
