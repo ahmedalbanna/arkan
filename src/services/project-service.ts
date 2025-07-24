@@ -1,7 +1,19 @@
 
 'use client';
+import type { ProjectState } from "@/lib/project-state-schema";
+import type { AnyProjectProposal } from "@/ai/schemas";
 
-import type { SavedProject, ProjectState } from "@/lib/types";
+
+// Represents a project document saved in Firestore
+export interface SavedProject extends ProjectState {
+    id: string;
+    userId: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    proposal: AnyProjectProposal | null;
+}
+
 
 // Fetch all projects for the current user
 export async function fetchProjects(token: string): Promise<SavedProject[]> {

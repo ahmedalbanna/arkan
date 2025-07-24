@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -5,11 +6,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
 import type { UserProfile } from "@/lib/db/queries";
-import type {
-  PricingPlan,
-  LoginCredentials,
-  SignupCredentials,
-} from "@/lib/types";
+import type { PricingPlan } from "@/components/PricingCard";
+import type { SignupCredentials } from "@/components/SignupForm";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
@@ -27,6 +25,11 @@ import { fetchUserProfile as fetchUserProfileApi } from "@/services/user-service
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
 // --- Query Functions ---
 

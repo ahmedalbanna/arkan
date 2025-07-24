@@ -6,7 +6,7 @@ import {
   updateUserByAdmin,
 } from "@/lib/db/queries";
 import { auth as adminAuth, adminDb } from "@/lib/firebase/admin";
-import { UserRole } from "@/lib/types";
+import type { UserRole } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 
 // Helper to verify if the requester is an admin OR the user themselves

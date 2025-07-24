@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
-import type { UserRole } from '@/lib/types';
+import type { UserRole } from '@/lib/db/queries';
 
 // Helper to verify admin role
 async function verifyAdmin(request: Request) {

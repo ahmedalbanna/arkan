@@ -15,7 +15,6 @@ import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useSignup, useGoogleSignIn } from '@/hooks/use-user';
-import type { SignupCredentials } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Separator } from './ui/separator';
@@ -25,6 +24,8 @@ const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
+
+export type SignupCredentials = z.infer<typeof formSchema>;
 
 export default function SignupForm() {
   const router = useRouter();

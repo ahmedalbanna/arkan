@@ -1,3 +1,4 @@
+
 // This file is now intended for Firebase queries.
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
@@ -7,12 +8,14 @@ import { FieldValue } from 'firebase-admin/firestore';
 import type { Agent, AgentData } from '@/lib/agents';
 import { AGENTS as defaultAgents } from '@/lib/agents';
 
+export type UserRole = 'user' | 'admin';
+
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
   credits: number;
-  role: 'user' | 'admin';
+  role: UserRole;
   createdAt: string; // Storing as ISO string
   updatedAt: string; // Storing as ISO string
   teams?: string[]; // Array of team IDs

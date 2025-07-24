@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-agents.md
 
 "use client";
@@ -5,11 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys } from "@/lib/query-keys";
-import type {
-  Agent,
-  UpdateAgentPayload,
-  UpdateAgentVariables,
-} from "@/lib/types";
+import type { Agent } from "@/lib/agents";
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -19,6 +16,18 @@ import {
   fetchAgents,
   updateAgent as updateAgentApi,
 } from "@/services/agent-service";
+
+export interface UpdateAgentPayload {
+    name?: string;
+    prompt?: string;
+    isEnabled?: boolean;
+}
+
+export interface UpdateAgentVariables {
+    agentId: string;
+    payload: UpdateAgentPayload;
+}
+
 
 /**
  * Custom hook to fetch the list of all AI agents.

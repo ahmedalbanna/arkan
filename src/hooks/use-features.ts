@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-features.md
 
 "use client";
@@ -6,16 +7,28 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { featureKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
-import type {
-  Feature,
-  UpdateFeaturePayload,
-  UpdateFeatureVariables,
-} from "@/lib/types";
 import {
   fetchFeatures as fetchFeaturesApi,
   updateFeature as updateFeatureApi,
 } from "@/services/feature-service";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+
+export interface Feature {
+    id: string;
+    name: string;
+    description: string;
+    isEnabled: boolean;
+}
+
+export interface UpdateFeaturePayload {
+    isEnabled: boolean;
+}
+
+export interface UpdateFeatureVariables {
+    featureId: string;
+    payload: UpdateFeaturePayload;
+}
+
 
 /**
  * Custom hook to fetch all feature flags.

@@ -1,9 +1,20 @@
+
 // code explantion in docs/hooks/use-history.md
 
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { HistoryEntry } from "@/lib/types";
+import type { AnyProjectProposal, DiagramType } from "@/ai/schemas";
+
+export interface HistoryEntry {
+  id: string;
+  createdAt: string;
+  type: 'proposal' | 'diagram' | 'section';
+  title: string; // e.g., "Project Proposal" or "Use Case Diagram"
+  data: any; // The actual generated data
+  projectIdea?: string;
+  proposal?: AnyProjectProposal | null; // The proposal at the time of generation
+}
 
 const HISTORY_KEY = "arkan-generation-history";
 
@@ -24,7 +35,7 @@ export function useHistory() {
     setIsLoaded(true);
   }, []);
 
-  const addHistoryEntry = useCallback((entry: HistoryEntry) => {
+  const addHistoryEntry = useCallback((entry: Omit<HistoryEntry, 'id' | 'createdAt'>) => {
     const newEntry: HistoryEntry = {
       ...entry,
       id: new Date().toISOString(),

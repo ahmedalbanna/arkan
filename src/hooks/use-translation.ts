@@ -1,10 +1,12 @@
+
 // code explantion in docs/hooks/use-translation.md
 
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import type { TranslateTextOutput, TranslateVariables } from "@/lib/types";
+import { userKeys } from "@/lib/query-keys";
+import type { TranslateTextInput, TranslateTextOutput } from "@/ai/schemas";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { translateText as translateTextApi } from "@/services/translation-service";
@@ -19,7 +21,7 @@ export function useTranslate() {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation<TranslateTextOutput, Error, TranslateVariables>({
+  return useMutation<TranslateTextOutput, Error, TranslateTextInput>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return translateTextApi(variables, token);

@@ -4,7 +4,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
-import { UserRole } from '@/lib/types';
+import type { UserRole } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
 
 const signupSchema = z.object({

@@ -8,8 +8,14 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from '@/hooks/use-toast';
 import { verifyPayment as verifyPaymentApi } from '@/services/transaction-service';
-import type { VerifyPaymentVariables } from '@/lib/types';
 
+export interface VerifyPaymentVariables {
+    transactionId: string;
+    userId: string;
+    creditsToGrant: number;
+    status: 'verified' | 'rejected';
+    adminNotes?: string;
+}
 
 /**
  * Custom mutation hook to verify or reject a payment transaction.

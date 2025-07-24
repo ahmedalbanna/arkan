@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-projects.md
 
 "use client";
@@ -6,17 +7,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { projectKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
-import type { SavedProject, ProjectState } from "@/lib/types";
 import {
   fetchProjects as fetchProjectsApi,
   fetchProject as fetchProjectApi,
   createProject,
   deleteProject,
   updateProject,
+  type SavedProject,
 } from "@/services/project-service";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { ProjectState } from "@/lib/project-state-schema";
+
 
 // Define types for mutation variables
 interface UpdateProjectVariables {
