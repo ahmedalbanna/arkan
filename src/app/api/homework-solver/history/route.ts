@@ -2,14 +2,11 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
-import { getUserProfile } from '@/lib/db/queries';
 import type { HomeworkHistoryEntry } from '@/services/homework-service';
-import { AnalyzedHomeworkSchema, SolvedHomeworkSchema } from '@/ai/flows/homework-solver.shared';
+import { FieldValue } from 'firebase-admin/firestore';
 
-// Increase the body size limit for this route to handle file uploads
 export const config = {
     api: {
         bodyParser: {
@@ -30,7 +27,7 @@ export async function GET(request: Request) {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const userId = decodedToken.uid;
 
-        const historySnapshot = await adminDb.collection('users').doc(userId).collection('homework_history').orderBy('createdAt', 'desc').get();
+        const historySnapshot = await adminDb.collection('homework_history').where('userId', '==', userId).orderBy('createdAt', 'desc').get();
         const history = historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as HomeworkHistoryEntry[];
 
         return NextResponse.json(history, { status: 200 });
@@ -55,8 +52,8 @@ export async function POST(request: Request) {
 
         const formData = await request.formData();
         
-        const analyzedHomework = JSON.parse(formData.get('analyzedHomework') as string);
-        const solvedHomework = JSON.parse(formData.get('solvedHomework') as string);
+        const analyzedHomework = formData.get('analyzedHomework') ? JSON.parse(formData.get('analyzedHomework') as string) : null;
+        const solvedHomework = formData.get('solvedHomework') ? JSON.parse(formData.get('solvedHomework') as string) : null;
         const homeworkFiles = formData.getAll('homeworkFiles') as File[];
         const curriculumFiles = formData.getAll('curriculumFiles') as File[];
 
@@ -64,28 +61,32 @@ export async function POST(request: Request) {
         const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
 
         const uploadFile = async (file: File, type: 'homework' | 'curriculum') => {
+            if (!file || file.size === 0) return null;
             const fileName = `homework_files/${userId}/${type}/${Date.now()}-${file.name}`;
             const fileBuffer = Buffer.from(await file.arrayBuffer());
             const fileRef = bucket.file(fileName);
             
             await fileRef.save(fileBuffer, { metadata: { contentType: file.type } });
-            await fileRef.makePublic(); // Make the file publicly readable
+            await fileRef.makePublic();
             
             return { name: file.name, type: file.type, url: fileRef.publicUrl() };
         };
-
-        const homeworkFileUrls = await Promise.all(homeworkFiles.map(file => uploadFile(file, 'homework')));
-        const curriculumFileUrls = await Promise.all(curriculumFiles.map(file => uploadFile(file, 'curriculum')));
+        
+        const [homeworkFileUrls, curriculumFileUrls] = await Promise.all([
+            Promise.all(homeworkFiles.map(file => uploadFile(file, 'homework'))),
+            Promise.all(curriculumFiles.map(file => uploadFile(file, 'curriculum')))
+        ]);
         
         const historyEntry: Omit<HomeworkHistoryEntry, 'id'> = {
+            userId,
             analyzedHomework,
             solvedHomework,
-            homeworkFiles: homeworkFileUrls,
-            curriculumFiles: curriculumFileUrls,
+            homeworkFiles: homeworkFileUrls.filter(u => u !== null) as any,
+            curriculumFiles: curriculumFileUrls.filter(u => u !== null) as any,
             createdAt: new Date().toISOString(),
         };
 
-        const newDocRef = await adminDb.collection('users').doc(userId).collection('homework_history').add(historyEntry);
+        const newDocRef = await adminDb.collection('homework_history').add(historyEntry);
 
         return NextResponse.json({ id: newDocRef.id, ...historyEntry }, { status: 201 });
 
@@ -108,8 +109,8 @@ export async function DELETE(request: Request) {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const userId = decodedToken.uid;
 
-        const historyCollectionRef = adminDb.collection('users').doc(userId).collection('homework_history');
-        const snapshot = await historyCollectionRef.get();
+        const historyCollectionRef = adminDb.collection('homework_history');
+        const snapshot = await historyCollectionRef.where('userId', '==', userId).get();
         
         if (snapshot.empty) {
             return NextResponse.json({ message: 'History already empty.' }, { status: 200 });

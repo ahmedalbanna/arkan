@@ -6,8 +6,9 @@ import type { AnalyzedHomework, SolvedHomework } from "@/ai/flows/homework-solve
 // This interface must match what the API returns for a history entry
 export interface HomeworkHistoryEntry {
   id: string;
-  analyzedHomework: AnalyzedHomework;
-  solvedHomework: SolvedHomework;
+  userId: string;
+  analyzedHomework: AnalyzedHomework | null;
+  solvedHomework: SolvedHomework | null;
   homeworkFiles: { name: string; type: string; url: string }[];
   curriculumFiles: { name: string; type: string; url: string }[];
   createdAt: string;
@@ -27,6 +28,7 @@ export async function fetchHomeworkHistory(token: string): Promise<HomeworkHisto
         }
     });
     if (!response.ok) {
+        if (response.status === 404) return []; // If history doesn't exist yet, return empty array
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch homework history');
     }
