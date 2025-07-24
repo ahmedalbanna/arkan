@@ -144,86 +144,6 @@ export default function ExamSolver() {
 
   const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
 
-  const analysisPanel = (
-    <Card className="h-full flex flex-col">
-        <CardHeader>
-            <CardTitle>{t('builder.examSolver.analysisCardTitle')}</CardTitle>
-            <CardDescription>{analyzedExam ? `${analyzedExam.subject} - ${analyzedExam.specialty}` : t('builder.examSolver.analysisPlaceholder')}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex-grow flex flex-col">
-            <ScrollArea className="flex-grow p-1">
-                {analyzedExam ? <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown> : (
-                    <div className="flex items-center justify-center h-full text-muted-foreground p-8">
-                        <BrainCircuit className="h-12 w-12 mb-4" />
-                    </div>
-                )}
-            </ScrollArea>
-            {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-                <Button onClick={handleSolveExam} disabled={stage !== 'readyToSolve'} className="mt-4 w-full">
-                    {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                    {t('builder.examSolver.solveButton')}
-                </Button>
-            )}
-        </CardContent>
-    </Card>
-  );
-
-  const solutionPanel = (
-     <Card className="min-h-[calc(100vh-250px)] flex flex-col">
-      <CardHeader>
-        <div className="flex justify-between items-center">
-            <CardTitle>{t('builder.examSolver.solutionCardTitle')}</CardTitle>
-            {solvedExam && (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" /> Download
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => exportExamAsDocx(analyzedExam!, solvedExam!, 'modern')}>
-                           <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
-                        </DropdownMenuItem>
-                         {originalFile && (
-                            <DropdownMenuItem onClick={() => window.open(originalFile.dataUrl, '_blank')}>
-                                <FileDown className="mr-2 h-4 w-4" /> Download Original PDF
-                            </DropdownMenuItem>
-                         )}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            )}
-        </div>
-        <CardDescription>{t('builder.examSolver.solutionCardDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        {stage === 'solving' ? (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <Loader2 className="h-12 w-12 animate-spin mb-4" />
-            <p>{t('builder.examSolver.solvingInProgress')}</p>
-          </div>
-        ) : solvedExam && Array.isArray(solvedExam.solutions) ? (
-          <ScrollArea className="h-[calc(100vh-350px)] p-1">
-              <div className="prose dark:prose-invert max-w-none space-y-6">
-                {solvedExam.solutions.map((pair, index) => (
-                    <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
-                        <ReactMarkdown components={markdownComponents}>{pair.question}</ReactMarkdown>
-                        <div className="p-4 rounded-md bg-muted/50 border border-border">
-                             <ReactMarkdown components={markdownComponents}>{pair.solution}</ReactMarkdown>
-                        </div>
-                    </div>
-                ))}
-              </div>
-          </ScrollArea>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-            <CheckSquare className="h-12 w-12 mb-4" />
-              <p>{t('builder.examSolver.solutionPlaceholder')}</p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-
   const controlAndHistoryPanel = (
     <div className="space-y-6">
         <Card>
@@ -288,7 +208,98 @@ export default function ExamSolver() {
             </CardFooter>
         </Card>
     </div>
+  );
+
+  const contentPanel = (
+     <Card className="min-h-[calc(100vh-250px)] flex flex-col">
+       <Tabs defaultValue="analysis" className="w-full flex flex-col flex-grow">
+          <CardHeader>
+             <div className="flex justify-between items-start">
+                  <div>
+                      <CardTitle>{analyzedExam ? analyzedExam.subject : "Exam"}</CardTitle>
+                      <CardDescription>{analyzedExam ? analyzedExam.specialty : "Upload a file and analyze to begin"}</CardDescription>
+                  </div>
+                   <TabsList>
+                      <TabsTrigger value="analysis">Analysis</TabsTrigger>
+                      <TabsTrigger value="solution" disabled={stage !== 'solved' && stage !== 'solving'}>Solution</TabsTrigger>
+                  </TabsList>
+             </div>
+          </CardHeader>
+          <TabsContent value="analysis" className="flex-grow">
+             <CardContent>
+                 <ScrollArea className="h-[calc(100vh-350px)] p-1">
+                      {stage === 'analyzing' || stage === 'parsing' ? (
+                          <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                              <Loader2 className="h-12 w-12 animate-spin mb-4" />
+                              <p>{stage === 'parsing' ? 'Parsing PDF...' : 'Analyzing exam...'}</p>
+                          </div>
+                      ) : analyzedExam ? (
+                          <ReactMarkdown components={markdownComponents}>{analyzedExam.structuredExam}</ReactMarkdown> 
+                      ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
+                              <BrainCircuit className="h-12 w-12 mb-4" />
+                              <p>{t('builder.examSolver.analysisPlaceholder')}</p>
+                          </div>
+                      )}
+                  </ScrollArea>
+             </CardContent>
+             <CardFooter>
+                 {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
+                      <Button onClick={handleSolveExam} disabled={stage !== 'readyToSolve'} className="w-full">
+                          {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                          {t('builder.examSolver.solveButton')}
+                      </Button>
+                  )}
+             </CardFooter>
+          </TabsContent>
+           <TabsContent value="solution" className="flex-grow">
+              <CardContent>
+                  <ScrollArea className="h-[calc(100vh-350px)] p-1">
+                       {stage === 'solving' ? (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                          <Loader2 className="h-12 w-12 animate-spin mb-4" />
+                          <p>{t('builder.examSolver.solvingInProgress')}</p>
+                        </div>
+                      ) : solvedExam && Array.isArray(solvedExam.solutions) ? (
+                        <div className="prose dark:prose-invert max-w-none space-y-6">
+                          {solvedExam.solutions.map((pair, index) => (
+                              <div key={index} className="space-y-2 border-b pb-4 last:border-b-0">
+                                  <ReactMarkdown components={markdownComponents}>{pair.question}</ReactMarkdown>
+                                  <div className="p-4 rounded-md bg-muted/50 border border-border">
+                                       <ReactMarkdown components={markdownComponents}>{pair.solution}</ReactMarkdown>
+                                  </div>
+                              </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                          <CheckSquare className="h-12 w-12 mb-4" />
+                            <p>{t('builder.examSolver.solutionPlaceholder')}</p>
+                        </div>
+                      )}
+                  </ScrollArea>
+              </CardContent>
+               <CardFooter>
+                  {solvedExam && (
+                      <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="w-full">
+                                  <Download className="mr-2 h-4 w-4" /> Download
+                              </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                              <DropdownMenuItem onClick={() => exportExamAsDocx(analyzedExam!, solvedExam!, 'modern')}>
+                                <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
+                              </DropdownMenuItem>
+                          </DropdownMenuContent>
+                      </DropdownMenu>
+                  )}
+               </CardFooter>
+           </TabsContent>
+       </Tabs>
+     </Card>
   )
+
 
   return (
     <div>
@@ -297,11 +308,8 @@ export default function ExamSolver() {
             <div className="lg:col-span-3">
                 {controlAndHistoryPanel}
             </div>
-            <div className="lg:col-span-4">
-                {analysisPanel}
-            </div>
-            <div className="lg:col-span-5">
-                {solutionPanel}
+            <div className="lg:col-span-9">
+                {contentPanel}
             </div>
         </div>
 
@@ -317,13 +325,14 @@ export default function ExamSolver() {
                     {controlAndHistoryPanel}
                 </TabsContent>
                 <TabsContent value="exam" className="mt-4">
-                    {analysisPanel}
+                    {contentPanel}
                 </TabsContent>
                 <TabsContent value="solution" className="mt-4">
-                    {solutionPanel}
+                    {contentPanel}
                 </TabsContent>
             </Tabs>
         </div>
     </div>
   );
 }
+
