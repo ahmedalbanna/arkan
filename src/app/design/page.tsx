@@ -13,7 +13,7 @@ function CustomizationPanel() {
             <CardHeader>
                 <CardTitle>Customize</CardTitle>
                 <CardDescription>
-                    Adjust the properties of your component.
+                    محرر الأنماط: يسمح للمستخدمين بتعديل الأنماط المرئية للقالب ، مثل الخطوط والألوان والخلفيات.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
