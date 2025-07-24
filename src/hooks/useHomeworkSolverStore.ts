@@ -7,13 +7,7 @@ import type {
   AnalyzedHomework,
   SolvedHomework,
 } from "@/ai/flows/homework-solver.shared";
-
-export type HomeworkSolverStage =
-  | "idle"
-  | "analyzing"
-  | "readyToSolve"
-  | "solving"
-  | "solved";
+import type { HomeworkHistoryEntry } from "@/services/homework-service";
 
 export interface FileData {
     name: string;
@@ -21,27 +15,18 @@ export interface FileData {
     dataUrl: string;
 }
 
-export interface HomeworkHistoryEntry {
-  id: string; // Using ISO timestamp as ID
-  analyzedHomework: AnalyzedHomework;
-  solvedHomework: SolvedHomework;
-  homeworkFiles: FileData[];
-  curriculumFiles: FileData[];
-}
-
 export interface HomeworkSolverState {
-  stage: HomeworkSolverStage;
+  stage: 'idle' | 'readyToSolve' | 'solved';
   analyzedHomework: AnalyzedHomework | null;
   solvedHomework: SolvedHomework | null;
-  curriculumContext: string | null; // New field to hold processed curriculum text
+  curriculumContext: string | null;
   homeworkFiles: FileData[];
   curriculumFiles: FileData[];
-  history: HomeworkHistoryEntry[];
   currentHistoryId: string | null;
 }
 
 interface HomeworkSolverActions {
-  setStage: (stage: HomeworkSolverStage) => void;
+  setStage: (stage: HomeworkSolverState['stage']) => void;
   setAnalyzedHomework: (homework: AnalyzedHomework | null) => void;
   setSolvedHomework: (solution: SolvedHomework | null) => void;
   setCurriculumContext: (context: string | null) => void;
@@ -49,25 +34,17 @@ interface HomeworkSolverActions {
   setCurriculumFiles: (files: FileList | null) => Promise<void>;
   removeHomeworkFile: (index: number) => void;
   removeCurriculumFile: (index: number) => void;
-  addSolvedHomeworkToHistory: (
-    analyzedHomework: AnalyzedHomework,
-    solvedHomework: SolvedHomework,
-    homeworkFiles: FileData[],
-    curriculumFiles: FileData[]
-  ) => void;
-  loadFromHistory: (id: string) => void;
-  clearHistory: () => void;
+  loadFromHistory: (historyEntry: HomeworkHistoryEntry) => Promise<void>;
   resetCurrent: () => void;
 }
 
-const initialState: HomeworkSolverState = {
+const initialState: Omit<HomeworkSolverState, 'history'> = {
   stage: "idle",
   analyzedHomework: null,
   solvedHomework: null,
   curriculumContext: null,
   homeworkFiles: [],
   curriculumFiles: [],
-  history: [],
   currentHistoryId: null,
 };
 
@@ -87,6 +64,7 @@ export const useHomeworkSolverStore = create<
   persist(
     (set, get) => ({
       ...initialState,
+      history: [], // History is now managed by React Query
       setStage: (stage) => set({ stage }),
       setAnalyzedHomework: (homework) =>
         set({
@@ -129,50 +107,42 @@ export const useHomeworkSolverStore = create<
       },
       removeHomeworkFile: (index) => set(state => ({ homeworkFiles: state.homeworkFiles.filter((_, i) => i !== index) })),
       removeCurriculumFile: (index) => set(state => ({ curriculumFiles: state.curriculumFiles.filter((_, i) => i !== index) })),
-      addSolvedHomeworkToHistory: (analyzedHomework, solvedHomework, homeworkFiles, curriculumFiles) => {
-        const newEntry: HomeworkHistoryEntry = {
-          id: new Date().toISOString(),
-          analyzedHomework,
-          solvedHomework,
-          homeworkFiles,
-          curriculumFiles,
-        };
-        set((state) => ({
-          history: [newEntry, ...state.history].slice(0, 20), // Keep last 20 entries
-          currentHistoryId: newEntry.id,
-        }));
-      },
-      loadFromHistory: (id) => {
-        const historyEntry = get().history.find((item) => item.id === id);
-        if (historyEntry) {
-          set({
+      
+      loadFromHistory: async (historyEntry) => {
+        // Fetch files from URLs and convert to FileData
+        const homeworkFilesPromises = historyEntry.homeworkFiles.map(async f => ({ name: f.name, type: f.type, dataUrl: await fetch(f.url).then(r => r.blob()).then(fileToDataUrl) }));
+        const curriculumFilesPromises = historyEntry.curriculumFiles.map(async f => ({ name: f.name, type: f.type, dataUrl: await fetch(f.url).then(r => r.blob()).then(fileToDataUrl) }));
+
+        const [hwFiles, curFiles] = await Promise.all([
+            Promise.all(homeworkFilesPromises),
+            Promise.all(curriculumFilesPromises)
+        ]);
+        
+        set({
             analyzedHomework: historyEntry.analyzedHomework,
             solvedHomework: historyEntry.solvedHomework,
-            homeworkFiles: historyEntry.homeworkFiles,
-            curriculumFiles: historyEntry.curriculumFiles,
+            homeworkFiles: hwFiles,
+            curriculumFiles: curFiles,
             stage: "solved",
-            currentHistoryId: id,
-            curriculumContext: null, // This would need to be re-processed if we want to re-solve
+            currentHistoryId: historyEntry.id,
+            curriculumContext: null,
           });
-        }
-      },
-      clearHistory: () => {
-        set({ history: [], currentHistoryId: null });
-        get().resetCurrent();
       },
       resetCurrent: () => {
         set({
           ...initialState,
-          history: get().history, // Keep history on reset
         });
       },
     }),
     {
-      name: "arkan-homework-solver-state-v4", // New name to avoid conflicts with old structure
+      name: "arkan-homework-solver-state-v5",
       storage: createJSONStorage(() => localStorage),
-       partialize: (state) => ({
-        history: state.history,
-      }),
+       partialize: (state) => ({ 
+           ...state,
+           // Exclude dataUrls from persistence to avoid quota errors
+           homeworkFiles: state.homeworkFiles.map(f => ({ name: f.name, type: f.type, dataUrl: '' })),
+           curriculumFiles: state.curriculumFiles.map(f => ({ name: f.name, type: f.type, dataUrl: '' })),
+        }),
     }
   )
 );

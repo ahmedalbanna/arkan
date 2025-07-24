@@ -9,6 +9,7 @@ import { analyzeHomework } from '@/ai/flows/homework-solver';
 
 const analyzeSchema = z.object({
   homeworkImageUris: z.array(z.string().url("A valid homework image data URI is required.")).min(1, "At least one homework image is required."),
+  curriculumContext: z.string().min(1, "Curriculum context is required for analysis."),
 });
 
 export async function POST(request: Request) {
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
 
     const result = await analyzeHomework({ 
         homeworkImageUris: validation.data.homeworkImageUris,
+        curriculumContext: validation.data.curriculumContext,
      });
 
     return NextResponse.json(result, { status: 200 });

@@ -1,3 +1,4 @@
+
 "use server";
 /**
  * @fileOverview AI agents for analyzing and solving homework from images and PDF context.
@@ -21,6 +22,7 @@ const AnalyzeHomeworkInputSchema = z.object({
         "A list of homework assignment images, as data URIs that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
       )
   ),
+  curriculumContext: z.string().describe("The context from the curriculum PDF."),
 });
 
 export async function analyzeHomework(
@@ -37,10 +39,10 @@ export async function analyzeHomework(
     name: "analyzeHomeworkPrompt",
     input: { schema: AnalyzeHomeworkInputSchema },
     output: { schema: AnalyzedHomeworkSchema },
-    prompt: `You are an expert academic analyst. Your task is to analyze the provided homework images.
+    prompt: `You are an expert academic analyst. Your task is to analyze the provided homework images and curriculum context.
 
     1.  **Analyze the Homework Images**: Extract all questions from all images provided.
-    2.  **Identify Subject and Title**: Based on the questions, determine the main subject and create a concise title for the assignment.
+    2.  **Identify Subject and Title**: Based on the questions and the curriculum context, determine the main subject and create a concise title for the assignment.
     3.  **Format Output**: Structure the extracted questions into a clean Markdown document.
 
     Homework Images:
@@ -48,6 +50,10 @@ export async function analyzeHomework(
     {{#each homeworkImageUris}}
     {{media url=this}}
     {{/each}}
+    ---
+    Curriculum Context:
+    ---
+    {{{curriculumContext}}}
     ---
     `,
   });

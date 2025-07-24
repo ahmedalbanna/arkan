@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCheck, BrainCircuit, CheckSquare, Image as ImageIcon, FileText, X, Save } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCopy, BrainCircuit, CheckSquare, Image as ImageIcon, FileText, X, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -26,11 +25,14 @@ import { homeworkKeys } from '@/lib/query-keys';
 
 
 // API call to analyze the homework
-async function analyzeHomeworkApi(variables: { homeworkImageUris: string[], token: string }): Promise<AnalyzedHomework> {
+async function analyzeHomeworkApi(variables: { homeworkImageUris: string[], curriculumContext: string, token: string }): Promise<AnalyzedHomework> {
   const response = await fetch('/api/homework-solver/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-    body: JSON.stringify({ homeworkImageUris: variables.homeworkImageUris }),
+    body: JSON.stringify({ 
+      homeworkImageUris: variables.homeworkImageUris,
+      curriculumContext: variables.curriculumContext
+     }),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Homework analysis failed.');
   return response.json();
@@ -109,8 +111,29 @@ export default function HomeworkSolver() {
     enabled: !!firebaseUser
   });
 
-  const analyzeMutation = useMutation({ mutationFn: analyzeHomeworkApi });
-  const solveMutation = useMutation({ mutationFn: solveHomeworkApi });
+  const analyzeMutation = useMutation({ 
+    mutationFn: analyzeHomeworkApi,
+    onSuccess: (data) => {
+      setAnalyzedHomework(data);
+      refetchUser();
+      toast({ title: t('builder.homeworkSolver.toasts.analysisSuccess') });
+    },
+    onError: (error: any) => {
+      toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+    }
+  });
+
+  const solveMutation = useMutation({ 
+    mutationFn: solveHomeworkApi,
+    onSuccess: (data) => {
+        setSolvedHomework(data);
+        refetchUser();
+        toast({ title: t('builder.homeworkSolver.toasts.solvingSuccess') });
+    },
+    onError: (error: any) => {
+        toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+    }
+  });
   const saveHistoryMutation = useMutation({ mutationFn: saveHomeworkHistory, 
     onSuccess: () => {
         toast({ title: 'Session Saved', description: 'Your homework session has been saved to your history.' });
@@ -145,48 +168,32 @@ export default function HomeworkSolver() {
       return;
     }
     const token = await firebaseUser.getIdToken();
-    setStage('analyzing');
 
     try {
         const curriculumBlobs = await Promise.all(curriculumFiles.map(f => fetch(f.dataUrl).then(res => res.blob())));
         const curriculumFileObjects = curriculumBlobs.map((blob, i) => new File([blob], curriculumFiles[i].name, { type: curriculumFiles[i].type }));
-        
-        const [curriculumText, analysisData] = await Promise.all([
-            processCurriculumPdfs({ files: curriculumFileObjects, token }),
-            analyzeMutation.mutateAsync({ 
-                homeworkImageUris: homeworkFiles.map(f => f.dataUrl), 
-                token 
-            })
-        ]);
-        
-        refetchUser();
+        const curriculumText = await processCurriculumPdfs({ files: curriculumFileObjects, token });
         setCurriculumContext(curriculumText);
-        setAnalyzedHomework(analysisData);
-        setStage('readyToSolve');
-        toast({ title: t('builder.homeworkSolver.toasts.analysisSuccess') });
+        refetchUser();
+
+        await analyzeMutation.mutateAsync({ 
+            homeworkImageUris: homeworkFiles.map(f => f.dataUrl), 
+            curriculumContext: curriculumText,
+            token 
+        });
+        
     } catch (error: any) {
       toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
-      setStage('idle');
     }
   };
 
   const handleSolveHomework = async () => {
-    if (!analyzedHomework || !curriculumContext || !firebaseUser || homeworkFiles.length === 0 || curriculumFiles.length === 0) {
+    if (!analyzedHomework || !curriculumContext || !firebaseUser) {
       toast({ title: t('builder.homeworkSolver.toasts.analysisMissing'), variant: 'destructive' });
-      return;
+        return;
     }
     const token = await firebaseUser.getIdToken();
-    setStage('solving');
-    try {
-      const solvedData = await solveMutation.mutateAsync({ analyzedHomework, curriculumContext, token });
-      setSolvedHomework(solvedData);
-      setStage('solved');
-      refetchUser();
-      toast({ title: t('builder.homeworkSolver.toasts.solvingSuccess') });
-    } catch (error: any) {
-      toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
-      setStage('readyToSolve');
-    }
+    solveMutation.mutate({ analyzedHomework, curriculumContext, token });
   };
 
   const handleSaveToHistory = async () => {
@@ -214,7 +221,7 @@ export default function HomeworkSolver() {
     clearHistoryMutation.mutate({ token });
   }
 
-  const isProcessing = ['analyzing', 'solving'].includes(stage);
+  const isProcessing = analyzeMutation.isPending || solveMutation.isPending;
 
   const analysisPanel = (
     <Card className="h-full flex flex-col">
@@ -224,7 +231,7 @@ export default function HomeworkSolver() {
         </CardHeader>
         <CardContent className="flex-grow flex flex-col">
             <ScrollArea className="flex-grow p-1">
-                {stage === 'analyzing' ? (
+                {analyzeMutation.isPending ? (
                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                         <Loader2 className="h-12 w-12 animate-spin mb-4" />
                         <p>Analyzing homework and curriculum...</p>
@@ -237,9 +244,9 @@ export default function HomeworkSolver() {
                     </div>
                 )}
             </ScrollArea>
-            {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-                <Button onClick={handleSolveHomework} disabled={stage !== 'readyToSolve'} className="mt-4 w-full">
-                    {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+            {(analyzedHomework || solveMutation.isPending || solvedHomework) && (
+                <Button onClick={handleSolveHomework} disabled={solveMutation.isPending || !!solvedHomework} className="mt-4 w-full">
+                    {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                     {t('builder.homeworkSolver.solveButton')}
                 </Button>
             )}
@@ -270,7 +277,7 @@ export default function HomeworkSolver() {
         <CardDescription>{t('builder.homeworkSolver.solutionCardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-        {stage === 'solving' ? (
+        {solveMutation.isPending ? (
           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
             <Loader2 className="h-12 w-12 animate-spin mb-4" />
             <p>{t('builder.homeworkSolver.solvingInProgress')}</p>
@@ -370,8 +377,8 @@ export default function HomeworkSolver() {
                         ))}
                      </ScrollArea>
                 </div>
-                <Button onClick={handleAnalyzeHomework} disabled={homeworkFiles.length === 0 || curriculumFiles.length === 0 || isProcessing || stage === 'solved'} className="w-full">
-                    {stage === 'analyzing' ? (
+                <Button onClick={handleAnalyzeHomework} disabled={homeworkFiles.length === 0 || curriculumFiles.length === 0 || isProcessing} className="w-full">
+                    {analyzeMutation.isPending ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Sparkles className="mr-2 h-4 w-4" />
@@ -384,7 +391,7 @@ export default function HomeworkSolver() {
                     onClick={handleSaveToHistory} 
                     variant="secondary" 
                     className="w-full"
-                    disabled={stage !== 'solved' || saveHistoryMutation.isPending}
+                    disabled={!analyzedHomework || saveHistoryMutation.isPending}
                  >
                     {saveHistoryMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                     Save Session
