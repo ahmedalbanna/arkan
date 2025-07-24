@@ -68,3 +68,8 @@ export const projectKeys = {
     details: () => [...projectKeys.all, 'detail'] as const,
     detail: (projectId: string) => [...projectKeys.details(), projectId] as const,
 }
+
+export const homeworkKeys = {
+    all: ['homework'] as const,
+    history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
+};
