@@ -11,6 +11,7 @@ import { AnalyzedHomeworkSchema } from '@/ai/flows/homework-solver.shared';
 const solveSchema = z.object({
   analyzedHomework: AnalyzedHomeworkSchema,
   curriculumContext: z.string().min(1, "Curriculum context cannot be empty."),
+  targetLang: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -33,7 +34,8 @@ export async function POST(request: Request) {
 
     const result = await solveHomework({
         analyzedHomework: validation.data.analyzedHomework,
-        curriculumContext: validation.data.curriculumContext
+        curriculumContext: validation.data.curriculumContext,
+        targetLang: validation.data.targetLang || 'English',
     });
 
     return NextResponse.json(result, { status: 200 });

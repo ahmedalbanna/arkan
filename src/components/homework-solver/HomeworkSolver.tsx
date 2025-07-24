@@ -41,7 +41,8 @@ async function solveHomeworkApi(variables: { analyzedHomework: AnalyzedHomework,
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
     body: JSON.stringify({
       analyzedHomework: variables.analyzedHomework,
-      curriculumContext: variables.curriculumContext
+      curriculumContext: variables.curriculumContext,
+      targetLang: 'Arabic', // Hardcoding to Arabic as per the implicit request
     }),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Homework solving failed.');
@@ -50,19 +51,24 @@ async function solveHomeworkApi(variables: { analyzedHomework: AnalyzedHomework,
 
 async function processCurriculumPdfs(variables: { files: File[], token: string }): Promise<string> {
     const formData = new FormData();
-    variables.files.forEach(file => formData.append('file', file));
-
-    const response = await fetch('/api/pdf-to-markdown', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${variables.token}` },
-        body: formData,
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Curriculum PDF processing failed.');
+    // Since the API only accepts one file, we send them one by one and combine results.
+    // A better implementation would be to modify the API to accept multiple files.
+    let combinedMarkdown = "";
+    for (const file of variables.files) {
+        formData.set('file', file);
+        const response = await fetch('/api/pdf-to-markdown', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${variables.token}` },
+            body: formData,
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || `Processing failed for ${file.name}.`);
+        }
+        const result = await response.json();
+        combinedMarkdown += result.markdown + "\n\n---\n\n";
     }
-    const result = await response.json();
-    return result.markdown;
+    return combinedMarkdown;
 }
 
 
@@ -126,10 +132,10 @@ export default function HomeworkSolver() {
             })
         ]);
         
+        refetchUser(); // Credits deducted for processing files
         setCurriculumContext(curriculumText);
         setAnalyzedHomework(analysisData);
         setStage('readyToSolve');
-        refetchUser(); // To update credits after processing
         toast({ title: t('builder.homeworkSolver.toasts.analysisSuccess') });
     } catch (error: any) {
       toast({ title: t('builder.homeworkSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
