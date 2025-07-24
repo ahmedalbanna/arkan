@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
 
 function CustomizationPanel({ setStyles, setContent }: { setStyles: React.Dispatch<React.SetStateAction<any>>, setContent: React.Dispatch<React.SetStateAction<any>> }) {
   const handleStyleChange = (key: string, value: string) => {
@@ -31,7 +32,7 @@ function CustomizationPanel({ setStyles, setContent }: { setStyles: React.Dispat
       <CardHeader>
         <CardTitle>لوحة التخصيص</CardTitle>
         <CardDescription>
-          تعديل محتوى وأنماط القالب الخاص بك.
+          يسمح للمستخدمين بتعديل الأنماط المرئية للقالب ، مثل الخطوط والألوان والخلفيات.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -136,7 +137,7 @@ function PreviewPanel({ styles, content }: { styles: any, content: any }) {
     <Card className="h-full min-h-[500px] lg:h-[calc(100vh-160px)]">
       <CardHeader>
         <CardTitle>معاينة القالب</CardTitle>
-        <CardDescription>هذه معاينة حية للتغييرات التي تجريها.</CardDescription>
+        <CardDescription>تعرض معاينة حية للقالب المحدد ، وتعرض كيف سيبدو مع البيانات المخصصة.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="w-full h-[calc(100vh-280px)] rounded-lg border-2 border-dashed bg-muted p-8 overflow-y-auto">
@@ -160,9 +161,12 @@ export default function DesignPage() {
     headerColor: '#111827',
     textColor: '#4b5563',
   });
+  
+  const defaultTemplate = PROPOSAL_TEMPLATES.find(t => t.id === 'default-software');
+
   const [content, setContent] = useState({
-    title: 'تقرير المشروع السنوي',
-    body: 'هذا هو ملخص للتقدم المحرز في المشروع خلال العام الماضي...',
+    title: defaultTemplate ? defaultTemplate.name : 'Template Not Found',
+    body: defaultTemplate ? `${defaultTemplate.description}\n\n${defaultTemplate.prompt}` : 'Could not load template data.'
   });
 
   return (
