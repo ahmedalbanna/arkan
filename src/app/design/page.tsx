@@ -39,7 +39,7 @@ function PreviewPanel() {
             </CardHeader>
             <CardContent>
                 <div className="flex items-center justify-center h-96 rounded-lg border-2 border-dashed bg-muted">
-                    <p className="text-muted-foreground">Live preview will appear here</p>
+                    <p className="text-muted-foreground">معاينة القالب: تعرض معاينة حية للقالب المحدد ، وتعرض كيف سيبدو مع البيانات المخصصة.</p>
                 </div>
             </CardContent>
         </Card>
