@@ -1,12 +1,13 @@
 // src/app/api/projects/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { revalidatePath } from 'next/cache';
 
 // GET /api/projects - Fetches all projects for the authenticated user
 export async function GET(request: Request) {
+    const adminAuth = getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
 
 // POST /api/projects - Creates a new project
 export async function POST(request: Request) {
+    const adminAuth = getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {

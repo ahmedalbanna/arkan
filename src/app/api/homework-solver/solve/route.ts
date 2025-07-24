@@ -3,7 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { deductCredit } from '@/services/credit-service';
 import { solveHomework } from '@/ai/flows/homework-solver';
 import { AnalyzedHomeworkSchema } from '@/ai/flows/homework-solver.shared';
@@ -15,6 +15,7 @@ const solveSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

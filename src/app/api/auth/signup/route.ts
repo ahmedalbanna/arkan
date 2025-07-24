@@ -3,7 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import type { UserRole } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
 
@@ -22,6 +22,7 @@ const providerSignupSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const body = await req.json();
     

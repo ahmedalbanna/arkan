@@ -2,10 +2,11 @@
 // src/app/api/templates/presentation/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) return { authorized: false, message: 'Unauthorized' };
     const token = authorization.substring(7);

@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { updateUserCredits } from '@/lib/db/queries';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { cookies } from 'next/headers';
 const purchaseSchema = z.object({
   planId: z.string().min(1),
@@ -10,6 +10,7 @@ const purchaseSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {

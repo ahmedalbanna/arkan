@@ -5,12 +5,13 @@ import {
   updateUser,
   updateUserByAdmin,
 } from "@/lib/db/queries";
-import { auth as adminAuth, adminDb } from "@/lib/firebase/admin";
+import { getAdminAuth, adminDb } from "@/lib/firebase/admin";
 import type { UserRole } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
+  const adminAuth = getAdminAuth();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return {
@@ -69,7 +70,7 @@ export async function GET(
     if (!accessCheck.authorized) {
       return NextResponse.json(
         { message: accessCheck.message },
-        { status: accessCheck.message === "Forbidden" ? 403 : 401 }
+        { status: accessCheck.message === 'Forbidden' ? 403 : 401 }
       );
     }
 
@@ -95,6 +96,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const adminAuth = getAdminAuth();
   try {
     const {id:targetUserId} = await params;
     const authHeader = req.headers.get("Authorization");

@@ -6,10 +6,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { updateUserByAdmin, deleteUser, getUserProfile } from '@/lib/db/queries';
 import { cookies } from 'next/headers';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
+  const adminAuth = getAdminAuth();
   const sessionCookie = cookies().get('__session')?.value;
   if (!sessionCookie) {
     return { authorized: false, message: 'Unauthorized' };

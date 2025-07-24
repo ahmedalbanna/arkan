@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { translateProposal } from '@/ai/flows/translate-proposal';
 import { deductCredit } from '@/services/credit-service';
-import { auth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ProposalTemplate } from '@/services/template-service';
 
@@ -15,6 +15,7 @@ const generateProposalSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

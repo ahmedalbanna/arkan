@@ -3,7 +3,8 @@
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
 'use server';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/admin-db';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { Agent, AgentData } from '@/lib/agents';
 import { AGENTS as defaultAgents } from '@/lib/agents';
@@ -149,6 +150,7 @@ export async function updateUserByAdmin(userId: string, data: Partial<UserProfil
 }
 
 export async function deleteUser(userId: string) {
+    const adminAuth = getAdminAuth();
     await adminAuth.deleteUser(userId);
     await adminDb.collection('users').doc(userId).delete();
 }

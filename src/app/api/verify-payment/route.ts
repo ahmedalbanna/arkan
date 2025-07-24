@@ -2,12 +2,12 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb } from '@/lib/firebase/admin';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 
 // Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', adminId: null };

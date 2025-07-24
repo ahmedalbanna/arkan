@@ -5,7 +5,7 @@ import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/a
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 // Schema for a new diagram generation request
@@ -53,6 +53,7 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

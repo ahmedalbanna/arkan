@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
-import { auth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const ApiGeneratePresentationSchema = z.object({
@@ -18,6 +18,7 @@ const ApiGeneratePresentationSchema = z.object({
 
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

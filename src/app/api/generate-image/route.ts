@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { deductCredit } from '@/services/credit-service';
 import { generateImage } from '@/ai/flows/generate-image';
 
@@ -10,6 +10,7 @@ const generateImageSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

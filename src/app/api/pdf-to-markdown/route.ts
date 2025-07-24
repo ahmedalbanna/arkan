@@ -3,9 +3,10 @@
 import { NextResponse } from 'next/server';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { generateCode } from '@/ai/flows/generate-code';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const generateCodeSchema = z.object({
@@ -13,6 +13,7 @@ const generateCodeSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

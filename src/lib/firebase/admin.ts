@@ -1,33 +1,40 @@
 import admin from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getAuth as getAdminAuth } from 'firebase-admin/auth';
-import * as fs from 'fs';
-import * as path from 'path';
 
-let serviceAccount: admin.ServiceAccount;
+// This function initializes the Firebase Admin SDK if it hasn't been already.
+function initializeFirebaseAdmin() {
+  if (admin.apps.length === 0) {
+    try {
+      const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
-// Check if the environment variable is set and file exists
-if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    const serviceAccountPath = path.resolve(process.cwd(), process.env.GOOGLE_APPLICATION_CREDENTIALS);
-    if (fs.existsSync(serviceAccountPath)) {
-        serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-    } else {
-        console.error("Firebase service account file not found at path:", serviceAccountPath);
-        throw new Error("Firebase admin credentials file is missing.");
+      if (!serviceAccount) {
+        throw new Error(
+          "The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set."
+        );
+      }
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_UL,
+      });
+
+      console.log("Firebase Admin SDK initialized successfully.");
+    } catch (error) {
+      console.error("Firebase Admin initialization error:", error);
+      // In a real app, you might want to handle this more gracefully.
+      // For this example, we'll let it throw to prevent the app from starting
+      // in a misconfigured state.
+      throw error;
     }
-} else {
-    console.error("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.");
-    throw new Error("Firebase admin credentials are not configured.");
+  }
 }
 
+// Ensure the SDK is initialized when this module is loaded.
+initializeFirebaseAdmin();
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+// Export a function to get the auth instance.
+export function getAdminAuth() {
+  return admin.auth();
 }
 
-const adminDb = getFirestore();
-const auth = getAdminAuth();
-
-export { adminDb, auth };
+// Export a function to get the firestore instance.
+// Note: We're exporting the db instance directly after initialization.
+export const adminDb = admin.firestore();

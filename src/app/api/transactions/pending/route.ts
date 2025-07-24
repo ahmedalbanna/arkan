@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { getPendingTransactions } from '@/lib/db/queries';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 import { z } from 'zod';
 
@@ -13,6 +13,7 @@ const getPendingSchema = z.object({
 
 // Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };

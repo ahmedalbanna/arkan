@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { evaluateReport } from '@/ai/flows/evaluate-report';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const evaluateReportSchema = z.object({
@@ -15,6 +15,7 @@ const evaluateReportSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

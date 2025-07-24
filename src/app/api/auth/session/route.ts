@@ -1,10 +1,11 @@
 
 // src/app/api/auth/session/route.ts
 import { NextResponse } from 'next/server';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 // Log in a user and set the session cookie
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const { idToken } = await request.json();
     if (!idToken) {

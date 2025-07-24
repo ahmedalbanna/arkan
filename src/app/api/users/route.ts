@@ -2,11 +2,12 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getPaginatedUsers, getUserProfile } from '@/lib/db/queries';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import type { UserRole } from '@/lib/db/queries';
 
 // Helper to verify admin role
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
@@ -34,6 +35,7 @@ const createUserSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   const adminCheck = await verifyAdmin(request);
   if (!adminCheck.authorized) {
     return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });

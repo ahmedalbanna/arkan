@@ -5,10 +5,11 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { manipulateText } from '@/ai/flows/manipulate-text';
 import { deductCredit } from '@/services/credit-service';
-import { auth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
 
 export async function POST(request: Request) {
+  const auth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

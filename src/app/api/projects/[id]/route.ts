@@ -1,12 +1,13 @@
 // src/app/api/projects/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { revalidatePath } from 'next/cache';
 
 // Helper to verify user owns the project
 async function verifyProjectOwner(request: Request, projectId: string) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };

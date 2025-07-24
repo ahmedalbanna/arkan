@@ -6,7 +6,7 @@ import { getAgent } from '@/lib/db/queries';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ReportGenerationTemplate } from '@/services/template-service';
 import { getUserProfile } from '@/lib/db/queries';
@@ -33,6 +33,7 @@ const generateFullReportSchema = z.object({
 
 
 export async function POST(request: Request) {
+  const adminAuth = getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

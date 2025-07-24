@@ -1,10 +1,11 @@
 
 // src/app/api/users/[id]/reset-password/route.ts
 import { NextResponse } from 'next/server';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };

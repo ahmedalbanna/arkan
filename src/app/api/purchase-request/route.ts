@@ -1,7 +1,7 @@
 
 // src/app/api/purchase-request/route.ts
 import { NextResponse } from 'next/server';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/lib/db/queries';
 
@@ -12,6 +12,7 @@ export const config = {
 };
 
 export async function POST(request: Request) {
+    const adminAuth = getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {

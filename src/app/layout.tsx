@@ -15,7 +15,7 @@ import { Footer } from '@/components/layout/Footer';
 import QueryProvider from '@/components/QueryProvider';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { auth as adminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { NextResponse } from 'next/server'; // Assuming you're using NextResponse
 
 export const metadata: Metadata = {
@@ -63,6 +63,7 @@ async function checkAuth(pathname: string, sessionCookieValue: string | undefine
   }
 
   try {
+    const adminAuth = getAdminAuth();
     // Verify the cookie is valid
     await adminAuth.verifySessionCookie(sessionCookieValue, true);
   } catch (error) {

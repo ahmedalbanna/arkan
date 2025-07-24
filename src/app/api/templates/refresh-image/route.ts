@@ -1,7 +1,7 @@
 // src/app/api/templates/refresh-image/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, auth as adminAuth } from '@/lib/firebase/admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
 import { getUserProfile } from '@/lib/db/queries';
@@ -14,6 +14,7 @@ const refreshImageSchema = z.object({
 
 // Helper to verify admin role
 async function verifyAdmin(request: Request) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
