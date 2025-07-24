@@ -7,7 +7,6 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { AnalyzedHomeworkSchema, AnalyzedHomework, SolvedHomeworkSchema, SolvedHomework } from './homework-solver.shared';
-// import { defineTool } from 'genkit/tool';
 
 // 1. Analyze Homework Flow
 const AnalyzeHomeworkInputSchema = z.object({
@@ -47,25 +46,25 @@ export async function analyzeHomework(input: z.infer<typeof AnalyzeHomeworkInput
 // 2. Solve Homework Flow
 
 // Define a simple web browsing tool
-// const webBrowserTool = defineTool(
-//   {
-//     name: 'webBrowser',
-//     description: 'Fetches the content of a given URL. Use this to access information from web pages.',
-//     inputSchema: z.object({ url: z.string().url() }),
-//     outputSchema: z.string(),
-//   },
-//   async ({ url }) => {
-//     // In a real implementation, this would fetch the URL content.
-//     // For this demonstration, we'll return placeholder content based on the URL.
-//     if (url.includes('youtube.com')) {
-//       return "YouTube's Intellectual Property (IP) policy states that creators must own the rights to all content they upload. YouTube provides tools like Content ID to help rights holders manage their content and provides a clear process for filing copyright takedown notices. Repeat infringers risk account termination.";
-//     }
-//     if (url.includes('udemy.com')) {
-//       return "Udemy's Intellectual Property policy prohibits instructors from using copyrighted material without permission. Instructors are responsible for ensuring their course content, including lectures, quizzes, and supplemental materials, is original or properly licensed. Udemy has a system for reporting and handling IP violations.";
-//     }
-//     return `Could not fetch content from URL: ${url}`;
-//   }
-// );
+const webBrowserTool = ai.defineTool(
+  {
+    name: 'webBrowser',
+    description: 'Fetches the content of a given URL. Use this to access information from web pages.',
+    inputSchema: z.object({ url: z.string().url() }),
+    outputSchema: z.string(),
+  },
+  async ({ url }) => {
+    // In a real implementation, this would fetch the URL content.
+    // For this demonstration, we'll return placeholder content based on the URL.
+    if (url.includes('youtube.com')) {
+      return "YouTube's Intellectual Property (IP) policy states that creators must own the rights to all content they upload. YouTube provides tools like Content ID to help rights holders manage their content and provides a clear process for filing copyright takedown notices. Repeat infringers risk account termination.";
+    }
+    if (url.includes('udemy.com')) {
+      return "Udemy's Intellectual Property policy prohibits instructors from using copyrighted material without permission. Instructors are responsible for ensuring their course content, including lectures, quizzes, and supplemental materials, is original or properly licensed. Udemy has a system for reporting and handling IP violations.";
+    }
+    return `Could not fetch content from URL: ${url}`;
+  }
+);
 
 
 const SolveHomeworkInputSchema = z.object({
@@ -87,8 +86,19 @@ export async function solveHomework(input: z.infer<typeof SolveHomeworkInputSche
     name: 'solveHomeworkPrompt',
     input: { schema: SolveHomeworkInputSchema },
     output: { schema: SolvedHomeworkSchema },
-    // tools: [webBrowserTool],
-    prompt: `You are an expert AI assistant tasked with completing a homework assignment. Your primary goal is to directly generate the required answers based on the provided questions and context.
+    model: 'googleai/gemini-2.5-flash',
+    // config: { temperature: 0.7, maxOutputTokens: 2000, topP: 0.95, topK: 40, stopSequences: ['---'] },
+    system: `You are an expert AI assistant tasked with completing a homework assignment. Your primary goal is to directly generate the required answers based on the provided questions and context.`,
+    context: {
+      curriculumContext: curriculumContext,
+      analyzedHomework: analyzedHomework,
+      targetLang: targetLang,
+    },
+    maxTurns: 10,
+    toolChoice: 'auto',
+    config: { temperature: 0.7, maxOutputTokens: 2000, topP: 0.95, topK: 40, stopSequences: ['---'] },
+    tools: [webBrowserTool],
+    prompt: `
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Execute the Task**: Do not act as a tutor or give instructions. Your task is to PERFORM the request and generate the final content.
@@ -96,14 +106,6 @@ export async function solveHomework(input: z.infer<typeof SolveHomeworkInputSche
 3.  **Primary Context**: Use the provided "Curriculum Context" as your main source of information for solving the problems.
 4.  **Language**: Generate the entire final solution in **{{{targetLang}}}**. All parts of your output must be in this language.
 5.  **Output Format**: Provide the solution as an array of question/solution pairs, adhering to the specified JSON schema.
-
----
-**Curriculum Context:**
-{{{curriculumContext}}}
----
-**Homework Questions (Subject: {{{analyzedHomework.subject}}}):**
-{{{analyzedHomework.structuredQuestions}}}
----
 `,
   });
 
