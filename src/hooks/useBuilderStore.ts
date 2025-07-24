@@ -1,16 +1,17 @@
+// code explantion in docs/hooks/useBuilderStore.md
 
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { type ProjectProposal } from '@/ai/schemas';
-import { toast } from '@/hooks/use-toast';
-import { useReportStore } from './useReportStore';
-import { useDiagramStore } from './useDiagramStore';
-import { usePresentationStore } from './usePresentationStore';
-import { useCodeGeneratorStore } from './useCodeGeneratorStore';
-import type { ProjectState } from '@/lib/types';
-import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import { type ProjectProposal } from "@/ai/schemas";
+import { toast } from "@/hooks/use-toast";
+import { useReportStore } from "./useReportStore";
+import { useDiagramStore } from "./useDiagramStore";
+import { usePresentationStore } from "./usePresentationStore";
+import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
+import type { ProjectState } from "@/lib/types";
+import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
 
 /**
  * Zustand store for managing the core state of the project builder.
@@ -31,34 +32,33 @@ export interface BuilderState {
 }
 
 interface BuilderActions {
-    // Basic Actions
-    newSession: () => void;
-    loadState: (state: ProjectState & { id?: string }) => void;
-    setProjectIdea: (idea: string) => void;
-    setCurrentProjectId: (id: string | null) => void;
-    setHasUnsavedChanges: (status: boolean) => void;
-    getFullState: () => ProjectState;
-    // Proposal Actions
-    setProposal: (proposal: ProjectProposal | null) => void;
-    handleProposalUpdate: (path: string, value: any) => void;
-    // UI State Actions
-    setSelectedTemplateId: (id: string) => void;
-    addCustomGuideline: () => void;
-    removeCustomGuideline: (index: number) => void;
-    setCustomGuidelineInput: (value: string) => void;
+  // Basic Actions
+  newSession: () => void;
+  loadState: (state: ProjectState & { id?: string }) => void;
+  setProjectIdea: (idea: string) => void;
+  setCurrentProjectId: (id: string | null) => void;
+  setHasUnsavedChanges: (status: boolean) => void;
+  getFullState: () => ProjectState;
+  // Proposal Actions
+  setProposal: (proposal: ProjectProposal | null) => void;
+  handleProposalUpdate: (path: string, value: any) => void;
+  // UI State Actions
+  setSelectedTemplateId: (id: string) => void;
+  addCustomGuideline: () => void;
+  removeCustomGuideline: (index: number) => void;
+  setCustomGuidelineInput: (value: string) => void;
 }
 
 const initialState: BuilderState = {
   name: undefined,
-  projectIdea: '',
+  projectIdea: "",
   proposal: null,
   currentProjectId: null,
   hasUnsavedChanges: false,
   selectedTemplateId: PROPOSAL_TEMPLATES[0].id,
   customGuidelines: [],
-  customGuidelineInput: '',
+  customGuidelineInput: "",
 };
-
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
   persist(
@@ -73,23 +73,31 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
         useCodeGeneratorStore.getState().newSession();
-        toast({ title: 'New Session Started', description: 'All content has been cleared.' });
+        toast({
+          title: "New Session Started",
+          description: "All content has been cleared.",
+        });
       },
       loadState: (newState) => {
         set({
-            name: newState.name,
-            projectIdea: newState.projectIdea || '',
-            proposal: newState.proposal || null,
-            currentProjectId: newState.id || null, // Set the current project ID
-            hasUnsavedChanges: false, // Loading a project means it's saved
+          name: newState.name,
+          projectIdea: newState.projectIdea || "",
+          proposal: newState.proposal || null,
+          currentProjectId: newState.id || null, // Set the current project ID
+          hasUnsavedChanges: false, // Loading a project means it's saved
         });
-        
+
         // Load state for other stores if present
         useReportStore.getState().loadState(newState);
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
-        
-        toast({ title: 'Project Loaded', description: `Successfully loaded "${newState.name || newState.proposal?.title || 'project'}".` });
+
+        toast({
+          title: "Project Loaded",
+          description: `Successfully loaded "${
+            newState.name || newState.proposal?.title || "project"
+          }".`,
+        });
       },
       getFullState: () => ({
         name: get().name,
@@ -100,10 +108,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         presentation: usePresentationStore.getState().presentation,
         externalContext: useReportStore.getState().externalContext,
       }),
-      setProjectIdea: (idea) => set({ projectIdea: idea, hasUnsavedChanges: true }),
+      setProjectIdea: (idea) =>
+        set({ projectIdea: idea, hasUnsavedChanges: true }),
       setCurrentProjectId: (id) => set({ currentProjectId: id }),
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
-      
+
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
         set({
@@ -119,37 +128,42 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         usePresentationStore.getState().newSession();
       },
       handleProposalUpdate: (path, value) => {
-          const { proposal } = get();
-          if (!proposal) return;
-          const newProposal = JSON.parse(JSON.stringify(proposal));
-          let current = newProposal;
-          const keys = path.split('.');
-          for (let i = 0; i < keys.length - 1; i++) { current = current[keys[i]]; }
-          current[keys[keys.length - 1]] = value;
-          set({ proposal: newProposal, hasUnsavedChanges: true });
+        const { proposal } = get();
+        if (!proposal) return;
+        const newProposal = JSON.parse(JSON.stringify(proposal));
+        let current = newProposal;
+        const keys = path.split(".");
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        set({ proposal: newProposal, hasUnsavedChanges: true });
       },
-      
+
       // --- UI STATE ACTIONS ---
       setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
       addCustomGuideline: () => {
-          const { customGuidelines, customGuidelineInput } = get();
-          const newGuideline = customGuidelineInput.trim();
-          if (newGuideline) {
-              set({
-                  customGuidelines: [...customGuidelines, newGuideline],
-                  customGuidelineInput: '',
-                  hasUnsavedChanges: true,
-              });
-          }
+        const { customGuidelines, customGuidelineInput } = get();
+        const newGuideline = customGuidelineInput.trim();
+        if (newGuideline) {
+          set({
+            customGuidelines: [...customGuidelines, newGuideline],
+            customGuidelineInput: "",
+            hasUnsavedChanges: true,
+          });
+        }
       },
-      removeCustomGuideline: (index) => set(state => ({ 
-        customGuidelines: state.customGuidelines.filter((_, i) => i !== index),
-        hasUnsavedChanges: true,
-      })),
+      removeCustomGuideline: (index) =>
+        set((state) => ({
+          customGuidelines: state.customGuidelines.filter(
+            (_, i) => i !== index
+          ),
+          hasUnsavedChanges: true,
+        })),
       setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
-      name: 'arkan-builder-state',
+      name: "arkan-builder-state",
       storage: createJSONStorage(() => localStorage),
       // Only persist user-generated content, not transient UI state
       partialize: (state) => ({
@@ -158,7 +172,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
         // Don't persist hasUnsavedChanges directly, it's a runtime flag
-        // hasUnsavedChanges: state.hasUnsavedChanges, 
+        // hasUnsavedChanges: state.hasUnsavedChanges,
 
         // Persist other stores
         sections: useReportStore.getState().sections,

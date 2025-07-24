@@ -1,22 +1,27 @@
+// code explantion in docs/hooks/use-autosave.md
 
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { useBuilderStore } from './useBuilderStore';
-import { useSaveProject, useUpdateProject } from './use-projects';
-import { useDebounce } from './use-debounce';
+import { useEffect, useRef, useState } from "react";
+import { useBuilderStore } from "./useBuilderStore";
+import { useSaveProject, useUpdateProject } from "./use-projects";
+import { useDebounce } from "./use-debounce";
 
 const AUTOSAVE_DELAY = 60000; // 1 minute
 
 export function useAutosave() {
   const store = useBuilderStore();
   const { hasUnsavedChanges, setHasUnsavedChanges } = store;
-  const debouncedHasUnsavedChanges = useDebounce(hasUnsavedChanges, AUTOSAVE_DELAY);
+  const debouncedHasUnsavedChanges = useDebounce(
+    hasUnsavedChanges,
+    AUTOSAVE_DELAY
+  );
 
   const saveProjectMutation = useSaveProject();
   const updateProjectMutation = useUpdateProject();
 
-  const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
+  const isSaving =
+    saveProjectMutation.isPending || updateProjectMutation.isPending;
   const [isAutoSaving, setIsAutoSaving] = useState(false);
 
   useEffect(() => {
@@ -38,8 +43,11 @@ export function useAutosave() {
         setIsAutoSaving(false); // Reset if there's nothing to save
         return;
       }
-      
-      const saveData = { ...projectData, name: projectData.name || projectData.proposal.title };
+
+      const saveData = {
+        ...projectData,
+        name: projectData.name || projectData.proposal.title,
+      };
 
       const onSettled = () => {
         // After the mutation completes (success or error), mark autosave as finished
@@ -49,18 +57,21 @@ export function useAutosave() {
       };
 
       if (store.currentProjectId) {
-        updateProjectMutation.mutate({ projectId: store.currentProjectId, data: projectData }, { onSettled });
+        updateProjectMutation.mutate(
+          { projectId: store.currentProjectId, data: projectData },
+          { onSettled }
+        );
       } else {
         saveProjectMutation.mutate(saveData, { onSettled });
       }
     }
   }, [
-      debouncedHasUnsavedChanges, 
-      store,
-      isSaving,
-      isAutoSaving,
-      saveProjectMutation, 
-      updateProjectMutation, 
-      setHasUnsavedChanges,
-    ]);
+    debouncedHasUnsavedChanges,
+    store,
+    isSaving,
+    isAutoSaving,
+    saveProjectMutation,
+    updateProjectMutation,
+    setHasUnsavedChanges,
+  ]);
 }

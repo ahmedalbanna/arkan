@@ -14,6 +14,6 @@ module.exports = {
   },
   // Ignore transformers for node_modules, except for specific ES modules
   transformIgnorePatterns: [
-    '/node_modules/(?!pdfjs-dist|unified|remark-parse|remark-gfm|unist-util-visit|micromark-util-symbol)/',
+    '/node_modules/(?!pdfjs-dist|unified|remark-parse|remark-gfm|unist-util-visit|micromark-util-symbol|lucide-react)/',
   ],
 };

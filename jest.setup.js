@@ -1,7 +1,8 @@
+// jest.setup.js
 
 // Learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom';
-import fetchMock from 'jest-fetch-mock';
+require('@testing-library/jest-dom');
+const fetchMock = require('jest-fetch-mock'); // Use const for consistency
 
 // Mock useRouter from next/navigation
 jest.mock('next/navigation', () => ({
@@ -36,19 +37,19 @@ Object.defineProperty(window, 'matchMedia', {
 fetchMock.enableMocks();
 
 // Mock localStorage
-const localStorageMock = (function() {
+const localStorageMock = (function () {
   let store = {};
   return {
-    getItem: function(key) {
+    getItem: function (key) {
       return store[key] || null;
     },
-    setItem: function(key, value) {
+    setItem: function (key, value) {
       store[key] = value.toString();
     },
-    removeItem: function(key) {
+    removeItem: function (key) {
       delete store[key];
     },
-    clear: function() {
+    clear: function () {
       store = {};
     }
   };

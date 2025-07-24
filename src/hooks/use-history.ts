@@ -1,9 +1,11 @@
-'use client';
+// code explantion in docs/hooks/use-history.md
 
-import { useState, useEffect, useCallback } from 'react';
-import type { HistoryEntry } from '@/lib/types';
+"use client";
 
-const HISTORY_KEY = 'arkan-generation-history';
+import { useState, useEffect, useCallback } from "react";
+import type { HistoryEntry } from "@/lib/types";
+
+const HISTORY_KEY = "arkan-generation-history";
 
 export function useHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -16,7 +18,7 @@ export function useHistory() {
         setHistory(JSON.parse(storedHistory));
       }
     } catch (error) {
-      console.error('Failed to load history from localStorage', error);
+      console.error("Failed to load history from localStorage", error);
       setHistory([]);
     }
     setIsLoaded(true);
@@ -29,12 +31,12 @@ export function useHistory() {
       createdAt: new Date().toISOString(),
     };
 
-    setHistory(prevHistory => {
+    setHistory((prevHistory) => {
       const updatedHistory = [newEntry, ...prevHistory];
       try {
         localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
       } catch (error) {
-        console.error('Failed to save history to localStorage', error);
+        console.error("Failed to save history to localStorage", error);
       }
       return updatedHistory;
     });
@@ -45,10 +47,9 @@ export function useHistory() {
     try {
       localStorage.removeItem(HISTORY_KEY);
     } catch (error) {
-      console.error('Failed to clear history from localStorage', error);
+      console.error("Failed to clear history from localStorage", error);
     }
   }, []);
-
 
   return { history, addHistoryEntry, isLoaded, clearHistory };
 }

@@ -1,7 +1,8 @@
+// code explantion in docs/hooks/use-debounces.md
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 /**
  * A custom hook that debounces a value.
@@ -20,7 +21,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 
     // Return a cleanup function that will be called every time ...
     // ... useEffect is re-called. useEffect will only be re-called ...
-    // ... if value or delay changes (see the inputs array below). 
+    // ... if value or delay changes (see the inputs array below).
     // This is how we prevent debouncedValue from changing if value is ...
     // ... changed within the delay period.
     return () => {

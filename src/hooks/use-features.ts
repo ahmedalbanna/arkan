@@ -1,12 +1,21 @@
-'use client';
+// code explantion in docs/hooks/use-features.md
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { featureKeys } from '@/lib/query-keys';
-import { useAuth } from '@/context/AuthContext';
-import { handleErrorUtility } from '@/lib/errorUtils';
-import type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/lib/types';
-import { fetchFeatures as fetchFeaturesApi, updateFeature as updateFeatureApi } from '@/services/feature-service';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+"use client";
+
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { featureKeys } from "@/lib/query-keys";
+import { useAuth } from "@/context/AuthContext";
+import { handleErrorUtility } from "@/lib/errorUtils";
+import type {
+  Feature,
+  UpdateFeaturePayload,
+  UpdateFeatureVariables,
+} from "@/lib/types";
+import {
+  fetchFeatures as fetchFeaturesApi,
+  updateFeature as updateFeatureApi,
+} from "@/services/feature-service";
+import { getAuthenticatedToken } from "@/lib/authUtils";
 
 /**
  * Custom hook to fetch all feature flags.
@@ -15,16 +24,21 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
  * @returns An object containing the list of features, loading status, and error status.
  */
 export function useFeatures() {
-    const { data: features, isLoading, isError } = useQuery<Feature[]>({
-        queryKey: featureKeys.lists(),
-        queryFn: fetchFeaturesApi,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        meta: {
-            onError: (error: Error) => handleErrorUtility(error, 'Failed to fetch features'),
-        }
-    });
+  const {
+    data: features,
+    isLoading,
+    isError,
+  } = useQuery<Feature[]>({
+    queryKey: featureKeys.lists(),
+    queryFn: fetchFeaturesApi,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    meta: {
+      onError: (error: Error) =>
+        handleErrorUtility(error, "Failed to fetch features"),
+    },
+  });
 
-    return { features: features || [], isLoaded: !isLoading, isError };
+  return { features: features || [], isLoaded: !isLoading, isError };
 }
 
 /**
@@ -34,36 +48,40 @@ export function useFeatures() {
  * @returns The result of the useMutation hook.
  */
 export function useUpdateFeature() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
 
-    return useMutation<Feature, Error, UpdateFeatureVariables>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateFeatureApi(variables, token);
-        },
-        // Optimistic update for a better user experience
-        onMutate: async (newData) => {
-            await queryClient.cancelQueries({ queryKey: featureKeys.lists() });
-            const previousFeatures = queryClient.getQueryData<Feature[]>(featureKeys.lists());
-            if (previousFeatures) {
-                queryClient.setQueryData<Feature[]>(featureKeys.lists(), old =>
-                    old?.map(feature =>
-                        feature.id === newData.featureId ? { ...feature, ...newData.payload } : feature
-                    )
-                );
-            }
-            return { previousFeatures };
-        },
-        onError: (err, newData, context) => {
-            if (context?.previousFeatures) {
-                // Rollback on error
-                queryClient.setQueryData(featureKeys.lists(), context.previousFeatures);
-            }
-            handleErrorUtility(err, 'Update Feature Failed');
-        },
-        onSettled: () => {
-            queryClient.invalidateQueries({ queryKey: featureKeys.lists() });
-        }
-    });
+  return useMutation<Feature, Error, UpdateFeatureVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return updateFeatureApi(variables, token);
+    },
+    // Optimistic update for a better user experience
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: featureKeys.lists() });
+      const previousFeatures = queryClient.getQueryData<Feature[]>(
+        featureKeys.lists()
+      );
+      if (previousFeatures) {
+        queryClient.setQueryData<Feature[]>(featureKeys.lists(), (old) =>
+          old?.map((feature) =>
+            feature.id === newData.featureId
+              ? { ...feature, ...newData.payload }
+              : feature
+          )
+        );
+      }
+      return { previousFeatures };
+    },
+    onError: (err, newData, context) => {
+      if (context?.previousFeatures) {
+        // Rollback on error
+        queryClient.setQueryData(featureKeys.lists(), context.previousFeatures);
+      }
+      handleErrorUtility(err, "Update Feature Failed");
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: featureKeys.lists() });
+    },
+  });
 }

@@ -57,7 +57,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const { id: userId } = params; 
+    const { id: userId } = await params;
     if (!userId) {
       return NextResponse.json(
         { message: "User ID is required." },
@@ -96,7 +96,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const targetUserId = params.id;
+    const {id:targetUserId} = await params;
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -1,11 +1,21 @@
+// code explantion in docs/hooks/useHomeworkSolverStore.md
 
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import type { AnalyzedHomework, SolvedHomework } from '@/ai/flows/homework-solver.shared';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import type {
+  AnalyzedHomework,
+  SolvedHomework,
+} from "@/ai/flows/homework-solver.shared";
 
-export type HomeworkSolverStage = 'idle' | 'parsing' | 'analyzing' | 'readyToSolve' | 'solving' | 'solved';
+export type HomeworkSolverStage =
+  | "idle"
+  | "parsing"
+  | "analyzing"
+  | "readyToSolve"
+  | "solving"
+  | "solved";
 
 export interface HomeworkHistoryEntry {
   id: string; // Using ISO timestamp as ID
@@ -22,7 +32,7 @@ export interface HomeworkSolverState {
   stage: HomeworkSolverStage;
   analyzedHomework: AnalyzedHomework | null;
   solvedHomework: SolvedHomework | null;
-  originalFile: { name: string; type: string; dataUrl: string; } | null;
+  originalFile: { name: string; type: string; dataUrl: string } | null;
   history: HomeworkHistoryEntry[];
   currentHistoryId: string | null;
 }
@@ -32,14 +42,18 @@ interface HomeworkSolverActions {
   setAnalyzedHomework: (homework: AnalyzedHomework | null) => void;
   setSolvedHomework: (solution: SolvedHomework | null) => void;
   setOriginalFile: (file: File | null) => Promise<void>;
-  addSolvedHomeworkToHistory: (analyzedHomework: AnalyzedHomework, solvedHomework: SolvedHomework, originalFile: { name: string; type: string; dataUrl: string; }) => void;
+  addSolvedHomeworkToHistory: (
+    analyzedHomework: AnalyzedHomework,
+    solvedHomework: SolvedHomework,
+    originalFile: { name: string; type: string; dataUrl: string }
+  ) => void;
   loadFromHistory: (id: string) => void;
   clearHistory: () => void;
   resetCurrent: () => void;
 }
 
 const initialState: HomeworkSolverState = {
-  stage: 'idle',
+  stage: "idle",
   analyzedHomework: null,
   solvedHomework: null,
   originalFile: null,
@@ -49,50 +63,75 @@ const initialState: HomeworkSolverState = {
 
 // Helper to convert File to Data URL
 const fileToDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
 
-
-export const useHomeworkSolverStore = create<HomeworkSolverState & HomeworkSolverActions>()(
+export const useHomeworkSolverStore = create<
+  HomeworkSolverState & HomeworkSolverActions
+>()(
   persist(
     (set, get) => ({
       ...initialState,
       setStage: (stage) => set({ stage }),
-      setAnalyzedHomework: (homework) => set({ analyzedHomework: homework, solvedHomework: null, stage: homework ? 'readyToSolve' : 'idle', currentHistoryId: null }),
-      setSolvedHomework: (solution) => set({ solvedHomework: solution, stage: solution ? 'solved' : 'readyToSolve' }),
+      setAnalyzedHomework: (homework) =>
+        set({
+          analyzedHomework: homework,
+          solvedHomework: null,
+          stage: homework ? "readyToSolve" : "idle",
+          currentHistoryId: null,
+        }),
+      setSolvedHomework: (solution) =>
+        set({
+          solvedHomework: solution,
+          stage: solution ? "solved" : "readyToSolve",
+        }),
       setOriginalFile: async (file) => {
         if (!file) {
-            set({ originalFile: null, stage: 'idle', analyzedHomework: null, solvedHomework: null });
-            return;
+          set({
+            originalFile: null,
+            stage: "idle",
+            analyzedHomework: null,
+            solvedHomework: null,
+          });
+          return;
         }
         const dataUrl = await fileToDataUrl(file);
-        set({ originalFile: { name: file.name, type: file.type, dataUrl }, stage: 'idle', analyzedHomework: null, solvedHomework: null });
+        set({
+          originalFile: { name: file.name, type: file.type, dataUrl },
+          stage: "idle",
+          analyzedHomework: null,
+          solvedHomework: null,
+        });
       },
-      addSolvedHomeworkToHistory: (analyzedHomework, solvedHomework, originalFile) => {
+      addSolvedHomeworkToHistory: (
+        analyzedHomework,
+        solvedHomework,
+        originalFile
+      ) => {
         const newEntry: HomeworkHistoryEntry = {
           id: new Date().toISOString(),
           analyzedHomework,
           solvedHomework,
           originalFile,
         };
-        set(state => ({
-            history: [newEntry, ...state.history].slice(0, 20), // Keep last 20 entries
-            currentHistoryId: newEntry.id
+        set((state) => ({
+          history: [newEntry, ...state.history].slice(0, 20), // Keep last 20 entries
+          currentHistoryId: newEntry.id,
         }));
       },
       loadFromHistory: (id) => {
-        const historyEntry = get().history.find(item => item.id === id);
+        const historyEntry = get().history.find((item) => item.id === id);
         if (historyEntry) {
           set({
             analyzedHomework: historyEntry.analyzedHomework,
             solvedHomework: historyEntry.solvedHomework,
             originalFile: historyEntry.originalFile,
-            stage: 'solved',
+            stage: "solved",
             currentHistoryId: id,
           });
         }
@@ -102,18 +141,18 @@ export const useHomeworkSolverStore = create<HomeworkSolverState & HomeworkSolve
         get().resetCurrent();
       },
       resetCurrent: () => {
-          // Reset all state except for history
-          set({
-            stage: 'idle',
-            analyzedHomework: null,
-            solvedHomework: null,
-            originalFile: null,
-            currentHistoryId: null,
-          });
+        // Reset all state except for history
+        set({
+          stage: "idle",
+          analyzedHomework: null,
+          solvedHomework: null,
+          originalFile: null,
+          currentHistoryId: null,
+        });
       },
     }),
     {
-      name: 'arkan-homework-solver-state', // Name for the localStorage item
+      name: "arkan-homework-solver-state", // Name for the localStorage item
       storage: createJSONStorage(() => localStorage),
       // We don't persist originalFile in the main state as it belongs to history entries
       partialize: (state) => ({ ...state, originalFile: null }),

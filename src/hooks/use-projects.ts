@@ -1,138 +1,144 @@
+// code explantion in docs/hooks/use-projects.md
 
-'use client';
+"use client";
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
-import { projectKeys } from '@/lib/query-keys';
-import { useAuth } from '@/context/AuthContext';
-import type { SavedProject, ProjectState } from '@/lib/types';
-import { 
-    fetchProjects as fetchProjectsApi,
-    fetchProject as fetchProjectApi,
-    createProject, 
-    deleteProject, 
-    updateProject 
-} from '@/services/project-service';
-import { useBuilderStore } from './useBuilderStore';
-import { handleErrorUtility } from '@/lib/errorUtils';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import { projectKeys } from "@/lib/query-keys";
+import { useAuth } from "@/context/AuthContext";
+import type { SavedProject, ProjectState } from "@/lib/types";
+import {
+  fetchProjects as fetchProjectsApi,
+  fetchProject as fetchProjectApi,
+  createProject,
+  deleteProject,
+  updateProject,
+} from "@/services/project-service";
+import { useBuilderStore } from "./useBuilderStore";
+import { handleErrorUtility } from "@/lib/errorUtils";
+import { getAuthenticatedToken } from "@/lib/authUtils";
 
 // Define types for mutation variables
 interface UpdateProjectVariables {
-    projectId: string;
-    data: ProjectState;
+  projectId: string;
+  data: ProjectState;
 }
 
 type SaveProjectVariables = ProjectState & { name: string };
 
 export function useProjects() {
-    const { firebaseUser } = useAuth();
-    return useQuery<SavedProject[]>({
-        queryKey: projectKeys.lists(),
-        queryFn: async () => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return fetchProjectsApi(token);
-        },
-        enabled: !!firebaseUser,
-        meta: { // Add this meta property
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Failed to fetch projects');
-            },
-        }
-    });
+  const { firebaseUser } = useAuth();
+  return useQuery<SavedProject[]>({
+    queryKey: projectKeys.lists(),
+    queryFn: async () => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchProjectsApi(token);
+    },
+    enabled: !!firebaseUser,
+    meta: {
+      // Add this meta property
+      onError: (error: Error) => {
+        handleErrorUtility(error, "Failed to fetch projects");
+      },
+    },
+  });
 }
 
 export function useProject(projectId: string) {
-    const { firebaseUser } = useAuth();
-    return useQuery<SavedProject>({
-        queryKey: projectKeys.detail(projectId),
-        queryFn: async () => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return fetchProjectApi(projectId, token);
-        },
-        enabled: !!firebaseUser && !!projectId,
-        meta: { // Add this meta property
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Failed to fetch project');
-            }
-        }
-    });
+  const { firebaseUser } = useAuth();
+  return useQuery<SavedProject>({
+    queryKey: projectKeys.detail(projectId),
+    queryFn: async () => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchProjectApi(projectId, token);
+    },
+    enabled: !!firebaseUser && !!projectId,
+    meta: {
+      // Add this meta property
+      onError: (error: Error) => {
+        handleErrorUtility(error, "Failed to fetch project");
+      },
+    },
+  });
 }
-
 
 export function useSaveProject() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    const setCurrentProjectId = useBuilderStore(state => state.setCurrentProjectId);
-    const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+  const setCurrentProjectId = useBuilderStore(
+    (state) => state.setCurrentProjectId
+  );
+  const setHasUnsavedChanges = useBuilderStore(
+    (state) => state.setHasUnsavedChanges
+  );
 
-    return useMutation<SavedProject, Error, SaveProjectVariables>({
-        mutationFn: async (data) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createProject(data, token);
-        },
-        onSuccess: (newProject) => {
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-            setCurrentProjectId(newProject.id); // Set the ID in the store for subsequent saves
-            setHasUnsavedChanges(false);
-            toast({
-                title: 'Project Saved',
-                description: `"${newProject.name}" has been successfully saved.`,
-            });
-        },
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Save Failed');
-        }
-    });
+  return useMutation<SavedProject, Error, SaveProjectVariables>({
+    mutationFn: async (data) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createProject(data, token);
+    },
+    onSuccess: (newProject) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+      setCurrentProjectId(newProject.id); // Set the ID in the store for subsequent saves
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Project Saved",
+        description: `"${newProject.name}" has been successfully saved.`,
+      });
+    },
+    onError: (error: Error) => {
+      handleErrorUtility(error, "Save Failed");
+    },
+  });
 }
-
 
 export function useUpdateProject() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    const setHasUnsavedChanges = useBuilderStore(state => state.setHasUnsavedChanges);
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+  const setHasUnsavedChanges = useBuilderStore(
+    (state) => state.setHasUnsavedChanges
+  );
 
-    return useMutation<SavedProject, Error, UpdateProjectVariables>({
-        mutationFn: async (variables) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return updateProject(variables.projectId, variables.data, token);
-        },
-        onSuccess: (updatedProject) => {
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: projectKeys.detail(updatedProject.id) });
-            setHasUnsavedChanges(false);
-            toast({
-                title: 'Project Updated',
-                description: `"${updatedProject.name}" has been successfully updated.`,
-            });
-        },
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Update Failed');
-        }
-    });
+  return useMutation<SavedProject, Error, UpdateProjectVariables>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return updateProject(variables.projectId, variables.data, token);
+    },
+    onSuccess: (updatedProject) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: projectKeys.detail(updatedProject.id),
+      });
+      setHasUnsavedChanges(false);
+      toast({
+        title: "Project Updated",
+        description: `"${updatedProject.name}" has been successfully updated.`,
+      });
+    },
+    onError: (error: Error) => {
+      handleErrorUtility(error, "Update Failed");
+    },
+  });
 }
-
 
 export function useDeleteProject() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
 
-    return useMutation<void, Error, string>({
-        mutationFn: async (projectId) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            await deleteProject(projectId, token);
-        },
-        onSuccess: (_, projectId) => {
-            queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
-            toast({
-                title: 'Project Deleted',
-                description: 'The project has been successfully deleted.',
-            });
-        },
-        onError: (error: Error) => {
-            handleErrorUtility(error, 'Delete Failed');
-        }
-    });
+  return useMutation<void, Error, string>({
+    mutationFn: async (projectId) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      await deleteProject(projectId, token);
+    },
+    onSuccess: (_, projectId) => {
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+      toast({
+        title: "Project Deleted",
+        description: "The project has been successfully deleted.",
+      });
+    },
+    onError: (error: Error) => {
+      handleErrorUtility(error, "Delete Failed");
+    },
+  });
 }
-
-    
