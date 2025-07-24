@@ -191,12 +191,16 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="header-color">لون العنوان</Label>
-              <Input id="header-color" type="color" defaultValue="#111827" onChange={(e) => handleStyleChange('headerColor', e.target.value)} />
+              <Label htmlFor="h1-color">لون العنوان H1</Label>
+              <Input id="h1-color" type="color" defaultValue={styles.h1Color} onChange={(e) => handleStyleChange('h1Color', e.target.value)} />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="h2-color">لون العنوان H2</Label>
+              <Input id="h2-color" type="color" defaultValue={styles.h2Color} onChange={(e) => handleStyleChange('h2Color', e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="text-color">لون النص</Label>
-              <Input id="text-color" type="color" defaultValue="#4b5563" onChange={(e) => handleStyleChange('textColor', e.target.value)} />
+              <Input id="text-color" type="color" defaultValue={styles.textColor} onChange={(e) => handleStyleChange('textColor', e.target.value)} />
             </div>
           </div>
         </div>
@@ -242,11 +246,11 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
 function DefaultSoftwarePreview({ styles, content }: { styles: any, content: ProjectProposal }) {
     return (
         <>
-            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
-            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Objective</h2>
+            <h1 style={{ color: styles.h1Color, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6">{content.category}</p>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Objective</h2>
             <p className="whitespace-pre-wrap leading-relaxed">{content.objective}</p>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Timeline</h2>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Timeline</h2>
             <UiTable>
                 <TableHeader><TableRow><TableHead>Phase</TableHead><TableHead>Duration</TableHead></TableRow></TableHeader>
                 <TableBody>
@@ -255,7 +259,7 @@ function DefaultSoftwarePreview({ styles, content }: { styles: any, content: Pro
                     ))}
                 </TableBody>
             </UiTable>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Budget ({content.budget.currency})</h2>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Budget ({content.budget.currency})</h2>
             <UiTable>
                 <TableHeader><TableRow><TableHead>Item</TableHead><TableHead className="text-right">Cost</TableHead></TableRow></TableHeader>
                 <TableBody>
@@ -272,11 +276,11 @@ function DefaultSoftwarePreview({ styles, content }: { styles: any, content: Pro
 function AgileProjectPreview({ styles, content }: { styles: any, content: ProjectProposal }) {
      return (
         <>
-            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
-            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Project Goal</h2>
+            <h1 style={{ color: styles.h1Color, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6">{content.category}</p>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Project Goal</h2>
             <p className="whitespace-pre-wrap leading-relaxed p-4 bg-accent/10 rounded-md">{content.objective}</p>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Sprint Plan</h2>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Sprint Plan</h2>
             <p className="text-sm text-muted-foreground mb-2">Methodology: {content.methodology}</p>
             <UiTable>
                 <TableHeader><TableRow><TableHead>Sprint</TableHead><TableHead>Focus</TableHead><TableHead>Duration</TableHead></TableRow></TableHeader>
@@ -286,7 +290,7 @@ function AgileProjectPreview({ styles, content }: { styles: any, content: Projec
                     ))}
                 </TableBody>
             </UiTable>
-             <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Success Criteria</h2>
+             <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Success Criteria</h2>
              <ul className="list-disc pl-5 space-y-1">
                 {content.success_criteria.map((item, i) => <li key={i}>{item}</li>)}
              </ul>
@@ -297,17 +301,17 @@ function AgileProjectPreview({ styles, content }: { styles: any, content: Projec
 function MarketingCampaignPreview({ styles, content }: { styles: any, content: ProjectProposal }) {
     return (
         <>
-            <h1 style={{ color: styles.headerColor, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
-            <p className="text-sm text-muted-foreground mb-6" style={{ color: styles.headerColor }}>{content.category}</p>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Campaign Objective</h2>
+            <h1 style={{ color: styles.h1Color, fontSize: '2em' }} className="font-bold mb-1">{content.title}</h1>
+            <p className="text-sm text-muted-foreground mb-6">{content.category}</p>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Campaign Objective</h2>
             <p className="whitespace-pre-wrap leading-relaxed border-l-4 border-accent pl-4">{content.objective}</p>
-             <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Expected Outcomes</h2>
+             <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Expected Outcomes</h2>
              <div className="grid grid-cols-2 gap-4">
                 {content.expected_outcome.map((item, i) => (
                     <Card key={i} className="p-4 bg-muted/50"><p className="font-semibold">{item}</p></Card>
                 ))}
             </div>
-            <h2 style={{ color: styles.headerColor }} className="text-xl font-bold mt-6 mb-2">Primary Stakeholder</h2>
+            <h2 style={{ color: styles.h2Color }} className="text-xl font-bold mt-6 mb-2">Primary Stakeholder</h2>
             <p>{content.stakeholders[0].name} - {content.stakeholders[0].role}</p>
         </>
     );
@@ -381,7 +385,8 @@ export default function DesignPage() {
   const [styles, setStyles] = useState({
     fontFamily: 'Inter',
     fontSize: '16px',
-    headerColor: '#111827',
+    h1Color: '#111827',
+    h2Color: '#111827',
     textColor: '#4b5563',
   });
   
