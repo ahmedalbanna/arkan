@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 
 function AgentSkeleton() {
   return (
-    <Card>
+    <Card role="listitem">
       <CardHeader>
         <div className="flex items-center gap-4">
           <Skeleton className="w-8 h-8 rounded-full" />
@@ -62,7 +62,7 @@ function AgentCard({ agent }: { agent: Agent }) {
               <Badge variant="outline" className="mt-1">{category}</Badge>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             <Switch
               id={`switch-${id}`}
               checked={isEnabled}

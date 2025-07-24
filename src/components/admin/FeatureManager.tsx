@@ -12,7 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 
 function FeatureSkeleton() {
   return (
-    <Card className="flex items-center justify-between p-6">
+    <Card role="listitem" className="flex items-center justify-between p-6 animate-pulse">
       <div className="space-y-2">
         <Skeleton className="h-5 w-40" />
         <Skeleton className="h-4 w-64" />
@@ -37,7 +37,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
         <CardTitle className="font-headline text-lg">{name}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </div>
-       <div className="flex items-center space-x-2">
+       <div className="flex items-center gap-2">
         <Switch
           id={`switch-${id}`}
           checked={isEnabled}
