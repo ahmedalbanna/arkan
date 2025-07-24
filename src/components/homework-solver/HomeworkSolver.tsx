@@ -296,8 +296,8 @@ export default function HomeworkSolver() {
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="homework-file">Homework File(s) (Images)</Label>
-                    <Input id="homework-file" type="file" accept="image/*" onChange={handleHomeworkFileChange} disabled={isProcessing} multiple className="text-xs" />
+                    <Label htmlFor="homework-file">Homework File(s) (Images/PDF)</Label>
+                    <Input id="homework-file" type="file" accept="image/*,.pdf" onChange={handleHomeworkFileChange} disabled={isProcessing} multiple className="text-xs" />
                      <ScrollArea className="h-24 w-full rounded-md border p-2">
                         {homeworkFiles.map((file, index) => (
                            <Badge key={index} variant="secondary" className="mr-1 mb-1">
@@ -308,8 +308,8 @@ export default function HomeworkSolver() {
                      </ScrollArea>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="curriculum-file">Curriculum File(s) (PDF)</Label>
-                    <Input id="curriculum-file" type="file" accept=".pdf" onChange={handleCurriculumFileChange} disabled={isProcessing} multiple className="text-xs" />
+                    <Label htmlFor="curriculum-file">Curriculum File(s) (Images/PDF)</Label>
+                    <Input id="curriculum-file" type="file" accept="image/*,.pdf" onChange={handleCurriculumFileChange} disabled={isProcessing} multiple className="text-xs" />
                      <ScrollArea className="h-24 w-full rounded-md border p-2">
                         {curriculumFiles.map((file, index) => (
                            <Badge key={index} variant="secondary" className="mr-1 mb-1">
