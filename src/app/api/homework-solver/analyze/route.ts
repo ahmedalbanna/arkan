@@ -8,7 +8,8 @@ import { deductCredit } from '@/services/credit-service';
 import { analyzeHomework } from '@/ai/flows/homework-solver';
 
 const analyzeSchema = z.object({
-  markdown: z.string().min(10, 'Markdown content is too short.'),
+  homeworkImageUri: z.string().url("A valid homework image data URI is required."),
+  curriculumPdfUri: z.string().url("A valid curriculum PDF data URI is required."),
 });
 
 export async function POST(request: Request) {
@@ -26,9 +27,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    await deductCredit(decodedToken.uid, 1);
+    // Analysis is now a more complex task involving two documents
+    await deductCredit(decodedToken.uid, 2);
 
-    const result = await analyzeHomework({ markdownContent: validation.data.markdown });
+    const result = await analyzeHomework({ 
+        homeworkImageUri: validation.data.homeworkImageUri,
+        curriculumPdfUri: validation.data.curriculumPdfUri,
+     });
 
     return NextResponse.json(result, { status: 200 });
 

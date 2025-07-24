@@ -1,17 +1,17 @@
 
 'use server';
 /**
- * @fileOverview AI agents for analyzing and solving homework from markdown.
+ * @fileOverview AI agents for analyzing and solving homework from images and PDF context.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { AnalyzedHomeworkSchema, AnalyzedHomework, SolvedHomeworkSchema, SolvedHomework } from './homework-solver.shared';
 
-
 // 1. Analyze Homework Flow
 const AnalyzeHomeworkInputSchema = z.object({
-  markdownContent: z.string(),
+  homeworkImageUri: z.string().describe("An image of the homework assignment, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  curriculumPdfUri: z.string().describe("The curriculum/textbook document as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
 });
 
 export async function analyzeHomework(input: z.infer<typeof AnalyzeHomeworkInputSchema>): Promise<AnalyzedHomework> {
@@ -24,20 +24,26 @@ export async function analyzeHomework(input: z.infer<typeof AnalyzeHomeworkInput
     name: 'analyzeHomeworkPrompt',
     input: { schema: AnalyzeHomeworkInputSchema },
     output: { schema: AnalyzedHomeworkSchema },
-    prompt: `You are an expert academic analyst. Your task is to analyze the following homework content provided in Markdown.
+    prompt: `You are an expert academic analyst. Your task is to analyze the provided homework image and curriculum PDF.
 
-    1.  Identify the main **subject** (e.g., Algebra, Biology, History).
-    2.  Create a concise **title** for the assignment.
-    3.  Review the entire homework and re-format it into a clean, well-structured **Markdown document**. Ensure questions, sub-questions, and instructions are clearly organized using headings, lists, and other appropriate markdown elements.
+    1.  **Analyze the Homework Image**: Extract all questions from the image.
+    2.  **Analyze the Curriculum PDF**: Read the PDF and create a structured summary of its content. This will serve as the knowledge base for solving the homework.
+    3.  **Identify Subject and Title**: Based on both documents, determine the main subject and create a concise title for the assignment.
+    4.  **Format Output**: Structure the extracted questions into a clean Markdown document.
 
-    Homework Content:
+    Homework Image:
     ---
-    {{{markdownContent}}}
+    {{media url=homeworkImageUri}}
+    ---
+
+    Curriculum PDF:
+    ---
+    {{media url=curriculumPdfUri}}
     ---
     `,
   });
 
-  const { output } = await analysisPrompt({ markdownContent: validation.data.markdownContent });
+  const { output } = await analysisPrompt(validation.data);
   return output!;
 }
 
@@ -56,11 +62,14 @@ export async function solveHomework(input: AnalyzedHomework): Promise<SolvedHome
 
     Your task is to provide a comprehensive and accurate solution to the following homework assignment titled **"{{{title}}}"**.
     
-    For each question in the provided homework, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
-    
-    - For each question, provide a step-by-step solution.
-    - Format all mathematical equations and steps clearly using Markdown.
-    - Ensure your final output is an array of objects, where each object contains a 'question' and its corresponding 'solution'.
+    **CRITICAL INSTRUCTION:** You MUST use the provided "Curriculum Context" as your primary source of information to answer the questions. Do not use general knowledge unless the context is insufficient.
+
+    For each question in the provided homework, generate a detailed, step-by-step solution based on the curriculum. Present the final output as an array of question/solution pairs.
+
+    Curriculum Context:
+    ---
+    {{{curriculumContext}}}
+    ---
 
     Homework Questions:
     ---
