@@ -1,18 +1,19 @@
 
 'use client';
 
-import { useDocxStyles, useCreateDocxTemplate } from '@/hooks/use-docx-styles';
+import { useDocxStyles, useCreateDocxTemplate, useDeleteDocxTemplate } from '@/hooks/use-docx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '../ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -166,6 +167,7 @@ function TemplatePreview({ styles }: { styles: any }) {
 
 export default function DocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
+  const deleteMutation = useDeleteDocxTemplate();
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
@@ -175,6 +177,10 @@ export default function DocxTemplateManager() {
   const handleSave = (key: TemplateKey) => {
     saveChanges(key);
   };
+  
+  const handleDelete = (key: TemplateKey) => {
+    deleteMutation.mutate(key);
+  }
 
   if (!isLoaded) {
     return (
@@ -195,12 +201,38 @@ export default function DocxTemplateManager() {
       {(Object.keys(templates) as TemplateKey[]).map((key) => {
         const template = templates[key];
         const styles = template.styles.default;
+        const isDefaultTemplate = ['modern', 'classic', 'academic'].includes(key);
 
         return (
           <Card key={key} className="flex flex-col">
             <CardHeader>
-              <CardTitle className="font-headline">{t(template.name)}</CardTitle>
-              <CardDescription>{t(template.description)}</CardDescription>
+              <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <CardTitle className="font-headline">{t(template.name)}</CardTitle>
+                    <CardDescription>{t(template.description)}</CardDescription>
+                  </div>
+                  {!isDefaultTemplate && (
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                                {deleteMutation.isPending && deleteMutation.variables === key ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4" />}
+                              </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure you want to delete this template?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. The template "{t(template.name)}" will be permanently deleted.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(key)}>Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                  )}
+              </div>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
               <TemplatePreview styles={template.styles} />

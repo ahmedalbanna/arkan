@@ -31,8 +31,7 @@ const updateDocxTemplateSchema = z.object({
 });
 
 
-export async function PUT(request: Request, props: { params: Promise<{ key: string }> }) {
-    const params = await props.params;
+export async function PUT(request: Request, { params }: { params: { key: string } }) {
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
@@ -65,6 +64,40 @@ export async function PUT(request: Request, props: { params: Promise<{ key: stri
 
     } catch (error) {
         console.error(`Error updating DOCX template ${key}:`, error);
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request, { params }: { params: { key: string } }) {
+    const adminCheck = await verifyAdmin(request);
+    if (!adminCheck.authorized) {
+        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+    }
+
+    const { key } = params;
+    if (!key) {
+        return NextResponse.json({ message: 'Template key is required.' }, { status: 400 });
+    }
+
+    // Protect default templates from deletion
+    if (['modern', 'classic', 'academic'].includes(key)) {
+        return NextResponse.json({ message: 'Default templates cannot be deleted.' }, { status: 403 });
+    }
+
+    try {
+        const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
+        const templateDoc = await templateRef.get();
+
+        if (!templateDoc.exists) {
+            return NextResponse.json({ message: 'DOCX template not found.' }, { status: 404 });
+        }
+        
+        await templateRef.delete();
+        
+        return NextResponse.json({ message: `Template "${key}" deleted successfully.` }, { status: 200 });
+
+    } catch (error) {
+        console.error(`Error deleting DOCX template ${key}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }

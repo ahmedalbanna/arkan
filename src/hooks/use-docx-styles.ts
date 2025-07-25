@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { createDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi } from "@/services/template-service";
+import { createDocxTemplate, deleteDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi } from "@/services/template-service";
 
 const DOCX_TEMPLATES_QUERY_KEY = "docx-templates";
 
@@ -83,7 +83,11 @@ export function useDocxStyles() {
       const keys = path.split(".");
       let current = templateToUpdate.styles.default;
       for (let i = 0; i < keys.length - 1; i++) {
-        current = current[keys[i]];
+        const key = keys[i];
+        if (typeof current[key] === "undefined") {
+          current[key] = {};
+        }
+        current = current[key];
       }
       current[keys[keys.length - 1]] = value;
 
@@ -125,6 +129,25 @@ export function useCreateDocxTemplate() {
         onError: (error: Error) => {
             handleErrorUtility(error, "Create DOCX Template Failed");
             throw error; // Re-throw to be caught by form
+        },
+    });
+}
+
+export function useDeleteDocxTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, TemplateKey>({
+        mutationFn: async (templateKey) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deleteDocxTemplate(templateKey, token);
+        },
+        onSuccess: (data, templateKey) => {
+            queryClient.invalidateQueries({ queryKey: [DOCX_TEMPLATES_QUERY_KEY] });
+            toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Template Failed");
         },
     });
 }

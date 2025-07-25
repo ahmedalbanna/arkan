@@ -195,6 +195,20 @@ export async function updateDocxTemplate(
   return response.json();
 }
 
+export async function deleteDocxTemplate(templateKey: string, token: string) {
+    const response = await fetch(`/api/templates/docx/${templateKey}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete template');
+    }
+    return response.json();
+}
+
 export async function refreshTemplateImage(
   variables: { templateType: string; templateId: string; prompt: string },
   token: string
