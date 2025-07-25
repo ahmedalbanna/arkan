@@ -106,3 +106,34 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
+
+// DELETE /api/agents/[id]
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    const { id: agentId } = await params;
+    const adminCheck = await verifyAdmin(request);
+    if (!adminCheck.authorized) {
+        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+    }
+
+    // Prevent deletion of default agents
+    const isDefaultAgent = defaultAgents.some(agent => agent.id === agentId);
+    if (isDefaultAgent) {
+        return NextResponse.json({ message: 'Default agents cannot be deleted.' }, { status: 403 });
+    }
+
+    try {
+        const agentRef = adminDb.collection('agents').doc(agentId);
+        const doc = await agentRef.get();
+
+        if (!doc.exists) {
+            return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
+        }
+        
+        await agentRef.delete();
+
+        return NextResponse.json({ message: `Agent '${agentId}' deleted successfully.` }, { status: 200 });
+    } catch (error) {
+        console.error(`Error deleting agent ${agentId}:`, error);
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    }
+}

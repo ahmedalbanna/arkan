@@ -6,7 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys } from "@/lib/query-keys";
-import type { Agent } from "@/lib/agents";
+import type { Agent, AgentData } from "@/lib/agents";
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -15,6 +15,8 @@ import {
   fetchAgent,
   fetchAgents,
   updateAgent as updateAgentApi,
+  createAgent as createAgentApi,
+  deleteAgent as deleteAgentApi,
 } from "@/services/agent-service";
 
 export interface UpdateAgentPayload {
@@ -27,6 +29,8 @@ export interface UpdateAgentVariables {
     agentId: string;
     payload: UpdateAgentPayload;
 }
+
+export type CreateAgentVariables = Omit<AgentData, 'isEnabled' | 'prompt'> & { prompt: string };
 
 
 /**
@@ -127,4 +131,51 @@ export function useUpdateAgent() {
       handleErrorUtility(error, "Update Agent Failed");
     },
   });
+}
+
+/**
+ * Custom mutation hook to create a new agent.
+ * @returns The result of the useMutation hook.
+ */
+export function useCreateAgent() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<Agent, Error, CreateAgentVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return createAgentApi(variables, token);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            toast({ title: 'Success', description: 'New AI agent created.' });
+        },
+        onError: (error: Error) => {
+             handleErrorUtility(error, "Create Agent Failed");
+             throw error; // Re-throw to be handled by the form
+        },
+    });
+}
+
+/**
+ * Custom mutation hook to delete an agent.
+ * @returns The result of the useMutation hook.
+ */
+export function useDeleteAgent() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, string>({
+        mutationFn: async (agentId: string) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deleteAgentApi(agentId, token);
+        },
+        onSuccess: (data, agentId) => {
+            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+            toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Agent Failed");
+        }
+    });
 }

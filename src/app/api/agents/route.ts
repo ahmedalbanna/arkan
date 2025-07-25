@@ -1,6 +1,7 @@
 
 // src/app/api/agents/route.ts
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 import { AGENTS as defaultAgents } from '@/lib/agents';
@@ -65,5 +66,53 @@ export async function GET(request: Request) {
     } catch (error) {
         console.error('Error fetching agents:', error);
         return NextResponse.json({ message: 'An unexpected error occurred while fetching agents.' }, { status: 500 });
+    }
+}
+
+
+const createAgentSchema = z.object({
+  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  category: z.string().min(1, "Category is required"),
+  pageUrl: z.string().min(1, "Page URL is required"),
+  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
+});
+
+
+// POST /api/agents
+export async function POST(request: Request) {
+    const adminCheck = await verifyAdmin(request);
+    if (!adminCheck.authorized) {
+        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+    }
+
+    try {
+        const body = await request.json();
+        const validation = createAgentSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
+
+        const { id, ...agentData } = validation.data;
+        const agentRef = adminDb.collection('agents').doc(id);
+        const doc = await agentRef.get();
+
+        if (doc.exists) {
+            return NextResponse.json({ errors: { id: ["An agent with this ID already exists."] } }, { status: 409 });
+        }
+
+        const newAgent = {
+            ...agentData,
+            isEnabled: true, // New agents are enabled by default
+        };
+
+        await agentRef.set(newAgent);
+        
+        return NextResponse.json({ id: agentRef.id, ...newAgent }, { status: 201 });
+
+    } catch (error) {
+        console.error('Error creating agent:', error);
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }

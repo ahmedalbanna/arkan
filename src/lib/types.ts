@@ -1,3 +1,4 @@
+
 import { type ProjectState as FullProjectState } from './project-state-schema';
 import type {
   ProjectProposal,
@@ -16,7 +17,7 @@ export type {
   useHistory,
 } from '@/hooks/use-history';
 export type { LoginCredentials } from '@/hooks/use-user';
-export type { UpdateAgentPayload, UpdateAgentVariables } from '@/hooks/use-agents';
+export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
 export type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/hooks/use-features';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { TranslateTextOutput } from '@/ai/schemas';
@@ -30,3 +31,4 @@ export type TranslateVariables = {
     targetLang: 'en' | 'ar';
 };
 export type { HomeworkHistoryEntry } from '@/services/homework-service';
+export type { AgentData, Agent } from '@/lib/agents';
