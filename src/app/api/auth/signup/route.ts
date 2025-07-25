@@ -21,10 +21,25 @@ const providerSignupSchema = z.object({
     phoneNumber: z.string().optional().nullable(),
 });
 
+// Helper to get the default credits for new users
+async function getNewUserCredits(): Promise<number> {
+    try {
+        const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
+        if (settingsDoc.exists) {
+            return settingsDoc.data()?.newUserCredits || 10;
+        }
+        return 10; // Fallback default
+    } catch (error) {
+        console.error("Could not fetch default settings, falling back to 10 credits.", error);
+        return 10;
+    }
+}
+
 export async function POST(req: Request) {
   const adminAuth = getAdminAuth();
   try {
     const body = await req.json();
+    const defaultCredits = await getNewUserCredits();
     
     // Check if this is a provider-based sign-up/sign-in request
     if (body.uid) {
@@ -44,7 +59,7 @@ export async function POST(req: Request) {
             name: name || `User ${uid.slice(0, 6)}`, // Default name if not provided
             email: email || '', // Email can be null for phone auth
             phoneNumber: phoneNumber || '',
-            credits: 10,
+            credits: defaultCredits,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             bio: '',
@@ -76,7 +91,7 @@ export async function POST(req: Request) {
             name,
             email,
             phoneNumber: '',
-            credits: 10,
+            credits: defaultCredits,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             bio: '',
