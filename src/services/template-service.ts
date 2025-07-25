@@ -75,6 +75,18 @@ export async function updateProposalTemplate(id: string, data: Partial<ProposalT
     return await response.json();
 }
 
+export async function deleteProposalTemplate(id: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/templates/proposal/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete proposal template');
+    }
+    return await response.json();
+}
+
 // --- Report Templates ---
 export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]> {
     const response = await fetch('/api/templates/report');
@@ -110,6 +122,18 @@ export async function updateReportTemplate(id: string, data: Partial<ReportGener
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update report template');
+    }
+    return await response.json();
+}
+
+export async function deleteReportTemplate(id: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/templates/report/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete report template');
     }
     return await response.json();
 }
@@ -151,6 +175,19 @@ export async function updatePresentationTemplate(id: string, data: Partial<Prese
     }
     return await response.json();
 }
+
+export async function deletePresentationTemplate(id: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/templates/presentation/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete presentation template');
+    }
+    return await response.json();
+}
+
 
 // --- DOCX Templates ---
 

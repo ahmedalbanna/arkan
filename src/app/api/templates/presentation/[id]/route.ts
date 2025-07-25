@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 
 async function verifyAdmin(request: Request) {
     const adminAuth = getAdminAuth();
@@ -50,6 +51,37 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     } catch (error) {
         console.error(`Error updating presentation template ${id}:`, error);
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    }
+}
+
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    const adminCheck = await verifyAdmin(request);
+    if (!adminCheck.authorized) {
+        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
+    }
+
+    const { id } = params;
+
+    // Protect default templates
+    if (PRESENTATION_GENERATION_TEMPLATES.some(t => t.id === id)) {
+        return NextResponse.json({ message: 'Default templates cannot be deleted.' }, { status: 403 });
+    }
+
+    try {
+        const templateRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
+        const doc = await templateRef.get();
+        if (!doc.exists) {
+            return NextResponse.json({ message: 'Template not found.' }, { status: 404 });
+        }
+        
+        await templateRef.delete();
+        
+        return NextResponse.json({ message: `Template "${id}" deleted successfully.` }, { status: 200 });
+
+    } catch (error) {
+        console.error(`Error deleting presentation template ${id}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
