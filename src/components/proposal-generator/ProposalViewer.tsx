@@ -243,6 +243,9 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
 
     const defaultOpen = ["Objective", "Methodology"];
 
+    const objectiveWords = proposal.objective.split(/\s+/).filter(Boolean).length;
+    const objectiveChars = proposal.objective.length;
+
     return (
         <div className="space-y-6">
             <Card>
@@ -265,6 +268,10 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         <AccordionContent>
                             <div className="p-6 pt-0">
                                 <EditableField value={proposal.objective} path="objective" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                <div className="mt-4 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                    <span>{objectiveWords} words</span>
+                                    <span>{objectiveChars} characters</span>
+                                </div>
                             </div>
                         </AccordionContent>
                     </Card>
