@@ -1,19 +1,18 @@
 
 'use client';
 
-import { useDocxStyles, useRefreshTemplateImage, useCreateDocxTemplate } from '@/hooks/use-docx-styles';
+import { useDocxStyles, useCreateDocxTemplate } from '@/hooks/use-docx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, RefreshCw, PlusCircle } from 'lucide-react';
+import { Loader2, Save, PlusCircle } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '../ui/dialog';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -122,9 +121,51 @@ function DocxTemplateSkeleton() {
     );
 }
 
+function TemplatePreview({ styles }: { styles: any }) {
+    const docStyles = styles?.default?.document?.run || {};
+    const h1Styles = styles?.default?.heading1?.run || {};
+    const h2Styles = styles?.default?.heading2?.run || {};
+
+    const inlineDocStyles = {
+        fontFamily: docStyles.font?.name || 'Calibri',
+        fontSize: `${docStyles.size / 2 || 11}pt`,
+        color: `#${docStyles.color || '333333'}`,
+    };
+
+    const inlineH1Styles = {
+        fontFamily: h1Styles.font?.name || 'Calibri Light',
+        fontSize: `${h1Styles.size / 2 || 16}pt`,
+        color: `#${h1Styles.color || '2E74B5'}`,
+        fontWeight: h1Styles.bold ? 'bold' : 'normal',
+    };
+    
+    const inlineH2Styles = {
+        fontFamily: h2Styles.font?.name || 'Calibri Light',
+        fontSize: `${h2Styles.size / 2 || 13}pt`,
+        color: `#${h2Styles.color || '2E74B5'}`,
+        fontWeight: h2Styles.bold ? 'bold' : 'normal',
+    };
+
+    return (
+        <div className="w-full aspect-[400/565] rounded-md border bg-white p-6 overflow-hidden">
+            <div style={inlineDocStyles}>
+                <h1 style={inlineH1Styles} className="mb-4 pb-2 border-b">Sample Document Title</h1>
+                <p className="mb-4">
+                    This is a sample paragraph to demonstrate the default body text style for this template. You can adjust the font family, size, and color to match your branding.
+                </p>
+                <h2 style={inlineH2Styles} className="mb-2">A Secondary Heading</h2>
+                <ul className="list-disc pl-5 space-y-1">
+                    <li>This is a list item.</li>
+                    <li>Another list item for styling.</li>
+                    <li>And a final one to complete the list.</li>
+                </ul>
+            </div>
+        </div>
+    );
+}
+
 export default function DocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
-  const refreshImageMutation = useRefreshTemplateImage('docx');
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
@@ -162,24 +203,7 @@ export default function DocxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-              <div className="relative">
-                <Image
-                  src={template.imageUrl || `https://placehold.co/400x565.png`}
-                  alt={`${t(template.name)} preview`}
-                  width={400}
-                  height={565}
-                  className="w-full h-auto rounded-md border"
-                />
-                 <Button
-                    size="sm"
-                    variant="secondary"
-                    className="absolute top-2 right-2"
-                    onClick={() => refreshImageMutation.mutate({ templateId: key, prompt: template.dataAiHint })}
-                    disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key}
-                  >
-                    {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                </Button>
-              </div>
+              <TemplatePreview styles={template.styles} />
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="general">
                   <AccordionTrigger>{t('manageTemplates.generalStyles')}</AccordionTrigger>

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-docx-styles.md
 
 "use client";
@@ -8,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { createDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi, refreshTemplateImage as refreshTemplateImageApi } from "@/services/template-service";
+import { createDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi } from "@/services/template-service";
 
 const DOCX_TEMPLATES_QUERY_KEY = "docx-templates";
 
@@ -16,11 +17,6 @@ const DOCX_TEMPLATES_QUERY_KEY = "docx-templates";
 interface UpdateDocxTemplateVariables {
   key: TemplateKey;
   styles: any;
-}
-
-interface RefreshTemplateImageVariables {
-  templateId: string;
-  prompt: string;
 }
 
 interface CreateDocxTemplateVariables {
@@ -131,29 +127,4 @@ export function useCreateDocxTemplate() {
             throw error; // Re-throw to be caught by form
         },
     });
-}
-
-
-export function useRefreshTemplateImage(templateType: "docx" | "pptx") {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-
-  return useMutation<any, Error, RefreshTemplateImageVariables>({
-    mutationFn: async (variables) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return refreshTemplateImageApi({ ...variables, templateType }, token);
-    },
-    onSuccess: (data, variables) => {
-      const queryKey =
-        templateType === "docx" ? DOCX_TEMPLATES_QUERY_KEY : "pptx-templates";
-      queryClient.invalidateQueries({ queryKey: [queryKey] });
-      toast({
-        title: "Preview Refreshed",
-        description: `The preview image for "${data.name}" has been updated.`,
-      });
-    },
-    onError: (error: Error) => {
-      handleErrorUtility(error, "Image Refresh Failed");
-    },
-  });
 }
