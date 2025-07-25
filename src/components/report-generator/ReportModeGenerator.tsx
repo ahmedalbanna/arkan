@@ -1,12 +1,10 @@
 
 'use client';
 
-import { ReportActions } from './ReportActions';
 import { ReportResults } from './ReportResults';
 import { AlertCircle } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './ReportGenerationTools';
-import { EvaluationTools } from '../EvaluationTools';
 import { Card } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
@@ -78,19 +76,13 @@ export default function ReportGenerator() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       {/* Left Column: Generation Tools */}
-      <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-        <GenerationTools />
+      <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+        <GenerationTools onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
       </div>
 
-      {/* Center Column: Report Results */}
-      <div className="lg:col-span-6 overflow-y-auto pr-2">
+      {/* Right Column: Report Results */}
+      <div className="lg:col-span-8 overflow-y-auto pr-2">
         <ReportResults onSectionUpdate={handleSectionUpdate} />
-      </div>
-
-       {/* Right Column: Actions & Evaluation */}
-       <div className="lg:col-span-3 space-y-6 overflow-y-auto pr-2">
-        <ReportActions onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
-        <EvaluationTools />
       </div>
     </div>
   );
