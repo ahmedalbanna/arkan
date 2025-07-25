@@ -46,34 +46,10 @@ async function updatePptxTemplateApi(
   return response.json();
 }
 
-async function refreshTemplateImageApi(
-  variables: { templateType: "pptx"; templateId: string; prompt: string },
-  token: string
-) {
-  const response = await fetch("/api/templates/refresh-image", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(variables),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to refresh image");
-  }
-  return response.json();
-}
-
 // Define types for mutation variables
 interface UpdatePptxTemplateVariables {
   key: PptxTemplateKey;
   styles: PptxStyleOptions;
-}
-
-interface RefreshTemplateImageVariables {
-  templateId: string;
-  prompt: string;
 }
 
 // Helper to set nested property
@@ -163,29 +139,4 @@ export function usePptxStyles() {
     saveChanges,
     isSaving: mutation.isPending,
   };
-}
-
-export function useRefreshPptxTemplateImage() {
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-
-  return useMutation<any, Error, RefreshTemplateImageVariables>({
-    mutationFn: async (variables) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return refreshTemplateImageApi(
-        { ...variables, templateType: "pptx" },
-        token
-      );
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [PPTX_TEMPLATES_QUERY_KEY] });
-      toast({
-        title: "Preview Refreshed",
-        description: `The preview image for "${data.name}" has been updated.`,
-      });
-    },
-    onError: (error: Error) => {
-      handleErrorUtility(error, "Image Refresh Failed");
-    },
-  });
 }

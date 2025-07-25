@@ -6,10 +6,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, RefreshCw } from 'lucide-react';
-import type { PptxTemplateKey } from '@/lib/pptx-styles';
+import { Loader2, Save } from 'lucide-react';
+import type { PptxTemplateKey, PptxStyleOptions } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
@@ -36,10 +35,37 @@ function PptxTemplateSkeleton() {
     );
 }
 
+function PptxTemplatePreview({ styles }: { styles: PptxStyleOptions }) {
+    const slideStyles = {
+        backgroundColor: `#${styles.background.color}`,
+        fontFamily: styles.body.fontFace || 'Arial',
+        color: `#${styles.body.color || '000000'}`,
+        fontSize: `${styles.body.fontSize || 18}pt`,
+    };
+
+    const titleStyles: React.CSSProperties = {
+        fontFamily: styles.title.fontFace || 'Arial',
+        fontSize: `${styles.title.fontSize || 32}pt`,
+        color: `#${styles.title.color || '000000'}`,
+        fontWeight: styles.title.bold ? 'bold' : 'normal',
+        textAlign: styles.title.align || 'left',
+    };
+
+    return (
+        <div className="w-full aspect-video rounded-md border bg-white p-6 overflow-hidden flex flex-col" style={slideStyles}>
+            <h1 style={titleStyles} className="mb-4">Sample Title</h1>
+            <ul className="list-disc pl-5 space-y-2" style={{color: `#${styles.body.color}`}}>
+                <li>This is a sample bullet point.</li>
+                <li>Another point to show styling.</li>
+                <li>A third item for good measure.</li>
+            </ul>
+        </div>
+    );
+}
+
 
 export default function PptxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
-  const refreshImageMutation = useRefreshPptxTemplateImage();
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
@@ -77,24 +103,7 @@ export default function PptxTemplateManager() {
               <CardDescription>{t(template.description)}</CardDescription>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-               <div className="relative">
-                <Image
-                  src={template.imageUrl || 'https://placehold.co/400x225.png'}
-                  alt={`${t(template.name)} preview`}
-                  width={400}
-                  height={225}
-                  className="w-full h-auto rounded-md border"
-                />
-                 <Button
-                    size="sm"
-                    variant="secondary"
-                    className="absolute top-2 right-2"
-                    onClick={() => refreshImageMutation.mutate({ templateId: key, prompt: template.dataAiHint })}
-                    disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key}
-                  >
-                    {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === key ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                </Button>
-               </div>
+               <PptxTemplatePreview styles={styles} />
               <Accordion type="multiple" className="w-full" defaultValue={['general']}>
                 <AccordionItem value="general">
                   <AccordionTrigger>{t('pptxTemplates.generalStyles')}</AccordionTrigger>
@@ -216,3 +225,4 @@ export default function PptxTemplateManager() {
     </div>
   );
 }
+
