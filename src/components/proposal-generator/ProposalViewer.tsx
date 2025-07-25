@@ -243,8 +243,15 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
 
     const defaultOpen = ["Objective", "Methodology"];
 
-    const objectiveWords = proposal.objective.split(/\s+/).filter(Boolean).length;
-    const objectiveChars = proposal.objective.length;
+    const calculateCounts = (text: string) => {
+        const words = text.split(/\s+/).filter(Boolean).length;
+        const chars = text.length;
+        return { words, chars };
+    };
+    
+    const { words: objectiveWords, chars: objectiveChars } = calculateCounts(proposal.objective);
+    const { words: methodologyWords, chars: methodologyChars } = calculateCounts(proposal.methodology);
+    const { words: evaluationWords, chars: evaluationChars } = calculateCounts(proposal.evaluation);
 
     return (
         <div className="space-y-6">
@@ -285,6 +292,10 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         <AccordionContent>
                             <div className="p-6 pt-0">
                                 <EditableField value={proposal.methodology} path="methodology" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                <div className="mt-4 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                    <span>{methodologyWords} words</span>
+                                    <span>{methodologyChars} characters</span>
+                                </div>
                             </div>
                         </AccordionContent>
                     </Card>
@@ -380,6 +391,10 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                                 </ul>
                                 <h4 className="font-semibold pt-4 border-t">{t('builder.proposalViewer.evaluationPlan')}</h4>
                                 <EditableField value={proposal.evaluation} path="evaluation" onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                 <div className="mt-4 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                    <span>{evaluationWords} words</span>
+                                    <span>{evaluationChars} characters</span>
+                                </div>
                             </div>
                         </AccordionContent>
                     </Card>
@@ -392,13 +407,19 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
-                                {proposal.stakeholders.map((stakeholder, index) => (
+                                {proposal.stakeholders.map((stakeholder, index) => {
+                                    const { words: interestWords, chars: interestChars } = calculateCounts(stakeholder.interest);
+                                    return (
                                     <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
                                         <div className="font-bold"><EditableField value={stakeholder.name} path={`stakeholders.${index}.name`} onUpdate={onUpdate} readOnly={readOnly} /></div>
                                         <div className="text-sm"><EditableField value={stakeholder.role} path={`stakeholders.${index}.role`} onUpdate={onUpdate} readOnly={readOnly} /></div>
                                         <EditableField value={stakeholder.interest} path={`stakeholders.${index}.interest`} onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                        <div className="mt-2 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                            <span>{interestWords} words</span>
+                                            <span>{interestChars} characters</span>
+                                        </div>
                                     </div>
-                                ))}
+                                )})}
                             </div>
                         </AccordionContent>
                     </Card>
@@ -411,12 +432,29 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
                         </AccordionTrigger>
                         <AccordionContent>
                             <div className="p-6 pt-0">
-                                {proposal.risks.map((risk, index) => (
+                                {proposal.risks.map((risk, index) => {
+                                      const { words: descWords, chars: descChars } = calculateCounts(risk.description);
+                                      const { words: mitWords, chars: mitChars } = calculateCounts(risk.mitigation);
+                                    return (
                                     <div key={index} className="mb-4 not-last:border-b not-last:pb-4">
-                                        <div><strong>{t('builder.proposalViewer.risk')}</strong> <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
-                                        <div><strong>{t('builder.proposalViewer.mitigation')}</strong> <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly} /></div>
+                                        <div>
+                                            <strong>{t('builder.proposalViewer.risk')}</strong>
+                                            <EditableField value={risk.description} path={`risks.${index}.description`} onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                             <div className="mt-2 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                                <span>{descWords} words</span>
+                                                <span>{descChars} characters</span>
+                                            </div>
+                                        </div>
+                                        <div className="mt-2">
+                                            <strong>{t('builder.proposalViewer.mitigation')}</strong>
+                                            <EditableField value={risk.mitigation} path={`risks.${index}.mitigation`} onUpdate={onUpdate} multiline readOnly={readOnly} />
+                                             <div className="mt-2 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                                                <span>{mitWords} words</span>
+                                                <span>{mitChars} characters</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                ))}
+                                )})}
                             </div>
                         </AccordionContent>
                     </Card>
@@ -425,3 +463,5 @@ export default function ProposalViewer({ proposal, onUpdate, readOnly = false }:
         </div>
     );
 }
+
+    
