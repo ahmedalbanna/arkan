@@ -1,7 +1,5 @@
 
-// code explantion in docs/hooks/use-templates.md
-
-"use client";
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -14,6 +12,9 @@ import {
   createProposalTemplate,
   createReportTemplate,
   createPresentationTemplate,
+  deleteProposalTemplate,
+  deleteReportTemplate,
+  deletePresentationTemplate,
   type ProposalTemplate,
   type ReportGenerationTemplate,
   type PresentationGenerationTemplate,
@@ -185,6 +186,10 @@ export function useCreateProposalTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
     },
+     onError: (error) => {
+        // Re-throw the error to be caught by the form's onSubmit
+        throw error;
+    }
   });
 }
 
@@ -204,6 +209,9 @@ export function useCreateReportTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
     },
+     onError: (error) => {
+        throw error;
+    }
   });
 }
 
@@ -223,5 +231,67 @@ export function useCreatePresentationTemplate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
     },
+     onError: (error) => {
+        throw error;
+    }
   });
+}
+
+// --- Delete Mutations ---
+
+export function useDeleteProposalTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, string>({
+        mutationFn: async (templateId: string) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deleteProposalTemplate(templateId, token);
+        },
+        onSuccess: (data, templateId) => {
+            queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
+            toast({ title: 'Template Deleted', description: `Template "${templateId}" was successfully deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Failed");
+        }
+    });
+}
+
+export function useDeleteReportTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, string>({
+        mutationFn: async (templateId: string) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deleteReportTemplate(templateId, token);
+        },
+        onSuccess: (data, templateId) => {
+            queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
+            toast({ title: 'Template Deleted', description: `Template "${templateId}" was successfully deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Failed");
+        }
+    });
+}
+
+export function useDeletePresentationTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, string>({
+        mutationFn: async (templateId: string) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deletePresentationTemplate(templateId, token);
+        },
+        onSuccess: (data, templateId) => {
+            queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
+            toast({ title: 'Template Deleted', description: `Template "${templateId}" was successfully deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Failed");
+        }
+    });
 }

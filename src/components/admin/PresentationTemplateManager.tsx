@@ -2,13 +2,13 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate } from '@/hooks/use-templates';
+import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate } from '@/hooks/use-templates';
 import { type PresentationGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Button } from '../ui/button';
-import { Loader2, Save, PlusCircle } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,8 +19,10 @@ import { Checkbox } from '../ui/checkbox';
 import { AGENTS } from '@/lib/agents';
 import { Skeleton } from '../ui/skeleton';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -220,13 +222,13 @@ function CreatePresentationTemplateDialog() {
                                 </FormItem>
                             )}
                         />
-                         <div className="flex justify-end gap-2">
+                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                 Create
                             </Button>
-                        </div>
+                        </DialogFooter>
                     </form>
                 </Form>
             </DialogContent>
@@ -249,9 +251,14 @@ export function PresentationTemplateManager() {
     });
 
     const updateMutation = useUpdatePresentationTemplate();
+    const deleteMutation = useDeletePresentationTemplate();
 
     const handleSave = async (data: PresentationFormValues) => {
         updateMutation.mutate({ templateId: data.id, data });
+    };
+
+    const handleDelete = (templateId: string) => {
+        deleteMutation.mutate(templateId);
     };
 
     if (isLoading) return <Skeleton className="h-48 w-full" />
@@ -270,9 +277,32 @@ export function PresentationTemplateManager() {
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                    {templates?.map(template => (
+                    {templates?.map(template => {
+                        const isDefault = PRESENTATION_GENERATION_TEMPLATES.some(t => t.id === template.id);
+                        return (
                         <AccordionItem value={template.id} key={template.id}>
-                            <AccordionTrigger>{template.name}</AccordionTrigger>
+                            <div className="flex items-center justify-between">
+                                <AccordionTrigger className="flex-1">{template.name}</AccordionTrigger>
+                                {!isDefault && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
+                                                {deleteMutation.isPending && deleteMutation.variables === template.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => handleDelete(template.id)}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
+                            </div>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
                                 <PresentationTemplateForm 
                                     template={template} 
@@ -281,7 +311,7 @@ export function PresentationTemplateManager() {
                                 />
                             </AccordionContent>
                         </AccordionItem>
-                    ))}
+                    )})}
                 </Accordion>
             </CardContent>
         </Card>

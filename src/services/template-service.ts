@@ -17,7 +17,7 @@ export interface ReportGenerationTemplate {
     id: string;
     name: string;
     description: string;
-    agentIds: string[];
+    agentIds: string[]; // List of agent IDs included in this report type
 }
 
 export interface PresentationGenerationTemplate {
