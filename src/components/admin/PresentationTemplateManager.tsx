@@ -22,7 +22,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -43,7 +43,7 @@ type CreatePresentationFormValues = z.infer<typeof createPresentationTemplateSch
 const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
 
 
-function PresentationTemplateForm({ template, onSave, isSaving }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean }) {
+function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const form = useForm<PresentationFormValues>({
         resolver: zodResolver(presentationTemplateSchema),
         defaultValues: {
@@ -52,20 +52,22 @@ function PresentationTemplateForm({ template, onSave, isSaving }: { template: Pr
         },
     });
 
+    const isDefaultTemplate = PRESENTATION_GENERATION_TEMPLATES.some(t => t.id === template.id);
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Template Name</FormLabel>
-                        <FormControl><Input {...field} disabled={isSaving} /></FormControl>
+                        <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Description</FormLabel>
-                        <FormControl><Textarea {...field} disabled={isSaving} rows={2} /></FormControl>
+                        <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
@@ -111,8 +113,28 @@ function PresentationTemplateForm({ template, onSave, isSaving }: { template: Pr
                         </FormItem>
                     )}
                 />
-                <div className="flex justify-end">
-                    <Button type="submit" disabled={isSaving}>
+                <div className="flex justify-end gap-2">
+                    {!isDefaultTemplate && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
+                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                    Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                    <Button type="submit" disabled={isSaving || isDeleting}>
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Save Changes
                     </Button>
@@ -253,7 +275,7 @@ export function PresentationTemplateManager() {
     const updateMutation = useUpdatePresentationTemplate();
     const deleteMutation = useDeletePresentationTemplate();
 
-    const handleSave = async (data: PresentationFormValues) => {
+    const handleSave = (data: PresentationFormValues) => {
         updateMutation.mutate({ templateId: data.id, data });
     };
 
@@ -278,36 +300,16 @@ export function PresentationTemplateManager() {
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                     {templates?.map(template => {
-                        const isDefault = PRESENTATION_GENERATION_TEMPLATES.some(t => t.id === template.id);
                         return (
                         <AccordionItem value={template.id} key={template.id}>
-                            <div className="flex items-center justify-between">
-                                <AccordionTrigger className="flex-1">{template.name}</AccordionTrigger>
-                                {!isDefault && (
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                                {deleteMutation.isPending && deleteMutation.variables === template.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(template.id)}>Delete</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                )}
-                            </div>
+                            <AccordionTrigger>{template.name}</AccordionTrigger>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
                                 <PresentationTemplateForm 
                                     template={template} 
                                     onSave={handleSave}
                                     isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                    onDelete={() => handleDelete(template.id)}
+                                    isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
                                 />
                             </AccordionContent>
                         </AccordionItem>
