@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-pptx-styles.md
 
 "use client";
@@ -12,6 +13,7 @@ import {
 } from "@/lib/pptx-styles";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { createPptxTemplate, deletePptxTemplate, refreshTemplateImage } from "@/services/template-service";
 
 export const PPTX_TEMPLATES_QUERY_KEY = "pptx-templates";
 
@@ -50,6 +52,12 @@ async function updatePptxTemplateApi(
 interface UpdatePptxTemplateVariables {
   key: PptxTemplateKey;
   styles: PptxStyleOptions;
+}
+
+interface CreatePptxTemplateVariables {
+    id: string;
+    name: string;
+    description: string;
 }
 
 // Helper to set nested property
@@ -139,4 +147,44 @@ export function usePptxStyles() {
     saveChanges,
     isSaving: mutation.isPending,
   };
+}
+
+
+export function useCreatePptxTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<PptxTemplate, Error, CreatePptxTemplateVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return createPptxTemplate(variables, token);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [PPTX_TEMPLATES_QUERY_KEY] });
+            toast({ title: 'Success', description: 'New PPTX template created.' });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Create PPTX Template Failed");
+            throw error; // Re-throw to be caught by form
+        },
+    });
+}
+
+export function useDeletePptxTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<any, Error, PptxTemplateKey>({
+        mutationFn: async (templateKey) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return deletePptxTemplate(templateKey, token);
+        },
+        onSuccess: (data, templateKey) => {
+            queryClient.invalidateQueries({ queryKey: [PPTX_TEMPLATES_QUERY_KEY] });
+            toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Delete Template Failed");
+        },
+    });
 }
