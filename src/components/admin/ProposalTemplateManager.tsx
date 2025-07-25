@@ -39,7 +39,7 @@ const createProposalTemplateSchema = proposalTemplateSchema.omit({ id: true }).e
 type CreateProposalFormValues = z.infer<typeof createProposalTemplateSchema>;
 
 
-function ProposalTemplateForm({ template, onSave, isSaving }: { template: ProposalTemplate, onSave: (data: ProposalFormValues) => void, isSaving: boolean }) {
+function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ProposalTemplate, onSave: (data: ProposalFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const form = useForm<ProposalFormValues>({
         resolver: zodResolver(proposalTemplateSchema),
         defaultValues: {
@@ -53,27 +53,29 @@ function ProposalTemplateForm({ template, onSave, isSaving }: { template: Propos
         name: "guidelines",
     });
 
+    const isDefaultTemplate = PROPOSAL_TEMPLATES.some(t => t.id === template.id);
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Template Name</FormLabel>
-                        <FormControl><Input {...field} disabled={isSaving} /></FormControl>
+                        <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Description</FormLabel>
-                        <FormControl><Textarea {...field} disabled={isSaving} rows={2} /></FormControl>
+                        <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="prompt" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Base Prompt</FormLabel>
-                        <FormControl><Textarea {...field} disabled={isSaving} rows={8} className="font-mono text-xs" /></FormControl>
+                        <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={8} className="font-mono text-xs" /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
@@ -83,17 +85,37 @@ function ProposalTemplateForm({ template, onSave, isSaving }: { template: Propos
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex items-center gap-2">
                                 <FormField control={form.control} name={`guidelines.${index}`} render={({ field }) => (
-                                    <Input {...field} disabled={isSaving} />
+                                    <Input {...field} disabled={isSaving || isDeleting} />
                                 )} />
-                                <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>Remove</Button>
+                                <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isSaving || isDeleting}>Remove</Button>
                             </div>
                         ))}
-                        <Button type="button" variant="outline" size="sm" onClick={() => append("")}>Add Guideline</Button>
+                        <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>Add Guideline</Button>
                     </div>
                 </div>
 
-                <div className="flex justify-end">
-                    <Button type="submit" disabled={isSaving}>
+                <div className="flex justify-end gap-2">
+                     {!isDefaultTemplate && (
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
+                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                    Delete
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    )}
+                    <Button type="submit" disabled={isSaving || isDeleting}>
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                         Save Changes
                     </Button>
@@ -254,36 +276,18 @@ export function ProposalTemplateManager() {
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                     {templates?.map(template => {
-                        const isDefault = PROPOSAL_TEMPLATES.some(t => t.id === template.id);
                         return (
                         <AccordionItem value={template.id} key={template.id}>
                            <div className="flex items-center justify-between">
                                 <AccordionTrigger className="flex-1">{template.name}</AccordionTrigger>
-                                {!isDefault && (
-                                     <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
-                                                {deleteMutation.isPending && deleteMutation.variables === template.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => handleDelete(template.id)}>Delete</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                )}
                             </div>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
                                 <ProposalTemplateForm 
                                     template={template} 
                                     onSave={handleSave}
                                     isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                    onDelete={() => handleDelete(template.id)}
+                                    isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
                                 />
                             </AccordionContent>
                         </AccordionItem>
