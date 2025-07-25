@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, Presentation, FileDown } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, Presentation, FileDown, History } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -37,6 +37,7 @@ import { PptxTemplateKey, templates as pptxStyles } from '@/lib/pptx-styles';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks/use-templates';
+import { formatDistanceToNow } from 'date-fns';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -112,6 +113,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const {
         presentation,
         activePresentationId,
+        setActivePresentationId,
     } = usePresentationStore();
 
     const {
@@ -187,181 +189,222 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="space-y-2 mb-4">
-                    <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
-                    {presentationTemplatesLoading ? <Skeleton className="h-10 w-full" /> : (
-                        <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
-                            <SelectTrigger id="presentation-template-select">
-                                <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {presentationTemplates?.map(template => (
-                                    <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    )}
-                    {selectedTemplate && (
-                        <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
-                    )}
-                </div>
-
-                <Accordion type="single" collapsible defaultValue="presentation" className="w-full space-y-1">
-                    <AccordionItem value="presentation">
-                        <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                            <div className="flex items-center gap-2">
-                                <Presentation className="h-4 w-4" /> {t('builder.presentationGenerator.editDetails')}
-                            </div>
-                        </AccordionTrigger>
-                        <AccordionContent className="space-y-4 p-4">
-                            <Tabs defaultValue="prompt" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                    <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="prompt" className="pt-4 space-y-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                                        <div className="p-3 rounded-md border bg-muted text-xs">
-                                            <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                                        </div>
-                                    </div>
-
-                                    {hasGuidelines && (
-                                        <div className="space-y-2">
-                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
-                                            <div className="space-y-2 p-3 rounded-md border">
-                                                {promptConfig.guidelines!.map((guideline, index) => (
-                                                    <div key={index} className="flex items-start gap-2">
-                                                        <Checkbox
-                                                            id={`guideline-presentation-${index}`}
-                                                            checked={currentGuidelineState?.checked[index] ?? false}
-                                                            onCheckedChange={(checked) => handleGuidelineToggle(index, !!checked)}
-                                                        />
-                                                        <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
-                                                            <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
-                                                        </Label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                                        {currentGuidelineState?.custom.map((custom, index) => (
-                                            <div key={index} className="flex items-center gap-2 text-sm">
-                                                <span>- {custom}</span>
-                                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
-                                                    <Trash2 className="h-3 w-3 text-destructive" />
-                                                </Button>
-                                            </div>
+                <Tabs defaultValue="generate" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="generate">Generate</TabsTrigger>
+                        <TabsTrigger value="history">History</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="generate" className="pt-6">
+                        <div className="space-y-2 mb-4">
+                            <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
+                            {presentationTemplatesLoading ? <Skeleton className="h-10 w-full" /> : (
+                                <Select value={selectedPresentationTemplateId} onValueChange={(val) => setSelectedPresentationTemplateId(val)}>
+                                    <SelectTrigger id="presentation-template-select">
+                                        <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {presentationTemplates?.map(template => (
+                                            <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
                                         ))}
-                                        <div className="flex gap-2">
-                                            <Input
-                                                placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
-                                                value={customGuidelineInput['presentation'] || ''}
-                                                onChange={(e) => setCustomGuidelineInputForItem(e.target.value)}
-                                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem())}
-                                            />
-                                            <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem()}>
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </TabsContent>
+                                    </SelectContent>
+                                </Select>
+                            )}
+                            {selectedTemplate && (
+                                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+                            )}
+                        </div>
 
-                                <TabsContent value="context" className="pt-4">
-                                    <div className="space-y-2">
-                                        <Label className="font-semibold">{t('builder.reportGenerator.tool_tab_context')}</Label>
-                                        {!hasContent && !externalContext ? (
-                                            <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
-                                                {t('builder.reportGenerator.no_other_sections')}
-                                            </p>
-                                        ) : (
-                                            <ScrollArea className="h-48 border rounded-md p-2">
-                                              <div className="space-y-4 pr-4">
-                                                  <div className="space-y-2">
-                                                      <Label className="font-semibold">{t('builder.reportGenerator.context_sections')}</Label>
-                                                      {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
-                                                          <div key={`ctx-s-pres-${contextKey}`} className="flex items-center space-x-2">
-                                                              <Checkbox
-                                                                  id={`context-section-pres-${contextKey}`}
-                                                                  checked={!!currentSelection.sections[contextKey]}
-                                                                  onCheckedChange={(checked) => toggleContextSelection('presentation', 'sections', contextKey, !!checked)}
-                                                              />
-                                                              <Label htmlFor={`context-section-pres-${contextKey}`} className="text-sm font-normal">
-                                                                  <div className="flex items-center gap-2">
-                                                                      <BookCheck className="h-4 w-4" />
-                                                                      {t(sectionConfig[contextKey].title)}
-                                                                  </div>
-                                                              </Label>
-                                                          </div>
-                                                      ))}
-                                                      {Object.keys(sections).length === 0 && (
-                                                        <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.no_other_sections')}</p>
-                                                      )}
-                                                  </div>
-                                                  {Object.keys(diagrams || {}).length > 0 && (
-                                                    <div className="space-y-2 pt-2 border-t">
-                                                        <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
-                                                        {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
-                                                            <div key={`ctx-d-pres-${contextKey}`} className="flex items-center space-x-2">
+                        <Accordion type="single" collapsible defaultValue="presentation" className="w-full space-y-1">
+                            <AccordionItem value="presentation">
+                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                    <div className="flex items-center gap-2">
+                                        <Presentation className="h-4 w-4" /> {t('builder.presentationGenerator.editDetails')}
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="space-y-4 p-4">
+                                    <Tabs defaultValue="prompt" className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2">
+                                            <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
+                                            <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
+                                        </TabsList>
+                                        <TabsContent value="prompt" className="pt-4 space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
+                                                <div className="p-3 rounded-md border bg-muted text-xs">
+                                                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                                                </div>
+                                            </div>
+
+                                            {hasGuidelines && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
+                                                    <div className="space-y-2 p-3 rounded-md border">
+                                                        {promptConfig.guidelines!.map((guideline, index) => (
+                                                            <div key={index} className="flex items-start gap-2">
                                                                 <Checkbox
-                                                                    id={`context-diagram-pres-${contextKey}`}
-                                                                    checked={!!currentSelection.diagrams[contextKey]}
-                                                                    onCheckedChange={(checked) => toggleContextSelection('presentation', 'diagrams', contextKey, !!checked)}
+                                                                    id={`guideline-presentation-${index}`}
+                                                                    checked={currentGuidelineState?.checked[index] ?? false}
+                                                                    onCheckedChange={(checked) => handleGuidelineToggle(index, !!checked)}
                                                                 />
-                                                                <Label htmlFor={`context-diagram-pres-${contextKey}`} className="text-sm font-normal">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <GitGraph className="h-4 w-4" />
-                                                                        {t(diagramConfig[contextKey].title)}
-                                                                    </div>
+                                                                <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
+                                                                    <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
                                                                 </Label>
                                                             </div>
                                                         ))}
                                                     </div>
-                                                  )}
-                                                  {externalContext && (
-                                                    <div className="space-y-2 pt-2 border-t">
-                                                        <Label className="font-semibold">{t('builder.reportGenerator.context_external')}</Label>
-                                                        <div className="flex items-center space-x-2">
-                                                            <Checkbox
-                                                                id="context-external-pres"
-                                                                checked={!!currentSelection.externalContext}
-                                                                onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', null, !!checked)}
-                                                            />
-                                                            <Label htmlFor="context-external-pres" className="text-sm font-normal">
-                                                                <div className="flex items-center gap-2">
-                                                                    <FileText className="h-4 w-4" />
-                                                                    {externalContext.fileName}
-                                                                </div>
-                                                            </Label>
-                                                        </div>
+                                                </div>
+                                            )}
+
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
+                                                {currentGuidelineState?.custom.map((custom, index) => (
+                                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                                        <span>- {custom}</span>
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
+                                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                                        </Button>
                                                     </div>
-                                                  )}
-                                              </div>
-                                            </ScrollArea>
-                                        )}
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
+                                                ))}
+                                                <div className="flex gap-2">
+                                                    <Input
+                                                        placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
+                                                        value={customGuidelineInput['presentation'] || ''}
+                                                        onChange={(e) => setCustomGuidelineInputForItem(e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem())}
+                                                    />
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem()}>
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </TabsContent>
+
+                                        <TabsContent value="context" className="pt-4">
+                                            <div className="space-y-2">
+                                                <Label className="font-semibold">{t('builder.reportGenerator.tool_tab_context')}</Label>
+                                                {!hasContent && !externalContext ? (
+                                                    <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
+                                                        {t('builder.reportGenerator.no_other_sections')}
+                                                    </p>
+                                                ) : (
+                                                    <ScrollArea className="h-48 border rounded-md p-2">
+                                                      <div className="space-y-4 pr-4">
+                                                          <div className="space-y-2">
+                                                              <Label className="font-semibold">{t('builder.reportGenerator.context_sections')}</Label>
+                                                              {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
+                                                                  <div key={`ctx-s-pres-${contextKey}`} className="flex items-center space-x-2">
+                                                                      <Checkbox
+                                                                          id={`context-section-pres-${contextKey}`}
+                                                                          checked={!!currentSelection.sections[contextKey]}
+                                                                          onCheckedChange={(checked) => toggleContextSelection('presentation', 'sections', contextKey, !!checked)}
+                                                                      />
+                                                                      <Label htmlFor={`context-section-pres-${contextKey}`} className="text-sm font-normal">
+                                                                          <div className="flex items-center gap-2">
+                                                                              <BookCheck className="h-4 w-4" />
+                                                                              {t(sectionConfig[contextKey].title)}
+                                                                          </div>
+                                                                      </Label>
+                                                                  </div>
+                                                              ))}
+                                                              {Object.keys(sections).length === 0 && (
+                                                                <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.no_other_sections')}</p>
+                                                              )}
+                                                          </div>
+                                                          {Object.keys(diagrams || {}).length > 0 && (
+                                                            <div className="space-y-2 pt-2 border-t">
+                                                                <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
+                                                                {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
+                                                                    <div key={`ctx-d-pres-${contextKey}`} className="flex items-center space-x-2">
+                                                                        <Checkbox
+                                                                            id={`context-diagram-pres-${contextKey}`}
+                                                                            checked={!!currentSelection.diagrams[contextKey]}
+                                                                            onCheckedChange={(checked) => toggleContextSelection('presentation', 'diagrams', contextKey, !!checked)}
+                                                                        />
+                                                                        <Label htmlFor={`context-diagram-pres-${contextKey}`} className="text-sm font-normal">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <GitGraph className="h-4 w-4" />
+                                                                                {t(diagramConfig[contextKey].title)}
+                                                                            </div>
+                                                                        </Label>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                          )}
+                                                          {externalContext && (
+                                                            <div className="space-y-2 pt-2 border-t">
+                                                                <Label className="font-semibold">{t('builder.reportGenerator.context_external')}</Label>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id="context-external-pres"
+                                                                        checked={!!currentSelection.externalContext}
+                                                                        onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', null, !!checked)}
+                                                                    />
+                                                                    <Label htmlFor="context-external-pres" className="text-sm font-normal">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <FileText className="h-4 w-4" />
+                                                                            {externalContext.fileName}
+                                                                        </div>
+                                                                    </Label>
+                                                                </div>
+                                                            </div>
+                                                          )}
+                                                      </div>
+                                                    </ScrollArea>
+                                                )}
+                                            </div>
+                                        </TabsContent>
+                                    </Tabs>
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                        <div className="pt-4">
+                           <Button
+                                type="button"
+                                onClick={handleGenerateClick}
+                                disabled={isDisabled || isGenerating}
+                                className="font-headline w-full"
+                                title={t('builder.presentationGenerator.generateButton')}
+                            >
+                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                {t('builder.presentationGenerator.generateButton')}
+                            </Button>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="history" className="pt-6">
+                        <ScrollArea className="h-96">
+                            {presentations.length > 0 ? (
+                                <div className="space-y-2">
+                                    {presentations.map(p => {
+                                        const isValidDate = p.id && !isNaN(new Date(p.id).getTime());
+                                        return (
+                                            <Button
+                                                key={p.id}
+                                                variant="ghost"
+                                                onClick={() => setActivePresentationId(p.id)}
+                                                className={cn(
+                                                    "w-full h-auto justify-start text-left p-2",
+                                                    activePresentationId === p.id && "bg-muted"
+                                                )}
+                                            >
+                                                <div className="flex flex-col">
+                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
+                                                    {isValidDate && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {formatDistanceToNow(new Date(p.id), { addSuffix: true })}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </Button>
+                                        )
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center">{t('builder.presentationGenerator.historyEmpty')}</p>
+                            )}
+                        </ScrollArea>
+                    </TabsContent>
+                </Tabs>
             </CardContent>
-            <CardFooter>
-                <Button
-                    type="button"
-                    onClick={handleGenerateClick}
-                    disabled={isDisabled || isGenerating}
-                    className="font-headline w-full"
-                    title={t('builder.presentationGenerator.generateButton')}
-                >
-                    {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                    {t('builder.presentationGenerator.generateButton')}
-                </Button>
-            </CardFooter>
         </Card>
     );
 };
