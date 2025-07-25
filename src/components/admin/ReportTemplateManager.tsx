@@ -21,6 +21,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Skeleton } from '../ui/skeleton';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from '../ui/dialog';
+import { handleErrorUtility } from '@/lib/errorUtils';
 
 
 const reportTemplateSchema = z.object({
@@ -238,9 +239,15 @@ export function ReportTemplateManager() {
         queryKey: templateKeys.reports(),
         queryFn: async () => {
             if (!firebaseUser) return [];
-            return await fetchReportTemplates();
+            const { fetchReportTemplates } = await import('@/services/template-service');
+            return fetchReportTemplates();
         },
         enabled: !!firebaseUser,
+        meta: {
+            onError: (error: Error) => {
+                handleErrorUtility(error, "Failed to load report templates");
+            },
+        },
     });
 
     const updateMutation = useUpdateReportTemplate();
