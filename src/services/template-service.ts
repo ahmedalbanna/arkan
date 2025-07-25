@@ -26,7 +26,7 @@ export interface PresentationGenerationTemplate {
     relevantReportSectionIds?: string[];
 }
 
-// Fetch Proposal Templates
+// --- Proposal Templates ---
 export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
     const response = await fetch('/api/templates/proposal');
     if (!response.ok) {
@@ -35,7 +35,19 @@ export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
     return await response.json();
 }
 
-// Update Proposal Template
+export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' | 'createdAt'> & { id: string }, token: string): Promise<ProposalTemplate> {
+    const response = await fetch('/api/templates/proposal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error; // Throw the structured error from the API
+    }
+    return await response.json();
+}
+
 export async function updateProposalTemplate(id: string, data: Partial<ProposalTemplate>, token: string): Promise<ProposalTemplate> {
     const response = await fetch(`/api/templates/proposal/${id}`, {
         method: 'PUT',
@@ -52,7 +64,7 @@ export async function updateProposalTemplate(id: string, data: Partial<ProposalT
     return await response.json();
 }
 
-// Fetch Report Templates
+// --- Report Templates ---
 export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]> {
     const response = await fetch('/api/templates/report');
     if (!response.ok) {
@@ -61,7 +73,20 @@ export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]
     return await response.json();
 }
 
-// Update Report Template
+export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'createdAt'>, token: string): Promise<ReportGenerationTemplate> {
+     const response = await fetch('/api/templates/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return await response.json();
+}
+
+
 export async function updateReportTemplate(id: string, data: Partial<ReportGenerationTemplate>, token: string): Promise<ReportGenerationTemplate> {
     const response = await fetch(`/api/templates/report/${id}`, {
         method: 'PUT',
@@ -78,7 +103,7 @@ export async function updateReportTemplate(id: string, data: Partial<ReportGener
     return await response.json();
 }
 
-// Fetch Presentation Templates
+// --- Presentation Templates ---
 export async function fetchPresentationTemplates(): Promise<PresentationGenerationTemplate[]> {
     const response = await fetch('/api/templates/presentation');
     if (!response.ok) {
@@ -87,7 +112,19 @@ export async function fetchPresentationTemplates(): Promise<PresentationGenerati
     return await response.json();
 }
 
-// Update Presentation Template
+export async function createPresentationTemplate(data: Omit<PresentationGenerationTemplate, 'createdAt'>, token: string): Promise<PresentationGenerationTemplate> {
+     const response = await fetch('/api/templates/presentation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return await response.json();
+}
+
 export async function updatePresentationTemplate(id: string, data: Partial<PresentationGenerationTemplate>, token: string): Promise<PresentationGenerationTemplate> {
     const response = await fetch(`/api/templates/presentation/${id}`, {
         method: 'PUT',

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-templates.md
 
 "use client";
@@ -10,6 +11,9 @@ import {
   updateProposalTemplate,
   updateReportTemplate,
   updatePresentationTemplate,
+  createProposalTemplate,
+  createReportTemplate,
+  createPresentationTemplate,
   type ProposalTemplate,
   type ReportGenerationTemplate,
   type PresentationGenerationTemplate,
@@ -159,6 +163,65 @@ export function useUpdatePresentationTemplate() {
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Update Presentation Template Failed");
+    },
+  });
+}
+
+// --- Create Mutations ---
+
+export function useCreateProposalTemplate() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation<
+    ProposalTemplate,
+    Error,
+    Omit<ProposalTemplate, 'createdAt'>
+  >({
+    mutationFn: async (data) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createProposalTemplate(data, token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: templateKeys.proposals() });
+    },
+  });
+}
+
+export function useCreateReportTemplate() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation<
+    ReportGenerationTemplate,
+    Error,
+    Omit<ReportGenerationTemplate, 'createdAt'>
+  >({
+    mutationFn: async (data) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createReportTemplate(data, token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: templateKeys.reports() });
+    },
+  });
+}
+
+export function useCreatePresentationTemplate() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation<
+    PresentationGenerationTemplate,
+    Error,
+    Omit<PresentationGenerationTemplate, 'createdAt'>
+  >({
+    mutationFn: async (data) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createPresentationTemplate(data, token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: templateKeys.presentations() });
     },
   });
 }
