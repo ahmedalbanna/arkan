@@ -8,56 +8,9 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { createDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi, refreshTemplateImage as refreshTemplateImageApi } from "@/services/template-service";
 
 const DOCX_TEMPLATES_QUERY_KEY = "docx-templates";
-
-// --- API Service Functions ---
-
-async function fetchDocxTemplates(): Promise<Record<TemplateKey, Template>> {
-  const response = await fetch("/api/templates/docx");
-  if (!response.ok) {
-    throw new Error("Failed to fetch DOCX templates");
-  }
-  return await response.json();
-}
-
-async function updateDocxTemplateApi(
-  { key, styles }: { key: TemplateKey; styles: any },
-  token: string
-) {
-  const response = await fetch(`/api/templates/docx/${key}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ styles }),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to update DOCX template");
-  }
-  return response.json();
-}
-
-async function refreshTemplateImageApi(
-  variables: { templateType: string; templateId: string; prompt: string },
-  token: string
-) {
-  const response = await fetch("/api/templates/refresh-image", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(variables),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to refresh image");
-  }
-  return response.json();
-}
 
 // Define types for mutation variables
 interface UpdateDocxTemplateVariables {
@@ -69,6 +22,13 @@ interface RefreshTemplateImageVariables {
   templateId: string;
   prompt: string;
 }
+
+interface CreateDocxTemplateVariables {
+    id: string;
+    name: string;
+    description: string;
+}
+
 
 // --- Custom Hooks ---
 
@@ -152,6 +112,27 @@ export function useDocxStyles() {
     isSaving: mutation.isPending,
   };
 }
+
+export function useCreateDocxTemplate() {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation<Template, Error, CreateDocxTemplateVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return createDocxTemplate(variables, token);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: [DOCX_TEMPLATES_QUERY_KEY] });
+            toast({ title: 'Success', description: 'New DOCX template created.' });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Create DOCX Template Failed");
+            throw error; // Re-throw to be caught by form
+        },
+    });
+}
+
 
 export function useRefreshTemplateImage(templateType: "docx" | "pptx") {
   const queryClient = useQueryClient();

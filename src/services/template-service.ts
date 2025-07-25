@@ -1,6 +1,8 @@
 
 'use client';
 
+import { IStylesOptions } from 'docx';
+
 // This file centralizes fetching and updating for generation templates.
 
 export interface ProposalTemplate {
@@ -24,6 +26,15 @@ export interface PresentationGenerationTemplate {
     description: string;
     primaryAgentId: string;
     relevantReportSectionIds?: string[];
+}
+
+export interface DocxTemplate {
+    id: string;
+    name: string;
+    description: string;
+    styles: IStylesOptions;
+    imageUrl: string;
+    dataAiHint: string;
 }
 
 // --- Proposal Templates ---
@@ -139,4 +150,66 @@ export async function updatePresentationTemplate(id: string, data: Partial<Prese
         throw new Error(error.message || 'Failed to update presentation template');
     }
     return await response.json();
+}
+
+// --- DOCX Templates ---
+
+export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>> {
+  const response = await fetch("/api/templates/docx");
+  if (!response.ok) {
+    throw new Error("Failed to fetch DOCX templates");
+  }
+  return await response.json();
+}
+
+export async function createDocxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<DocxTemplate> {
+    const response = await fetch('/api/templates/docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return await response.json();
+}
+
+
+export async function updateDocxTemplate(
+  variables: {key: string, styles: any},
+  token: string
+) {
+  const response = await fetch(`/api/templates/docx/${variables.key}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ styles: variables.styles }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update DOCX template");
+  }
+  return response.json();
+}
+
+export async function refreshTemplateImage(
+  variables: { templateType: string; templateId: string; prompt: string },
+  token: string
+) {
+  const response = await fetch("/api/templates/refresh-image", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(variables),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to refresh image");
+  }
+  return response.json();
 }

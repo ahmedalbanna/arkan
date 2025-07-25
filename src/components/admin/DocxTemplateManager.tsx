@@ -1,20 +1,107 @@
 
 'use client';
 
-import { useDocxStyles, useRefreshTemplateImage } from '@/hooks/use-docx-styles';
+import { useDocxStyles, useRefreshTemplateImage, useCreateDocxTemplate } from '@/hooks/use-docx-styles';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, RefreshCw } from 'lucide-react';
+import { Loader2, Save, RefreshCw, PlusCircle } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import Image from 'next/image';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '../ui/dialog';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Textarea } from '../ui/textarea';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
+
+const createDocxTemplateSchema = z.object({
+  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+});
+type CreateDocxTemplateValues = z.infer<typeof createDocxTemplateSchema>;
+
+
+function CreateTemplateDialog() {
+    const [isOpen, setIsOpen] = useState(false);
+    const createMutation = useCreateDocxTemplate();
+
+    const form = useForm<CreateDocxTemplateValues>({
+        resolver: zodResolver(createDocxTemplateSchema),
+        defaultValues: { id: '', name: '', description: '' },
+    });
+
+    const handleSave = (data: CreateDocxTemplateValues) => {
+        createMutation.mutate(data, {
+            onSuccess: () => {
+                setIsOpen(false);
+                form.reset();
+            },
+            onError: (error: any) => {
+                 if (error.errors) {
+                    for (const key in error.errors) {
+                        form.setError(key as keyof CreateDocxTemplateValues, { message: error.errors[key][0] });
+                    }
+                }
+            }
+        });
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New</Button>
+            </DialogTrigger>
+            <DialogContent>
+                 <DialogHeader>
+                    <DialogTitle>Create New DOCX Template</DialogTitle>
+                    <DialogDescription>Define a new style template for DOCX exports. It will be initialized with the "Modern" style as a base.</DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                     <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
+                        <FormField control={form.control} name="id" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Template ID</FormLabel>
+                                <FormControl><Input {...field} placeholder="e.g., my-company-style" disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Template Name</FormLabel>
+                                <FormControl><Input {...field} placeholder="e.g., My Company Style" disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="description" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl><Textarea {...field} rows={2} disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <DialogFooter>
+                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <Button type="submit" disabled={createMutation.isPending}>
+                                {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Create Template
+                            </Button>
+                        </DialogFooter>
+                     </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 function DocxTemplateSkeleton() {
     return (
@@ -59,6 +146,10 @@ export default function DocxTemplateManager() {
   }
 
   return (
+    <>
+    <div className="flex justify-end mb-4">
+        <CreateTemplateDialog />
+    </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {(Object.keys(templates) as TemplateKey[]).map((key) => {
         const template = templates[key];
@@ -196,5 +287,6 @@ export default function DocxTemplateManager() {
         );
       })}
     </div>
+    </>
   );
 }
