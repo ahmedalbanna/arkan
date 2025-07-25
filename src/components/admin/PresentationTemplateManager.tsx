@@ -20,6 +20,7 @@ import { AGENTS } from '@/lib/agents';
 import { Skeleton } from '../ui/skeleton';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose } from '../ui/dialog';
+import { useToast } from '@/hooks/use-toast';
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
