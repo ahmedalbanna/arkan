@@ -31,13 +31,22 @@ interface EditableSectionProps {
     onUpdate: (key: SectionName, value: string) => void;
 }
 
+// Helper to calculate word and character counts
+const calculateCounts = (text: string) => {
+    if (!text) return { words: 0, chars: 0 };
+    const words = text.split(/\s+/).filter(Boolean).length;
+    const chars = text.length;
+    return { words, chars };
+};
+
+
 // API call function for text manipulation
 async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
     const response = await fetch('/api/manipulate-text', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
+            'Authorization': `Bearer ${'${variables.token}'}`,
         },
         body: JSON.stringify(variables.data),
     });
@@ -102,7 +111,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
             textAreaRef.current.style.height = "auto";
-            textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
+            textAreaRef.current.style.height = `${'${textAreaRef.current.scrollHeight}'}px`;
         }
     }, [isEditing, currentContent]);
 
@@ -175,7 +184,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     const handleExportPdf = () => {
         if (contentRef.current) {
-            exportComponentAsPDF(contentRef.current, `${title}.pdf`);
+            exportComponentAsPDF(contentRef.current, `${'${title}'}.pdf`);
         }
         setIsEditorPopoverOpen(false);
     };
@@ -225,6 +234,8 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 {content}
             </DynamicReactMarkdown>);
     }
+    
+    const { words, chars } = calculateCounts(content);
 
     return (
         <AccordionItem value={title} key={sectionKey} className="bg-background rounded-lg border">
@@ -240,6 +251,12 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 <div className="prose dark:prose-invert max-w-none" ref={contentRef}>
                   {renderEditableContent()}
                 </div>
+                
+                 <div className="mt-4 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+                    <span>{words} words</span>
+                    <span>{chars} characters</span>
+                </div>
+
 
                 <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100">
                     <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
