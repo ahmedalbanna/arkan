@@ -36,6 +36,7 @@ interface BuilderActions {
   // Basic Actions
   newSession: () => void;
   loadState: (state: ProjectState & { id?: string }) => void;
+  setProjectName: (name: string) => void;
   setProjectIdea: (idea: string) => void;
   setCurrentProjectId: (id: string | null) => void;
   setHasUnsavedChanges: (status: boolean) => void;
@@ -107,6 +108,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         presentation: usePresentationStore.getState().presentation,
         externalContext: useReportStore.getState().externalContext,
       }),
+      setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
         set({ projectIdea: idea, hasUnsavedChanges: true }),
       setCurrentProjectId: (id) => set({ currentProjectId: id }),

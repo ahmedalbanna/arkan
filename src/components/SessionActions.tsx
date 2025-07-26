@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 
 function SaveStatus() {
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
@@ -62,11 +64,23 @@ function SaveStatus() {
     )
 }
 
+function hasAnyContent(state: ReturnType<typeof useBuilderStore.getState>): boolean {
+    if (state.proposal) return true;
+    if (Object.values(useReportStore.getState().sections).some(s => !!s)) return true;
+    if (Object.values(useDiagramStore.getState().diagrams).some(d => !!d)) return true;
+    // Add other store checks if necessary
+    return false;
+}
+
+
 export const SessionActions = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
     const { t } = useLocalization();
     const [saveAsName, setSaveAsName] = useState('');
+    const [isSaveAsOpen, setIsSaveAsOpen] = useState(false);
+    const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
+    const [projectName, setProjectName] = useState('');
 
     const store = useBuilderStore();
     const saveProjectMutation = useSaveProject();
@@ -103,38 +117,61 @@ export const SessionActions = () => {
     };
     
     const handleSaveProjectFile = () => {
-        if (!store.proposal) return;
+        if (!hasAnyContent(store)) return;
         const jsonString = JSON.stringify(store.getFullState());
         // Encode to Base64 with Unicode support
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, `${store.proposal.title.replace(/[\s\W]/g, '_') || 'arkan_project'}.arkan`);
+        saveAs(blob, `${store.name || 'arkan_project'}.arkan`);
     }
 
-    const handleSave = () => {
-        if (!store.proposal) {
-            toast({ title: "Cannot Save", description: "Please generate a proposal first.", variant: 'destructive' });
+    const performSave = (name?: string) => {
+        if (!hasAnyContent(store)) {
+            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
             return;
         }
 
         const projectData = store.getFullState();
-        const saveData = { ...projectData, name: store.name || store.proposal.title };
-
+        const finalName = name || store.name || store.proposal?.title || 'Untitled Project';
+        const saveData = { ...projectData, name: finalName };
+        
         if (store.currentProjectId) {
-            updateProjectMutation.mutate({ projectId: store.currentProjectId, data: projectData });
+            updateProjectMutation.mutate({ projectId: store.currentProjectId, data: saveData });
         } else {
             saveProjectMutation.mutate(saveData);
         }
     }
 
+
+    const handleSave = () => {
+        // If we are editing a saved project, or if the project has a name, save directly.
+        if (store.currentProjectId || store.name || store.proposal?.title) {
+            performSave();
+        } else {
+            // If it's a new project without a name, prompt for one.
+            setIsSavePromptOpen(true);
+        }
+    }
+    
+    const handleSaveFromPrompt = () => {
+        if (projectName.trim()) {
+            performSave(projectName);
+            setIsSavePromptOpen(false);
+            setProjectName('');
+        } else {
+            toast({ title: "Name Required", description: "Please enter a name for your project.", variant: "destructive" });
+        }
+    };
+
     const handleSaveAs = () => {
-        if (!store.proposal) {
-            toast({ title: "Cannot Save", description: "Please generate a proposal first.", variant: 'destructive' });
+        if (!hasAnyContent(store)) {
+            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
             return;
         }
         const projectData = store.getFullState();
         // Create a new project with a new name, but don't change the current project context
-        const saveData = { ...projectData, name: saveAsName || store.proposal.title };
+        const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
+        const saveData = { ...projectData, name: finalSaveAsName };
         saveProjectMutation.mutate(saveData, {
             // Overwrite onSuccess to not change the current project context
             onSuccess: (newProject) => {
@@ -142,6 +179,8 @@ export const SessionActions = () => {
                     title: 'Project Saved As New',
                     description: `A new project "${newProject.name}" has been created.`,
                 });
+                setIsSaveAsOpen(false);
+                setSaveAsName('');
             }
         });
     }
@@ -178,7 +217,7 @@ export const SessionActions = () => {
                             variant="outline"
                             size="icon"
                             onClick={handleSaveProjectFile}
-                            disabled={!store.proposal}
+                            disabled={!hasAnyContent(store)}
                              className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <FileDown className="h-4 w-4" />
@@ -203,12 +242,34 @@ export const SessionActions = () => {
                      <span className="hidden md:inline ml-2">Save Project</span>
                 </Button>
 
-                <AlertDialog>
+                <AlertDialog open={isSavePromptOpen} onOpenChange={setIsSavePromptOpen}>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>Save New Project</AlertDialogTitle>
+                            <AlertDialogDescription>Please provide a name for your new project before saving.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                         <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="save-project-name" className="text-right">Name</Label>
+                                <Input id="save-project-name" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="col-span-3" />
+                            </div>
+                        </div>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setProjectName('')}>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleSaveFromPrompt} disabled={isSaving}>
+                                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                                Save
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={isSaveAsOpen} onOpenChange={setIsSaveAsOpen}>
                     <AlertDialogTrigger asChild>
                          <Button
                             variant="outline"
                             size="icon"
-                            disabled={!store.proposal || isSaving}
+                            disabled={!hasAnyContent(store) || isSaving}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <DiscAlbum className="h-4 w-4" />
@@ -224,8 +285,8 @@ export const SessionActions = () => {
                         </AlertDialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">Name</Label>
-                                <Input id="name" defaultValue={store.proposal?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
+                                <Label htmlFor="save-as-name" className="text-right">Name</Label>
+                                <Input id="save-as-name" defaultValue={store.name || store.proposal?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <AlertDialogFooter>
