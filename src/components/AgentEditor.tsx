@@ -152,24 +152,20 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
                             name={`prompt.guidelines.${index}.text`}
                             render={({ field }) => (
                               <FormItem className="flex-grow">
-                                <FormControl><Input {...field} disabled={isProcessing || isDefaultAgent} /></FormControl>
+                                <FormControl><Input {...field} disabled={isProcessing} /></FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          {!isDefaultAgent && (
-                             <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isProcessing}>
-                                <Trash2 className="h-4 w-4" />
-                             </Button>
-                          )}
+                          <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isProcessing}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       ))}
-                      {!isDefaultAgent && (
-                        <Button type="button" variant="outline" size="sm" onClick={() => append({ text: '', isDefault: false })} disabled={isProcessing}>
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Add Guideline
-                        </Button>
-                      )}
+                      <Button type="button" variant="outline" size="sm" onClick={() => append({ text: '', isDefault: false })} disabled={isProcessing}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Guideline
+                      </Button>
                     </div>
                   </div>
                 </>
