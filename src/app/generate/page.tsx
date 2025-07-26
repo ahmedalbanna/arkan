@@ -4,7 +4,6 @@
 import { useState, useEffect } from 'react';
 import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SessionActions } from '@/components/SessionActions';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import dynamic from 'next/dynamic';
@@ -24,6 +23,11 @@ const LoadingSkeleton = () => (
       <Skeleton className="h-[calc(100vh-300px)] w-full" />
   </div>
 );
+
+const SessionActions = dynamic(() => import('@/components/SessionActions').then(mod => mod.SessionActions), {
+  ssr: false,
+  loading: () => <Skeleton className="h-8 w-[400px]" />,
+});
 
 
 const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), {
