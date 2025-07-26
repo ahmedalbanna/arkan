@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, Download, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { AcademicUploaders } from './AcademicUploaders';
+import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 
 async function analyzeApi(variables: { markdown: string, documentType: 'exam' | 'homework', token: string }): Promise<any> {
     const { markdown, documentType, token } = variables;
@@ -112,6 +113,12 @@ export default function AcademicSolver() {
       setStage('readyToSolve');
     }
   };
+
+  const handleExportDocx = () => {
+      if (analyzedDocument && solvedDocument) {
+          exportDocumentAsDocx(analyzedDocument, solvedDocument);
+      }
+  }
 
   const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
 
@@ -243,6 +250,14 @@ export default function AcademicSolver() {
                       )}
                   </ScrollArea>
               </CardContent>
+              <CardFooter className="flex gap-2">
+                <Button onClick={handleExportDocx} disabled={stage !== 'solved'} className="flex-1">
+                    <FileText className="mr-2 h-4 w-4" /> Export DOCX
+                </Button>
+                <Button onClick={() => alert("PDF Export coming soon!")} disabled={stage !== 'solved'} className="flex-1">
+                    <Download className="mr-2 h-4 w-4" /> Export PDF
+                </Button>
+              </CardFooter>
            </TabsContent>
        </Tabs>
      </Card>
