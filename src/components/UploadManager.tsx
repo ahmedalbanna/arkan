@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { FileUploader } from './FileUploader';
+import { PasteTextUploader } from './PasteTextUploader';
 
 export function UploadManager() {
     return (
@@ -26,10 +27,7 @@ export function UploadManager() {
                        <FileUploader />
                     </TabsContent>
                     <TabsContent value="text" className="mt-4">
-                        {/* Placeholder for text input component */}
-                        <p className="text-center text-muted-foreground p-8 border rounded-md">
-                            Pasting text and markdown will be available soon.
-                        </p>
+                        <PasteTextUploader />
                     </TabsContent>
                     <TabsContent value="image" className="mt-4">
                          {/* Placeholder for image input component */}
@@ -42,4 +40,3 @@ export function UploadManager() {
         </Card>
     );
 }
-

@@ -17,7 +17,7 @@ import { markdownComponents } from '@/lib/markdown-components';
 export function FileUploader() {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
-    const { addExternalContext, externalContext, removeExternalContext } = useReportStore();
+    const { externalContext, addExternalContext, removeExternalContext } = useReportStore();
     const [isLoading, setIsLoading] = useState(false);
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -88,7 +88,7 @@ export function FileUploader() {
                         <>
                             <UploadCloud className="h-12 w-12 text-muted-foreground" />
                             <p className="mt-4 font-semibold">
-                                {isDragActive ? 'Drop the file here...' : 'Drag & drop a file here, or click to select'}
+                                {isDragActive ? 'Drop the file here...' : 'Drag & drop a PDF here, or click to select'}
                             </p>
                             <p className="text-xs text-muted-foreground">PDF only (Max 5MB)</p>
                         </>
