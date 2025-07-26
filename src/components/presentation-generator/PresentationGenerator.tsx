@@ -48,7 +48,7 @@ async function generatePresentation(variables: { body: any, token: string }): Pr
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate presentation');
     }
-    return response.json();
+    return await response.json();
 }
 
 export default function PresentationGenerator() {
@@ -89,6 +89,8 @@ export default function PresentationGenerator() {
         mutation.mutate({ body, token });
     };
 
+    const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
+
     if (!proposal && !activePresentation) {
         return (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
@@ -100,8 +102,6 @@ export default function PresentationGenerator() {
             </Card>
         )
     }
-
-    const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
