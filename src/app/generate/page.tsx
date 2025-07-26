@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -47,6 +48,10 @@ const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGene
   loading: () => <LoadingSkeleton />,
 });
 const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), {
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/ProjectPlanGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -155,12 +160,15 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
+                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
                             </TabsTrigger>
                         )}
+                        <TabsTrigger value="plan" className="gap-2" disabled={!proposal}>
+                            <GanttChartSquare className="h-4 w-4" /> Project Plan
+                        </TabsTrigger>
                         {isFeatureEnabled('report') && (
                             <TabsTrigger value="report" className="gap-2">
                                 <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
@@ -186,6 +194,9 @@ function GeneratePageContent() {
                     <div className="w-full flex-grow mt-4">
                         <TabsContent value="proposal" className="h-full">
                             {activeTab === 'proposal' && <ProposalModeGenerator />}
+                        </TabsContent>
+                         <TabsContent value="plan" className="h-full">
+                            {activeTab === 'plan' && <ProjectPlanGenerator />}
                         </TabsContent>
                         <TabsContent value="report" className="h-full">
                             {activeTab === 'report' && <ReportGenerator />}

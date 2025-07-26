@@ -1,4 +1,5 @@
 
+
 import { z } from 'zod';
 
 export const DiagramTypeSchema = z.enum([
@@ -125,3 +126,22 @@ export const GeneratePresentationOutputSchema = z.object({
   slides: z.array(PresentationSlideSchema),
 });
 export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;
+
+// Schemas for Project Plan Generation
+export const ProjectTaskSchema = z.object({
+  title: z.string().describe('A concise title for the task or user story.'),
+  description: z.string().describe('A detailed description of the task, explaining what needs to be done.'),
+  acceptanceCriteria: z.array(z.string()).describe('A list of specific, measurable criteria that must be met for the task to be considered complete.'),
+});
+export type ProjectTask = z.infer<typeof ProjectTaskSchema>;
+
+export const ProjectPhaseSchema = z.object({
+  phaseName: z.string().describe('The name of the project phase (e.g., "Sprint 1: User Authentication", "Phase 2: UI/UX Design").'),
+  tasks: z.array(ProjectTaskSchema).describe('An array of tasks to be completed within this phase.'),
+});
+export type ProjectPhase = z.infer<typeof ProjectPhaseSchema>;
+
+export const ProjectPlanSchema = z.object({
+  phases: z.array(ProjectPhaseSchema).describe('The full list of project phases, each containing a list of tasks.'),
+});
+export type ProjectPlan = z.infer<typeof ProjectPlanSchema>;
