@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { transactionKeys } from '@/lib/query-keys';
-import { getPendingTransactions } from '@/services/transaction-service';
+import { getTransactions } from '@/services/transaction-service';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { PendingPaymentCard } from './PendingPaymentCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,8 +11,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { TransactionData } from '@/lib/db/queries';
 
-const PENDING_TRANSACTIONS_PER_PAGE = 6;
+const TRANSACTIONS_PER_PAGE = 6;
+type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
 function ConsoleSkeleton() {
     return (
@@ -35,20 +38,10 @@ function ConsoleSkeleton() {
     );
 }
 
-export function PaymentVerificationConsole() {
+function TransactionList({ status }: { status: TransactionStatus }) {
     const { firebaseUser } = useAuth();
     const { t } = useLocalization();
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchToken = async () => {
-            if (firebaseUser) {
-                const idToken = await firebaseUser.getIdToken();
-                setToken(idToken);
-            }
-        };
-        fetchToken();
-    }, [firebaseUser]);
+    const queryClient = useQueryClient();
 
     const {
         data,
@@ -56,25 +49,32 @@ export function PaymentVerificationConsole() {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        status,
+        isLoading,
+        isError,
     } = useInfiniteQuery({
-        queryKey: transactionKeys.pending(),
-        queryFn: ({ pageParam }) => getPendingTransactions({ token: token!, limit: PENDING_TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam }),
+        queryKey: transactionKeys.list(status),
+        queryFn: ({ pageParam }) => getTransactions({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => {
             if (!lastPage.hasNextPage) return undefined;
             const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];
             return lastTransaction?.id;
         },
-        enabled: !!token,
+        enabled: !!firebaseUser,
         staleTime: 1000 * 60, // 1 minute
     });
 
-    if (status === 'pending') {
+    useEffect(() => {
+        // Invalidate other tabs when this one becomes active to refetch data
+        queryClient.invalidateQueries({ queryKey: transactionKeys.list(status) });
+    }, [status, queryClient]);
+
+
+    if (isLoading) {
         return <ConsoleSkeleton />;
     }
 
-    if (status === 'error') {
+    if (isError) {
         return (
             <div className="p-8 text-center text-destructive border rounded-lg">
                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
@@ -82,19 +82,19 @@ export function PaymentVerificationConsole() {
             </div>
         );
     }
-    
-    const allTransactions = data.pages.flatMap(page => page.transactions);
+
+    const allTransactions = data?.pages.flatMap(page => page.transactions) ?? [];
 
     if (allTransactions.length === 0) {
         return (
-            <div className="p-8 text-center text-muted-foreground border rounded-lg">
-                <p>{t('managePayments.noPending')}</p>
+            <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+                <p>No {status} transactions found.</p>
             </div>
         )
     }
 
     return (
-        <div>
+        <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {allTransactions.map(transaction => (
                     <PendingPaymentCard key={transaction.id} transaction={transaction} />
@@ -103,13 +103,32 @@ export function PaymentVerificationConsole() {
             {hasNextPage && (
                 <div className="mt-8 text-center">
                     <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                        {isFetchingNextPage ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : null}
+                        {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isFetchingNextPage ? 'Loading more...' : 'Load More'}
                     </Button>
                 </div>
             )}
         </div>
+    )
+}
+
+export function PaymentVerificationConsole() {
+    return (
+        <Tabs defaultValue="pending" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+                <TabsTrigger value="pending">Pending</TabsTrigger>
+                <TabsTrigger value="verified">Verified</TabsTrigger>
+                <TabsTrigger value="rejected">Rejected</TabsTrigger>
+            </TabsList>
+            <TabsContent value="pending">
+                <TransactionList status="pending" />
+            </TabsContent>
+            <TabsContent value="verified">
+                <TransactionList status="verified" />
+            </TabsContent>
+            <TabsContent value="rejected">
+                <TransactionList status="rejected" />
+            </TabsContent>
+        </Tabs>
     );
 }

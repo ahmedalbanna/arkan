@@ -4,22 +4,28 @@
 import type { TransactionData } from '@/lib/db/queries';
 import type { VerifyPaymentVariables } from '@/lib/types';
 
-interface FetchPendingTransactionsParams {
-  token: string;
+interface FetchTransactionsParams {
+  token: Promise<string>;
+  status: 'pending' | 'verified' | 'rejected';
   limit: number;
   lastVisibleId?: string;
 }
 
-export async function getPendingTransactions(params: FetchPendingTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
-    const { token, limit, lastVisibleId } = params;
+export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
+    const { token: tokenPromise, status, limit, lastVisibleId } = params;
+    const token = await tokenPromise;
     if (!token) {
         throw new Error("Authentication token is required.");
     }
     
-    const queryParams = new URLSearchParams({ limit: limit.toString() });
+    const queryParams = new URLSearchParams({ 
+        status,
+        limit: limit.toString(),
+    });
+
     if(lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/transactions/pending?${queryParams.toString()}`, {
+    const response = await fetch(`/api/transactions?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -27,7 +33,7 @@ export async function getPendingTransactions(params: FetchPendingTransactionsPar
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch pending transactions');
+        throw new Error(error.message || 'Failed to fetch transactions');
     }
     return await response.json();
 }

@@ -164,10 +164,10 @@ export async function createTransaction(data: Omit<TransactionData, 'createdAt' 
     return { id: transactionRef.id };
 }
 
-export async function getPendingTransactions(limit: number, lastVisibleId?: string): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
+export async function getTransactionsByStatus({ status, limit, lastVisibleId }: { status: 'pending' | 'verified' | 'rejected', limit: number, lastVisibleId?: string }): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
     let query = adminDb.collection('transactions')
-        .where('status', '==', 'pending')
-        .orderBy('createdAt', 'asc')
+        .where('status', '==', status)
+        .orderBy('createdAt', 'desc')
         .limit(limit + 1); // Fetch one extra to check for next page
 
     if (lastVisibleId) {
@@ -182,7 +182,6 @@ export async function getPendingTransactions(limit: number, lastVisibleId?: stri
 
     return { transactions, hasNextPage };
 }
-
 
 // --- Team Queries ---
 

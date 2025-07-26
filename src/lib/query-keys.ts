@@ -42,7 +42,7 @@ export const teamKeys = {
 export const transactionKeys = {
     all: ['transactions'] as const,
     lists: () => [...transactionKeys.all, 'list'] as const,
-    pending: () => [...transactionKeys.lists(), 'pending'] as const,
+    list: (status: 'pending' | 'verified' | 'rejected') => [...transactionKeys.lists(), { status }] as const,
 }
 
 export const generationLogKeys = {
