@@ -9,6 +9,7 @@ export const AnalyzedDocumentSchema = z.object({
   subject: z.string().describe('The main subject of the document (e.g., "Physics", "History", "Algebra").'),
   title: z.string().describe('A concise title for the assignment (e.g., "Quantum Mechanics Final", "World War II Worksheet").'),
   structuredContent: z.string().describe('The original content, restructured and cleaned up in Markdown format for clarity and better processing.'),
+  language: z.string().describe("The language of the document (e.g., 'English', 'Spanish', 'Arabic')."),
 });
 export type AnalyzedDocument = z.infer<typeof AnalyzedDocumentSchema>;
 

@@ -23,7 +23,7 @@ const AnalyzeDocumentInputSchema = z.object({
 export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocumentInputSchema>): Promise<AnalyzedDocument> {
   const validation = AnalyzeDocumentInputSchema.safeParse(input);
   if (!validation.success) {
-    throw new Error(`Invalid input for analyzeAcademicDocument: ${validation.error.message}`);
+    throw new Error(`Invalid input for analyzeAcademicDocument: ${'${validation.error.message}'}`);
   }
 
   const analysisPrompt = ai.definePrompt({
@@ -34,7 +34,8 @@ export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocum
 
     1.  Identify the main **subject** and a concise **title**.
     2.  Review the entire document and re-format it into a clean, well-structured **Markdown document**. Ensure questions, sub-questions, and options are clearly organized using headings, lists, and other appropriate markdown elements.
-    3.  Return the 'documentType' as provided in the input.
+    3.  Identify the **language** of the document (e.g., "English", "Arabic", "Spanish").
+    4.  Return the 'documentType' as provided in the input.
 
     Document Content:
     ---
@@ -57,7 +58,7 @@ const SolveDocumentInputSchema = z.object({
 export async function solveAcademicDocument(input: z.infer<typeof SolveDocumentInputSchema>): Promise<SolvedDocument> {
   const validation = SolveDocumentInputSchema.safeParse(input);
   if (!validation.success) {
-    throw new Error(`Invalid input for solveAcademicDocument: ${validation.error.message}`);
+    throw new Error(`Invalid input for solveAcademicDocument: ${'${validation.error.message}'}`);
   }
 
   const solvePrompt = ai.definePrompt({
@@ -66,7 +67,7 @@ export async function solveAcademicDocument(input: z.infer<typeof SolveDocumentI
     output: { schema: SolvedDocumentSchema },
     prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}** with a deep knowledge of **{{{analyzedDocument.title}}}**.
 
-    Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'.
+    Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'. **You must provide your response in {{{analyzedDocument.language}}}**.
 
     {{#if contextMarkdown}}
     --- IMPORTANT CONTEXT ---
