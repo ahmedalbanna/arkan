@@ -20,6 +20,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
+import React from 'react'; // Import React for React.ReactNode type
 
 interface ProjectCardProps {
     project: SavedProject;
@@ -42,6 +43,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
     
     const projectTitle = project.name || project.proposal?.title || 'Untitled Project';
 
+    const isDeletingThisProject = deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id;
+
     return (
         <Card className={cn(
             "flex flex-col group transition-all duration-300 ease-in-out",
@@ -49,13 +52,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
         )}>
             <CardHeader>
                 <div className="flex justify-between items-start gap-2">
-                    <CardTitle className="font-headline text-lg truncate" title={projectTitle}>
-                        {projectTitle}
+                    <CardTitle className="font-headline text-lg truncate" title={projectTitle as string}>
+                        {projectTitle as React.ReactNode}
                     </CardTitle>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id}>
-                               {deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id ? <Loader2 className="h-4 w-4 animate-spin" /> :  <Trash2 className="h-4 w-4 text-destructive" />}
+                            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" disabled={isDeletingThisProject}>
+                               {isDeletingThisProject ? <Loader2 className="h-4 w-4 animate-spin" /> :  <Trash2 className="h-4 w-4 text-destructive" />}
                             </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -63,7 +66,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     This action cannot be undone. This will permanently delete your project
-                                    "{projectTitle}".
+                                    "{projectTitle  as React.ReactNode}".
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -79,7 +82,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {project.projectIdea || project.proposal?.objective || 'No description available.'}
+                    {(project.proposal?.objective || 'No description available.') as React.ReactNode}
                 </p>
             </CardContent>
             <CardFooter>

@@ -64,14 +64,14 @@ function HeaderSection({ userName }: { userName: string }) {
         {t('editUser.pageTitle')}
       </h1>
       <p className="text-lg text-muted-foreground mt-2">
-        {t('editUser.pageSubtitle', { userName })}
+        {t('editUser.pageSubtitle').replace('{userName}', userName)}
       </p>
     </div>
   )
 }
 
 
-export default function EditUserPage({ params: paramsPromise }: { params: { id: string } }) {
-    const params = use(paramsPromise);
-    return <EditUserPageContent userId={params.id} />
+export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
+    const resolvedParams = use(params);
+    return <EditUserPageContent userId={resolvedParams.id} />
 }

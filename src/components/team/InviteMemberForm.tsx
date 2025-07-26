@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -39,7 +40,7 @@ export function InviteMemberForm({ teamId }: { teamId: string }) {
             queryClient.invalidateQueries({ queryKey: teamKeys.lists() });
             toast({
                 title: t('team.inviteSuccessTitle'),
-                description: t('team.inviteSuccessDescription', { email: variables.email }),
+                description: t('team.inviteSuccessDescription').replace('{email}', variables.email),
             });
             form.reset();
         },

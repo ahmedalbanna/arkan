@@ -14,6 +14,8 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 
 async function evaluateReport(variables: { body: any; token: string }): Promise<EvaluateReportOutput> {
     const response = await fetch('/api/evaluate-report', {
@@ -32,7 +34,9 @@ async function evaluateReport(variables: { body: any; token: string }): Promise<
 }
 
 export const EvaluationTools = () => {
-    const { proposal, sections, diagrams, evaluation, setEvaluation } = useBuilderStore();
+    const { proposal } = useBuilderStore();
+    const { sections, evaluation, setEvaluation } = useReportStore();
+    const { diagrams } = useDiagramStore();
     const { firebaseUser } = useAuth();
     const { t } = useLocalization();
     const { toast } = useToast();
@@ -115,7 +119,7 @@ export const EvaluationTools = () => {
         const body = {
             proposal,
             reportSections: sections,
-            diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+            diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
             acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
         };
         mutation.mutate({ body, token });

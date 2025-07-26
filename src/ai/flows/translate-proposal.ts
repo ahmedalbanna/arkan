@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, ProjectProposal } from '@/ai/schemas';
 
 const TranslateProposalInputSchema = z.object({
   proposal: ProjectProposalSchema.describe('The project proposal object to be translated.'),
@@ -39,19 +39,19 @@ const translateProposalFlow = ai.defineFlow(
       output: { schema: ProjectProposalSchema },
       prompt: `You are an expert translator. A user has provided a JSON object representing a project proposal. Your task is to translate all user-facing text values within this object to the specified target language.
 
-**CRITICAL INSTRUCTIONS:**
-1.  **Translate ONLY Text Values**: You must only translate the values of keys that contain human-readable text (e.g., "title", "objective", "description", "name", "mitigation").
-2.  **DO NOT Translate Keys**: The JSON keys themselves (like "title", "objective", etc.) must remain in English.
-3.  **Preserve Structure**: The original JSON structure, including all nested objects and arrays, must be perfectly preserved.
-4.  **Preserve Non-Text Data**: Do not alter data that is not natural language text. This includes dates (YYYY-MM-DD format), numbers (like "durationWeeks", "totalAmount"), booleans, and currency codes (like "USD").
-5.  **Return ONLY JSON**: Your final output must be only the translated JSON object, with no extra text or markdown formatting around it.
+Follow these rules:
 
-**Target Language:** {{{targetLang}}}
+- Translate ONLY the VALUES of the JSON object that are user-facing text. DO NOT translate the JSON keys.
+- Maintain the exact structure of the original JSON object.
+- Ensure the output is valid JSON.
+- The target language is: {{{targetLang}}}
 
-**Original Proposal JSON:**
-\`\`\`json
+JSON Object to Translate:
+---
 ${stringifiedProposal}
-\`\`\`
+---
+
+Translated JSON Object:
 `,
     });
 

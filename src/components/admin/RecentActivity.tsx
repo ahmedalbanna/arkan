@@ -14,12 +14,13 @@ const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: fal
 
 
 interface Activity {
-    id: string;
     userId: string;
     agentId: string;
     createdAt: string;
-    input: any;
-    output: any;
+    // id, input, and output are not present in the data from fetchDashboardStats
+    // id: string;
+    // input: any;
+    // output: any;
 }
 
 interface RecentActivityProps {
@@ -29,6 +30,8 @@ interface RecentActivityProps {
 function LogDetailView({ log }: { log: Activity }) {
     const { resolvedTheme } = useTheme();
 
+    // Since input and output are not available in this data structure, 
+    // we cannot display them in the detail view.
     return (
         <DialogContent className="max-w-4xl">
             <DialogHeader>
@@ -37,30 +40,10 @@ function LogDetailView({ log }: { log: Activity }) {
                     Agent: {log.agentId} | User: {log.userId}
                 </DialogDescription>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh]">
+            <div className="grid grid-cols-1 gap-4 max-h-[70vh]">
                 <div className="space-y-2">
-                    <h4 className="font-semibold">Input</h4>
-                    <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.input} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
-                            collapsed={2}
-                            displayDataTypes={false}
-                            name={false}
-                        />
-                    </ScrollArea>
-                </div>
-                <div className="space-y-2">
-                    <h4 className="font-semibold">Output</h4>
-                     <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.output} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
-                            collapsed={2}
-                            displayDataTypes={false}
-                            name={false}
-                        />
-                    </ScrollArea>
+                    <h4 className="font-semibold">Details Unavailable</h4>
+                    <p>Detailed input and output are not available for this activity entry.</p>
                 </div>
             </div>
         </DialogContent>
@@ -76,8 +59,9 @@ export function RecentActivity({ data }: RecentActivityProps) {
                 <CardTitle>{t('adminDashboard.recentActivityTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-                {data.length > 0 ? data.map((activity) => (
-                    <Dialog key={activity.id}>
+                {data.length > 0 ? data.map((activity, index) => (
+                    // Using index as key since id is not available in this data structure
+                    <Dialog key={index}>
                         <DialogTrigger asChild>
                             <div className="flex items-center gap-4 cursor-pointer hover:bg-muted p-2 rounded-md">
                                 <Avatar className="h-9 w-9">

@@ -1,17 +1,18 @@
 
 'use client';
 
-import type { IStylesOptions, IRunOptions, SectionType, INumberingOptions } from 'docx';
+import type { IStylesOptions, IRunOptions, INumberingOptions } from 'docx';
+import {SectionType} from 'docx'
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 import type { Root, PhrasingContent, List } from 'mdast';
 import { sectionConfig, diagramConfig } from './report-config';
 import { templates, type TemplateKey } from './docx-styles';
+import { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun, Document, Packer, HeadingLevel, Header, Footer, PageNumber, TableOfContents } from 'docx';
 
 export async function createDocxParagraphs(markdown: string) {
     const { unified } = await import('unified');
     const { default: remarkParse } = await import('remark-parse');
     const { default: remarkGfm } = await import('remark-gfm');
-    const { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun } = await import('docx');
 
     if (!markdown) return [];
 
@@ -186,7 +187,6 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: ISty
 
 
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
-    const { Document, Packer, Paragraph, HeadingLevel } = await import('docx');
     const { saveAs } = await import('file-saver');
     
     const allTemplates = await getStylesFromServer();
@@ -210,7 +210,6 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
 
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
-    const { Document, Packer, Paragraph, HeadingLevel, TextRun, Table, TableRow, TableCell, WidthType, Header, Footer, PageNumber, TableOfContents, AlignmentType } = await import('docx');
     const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
@@ -223,7 +222,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
         numbering,
         sections: [
             {
-                properties: { type: "nextPage" as SectionType },
+                properties: { type: SectionType.NEXT_PAGE },
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: title, style: 'Title' }),
@@ -231,7 +230,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                 ]
             },
             {
-                properties: { type: "nextPage" as SectionType },
+                properties: { type: SectionType.NEXT_PAGE },
                 headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
@@ -289,7 +288,6 @@ export async function exportReportAsDocx(
     templateKey: TemplateKey,
     translatedTitles: { [key in SectionName]?: string; }
 ) {
-    const { Document, Packer, Paragraph, HeadingLevel, AlignmentType, ImageRun, TextRun, TableOfContents, Header, Footer, PageNumber } = await import('docx');
     const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
@@ -361,7 +359,7 @@ export async function exportReportAsDocx(
         numbering,
         sections: [
             {
-                properties: { type: "nextPage" as SectionType },
+                properties: { type: SectionType.NEXT_PAGE },
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: `Project Report`, style: 'Title' }),
@@ -369,7 +367,7 @@ export async function exportReportAsDocx(
                 ]
             },
             {
-                properties: { type: "nextPage" as SectionType },
+                properties: { type: SectionType.NEXT_PAGE },
                 headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({

@@ -138,7 +138,7 @@ export default function PresentationViewer({ activePresentation }: PresentationV
           </div>
         </div>
         <CardDescription>
-          {t('builder.presentationGenerator.slideLabel', { current: currentSlide + 1, total: slides.length })}
+          {t('builder.presentationGenerator.slideLabel').replace('{current}', (currentSlide + 1).toString()).replace('{total}', slides.length.toString())}
         </CardDescription>
       </CardHeader>
 
@@ -181,7 +181,7 @@ export default function PresentationViewer({ activePresentation }: PresentationV
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`h-2 w-2 rounded-full ${currentSlide === index ? 'bg-primary' : 'bg-muted hover:bg-muted-foreground'}`}
-              aria-label={t('builder.presentationGenerator.goToSlide', { slideNumber: index + 1 })}
+              aria-label={t('builder.presentationGenerator.goToSlide').replace('{slideNumber}', (index + 1).toString())}
             />
           ))}
         </div>

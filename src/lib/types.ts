@@ -1,16 +1,14 @@
 
-import { type ProjectState as FullProjectState } from './project-state-schema';
-import type {
-  ProjectProposal,
-  DiagramType,
-  SectionName,
-  PresentationHistoryEntry,
-} from './schemas';
+import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, TranslateTextInput, TranslateTextOutput } from '@/ai/schemas';
 export type {
   ProjectProposal,
   DiagramType,
   SectionName,
   PresentationHistoryEntry,
+  ManipulateTextInput,
+  ManipulateTextOutput,
+  TranslateTextInput,
+  TranslateTextOutput,
 };
 export type {
   HistoryEntry,
@@ -20,15 +18,15 @@ export type { LoginCredentials } from '@/hooks/use-user';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
 export type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/hooks/use-features';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
-export type { TranslateTextOutput } from '@/ai/schemas';
 export type { PricingPlan } from '@/components/PricingCard';
-export type { SavedProject } from '@/services/project-service';
+export type { SavedProject, ProjectState } from '@/services/project-service';
 
-// This re-exports the Zod-inferred type for use on the client
-export type ProjectState = FullProjectState;
 export type TranslateVariables = {
     text: string;
     targetLang: 'en' | 'ar';
 };
-export type { HomeworkHistoryEntry } from '@/services/homework-service';
 export type { AgentData, Agent } from '@/lib/agents';
+
+// Define TranslateTextOutput here since it is no longer in schemas.ts
+export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
+export type { HomeworkHistoryEntry } from '@/hooks/useHomeworkSolverStore';

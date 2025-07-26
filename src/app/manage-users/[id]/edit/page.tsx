@@ -1,4 +1,6 @@
 
+'use client';
+
 import EditUserForm from '@/components/EditUserForm';
 import { useUserProfile } from '@/hooks/use-user';
 import { notFound } from 'next/navigation';
@@ -64,7 +66,7 @@ function HeaderSection({ userName }: { userName: string }) {
         {t('editUser.pageTitle')}
       </h1>
       <p className="text-lg text-muted-foreground mt-2">
-        {t('editUser.pageSubtitle', { userName })}
+        {t('editUser.pageSubtitle').replace('{userName}', userName)}
       </p>
     </div>
   )

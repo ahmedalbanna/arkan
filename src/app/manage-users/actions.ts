@@ -11,7 +11,7 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
   const adminAuth = getAdminAuth();
-  const sessionCookie = cookies().get('__session')?.value;
+  const sessionCookie = (await cookies()).get('__session')?.value;
   if (!sessionCookie) {
     return { authorized: false, message: 'Unauthorized' };
   }

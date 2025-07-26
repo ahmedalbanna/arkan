@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -26,7 +27,7 @@ export function TeamCard({ team }: TeamCardProps) {
             <AccordionTrigger className="p-4 hover:no-underline">
                 <div className="flex flex-col items-start">
                     <CardTitle className="font-headline text-xl">{team.name}</CardTitle>
-                    <CardDescription>{t('team.memberCount', { count: team.members.length })}</CardDescription>
+                    <CardDescription>{t('team.memberCount').replace('{count}', team.members.length.toString())}</CardDescription>
                 </div>
             </AccordionTrigger>
             <AccordionContent className="p-4 pt-0">

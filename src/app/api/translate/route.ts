@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         output: result,
     });
 
-    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/gs, '');
+    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
     return NextResponse.json({ translatedText: cleanedTranslatedText }, { status: 200 });
   } catch (error) {
     console.error('Error translating text:', error);

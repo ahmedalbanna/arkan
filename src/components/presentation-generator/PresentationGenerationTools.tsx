@@ -8,8 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
@@ -28,7 +26,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { GenerateIntroductionOutput } from '@/ai/flows/generate-introduction';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
@@ -38,6 +35,10 @@ import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks/use-templates';
 import { formatDistanceToNow } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { FileUploader } from '../FileUploader';
+import { PasteTextUploader } from '../PasteTextUploader';
+import { ImageUploader } from '../ImageUploader';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -167,7 +168,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             sections: selectedSections,
             diagrams: selectedDiagrams,
             guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
-            externalContextContent: selection.externalContext ? externalContext?.content : undefined,
+            externalContextContent: selection.externalContext && externalContext ? externalContext.map(c => c.content).join('\n\n---\n\n') : undefined,
             templateId: selectedPresentationTemplateId, // Pass the templateId
         };
         onGenerate(body);
@@ -330,22 +331,24 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                 ))}
                                                             </div>
                                                           )}
-                                                          {externalContext && (
+                                                          {externalContext.length > 0 && (
                                                             <div className="space-y-2 pt-2 border-t">
-                                                                <Label className="font-semibold">{t('builder.reportGenerator.context_external')}</Label>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        id="context-external-pres"
-                                                                        checked={!!currentSelection.externalContext}
-                                                                        onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', null, !!checked)}
-                                                                    />
-                                                                    <Label htmlFor="context-external-pres" className="text-sm font-normal">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <FileText className="h-4 w-4" />
-                                                                            {externalContext.fileName}
-                                                                        </div>
-                                                                    </Label>
-                                                                </div>
+                                                                <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
+                                                                {externalContext.map((item, index) => (
+                                                                    <div key={index} className="flex items-center space-x-2">
+                                                                        <Checkbox
+                                                                            id={`context-external-${'presentation'}-${index}`}
+                                                                            checked={!!currentSelection.externalContext[index]}
+                                                                            onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', index, !!checked)}
+                                                                        />
+                                                                        <Label htmlFor={`context-external-${'presentation'}-${index}`} className="text-sm font-normal">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <FileText className="h-4 w-4" />
+                                                                                {item.fileName}
+                                                                            </div>
+                                                                        </Label>
+                                                                    </div>
+                                                                ))}
                                                             </div>
                                                           )}
                                                       </div>
@@ -387,7 +390,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 )}
                                             >
                                                 <div className="flex flex-col">
-                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem', { slideCount: (p.slides || []).length })})</span>
+                                                    <span>{p.name} ({t('builder.presentationGenerator.historyItem').replace('{slideCount}', (p.slides || []).length.toString())})</span>
                                                     {isValidDate && (
                                                         <span className="text-xs text-muted-foreground">
                                                             {formatDistanceToNow(new Date(p.id), { addSuffix: true })}

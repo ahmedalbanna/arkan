@@ -64,7 +64,7 @@ export function useUpdateFeature() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation<Feature, Error, UpdateFeatureVariables>({
+  return useMutation<Feature, Error, UpdateFeatureVariables, { previousFeatures?: Feature[] }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateFeatureApi(variables, token);

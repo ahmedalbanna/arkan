@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -98,14 +97,17 @@ export const DiagramGenerationTools = () => {
     const diagramMutation = useMutation({
         mutationFn: generateDiagram,
         onSuccess: (data, variables) => {
-            const diagramKey = variables.body.diagramToGenerate;
+            const diagramKey = variables.body.diagramToGenerate as DiagramType;
+            const translatedTitle = t(diagramConfig[diagramKey].title);
             setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
             queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: t('builder.diagramGenerator.toasts.success', { title: t(diagramConfig[diagramKey].title) }) });
+            toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle }) });
             setActiveMutationKey(null);
         },
         onError: (error: Error, variables) => {
-            toast({ title: t('builder.diagramGenerator.toasts.failed', { title: t(diagramConfig[variables.body.diagramToGenerate].title) }), description: error.message, variant: "destructive" });
+            const diagramKey = variables.body.diagramToGenerate as DiagramType;
+            const translatedTitle = t(diagramConfig[diagramKey].title);
+            toast({ title: t('builder.diagramGenerator.toasts.failed', { title: translatedTitle }), description: error.message, variant: "destructive" });
             setActiveMutationKey(null);
         },
     });
@@ -122,13 +124,9 @@ export const DiagramGenerationTools = () => {
 
         const token = await firebaseUser.getIdToken();
         const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
-        const otherSections = Object.entries(selection.sections)
-            .filter(([, isSelected]) => isSelected)
-            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+        const otherSections = Object.entries(selection.sections) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
         
-        const otherDiagrams = Object.entries(selection.diagrams)
-            .filter(([, isSelected]) => isSelected)
-            .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+        const otherDiagrams = Object.entries(selection.diagrams) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
         
         const selectedExternalContexts = externalContext.filter((_, index) => selection.externalContext[index]);
 
@@ -138,9 +136,7 @@ export const DiagramGenerationTools = () => {
             otherSections,
             otherDiagrams,
             guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
-            externalContextContent: selectedExternalContexts.map(c => c.content).join('\n\n---\n\n'),
-        };
-        setActiveMutationKey(diagramType);
+            externalContextContent: selectedExternalContexts.map(c => c.content).join('')}; setActiveMutationKey(diagramType);
         diagramMutation.mutate({ body, token });
     };
 
@@ -205,8 +201,7 @@ export const DiagramGenerationTools = () => {
                                                 {guidelineState[key]?.custom.map((custom, index) => (
                                                     <div key={index} className="flex items-center gap-2 text-sm">
                                                         <span>- {custom}</span>
-                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>
-                                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>                                                            <Trash2 className="h-3 w-3 text-destructive" />
                                                         </Button>
                                                     </div>
                                                 ))}
@@ -217,8 +212,7 @@ export const DiagramGenerationTools = () => {
                                                         onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
                                                     />
-                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>
-                                                        <Plus className="h-4 w-4" />
+                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>                                                        <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </div>
@@ -252,10 +246,9 @@ export const DiagramGenerationTools = () => {
                                                           <p className="text-xs text-muted-foreground">{t('builder.diagramGenerator.noSections')}</p>
                                                         )}
                                                     </div>
-                                                    {Object.keys(diagrams || {}).length > 0 && (
-                                                      <div className="space-y-2 pt-2 border-t">
+                                                    {Object.keys(diagrams || {}).length > 0 && (                                                      <div className="space-y-2 pt-2 border-t">
                                                           <Label className="font-semibold">{t('builder.diagramGenerator.contextDiagrams')}</Label>
-                                                          {orderedDiagrams.filter(dKey => dKey !== key && diagrams?.[dKey]).map(contextKey => (
+                                                          {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
                                                               <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                   <Checkbox
                                                                       id={`context-diagram-${key}-${contextKey}`}
@@ -273,8 +266,7 @@ export const DiagramGenerationTools = () => {
                                                       </div>
                                                     )}
                                                      {/* Context selection UI for external file */}
-                                                    {externalContext.length > 0 && (
-                                                        <div className="space-y-2 pt-2 border-t">
+                                                    {externalContext.length > 0 && (                                                        <div className="space-y-2 pt-2 border-t">
                                                             <Label className="font-semibold">{t('builder.diagramGenerator.externalContext')}</Label>
                                                             {externalContext.map((item, index) => (
                                                                 <div key={index} className="flex items-center space-x-2">
@@ -303,7 +295,7 @@ export const DiagramGenerationTools = () => {
                                             onClick={() => onGenerateDiagram(key as DiagramType)}
                                             disabled={isAnythingGenerating || !agent?.isEnabled}
                                             className="font-headline"
-                                            title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.diagramGenerator.generateButton', { title: t(title) })}
+                                            title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.diagramGenerator.generateButton', { title: t(title) as string })}
                                         >
                                             {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                             {t('builder.diagramGenerator.generateButton')}

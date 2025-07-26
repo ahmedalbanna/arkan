@@ -2,6 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Languages, Loader2 } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
@@ -29,7 +30,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
 
   useEffect(() => {
     const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
-    if (savedDocxTemplate && docxTemplates[savedDocxTemplate]) {
+    if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
       setSelectedDocxTemplate(savedDocxTemplate);
     }
   }, [docxTemplates]);
@@ -55,7 +56,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                       <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
                   <SelectContent>
-                      {Object.entries(docxTemplates).map(([key, template]) => (
+                      {docxTemplates && Object.entries(docxTemplates).map(([key, template]) => (
                           <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
                       ))}
                   </SelectContent>

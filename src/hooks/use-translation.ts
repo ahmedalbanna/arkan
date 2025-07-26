@@ -6,10 +6,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
-import type { TranslateTextInput, TranslateTextOutput } from "@/ai/schemas";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { translateText as translateTextApi } from "@/services/translation-service";
+import { type TranslateTextOutput, type TranslateVariables } from "@/lib/types";
 
 /**
  * Custom mutation hook for translating text using an AI flow.
@@ -21,7 +21,7 @@ export function useTranslate() {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation<TranslateTextOutput, Error, TranslateTextInput>({
+  return useMutation<TranslateTextOutput, Error, TranslateVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return translateTextApi(variables, token);

@@ -34,7 +34,7 @@ export function useVerifyPayment() {
         },
         onSuccess: (data, variables) => {
             // Invalidate queries to refetch data after verification
-            queryClient.invalidateQueries({ queryKey: transactionKeys.pending() });
+            queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
             queryClient.invalidateQueries({ queryKey: userKeys.profile(variables.userId) });
 
             toast({

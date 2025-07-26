@@ -101,7 +101,7 @@ export function ProposalModeGenerator() {
         onSuccess: (data) => {
             setProposal(data);
             refetchUser(); // Invalidate user query to update credits
-            toast({ title: t('builder.toasts.generationSuccess'), description: t('builder.toasts.generationSuccessDesc', {item: 'Proposal'}) });
+            toast({ title: t('builder.toasts.generationSuccess'), description: t('builder.toasts.generationSuccessDesc').replace('{item}', 'Proposal') });
         },
         onError: (error: Error) => {
             toast({ title: t('builder.toasts.generationFailed'), description: error.message, variant: 'destructive' });

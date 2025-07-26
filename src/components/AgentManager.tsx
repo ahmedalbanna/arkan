@@ -21,19 +21,20 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { AgentCategory } from '@/lib/agents';
 
 const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
+  category: z.nativeEnum(AgentCategory),
   pageUrl: z.string().min(1, "Page URL is required").startsWith('/', "URL must start with /"),
   prompt: z.string().min(10, "Prompt must be at least 10 characters"),
 });
 
 type CreateAgentFormValues = z.infer<typeof createAgentSchema>;
 
-const agentCategories = [...new Set(AGENTS.map(a => a.category))];
+const agentCategories = Object.values(AgentCategory);
 
 function CreateAgentDialog() {
     const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +42,7 @@ function CreateAgentDialog() {
 
     const form = useForm<CreateAgentFormValues>({
         resolver: zodResolver(createAgentSchema),
-        defaultValues: { id: '', name: '', description: '', category: '', pageUrl: '/', prompt: '' },
+        defaultValues: { id: '', name: '', description: '', category: AgentCategory.ContentGeneration, pageUrl: '/', prompt: '' },
     });
 
     const onSubmit = (data: CreateAgentFormValues) => {

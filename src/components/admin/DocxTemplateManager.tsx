@@ -198,8 +198,9 @@ export default function DocxTemplateManager() {
         <CreateTemplateDialog />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {(Object.keys(templates) as TemplateKey[]).map((key) => {
-        const template = templates[key];
+      {(Object.keys(templates || {}) as TemplateKey[]).map((key) => {
+        const template = templates?.[key];
+        if (!template) return null;
         const styles = template.styles.default;
         const isDefaultTemplate = ['modern', 'classic', 'academic'].includes(key);
 
@@ -287,7 +288,7 @@ export default function DocxTemplateManager() {
                   <AccordionContent className="space-y-6">
                     {[1, 2, 3].map(level => (
                       <div key={level} className="space-y-3 p-2 border-l-2">
-                        <h4 className="font-semibold">{t('manageTemplates.headingLevel', { level })}</h4>
+                        <h4 className="font-semibold">{t('manageTemplates.headingLevel').replace('{level}', level.toString())}</h4>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label>{t('manageTemplates.fontSize')}</Label>

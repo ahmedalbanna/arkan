@@ -1,7 +1,8 @@
+
 // src/app/api/teams/[id]/invitations/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { auth as adminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -11,6 +12,7 @@ const inviteMemberSchema = z.object({
 
 // Helper to verify if the requester is the owner of the team
 async function verifyTeamOwner(request: Request, teamId: string) {
+    const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
@@ -55,7 +57,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
-        const userProfile = userDoc.data();
+        const userProfile = await getUserProfile(userId);
+
+        if (!userProfile) {
+            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
+        }
+
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();

@@ -264,7 +264,7 @@
     "fontSize": "Font Size (pt)",
     "fontColor": "Font Color",
     "bold": "Bold",
-    "headingLevel": "Heading {level}",
+    "c": "Heading {level}",
     "saveButton": "Save Template"
   },
   "templates": {
@@ -587,8 +587,9 @@
         "er": "ER Diagram"
       },
       "toasts": {
-        "success": "\"{title}\" generated successfully!",
-        "failed": "Failed to generate \"{title}\"",
+        "success": "Successfully generated {{title}} diagram!",
+        "failed": "Failed to generate {{title}} diagram.",
+        "generateButton": "Generate {{title}}",
         "updateSuccess": "Diagram updated successfully!",
         "updateFailed": "Diagram Update Failed"
       },

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, use, useActionState } from 'react';
@@ -68,7 +67,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   const { firebaseUser, userProfile: currentUserProfile } = useAuth();
   
   const [updateState, updateFormAction] = useActionState(handleUpdateUser, { errors: {} });
-  const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: null });
+  const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: '' });
 
   const form = useForm<EditUserFormValues>({
       resolver: zodResolver(editUserSchema),
@@ -86,7 +85,8 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
     if (updateState.success) {
       toast({ title: t('editUser.successToastTitle'), description: updateState.message });
     }
-    if (updateState.errors?._form) {
+    // Check if updateState.errors exists and has the _form property
+    if (updateState.errors && '_form' in updateState.errors) {
       toast({ title: t('editUser.errorToastTitle'), description: updateState.errors._form, variant: 'destructive' });
     }
   }, [updateState, t, toast]);

@@ -50,7 +50,7 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
-        name: "guidelines",
+        name: "guidelines" as never,
     });
 
     const isDefaultTemplate = PROPOSAL_TEMPLATES.some(t => t.id === template.id);
@@ -84,7 +84,7 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                     <div className="space-y-2 mt-2">
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex items-center gap-2">
-                                <FormField control={form.control} name={`guidelines.${index}`} render={({ field }) => (
+                                <FormField control={form.control} name={`guidelines.${index}` as any} render={({ field }) => (
                                     <Input {...field} disabled={isSaving || isDeleting} />
                                 )} />
                                 <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isSaving || isDeleting}>Remove</Button>
@@ -143,7 +143,7 @@ function CreateProposalTemplateDialog() {
 
      const { fields, append, remove } = useFieldArray({
         control: form.control,
-        name: "guidelines",
+        name: "guidelines" as never,
     });
 
     const handleSave = (data: CreateProposalFormValues) => {
@@ -213,7 +213,7 @@ function CreateProposalTemplateDialog() {
                             <div className="space-y-2 mt-2">
                                 {fields.map((field, index) => (
                                     <div key={field.id} className="flex items-center gap-2">
-                                        <FormField control={form.control} name={`guidelines.${index}`} render={({ field }) => (
+                                        <FormField control={form.control} name={`guidelines.${index}` as any} render={({ field }) => (
                                             <Input {...field} disabled={createMutation.isPending} />
                                         )} />
                                         <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>Remove</Button>

@@ -1,8 +1,19 @@
 
 'use client';
-import type { ProjectState } from "@/lib/project-state-schema";
 import type { AnyProjectProposal } from "@/ai/schemas";
 
+// This represents the full state of a project that can be saved or loaded.
+// It is a combination of states from various Zustand stores.
+export interface ProjectState {
+    name?: string;
+    projectIdea?: string;
+    proposal: AnyProjectProposal | null;
+    sections?: Record<string, string>;
+    diagrams?: Record<string, { plantUmlCode: string; imageUrl: string; }>;
+    presentation?: any; // Define a more specific type if needed
+    externalContext?: any[]; // Define a more specific type if needed
+    teamId?: string;
+}
 
 // Represents a project document saved in Firestore
 export interface SavedProject extends ProjectState {

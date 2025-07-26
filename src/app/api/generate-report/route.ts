@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
@@ -71,6 +71,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
         }
         
+        if (!proposal) {
+            return NextResponse.json({ message: "A project proposal is required to generate a full report." }, { status: 400 });
+        }
+        
         // Call the new evaluation agent to get the optimal configuration
         const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
         const evalResult = await evaluateAndSelectContext(evalInput);
@@ -81,15 +85,15 @@ export async function POST(request: Request) {
         const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
         for (const config of evalResult.configs) {
-            const agentInfo = sectionConfig[config.section];
+            const agentInfo = sectionConfig[config.section as SectionName];
             
             const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
             
             const agentInput = {
                 proposal,
                 sectionToGenerate: config.section,
-                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key] }), {}),
-                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key] }), {}),
+                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key as SectionName] }), {}),
+                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key as DiagramType] }), {}),
                 guidelines: config.guidelines,
                 instructionText,
             };
@@ -97,7 +101,7 @@ export async function POST(request: Request) {
             const result = await generateReportSection(agentInput);
             await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { [result.sectionName]: result.content } });
     
-            generatedSections[result.sectionName] = result.content;
+            generatedSections[result.sectionName as SectionName] = result.content;
         }
 
         return NextResponse.json({ sections: generatedSections }, { status: 200 });

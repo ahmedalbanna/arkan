@@ -1,11 +1,10 @@
-
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { type ProjectProposal } from "@/ai/schemas";
+import { type ProjectProposal, ProjectProposalSchema } from "@/ai/schemas";
 import { toast } from "@/hooks/use-toast";
 import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";
@@ -13,6 +12,7 @@ import { usePresentationStore } from "./usePresentationStore";
 import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
 import type { ProjectState } from "@/lib/types";
 import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
+import { z } from "zod";
 
 /**
  * Zustand store for managing the core state of the project builder.
@@ -80,10 +80,23 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         });
       },
       loadState: (newState) => {
+        let loadedProposal: ProjectProposal | null = null;
+        if (newState.proposal) {
+          // Attempt to parse the loaded proposal with the schema to ensure type correctness
+          const parseResult = ProjectProposalSchema.safeParse(newState.proposal);
+          if (parseResult.success) {
+            loadedProposal = parseResult.data;
+          } else {
+            console.error("Failed to parse loaded proposal state:", parseResult.error);
+            // Optionally show a toast or handle the error appropriately
+            toast({ title: "Error loading proposal", description: "The loaded proposal data was invalid.", variant: "destructive" });
+          }
+        }
+
         set({
           name: newState.name,
           projectIdea: newState.projectIdea || "",
-          proposal: newState.proposal || null,
+          proposal: loadedProposal, // Assign the parsed and validated proposal
           currentProjectId: newState.id || null, // Set the current project ID
           hasUnsavedChanges: false, // Loading a project means it's saved
         });
@@ -106,6 +119,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
+        codeGenerator: useCodeGeneratorStore.getState(),
         externalContext: useReportStore.getState().externalContext,
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
@@ -179,11 +193,26 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       }),
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
+
+        // Attempt to parse the loaded proposal with the schema during merge
+        let loadedProposal: ProjectProposal | null = null;
+        if (persistedState.proposal) {
+           const parseResult = ProjectProposalSchema.safeParse(persistedState.proposal);
+            if (parseResult.success) {
+                loadedProposal = parseResult.data;
+            } else {
+                console.error("Failed to parse persisted proposal state during merge:", parseResult.error);
+                // Optionally show a toast or handle the error appropriately
+                toast({ title: "Error loading saved proposal", description: "The saved proposal data was invalid.", variant: "destructive" });
+            }
+        }
+
         useReportStore.getState().loadState(persistedState);
         useDiagramStore.getState().loadState(persistedState);
         usePresentationStore.getState().loadState(persistedState);
         useCodeGeneratorStore.getState().loadState(persistedState);
-        return { ...merged, hasUnsavedChanges: false };
+
+        return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },
     }
   )

@@ -1,3 +1,4 @@
+
 // src/app/api/templates/proposal/route.ts
 import { NextResponse } from 'next/server';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
 
         await docRef.set(newTemplate);
 
-        return NextResponse.json({ id: docRef.id, ...newTemplate }, { status: 201 });
+        return NextResponse.json(newTemplate, { status: 201 });
     } catch (error) {
         console.error('Error creating proposal template:', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });

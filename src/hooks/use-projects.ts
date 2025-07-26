@@ -18,7 +18,7 @@ import {
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { ProjectState } from "@/lib/project-state-schema";
+import { type ProjectState } from "@/services/project-service";
 
 
 // Define types for mutation variables

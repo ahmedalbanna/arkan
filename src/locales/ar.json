@@ -587,8 +587,9 @@
         "er": "رسم بياني ER"
       },
       "toasts": {
-        "success": "تم إنشاء \"{title}\" بنجاح!",
-        "failed": "فشل إنشاء \"{title}\"",
+        "success": "تم إنشاؤها بنجاح {{title}}!",
+        "failed": "فشل إنشاء {{title}}.",
+        "generateButton":"إنشاء {{title}}",
         "updateSuccess": "تم تحديث الرسم البياني بنجاح!",
         "updateFailed": "فشل تحديث الرسم البياني"
       },

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-sound.md
 
 "use client";
