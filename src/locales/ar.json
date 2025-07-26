@@ -694,7 +694,7 @@
     },
     "examSolver": {
       "pageTitle": "حل الامتحانات بالذكاء الاصطناعي",
-      "pageSubtitle": "ارفع امتحان، ودع الذكاء الاصطناعي يحلله ويحله لك.",
+      "pageSubtitle": "ارفع امتحانًا، ودع الذكاء الاصطناعي يحلله ويحله لك.",
       "uploadCardTitle": "الخطوة 1: رفع ملف الامتحان PDF",
       "uploadCardDescription": "سيقوم النظام بتحليل ملف PDF، وتحويله إلى Markdown، وتحليل محتوياته.",
       "uploadAndAnalyzeButton": "رفع وتحليل",

@@ -204,7 +204,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         return (
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">{t('builder.reportGenerator.step3Title')}</CardTitle>
+                    <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-10 w-full" />
@@ -221,8 +221,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">{t('builder.reportGenerator.step3Title')}</CardTitle>
-                <CardDescription>{t('builder.reportGenerator.step3Desc')}</CardDescription>
+                <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
+                <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
                  <Tabs defaultValue="generate" className="w-full">

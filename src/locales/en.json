@@ -727,8 +727,6 @@
       "uploadAndAnalyzeButton": "Upload & Analyze",
       "analysisCardTitle": "Step 2: Analyzed Homework",
       "analysisCardDescription": "Review the structured questions. Click solve when ready.",
-      "analysisPlaceholder": "No homework has been analyzed yet. Please upload a file first.",
-      "solveButton": "Solve Homework",
       "solutionCardTitle": "Step 3: Homework Solution",
       "solutionCardDescription": "The AI-generated solution is displayed below.",
       "solvingInProgress": "Solving in progress... The AI is working on the solution.",
