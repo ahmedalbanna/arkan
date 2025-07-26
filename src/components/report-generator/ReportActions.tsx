@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -78,7 +77,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                       <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
                   <SelectContent>
-                      {Object.entries(docxTemplates).map(([key, template]) => (
+                      {docxTemplates && Object.entries(docxTemplates).map(([key, template]) => (
                           <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
                       ))}
                   </SelectContent>
