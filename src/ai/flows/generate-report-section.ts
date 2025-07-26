@@ -15,7 +15,7 @@ import type { AgentPrompt } from '@/lib/agents';
 // This input schema is generic and can handle any section generation.
 // The `sectionToGenerate` field tells the flow which agent's prompt to use.
 const GenerateSectionInputSchema = z.object({
-  proposal: AnyProjectProposalSchema,
+  proposal: AnyProjectProposalSchema.optional(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
@@ -48,7 +48,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
   const agentPrompt = agent.prompt as AgentPrompt;
   const basePrompt = agentPrompt.base;
 
-  const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+  const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
   
   // A single, dynamic prompt definition.
   const prompt = ai.definePrompt({
@@ -94,10 +94,12 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 {{/each}}
 {{/if}}
 
+{{#if proposal}}
 --- Main Input: Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
 \`\`\`
+{{/if}}
 `,
   });
 

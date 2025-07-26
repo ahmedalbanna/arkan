@@ -13,7 +13,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -157,7 +157,7 @@ export const DiagramGenerationTools = () => {
         }
 
         const token = await firebaseUser.getIdToken();
-        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: false };
+        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: false, proposal: true };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
@@ -167,7 +167,7 @@ export const DiagramGenerationTools = () => {
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
 
         const body = {
-            proposal: proposal,
+            proposal: selection.proposal ? proposal : undefined,
             diagramToGenerate: diagramType,
             otherSections,
             otherDiagrams,
@@ -207,7 +207,7 @@ export const DiagramGenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: false };
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: false, proposal: true };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -270,9 +270,12 @@ export const DiagramGenerationTools = () => {
                                         <TabsContent value="context" className="pt-4">
                                             <ScrollArea className="h-60 w-full">
                                             <div className="space-y-4 pr-4">
-                                                    {/* Context selection UI for other sections */}
                                                     <div className="space-y-2">
                                                         <Label className="font-semibold">{t('builder.diagramGenerator.contextSections')}</Label>
+                                                          <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
+                                                            <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                                                        </div>
                                                         {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
                                                                 <Checkbox
@@ -292,7 +295,6 @@ export const DiagramGenerationTools = () => {
                                                           <p className="text-xs text-muted-foreground">{t('builder.diagramGenerator.noSections')}</p>
                                                         )}
                                                     </div>
-                                                    {/* Context selection UI for diagrams */}
                                                     {Object.keys(diagrams || {}).length > 0 && (
                                                       <div className="space-y-2 pt-2 border-t">
                                                           <Label className="font-semibold">{t('builder.diagramGenerator.contextDiagrams')}</Label>

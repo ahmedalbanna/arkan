@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -36,7 +37,7 @@ export interface ReportState {
   guidelineState: Record<string, GuidelineState>;
   controlState: Record<SectionName, ControlState>;
   customGuidelineInput: Record<string, string>;
-  contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean; }>;
+  contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean; proposal: boolean; }>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
 }
@@ -54,7 +55,7 @@ interface ReportActions {
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
-    toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext', contextKey: string | null, isSelected: boolean) => void;
+    toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal', contextKey: string | null, isSelected: boolean) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
 }
@@ -186,10 +187,12 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set(state => {
             const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
             if (!newSelection[itemKey]) {
-                newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: false };
+                newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: false, proposal: true };
             }
             if (type === 'externalContext') {
                 newSelection[itemKey].externalContext = isSelected;
+            } else if (type === 'proposal') {
+                 newSelection[itemKey].proposal = isSelected;
             } else if (contextKey) {
                 newSelection[itemKey][type][contextKey] = isSelected;
             }
