@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -34,6 +34,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { Slider } from '../ui/slider';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
+import { FileUploader } from '../FileUploader';
+import { PasteTextUploader } from '../PasteTextUploader';
+import { ImageUploader } from '../ImageUploader';
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -84,20 +87,6 @@ async function generateReportApi(variables: any): Promise<any> {
     return await response.json();
 }
 
-
-async function uploadPdf(variables: {formData: FormData, token: string}): Promise<{ markdown: string }> {
-     const response = await fetch('/api/pdf-to-markdown', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${variables.token}` },
-        body: variables.formData,
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to process PDF');
-    }
-    return await response.json();
-}
-
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
@@ -125,8 +114,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         setSelectedReportTemplateId,
         setSection,
         setAllSections,
-        setExternalContext,
-        removeExternalContext,
         handleControlChange,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
@@ -134,9 +121,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
     } = useReportStore();
-
-    const [pdfFile, setPdfFile] = React.useState<File | null>(null);
-
+    
     const handleGenerationResult = (data: any, variables: any) => {
         if (variables.body.templateId) { // Full report was generated
             setAllSections(data.sections);
@@ -164,33 +149,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     });
 
 
-    const pdfMutation = useMutation({
-        mutationFn: uploadPdf,
-        onSuccess: (data, variables) => {
-            const file = variables.formData.get('file') as File;
-            setExternalContext(file.name, data.markdown);
-            queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
-            toast({ title: t('builder.reportGenerator.toasts.contextAdded'), description: t('builder.reportGenerator.toasts.contextAddedDesc', { fileName: file.name }) });
-        },
-        onError: (error: Error) => {
-            toast({ title: t('builder.reportGenerator.toasts.uploadFailed'), description: error.message, variant: "destructive" });
-        },
-    });
-
     const isAnythingGenerating = reportGenerationMutation.isPending;
     const isDisabled = isAnythingGenerating;
-    
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files?.[0]) {
-            const file = e.target.files[0];
-            if (file.type === 'application/pdf') {
-                setPdfFile(file);
-            } else {
-                toast({ title: "Invalid File Type", description: "Please upload a PDF file.", variant: "destructive" });
-            }
-        }
-    };
-    
+        
     const onGenerateSection = async (section: SectionName) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
@@ -198,7 +159,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         };
 
         const token = await firebaseUser.getIdToken();
-        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: false, proposal: true };
+        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
@@ -206,6 +167,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const otherDiagrams = Object.entries(selection.diagrams)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+        
+        const selectedExternalContexts = externalContext.filter((_, index) => selection.externalContext[index]);
 
 
         const body = {
@@ -215,7 +178,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
-            externalContextContent: selection.externalContext ? externalContext?.content : undefined,
+            externalContextContent: selectedExternalContexts.map(c => c.content).join('\n\n---\n\n'),
         };
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
@@ -237,20 +200,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         reportGenerationMutation.mutate({ body, token });
     };
 
-    const onPdfUpload = async () => {
-        if (!pdfFile || !firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        pdfMutation.mutate({ formData, token });
-    };
-
     if (!agentsLoaded) {
         return (
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">{t('builder.reportGenerator.step3Title')}</CardTitle>
-                    <CardDescription>{t('builder.reportGenerator.step3Desc')}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-10 w-full" />
@@ -307,7 +261,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: false, proposal: true };
+                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -428,7 +382,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                         </Label>
                                                                     </div>
                                                                 ))}
-                                                                {orderedSections.filter(sKey => sKey !==key && !sections[sKey]).length === orderedSections.length -1 && (
+                                                                {Object.values(sections).filter(Boolean).length <= 1 && orderedSections.filter(sKey => sKey !== key).length > 0 && (
                                                                     <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.noOtherSections')}</p>
                                                                 )}
                                                             </div>
@@ -452,22 +406,24 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                   ))}
                                                               </div>
                                                             )}
-                                                            {externalContext && (
+                                                            {externalContext.length > 0 && (
                                                                 <div className="space-y-2 pt-2 border-t">
                                                                     <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
-                                                                    <div className="flex items-center space-x-2">
-                                                                        <Checkbox
-                                                                            id={`context-external-${key}`}
-                                                                            checked={!!currentSelection.externalContext}
-                                                                            onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', null, !!checked)}
-                                                                        />
-                                                                        <Label htmlFor={`context-external-${key}`} className="text-sm font-normal">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <FileText className="h-4 w-4" />
-                                                                                {externalContext.fileName}
-                                                                            </div>
-                                                                        </Label>
-                                                                    </div>
+                                                                     {externalContext.map((contextItem, index) => (
+                                                                        <div key={index} className="flex items-center space-x-2">
+                                                                            <Checkbox
+                                                                                id={`context-external-${key}-${index}`}
+                                                                                checked={!!currentSelection.externalContext?.[index]}
+                                                                                onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', index, !!checked)}
+                                                                            />
+                                                                            <Label htmlFor={`context-external-${key}-${index}`} className="text-sm font-normal">
+                                                                                <div className="flex items-center gap-2">
+                                                                                    <FileText className="h-4 w-4" />
+                                                                                    {contextItem.fileName}
+                                                                                </div>
+                                                                            </Label>
+                                                                        </div>
+                                                                    ))}
                                                                 </div>
                                                               )}
                                                         </div>
@@ -491,47 +447,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 );
                             })}
                         </Accordion>
-                        <div className="pt-4 mt-4 border-t">
-                            <h3 className="text-sm font-semibold mb-2">{t('builder.reportGenerator.externalContext')}</h3>
-                            {externalContext ? (
-                                <div className="space-y-2">
-                                     <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground p-2 border rounded-md">
-                                       <div className="flex items-center gap-2 truncate">
-                                         <FileText className="h-4 w-4 shrink-0" />
-                                         <span className="truncate">{externalContext.fileName}</span>
-                                       </div>
-                                       <div className="flex items-center">
-                                            <Dialog>
-                                                <DialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
-                                                        <Eye className="h-4 w-4" />
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent className="max-w-3xl">
-                                                    <DialogHeader>
-                                                        <DialogTitle>{externalContext.fileName}</DialogTitle>
-                                                    </DialogHeader>
-                                                    <ScrollArea className="h-[60vh] rounded-md border p-4">
-                                                        <ReactMarkdown components={markdownComponents}>{externalContext.content}</ReactMarkdown>
-                                                    </ScrollArea>
-                                                </DialogContent>
-                                            </Dialog>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeExternalContext} title="Remove File">
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                       </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    <Input type="file" accept="application/pdf" onChange={handleFileChange} className="text-xs" />
-                                    <Button type="button" size="sm" onClick={onPdfUpload} disabled={!pdfFile || pdfMutation.isPending} className="w-full">
-                                        {pdfMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
-                                        Upload & Process PDF
-                                    </Button>
-                                </div>
-                            )}
-                        </div>
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
                          <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
@@ -540,6 +455,25 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <EvaluationTools />
                     </TabsContent>
                  </Tabs>
+                 <div className="pt-4 mt-4 border-t">
+                    <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
+                    <Tabs defaultValue="file" className="w-full">
+                         <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
+                            <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
+                            <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="file" className="mt-4">
+                            <FileUploader />
+                        </TabsContent>
+                         <TabsContent value="text" className="mt-4">
+                            <PasteTextUploader />
+                        </TabsContent>
+                        <TabsContent value="image" className="mt-4">
+                            <ImageUploader />
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </CardContent>
         </Card>
     );

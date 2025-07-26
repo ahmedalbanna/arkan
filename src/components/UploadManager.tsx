@@ -20,14 +20,14 @@ export function UploadManager() {
             <CardContent>
                 <Tabs defaultValue="file" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> File Upload</TabsTrigger>
+                        <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
                         <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
                         <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
                     </TabsList>
                     <TabsContent value="file" className="mt-4">
                        <FileUploader />
                     </TabsContent>
-                    <TabsContent value="text" className="mt-4">
+                     <TabsContent value="text" className="mt-4">
                         <PasteTextUploader />
                     </TabsContent>
                     <TabsContent value="image" className="mt-4">
