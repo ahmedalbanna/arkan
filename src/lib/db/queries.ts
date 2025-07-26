@@ -183,6 +183,16 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
     return { transactions, hasNextPage };
 }
 
+export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<TransactionData[]> {
+    const snapshot = await adminDb.collection('transactions')
+        .where('createdAt', '>=', startDate)
+        .where('createdAt', '<=', endDate)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionData);
+}
+
 // --- Team Queries ---
 
 export async function getUserTeams(userId: string) {

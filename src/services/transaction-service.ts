@@ -57,3 +57,27 @@ export async function verifyPayment(variables: VerifyPaymentVariables, token: st
     }
     return await response.json();
 }
+
+interface FetchReportParams {
+  token: string;
+  startDate: string;
+  endDate: string;
+}
+
+export async function fetchTransactionsForReport(params: FetchReportParams): Promise<TransactionData[]> {
+    const { token, startDate, endDate } = params;
+    if (!token) {
+        throw new Error("Authentication token is required.");
+    }
+    const queryParams = new URLSearchParams({ startDate, endDate });
+    const response = await fetch(`/api/transactions/report?${queryParams.toString()}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch transaction report data');
+    }
+    return await response.json();
+}

@@ -13,6 +13,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TransactionData } from '@/lib/db/queries';
+import { FinancialReportExporter } from './FinancialReportExporter';
+import { Card, CardHeader, CardTitle, CardDescription } from '../ui/card';
 
 const TRANSACTIONS_PER_PAGE = 6;
 type TransactionStatus = 'pending' | 'verified' | 'rejected';
@@ -114,21 +116,32 @@ function TransactionList({ status }: { status: TransactionStatus }) {
 
 export function PaymentVerificationConsole() {
     return (
-        <Tabs defaultValue="pending" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="pending">Pending</TabsTrigger>
-                <TabsTrigger value="verified">Verified</TabsTrigger>
-                <TabsTrigger value="rejected">Rejected</TabsTrigger>
-            </TabsList>
-            <TabsContent value="pending">
-                <TransactionList status="pending" />
-            </TabsContent>
-            <TabsContent value="verified">
-                <TransactionList status="verified" />
-            </TabsContent>
-            <TabsContent value="rejected">
-                <TransactionList status="rejected" />
-            </TabsContent>
-        </Tabs>
+        <div className="space-y-8">
+            <FinancialReportExporter />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Transaction History</CardTitle>
+                    <CardDescription>View and manage all user transactions.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Tabs defaultValue="pending" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3 mb-6">
+                            <TabsTrigger value="pending">Pending</TabsTrigger>
+                            <TabsTrigger value="verified">Verified</TabsTrigger>
+                            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="pending">
+                            <TransactionList status="pending" />
+                        </TabsContent>
+                        <TabsContent value="verified">
+                            <TransactionList status="verified" />
+                        </TabsContent>
+                        <TabsContent value="rejected">
+                            <TransactionList status="rejected" />
+                        </TabsContent>
+                    </Tabs>
+                </CardContent>
+            </Card>
+        </div>
     );
 }
