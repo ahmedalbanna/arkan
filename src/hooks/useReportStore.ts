@@ -4,7 +4,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { type SectionName, type DiagramType } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { sectionConfig } from '@/lib/report-config';
@@ -33,29 +32,29 @@ export interface ReportState {
   sections: { [key in SectionName]?: string };
   evaluation: EvaluateReportOutput | null;
   // UI States
-  externalContext: ExternalContext | null;
+  externalContext: ExternalContext[];
   guidelineState: Record<string, GuidelineState>;
   controlState: Record<SectionName, ControlState>;
   customGuidelineInput: Record<string, string>;
-  contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean; proposal: boolean; }>;
+  contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean[]; proposal: boolean; }>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
 }
 
 interface ReportActions {
     newSession: () => void;
-    loadState: (state: Partial<ReportState & { externalContext: ExternalContext | null }>) => void;
+    loadState: (state: Partial<ReportState & { externalContext: ExternalContext[] }>) => void;
     setSection: (key: SectionName, content: string) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
-    setExternalContext: (fileName: string, content: string) => void;
-    removeExternalContext: () => void;
+    addExternalContext: (fileName: string, content: string) => void;
+    removeExternalContext: (index: number) => void;
     handleControlChange: (section: SectionName, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
-    toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal', contextKey: string | null, isSelected: boolean) => void;
+    toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal', contextKey: string | number | null, isSelected: boolean) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
 }
@@ -85,7 +84,7 @@ const defaultControlState = {
 const initialState: ReportState = {
   sections: {},
   evaluation: null,
-  externalContext: null,
+  externalContext: [],
   guidelineState: getDefaultGuidelineState(),
   controlState: Object.keys(sectionConfig).reduce((acc, key) => ({ ...acc, [key]: defaultControlState }), {} as Record<SectionName, ControlState>),
   customGuidelineInput: {},
@@ -121,12 +120,14 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set({ evaluation });
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      setExternalContext: (fileName, content) => {
-        set({ externalContext: { fileName, content } });
+      addExternalContext: (fileName, content) => {
+        set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      removeExternalContext: () => {
-        set({ externalContext: null });
+      removeExternalContext: (index) => {
+        set((state) => ({
+            externalContext: state.externalContext.filter((_, i) => i !== index),
+        }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleControlChange: (section, control, value) => {
@@ -187,14 +188,19 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set(state => {
             const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
             if (!newSelection[itemKey]) {
-                newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: false, proposal: true };
+                newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: [], proposal: true };
             }
-            if (type === 'externalContext') {
-                newSelection[itemKey].externalContext = isSelected;
-            } else if (type === 'proposal') {
+            if (type === 'proposal') {
                  newSelection[itemKey].proposal = isSelected;
+            } else if (type === 'externalContext') {
+                if (typeof contextKey === 'number') {
+                    if (!Array.isArray(newSelection[itemKey].externalContext)) {
+                        newSelection[itemKey].externalContext = [];
+                    }
+                    newSelection[itemKey].externalContext[contextKey] = isSelected;
+                }
             } else if (contextKey) {
-                newSelection[itemKey][type][contextKey] = isSelected;
+                newSelection[itemKey][type][contextKey as string] = isSelected;
             }
             return { contextSelection: newSelection };
         });
