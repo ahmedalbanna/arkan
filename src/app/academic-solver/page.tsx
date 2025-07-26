@@ -1,11 +1,11 @@
 
 'use client';
 
-import HomeworkSolver from '@/components/homework-solver/HomeworkSolver';
+import AcademicSolver from '@/components/academic-solver/AcademicSolver';
 import { useLocalization } from '@/context/LocalizationContext';
 import { BookCheck } from 'lucide-react';
 
-export default function HomeworkSolverPage() {
+export default function AcademicSolverPage() {
   const { t } = useLocalization();
 
   return (
@@ -13,13 +13,13 @@ export default function HomeworkSolverPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <BookCheck className="w-10 h-10" />
-          {t('builder.homeworkSolver.pageTitle')}
+          {t('builder.academicSolver.pageTitle')}
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          {t('builder.homeworkSolver.pageSubtitle')}
+          {t('builder.academicSolver.pageSubtitle')}
         </p>
       </div>
-      <HomeworkSolver />
+      <AcademicSolver />
     </div>
   );
 }

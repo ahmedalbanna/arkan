@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TransactionData } from '@/lib/db/queries';
 import { FinancialReportExporter } from './FinancialReportExporter';
-import { Card, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 
 const TRANSACTIONS_PER_PAGE = 6;
 type TransactionStatus = 'pending' | 'verified' | 'rejected';

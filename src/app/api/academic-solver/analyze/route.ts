@@ -5,12 +5,13 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { deductCredit } from '@/services/credit-service';
-import { solveExam } from '@/ai/flows/exam-solver';
-import { AnalyzedExamSchema } from '@/ai/flows/exam-solver.shared';
+import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
 import { logGeneration } from '@/services/generation-service';
+import { AcademicDocumentTypeSchema } from '@/ai/flows/academic-solver.shared';
 
-const solveSchema = z.object({
-  analyzedExam: AnalyzedExamSchema,
+const analyzeSchema = z.object({
+  documentType: AcademicDocumentTypeSchema,
+  markdown: z.string().min(20, 'Markdown content is too short.'),
 });
 
 export async function POST(request: Request) {
@@ -25,19 +26,21 @@ export async function POST(request: Request) {
     const userId = decodedToken.uid;
 
     const body = await request.json();
-    const validation = solveSchema.safeParse(body);
+    const validation = analyzeSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
+
+    await deductCredit(userId, 1);
     
-    // Deduct a higher amount for solving
-    await deductCredit(userId, 3);
-    
-    const agentInput = validation.data.analyzedExam;
-    const result = await solveExam(agentInput);
+    const agentInput = {
+      documentType: validation.data.documentType,
+      markdownContent: validation.data.markdown,
+    };
+    const result = await analyzeAcademicDocument(agentInput);
 
     await logGeneration({
-        agentId: 'solve-exam',
+        agentId: `analyze-${validation.data.documentType}`,
         userId,
         input: agentInput,
         output: result,
@@ -46,7 +49,7 @@ export async function POST(request: Request) {
     return NextResponse.json(result, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error solving exam:', error);
+    console.error(`Error analyzing ${error.documentType}:`, error);
     if (error.message?.includes('credit')) {
         return NextResponse.json({ message: error.message }, { status: 402 });
     }
