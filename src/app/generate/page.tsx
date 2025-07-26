@@ -132,6 +132,7 @@ function GeneratePageContent() {
 
   const enabledTabs = [
       { id: 'proposal', enabled: isFeatureEnabled('proposal') },
+      { id: 'plan', enabled: isFeatureEnabled('plan') },
       { id: 'report', enabled: isFeatureEnabled('report') },
       { id: 'diagram', enabled: isFeatureEnabled('diagram') },
       { id: 'code', enabled: isFeatureEnabled('code') },
@@ -166,9 +167,11 @@ function GeneratePageContent() {
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
                             </TabsTrigger>
                         )}
-                        <TabsTrigger value="plan" className="gap-2">
-                            <GanttChartSquare className="h-4 w-4" /> Project Plan
-                        </TabsTrigger>
+                        {isFeatureEnabled('plan') && (
+                            <TabsTrigger value="plan" className="gap-2">
+                                <GanttChartSquare className="h-4 w-4" /> Project Plan
+                            </TabsTrigger>
+                        )}
                         {isFeatureEnabled('report') && (
                             <TabsTrigger value="report" className="gap-2" disabled={!proposal}>
                                 <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
