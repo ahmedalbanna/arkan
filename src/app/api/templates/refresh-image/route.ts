@@ -1,3 +1,4 @@
+
 // src/app/api/templates/refresh-image/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -5,6 +6,7 @@ import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
 import { getUserProfile } from '@/lib/db/queries';
+import { logGeneration } from '@/services/generation-service';
 
 const refreshImageSchema = z.object({
   templateType: z.enum(['docx', 'pptx', 'proposal', 'report', 'presentation']),
@@ -12,30 +14,29 @@ const refreshImageSchema = z.object({
   prompt: z.string(),
 });
 
-// Helper to verify admin role
 async function verifyAdmin(request: Request) {
     const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
+        return { authorized: false, message: 'Unauthorized', adminId: null };
     }
     const token = authorization.substring(7);
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const user = await getUserProfile(decodedToken.uid);
         if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden' };
+            return { authorized: false, message: 'Forbidden', adminId: null };
         }
-        return { authorized: true };
+        return { authorized: true, adminId: decodedToken.uid };
     } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
+        return { authorized: false, message: 'Unauthorized', adminId: null };
     }
 }
 
 
 export async function POST(request: Request) {
   const adminCheck = await verifyAdmin(request);
-  if (!adminCheck.authorized) {
+  if (!adminCheck.authorized || !adminCheck.adminId) {
     return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
   }
 
@@ -47,15 +48,21 @@ export async function POST(request: Request) {
     }
     
     const { templateType, templateId, prompt } = validation.data;
-
-    // 1. Generate the image using the AI flow
-    const { imageUrl: base64DataUri } = await generateImage({ prompt });
+    
+    const agentInput = { prompt };
+    const { imageUrl: base64DataUri } = await generateImage(agentInput);
     
     if (!base64DataUri.startsWith('data:image/')) {
         throw new Error('Invalid image data received from generation service.');
     }
 
-    // 2. Upload the image to Firebase Storage
+    await logGeneration({
+        agentId: 'generate-template-image',
+        userId: adminCheck.adminId,
+        input: agentInput,
+        output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
+    });
+    
     const storage = getStorage();
     const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
     
@@ -70,11 +77,9 @@ export async function POST(request: Request) {
         metadata: { contentType: mimeType },
     });
     
-    // 3. Make the file public and get its URL
     await file.makePublic();
     const publicUrl = file.publicUrl();
 
-    // 4. Update the imageUrl in the corresponding Firestore template document
     const collectionPath = templateType === 'docx' || templateType === 'pptx' ? 'styles' : 'items';
     const templateRef = adminDb.collection('templates').doc(templateType).collection(collectionPath).doc(templateId);
     

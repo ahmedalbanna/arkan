@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { deductCredit } from '@/services/credit-service';
 import { analyzeExam } from '@/ai/flows/exam-solver';
+import { logGeneration } from '@/services/generation-service';
 
 const analyzeSchema = z.object({
   markdown: z.string().min(20, 'Markdown content is too short.'),
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     }
     const token = authorization.substring(7);
     const decodedToken = await adminAuth.verifyIdToken(token);
+    const userId = decodedToken.uid;
 
     const body = await request.json();
     const validation = analyzeSchema.safeParse(body);
@@ -27,9 +29,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    await deductCredit(decodedToken.uid, 1);
+    await deductCredit(userId, 1);
+    
+    const agentInput = { markdownContent: validation.data.markdown };
+    const result = await analyzeExam(agentInput);
 
-    const result = await analyzeExam({ markdownContent: validation.data.markdown });
+    await logGeneration({
+        agentId: 'analyze-exam',
+        userId,
+        input: agentInput,
+        output: result,
+    });
 
     return NextResponse.json(result, { status: 200 });
 

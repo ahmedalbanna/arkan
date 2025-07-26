@@ -7,6 +7,7 @@ import { translateProposal } from '@/ai/flows/translate-proposal';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { ProjectProposalSchema } from '@/ai/schemas';
+import { logGeneration } from '@/services/generation-service';
 
 const translateProposalSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -31,10 +32,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    // Deduct a larger amount for a full proposal translation
     await deductCredit(userId, 2);
 
-    const result = await translateProposal(validation.data);
+    const agentInput = validation.data;
+    const result = await translateProposal(agentInput);
+
+    await logGeneration({
+        agentId: 'translate-proposal',
+        userId,
+        input: { targetLang: agentInput.targetLang, proposalTitle: agentInput.proposal.title }, // Don't log full object
+        output: { proposalTitle: result.title },
+    });
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error('Error translating proposal:', error);

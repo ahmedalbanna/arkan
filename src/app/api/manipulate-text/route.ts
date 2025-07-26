@@ -7,6 +7,7 @@ import { manipulateText } from '@/ai/flows/manipulate-text';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { ManipulateTextInputSchema } from '@/ai/schemas';
+import { logGeneration } from '@/services/generation-service';
 
 export async function POST(request: Request) {
   const auth = getAdminAuth();
@@ -28,7 +29,16 @@ export async function POST(request: Request) {
 
     await deductCredit(userId, 1);
 
-    const result = await manipulateText(validation.data);
+    const agentInput = validation.data;
+    const result = await manipulateText(agentInput);
+
+    await logGeneration({
+        agentId: 'manipulate-text',
+        userId,
+        input: agentInput,
+        output: result,
+    });
+    
     return NextResponse.json(result, { status: 200 });
 
   } catch (error) {

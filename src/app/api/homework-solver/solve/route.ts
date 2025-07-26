@@ -7,6 +7,7 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 import { deductCredit } from '@/services/credit-service';
 import { solveHomework } from '@/ai/flows/homework-solver';
 import { AnalyzedHomeworkSchema } from '@/ai/flows/homework-solver.shared';
+import { logGeneration } from '@/services/generation-service';
 
 const solveSchema = z.object({
   analyzedHomework: AnalyzedHomeworkSchema,
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
     }
     const token = authorization.substring(7);
     const decodedToken = await adminAuth.verifyIdToken(token);
+    const userId = decodedToken.uid;
 
     const body = await request.json();
     const validation = solveSchema.safeParse(body);
@@ -30,13 +32,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
     
-    // Deduct credit for solving
-    await deductCredit(decodedToken.uid, 2);
+    await deductCredit(userId, 2);
 
-    const result = await solveHomework({
+    const agentInput = {
         analyzedHomework: validation.data.analyzedHomework,
         curriculumContext: validation.data.curriculumContext,
         targetLang: validation.data.targetLang || 'English',
+    };
+    const result = await solveHomework(agentInput);
+
+    await logGeneration({
+        agentId: 'solve-homework',
+        userId,
+        input: agentInput,
+        output: result,
     });
 
     return NextResponse.json(result, { status: 200 });

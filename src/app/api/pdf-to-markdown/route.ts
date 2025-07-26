@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { rewriteDocumentToMarkdown } from '@/ai/flows/rewrite-document-to-markdown';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 export async function POST(request: Request) {
   const auth = getAdminAuth();
@@ -27,16 +28,21 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Invalid file type. Only PDF is allowed.' }, { status: 400 });
     }
 
-    // Deduct credit before processing
     await deductCredit(userId, 2);
 
-    // Convert file to Base64 Data URI
     const fileArrayBuffer = await file.arrayBuffer();
     const base64 = Buffer.from(fileArrayBuffer).toString('base64');
     const pdfDataUri = `data:application/pdf;base64,${base64}`;
     
-    // Call the simplified AI flow
-    const result = await rewriteDocumentToMarkdown({ pdfDataUri });
+    const agentInput = { pdfDataUri };
+    const result = await rewriteDocumentToMarkdown(agentInput);
+
+    await logGeneration({
+        agentId: 'pdf-to-markdown',
+        userId,
+        input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
+        output: result,
+    });
 
     return NextResponse.json({ markdown: result.markdown }, { status: 200 });
 

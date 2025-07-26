@@ -1,3 +1,4 @@
+
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -5,6 +6,7 @@ import { z } from 'zod';
 import { translateText } from '@/ai/flows/translate-text';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 const translateSchema = z.object({
   text: z.string().min(1),
@@ -31,8 +33,16 @@ export async function POST(request: Request) {
 
     await deductCredit(userId, 1);
 
-    const result = await translateText(validation.data);
-    // Use regex to remove text between --- and ---
+    const agentInput = validation.data;
+    const result = await translateText(agentInput);
+
+    await logGeneration({
+        agentId: 'translate-text',
+        userId,
+        input: agentInput,
+        output: result,
+    });
+
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/gs, '');
     return NextResponse.json({ translatedText: cleanedTranslatedText }, { status: 200 });
   } catch (error) {

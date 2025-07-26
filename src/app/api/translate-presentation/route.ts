@@ -7,6 +7,7 @@ import { translatePresentation } from '@/ai/flows/translate-presentation';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { PresentationHistoryEntrySchema } from '@/ai/schemas';
+import { logGeneration } from '@/services/generation-service';
 
 const translatePresentationSchema = z.object({
   presentation: PresentationHistoryEntrySchema,
@@ -31,10 +32,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
     }
 
-    // Deduct credit for presentation translation
     await deductCredit(userId, 2);
 
-    const result = await translatePresentation(validation.data);
+    const agentInput = validation.data;
+    const result = await translatePresentation(agentInput);
+
+    await logGeneration({
+        agentId: 'translate-presentation',
+        userId,
+        input: { ...agentInput, presentation: `Presentation ID: ${agentInput.presentation.id}` }, // Don't log full object
+        output: { ...result, presentation: `Presentation ID: ${result.id}` },
+    });
+
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error('Error translating presentation:', error);

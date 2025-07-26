@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { imageToText } from '@/ai/flows/image-to-text';
 import { deductCredit } from '@/services/credit-service';
 import { getAdminAuth } from '@/lib/firebase/admin';
+import { logGeneration } from '@/services/generation-service';
 
 export async function POST(request: Request) {
   const auth = getAdminAuth();
@@ -27,15 +28,21 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Invalid file type. Only images are allowed.' }, { status: 400 });
     }
 
-    // Deduct credit before processing. Image processing is similar in cost to PDF.
     await deductCredit(userId, 2);
 
-    // Convert file to Base64 Data URI
     const fileArrayBuffer = await file.arrayBuffer();
     const base64 = Buffer.from(fileArrayBuffer).toString('base64');
     const imageDataUri = `data:${file.type};base64,${base64}`;
     
-    const result = await imageToText({ imageDataUri });
+    const agentInput = { imageDataUri };
+    const result = await imageToText(agentInput);
+
+    await logGeneration({
+        agentId: 'image-to-text',
+        userId,
+        input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
+        output: result,
+    });
 
     return NextResponse.json({ text: result.text }, { status: 200 });
 
