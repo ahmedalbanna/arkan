@@ -11,28 +11,43 @@ export async function createDocxParagraphs(markdown: string) {
     const { unified } = await import('unified');
     const { default: remarkParse } = await import('remark-parse');
     const { default: remarkGfm } = await import('remark-gfm');
-    const { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType } = await import('docx');
+    const { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun } = await import('docx');
 
     if (!markdown) return [];
 
     const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
     const docxObjects: (InstanceType<typeof Paragraph> | InstanceType<typeof Table>)[] = [];
 
-    const transformInlines = (nodes: PhrasingContent[], options: IRunOptions = {}): InstanceType<typeof TextRun>[] => {
-        const runs: InstanceType<typeof TextRun>[] = [];
+    // Make transformInlines async to handle image fetching
+    const transformInlines = async (nodes: PhrasingContent[], options: IRunOptions = {}): Promise<(InstanceType<typeof TextRun> | InstanceType<typeof ImageRun>)[]> => {
+        const runs: (InstanceType<typeof TextRun> | InstanceType<typeof ImageRun>)[] = [];
         for (const node of nodes) {
             switch (node.type) {
                 case 'strong':
-                    runs.push(...transformInlines(node.children, { ...options, bold: true }));
+                    runs.push(...await transformInlines(node.children, { ...options, bold: true }));
                     break;
                 case 'emphasis':
-                    runs.push(...transformInlines(node.children, { ...options, italics: true }));
+                    runs.push(...await transformInlines(node.children, { ...options, italics: true }));
                     break;
                 case 'inlineCode':
                     runs.push(new TextRun({ ...options, text: node.value, font: { name: 'Courier New' } }));
                     break;
                 case 'link':
-                    runs.push(...transformInlines(node.children, { ...options, style: 'Hyperlink' }));
+                    runs.push(...await transformInlines(node.children, { ...options, style: 'Hyperlink' }));
+                    break;
+                case 'image':
+                    try {
+                        const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(node.url)}`;
+                        const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
+                        if (imageBuffer) {
+                            runs.push(new ImageRun({
+                                data: imageBuffer,
+                                transformation: { width: 100, height: 100 } // Smaller size for inline images
+                            }));
+                        }
+                    } catch (e) {
+                        console.error("Failed to process inline image", e);
+                    }
                     break;
                 case 'text':
                     runs.push(new TextRun({ ...options, text: node.value }));
@@ -44,19 +59,19 @@ export async function createDocxParagraphs(markdown: string) {
         return runs;
     }
 
-    const processListItems = (listNode: List, level: number): InstanceType<typeof Paragraph>[] => {
+    const processListItems = async (listNode: List, level: number): Promise<InstanceType<typeof Paragraph>[]> => {
         let paragraphs: InstanceType<typeof Paragraph>[] = [];
         for (const listItem of listNode.children) {
             for (const itemContent of listItem.children) {
                 if (itemContent.type === 'paragraph') {
                     paragraphs.push(new Paragraph({
-                        children: transformInlines(itemContent.children),
+                        children: await transformInlines(itemContent.children),
                         style: 'ListParagraph',
                         bullet: listNode.ordered ? undefined : { level },
                         numbering: listNode.ordered ? { reference: "default-numbering", level } : undefined,
                     }));
                 } else if (itemContent.type === 'list') {
-                    paragraphs.push(...processListItems(itemContent, level + 1));
+                    paragraphs.push(...await processListItems(itemContent, level + 1));
                 }
             }
         }
@@ -67,38 +82,52 @@ export async function createDocxParagraphs(markdown: string) {
         switch (node.type) {
             case 'heading':
                 docxObjects.push(new Paragraph({
-                    children: transformInlines(node.children),
+                    children: await transformInlines(node.children),
                     heading: `Heading${node.depth}` as any,
                 }));
                 break;
             case 'paragraph':
-                docxObjects.push(new Paragraph({
-                    children: transformInlines(node.children),
-                    spacing: { after: 120 },
-                }));
+                const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
+                if (imageNode) {
+                    const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
+                    const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
+                    if (imageBuffer) {
+                        docxObjects.push(new Paragraph({
+                            children: [new ImageRun({ data: imageBuffer, transformation: { width: 450, height: 300 } })],
+                            alignment: AlignmentType.CENTER,
+                        }));
+                    } else {
+                        docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
+                    }
+                } else {
+                    docxObjects.push(new Paragraph({
+                        children: await transformInlines(node.children),
+                        spacing: { after: 120 },
+                    }));
+                }
                 break;
             case 'list':
-                docxObjects.push(...processListItems(node, 0));
+                docxObjects.push(...await processListItems(node, 0));
                 break;
             case 'blockquote':
                 for (const content of node.children) {
                     if (content.type === 'paragraph') {
                         docxObjects.push(new Paragraph({
-                            children: transformInlines(content.children),
+                            children: await transformInlines(content.children),
                             style: 'Quote',
                         }));
                     }
                 }
                 break;
             case 'table': {
-                const tableRows = node.children.map((row, rowIndex) => {
+                const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
                     return new TableRow({
-                        children: row.children.map(cell => new TableCell({
-                            children: [new Paragraph({ children: transformInlines(cell.children) })],
-                        })),
+                        children: await Promise.all(row.children.map(async cell => new TableCell({
+                            children: [new Paragraph({ children: await transformInlines(cell.children) })],
+                        }))),
                         tableHeader: rowIndex === 0,
                     });
-                });
+                }));
                 docxObjects.push(new Table({
                     rows: tableRows,
                     width: { size: 100, type: WidthType.PERCENTAGE },
