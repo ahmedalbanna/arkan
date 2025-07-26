@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -247,7 +247,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
                         </div>
 
-                        <Button onClick={onGenerateFullReport} className="w-full mb-4 font-headline">
+                        <Button onClick={onGenerateFullReport} className="w-full mb-4 font-headline" disabled={!proposal}>
                             {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                             {t('builder.reportGenerator.GenerateFullReport')}
                         </Button>
@@ -262,6 +262,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+                                const hasSelectedContext = currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || currentSelection.externalContext.some(v => v);
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -434,9 +435,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                <Button
                                                     type="button"
                                                     onClick={() => onGenerateSection(key)}
-                                                    disabled={isAnythingGenerating || !agent?.isEnabled}
+                                                    disabled={isAnythingGenerating || !agent?.isEnabled || !hasSelectedContext}
                                                     className="font-headline"
-                                                    title={!agent?.isEnabled ? 'This agent is disabled' : `Generate ${t(title)}`}
+                                                    title={!agent?.isEnabled ? 'This agent is disabled' : !hasSelectedContext ? "Please select at least one context item" : `Generate ${t(title)}`}
                                                 >
                                                     {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                                     {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
