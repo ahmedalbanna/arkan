@@ -22,7 +22,7 @@ export interface AcademicSolverState {
   documentType: AcademicDocumentType | null;
   analyzedDocument: AnalyzedDocument | null;
   solvedDocument: SolvedDocument | null;
-  originalFile: { name: string; type: string; dataUrl: string } | null;
+  questionContent: string | null;
   externalContext: ExternalContext[];
 }
 
@@ -31,7 +31,7 @@ interface AcademicSolverActions {
   setDocumentType: (type: AcademicDocumentType | null) => void;
   setAnalyzedDocument: (document: AnalyzedDocument | null) => void;
   setSolvedDocument: (solution: SolvedDocument | null) => void;
-  setOriginalFile: (file: File | null) => Promise<void>;
+  setQuestionContent: (content: string | null) => void;
   addExternalContext: (fileName: string, content: string) => void;
   removeExternalContext: (index: number) => void;
   resetCurrent: () => void;
@@ -42,17 +42,8 @@ const initialState: AcademicSolverState = {
   documentType: null,
   analyzedDocument: null,
   solvedDocument: null,
-  originalFile: null,
+  questionContent: null,
   externalContext: [],
-};
-
-const fileToDataUrl = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 };
 
 export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolverActions>()(
@@ -71,18 +62,13 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         solvedDocument: solution,
         stage: solution ? "solved" : "readyToSolve",
       }),
-    setOriginalFile: async (file) => {
-      if (!file) {
-        set({ originalFile: null, stage: "idle", analyzedDocument: null, solvedDocument: null });
-        return;
-      }
-      const dataUrl = await fileToDataUrl(file);
-      set({
-        originalFile: { name: file.name, type: file.type, dataUrl },
-        stage: "idle", // Reset stage when a new file is selected
-        analyzedDocument: null,
-        solvedDocument: null,
-      });
+    setQuestionContent: (content) => {
+        set({
+            questionContent: content,
+            stage: "idle",
+            analyzedDocument: null,
+            solvedDocument: null
+        })
     },
     addExternalContext: (fileName, content) => {
         set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));

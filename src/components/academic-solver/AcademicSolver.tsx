@@ -5,8 +5,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,21 +16,7 @@ import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
-import { FileUploader as ContextFileUploader } from '../FileUploader';
-import { PasteTextUploader } from '../PasteTextUploader';
-import { ImageUploader } from '../ImageUploader';
-import { useReportStore } from '@/hooks/useReportStore';
-
-// Re-using the same function, just changing the URL and body structure slightly
-async function parseFile(formData: FormData, token: string): Promise<{ markdown: string }> {
-  const response = await fetch('/api/pdf-to-markdown', {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
-    body: formData,
-  });
-  if (!response.ok) throw new Error((await response.json()).message || 'File parsing failed.');
-  return response.json();
-}
+import { AcademicUploaders } from './AcademicUploaders';
 
 async function analyzeApi(variables: { markdown: string, documentType: 'exam' | 'homework', token: string }): Promise<any> {
     const { markdown, documentType, token } = variables;
@@ -55,60 +40,41 @@ async function solveApi(variables: { analyzedDocument: any, contextMarkdown?: st
     return response.json();
 }
 
-
 export default function AcademicSolver() {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
-  const { addExternalContext, removeExternalContext } = useReportStore.getState();
 
   const {
     stage,
     documentType,
     analyzedDocument,
     solvedDocument,
-    originalFile,
+    questionContent,
     externalContext,
     setStage,
     setDocumentType,
+    setQuestionContent,
     setAnalyzedDocument,
     setSolvedDocument,
-    setOriginalFile,
+    addExternalContext,
+    removeExternalContext,
     resetCurrent,
   } = useAcademicSolverStore();
 
-  const parseMutation = useMutation({ mutationFn: (vars: { formData: FormData, token: string }) => parseFile(vars.formData, vars.token) });
   const analyzeMutation = useMutation({ mutationFn: analyzeApi });
   const solveMutation = useMutation({ mutationFn: solveApi });
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-        if (selectedFile.type === 'application/pdf') {
-          await setOriginalFile(selectedFile);
-        } else {
-          toast({ title: t('builder.academicSolver.toasts.invalidFile'), variant: 'destructive' });
-          await setOriginalFile(null);
-        }
-    }
-  };
-
   const handleAnalyze = async () => {
-    if (!originalFile || !firebaseUser || !documentType) {
-      toast({ title: t('builder.academicSolver.toasts.analysisError'), variant: 'destructive' });
+    if (!questionContent || !documentType || !firebaseUser) {
+      toast({ title: t('builder.academicSolver.toasts.analysisError'), description: "Please provide the document content and select a document type.", variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
-    setStage('parsing');
-    const fileBlob = await (await fetch(originalFile.dataUrl)).blob();
-    const formData = new FormData();
-    formData.append('file', fileBlob, originalFile.name);
-
+    setStage('analyzing');
+    
     try {
-      const parsedData = await parseMutation.mutateAsync({ formData, token });
-      refetchUser();
-      setStage('analyzing');
-      const analysisData = await analyzeMutation.mutateAsync({ markdown: parsedData.markdown, documentType, token });
+      const analysisData = await analyzeMutation.mutateAsync({ markdown: questionContent, documentType, token });
       setAnalyzedDocument(analysisData);
       setStage('readyToSolve');
       refetchUser();
@@ -172,34 +138,23 @@ export default function AcademicSolver() {
                 </div>
             </RadioGroup>
 
-            <div className="space-y-2">
-                <Label htmlFor="file-input-questions">{t('builder.academicSolver.uploadLabel')} (Questions)</Label>
-                <Input id="file-input-questions" type="file" accept=".pdf" onChange={handleFileChange} disabled={isProcessing} key={originalFile?.name || 'file-input-q'} />
-                {originalFile && <p className="text-xs text-muted-foreground">Selected: {originalFile.name}</p>}
-            </div>
+             <AcademicUploaders
+                title="Questions Document"
+                onContentAdded={setQuestionContent}
+                onContentRemoved={() => setQuestionContent(null)}
+                isProcessing={isProcessing}
+             />
              
-             <div className="pt-4 border-t">
-                  <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
-                  <Tabs defaultValue="file" className="w-full">
-                       <TabsList className="grid w-full grid-cols-3">
-                          <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> PDF</TabsTrigger>
-                          <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Text</TabsTrigger>
-                          <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Image</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="file" className="mt-4">
-                          <ContextFileUploader />
-                      </TabsContent>
-                       <TabsContent value="text" className="mt-4">
-                          <PasteTextUploader />
-                      </TabsContent>
-                      <TabsContent value="image" className="mt-4">
-                           <ImageUploader />
-                      </TabsContent>
-                  </Tabs>
-              </div>
+             <AcademicUploaders
+                title="Context/Syllabus Document (Optional)"
+                onContentAdded={addExternalContext}
+                onContentRemoved={removeExternalContext}
+                isProcessing={isProcessing}
+                isContext
+             />
 
-            <Button onClick={handleAnalyze} disabled={!originalFile || !documentType || isProcessing} className="w-full">
-                {stage === 'parsing' || stage === 'analyzing' ? (
+            <Button onClick={handleAnalyze} disabled={!questionContent || !documentType || isProcessing} className="w-full">
+                {stage === 'analyzing' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
@@ -231,10 +186,10 @@ export default function AcademicSolver() {
           <TabsContent value="analysis" className="flex-grow">
              <CardContent>
                  <ScrollArea className="h-[calc(100vh-350px)] p-1">
-                      {stage === 'analyzing' || stage === 'parsing' ? (
+                      {stage === 'analyzing' ? (
                           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                               <Loader2 className="h-12 w-12 animate-spin mb-4" />
-                              <p>{stage === 'parsing' ? 'Parsing PDF...' : `Analyzing ${documentType}...`}</p>
+                              <p>{`Analyzing ${documentType}...`}</p>
                           </div>
                       ) : analyzedDocument ? (
                           <ReactMarkdown components={markdownComponents}>{analyzedDocument.structuredContent}</ReactMarkdown> 
