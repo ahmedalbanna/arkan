@@ -49,19 +49,31 @@ export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocum
 
 
 // 2. Solve Document Flow
-export async function solveAcademicDocument(input: AnalyzedDocument): Promise<SolvedDocument> {
-  const validation = AnalyzedDocumentSchema.safeParse(input);
+const SolveDocumentInputSchema = z.object({
+  analyzedDocument: AnalyzedDocumentSchema,
+  contextMarkdown: z.string().optional().describe("Additional context from a syllabus or textbook to help answer the questions accurately."),
+});
+
+export async function solveAcademicDocument(input: z.infer<typeof SolveDocumentInputSchema>): Promise<SolvedDocument> {
+  const validation = SolveDocumentInputSchema.safeParse(input);
   if (!validation.success) {
     throw new Error(`Invalid input for solveAcademicDocument: ${validation.error.message}`);
   }
 
   const solvePrompt = ai.definePrompt({
     name: 'solveAcademicDocumentPrompt',
-    input: { schema: AnalyzedDocumentSchema },
+    input: { schema: SolveDocumentInputSchema },
     output: { schema: SolvedDocumentSchema },
-    prompt: `You are an expert tutor specializing in **{{{subject}}}** with a deep knowledge of **{{{title}}}**.
+    prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}** with a deep knowledge of **{{{analyzedDocument.title}}}**.
 
-    Your task is to provide a comprehensive and accurate solution to the following '{{{documentType}}}'.
+    Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'.
+
+    {{#if contextMarkdown}}
+    --- IMPORTANT CONTEXT ---
+    Use the following text as the primary source of truth and context for answering the questions. Base your solutions on this material.
+    {{{contextMarkdown}}}
+    -------------------------
+    {{/if}}
     
     For each question in the provided document, generate a detailed, well-structured solution. Present the final output as an array of question/solution pairs.
     
@@ -71,7 +83,7 @@ export async function solveAcademicDocument(input: AnalyzedDocument): Promise<So
 
     Document Questions:
     ---
-    {{{structuredContent}}}
+    {{{analyzedDocument.structuredContent}}}
     ---
     `,
   });

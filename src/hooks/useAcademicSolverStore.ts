@@ -2,7 +2,6 @@
 'use client';
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from "@/ai/flows/academic-solver.shared";
 
 export type AcademicSolverStage =
@@ -19,6 +18,7 @@ export interface AcademicSolverState {
   analyzedDocument: AnalyzedDocument | null;
   solvedDocument: SolvedDocument | null;
   originalFile: { name: string; type: string; dataUrl: string } | null;
+  contextFile: { name: string; type: string; dataUrl: string } | null;
 }
 
 interface AcademicSolverActions {
@@ -27,6 +27,7 @@ interface AcademicSolverActions {
   setAnalyzedDocument: (document: AnalyzedDocument | null) => void;
   setSolvedDocument: (solution: SolvedDocument | null) => void;
   setOriginalFile: (file: File | null) => Promise<void>;
+  setContextFile: (file: File | null) => Promise<void>;
   resetCurrent: () => void;
 }
 
@@ -36,6 +37,7 @@ const initialState: AcademicSolverState = {
   analyzedDocument: null,
   solvedDocument: null,
   originalFile: null,
+  contextFile: null,
 };
 
 const fileToDataUrl = (file: File): Promise<string> => {
@@ -74,6 +76,16 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         stage: "idle", // Reset stage when a new file is selected
         analyzedDocument: null,
         solvedDocument: null,
+      });
+    },
+    setContextFile: async (file) => {
+      if (!file) {
+        set({ contextFile: null });
+        return;
+      }
+      const dataUrl = await fileToDataUrl(file);
+      set({
+        contextFile: { name: file.name, type: file.type, dataUrl },
       });
     },
     resetCurrent: () => set(initialState),

@@ -44,12 +44,12 @@ async function analyzeApi(variables: { markdown: string, documentType: 'exam' | 
     return response.json();
 }
 
-async function solveApi(variables: { analyzedDocument: any, token: string }): Promise<any> {
-    const { analyzedDocument, token } = variables;
+async function solveApi(variables: { analyzedDocument: any, contextMarkdown?: string, token: string }): Promise<any> {
+    const { analyzedDocument, contextMarkdown, token } = variables;
     const response = await fetch('/api/academic-solver/solve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ analyzedDocument }),
+      body: JSON.stringify({ analyzedDocument, contextMarkdown }),
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Solving failed.');
     return response.json();
@@ -67,11 +67,13 @@ export default function AcademicSolver() {
     analyzedDocument,
     solvedDocument,
     originalFile,
+    contextFile,
     setStage,
     setDocumentType,
     setAnalyzedDocument,
     setSolvedDocument,
     setOriginalFile,
+    setContextFile,
     resetCurrent,
   } = useAcademicSolverStore();
 
@@ -79,14 +81,19 @@ export default function AcademicSolver() {
   const analyzeMutation = useMutation({ mutationFn: analyzeApi });
   const solveMutation = useMutation({ mutationFn: solveApi });
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'original' | 'context') => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
         if (selectedFile.type === 'application/pdf') {
-          await setOriginalFile(selectedFile);
+          if (fileType === 'original') {
+            await setOriginalFile(selectedFile);
+          } else {
+            await setContextFile(selectedFile);
+          }
         } else {
           toast({ title: t('builder.academicSolver.toasts.invalidFile'), variant: 'destructive' });
-          await setOriginalFile(null);
+          if (fileType === 'original') await setOriginalFile(null);
+          else await setContextFile(null);
         }
     }
   };
@@ -124,8 +131,24 @@ export default function AcademicSolver() {
     }
     const token = await firebaseUser.getIdToken();
     setStage('solving');
+    
+    let contextMarkdown: string | undefined = undefined;
+    if (contextFile) {
+        try {
+            const contextBlob = await (await fetch(contextFile.dataUrl)).blob();
+            const formData = new FormData();
+            formData.append('file', contextBlob, contextFile.name);
+            const parsedData = await parseMutation.mutateAsync({ formData, token });
+            contextMarkdown = parsedData.markdown;
+        } catch (error: any) {
+             toast({ title: "Context File Error", description: `Failed to process the context file: ${error.message}`, variant: 'destructive' });
+             setStage('readyToSolve');
+             return;
+        }
+    }
+    
     try {
-      const solvedData = await solveMutation.mutateAsync({ analyzedDocument, token });
+      const solvedData = await solveMutation.mutateAsync({ analyzedDocument, contextMarkdown, token });
       setSolvedDocument(solvedData);
       setStage('solved');
       refetchUser();
@@ -145,7 +168,7 @@ export default function AcademicSolver() {
         </CardHeader>
         <CardContent className="space-y-4">
              <RadioGroup
-                value={documentType}
+                value={documentType || undefined}
                 onValueChange={(value) => setDocumentType(value as 'exam' | 'homework')}
                 className="grid grid-cols-2 gap-4"
                 disabled={isProcessing}
@@ -165,9 +188,14 @@ export default function AcademicSolver() {
             </RadioGroup>
 
             <div className="space-y-2">
-                <Label htmlFor="file-input">{t('builder.academicSolver.uploadLabel')}</Label>
-                <Input id="file-input" type="file" accept=".pdf" onChange={handleFileChange} disabled={isProcessing} key={originalFile?.name || 'file-input'} />
+                <Label htmlFor="file-input-questions">{t('builder.academicSolver.uploadLabel')} (Questions)</Label>
+                <Input id="file-input-questions" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'original')} disabled={isProcessing} key={originalFile?.name || 'file-input-q'} />
                 {originalFile && <p className="text-xs text-muted-foreground">Selected: {originalFile.name}</p>}
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="file-input-context">Upload Context PDF (Optional)</Label>
+                <Input id="file-input-context" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'context')} disabled={isProcessing} key={contextFile?.name || 'file-input-c'} />
+                {contextFile && <p className="text-xs text-muted-foreground">Selected: {contextFile.name}</p>}
             </div>
 
             <Button onClick={handleAnalyze} disabled={!originalFile || !documentType || isProcessing} className="w-full">

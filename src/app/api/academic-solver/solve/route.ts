@@ -11,6 +11,7 @@ import { logGeneration } from '@/services/generation-service';
 
 const solveSchema = z.object({
   analyzedDocument: AnalyzedDocumentSchema,
+  contextMarkdown: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -34,13 +35,17 @@ export async function POST(request: Request) {
     const creditCost = documentType === 'exam' ? 3 : 2;
     await deductCredit(userId, creditCost);
     
-    const agentInput = validation.data.analyzedDocument;
-    const result = await solveAcademicDocument(agentInput);
+    const { analyzedDocument, contextMarkdown } = validation.data;
+    
+    const result = await solveAcademicDocument({
+      analyzedDocument,
+      contextMarkdown
+    });
 
     await logGeneration({
         agentId: `solve-${documentType}`,
         userId,
-        input: agentInput,
+        input: { analyzedDocument, contextMarkdown: !!contextMarkdown },
         output: result,
     });
 
