@@ -35,7 +35,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
 
   useEffect(() => {
     const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
-    if (savedDocxTemplate && docxTemplates[savedDocxTemplate]) {
+    if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
       setSelectedDocxTemplate(savedDocxTemplate);
     }
   }, [docxTemplates]);

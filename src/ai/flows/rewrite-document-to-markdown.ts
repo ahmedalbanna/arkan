@@ -19,23 +19,12 @@ const RewriteDocumentOutputSchema = z.object({
 });
 export type RewriteDocumentOutput = z.infer<typeof RewriteDocumentOutputSchema>;
 
-
-export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
-  return rewriteDocumentFlow(input);
-}
-
-const rewriteDocumentFlow = ai.defineFlow(
-  {
-    name: 'rewriteDocumentToMarkdownFlow',
-    inputSchema: RewriteDocumentInputSchema,
-    outputSchema: RewriteDocumentOutputSchema,
-  },
-  async (input) => {
-    const generateMarkdownPrompt = ai.definePrompt({
-      name: 'generateMarkdownFromDocumentPrompt',
-      input: { schema: RewriteDocumentInputSchema },
-      output: { schema: RewriteDocumentOutputSchema },
-      prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
+// Define the prompt outside the flow definition
+const generateMarkdownPrompt = ai.definePrompt({
+  name: 'generateMarkdownFromDocumentPrompt',
+  input: { schema: RewriteDocumentInputSchema },
+  output: { schema: RewriteDocumentOutputSchema },
+  prompt: `You are an expert document editor. Your task is to take the content of the provided PDF document and rewrite it into clean, well-structured markdown.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the PDF to understand the original layout. Identify headings, subheadings, paragraphs, lists, tables, and other structural elements, and format them correctly using markdown syntax (e.g., '#', '##', '-', '1.').
@@ -50,7 +39,16 @@ PDF Document:
 `,
     });
 
-    const { output } = await generateMarkdownPrompt(input);
-    return output!;
-  }
-);
+    export async function rewriteDocumentToMarkdown(input: RewriteDocumentInput): Promise<RewriteDocumentOutput> {
+      return rewriteDocumentFlow(input);
+    }
+    const rewriteDocumentFlow = ai.defineFlow(
+      {
+        name: 'rewriteDocumentToMarkdownFlow',
+        inputSchema: RewriteDocumentInputSchema,
+        outputSchema: RewriteDocumentOutputSchema,
+      },
+      async (input) => {
+        const { output } = await generateMarkdownPrompt(input);
+        return output!;
+      });
