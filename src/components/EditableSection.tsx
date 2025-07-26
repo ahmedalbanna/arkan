@@ -63,8 +63,6 @@ const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
     ssr: false,
     loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />,
 });
-const DynamicRemarkGfm = dynamic(() => import('remark-gfm'), { ssr: false });
-
 export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentContent, setCurrentContent] = useState(content);
@@ -195,7 +193,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
                     <p className="text-xs font-semibold text-accent-foreground mb-2">{t('builder.editableSection.aiSuggestion')}</p>
                     <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
-                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
+                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
                             {aiSuggestion}
                         </DynamicReactMarkdown>
 
@@ -230,7 +228,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         return (
             <DynamicReactMarkdown
                 components={markdownComponents}
-                remarkPlugins={[DynamicRemarkGfm as Pluggable]}>
+                remarkPlugins={[remarkGfm]}>
                 {content}
             </DynamicReactMarkdown>);
     }
