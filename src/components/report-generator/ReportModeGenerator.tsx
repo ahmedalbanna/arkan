@@ -18,6 +18,7 @@ export default function ReportGenerator() {
     const { proposal } = useBuilderStore();
     const {
         sections,
+        externalContext,
         setSection,
     } = useReportStore();
     const translateMutation = useTranslate();
@@ -28,7 +29,7 @@ export default function ReportGenerator() {
   };
 
 
-  if (!proposal && Object.keys(sections).length === 0) {
+  if (!proposal && Object.keys(sections).length === 0 && externalContext.length === 0) {
     return (
         <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">

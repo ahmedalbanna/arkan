@@ -8,7 +8,7 @@ import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 
 const ApiGeneratePresentationSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional(),
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),

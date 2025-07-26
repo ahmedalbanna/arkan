@@ -19,7 +19,7 @@ import type { AgentPrompt } from '@/lib/agents';
 
 
 const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional(),
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
@@ -50,7 +50,7 @@ const generatePresentationFlow = ai.defineFlow(
     const agentPrompt = agent.prompt as AgentPrompt;
     const basePrompt = agentPrompt.base;
 
-    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
+    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
 
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
@@ -88,10 +88,12 @@ const generatePresentationFlow = ai.defineFlow(
 {{/each}}
 {{/if}}
 
+{{#if proposal}}
 --- Main Input: Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
 \`\`\`
+{{/if}}
 `,
     });
 

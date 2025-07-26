@@ -16,6 +16,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { useReportStore } from '@/hooks/useReportStore';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -48,6 +49,7 @@ export default function DiagramGenerator() {
     const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     const { proposal } = useBuilderStore();
+    const { externalContext } = useReportStore();
     const {
         diagrams,
         handleDiagramCodeUpdate,
@@ -80,7 +82,7 @@ export default function DiagramGenerator() {
         mutation.mutate({ plantUmlCode, token });
     };
 
-    if (!proposal && Object.keys(diagrams || {}).length === 0) {
+    if (!proposal && Object.keys(diagrams || {}).length === 0 && externalContext.length === 0) {
       return (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">

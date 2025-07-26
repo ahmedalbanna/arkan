@@ -14,18 +14,18 @@ import { sectionConfig } from '@/lib/report-config';
 
 // Schema for generating a single section
 const generateSectionSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(),
+  guidelines: z.array(z.string()).optional(), 
   instructionText: z.string().optional(),
   externalContextContent: z.string().optional(),
 });
 
 // Schema for generating a full report based on a template
 const generateFullReportSchema = z.object({
-    proposal: ProjectProposalSchema,
+    proposal: ProjectProposalSchema.optional(),
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),

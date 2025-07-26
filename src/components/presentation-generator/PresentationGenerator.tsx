@@ -18,6 +18,7 @@ import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { Skeleton } from '../ui/skeleton';
+import { useReportStore } from '@/hooks/useReportStore';
 
 function ViewerSkeleton() {
     return (
@@ -56,6 +57,7 @@ export default function PresentationGenerator() {
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const { proposal } = useBuilderStore();
+    const { externalContext } = useReportStore();
     const {
         presentation,
         activePresentationId,
@@ -91,7 +93,7 @@ export default function PresentationGenerator() {
 
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
-    if (!proposal && !activePresentation) {
+    if (!proposal && !activePresentation && externalContext.length === 0) {
         return (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
                 <div className="text-center text-muted-foreground p-8">
