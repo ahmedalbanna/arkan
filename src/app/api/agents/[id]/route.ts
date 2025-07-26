@@ -51,12 +51,23 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 
+const agentGuidelineSchema = z.object({
+  text: z.string().min(1),
+  isDefault: z.boolean(),
+});
+
+const agentPromptSchema = z.object({
+  base: z.string().min(1),
+  guidelines: z.array(agentGuidelineSchema).optional(),
+});
+
 // PUT /api/agents/[id]
 const updateAgentSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  prompt: z.string().min(10, "Prompt must be at least 10 characters").optional(),
+  prompt: z.union([z.string().min(10), agentPromptSchema]).optional(),
   isEnabled: z.boolean().optional(),
 });
+
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
     const { id: agentId } = await params;
@@ -79,20 +90,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
-        const currentAgentData = agentDoc.data();
         const updateData: any = {};
 
         if (validation.data.name) updateData.name = validation.data.name;
         if (validation.data.isEnabled !== undefined) updateData.isEnabled = validation.data.isEnabled;
+        if (validation.data.prompt) updateData.prompt = validation.data.prompt;
 
-        if (validation.data.prompt) {
-            // Check if the prompt is simple or complex and update accordingly
-            if (typeof currentAgentData?.prompt === 'object') {
-                updateData.prompt = { ...currentAgentData.prompt, base: validation.data.prompt };
-            } else {
-                updateData.prompt = validation.data.prompt;
-            }
-        }
 
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
@@ -116,7 +119,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     // Prevent deletion of default agents
-    const isDefaultAgent = defaultAgents.some(agent => agent.id === agentId);
+    const isDefaultAgent = AGENTS.some(agent => agent.id === agentId);
     if (isDefaultAgent) {
         return NextResponse.json({ message: 'Default agents cannot be deleted.' }, { status: 403 });
     }
