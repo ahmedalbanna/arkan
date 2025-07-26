@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Loader2, Sparkles, Wand2, History, Trash2, Download, FileDown, BookCopy, BrainCircuit, CheckSquare, FileText, Image as ImageIcon, UploadCloud } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -14,13 +14,13 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
-import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
+import { FileUploader as ContextFileUploader } from '../FileUploader';
+import { PasteTextUploader } from '../PasteTextUploader';
+import { ImageUploader } from '../ImageUploader';
+import { useReportStore } from '@/hooks/useReportStore';
 
 // Re-using the same function, just changing the URL and body structure slightly
 async function parseFile(formData: FormData, token: string): Promise<{ markdown: string }> {
@@ -60,6 +60,7 @@ export default function AcademicSolver() {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
+  const { addExternalContext, removeExternalContext } = useReportStore.getState();
 
   const {
     stage,
@@ -67,13 +68,12 @@ export default function AcademicSolver() {
     analyzedDocument,
     solvedDocument,
     originalFile,
-    contextFile,
+    externalContext,
     setStage,
     setDocumentType,
     setAnalyzedDocument,
     setSolvedDocument,
     setOriginalFile,
-    setContextFile,
     resetCurrent,
   } = useAcademicSolverStore();
 
@@ -81,19 +81,14 @@ export default function AcademicSolver() {
   const analyzeMutation = useMutation({ mutationFn: analyzeApi });
   const solveMutation = useMutation({ mutationFn: solveApi });
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'original' | 'context') => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
         if (selectedFile.type === 'application/pdf') {
-          if (fileType === 'original') {
-            await setOriginalFile(selectedFile);
-          } else {
-            await setContextFile(selectedFile);
-          }
+          await setOriginalFile(selectedFile);
         } else {
           toast({ title: t('builder.academicSolver.toasts.invalidFile'), variant: 'destructive' });
-          if (fileType === 'original') await setOriginalFile(null);
-          else await setContextFile(null);
+          await setOriginalFile(null);
         }
     }
   };
@@ -133,18 +128,8 @@ export default function AcademicSolver() {
     setStage('solving');
     
     let contextMarkdown: string | undefined = undefined;
-    if (contextFile) {
-        try {
-            const contextBlob = await (await fetch(contextFile.dataUrl)).blob();
-            const formData = new FormData();
-            formData.append('file', contextBlob, contextFile.name);
-            const parsedData = await parseMutation.mutateAsync({ formData, token });
-            contextMarkdown = parsedData.markdown;
-        } catch (error: any) {
-             toast({ title: "Context File Error", description: `Failed to process the context file: ${error.message}`, variant: 'destructive' });
-             setStage('readyToSolve');
-             return;
-        }
+    if (externalContext && externalContext.length > 0) {
+      contextMarkdown = externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
     }
     
     try {
@@ -189,14 +174,29 @@ export default function AcademicSolver() {
 
             <div className="space-y-2">
                 <Label htmlFor="file-input-questions">{t('builder.academicSolver.uploadLabel')} (Questions)</Label>
-                <Input id="file-input-questions" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'original')} disabled={isProcessing} key={originalFile?.name || 'file-input-q'} />
+                <Input id="file-input-questions" type="file" accept=".pdf" onChange={handleFileChange} disabled={isProcessing} key={originalFile?.name || 'file-input-q'} />
                 {originalFile && <p className="text-xs text-muted-foreground">Selected: {originalFile.name}</p>}
             </div>
-             <div className="space-y-2">
-                <Label htmlFor="file-input-context">Upload Context PDF (Optional)</Label>
-                <Input id="file-input-context" type="file" accept=".pdf" onChange={(e) => handleFileChange(e, 'context')} disabled={isProcessing} key={contextFile?.name || 'file-input-c'} />
-                {contextFile && <p className="text-xs text-muted-foreground">Selected: {contextFile.name}</p>}
-            </div>
+             
+             <div className="pt-4 border-t">
+                  <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
+                  <Tabs defaultValue="file" className="w-full">
+                       <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> PDF</TabsTrigger>
+                          <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Text</TabsTrigger>
+                          <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Image</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="file" className="mt-4">
+                          <ContextFileUploader />
+                      </TabsContent>
+                       <TabsContent value="text" className="mt-4">
+                          <PasteTextUploader />
+                      </TabsContent>
+                      <TabsContent value="image" className="mt-4">
+                           <ImageUploader />
+                      </TabsContent>
+                  </Tabs>
+              </div>
 
             <Button onClick={handleAnalyze} disabled={!originalFile || !documentType || isProcessing} className="w-full">
                 {stage === 'parsing' || stage === 'analyzing' ? (
@@ -282,22 +282,6 @@ export default function AcademicSolver() {
                       )}
                   </ScrollArea>
               </CardContent>
-               <CardFooter>
-                  {solvedDocument && (
-                      <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="w-full">
-                                  <Download className="mr-2 h-4 w-4" /> Download
-                              </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                              <DropdownMenuItem onClick={() => exportDocumentAsDocx(analyzedDocument!, solvedDocument!, 'modern')}>
-                                <FileDown className="mr-2 h-4 w-4" /> Export as DOCX
-                              </DropdownMenuItem>
-                          </DropdownMenuContent>
-                      </DropdownMenu>
-                  )}
-               </CardFooter>
            </TabsContent>
        </Tabs>
      </Card>

@@ -12,13 +12,18 @@ export type AcademicSolverStage =
   | "solving"
   | "solved";
 
+export interface ExternalContext {
+    fileName: string;
+    content: string;
+}
+
 export interface AcademicSolverState {
   stage: AcademicSolverStage;
   documentType: AcademicDocumentType | null;
   analyzedDocument: AnalyzedDocument | null;
   solvedDocument: SolvedDocument | null;
   originalFile: { name: string; type: string; dataUrl: string } | null;
-  contextFile: { name: string; type: string; dataUrl: string } | null;
+  externalContext: ExternalContext[];
 }
 
 interface AcademicSolverActions {
@@ -27,7 +32,8 @@ interface AcademicSolverActions {
   setAnalyzedDocument: (document: AnalyzedDocument | null) => void;
   setSolvedDocument: (solution: SolvedDocument | null) => void;
   setOriginalFile: (file: File | null) => Promise<void>;
-  setContextFile: (file: File | null) => Promise<void>;
+  addExternalContext: (fileName: string, content: string) => void;
+  removeExternalContext: (index: number) => void;
   resetCurrent: () => void;
 }
 
@@ -37,7 +43,7 @@ const initialState: AcademicSolverState = {
   analyzedDocument: null,
   solvedDocument: null,
   originalFile: null,
-  contextFile: null,
+  externalContext: [],
 };
 
 const fileToDataUrl = (file: File): Promise<string> => {
@@ -78,15 +84,13 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         solvedDocument: null,
       });
     },
-    setContextFile: async (file) => {
-      if (!file) {
-        set({ contextFile: null });
-        return;
-      }
-      const dataUrl = await fileToDataUrl(file);
-      set({
-        contextFile: { name: file.name, type: file.type, dataUrl },
-      });
+    addExternalContext: (fileName, content) => {
+        set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
+    },
+    removeExternalContext: (index) => {
+        set((state) => ({
+            externalContext: state.externalContext.filter((_, i) => i !== index),
+        }));
     },
     resetCurrent: () => set(initialState),
   })
