@@ -4,11 +4,15 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent } from '@/components/ui/card';
-import { UploadCloud, File, Loader2, X, AlertCircle } from 'lucide-react';
+import { UploadCloud, File, Loader2, X, AlertCircle, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useReportStore } from '@/hooks/useReportStore';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { ScrollArea } from './ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
 
 export function FileUploader() {
     const { toast } = useToast();
@@ -102,9 +106,26 @@ export function FileUploader() {
                                     <File className="h-4 w-4 shrink-0" />
                                     <span className="truncate">{item.fileName}</span>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}>
-                                    <X className="h-4 w-4 text-destructive" />
-                                </Button>
+                                <div className="flex items-center">
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-3xl">
+                                            <DialogHeader>
+                                                <DialogTitle>{item.fileName}</DialogTitle>
+                                            </DialogHeader>
+                                            <ScrollArea className="h-[60vh] rounded-md border p-4">
+                                                <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
+                                            </ScrollArea>
+                                        </DialogContent>
+                                    </Dialog>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}>
+                                        <X className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                </div>
                             </li>
                         ))}
                     </ul>
@@ -113,4 +134,3 @@ export function FileUploader() {
         </div>
     );
 }
-
