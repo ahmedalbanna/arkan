@@ -127,7 +127,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             setAllSections(data.sections);
             toast({ title: `Full report generated successfully!` });
         } else { // Single section
-            const sectionKey = variables.body.sectionToGenerate;
+            const sectionKey = variables.body.sectionToGenerate as SectionName;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
             toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
