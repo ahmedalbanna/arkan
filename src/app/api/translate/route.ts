@@ -1,4 +1,3 @@
-
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -33,7 +32,9 @@ export async function POST(request: Request) {
     await deductCredit(userId, 1);
 
     const result = await translateText(validation.data);
-    return NextResponse.json(result, { status: 200 });
+    // Use regex to remove text between --- and ---
+    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/gs, '');
+    return NextResponse.json({ translatedText: cleanedTranslatedText }, { status: 200 });
   } catch (error) {
     console.error('Error translating text:', error);
     if (error instanceof Error) {
