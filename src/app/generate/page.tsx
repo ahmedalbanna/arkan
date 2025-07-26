@@ -166,16 +166,16 @@ function GeneratePageContent() {
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
                             </TabsTrigger>
                         )}
-                        <TabsTrigger value="plan" className="gap-2" disabled={!proposal}>
+                        <TabsTrigger value="plan" className="gap-2">
                             <GanttChartSquare className="h-4 w-4" /> Project Plan
                         </TabsTrigger>
                         {isFeatureEnabled('report') && (
-                            <TabsTrigger value="report" className="gap-2">
+                            <TabsTrigger value="report" className="gap-2" disabled={!proposal}>
                                 <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('diagram') && (
-                            <TabsTrigger value="diagram" className="gap-2">
+                            <TabsTrigger value="diagram" className="gap-2" disabled={!proposal}>
                                 <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                             </TabsTrigger>
                         )}
@@ -185,7 +185,7 @@ function GeneratePageContent() {
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('presentation') && (
-                             <TabsTrigger value="presentation" className="gap-2">
+                             <TabsTrigger value="presentation" className="gap-2" disabled={!proposal}>
                                 <Presentation className="h-4 w-4" /> {t('builder.tabs.presentation')}
                             </TabsTrigger>
                         )}
