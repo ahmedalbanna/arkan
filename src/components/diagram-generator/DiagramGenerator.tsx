@@ -81,18 +81,6 @@ export default function DiagramGenerator() {
         const token = await firebaseUser.getIdToken();
         mutation.mutate({ plantUmlCode, token });
     };
-
-    if (!proposal && Object.keys(diagrams || {}).length === 0 && externalContext.length === 0) {
-      return (
-          <Card className="flex items-center justify-center h-full min-h-[400px]">
-              <div className="text-center text-muted-foreground p-8">
-                  <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                  <h3 className="text-lg font-semibold">{t('builder.diagramGenerator.noProposal')}</h3>
-                  <p>{t('builder.diagramGenerator.noProposalDesc')}</p>
-              </div>
-          </Card>
-      )
-    }
     
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
 

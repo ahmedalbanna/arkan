@@ -93,17 +93,6 @@ export default function PresentationGenerator() {
 
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
-    if (!proposal && !activePresentation && externalContext.length === 0) {
-        return (
-            <Card className="flex items-center justify-center h-full min-h-[400px]">
-                <div className="text-center text-muted-foreground p-8">
-                    <AlertCircle className="w-16 h-16 mx-auto mb-4 text-destructive" />
-                    <h3 className="text-lg font-semibold">{t('builder.presentationGenerator.noProposal')}</h3>
-                    <p>{t('builder.presentationGenerator.noProposalDesc')}</p>
-                </div>
-            </Card>
-        )
-    }
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
