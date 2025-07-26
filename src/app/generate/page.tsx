@@ -158,12 +158,12 @@ function GeneratePageContent() {
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('report') && (
-                            <TabsTrigger value="report" className="gap-2" disabled={!proposal}>
+                            <TabsTrigger value="report" className="gap-2">
                                 <FileText className="h-4 w-4" /> {t('builder.tabs.document')}
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('diagram') && (
-                            <TabsTrigger value="diagram" className="gap-2" disabled={!proposal}>
+                            <TabsTrigger value="diagram" className="gap-2">
                                 <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                             </TabsTrigger>
                         )}
@@ -173,7 +173,7 @@ function GeneratePageContent() {
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('presentation') && (
-                             <TabsTrigger value="presentation" className="gap-2" disabled={!proposal}>
+                             <TabsTrigger value="presentation" className="gap-2">
                                 <Presentation className="h-4 w-4" /> {t('builder.tabs.presentation')}
                             </TabsTrigger>
                         )}

@@ -89,7 +89,7 @@ export default function PresentationGenerator() {
         mutation.mutate({ body, token });
     };
 
-    if (!proposal) {
+    if (!proposal && !activePresentation) {
         return (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
                 <div className="text-center text-muted-foreground p-8">
@@ -108,7 +108,7 @@ export default function PresentationGenerator() {
             {/* Left Column */}
             <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <PresentationGenerationTools
-                    isDisabled={!proposal || mutation.isPending}
+                    isDisabled={mutation.isPending}
                     isGenerating={mutation.isPending}
                     onGenerate={onGenerate}
                 />
