@@ -13,12 +13,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
-import { useLocalization } from '@/context/LocalizationContext';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { useTheme } from 'next-themes';
-import { AGENTS } from '@/lib/agents';
 import { useDebounce } from '@/hooks/use-debounce';
 import dynamic from 'next/dynamic';
 
@@ -27,15 +25,14 @@ const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: fal
 const LOGS_PER_PAGE = 15;
 
 function LogTableSkeleton() {
-    const { t } = useLocalization();
     return (
         <Table>
             <TableHeader>
                 <TableRow>
-                    <TableHead>{t('manageGenerations.agent')}</TableHead>
-                    <TableHead>{t('manageGenerations.user')}</TableHead>
-                    <TableHead>{t('manageGenerations.date')}</TableHead>
-                    <TableHead className="text-right">{t('manageGenerations.actions')}</TableHead>
+                    <TableHead>Agent</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,7 +91,6 @@ function LogDetailView({ log }: { log: GenerationLog }) {
 }
 
 export default function GenerationLogViewer() {
-    const { t } = useLocalization();
     const [page, setPage] = useState(1);
     const [agentIdFilter, setAgentIdFilter] = useState('');
     const [userIdFilter, setUserIdFilter] = useState('');
@@ -122,7 +118,7 @@ export default function GenerationLogViewer() {
     if (authLoading || isLoading) {
         return (
             <Card>
-                <CardHeader><CardTitle>{t('manageGenerations.cardTitle')}</CardTitle></CardHeader>
+                <CardHeader><CardTitle>Generation Log</CardTitle></CardHeader>
                 <CardContent><LogTableSkeleton /></CardContent>
             </Card>
         );
@@ -133,7 +129,7 @@ export default function GenerationLogViewer() {
             <Card>
                 <CardContent className="p-8 text-center text-destructive">
                     <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                    <p>{t('manageGenerations.errorLoading')}: {error?.message}</p>
+                    <p>Failed to load generation logs: {error?.message}</p>
                 </CardContent>
             </Card>
         );
@@ -143,14 +139,14 @@ export default function GenerationLogViewer() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                    <span>{t('manageGenerations.cardTitle')}</span>
+                    <span>Generation Log</span>
                     {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
                 </CardTitle>
                 <div className="flex flex-col md:flex-row gap-4 pt-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder={t('manageGenerations.filterAgentPlaceholder')} 
+                            placeholder="Filter by agent ID..."
                             value={agentIdFilter} 
                             onChange={(e) => setAgentIdFilter(e.target.value)}
                             className="pl-10"
@@ -159,7 +155,7 @@ export default function GenerationLogViewer() {
                      <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder={t('manageGenerations.filterUserPlaceholder')}
+                            placeholder="Filter by user ID..."
                             value={userIdFilter} 
                             onChange={(e) => setUserIdFilter(e.target.value)}
                             className="pl-10"
@@ -172,10 +168,10 @@ export default function GenerationLogViewer() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>{t('manageGenerations.agent')}</TableHead>
-                                <TableHead>{t('manageGenerations.user')}</TableHead>
-                                <TableHead>{t('manageGenerations.date')}</TableHead>
-                                <TableHead className="text-right">{t('manageGenerations.actions')}</TableHead>
+                                <TableHead>Agent</TableHead>
+                                <TableHead>User</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -203,7 +199,7 @@ export default function GenerationLogViewer() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">{t('manageGenerations.noResults')}</TableCell>
+                                    <TableCell colSpan={4} className="text-center h-24">No results found matching your query.</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -217,16 +213,16 @@ export default function GenerationLogViewer() {
                         disabled={page === 1}
                     >
                         <ChevronLeft className="mr-2 rtl:mr-0 rtl:ml-2 h-4 w-4" />
-                        {t('manageUsers.previousButton')}
+                        Previous
                     </Button>
-                    <span className="text-sm font-medium">{t('manageUsers.pageLabel')} {page}</span>
+                    <span className="text-sm font-medium">Page {page}</span>
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setPage(p => p + 1)}
                         disabled={!data?.hasNextPage}
                     >
-                        {t('manageUsers.nextButton')}
+                        Next
                         <ChevronRight className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
                     </Button>
                 </div>

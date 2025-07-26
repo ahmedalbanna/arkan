@@ -39,12 +39,7 @@ export async function GET(request: Request) {
 
     try {
         const { searchParams } = new URL(request.url);
-        const queryValidation = getLogsQuerySchema.safeParse({
-            page: searchParams.get('page'),
-            limit: searchParams.get('limit'),
-            agentId: searchParams.get('agentId'),
-            userId: searchParams.get('userId'),
-        });
+        const queryValidation = getLogsQuerySchema.safeParse(Object.fromEntries(searchParams));
 
         if (!queryValidation.success) {
             return NextResponse.json({ errors: queryValidation.error.flatten().fieldErrors }, { status: 400 });
@@ -63,22 +58,13 @@ export async function GET(request: Request) {
 
         query = query.orderBy('createdAt', 'desc');
 
-        let lastDoc;
-        if (page > 1) {
-            const previousDocsSnapshot = await query.limit((page - 1) * limit).get();
-            lastDoc = previousDocsSnapshot.docs[previousDocsSnapshot.docs.length - 1];
-            if(lastDoc) {
-                query = query.startAfter(lastDoc);
-            }
-        }
+        const offset = (page - 1) * limit;
+        query = query.offset(offset);
         
-        const snapshot = await query.limit(limit).get();
-        const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        // Check if there is a next page
-        const nextQuery = query.limit(1).startAfter(snapshot.docs[snapshot.docs.length -1]);
-        const nextSnapshot = await nextQuery.get();
-        const hasNextPage = !nextSnapshot.empty;
+        const snapshot = await query.limit(limit + 1).get(); // Fetch one extra to check for next page
+        
+        const logs = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() }));
+        const hasNextPage = snapshot.docs.length > limit;
 
         return NextResponse.json({
             logs,
