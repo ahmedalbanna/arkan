@@ -24,4 +24,5 @@ import '@/ai/flows/translate-proposal.ts';
 import '@/ai/flows/translate-presentation.ts';
 import '@/ai/flows/image-to-text.ts';
 import '@/ai/flows/generate-project-plan.ts';
+import '@/ai/flows/project-chat.ts';
     

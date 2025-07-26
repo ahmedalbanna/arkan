@@ -16,6 +16,7 @@ import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
+import ProjectChat from '@/components/chat/ProjectChat';
 
 
 const LoadingSkeleton = () => (
@@ -150,7 +151,7 @@ function GeneratePageContent() {
   }, [features, activeTab, enabledTabs]);
 
   return (
-    <>
+    <div className="relative h-full">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
         <div className="flex justify-end items-center mb-4">
@@ -218,7 +219,8 @@ function GeneratePageContent() {
             )}
         </div>
       </div>
-    </>
+      {isFeatureEnabled('chat') && <ProjectChat />}
+    </div>
   );
 }
 
