@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
+import { ImageUploader } from './ImageUploader';
 
 export function UploadManager() {
     return (
@@ -21,7 +22,7 @@ export function UploadManager() {
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> File Upload</TabsTrigger>
                         <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Paste Image</TabsTrigger>
+                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
                     </TabsList>
                     <TabsContent value="file" className="mt-4">
                        <FileUploader />
@@ -30,10 +31,7 @@ export function UploadManager() {
                         <PasteTextUploader />
                     </TabsContent>
                     <TabsContent value="image" className="mt-4">
-                         {/* Placeholder for image input component */}
-                        <p className="text-center text-muted-foreground p-8 border rounded-md">
-                            Pasting images will be available soon.
-                        </p>
+                         <ImageUploader />
                     </TabsContent>
                 </Tabs>
             </CardContent>

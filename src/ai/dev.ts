@@ -21,4 +21,5 @@ import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/evaluate-and-select-context.ts';
 import '@/ai/flows/translate-proposal.ts';
 import '@/ai/flows/translate-presentation.ts';
+import '@/ai/flows/image-to-text.ts';
     
