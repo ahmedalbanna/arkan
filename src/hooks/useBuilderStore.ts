@@ -39,7 +39,7 @@ interface BuilderActions {
   setProjectIdea: (idea: string) => void;
   setCurrentProjectId: (id: string | null) => void;
   setHasUnsavedChanges: (status: boolean) => void;
-  getFullState: () => Omit<ProjectState, 'externalContext'>;
+  getFullState: () => ProjectState;
   // Proposal Actions
   setProposal: (proposal: ProjectProposal | null) => void;
   handleProposalUpdate: (path: string, value: any) => void;
@@ -69,11 +69,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       // --- GENERIC ACTIONS ---
       newSession: () => {
         set(initialState);
-        // Reset other stores as well, but not the external context in report store
-        const { newSession: newReportSession, externalContext } = useReportStore.getState();
-        newReportSession();
-        useReportStore.setState({ externalContext }); // Keep the external context
-
+        useReportStore.getState().newSession();
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
         useCodeGeneratorStore.getState().newSession();
@@ -91,8 +87,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           hasUnsavedChanges: false, // Loading a project means it's saved
         });
 
-        // Load state for other stores if present
-        // Note: externalContext is now managed separately by useReportStore's own persistence
         useReportStore.getState().loadState(newState);
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
@@ -111,6 +105,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
+        externalContext: useReportStore.getState().externalContext,
       }),
       setProjectIdea: (idea) =>
         set({ projectIdea: idea, hasUnsavedChanges: true }),
@@ -127,10 +122,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           hasUnsavedChanges: true,
         });
         // Clear downstream states when a new proposal is set
-        const { newSession: newReportSession, externalContext } = useReportStore.getState();
-        newReportSession();
-        useReportStore.setState({ externalContext });
-
+        useReportStore.getState().newSession();
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
       },
@@ -172,7 +164,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     {
       name: "arkan-builder-state-v2", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
-      // Only persist project-specific content, not global UI state or external context
       partialize: (state) => ({
         name: state.name,
         projectIdea: state.projectIdea,
@@ -182,8 +173,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
+        externalContext: useReportStore.getState().externalContext,
       }),
-      // Custom merge function to handle loading from storage
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
         useReportStore.getState().loadState(persistedState);

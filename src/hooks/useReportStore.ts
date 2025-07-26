@@ -4,7 +4,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { type SectionName, type DiagramType } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { sectionConfig } from '@/lib/report-config';
@@ -44,7 +43,7 @@ export interface ReportState {
 
 interface ReportActions {
     newSession: () => void;
-    loadState: (state: Partial<Pick<ReportState, 'sections' | 'evaluation'>>) => void;
+    loadState: (state: Partial<Pick<ReportState, 'sections' | 'evaluation' | 'externalContext'>>) => void;
     setSection: (key: SectionName, content: string) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
@@ -65,7 +64,6 @@ const getDefaultGuidelineState = () => {
     AGENTS.forEach(agent => {
         const prompt = agent.prompt as AgentPrompt;
         if (prompt && prompt.guidelines) {
-            // Use the kebab-case agent ID to derive the key, removing the prefix and suffix
             const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
             state[itemKey] = {
                 checked: prompt.guidelines.map(g => g.isDefault),
@@ -96,17 +94,13 @@ const initialState: ReportState = {
 
 
 export const useReportStore = create<ReportState & ReportActions>()(
-  persist(
     (set, get) => ({
       ...initialState,
-      newSession: () => set(state => ({
-        ...initialState,
-        // Preserve external context on new session
-        externalContext: state.externalContext,
-      })),
+      newSession: () => set(initialState),
       loadState: (newState) => {
         if (newState.sections) set({ sections: newState.sections });
         if (newState.evaluation) set({ evaluation: newState.evaluation });
+        if (newState.externalContext) set({ externalContext: newState.externalContext });
       },
       setSection: (key, content) => {
         set(state => ({ sections: { ...state.sections, [key]: content } }));
@@ -127,11 +121,13 @@ export const useReportStore = create<ReportState & ReportActions>()(
       },
       addExternalContext: (fileName, content) => {
         set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       removeExternalContext: (index) => {
         set((state) => ({
             externalContext: state.externalContext.filter((_, i) => i !== index),
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleControlChange: (section, control, value) => {
         set(state => ({
@@ -217,14 +213,5 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set({ selectedPresentationTemplateId: id });
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-    }),
-    {
-      name: 'arkan-external-context-store',
-      storage: createJSONStorage(() => localStorage),
-      // Only persist the externalContext part of the state
-      partialize: (state) => ({
-        externalContext: state.externalContext,
-      }),
-    }
-  )
+    })
 );
