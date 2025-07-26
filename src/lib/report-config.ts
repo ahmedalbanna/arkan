@@ -1,8 +1,15 @@
-import { BookMarked, Library, Waypoints, BookText, Code, TestTube2, Flag, GitGraph, Presentation, DatabaseZap } from 'lucide-react';
+import { BookMarked, Library, Waypoints, BookText, Code, TestTube2, Flag, GitGraph, Presentation, DatabaseZap, FileHeart, Hand, DraftingCompass, Pencil, Files, FileText } from 'lucide-react';
 import type { DiagramType, SectionName } from '@/ai/schemas';
 
 export const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
     introduction: { title: "builder.reportGenerator.sections.introduction", icon: BookMarked, agentId: "generate-introduction-section" },
+    abstract: { title: "builder.reportGenerator.sections.abstract", icon: FileText, agentId: "generate-abstract-section" },
+    acknowledgment: { title: "builder.reportGenerator.sections.acknowledgment", icon: FileHeart, agentId: "generate-acknowledgment-section" },
+    trainingProgram: { title: "builder.reportGenerator.sections.trainingProgram", icon: Library, agentId: "generate-trainingProgram-section" },
+    technicalExperience: { title: "builder.reportGenerator.sections.technicalExperience", icon: TestTube2, agentId: "generate-technicalExperience-section" },
+    recommendations: { title: "builder.reportGenerator.sections.recommendations", icon: Hand, agentId: "generate-recommendations-section" },
+    references: { title: "builder.reportGenerator.sections.references", icon: DraftingCompass, agentId: "generate-references-section" },
+    appendices: { title: "builder.reportGenerator.sections.appendices", icon: Files, agentId: "generate-appendices-section" },
     literatureReview: { title: "builder.reportGenerator.sections.literatureReview", icon: Library, agentId: "generate-literatureReview-section" },
     systemAnalysis: { title: "builder.reportGenerator.sections.systemAnalysis", icon: Waypoints, agentId: "generate-systemAnalysis-section" },
     designStrategy: { title: "builder.reportGenerator.sections.designStrategy", icon: BookText, agentId: "generate-designStrategy-section" },

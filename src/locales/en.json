@@ -538,7 +538,14 @@
         "systemDesign": "System Design",
         "systemProgramming": "System Programming",
         "systemTesting": "System Testing",
-        "conclusion": "Conclusion"
+        "conclusion": "Conclusion",
+        "abstract": "Abstract",
+        "acknowledgment": "Acknowledgment",
+        "trainingProgram": "Training Program",
+        "technicalExperience": "Technical Experience",
+        "recommendations": "Recommendations",
+        "references": "References",
+        "appendices": "Appendices"
       },
       "toasts": {
         "evaluationComplete": "Evaluation Complete!",

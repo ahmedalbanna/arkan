@@ -1,5 +1,5 @@
 
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -78,6 +78,41 @@ Project Idea: {{{projectIdea}}}`
   },
   // Report Section Agents
   {
+    id: 'generate-abstract-section',
+    name: 'Abstract Agent',
+    description: 'Writes a concise abstract summarizing the entire training report.',
+    category: 'Report Generation',
+    icon: FileText,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are an academic writer. Based on the provided context, write a concise and informative abstract for a training report. The abstract should summarize the purpose, methods, key experiences, and major conclusions of the training period.`,
+        guidelines: [
+            { text: "Keep the abstract to a single paragraph and under 250 words.", isDefault: true },
+            { text: "Clearly state the main objectives of the training.", isDefault: true },
+            { text: "Briefly mention the key areas of the training program and technical skills acquired.", isDefault: true },
+            { text: "Conclude with the most significant outcomes and recommendations.", isDefault: true },
+        ]
+    }
+  },
+   {
+    id: 'generate-acknowledgment-section',
+    name: 'Acknowledgment Agent',
+    description: 'Drafts a professional acknowledgment section to thank individuals and organizations.',
+    category: 'Report Generation',
+    icon: FileHeart,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are a professional writer. Based on the provided context, draft a heartfelt and professional 'Acknowledgment' section. Thank the individuals, supervisors, and organizations that supported the training or research.`,
+        guidelines: [
+            { text: "Maintain a formal and appreciative tone.", isDefault: true },
+            { text: "Mention specific roles like supervisors, team members, or company departments if context is available.", isDefault: true },
+            { text: "Acknowledge the training institution or company by name.", isDefault: true },
+        ]
+    }
+  },
+  {
     id: 'generate-introduction-section',
     name: 'Introduction Agent',
     description: 'Writes a professional introduction for a project report based on the full proposal data.',
@@ -97,6 +132,93 @@ The introduction should be well-structured, engaging, and must include:`,
         { text: "**Overview of the Document**: An outline of the report structure, mentioning the main sections.", isDefault: true },
         { text: "**Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.", isDefault: true },
       ]
+    }
+  },
+  {
+    id: 'generate-trainingProgram-section',
+    name: 'Training Program Agent',
+    description: 'Details the training program, including objectives, structure, and timeline.',
+    category: 'Report Generation',
+    icon: Library,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are a training coordinator. Based on the context provided, write a detailed 'Training Program' section. Describe the structure, goals, and schedule of the training undertaken.`,
+        guidelines: [
+            { text: "Outline the main objectives of the training program.", isDefault: true },
+            { text: "Describe the weekly or monthly schedule of activities and learning modules.", isDefault: true },
+            { text: "List the key departments or areas covered during the training.", isDefault: true },
+            { text: "Use a table to present the training timeline clearly.", isDefault: false },
+        ]
+    }
+  },
+  {
+    id: 'generate-technicalExperience-section',
+    name: 'Technical Experience Agent',
+    description: 'Describes the technical skills and knowledge gained during the training period.',
+    category: 'Report Generation',
+    icon: TestTube2,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are a technical specialist. Based on the provided context, write a 'Technical Experience' section. Detail the practical skills, software, tools, and methodologies the trainee learned and applied.`,
+        guidelines: [
+            { text: "List specific software, programming languages, or tools used.", isDefault: true },
+            { text: "Describe the tasks and projects the trainee worked on.", isDefault: true },
+            { text: "Explain how theoretical knowledge was applied to practical problems.", isDefault: true },
+            { text: "Use a dedicated subsection for each major skill or project area.", isDefault: false },
+        ]
+    }
+  },
+  {
+    id: 'generate-recommendations-section',
+    name: 'Recommendations Agent',
+    description: 'Provides actionable recommendations based on the training experience.',
+    category: 'Report Generation',
+    icon: Hand,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are a strategic analyst. Based on the training experience outlined in the report, provide a set of actionable recommendations in a 'Recommendations' section. These could be for the company, the training program, or future trainees.`,
+        guidelines: [
+            { text: "Structure the recommendations as a numbered or bulleted list.", isDefault: true },
+            { text: "Ensure each recommendation is specific, measurable, and relevant.", isDefault: true },
+            { text: "Provide a brief justification for each recommendation based on the experiences described in the report.", isDefault: true },
+        ]
+    }
+  },
+   {
+    id: 'generate-references-section',
+    name: 'References Agent',
+    description: 'Generates a list of references or a bibliography in a consistent citation style.',
+    category: 'Report Generation',
+    icon: DraftingCompass,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are an academic librarian. Based on the context provided throughout the report, generate a 'References' section. List all the books, articles, websites, or other sources mentioned or implied in the text.`,
+        guidelines: [
+            { text: "Format all citations consistently using a standard style (e.g., APA, MLA).", isDefault: true },
+            { text: "Ensure the list is alphabetically sorted.", isDefault: true },
+            { text: "If no specific sources are mentioned, create a plausible list of 5-7 relevant, fictional sources that fit the report's topic.", isDefault: false },
+        ]
+    }
+  },
+  {
+    id: 'generate-appendices-section',
+    name: 'Appendices Agent',
+    description: 'Creates appendices for supplementary materials like code snippets, datasheets, or detailed logs.',
+    category: 'Report Generation',
+    icon: Files,
+    pageUrl: '/generate',
+    isEnabled: true,
+    prompt: {
+        base: `You are a technical editor. Compile any supplementary materials mentioned in the report into an 'Appendices' section. This may include code snippets, large data tables, or other detailed information that supports the main body of the report.`,
+        guidelines: [
+            { text: "Label each appendix clearly (e.g., 'Appendix A: Source Code for Module X').", isDefault: true },
+            { text: "Use markdown code blocks for any source code.", isDefault: true },
+            { text: "Use markdown tables for large datasets.", isDefault: true },
+        ]
     }
   },
   {

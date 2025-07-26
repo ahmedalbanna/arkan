@@ -538,7 +538,14 @@
         "systemDesign": "تصميم النظام",
         "systemProgramming": "برمجة النظام",
         "systemTesting": "اختبار النظام",
-        "conclusion": "الخاتمة"
+        "conclusion": "الخاتمة",
+        "abstract": "الملخص",
+        "acknowledgment": "الشكر والتقدير",
+        "trainingProgram": "برنامج التدريب",
+        "technicalExperience": "الخبرة التقنية",
+        "recommendations": "التوصيات",
+        "references": "المراجع",
+        "appendices": "الملاحق"
       },
       "toasts": {
         "evaluationComplete": "اكتمل التقييم!",

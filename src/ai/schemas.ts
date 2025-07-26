@@ -21,6 +21,13 @@ export const SectionNameSchema = z.enum([
   'systemProgramming',
   'systemTesting',
   'conclusion',
+  'abstract',
+  'acknowledgment',
+  'trainingProgram',
+  'technicalExperience',
+  'recommendations',
+  'references',
+  'appendices'
 ]);
 export type SectionName = z.infer<typeof SectionNameSchema>;
 
@@ -107,13 +114,9 @@ export type PresentationHistoryEntry = z.infer<typeof PresentationHistoryEntrySc
 
 
 export const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema,
-  sections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").optional(),
-  diagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional(),
+  proposal: ProjectProposalSchema.optional(),
+  sections: z.record(SectionNameSchema, z.string()).optional(),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   prompt: z.string(),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;

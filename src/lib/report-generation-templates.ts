@@ -24,6 +24,22 @@ export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
         ]
     },
     {
+        id: 'training-report',
+        name: 'Training Report',
+        description: 'Generates a detailed report for an internship or training program, covering experience, skills, and recommendations.',
+        agentIds: [
+            'generate-abstract-section',
+            'generate-acknowledgment-section',
+            'generate-introduction-section',
+            'generate-trainingProgram-section',
+            'generate-technicalExperience-section',
+            'generate-conclusion-section',
+            'generate-recommendations-section',
+            'generate-references-section',
+            'generate-appendices-section',
+        ]
+    },
+    {
         id: 'scientific-research-report',
         name: 'Scientific Research Report',
         description: 'Generates a report structure suitable for academic or scientific projects, emphasizing literature review and analysis.',
