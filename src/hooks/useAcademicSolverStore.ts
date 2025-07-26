@@ -22,7 +22,7 @@ export interface AcademicSolverState {
   documentType: AcademicDocumentType | null;
   analyzedDocument: AnalyzedDocument | null;
   solvedDocument: SolvedDocument | null;
-  questionContent: string | null;
+  questionContent: ExternalContext | null; // Changed to handle file name and content
   externalContext: ExternalContext[];
 }
 
@@ -31,7 +31,7 @@ interface AcademicSolverActions {
   setDocumentType: (type: AcademicDocumentType | null) => void;
   setAnalyzedDocument: (document: AnalyzedDocument | null) => void;
   setSolvedDocument: (solution: SolvedDocument | null) => void;
-  setQuestionContent: (content: string | null) => void;
+  setQuestionContent: (file: ExternalContext | null) => void; // Updated signature
   addExternalContext: (fileName: string, content: string) => void;
   removeExternalContext: (index: number) => void;
   resetCurrent: () => void;
@@ -62,9 +62,9 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         solvedDocument: solution,
         stage: solution ? "solved" : "readyToSolve",
       }),
-    setQuestionContent: (content) => {
+    setQuestionContent: (file) => {
         set({
-            questionContent: content,
+            questionContent: file,
             stage: "idle",
             analyzedDocument: null,
             solvedDocument: null

@@ -66,7 +66,7 @@ export default function AcademicSolver() {
   const solveMutation = useMutation({ mutationFn: solveApi });
 
   const handleAnalyze = async () => {
-    if (!questionContent || !documentType || !firebaseUser) {
+    if (!questionContent?.content || !documentType || !firebaseUser) {
       toast({ title: t('builder.academicSolver.toasts.analysisError'), description: "Please provide the document content and select a document type.", variant: 'destructive' });
       return;
     }
@@ -74,7 +74,7 @@ export default function AcademicSolver() {
     setStage('analyzing');
     
     try {
-      const analysisData = await analyzeMutation.mutateAsync({ markdown: questionContent, documentType, token });
+      const analysisData = await analyzeMutation.mutateAsync({ markdown: questionContent.content, documentType, token });
       setAnalyzedDocument(analysisData);
       setStage('readyToSolve');
       refetchUser();
@@ -140,9 +140,11 @@ export default function AcademicSolver() {
 
              <AcademicUploaders
                 title="Questions Document"
-                onContentAdded={setQuestionContent}
+                onContentAdded={(fileName, content) => setQuestionContent({ fileName, content })}
                 onContentRemoved={() => setQuestionContent(null)}
                 isProcessing={isProcessing}
+                uploadedContent={questionContent ? [questionContent] : []}
+                isContext={false}
              />
              
              <AcademicUploaders
@@ -150,6 +152,7 @@ export default function AcademicSolver() {
                 onContentAdded={addExternalContext}
                 onContentRemoved={removeExternalContext}
                 isProcessing={isProcessing}
+                uploadedContent={externalContext}
                 isContext
              />
 

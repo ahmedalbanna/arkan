@@ -4,7 +4,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
+import { useAcademicSolverStore, type ExternalContext } from '@/hooks/useAcademicSolverStore';
 
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
@@ -25,7 +25,7 @@ interface SingleUploaderProps {
     onContentRemoved: (index: number) => void;
     isProcessing: boolean;
     isContext?: boolean;
-    uploadedContent: { fileName: string, content: string }[];
+    uploadedContent: ExternalContext[];
 }
 
 
@@ -89,7 +89,7 @@ const PDFUploader = ({ onContentAdded, isProcessing }: { onContentAdded: (fileNa
 
 const TextPaster = ({ onContentAdded, isProcessing }: { onContentAdded: (fileName: string, content: string) => void, isProcessing: boolean }) => {
     const [text, setText] = useState('');
-    const [fileName, setFileName] = useState('Pasted Text');
+    const fileName = 'Pasted Text';
     const { toast } = useToast();
 
     const handleAdd = () => {
@@ -171,26 +171,15 @@ const ImageTextExtractor = ({ onContentAdded, isProcessing }: { onContentAdded: 
     );
 };
 
-export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false }: { title: string, onContentAdded: (fileName: string, content: string) => void, onContentRemoved: (index: number) => void, isProcessing: boolean, isContext?: boolean }) => {
-    const { questionContent, externalContext } = useAcademicSolverStore();
-    const contentArray = isContext ? externalContext : (questionContent ? [{ fileName: 'Questions Document', content: questionContent }] : []);
-
-    const handleSingleContentAdded = (fileName: string, content: string) => {
-        // For non-context, this will replace the content.
-        if (!isContext) {
-            (onContentAdded as (fileName: string | null, content: string) => void)(null, content);
-        } else {
-            onContentAdded(fileName, content);
-        }
-    }
-
+export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: { title: string, onContentAdded: (fileName: string, content: string) => void, onContentRemoved: (index: number) => void, isProcessing: boolean, isContext?: boolean, uploadedContent: ExternalContext[] }) => {
+    
     return (
         <Card>
             <CardContent className="p-4 space-y-2">
                  <Label className="font-semibold">{title}</Label>
-                 {contentArray.length > 0 ? (
-                      <div className="space-y-2">
-                        {contentArray.map((item, index) => (
+                 {uploadedContent.length > 0 ? (
+                      <ul className="space-y-2">
+                        {uploadedContent.map((item, index) => (
                             <li key={index} className="flex items-center justify-between p-2 border rounded-md bg-muted/50 text-sm list-none">
                                 <div className="flex items-center gap-2 truncate">
                                     <File className="h-4 w-4 shrink-0" />
@@ -213,9 +202,9 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                             <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Text</TabsTrigger>
                             <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Image</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="pdf" className="mt-2"><PDFUploader onContentAdded={handleSingleContentAdded} isProcessing={isProcessing} /></TabsContent>
-                        <TabsContent value="text" className="mt-2"><TextPaster onContentAdded={handleSingleContentAdded} isProcessing={isProcessing} /></TabsContent>
-                        <TabsContent value="image" className="mt-2"><ImageTextExtractor onContentAdded={handleSingleContentAdded} isProcessing={isProcessing} /></TabsContent>
+                        <TabsContent value="pdf" className="mt-2"><PDFUploader onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
+                        <TabsContent value="text" className="mt-2"><TextPaster onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
+                        <TabsContent value="image" className="mt-2"><ImageTextExtractor onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
                     </Tabs>
                  )}
             </CardContent>
