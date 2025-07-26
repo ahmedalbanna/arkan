@@ -15,6 +15,8 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { sectionConfig } from '@/lib/report-config';
+import { SectionName } from '@/ai/schemas';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -51,7 +53,13 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
     if (proposal && proposal.title) {
         proposalTitle = proposal.title;
     }
-    await exportReportAsDocx(sections, diagrams || {}, proposalTitle, selectedDocxTemplate);
+
+    const translatedTitles = Object.keys(sectionConfig).reduce((acc, key) => {
+      acc[key as SectionName] = t(sectionConfig[key as SectionName].title);
+      return acc;
+    }, {} as { [key in SectionName]?: string });
+
+    await exportReportAsDocx(sections, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles);
   };
 
 

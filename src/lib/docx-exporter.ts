@@ -286,7 +286,8 @@ export async function exportReportAsDocx(
     sections: { [key in SectionName]?: string; },
     diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
-    templateKey: TemplateKey
+    templateKey: TemplateKey,
+    translatedTitles: { [key in SectionName]?: string; }
 ) {
     const { Document, Packer, Paragraph, HeadingLevel, AlignmentType, ImageRun, TextRun, TableOfContents, Header, Footer, PageNumber } = await import('docx');
     const { saveAs } = await import('file-saver');
@@ -301,7 +302,7 @@ export async function exportReportAsDocx(
         const content = sections[key];
         if (content) {
             return [
-                new Paragraph({ text: sectionConfig[key].title, heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: translatedTitles[key] || sectionConfig[key].title, heading: HeadingLevel.HEADING_1 }),
                 ...(await createDocxParagraphs(content)),
             ];
         }
