@@ -10,6 +10,7 @@ import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";
 import { usePresentationStore } from "./usePresentationStore";
 import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
+import { useProjectPlanStore } from "./useProjectPlanStore";
 import type { ProjectState } from "@/lib/types";
 import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
 import { z } from "zod";
@@ -74,6 +75,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
         useCodeGeneratorStore.getState().newSession();
+        useProjectPlanStore.getState().newSession();
         toast({
           title: "New Session Started",
           description: "All project content has been cleared.",
@@ -104,6 +106,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useReportStore.getState().loadState(newState);
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
+        useProjectPlanStore.getState().loadState(newState);
 
         toast({
           title: "Project Loaded",
@@ -121,6 +124,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
         externalContext: useReportStore.getState().externalContext,
+        projectPlan: useProjectPlanStore.getState().projectPlan,
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
@@ -141,6 +145,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useReportStore.getState().newSession();
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
+        useProjectPlanStore.getState().newSession();
       },
       handleProposalUpdate: (path, value) => {
         const { proposal } = get();
@@ -190,6 +195,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
         externalContext: useReportStore.getState().externalContext,
+        projectPlan: useProjectPlanStore.getState().projectPlan,
       }),
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
@@ -211,6 +217,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().loadState(persistedState);
         usePresentationStore.getState().loadState(persistedState);
         useCodeGeneratorStore.getState().loadState(persistedState);
+        useProjectPlanStore.getState().loadState(persistedState);
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },

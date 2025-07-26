@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema } from '@/ai/schemas';
 
 // This schema is defined in a separate, server-only file to prevent circular dependencies
 // that can occur when client and server modules import from the same files (e.g., types.ts and schemas.ts).
@@ -15,4 +15,5 @@ export const ProjectStateSchema = z.object({
         content: z.string(),
     })).nullable().optional(),
     teamId: z.string().optional(), // Add teamId to associate project with a team
+    projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
 });
