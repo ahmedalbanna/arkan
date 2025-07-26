@@ -22,7 +22,7 @@ export interface AcademicSolverState {
   documentType: AcademicDocumentType | null;
   analyzedDocument: AnalyzedDocument | null;
   solvedDocument: SolvedDocument | null;
-  questionContent: ExternalContext | null; // Changed to handle file name and content
+  questionDocuments: ExternalContext[];
   externalContext: ExternalContext[];
 }
 
@@ -31,7 +31,8 @@ interface AcademicSolverActions {
   setDocumentType: (type: AcademicDocumentType | null) => void;
   setAnalyzedDocument: (document: AnalyzedDocument | null) => void;
   setSolvedDocument: (solution: SolvedDocument | null) => void;
-  setQuestionContent: (file: ExternalContext | null) => void; // Updated signature
+  addQuestionDocument: (fileName: string, content: string) => void;
+  removeQuestionDocument: (index: number) => void;
   addExternalContext: (fileName: string, content: string) => void;
   removeExternalContext: (index: number) => void;
   resetCurrent: () => void;
@@ -42,7 +43,7 @@ const initialState: AcademicSolverState = {
   documentType: null,
   analyzedDocument: null,
   solvedDocument: null,
-  questionContent: null,
+  questionDocuments: [],
   externalContext: [],
 };
 
@@ -62,13 +63,18 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         solvedDocument: solution,
         stage: solution ? "solved" : "readyToSolve",
       }),
-    setQuestionContent: (file) => {
-        set({
-            questionContent: file,
+    addQuestionDocument: (fileName, content) => {
+        set((state) => ({ 
+            questionDocuments: [...state.questionDocuments, { fileName, content }],
             stage: "idle",
             analyzedDocument: null,
-            solvedDocument: null
-        })
+            solvedDocument: null,
+        }));
+    },
+    removeQuestionDocument: (index) => {
+         set((state) => ({
+            questionDocuments: state.questionDocuments.filter((_, i) => i !== index),
+        }));
     },
     addExternalContext: (fileName, content) => {
         set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));

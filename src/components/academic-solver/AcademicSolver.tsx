@@ -50,11 +50,12 @@ export default function AcademicSolver() {
     documentType,
     analyzedDocument,
     solvedDocument,
-    questionContent,
+    questionDocuments,
     externalContext,
     setStage,
     setDocumentType,
-    setQuestionContent,
+    addQuestionDocument,
+    removeQuestionDocument,
     setAnalyzedDocument,
     setSolvedDocument,
     addExternalContext,
@@ -66,15 +67,17 @@ export default function AcademicSolver() {
   const solveMutation = useMutation({ mutationFn: solveApi });
 
   const handleAnalyze = async () => {
-    if (!questionContent?.content || !documentType || !firebaseUser) {
+    if (questionDocuments.length === 0 || !documentType || !firebaseUser) {
       toast({ title: t('builder.academicSolver.toasts.analysisError'), description: "Please provide the document content and select a document type.", variant: 'destructive' });
       return;
     }
     const token = await firebaseUser.getIdToken();
     setStage('analyzing');
     
+    const combinedQuestionContent = questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
+
     try {
-      const analysisData = await analyzeMutation.mutateAsync({ markdown: questionContent.content, documentType, token });
+      const analysisData = await analyzeMutation.mutateAsync({ markdown: combinedQuestionContent, documentType, token });
       setAnalyzedDocument(analysisData);
       setStage('readyToSolve');
       refetchUser();
@@ -140,10 +143,10 @@ export default function AcademicSolver() {
 
              <AcademicUploaders
                 title="Questions Document"
-                onContentAdded={(fileName, content) => setQuestionContent({ fileName, content })}
-                onContentRemoved={() => setQuestionContent(null)}
+                onContentAdded={addQuestionDocument}
+                onContentRemoved={removeQuestionDocument}
                 isProcessing={isProcessing}
-                uploadedContent={questionContent ? [questionContent] : []}
+                uploadedContent={questionDocuments}
                 isContext={false}
              />
              
@@ -156,7 +159,7 @@ export default function AcademicSolver() {
                 isContext
              />
 
-            <Button onClick={handleAnalyze} disabled={!questionContent || !documentType || isProcessing} className="w-full">
+            <Button onClick={handleAnalyze} disabled={questionDocuments.length === 0 || !documentType || isProcessing} className="w-full">
                 {stage === 'analyzing' ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
