@@ -17,7 +17,7 @@ interface PendingPaymentCardProps {
 }
 
 export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
-    const [adminNotes, setAdminNotes] = useState('');
+    const [adminNotes, setAdminNotes] = useState(transaction.adminNotes || '');
     const { mutate, isPending } = useVerifyPayment();
     const { t } = useLocalization();
 
@@ -36,7 +36,9 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <CardTitle className="font-headline text-lg">{transaction.planName}</CardTitle>
-                    <Badge variant="secondary">{transaction.status}</Badge>
+                    <Badge variant={transaction.status === 'verified' ? 'default' : transaction.status === 'rejected' ? 'destructive' : 'secondary'}>
+                        {transaction.status}
+                    </Badge>
                 </div>
                 <CardDescription>
                     {format(new Date(transaction.createdAt), 'd MMM yyyy, h:mm a')}
@@ -58,29 +60,36 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                         onChange={(e) => setAdminNotes(e.target.value)}
                         className="text-xs mt-2"
                         rows={2}
-                        disabled={isPending}
+                        disabled={isPending || transaction.status !== 'pending'}
                     />
                 </div>
+                 {transaction.verifiedBy && transaction.verifiedAt && (
+                    <p className="text-xs text-muted-foreground pt-2 border-t">
+                        Processed on {format(new Date(transaction.verifiedAt), 'd MMM yyyy')}
+                    </p>
+                )}
             </CardContent>
-            <CardFooter className="gap-2 justify-end">
-                <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleVerification('rejected')}
-                    disabled={isPending}
-                >
-                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
-                    {t('managePayments.declineButton')}
-                </Button>
-                <Button
-                    size="sm"
-                    onClick={() => handleVerification('verified')}
-                    disabled={isPending}
-                >
-                    {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                    {t('managePayments.approveButton')}
-                </Button>
-            </CardFooter>
+            {transaction.status === 'pending' && (
+                 <CardFooter className="gap-2 justify-end">
+                    <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleVerification('rejected')}
+                        disabled={isPending}
+                    >
+                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
+                        {t('managePayments.declineButton')}
+                    </Button>
+                    <Button
+                        size="sm"
+                        onClick={() => handleVerification('verified')}
+                        disabled={isPending}
+                    >
+                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                        {t('managePayments.approveButton')}
+                    </Button>
+                </CardFooter>
+            )}
         </Card>
     );
 }
