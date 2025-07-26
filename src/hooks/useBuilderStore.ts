@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -38,7 +39,7 @@ interface BuilderActions {
   setProjectIdea: (idea: string) => void;
   setCurrentProjectId: (id: string | null) => void;
   setHasUnsavedChanges: (status: boolean) => void;
-  getFullState: () => ProjectState;
+  getFullState: () => Omit<ProjectState, 'externalContext'>;
   // Proposal Actions
   setProposal: (proposal: ProjectProposal | null) => void;
   handleProposalUpdate: (path: string, value: any) => void;
@@ -68,14 +69,17 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       // --- GENERIC ACTIONS ---
       newSession: () => {
         set(initialState);
-        // Reset other stores as well
-        useReportStore.getState().newSession();
+        // Reset other stores as well, but not the external context in report store
+        const { newSession: newReportSession, externalContext } = useReportStore.getState();
+        newReportSession();
+        useReportStore.setState({ externalContext }); // Keep the external context
+
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
         useCodeGeneratorStore.getState().newSession();
         toast({
           title: "New Session Started",
-          description: "All content has been cleared.",
+          description: "All project content has been cleared.",
         });
       },
       loadState: (newState) => {
@@ -88,6 +92,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         });
 
         // Load state for other stores if present
+        // Note: externalContext is now managed separately by useReportStore's own persistence
         useReportStore.getState().loadState(newState);
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
@@ -106,7 +111,6 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
-        externalContext: useReportStore.getState().externalContext,
       }),
       setProjectIdea: (idea) =>
         set({ projectIdea: idea, hasUnsavedChanges: true }),
@@ -123,7 +127,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           hasUnsavedChanges: true,
         });
         // Clear downstream states when a new proposal is set
-        useReportStore.getState().newSession();
+        const { newSession: newReportSession, externalContext } = useReportStore.getState();
+        newReportSession();
+        useReportStore.setState({ externalContext });
+
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
       },
@@ -163,34 +170,27 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
-      name: "arkan-builder-state",
+      name: "arkan-builder-state-v2", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
-      // Only persist user-generated content, not transient UI state
+      // Only persist project-specific content, not global UI state or external context
       partialize: (state) => ({
         name: state.name,
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
-        // Don't persist hasUnsavedChanges directly, it's a runtime flag
-        // hasUnsavedChanges: state.hasUnsavedChanges,
-
-        // Persist other stores
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
-        externalContext: useReportStore.getState().externalContext,
       }),
       // Custom merge function to handle loading from storage
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
-        // Now, we need to hydrate the other stores from the persisted state
-        // This is a bit of a trick to make all stores persist under one key
         useReportStore.getState().loadState(persistedState);
         useDiagramStore.getState().loadState(persistedState);
         usePresentationStore.getState().loadState(persistedState);
         useCodeGeneratorStore.getState().loadState(persistedState);
-        return { ...merged, hasUnsavedChanges: false }; // Always start a session as "saved"
+        return { ...merged, hasUnsavedChanges: false };
       },
     }
   )
