@@ -5,11 +5,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Download, Copy, Check, Share2, RefreshCw } from 'lucide-react';
+import { Loader2, Download, Copy, Check, Share2, RefreshCw, PenSquare, Eye } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 
 interface DiagramViewerProps {
     title: string;
@@ -33,6 +32,7 @@ export default function DiagramViewer({
     const { t } = useLocalization();
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
+    const [viewMode, setViewMode] = useState<'image' | 'code'>('image');
 
     const handleCopy = () => {
         navigator.clipboard.writeText(plantUmlCode).then(() => {
@@ -54,13 +54,72 @@ export default function DiagramViewer({
         }
     };
 
+    const ViewToolbar = () => (
+        <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 rounded-md p-1">
+             <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode('code')} aria-label="Edit Code">
+                            <PenSquare className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Edit Code</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={isDownloading} aria-label="Download Image">
+                            {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
+    );
+
+    const EditToolbar = () => (
+         <div className="flex items-center justify-end p-2 border-b">
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setViewMode('image')} aria-label="View Image">
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>View Image</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy} type="button" aria-label="Copy Code">
+                            {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button variant="ghost" size="icon" asChild type="button" className="h-7 w-7">
+                            <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
+                                <Share2 className="h-4 w-4" />
+                            </a>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>{t('builder.diagramGenerator.tooltips.openRenderer')}</p></TooltipContent>
+                </Tooltip>
+            </TooltipProvider>
+        </div>
+    );
+
     return (
-        <ResizablePanelGroup
-            direction="horizontal"
-            className="min-h-[600px] w-full rounded-lg border"
-        >
-            <ResizablePanel defaultSize={50}>
-                <div className="flex h-full items-center justify-center p-6">
+        <div className="min-h-[600px] w-full rounded-lg border flex flex-col">
+            {viewMode === 'image' ? (
+                <div className="flex-grow flex items-center justify-center p-6 relative group">
                     <Image
                         src={imageUrl}
                         alt={`Rendered ${title}`}
@@ -69,45 +128,11 @@ export default function DiagramViewer({
                         className="w-full h-auto object-contain"
                         unoptimized
                     />
+                    <ViewToolbar />
                 </div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={50}>
+            ) : (
                 <div className="flex h-full flex-col">
-                    <div className="flex items-center justify-end p-2 border-b">
-                         <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={isDownloading} aria-label="Download Image">
-                                        {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy} type="button" aria-label="Copy Code">
-                                        {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="ghost" size="icon" asChild type="button" className="h-7 w-7">
-                                        <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
-                                            <Share2 className="h-4 w-4" />
-                                        </a>
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent><p>{t('builder.diagramGenerator.tooltips.openRenderer')}</p></TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    </div>
+                    <EditToolbar />
                     <Textarea
                         readOnly={isReadOnly}
                         value={plantUmlCode}
@@ -128,7 +153,7 @@ export default function DiagramViewer({
                         </div>
                     )}
                 </div>
-            </ResizablePanel>
-        </ResizablePanelGroup>
+            )}
+        </div>
     );
 }
