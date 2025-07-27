@@ -18,7 +18,7 @@ async function verifyAdmin(request: Request) {
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
+        if (!user) {
             return { authorized: false, message: 'Forbidden' };
         }
         return { authorized: true, userId: decodedToken.uid };
