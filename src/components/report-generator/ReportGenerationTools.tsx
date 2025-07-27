@@ -32,8 +32,37 @@ import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
+import { type GuidelineState } from '@/hooks/useReportStore';
 
 const orderedSections = SectionNameSchema.options;
+
+// Helper function to get selected guidelines for a specific item
+const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
+    const agent = agents.find(a => a.id === sectionConfig[itemKey as SectionNameType]?.agentId);
+    const currentGuidelineState = guidelineState[itemKey];
+
+    if (!agent || !currentGuidelineState) {
+        return guidelineState[itemKey]?.custom || [];
+    }
+
+    const promptConfig = agent.prompt as AgentPrompt;
+    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
+        return currentGuidelineState.custom || [];
+    }
+
+    const guidelines: string[] = [];
+    promptConfig.guidelines.forEach((g, index) => {
+        if (currentGuidelineState.checked[index]) {
+            guidelines.push(g.text);
+        }
+    });
+
+    if (currentGuidelineState.custom) {
+        guidelines.push(...currentGuidelineState.custom);
+    }
+    
+    return guidelines;
+};
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -116,6 +145,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         manualTableOfContents,
         setManualTableOfContents,
         contextSelection,
+        guidelineState
     } = useReportStore();
     
     const handleGenerationResult = (data: any, variables: any) => {
@@ -278,7 +308,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             {availableSections.map((key) => {
                                 const { title, icon: Icon, agentId } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(contextSelection[key]?.sections || {}).some(v => v) || Object.values(contextSelection[key]?.diagrams || {}).some(v => v) || (externalContext && externalContext.length > 0 && contextSelection[key]?.externalContext.some(v => v));
+                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (externalContext.length > 0 && currentSelection.externalContext.some(v => v));
 
                                 return (
                                     <AccordionItem value={key} key={key}>
