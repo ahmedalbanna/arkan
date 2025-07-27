@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -6,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { MoreHorizontal, Plus, AlertTriangle } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
+import { AddStepDialog } from './AddStepDialog';
 
 const WebhookLogo = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -77,9 +78,16 @@ export function WorkflowCanvas() {
             <div className="h-8 w-px bg-border" />
 
             {/* Add Step */}
-             <Button variant="outline" className="w-80 border-dashed">
-                <Plus className="mr-2 h-4 w-4"/> Add Step
-            </Button>
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button variant="outline" className="w-80 border-dashed">
+                        <Plus className="mr-2 h-4 w-4"/> Add Step
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl h-[80vh] p-0">
+                    <AddStepDialog />
+                </DialogContent>
+            </Dialog>
         </div>
     </div>
   );
