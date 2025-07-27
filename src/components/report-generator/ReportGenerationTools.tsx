@@ -31,6 +31,7 @@ import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { Skeleton } from '../ui/skeleton';
 
 const orderedSections = SectionNameSchema.options;
 

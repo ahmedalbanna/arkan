@@ -28,7 +28,9 @@ interface ContextSelectorProps {
     };
 }
 
-export function ContextSelector({ itemKey, currentSelection }: ContextSelectorProps) {
+const defaultSelection = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+
+export function ContextSelector({ itemKey, currentSelection = defaultSelection }: ContextSelectorProps) {
     const { t } = useLocalization();
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
