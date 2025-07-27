@@ -25,3 +25,6 @@ import '@/ai/flows/generate-project-plan.ts';
 import '@/ai/flows/project-chat.ts';
 import '@/ai/flows/generate-codebase.ts';
     
+// Import tools so Genkit recognizes them in development
+import '@/ai/tools/generateReportSection';
+import '@/ai/tools/updateProposalField';
