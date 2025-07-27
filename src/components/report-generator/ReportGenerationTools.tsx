@@ -10,8 +10,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { sectionConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, Presentation, FileDown, History } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -33,7 +32,6 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import type { GuidelineState } from '@/hooks/useReportStore';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -161,19 +159,19 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         const fullState = getFullState();
 
-        const selectedContext = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+        const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         
-        const exampleFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example');
-        const contextFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context');
+        const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
+        const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
         
         const agent = fullState.agents?.find(a => a.id === sectionConfig[section as SectionNameType]?.agentId);
 
         const body = {
-            proposal: selectedContext.proposal ? fullState.proposal : undefined,
-            projectPlan: selectedContext.projectPlan ? fullState.projectPlan : undefined,
+            proposal: currentSelection.proposal ? fullState.proposal : undefined,
+            projectPlan: currentSelection.projectPlan ? fullState.projectPlan : undefined,
             sectionToGenerate: section,
-            otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionNameType]}), {}),
-            otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
+            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionNameType]}), {}),
+            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: generateInstructionText(controlState[section]),
             exampleFiles,
