@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import KnowledgeTab from './admin/agent-editor/KnowledgeTab';
 import ToolsTab from './admin/agent-editor/ToolsTab';
+import CommandsTab from './admin/agent-editor/CommandsTab';
 
 interface AgentEditorProps {
   agentId: string;
@@ -182,6 +183,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <KnowledgeTab />;
       case 'tools':
         return <ToolsTab />;
+      case 'commands':
+        return <CommandsTab />;
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label || discoverItems.find(d => d.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }
