@@ -24,7 +24,7 @@ import GuidelinesTab from './GuidelinesTab';
 import AutomationTab from './AutomationTab';
 import { toast } from '@/hooks/use-toast';
 import ContextTab from './ContextTab';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { X } from 'lucide-react';
 
 interface AgentEditorProps {
