@@ -6,6 +6,7 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { projectChat } from '@/ai/flows/project-chat';
+import { GenerateResponse } from 'genkit';
 
 const chatRequestSchema = z.object({
   message: z.string(),
@@ -33,16 +34,34 @@ export async function POST(request: Request) {
     await deductCredit(userId, 1);
 
     const agentInput = validation.data;
-    const result = await projectChat(agentInput);
+    const result: GenerateResponse = await projectChat(agentInput);
+
+    // Convert the complex GenerateResponse object to a plain serializable object for Firestore
+    const serializableResult = {
+      text: result.text,
+      toolRequest: result.toolRequest,
+      candidates: result.candidates.map(c => ({
+          index: c.index,
+          finishReason: c.finishReason,
+          message: {
+              role: c.message.role,
+              content: c.message.content.map(p => ({
+                  text: p.text,
+                  toolRequest: p.toolRequest
+              }))
+          }
+      })),
+      usage: result.usage
+    };
 
     await logGeneration({
       agentId: 'project-chat-agent',
       userId,
       input: { message: agentInput.message }, // Log only the message for brevity
-      output: result,
+      output: serializableResult,
     });
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json(serializableResult, { status: 200 });
 
   } catch (error: any) {
     console.error('Error in project chat API:', error);
