@@ -22,6 +22,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
+import BlockEditor from './BlockEditor';
 
 interface EditableSectionProps {
     sectionKey: SectionName;
@@ -66,7 +67,6 @@ const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
 export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [currentContent, setCurrentContent] = useState(content);
-    const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
 
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
@@ -105,13 +105,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             setCurrentContent(content);
         }
     }, [content, isEditing, aiSuggestion]);
-
-    useEffect(() => {
-        if (isEditing && textAreaRef.current) {
-            textAreaRef.current.style.height = "auto";
-            textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
-        }
-    }, [isEditing, currentContent]);
 
     const handleSave = () => {
         onUpdate(sectionKey, currentContent);
@@ -214,14 +207,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
         if (isEditing) {
             return (
-                <Textarea
-                    ref={textAreaRef}
-                    value={currentContent}
-                    onChange={(e) => setCurrentContent(e.target.value)}
-                    onBlur={handleSave}
-                    autoFocus
-                    className="bg-background/80 cursor-text my-2 w-full p-2"
-                />
+                <div className="my-2">
+                    <BlockEditor 
+                        initialContent={currentContent}
+                        onChange={setCurrentContent}
+                        editable={true}
+                    />
+                    <Button onClick={handleSave} className="mt-2">Save</Button>
+                </div>
             );
         }
         
@@ -246,7 +239,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
                 className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
             >
-                <div className="prose dark:prose-invert max-w-none" ref={contentRef}>
+                <div ref={contentRef}>
                   {renderEditableContent()}
                 </div>
                 

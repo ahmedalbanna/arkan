@@ -134,3 +134,6 @@ body {
     max-width: 1920px;
 }
 }
+
+/* Add BlockNote styles */
+@import "@blocknote/core/style.css";
