@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +39,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -116,6 +117,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         activePresentationId,
         setActivePresentationId,
     } = usePresentationStore();
+    const { userProfile } = useAuth();
+    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const {
         externalContext,
@@ -360,17 +363,29 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
-                        <div className="pt-4">
-                           <Button
-                                type="button"
-                                onClick={handleGenerateClick}
-                                disabled={isDisabled || isGenerating}
-                                className="font-headline w-full"
-                                title={t('builder.presentationGenerator.generateButton')}
-                            >
-                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                {t('builder.presentationGenerator.generateButton')}
-                            </Button>
+                         <div className="pt-4">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <div className="w-full">
+                                            <Button
+                                                type="button"
+                                                onClick={handleGenerateClick}
+                                                disabled={isDisabled || isGenerating || !hasCreditsForGeneration}
+                                                className="font-headline w-full"
+                                            >
+                                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                {t('builder.presentationGenerator.generateButton')}
+                                            </Button>
+                                        </div>
+                                    </TooltipTrigger>
+                                    {!hasCreditsForGeneration && (
+                                        <TooltipContent>
+                                            <p>{t('builder.toasts.insufficientCredits')}</p>
+                                        </TooltipContent>
+                                    )}
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </TabsContent>
                     <TabsContent value="history" className="pt-6">

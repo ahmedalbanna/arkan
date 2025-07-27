@@ -31,6 +31,7 @@ import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -75,7 +76,7 @@ export const DiagramGenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, userProfile } = useAuth();
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const explainMutation = useExplainDiagram();
@@ -143,7 +144,8 @@ export const DiagramGenerationTools = () => {
     
     const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating || explainMutation.isPending;
-    
+    const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
+
     const onGenerateDiagram = async (diagramType: DiagramType) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
@@ -319,16 +321,28 @@ export const DiagramGenerationTools = () => {
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
-                                        <Button
-                                            type="button"
-                                            onClick={() => onGenerateDiagram(key as DiagramType)}
-                                            disabled={isAnythingGenerating || !agent?.isEnabled}
-                                            className="font-headline"
-                                            title={!agent?.isEnabled ? t('builder.diagramGenerator.disabledTooltip') : t('builder.diagramGenerator.generateButton', { title: t(title) as string })}
-                                        >
-                                            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                            {t('builder.diagramGenerator.generateButton')}
-                                        </Button>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="w-full">
+                                                        <Button
+                                                            type="button"
+                                                            onClick={() => onGenerateDiagram(key as DiagramType)}
+                                                            disabled={isAnythingGenerating || !agent?.isEnabled || !hasCreditsForGeneration}
+                                                            className="font-headline w-full"
+                                                        >
+                                                            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                            {t('builder.diagramGenerator.generateButton')}
+                                                        </Button>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                {!hasCreditsForGeneration && (
+                                                    <TooltipContent>
+                                                        <p>{t('builder.toasts.insufficientCredits')}</p>
+                                                    </TooltipContent>
+                                                )}
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>

@@ -211,7 +211,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !sections[sectionKey]) || [];
     const fullReportCreditCost = sectionsToGenerate.length;
     const hasEnoughCreditsForFullReport = userProfile ? userProfile.credits >= fullReportCreditCost : false;
-    const hasCreditsForSingleSection = userProfile ? userProfile.credits > 0 : false;
+    const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
     if (!agentsLoaded) {
         return (
