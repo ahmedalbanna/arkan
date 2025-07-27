@@ -248,6 +248,14 @@ export async function deleteDocxTemplate(templateKey: string, token: string) {
 }
 
 // --- PPTX Templates ---
+export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
+  const response = await fetch("/api/templates/pptx");
+  if (!response.ok) {
+    throw new Error("Failed to fetch PPTX templates");
+  }
+  return await response.json();
+}
+
 export async function createPptxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<PptxTemplate> {
     const response = await fetch('/api/templates/pptx', {
         method: 'POST',
@@ -259,6 +267,26 @@ export async function createPptxTemplate(data: {id: string, name: string, descri
         throw error;
     }
     return await response.json();
+}
+
+
+export async function updatePptxTemplate(
+  variables: {key: string, styles: any},
+  token: string
+) {
+  const response = await fetch(`/api/templates/pptx/${variables.key}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ styles: variables.styles }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update PPTX template");
+  }
+  return response.json();
 }
 
 export async function deletePptxTemplate(templateKey: string, token: string) {

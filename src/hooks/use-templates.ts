@@ -15,6 +15,7 @@ import {
   deleteProposalTemplate,
   deleteReportTemplate,
   deletePresentationTemplate,
+  refreshTemplateImage,
   type ProposalTemplate,
   type ReportGenerationTemplate,
   type PresentationGenerationTemplate,
@@ -23,6 +24,8 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "./use-toast";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { docxTemplateKeys } from "./use-docx-styles";
+import { pptxTemplateKeys } from "./use-pptx-styles";
 
 export const templateKeys = {
   all: ["templates"] as const,
@@ -293,5 +296,28 @@ export function useDeletePresentationTemplate() {
         onError: (error: Error) => {
             handleErrorUtility(error, "Delete Failed");
         }
+    });
+}
+
+export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (variables: { templateId: string; prompt: string }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return refreshTemplateImage({ ...variables, templateType }, token);
+        },
+        onSuccess: () => {
+            if (templateType === 'docx') {
+                queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
+            } else if (templateType === 'pptx') {
+                queryClient.invalidateQueries({ queryKey: pptxTemplateKeys.lists() });
+            }
+            toast({ title: 'Success', description: 'Template image has been refreshed.' });
+        },
+        onError: (error) => {
+            handleErrorUtility(error, 'Image Refresh Failed');
+        },
     });
 }

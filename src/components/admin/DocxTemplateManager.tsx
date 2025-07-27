@@ -2,11 +2,12 @@
 'use client';
 
 import { useDocxStyles, useCreateDocxTemplate, useDeleteDocxTemplate } from '@/hooks/use-docx-styles';
+import { useRefreshTemplateImage } from '@/hooks/use-templates';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -168,6 +169,7 @@ function TemplatePreview({ styles }: { styles: any }) {
 export default function DocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
   const deleteMutation = useDeleteDocxTemplate();
+  const refreshImageMutation = useRefreshTemplateImage('docx');
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
@@ -181,6 +183,11 @@ export default function DocxTemplateManager() {
   const handleDelete = (key: TemplateKey) => {
     deleteMutation.mutate(key);
   }
+
+  const handleRefreshImage = (templateId: string, prompt: string) => {
+    refreshImageMutation.mutate({ templateType: 'docx', templateId, prompt });
+  };
+
 
   if (!isLoaded) {
     return (
@@ -236,7 +243,22 @@ export default function DocxTemplateManager() {
               </div>
             </CardHeader>
             <CardContent className="flex-grow space-y-4">
-              <TemplatePreview styles={template.styles} />
+               <div className="relative group">
+                    <TemplatePreview styles={template.styles} />
+                     <Button
+                        size="icon"
+                        variant="secondary"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRefreshImage(template.id, template.dataAiHint)}
+                        disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id}
+                      >
+                         {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                    </Button>
+                </div>
               <Accordion type="multiple" className="w-full">
                 <AccordionItem value="general">
                   <AccordionTrigger>{t('manageTemplates.generalStyles')}</AccordionTrigger>

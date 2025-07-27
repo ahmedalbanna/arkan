@@ -12,7 +12,6 @@ import {
   updateDocxTemplate,
   createDocxTemplate,
   deleteDocxTemplate,
-  refreshTemplateImage,
   type DocxTemplate,
 } from "@/services/template-service";
 import type { IStylesOptions } from 'docx';
@@ -133,27 +132,5 @@ export function useDeleteDocxTemplate() {
         onError: (error: Error) => {
             handleErrorUtility(error, "Failed to delete template");
         }
-    });
-}
-
-export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-
-    return useMutation({
-        mutationFn: async (variables: { templateId: string; prompt: string }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return refreshTemplateImage({ ...variables, templateType }, token);
-        },
-        onSuccess: () => {
-            if (templateType === 'docx') {
-                queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-            }
-            // Add similar logic for pptx if needed
-            toast({ title: 'Success', description: 'Template image has been refreshed.' });
-        },
-        onError: (error) => {
-            handleErrorUtility(error, 'Image Refresh Failed');
-        },
     });
 }

@@ -1,7 +1,8 @@
 
 'use client';
 
-import { usePptxStyles, useCreatePptxTemplate, useDeletePptxTemplate, useRefreshTemplateImage } from '@/hooks/use-templates';
+import { usePptxStyles, useCreatePptxTemplate, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
+import { useRefreshTemplateImage } from '@/hooks/use-templates';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
