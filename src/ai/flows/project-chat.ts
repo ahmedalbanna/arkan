@@ -1,4 +1,3 @@
-
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -17,7 +16,12 @@ const generateSectionTool = ai.defineTool(
     }),
     outputSchema: z.any(),
   },
-  async (input) => generateReportSection(input)
+  async (input) => generateReportSection({
+    sectionToGenerate: input.section,
+    // Add other required properties for generateReportSection if any
+    // For example, if it needs the whole project state:
+    // projectState: useBuilderStore.getState().getFullState(),
+  })
 );
 
 // Tool: Update a field in the Project Proposal

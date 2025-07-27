@@ -3,7 +3,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
-import { MessageSquare, Send, X, Bot, User, Loader2, Tool } from 'lucide-react';
+import { MessageSquare, Send, X, Bot, User, Loader2, PenToolIcon } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
@@ -14,15 +14,22 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useReportStore } from '@/hooks/useReportStore';
-import { runFlow, type RunFlowBody } from 'genkit/next';
 import { Badge } from '../ui/badge';
 
-async function sendChatMessage(body: RunFlowBody) {
-    const response = await runFlow('projectChatFlow', body);
-    if (response.error) {
-        throw new Error(response.error);
+async function sendChatMessage(body: { message: string, projectState: any }, token: string) {
+    const response = await fetch('/api/project-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get response from chat assistant');
     }
-    return response.result;
+    return response.json();
 }
 
 // Separate API function for generating a section when a tool is called
@@ -97,7 +104,10 @@ export default function ProjectChat() {
     };
     
     const chatMutation = useMutation({
-        mutationFn: sendChatMessage,
+        mutationFn: (variables: { message: string, projectState: any }) => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            return firebaseUser.getIdToken().then(token => sendChatMessage(variables, token));
+        },
         onSuccess: handleApiResponse,
         onError: (error: Error) => {
             toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -185,7 +195,7 @@ export default function ProjectChat() {
                                     )}>
                                         {message.isToolResponse ? (
                                             <div className="flex items-center gap-2 text-sm italic">
-                                                <Tool className="h-4 w-4" />
+                                                <PenToolIcon className="h-4 w-4" />
                                                 <p>{message.content}</p>
                                             </div>
                                         ) : (
@@ -241,3 +251,5 @@ function Avatar({ children, className }: { children: React.ReactNode, className?
         </div>
     )
 }
+
+    
