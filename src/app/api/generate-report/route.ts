@@ -147,7 +147,7 @@ export async function POST(request: Request) {
         const agentInput = singleSectionValidation.data;
 
         // A proposal or external context is required to generate a section.
-        if (!agentInput.proposal && (!agentInput.externalContext || agentInput.externalContext.length === 0) && !agentInput.projectPlan) {
+        if (!agentInput.proposal && !agentInput.projectPlan && (!agentInput.externalContext || agentInput.externalContext.length === 0)) {
             return NextResponse.json({ message: "A proposal, project plan, or external context is required to generate a report section." }, { status: 400 });
         }
 
