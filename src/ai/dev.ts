@@ -10,6 +10,7 @@ import '@/ai/flows/generate-diagrams.ts';
 import '@/ai/flows/manipulate-text.ts';
 import '@/ai/flows/generate-presentation.ts';
 import '@/ai/flows/generate-code.ts';
+import '@/ai/flows/generate-ui.ts';
 import '@/ai/flows/rewrite-to-markdown.ts';
 import '@/ai/flows/evaluate-report.ts';
 import '@/ai/flows/translate-text.ts';

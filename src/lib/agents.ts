@@ -1,5 +1,4 @@
-
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -69,6 +68,23 @@ export const AGENTS: Agent[] = [
 Please analyze the following project description and provide the output in the required structured format.
 
 Description: {{{projectDescription}}}`
+  },
+   {
+    id: 'generate-ui',
+    name: 'UI Agent',
+    description: 'Creates UI components from a text description.',
+    category: AgentCategory.CodeGeneration,
+    icon: LayoutGrid,
+    pageUrl: '/ui-agent',
+    isEnabled: true,
+    prompt: `You are an expert frontend developer specializing in modern UI design. Your task is to generate the HTML and CSS for a UI component based on a user's prompt.
+
+Guidelines:
+1.  **HTML**: Provide only the body content. Do not include <html>, <head>, or <body> tags. The HTML should be clean and semantic.
+2.  **CSS**: Provide only the CSS styles. Do not include <style> tags. Use modern CSS practices. Make it visually appealing, responsive, and use a professional color palette. Do not use any external images or fonts.
+
+User Prompt: {{{prompt}}}
+`,
   },
   {
     id: 'generate-proposal',
