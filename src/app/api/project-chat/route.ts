@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth } from '@/lib/firebase/admin';
@@ -39,26 +38,32 @@ export async function POST(request: Request) {
     // Convert the complex GenerateResponse object to a plain serializable object for Firestore
     const serializableResult = {
       text: result.text,
-      toolRequest: result.toolRequest ?? null,
-      candidates: (result.candidates || []).map(c => ({
+      toolRequests: result.toolRequests ?? null, // Corrected from toolRequest to toolRequests
+      candidates: (result.candidates || []).map((c: any) => ({ // Added explicit 'any' type for simplicity
           index: c.index,
           finishReason: c.finishReason,
           message: {
               role: c.message.role,
-              content: (c.message.content || []).map(p => ({
+              content: (c.message.content || []).map((p: any) => ({ // Added explicit 'any' type for simplicity
                   text: p.text,
                   toolRequest: p.toolRequest ?? null
               }))
-          }
+          },
+          // Include usage information per candidate if available and serializable
+          usage: c.usage ?? null
       })),
+      // Include overall usage information if available and serializable
       usage: result.usage ?? null
     };
+
+    // Clean up undefined values recursively before logging
+    const cleanSerializableResult = JSON.parse(JSON.stringify(serializableResult));
 
     await logGeneration({
       agentId: 'project-chat-agent',
       userId,
       input: { message: agentInput.message }, // Log only the message for brevity
-      output: serializableResult,
+      output: cleanSerializableResult,
     });
 
     return NextResponse.json(serializableResult, { status: 200 });

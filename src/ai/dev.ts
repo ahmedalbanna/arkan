@@ -15,8 +15,6 @@ import '@/ai/flows/generate-code.ts';
 import '@/ai/flows/rewrite-to-markdown.ts';
 import '@/ai/flows/evaluate-report.ts';
 import '@/ai/flows/translate-text.ts';
-import '@/ai/flows/exam-solver.ts';
-import '@/ai/flows/homework-solver.ts';
 import '@/ai/flows/rewrite-document-to-markdown.ts';
 import '@/ai/flows/generate-image.ts';
 import '@/ai/flows/evaluate-and-select-context.ts';
