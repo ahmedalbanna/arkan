@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered, BookCheck, GitGraph, Presentation } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered, BookCheck, GitGraph, Presentation, Eye, X } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -139,6 +139,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         sections,
         externalContext,
         addExternalContext,
+        removeExternalContext,
         controlState,
         guidelineState,
         customGuidelineInput,
@@ -472,7 +473,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                           <Checkbox
                                                                               id={`context-diagram-${key}-${contextKey}`}
                                                                               checked={!!currentSelection.diagrams[contextKey]}
-                                                                              onCheckedChange={(checked) => toggleContextSelection(key, 'diagrams', contextKey, !!checked)}
+                                                                              onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'diagrams', contextKey, !!checked)}
                                                                           />
                                                                           <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
                                                                               <div className="flex items-center gap-2">
@@ -492,7 +493,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                             <Checkbox
                                                                                 id={`context-external-${key}-${index}`}
                                                                                 checked={!!currentSelection.externalContext?.[index]}
-                                                                                onCheckedChange={(checked) => toggleContextSelection(key, 'externalContext', index, !!checked)}
+                                                                                onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'externalContext', index, !!checked)}
                                                                             />
                                                                             <Label htmlFor={`context-external-${key}-${index}`} className="text-sm font-normal">
                                                                                 <div className="flex items-center gap-2">
@@ -549,6 +550,36 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <EvaluationTools />
                     </TabsContent>
                  </Tabs>
+                 <div className="pt-4 mt-4 border-t">
+                    <h3 className="text-sm font-semibold mb-2">Uploaded Context</h3>
+                     {externalContext.length > 0 ? (
+                        <div className="space-y-2">
+                            {externalContext.map((item, index) => (
+                                <div key={index} className="flex items-center justify-between p-2 text-sm border rounded-md bg-muted/50">
+                                    <span className="truncate pr-2">{item.fileName}</span>
+                                    <div className="flex items-center">
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6"><Eye className="h-4 w-4" /></Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-2xl">
+                                                <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
+                                                <ScrollArea className="h-[60vh] p-4 border rounded-md">
+                                                    <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
+                                                </ScrollArea>
+                                            </DialogContent>
+                                        </Dialog>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}>
+                                            <X className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                     ) : (
+                         <p className="text-xs text-muted-foreground text-center p-2">No context uploaded.</p>
+                     )}
+                </div>
                  <div className="pt-4 mt-4 border-t">
                     <h3 className="text-sm font-semibold mb-2">Add Context / Examples</h3>
                     <Tabs defaultValue="context" className="w-full">
