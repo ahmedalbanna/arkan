@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import Link from 'next/link';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
-import CommandsTab from './CommandsTab';
+import GuidelinesTab from './GuidelinesTab';
 import ShareEmbedTab from './ShareEmbedTab';
 import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 import AutomationTab from './AutomationTab';
@@ -32,8 +32,14 @@ interface AgentEditorProps {
   initialData: Agent;
 }
 
+const agentGuidelineSchema = z.object({
+  text: z.string().min(1, "Guideline text cannot be empty."),
+  isDefault: z.boolean(),
+});
+
 const agentPromptSchema = z.object({
   base: z.string().min(10, "Base prompt must be at least 10 characters."),
+  guidelines: z.array(agentGuidelineSchema).optional(),
 });
 
 const agentEditorSchema = z.object({
@@ -44,7 +50,7 @@ const agentEditorSchema = z.object({
   ])
 });
 
-type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
+export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
 const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
   <Button
@@ -102,9 +108,9 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   const navItems = [
     { id: 'general', label: 'General', icon: Bot },
+    { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
     { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
     { id: 'tools', label: 'Tools', icon: Wrench },
-    { id: 'commands', label: 'Commands', icon: Terminal },
     { id: 'share', label: 'Share & Embed', icon: Share2 },
   ];
 
@@ -179,12 +185,12 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
             )}
           </div>
         );
+      case 'guidelines':
+        return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
       case 'knowledge':
         return <KnowledgeTab />;
       case 'tools':
         return <ToolsTab />;
-      case 'commands':
-        return <CommandsTab />;
       case 'share':
         return <ShareEmbedTab />;
        case 'automation':
