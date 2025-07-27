@@ -5,10 +5,16 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Download, Copy, Check, Share2, RefreshCw, PenSquare, Eye } from 'lucide-react';
+import { Loader2, Download, Copy, Check, Share2, RefreshCw, PenSquare, Eye, Wand2, FileText } from 'lucide-react';
 import { saveAs } from 'file-saver';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
+import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogTrigger } from '../ui/dialog';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface DiagramViewerProps {
     title: string;
@@ -18,6 +24,22 @@ interface DiagramViewerProps {
     isUpdating?: boolean;
     onCodeChange?: (newCode: string) => void;
     onUpdate?: () => void;
+}
+
+async function explainDiagramApi(imageDataUri: string, token: string) {
+    const response = await fetch('/api/explain-diagram', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ imageDataUri }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to explain diagram');
+    }
+    return await response.json();
 }
 
 export default function DiagramViewer({
@@ -33,10 +55,15 @@ export default function DiagramViewer({
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code'>('image');
+    const [explanation, setExplanation] = useState<string | null>(null);
+    const [isExplaining, setIsExplaining] = useState(false);
+    const { firebaseUser, refetchUser } = useAuth();
+    
 
     const handleCopy = () => {
         navigator.clipboard.writeText(plantUmlCode).then(() => {
             setIsCopied(true);
+            toast({title: "Copied!", description: "PlantUML code copied to clipboard."});
             setTimeout(() => setIsCopied(false), 2000);
         });
     };
@@ -49,13 +76,69 @@ export default function DiagramViewer({
             saveAs(blob, `${title.replace(/\s+/g, '_')}.png`);
         } catch (error) {
             console.error('Download failed:', error);
+            toast({title: "Download Failed", variant: "destructive"});
         } finally {
             setIsDownloading(false);
         }
     };
+    
+    const handleExplain = async () => {
+        if (!firebaseUser) {
+            toast({ title: 'Authentication Required', variant: 'destructive' });
+            return;
+        }
+        setIsExplaining(true);
+        setExplanation(null);
+        try {
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                const base64data = reader.result as string;
+                const token = await firebaseUser.getIdToken();
+                const result = await explainDiagramApi(base64data, token);
+                setExplanation(result.explanation);
+                refetchUser(); // Update credits
+            };
+        } catch (error: any) {
+            toast({ title: 'Explanation Failed', description: error.message, variant: 'destructive' });
+        } finally {
+             setIsExplaining(false);
+        }
+    };
+
 
     const ViewToolbar = () => (
         <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background/70 rounded-md p-1">
+            <Dialog>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                             <DialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleExplain} disabled={isExplaining}>
+                                    {isExplaining ? <Loader2 className="h-4 w-4 animate-spin"/> : <Wand2 className="h-4 w-4" />}
+                                </Button>
+                            </DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent><p>Explain Diagram</p></TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                 <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2"><FileText /> Diagram Explanation</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[60vh] pr-4">
+                        <div className="prose dark:prose-invert max-w-none">
+                            {explanation ? (
+                                <ReactMarkdown components={markdownComponents}>{explanation}</ReactMarkdown>
+                            ) : (
+                                <p>No explanation available. Click "Explain Diagram" to generate one.</p>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </DialogContent>
+            </Dialog>
              <TooltipProvider>
                 <Tooltip>
                     <TooltipTrigger asChild>
