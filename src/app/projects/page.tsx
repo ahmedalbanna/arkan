@@ -5,10 +5,12 @@ import { useAuth } from '@/context/AuthContext';
 import { fetchProjects } from '@/services/project-service';
 import { projectKeys } from '@/lib/query-keys';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, FolderOpen } from 'lucide-react';
+import { AlertCircle, FolderOpen, PlusCircle } from 'lucide-react';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useRouter } from 'next/navigation';
 
 function ProjectsPageSkeleton() {
     return (
@@ -22,6 +24,8 @@ function ProjectsPageSkeleton() {
 
 export default function MyProjectsPage() {
     const { firebaseUser, isLoading: authLoading } = useAuth();
+    const router = useRouter();
+    const newSession = useBuilderStore(state => state.newSession);
     
     const { data: projects, isLoading, isError, error } = useQuery({
         queryKey: projectKeys.lists(),
@@ -32,6 +36,11 @@ export default function MyProjectsPage() {
         },
         enabled: !authLoading && !!firebaseUser,
     });
+
+    const handleCreateNewProject = () => {
+        newSession();
+        router.push('/generate');
+    }
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
@@ -45,8 +54,9 @@ export default function MyProjectsPage() {
                         Load, manage, and continue working on your saved projects.
                     </p>
                 </div>
-                <Button asChild className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
-                    <Link href="/generate">Go to Builder</Link>
+                <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create New Project
                 </Button>
             </div>
             
