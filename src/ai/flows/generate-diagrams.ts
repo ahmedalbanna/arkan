@@ -7,13 +7,14 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/agents';
 
 // Define a generic input schema that can be used by all diagram generation flows.
 const GenerateDiagramInputSchema = z.object({
   proposal: ProjectProposalSchema.optional(),
+  projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
@@ -39,6 +40,8 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
     const basePrompt = agentPrompt.base;
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+    const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
+
 
     const diagramPrompt = ai.definePrompt({
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
@@ -84,6 +87,13 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 --- Main Input: Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
+\`\`\`
+{{/if}}
+
+{{#if projectPlan}}
+--- Main Input: Project Plan ---
+\`\`\`json
+${stringifiedPlan}
 \`\`\`
 {{/if}}
 `

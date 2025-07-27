@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
@@ -10,7 +10,8 @@ import { logGeneration } from '@/services/generation-service';
 
 // Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional(),
+  projectPlan: ProjectPlanSchema.optional().nullable(),
   diagramToGenerate: DiagramTypeSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),

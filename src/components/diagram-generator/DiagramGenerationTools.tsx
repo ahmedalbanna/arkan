@@ -13,7 +13,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -32,6 +32,7 @@ import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -82,6 +83,7 @@ export const DiagramGenerationTools = () => {
     const explainMutation = useExplainDiagram();
 
     const { proposal } = useBuilderStore();
+    const { projectPlan } = useProjectPlanStore();
     const { sections } = useReportStore();
     const { diagrams, setDiagram, setDiagramExplanation } = useDiagramStore();
 
@@ -153,7 +155,7 @@ export const DiagramGenerationTools = () => {
         }
 
         const token = await firebaseUser.getIdToken();
-        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+        const selection = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const otherSections = Object.entries(selection.sections) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
         
         const otherDiagrams = Object.entries(selection.diagrams) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
@@ -162,6 +164,7 @@ export const DiagramGenerationTools = () => {
 
         const body = {
             proposal: selection.proposal ? proposal : undefined,
+            projectPlan: selection.projectPlan ? projectPlan : undefined,
             diagramToGenerate: diagramType,
             otherSections,
             otherDiagrams,
@@ -191,7 +194,7 @@ export const DiagramGenerationTools = () => {
                         const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                         const { title, icon: Icon } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+                        const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -266,6 +269,10 @@ export const DiagramGenerationTools = () => {
                                                           <div className="flex items-center space-x-2">
                                                             <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
                                                             <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                                                        </div>
+                                                        <div className="flex items-center space-x-2">
+                                                            <Checkbox id={`context-plan-${key}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
+                                                            <Label htmlFor={`context-plan-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
                                                         </div>
                                                         {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
                                                             <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">

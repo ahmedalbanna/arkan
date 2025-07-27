@@ -9,12 +9,13 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, ProjectPlanSchema } from '@/ai/schemas';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 
 // Define the input schema for the context evaluation flow
 const EvaluateContextInputSchema = z.object({
   proposal: ProjectProposalSchema.describe("The original project proposal."),
+  projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   existingSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
   }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections."),
@@ -75,7 +76,7 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     name: 'evaluateAndSelectContextPrompt',
     input: { schema: EvaluateContextInputSchema },
     output: { schema: EvaluateContextOutputSchema },
-    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state (proposal, existing sections, diagrams) and create an optimal generation plan for a list of target sections.
+    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state (proposal, project plan, existing sections, diagrams) and create an optimal generation plan for a list of target sections.
 
 For each target section in the \`sectionsToGenerate\` list, you must determine the best configuration for its generation.
 
@@ -83,6 +84,7 @@ For each target section in the \`sectionsToGenerate\` list, you must determine t
 
 1.  **Review All Available Context:**
     *   Thoroughly examine the \`proposal\`.
+    *   Analyze the \`projectPlan\` to understand the breakdown of tasks and phases.
     *   Read through all \`existingSections\` to understand what has already been written.
     *   Analyze any \`existingDiagrams\` to understand the system structure.
 
@@ -90,7 +92,7 @@ For each target section in the \`sectionsToGenerate\` list, you must determine t
     *   For each target section, I will provide you with the AI agent's "Base Prompt" and its "Available Guidelines". Use this to understand what the agent is designed to do.
 
 3.  **Determine Optimal Configuration for EACH Target Section:**
-    *   **Context Selection**: From the list of \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent write its target section. Less is more; only select context that is directly useful.
+    *   **Context Selection**: From the list of \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent write its target section. The proposal and project plan are always available, so you only need to select which *other* generated items are relevant. Less is more; only select context that is directly useful.
     *   **Guideline Selection**: From the "Available Guidelines" for that agent, select the ones that are most appropriate given the project proposal. You can also CREATE NEW, specific guidelines if you believe they will improve the output.
     *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` for the section based on the project's nature.
 
@@ -104,6 +106,15 @@ For each target section in the \`sectionsToGenerate\` list, you must determine t
 \`\`\`json
 ${JSON.stringify(proposal, null, 2)}
 \`\`\`
+
+**Project Plan:**
+{{#if projectPlan}}
+\`\`\`json
+${JSON.stringify(input.projectPlan, null, 2)}
+\`\`\`
+{{else}}
+(No project plan has been generated yet)
+{{/if}}
 
 **Existing Report Sections:**
 {{#if existingSections}}

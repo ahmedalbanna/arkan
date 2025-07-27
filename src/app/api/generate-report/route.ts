@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType, ProjectPlanSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
@@ -15,6 +15,7 @@ import { sectionConfig } from '@/lib/report-config';
 // Schema for generating a single section
 const generateSectionSchema = z.object({
   proposal: ProjectProposalSchema.optional(),
+  projectPlan: ProjectPlanSchema.optional().nullable(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
@@ -25,7 +26,8 @@ const generateSectionSchema = z.object({
 
 // Schema for generating a full report based on a template
 const generateFullReportSchema = z.object({
-    proposal: ProjectProposalSchema.optional(),
+    proposal: ProjectProposalSchema,
+    projectPlan: ProjectPlanSchema.optional().nullable(),
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
+        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
@@ -71,12 +73,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
         }
         
-        if (!proposal) {
-            return NextResponse.json({ message: "A project proposal is required to generate a full report." }, { status: 400 });
-        }
-        
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, existingSections, existingDiagrams, sectionsToGenerate };
+        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
@@ -91,6 +89,7 @@ export async function POST(request: Request) {
             
             const agentInput = {
                 proposal,
+                projectPlan,
                 sectionToGenerate: config.section,
                 otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key as SectionName] }), {}),
                 otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key as DiagramType] }), {}),

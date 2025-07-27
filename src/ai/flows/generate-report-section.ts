@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { AnyProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { AnyProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/agents';
 
@@ -16,6 +16,7 @@ import type { AgentPrompt } from '@/lib/agents';
 // The `sectionToGenerate` field tells the flow which agent's prompt to use.
 const GenerateSectionInputSchema = z.object({
   proposal: AnyProjectProposalSchema.optional(),
+  projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
@@ -49,6 +50,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
   const basePrompt = agentPrompt.base;
 
   const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+  const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
   
   // A single, dynamic prompt definition.
   const prompt = ai.definePrompt({
@@ -98,6 +100,13 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 --- Main Input: Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
+\`\`\`
+{{/if}}
+
+{{#if projectPlan}}
+--- Main Input: Project Plan ---
+\`\`\`json
+${stringifiedPlan}
 \`\`\`
 {{/if}}
 `,
