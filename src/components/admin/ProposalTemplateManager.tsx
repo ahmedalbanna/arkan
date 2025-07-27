@@ -259,7 +259,7 @@ export function ProposalTemplateManager() {
         deleteMutation.mutate(templateId);
     };
 
-    if (isLoading) return <Skeleton className="h-48 w-full" />;
+    if (isLoading) return <Skeleton className="h-48 w-full" />
     if (isError) return <div>Error loading templates.</div>;
 
     return (
