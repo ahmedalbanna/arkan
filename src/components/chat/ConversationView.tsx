@@ -3,11 +3,43 @@
 
 import type { ChatSession } from './ChatList';
 import { Button } from '../ui/button';
-import { Plus, MessageSquare, Edit2, RotateCcw, Expand, X } from 'lucide-react';
-import { Card, CardHeader } from '../ui/card';
+import { Plus, MessageSquare, Edit2, RotateCcw, Expand, X, Bot, User, Send, Paperclip, Info, Settings2 } from 'lucide-react';
+import { CardHeader } from '../ui/card';
+import { Textarea } from '../ui/textarea';
+import { ScrollArea } from '../ui/scroll-area';
+import { cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronDown } from 'lucide-react';
+
 
 interface ConversationViewProps {
   chat: ChatSession | null;
+}
+
+function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
+    const isUser = role === 'user';
+    return (
+        <div className={cn("flex items-start gap-3", isUser && "justify-end")}>
+            {!isUser && (
+                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                    <Bot className="h-5 w-5"/>
+                </div>
+            )}
+            <div className={cn("p-3 rounded-lg max-w-lg", isUser ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                <p className="text-sm">{content}</p>
+            </div>
+             {isUser && (
+                 <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
+                    <User className="h-5 w-5"/>
+                </div>
+            )}
+        </div>
+    )
 }
 
 export function ConversationView({ chat }: ConversationViewProps) {
@@ -15,39 +47,10 @@ export function ConversationView({ chat }: ConversationViewProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center bg-background p-8">
         <div className="text-center">
-          <div className="mb-4 text-muted-foreground">
-            <svg
-              width="80"
-              height="80"
-              viewBox="0 0 80 80"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mx-auto"
-            >
-              <path
-                d="M65 40C65 53.8071 53.8071 65 40 65C34.6562 65 29.7441 63.2289 25.8322 60.2435L25 59.625V55C25 54.4477 25.4477 54 26 54H30.375L31.0007 53.166C34.7711 48.3438 40 45.4167 40 35C40 21.1929 28.8071 10 15 10C10.7833 10 6.85621 11.2289 3.5 13.374"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="opacity-50"
-              />
-              <path
-                d="M55 25C55 33.2843 48.2843 40 40 40C31.7157 40 25 33.2843 25 25C25 16.7157 31.7157 10 40 10C48.2843 10 55 16.7157 55 25Z"
-                stroke="currentColor"
-                strokeWidth="3"
-                className="opacity-90"
-              />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-semibold">Start a conversation</h2>
-          <p className="mt-2 text-muted-foreground max-w-sm">
-            Let's dive into a world of endless possibilities. Start a conversation, spark creativity, and explore new horizons together.
-          </p>
-          <Button className="mt-6">
-            <Plus className="mr-2 h-4 w-4" />
-            New chat
-          </Button>
+            <h2 className="text-2xl font-semibold">Start a conversation</h2>
+            <p className="mt-2 text-muted-foreground max-w-sm">
+                Select a chat from the sidebar or start a new one to begin.
+            </p>
         </div>
       </div>
     );
@@ -56,20 +59,52 @@ export function ConversationView({ chat }: ConversationViewProps) {
   return (
     <div className="flex h-full flex-col">
       <CardHeader className="flex flex-row items-center justify-between border-b p-4">
-        <h2 className="text-lg font-semibold">{chat.title}</h2>
-        <div className="flex items-center gap-2">
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                    <Bot className="h-5 w-5" />
+                    <h2 className="text-lg font-semibold">{chat.title}</h2>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem>Option 1</DropdownMenuItem>
+                <DropdownMenuItem>Option 2</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8"><Edit2 className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8"><RotateCcw className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8"><Expand className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8"><X className="h-4 w-4" /></Button>
         </div>
       </CardHeader>
-      <div className="flex-1 p-4">
-        {/* Conversation messages will go here */}
-        <p>Conversation for: {chat.title}</p>
-      </div>
-       <div className="p-4 border-t">
-        {/* Message input bar will go here */}
+      
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-6">
+            <Message role="assistant" content={`Hi there! How can I assist you today?`} />
+            <div className="text-center text-xs text-muted-foreground">This chat is only visible to you.</div>
+            {/* Additional messages would be mapped here */}
+        </div>
+      </ScrollArea>
+       
+       <div className="p-4 border-t bg-background">
+         <div className="relative">
+            <Textarea
+                placeholder="Ask me anything..."
+                className="w-full resize-none rounded-lg border border-input bg-muted pr-16 py-3"
+                rows={1}
+            />
+            <Button size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground">
+                <Send className="h-4 w-4"/>
+            </Button>
+         </div>
+         <div className="flex items-center gap-2 mt-2">
+            <Button variant="outline" size="sm" className="gap-1.5"><Settings2 className="h-4 w-4" /> General</Button>
+            <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon"><Info className="h-4 w-4" /></Button>
+         </div>
        </div>
     </div>
   );

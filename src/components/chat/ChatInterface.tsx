@@ -6,27 +6,10 @@ import { ChatList, type ChatSession } from './ChatList';
 import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import { cn } from '@/lib/utils';
+import { useChatStore } from '@/hooks/useChatStore';
 
 export default function ChatInterface() {
-  const [selectedChat, setSelectedChat] = useState<ChatSession | null>(null);
-
-  // Example data, this would come from a state management store in a real app
-  const [chats, setChats] = useState<ChatSession[]>([
-    { id: '1', title: 'User Onboarding Flow', lastMessage: 'Okay, let\'s refine the component...', timestamp: new Date(Date.now() - 1000 * 60 * 5) },
-    { id: '2', title: 'Database Schema for E-commerce', lastMessage: 'Can you add a "reviews" table?', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2) },
-    { id: '3', title: 'Marketing Copy for Ad Campaign', lastMessage: 'That sounds great, let\'s go with that.', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-  ]);
-
-  const handleNewChat = () => {
-    const newChat: ChatSession = {
-      id: (chats.length + 1).toString(),
-      title: `New Chat ${chats.length + 1}`,
-      lastMessage: '...',
-      timestamp: new Date(),
-    };
-    setChats([newChat, ...chats]);
-    setSelectedChat(newChat);
-  };
+  const { selectedChat, setSelectedChat, createNewChat, chats } = useChatStore();
 
   return (
     <ResizablePanelGroup
@@ -43,7 +26,7 @@ export default function ChatInterface() {
           chats={chats}
           selectedChat={selectedChat}
           onSelectChat={setSelectedChat}
-          onNewChat={handleNewChat}
+          onNewChat={createNewChat}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
