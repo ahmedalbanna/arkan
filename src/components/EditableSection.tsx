@@ -46,7 +46,7 @@ async function manipulateTextApi(variables: { data: ManipulateTextInput, token: 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${'${variables.token}'}`,
+            'Authorization': `Bearer ${variables.token}`,
         },
         body: JSON.stringify(variables.data),
     });
@@ -109,7 +109,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     useEffect(() => {
         if (isEditing && textAreaRef.current) {
             textAreaRef.current.style.height = "auto";
-            textAreaRef.current.style.height = `${'${textAreaRef.current.scrollHeight}'}px`;
+            textAreaRef.current.style.height = `${textAreaRef.current.scrollHeight}px`;
         }
     }, [isEditing, currentContent]);
 
@@ -182,7 +182,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     const handleExportPdf = () => {
         if (contentRef.current) {
-            exportComponentAsPDF(contentRef.current, `${'${title}'}.pdf`);
+            exportComponentAsPDF(contentRef.current, `${title}.pdf`);
         }
         setIsEditorPopoverOpen(false);
     };
