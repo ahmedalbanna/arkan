@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     // Convert the complex GenerateResponse object to a plain serializable object for Firestore
     const serializableResult = {
       text: result.text,
-      toolRequest: result.toolRequest,
+      toolRequest: result.toolRequest ?? null,
       candidates: (result.candidates || []).map(c => ({
           index: c.index,
           finishReason: c.finishReason,
@@ -47,11 +47,11 @@ export async function POST(request: Request) {
               role: c.message.role,
               content: (c.message.content || []).map(p => ({
                   text: p.text,
-                  toolRequest: p.toolRequest
+                  toolRequest: p.toolRequest ?? null
               }))
           }
       })),
-      usage: result.usage
+      usage: result.usage ?? null
     };
 
     await logGeneration({
