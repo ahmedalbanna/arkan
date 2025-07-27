@@ -1,4 +1,5 @@
 
+
 /**
  * Query Key Factories for React Query
  * 
@@ -56,6 +57,11 @@ export const adminKeys = {
   dashboardStats: () => [...adminKeys.all, 'dashboard-stats'] as const,
 }
 
+export const analyticsKeys = {
+    all: ['analytics'] as const,
+    userStats: (userId: string) => [...analyticsKeys.all, 'user-stats', userId] as const,
+}
+
 export const templateKeys = {
     all: ['templates'] as const,
     proposals: () => [...templateKeys.all, 'proposal'] as const,
@@ -74,3 +80,4 @@ export const homeworkKeys = {
     all: ['homework'] as const,
     history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
 };
+

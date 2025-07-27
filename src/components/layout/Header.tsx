@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -163,6 +164,12 @@ export function Header() {
                     <Link href={`/profile/${firebaseUser.uid}`}>
                       <UserCog className="mr-2 h-4 w-4" />
                       Profile
+                    </Link>
+                  </DropdownMenuItem>
+                   <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                      <AreaChart className="mr-2 h-4 w-4" />
+                      My Dashboard
                     </Link>
                   </DropdownMenuItem>
                    <DropdownMenuItem asChild>
