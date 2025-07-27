@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import Link from 'next/link';
@@ -41,9 +40,6 @@ export function Header() {
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
-    { href: '/design', label: t('header.design'), icon: Palette },
-    { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
-    { href: '/upload-project', label: 'Upload Context', icon: Upload },
   ];
   
   const adminLinks = [
@@ -247,6 +243,11 @@ export function Header() {
           ) : (
             <Button asChild><Link href="/login">Login</Link></Button>
           )}
+           <Button asChild variant="ghost" size="icon">
+                <Link href="/docs" aria-label={t('header.documentation')}>
+                    <BookOpenCheck className="h-5 w-5" />
+                </Link>
+            </Button>
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
