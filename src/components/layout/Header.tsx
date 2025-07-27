@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
 
 
 export function Header() {
@@ -42,7 +43,7 @@ export function Header() {
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
     { href: '/design', label: t('header.design'), icon: Palette },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
-    { href: '/notifications', label: t('header.pushNotifications'), icon: Bell },
+    { href: '/upload-project', label: 'Upload Context', icon: Upload },
   ];
   
   const adminLinks = [
@@ -145,6 +146,45 @@ export function Header() {
             </div>
           ) : firebaseUser && userProfile ? (
             <>
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                      <Bell className="h-5 w-5" />
+                      <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">3</Badge>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-80">
+                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                        <div className="flex items-start gap-3">
+                            <Bot className="h-5 w-5 text-primary mt-1" />
+                            <div>
+                                <p className="font-semibold">New Agent Available!</p>
+                                <p className="text-xs text-muted-foreground">The "Legal NDA Agent" has been added to your toolkit.</p>
+                            </div>
+                        </div>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem>
+                        <div className="flex items-start gap-3">
+                            <CreditCard className="h-5 w-5 text-green-500 mt-1" />
+                            <div>
+                                <p className="font-semibold">Payment Approved</p>
+                                <p className="text-xs text-muted-foreground">Your recent purchase of 200 credits was successful.</p>
+                            </div>
+                        </div>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem>
+                        <div className="flex items-start gap-3">
+                            <FileText className="h-5 w-5 text-secondary-foreground mt-1" />
+                            <div>
+                                <p className="font-semibold">Your Report is Ready</p>
+                                <p className="text-xs text-muted-foreground">"Project Alpha" report has finished generating.</p>
+                            </div>
+                        </div>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               <Button variant="outline" asChild>
                 <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
                   <Gem className="h-4 w-4" />
