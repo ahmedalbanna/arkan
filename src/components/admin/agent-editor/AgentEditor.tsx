@@ -22,7 +22,6 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';
-import ShareEmbedTab from './ShareEmbedTab';
 import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 import AutomationTab from './AutomationTab';
 import { toast } from '@/hooks/use-toast';
@@ -111,12 +110,11 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
     { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
     { id: 'tools', label: 'Tools', icon: Wrench },
-    { id: 'share', label: 'Share & Embed', icon: Share2 },
+    { id: 'automation', label: 'Automation', icon: BotMessageSquare },
   ];
 
   const discoverItems = [
     { id: 'templates', label: 'Prompt Templates', icon: Library },
-    { id: 'automation', label: 'Automation', icon: BotMessageSquare },
   ];
 
   const renderContent = () => {
@@ -191,8 +189,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <KnowledgeTab />;
       case 'tools':
         return <ToolsTab />;
-      case 'share':
-        return <ShareEmbedTab />;
        case 'automation':
         return <AutomationTab />;
        case 'templates':
