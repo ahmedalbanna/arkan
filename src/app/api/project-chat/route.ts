@@ -40,12 +40,12 @@ export async function POST(request: Request) {
     const serializableResult = {
       text: result.text,
       toolRequest: result.toolRequest,
-      candidates: result.candidates.map(c => ({
+      candidates: (result.candidates || []).map(c => ({
           index: c.index,
           finishReason: c.finishReason,
           message: {
               role: c.message.role,
-              content: c.message.content.map(p => ({
+              content: (c.message.content || []).map(p => ({
                   text: p.text,
                   toolRequest: p.toolRequest
               }))
