@@ -24,11 +24,8 @@ const GenerateSectionInputSchema = z.object({
   otherDiagrams: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-      type: z.enum(['context', 'example'])
-  })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
+  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
+  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
   tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
@@ -88,24 +85,26 @@ Your section, '{{sectionToGenerate}}', fits into this overall structure. Write y
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContext}}
-    {{#each externalContext}}
-        {{#if (eq this.type "example")}}
---- IMPORTANT EXAMPLE (STYLE REFERENCE) ---
+{{#if exampleFiles}}
+--- IMPORTANT EXAMPLES (STYLE REFERENCE) ---
 You MUST heavily reference the following content for style, tone, and structure.
+{{#each exampleFiles}}
 File: {{this.fileName}}
 {{{this.content}}}
 ---
-        {{/if}}
-        {{#if (eq this.type "context")}}
+{{/each}}
+{{/if}}
+
+{{#if contextFiles}}
 --- FACTUAL CONTEXT ---
 Use the following content for information and data.
+{{#each contextFiles}}
 File: {{this.fileName}}
 {{{this.content}}}
 ---
-        {{/if}}
-    {{/each}}
+{{/each}}
 {{/if}}
+
 {{#if otherSections}}
 --- PREVIOUSLY GENERATED SECTIONS ---
 {{#each otherSections}}

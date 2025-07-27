@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType, ProjectPlanSchema } from '@/ai/schemas';
@@ -117,6 +118,10 @@ export async function POST(request: Request) {
                 return acc;
             }, {} as Record<DiagramType, string | undefined>);
 
+            // Separate context files from example files
+            const contextFiles = externalContext?.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
+            const exampleFiles = externalContext?.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
+
 
             const agentInput = {
                 proposal,
@@ -126,7 +131,8 @@ export async function POST(request: Request) {
                 otherDiagrams: currentContextDiagrams,
                 guidelines: config.guidelines,
                 instructionText,
-                externalContext,
+                contextFiles,
+                exampleFiles,
                 tableOfContents: template.agentIds.map(agentId => sectionConfig[Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName]?.title)
             };
 
@@ -144,20 +150,30 @@ export async function POST(request: Request) {
     const singleSectionValidation = generateSectionSchema.safeParse(body);
     if (singleSectionValidation.success) {
         await deductCredit(userId, 1);
-        const agentInput = singleSectionValidation.data;
+        const { externalContext, ...restOfInput } = singleSectionValidation.data;
 
         // A proposal or external context is required to generate a section.
-        if (!agentInput.proposal && !agentInput.projectPlan && (!agentInput.externalContext || agentInput.externalContext.length === 0)) {
+        if (!restOfInput.proposal && !restOfInput.projectPlan && (!externalContext || externalContext.length === 0)) {
             return NextResponse.json({ message: "A proposal, project plan, or external context is required to generate a report section." }, { status: 400 });
         }
 
-        const agentInfo = sectionConfig[agentInput.sectionToGenerate];
+        const agentInfo = sectionConfig[restOfInput.sectionToGenerate];
 
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
 
-        const result = await generateReportSection({ ...agentInput });
+        // Separate context files from example files
+        const contextFiles = externalContext?.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
+        const exampleFiles = externalContext?.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
+
+        const agentInput = {
+            ...restOfInput,
+            contextFiles,
+            exampleFiles,
+        };
+        
+        const result = await generateReportSection(agentInput);
 
         const transformedOutput = { [result.sectionName]: result.content };
         
