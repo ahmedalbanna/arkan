@@ -13,6 +13,7 @@ import {
   Clock,
   Waypoints,
   Type,
+  Plus
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -92,6 +93,10 @@ export default function AutomationTab() {
       <p className="text-sm text-muted-foreground">
         Use your AI agent as part of an automation flow to handle tasks, make decisions, and streamline workflows. Build custom workflows and tools to further empower your agents. Your AI agents can seamlessly integrate into automations, transforming how you manage work. <a href="#" className="text-primary underline">Learn more.</a>
       </p>
+       <Button variant="outline" className="w-full justify-start">
+          <Plus className="mr-2 h-4 w-4" />
+          Add new automation
+        </Button>
       
       <div className="space-y-2">
         {automations.map((automation, index) => (
