@@ -9,12 +9,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { sectionConfig } from '@/lib/report-config';
-import { SectionName, type SectionName as SectionNameType } from '@/ai/schemas';
-import { Loader2, Sparkles } from 'lucide-react';
+import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, Presentation, FileDown, History } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
@@ -30,7 +31,7 @@ import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
 
-const orderedSections = SectionName.options;
+const orderedSections = SectionNameSchema.options;
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -156,6 +157,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const fullState = getFullState();
 
         const selectedContext = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+        
+        const exampleFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example');
+        const contextFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context');
 
         const body = {
             proposal: selectedContext.proposal ? fullState.proposal : undefined,
@@ -165,8 +169,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
             guidelines: getSelectedGuidelines(section, guidelineState, fullState.agents || []),
             instructionText: generateInstructionText(controlState[section]),
-            exampleFiles: fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example'),
-            contextFiles: fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context'),
+            exampleFiles,
+            contextFiles,
             tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
         
@@ -207,6 +211,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const fullReportCreditCost = sectionsToGenerate.length;
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
+
+    const { agents, isLoaded: agentsLoaded } = useAgents();
 
     if (!agentsLoaded) {
         return <ToolsSkeleton />;
@@ -343,7 +349,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                             <div className="w-full">
                                                                 <Button
                                                                     type="button"
-                                                                    onClick={() => onGenerateSection(key)}
+                                                                    onClick={() => onGenerateSection(key as SectionNameType)}
                                                                     disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
                                                                     className="font-headline w-full"
                                                                 >
