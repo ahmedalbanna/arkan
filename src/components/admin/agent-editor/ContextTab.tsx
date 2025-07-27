@@ -40,12 +40,12 @@ export default function ContextTab() {
         <h3 className="font-semibold">Available Agents</h3>
          {!isLoaded ? <ContextSkeleton /> : (
             <div className="grid grid-cols-2 gap-4">
-                {agents.map(agent => (
-                    <div key={agent.id} className="flex items-center space-x-2">
-                        <Checkbox id={`agent-context-${agent.id}`} />
-                        <Label htmlFor={`agent-context-${agent.id}`} className="font-normal flex items-center gap-2">
-                           <agent.icon className="h-4 w-4" />
-                           {agent.name}
+                {agents.map(({ id, name, icon: Icon }) => (
+                    <div key={id} className="flex items-center space-x-2">
+                        <Checkbox id={`agent-context-${id}`} />
+                        <Label htmlFor={`agent-context-${id}`} className="font-normal flex items-center gap-2">
+                           <Icon className="h-4 w-4" />
+                           {name}
                         </Label>
                     </div>
                 ))}
