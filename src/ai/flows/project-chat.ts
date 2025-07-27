@@ -1,4 +1,3 @@
-
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -7,6 +6,9 @@ import { toJSON, streamFlow } from '@genkit-ai/next';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { generateSectionTool } from '@/ai/tools/generateReportSection';
 import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
+import { generateDiagramTool } from '@/ai/tools/generateDiagram';
+import { addTaskToPhaseTool } from '@/ai/tools/addTaskToPhase';
+import { generateCodebaseTool } from '@/ai/tools/generateCodebase';
 
 const ChatInputSchema = z.object({
   message: z.string().describe("The user's message or command."),
@@ -31,6 +33,9 @@ Your task is to be as helpful as possible. Analyze the user's message and decide
 1.  Respond with a simple text message.
 2.  Use the 'generateReportSection' tool if they ask you to write or create a section.
 3.  Use the 'updateProposalField' tool if they ask you to change or edit a part of the proposal.
+4.  Use the 'generateDiagram' tool if they ask to create a system diagram.
+5.  Use the 'addTaskToPhase' tool if they want to add a task or user story to the project plan.
+6.  Use the 'generateCodebase' tool if they ask to scaffold the entire project.
 
 Base your actions on the user's intent.
 
@@ -46,7 +51,13 @@ ${stringifiedProjectState}
 `,
         model: 'googleai/gemini-2.0-flash',
         input: { message: input.message },
-        tools: [generateSectionTool, updateProposalFieldTool]
+        tools: [
+            generateSectionTool,
+            updateProposalFieldTool,
+            generateDiagramTool,
+            addTaskToPhaseTool,
+            generateCodebaseTool,
+        ]
     });
     
     return llmResponse;

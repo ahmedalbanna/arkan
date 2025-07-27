@@ -1,5 +1,3 @@
-
-
 'use server';
 
 import { config } from 'dotenv';
@@ -28,3 +26,6 @@ import '@/ai/flows/generate-codebase.ts';
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';
 import '@/ai/tools/updateProposalField';
+import '@/ai/tools/generateDiagram';
+import '@/ai/tools/addTaskToPhase';
+import '@/ai/tools/generateCodebase';
