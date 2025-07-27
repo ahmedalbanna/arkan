@@ -17,16 +17,17 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '../ui/card';
-
+import type { DiagramData } from '@/hooks/useDiagramStore';
+import type { DiagramType } from '@/ai/schemas';
 
 interface DiagramViewerProps {
-    title: string;
-    imageUrl: string;
-    plantUmlCode: string;
+    diagramKey: DiagramType;
+    diagramData: DiagramData;
     isReadOnly?: boolean;
     isUpdating?: boolean;
-    onCodeChange?: (newCode: string) => void;
-    onUpdate?: () => void;
+    onCodeChange: (newCode: string) => void;
+    onUpdate: () => void;
+    onExplanationSave: (explanation: string) => void;
 }
 
 async function explainDiagramApi(imageDataUri: string, token: string) {
@@ -46,25 +47,26 @@ async function explainDiagramApi(imageDataUri: string, token: string) {
 }
 
 export default function DiagramViewer({
-    title,
-    imageUrl,
-    plantUmlCode,
+    diagramKey,
+    diagramData,
     isReadOnly = false,
     isUpdating = false,
     onCodeChange,
-    onUpdate
+    onUpdate,
+    onExplanationSave,
 }: DiagramViewerProps) {
+    const { title: diagramTitle } = diagramData;
     const { t } = useLocalization();
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code'>('image');
-    const [explanation, setExplanation] = useState<string | null>(null);
     const [isExplaining, setIsExplaining] = useState(false);
+    const [isExplainDialogOpen, setIsExplainDialogOpen] = useState(false);
     const { firebaseUser, refetchUser } = useAuth();
     
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(plantUmlCode).then(() => {
+        navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
             toast({title: "Copied!", description: "PlantUML code copied to clipboard."});
             setTimeout(() => setIsCopied(false), 2000);
@@ -74,9 +76,9 @@ export default function DiagramViewer({
     const handleDownload = async () => {
         setIsDownloading(true);
         try {
-            const response = await fetch(imageUrl);
+            const response = await fetch(diagramData.imageUrl);
             const blob = await response.blob();
-            saveAs(blob, `${title.replace(/\s+/g, '_')}.png`);
+            saveAs(blob, `${diagramTitle.replace(/\s+/g, '_')}.png`);
         } catch (error) {
             console.error('Download failed:', error);
             toast({title: "Download Failed", variant: "destructive"});
@@ -86,14 +88,19 @@ export default function DiagramViewer({
     };
     
     const handleExplain = async () => {
+        if (diagramData.explanation) {
+            setIsExplainDialogOpen(true);
+            return;
+        }
+
         if (!firebaseUser) {
             toast({ title: 'Authentication Required', variant: 'destructive' });
             return;
         }
         setIsExplaining(true);
-        setExplanation(null);
+        setIsExplainDialogOpen(true);
         try {
-            const response = await fetch(imageUrl);
+            const response = await fetch(diagramData.imageUrl);
             const blob = await response.blob();
             const reader = new FileReader();
             reader.readAsDataURL(blob);
@@ -101,11 +108,12 @@ export default function DiagramViewer({
                 const base64data = reader.result as string;
                 const token = await firebaseUser.getIdToken();
                 const result = await explainDiagramApi(base64data, token);
-                setExplanation(result.explanation);
+                onExplanationSave(result.explanation);
                 refetchUser(); // Update credits
             };
         } catch (error: any) {
             toast({ title: 'Explanation Failed', description: error.message, variant: 'destructive' });
+            setIsExplainDialogOpen(false); // Close dialog on error
         } finally {
              setIsExplaining(false);
         }
@@ -114,26 +122,26 @@ export default function DiagramViewer({
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
             <CardContent className="flex-grow p-4 md:p-6">
-                 {viewMode === 'image' ? (
-                    <div className="flex h-full items-center justify-center relative group">
+                 <div className="flex h-full items-center justify-center relative group">
+                    {viewMode === 'image' ? (
                         <Image
-                            src={imageUrl}
-                            alt={`Rendered ${title}`}
+                            src={diagramData.imageUrl}
+                            alt={`Rendered ${diagramTitle}`}
                             width={800}
                             height={600}
                             className="w-full h-auto object-contain"
                             unoptimized
                         />
-                    </div>
-                 ) : (
-                    <Textarea
-                        readOnly={isReadOnly || isUpdating}
-                        value={plantUmlCode}
-                        onChange={(e) => onCodeChange?.(e.target.value)}
-                        className="h-full p-4 bg-muted/30 text-left font-mono text-xs rounded-md border-0 resize-none focus-visible:ring-1"
-                        dir="ltr"
-                    />
-                 )}
+                     ) : (
+                        <Textarea
+                            readOnly={isReadOnly || isUpdating}
+                            value={diagramData.plantUmlCode}
+                            onChange={(e) => onCodeChange?.(e.target.value)}
+                            className="h-full p-4 bg-muted/30 text-left font-mono text-xs rounded-md border-0 resize-none focus-visible:ring-1"
+                            dir="ltr"
+                        />
+                     )}
+                </div>
             </CardContent>
              <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
                 <div className="flex items-center gap-1">
@@ -145,7 +153,7 @@ export default function DiagramViewer({
                     </Button>
                 </div>
                  <div className="flex items-center gap-1">
-                     <Dialog>
+                     <Dialog open={isExplainDialogOpen} onOpenChange={setIsExplainDialogOpen}>
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -164,13 +172,13 @@ export default function DiagramViewer({
                             </DialogHeader>
                             <ScrollArea className="max-h-[60vh] pr-4">
                                 <div className="prose dark:prose-invert max-w-none">
-                                    {explanation ? (
-                                        <ReactMarkdown components={markdownComponents}>{explanation}</ReactMarkdown>
-                                    ) : (
+                                    {isExplaining && !diagramData.explanation ? (
                                         <div className="text-center p-8 text-muted-foreground">
                                              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                                              <p>The AI is analyzing the diagram...</p>
                                         </div>
+                                    ) : (
+                                        <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
                                     )}
                                 </div>
                             </ScrollArea>

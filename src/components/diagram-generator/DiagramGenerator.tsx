@@ -54,6 +54,7 @@ export default function DiagramGenerator() {
         diagrams,
         handleDiagramCodeUpdate,
         setDiagram,
+        setDiagramExplanation,
     } = useDiagramStore();
     
     const queryClient = useQueryClient();
@@ -63,7 +64,7 @@ export default function DiagramGenerator() {
             // Find which diagram this mutation was for to update the correct one
             const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === variables.plantUmlCode);
             if(diagramKey) {
-                setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+                setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
             }
             queryClient.invalidateQueries({ queryKey: ['user'] });
             toast({ title: t('builder.diagramGenerator.toasts.updateSuccess') });
@@ -112,11 +113,11 @@ export default function DiagramGenerator() {
                                       </AccordionTrigger>
                                       <AccordionContent className="p-4 border-t">
                                         <DiagramViewer
-                                            title={t(diagramConfig[key].title)}
-                                            imageUrl={diagramData.imageUrl}
-                                            plantUmlCode={diagramData.plantUmlCode}
+                                            diagramKey={key}
+                                            diagramData={diagramData}
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
                                             onUpdate={() => handleUpdateDiagram(diagramData.plantUmlCode)}
+                                            onExplanationSave={(explanation) => setDiagramExplanation(key, explanation)}
                                             isUpdating={mutation.isPending && mutation.variables?.plantUmlCode === diagramData.plantUmlCode}
                                             isReadOnly={mutation.isPending}
                                         />

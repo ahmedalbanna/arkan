@@ -9,6 +9,7 @@ import { useBuilderStore } from "./useBuilderStore";
 export interface DiagramData {
   plantUmlCode: string;
   imageUrl: string;
+  explanation?: string;
 }
 
 export interface DiagramState {
@@ -19,6 +20,7 @@ interface DiagramActions {
   newSession: () => void;
   loadState: (state: Partial<DiagramState>) => void;
   setDiagram: (key: DiagramType, data: DiagramData) => void;
+  setDiagramExplanation: (key: DiagramType, explanation: string) => void;
   handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
 }
 
@@ -42,6 +44,21 @@ export const useDiagramStore = create<DiagramState & DiagramActions>()(
           [key]: data,
         },
       }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setDiagramExplanation: (key, explanation) => {
+      set((state) => {
+        if (!state.diagrams[key]) return {};
+        return {
+          diagrams: {
+            ...state.diagrams,
+            [key]: {
+              ...state.diagrams[key]!,
+              explanation,
+            },
+          },
+        };
+      });
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     handleDiagramCodeUpdate: (key, code) => {
