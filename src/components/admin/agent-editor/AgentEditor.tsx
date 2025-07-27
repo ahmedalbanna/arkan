@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link, MessageSquare, Plus } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -24,6 +24,8 @@ import GuidelinesTab from './GuidelinesTab';
 import AutomationTab from './AutomationTab';
 import { toast } from '@/hooks/use-toast';
 import ContextTab from './ContextTab';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
+import { X } from 'lucide-react';
 
 interface AgentEditorProps {
   agentId: string;
@@ -45,7 +47,13 @@ const agentEditorSchema = z.object({
   prompt: z.union([
     z.string().min(10, "Prompt must be at least 10 characters"),
     agentPromptSchema
-  ])
+  ]),
+  introduction: z.string().max(500).optional(),
+  placeholder: z.string().optional(),
+  conversationStarters: z.array(z.object({ value: z.string() })).optional(),
+  tone: z.string().optional(),
+  language: z.string().optional(),
+  model: z.string().optional(),
 });
 
 export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
@@ -69,7 +77,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const router = useRouter();
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
-  const [promptLength, setPromptLength] = useState(0);
   
   const updateAgentMutation = useUpdateAgent();
 
@@ -78,30 +85,42 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       defaultValues: {
           name: initialData.name,
           prompt: initialData.prompt,
+          introduction: '',
+          placeholder: 'Ask me anything about TypeScript...',
+          conversationStarters: [],
+          tone: 'Default',
+          language: 'English (US)',
+          model: 'googleai/gemini-2.0-flash',
+
       }
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "conversationStarters",
+  });
+
   const promptValue = form.watch('prompt');
+  const introductionValue = form.watch('introduction');
+  const introLength = introductionValue?.length || 0;
   const isComplexPrompt = typeof promptValue === 'object';
-
-  useEffect(() => {
-    if (isComplexPrompt) {
-      setPromptLength((promptValue as AgentPrompt).base.length);
-    } else {
-      setPromptLength((promptValue as string).length);
-    }
-  }, [promptValue, isComplexPrompt]);
-
 
   useEffect(() => {
     form.reset({
       name: initialData.name,
       prompt: initialData.prompt,
+      introduction: '',
+      placeholder: 'Ask me anything about TypeScript...',
+      conversationStarters: [],
+      tone: 'Default',
+      language: 'English (US)',
+      model: 'googleai/gemini-2.0-flash',
     });
   }, [initialData, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    updateAgentMutation.mutate({ agentId, payload: data });
+    // We only update name and prompt for now
+    updateAgentMutation.mutate({ agentId, payload: { name: data.name, prompt: data.prompt } });
   };
 
   const navItems = [
@@ -119,19 +138,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return (
           <div className='space-y-6'>
             <CardTitle>General</CardTitle>
-            <p className="text-sm text-muted-foreground">Select an image or emoji for your agent, serving as a visual identifier for tasks it manages in project backgrounds.</p>
             
-            <div>
-              <FormLabel>Avatar</FormLabel>
-              <div className="mt-2 flex items-center gap-4">
-                  <Avatar className='h-16 w-16'>
-                      <AvatarImage src="" />
-                      <AvatarFallback><Bot className='h-8 w-8' /></AvatarFallback>
-                  </Avatar>
-                  <Button type="button" variant="outline">Upload</Button>
-              </div>
-            </div>
-
             <FormField
               control={form.control}
               name="name"
@@ -150,12 +157,9 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
                 name="prompt.base"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex justify-between items-center'>
-                      <span>Prompt</span>
-                      <span className='text-xs text-muted-foreground'>{promptLength}/10000</span>
-                    </FormLabel>
+                    <FormLabel>Prompt</FormLabel>
                     <FormControl>
-                      <Textarea {...field} rows={10} className="font-mono text-sm" disabled={updateAgentMutation.isPending} />
+                      <Textarea {...field} rows={8} className="font-mono text-sm" disabled={updateAgentMutation.isPending} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,16 +171,110 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
                 name="prompt"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex justify-between items-center'>
-                      <span>Prompt</span>
-                      <span className='text-xs text-muted-foreground'>{promptLength}/10000</span>
-                    </FormLabel>
-                    <FormControl><Textarea {...field} value={field.value as string} rows={10} className="font-mono text-sm" disabled={updateAgentMutation.isPending} /></FormControl>
+                    <FormLabel>Prompt</FormLabel>
+                    <FormControl><Textarea {...field} value={field.value as string} rows={8} className="font-mono text-sm" disabled={updateAgentMutation.isPending} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             )}
+
+            <FormField
+              control={form.control}
+              name="introduction"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex justify-between items-center">
+                    <span>Introduction</span>
+                    <span className="text-xs text-muted-foreground">{introLength}/500</span>
+                  </FormLabel>
+                  <FormControl><Textarea {...field} placeholder="Set your agent's introduction message here..." rows={3} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+             <FormField
+              control={form.control}
+              name="placeholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Input Placeholder</FormLabel>
+                  <FormControl><Input {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormItem>
+                <FormLabel>Conversation Starters</FormLabel>
+                <div className="space-y-2">
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="flex items-center gap-2">
+                           <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                           <Input {...form.register(`conversationStarters.${index}.value`)} className="flex-grow" />
+                           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}><X className="h-4 w-4" /></Button>
+                        </div>
+                    ))}
+                </div>
+                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="mr-2 h-4 w-4"/> Add message</Button>
+            </FormItem>
+
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="tone"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Tone</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    {['Default', 'Professional', 'Creative', 'Inspiring', 'Casual', 'Confident', 'Authoritative', 'Formal', 'Informal'].map(tone => <SelectItem key={tone} value={tone}>{tone}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="language"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Language</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                <SelectContent>
+                                    {['English (US)', 'English (UK)', 'Русский', 'Deutsch', 'Español', 'Français', 'Italiano', '日本語', '한국어', 'Nederlands', 'Polski', 'Português', 'Svenska', 'Türk', 'Tiếng Việt', '中文 (简体)', '中文 (繁體)', 'اَلْعَرَبِيَّة', 'Suomi', 'עברית', 'Norsk', 'فارسی', 'Românește', 'தமிழ்', 'ภาษาไทย', 'українська мова', 'Bahasa Indonesia', 'Czech', 'Slovak', 'Hungarian', 'Danish'].map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="model"
+              render={({ field }) => (
+                  <FormItem>
+                      <FormLabel>AI Model</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                          <SelectContent>
+                              <SelectItem value="googleai/gemini-2.0-flash">Gemini 2.0 Flash</SelectItem>
+                              <SelectItem value="googleai/gemini-2.0-pro">Gemini 2.0 Pro</SelectItem>
+                              <SelectItem value="googleai/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+                              <SelectItem value="googleai/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                          </SelectContent>
+                      </Select>
+                      <FormMessage />
+                  </FormItem>
+              )}
+            />
+
           </div>
         );
       case 'guidelines':
