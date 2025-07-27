@@ -25,7 +25,7 @@ const generateSectionSchema = z.object({
       content: z.string(),
       type: z.enum(['context', 'example'])
   })).optional(),
-  tableOfContents: z.array(z.string()).optional(), // Add ToC to the single section schema
+  tableOfContents: z.array(z.string()).optional(),
 });
 
 // Schema for generating a full report based on a template
