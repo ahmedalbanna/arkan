@@ -24,6 +24,16 @@ This code defines custom React hooks using TanStack Query to manage AI agent dat
     -   It calls the `updateAgentApi` service function to send the update request.
     -   On success, it invalidates the `agentKeys` queries to refetch the updated data and displays a success toast.
 
+**4. Agent Editor**
+
+The `AgentEditor` component, located in `src/components/admin/agent-editor/AgentEditor.tsx`, provides a user interface for configuring AI agents. It is divided into several tabs, each handling a specific aspect of the agent's configuration:
+-   **General**: Contains basic settings like the agent's name, prompt, introduction, and conversation starters. It is implemented in `src/components/admin/agent-editor/GeneralTab.tsx`.
+-   **Guidelines**: Allows for the addition of specific rules and instructions for the agent to follow.
+-   **Knowledge**: Used to train the agent with dynamic knowledge from various sources.
+-   **Tools**: Enables the selection of tools that the agent can use to perform actions.
+-   **Context**: Configures the agent's ability to share and receive context from other agents.
+-   **Automation**: Used to integrate the agent into automation workflows.
+
 **In summary:**
 
-The `use-agents.ts` file cleanly separates the concerns of data fetching and state management. The hooks provide a robust interface for components to interact with agent data, while the underlying services handle the direct API communication. This pattern makes the code more modular, testable, and easier to maintain.
+The `use-agents.ts` file cleanly separates the concerns of data fetching and state management. The hooks provide a robust interface for components to interact with agent data, while the underlying services handle the direct API communication. This pattern makes the code more modular, testable, and easier to maintain. The `AgentEditor` component provides a comprehensive UI for configuring all aspects of an agent's behavior.
