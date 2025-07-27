@@ -4,6 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
 import { Plus, Info } from 'lucide-react';
+import { CreateCommandDialog } from './CreateCommandDialog';
 
 export default function CommandsTab() {
   return (
@@ -13,10 +14,12 @@ export default function CommandsTab() {
         Create custom commands as advanced prompts for AI Agents. Run tasks in sequence with 'Plan & Execute' for complex goals. <a href="#" className="text-primary underline">Learn more.</a>
       </p>
 
-      <Button variant="outline" className="w-full justify-start">
-        <Plus className="mr-2 h-4 w-4" />
-        Add command
-      </Button>
+      <CreateCommandDialog>
+        <Button variant="outline" className="w-full justify-start">
+          <Plus className="mr-2 h-4 w-4" />
+          Add command
+        </Button>
+      </CreateCommandDialog>
 
       <div className="space-y-2">
         <div className="flex items-center gap-3 rounded-lg border p-4">
