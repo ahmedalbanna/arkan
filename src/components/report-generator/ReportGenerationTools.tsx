@@ -1,20 +1,20 @@
 
+
 'use client';
 
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { useLocalization } from '@/context/LocalizationContext';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, FileText, FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, Eye, X } from 'lucide-react';
+import { diagramConfig, sectionConfig } from '@/lib/report-config';
+import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -199,7 +199,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const otherDiagrams = Object.entries(selection.diagrams) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
         
         const selectedExternalContexts = externalContext ? externalContext.filter((_, index) => selection.externalContext[index]) : [];
-        
+        const exampleFiles = selectedExternalContexts.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
+        const contextFiles = selectedExternalContexts.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
+
         const hasContext = !!proposal || !!projectPlan || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
         if (!hasContext) {
             toast({ title: "No Context Provided", description: "Please generate a proposal or upload a document to provide context for generation.", variant: "destructive" });
@@ -215,7 +217,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
-            externalContext: selectedExternalContexts.length > 0 ? selectedExternalContexts : undefined,
+            exampleFiles: exampleFiles.length > 0 ? exampleFiles : undefined,
+            contextFiles: contextFiles.length > 0 ? contextFiles : undefined,
             tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
         setActiveMutationKey(section);
@@ -228,13 +231,18 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             return;
         }
         const token = await firebaseUser.getIdToken();
+        
+        const exampleFiles = externalContext ? externalContext.filter(f => f.type === 'example') : [];
+        const contextFiles = externalContext ? externalContext.filter(f => f.type === 'context') : [];
+        
         const body = {
             proposal,
             projectPlan,
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            externalContext: externalContext,
+            exampleFiles: exampleFiles.length > 0 ? exampleFiles : undefined,
+            contextFiles: contextFiles.length > 0 ? contextFiles : undefined,
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportGenerationMutation.mutate({ body, token });
@@ -297,7 +305,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </Button>
                                     </div>
                                 </TooltipTrigger>
-                                {!canGenerateFullReport && userProfile && userProfile.credits < fullReportCreditCost && (
+                                {userProfile && userProfile.credits < fullReportCreditCost && (
                                     <TooltipContent>
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
                                     </TooltipContent>
