@@ -13,6 +13,7 @@ import { usePresentationStore } from "./usePresentationStore";
 import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
 import { useProjectPlanStore } from "./useProjectPlanStore";
 import { useCodebaseStore } from "./useCodebaseStore";
+import { useAcademicSolverStore } from './useAcademicSolverStore';
 import type { ProjectState } from "@/lib/types";
 import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
 import { z } from "zod";
@@ -79,6 +80,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useCodeGeneratorStore.getState().newSession();
         useProjectPlanStore.getState().newSession();
         useCodebaseStore.getState().newSession();
+        useAcademicSolverStore.getState().newSession();
         toast({
           title: "New Session Started",
           description: "All project content has been cleared.",
@@ -112,6 +114,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useCodeGeneratorStore.getState().loadState(newState);
         useProjectPlanStore.getState().loadState(newState);
         useCodebaseStore.getState().loadState(newState);
+        useAcademicSolverStore.getState().loadState(newState);
 
         toast({
           title: "Project Loaded",
@@ -131,6 +134,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         codebase: useCodebaseStore.getState().codebase,
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
+        academicSolver: useAcademicSolverStore.getState(),
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
@@ -190,7 +194,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
-      name: "arkan-builder-state-v3", // Bump version to avoid conflicts
+      name: "arkan-builder-state-v4", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         name: state.name,
@@ -204,6 +208,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         codebase: useCodebaseStore.getState().codebase,
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
+        academicSolver: useAcademicSolverStore.getState(),
       }),
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
@@ -227,6 +232,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useCodeGeneratorStore.getState().loadState(persistedState);
         useProjectPlanStore.getState().loadState(persistedState);
         useCodebaseStore.getState().loadState(persistedState);
+        useAcademicSolverStore.getState().loadState(persistedState);
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },

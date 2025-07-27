@@ -35,6 +35,8 @@ interface AcademicSolverActions {
   removeQuestionDocument: (index: number) => void;
   addExternalContext: (fileName: string, content: string) => void;
   removeExternalContext: (index: number) => void;
+  newSession: () => void;
+  loadState: (state: Partial<{ academicSolver: AcademicSolverState }>) => void;
   resetCurrent: () => void;
 }
 
@@ -83,6 +85,12 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         set((state) => ({
             externalContext: state.externalContext.filter((_, i) => i !== index),
         }));
+    },
+    newSession: () => set(initialState),
+    loadState: (newState) => {
+        if (newState.academicSolver) {
+            set(newState.academicSolver);
+        }
     },
     resetCurrent: () => set(initialState),
   })
