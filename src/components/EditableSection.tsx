@@ -235,36 +235,29 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const { words, chars } = calculateCounts(content);
 
     return (
-        <AccordionItem value={title} key={sectionKey} className="bg-background rounded-lg border">
-            <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
-                <div className="flex items-center">
-                    <Icon className="mr-2 h-5 w-5 text-primary" /> {title}
-                </div>
-            </AccordionTrigger>
-            <AccordionContent
+        <div className="group relative">
+            <div
+                ref={contentRef}
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
-                className="max-w-none p-4 text-muted-foreground border-t group relative cursor-pointer"
+                className="max-w-none p-1 -m-1 rounded-md text-muted-foreground group relative cursor-pointer hover:bg-muted/50"
             >
-                <div ref={contentRef}>
-                  {renderEditableContent()}
-                </div>
-                
-                 <div className="mt-4 flex items-center justify-end gap-4 text-xs text-muted-foreground">
+              {renderEditableContent()}
+            </div>
+            
+             <div className="mt-4 flex items-center justify-between gap-4 text-xs text-muted-foreground">
+                <div className="flex gap-4">
                     <span>{words} words</span>
                     <span>{chars} characters</span>
                 </div>
-
-
-                <div className="absolute top-1 right-1 flex items-center opacity-0 group-hover:opacity-100">
+                <div className="flex items-center">
                     <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
+                                size="sm"
                                 title={t('builder.editableSection.tooltips.aiActions')}
                             >
-                                <Wand2 className="h-4 w-4" />
+                                <Wand2 className="h-4 w-4 mr-2" /> AI Actions
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
@@ -286,17 +279,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
                                         <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.checkGrammar')}
                                     </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                             <Button variant="ghost" className="w-full justify-start">
-                                                <Languages className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.translate')}
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" align="start">
-                                            <DropdownMenuItem onClick={() => handleTranslate('en')}>To English</DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => handleTranslate('ar')}>To Arabic</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
                                 </div>
                             )}
                         </PopoverContent>
@@ -305,11 +287,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                         <PopoverTrigger asChild>
                             <Button
                                 variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
+                                size="sm"
                                 title={t('builder.editableSection.tooltips.editorOptions')}
                             >
-                                <MoreVertical className="h-4 w-4" />
+                                <PenSquare className="h-4 w-4 mr-2" /> Editor Tools
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
@@ -330,7 +311,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                         </PopoverContent>
                     </Popover>
                 </div>
-            </AccordionContent>
-        </AccordionItem>
+            </div>
+        </div>
     );
 };

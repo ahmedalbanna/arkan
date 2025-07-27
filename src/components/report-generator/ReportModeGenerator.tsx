@@ -20,6 +20,7 @@ export default function ReportGenerator() {
         sections,
         externalContext,
         setSection,
+        setAllTranslatedSections
     } = useReportStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
@@ -46,14 +47,16 @@ export default function ReportGenerator() {
     });
 
     const results = await Promise.all(translationPromises);
-
+    
+    const translatedMap: { [key in SectionName]?: string } = {};
     results.forEach(result => {
         if ('content' in result) {
-            setSection(result.key, result.content);
+            translatedMap[result.key as SectionName] = result.content;
         } else {
             console.error(`Failed to translate section ${result.key}:`, result.error);
         }
     });
+    setAllTranslatedSections(translatedMap);
 
     setIsTranslatingAll(false);
     toast({

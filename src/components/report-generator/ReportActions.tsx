@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -27,7 +28,7 @@ interface ReportActionsProps {
 export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsProps) => {
   const { t } = useLocalization();
   const { proposal } = useBuilderStore();
-  const { sections } = useReportStore();
+  const { sections, translatedSections } = useReportStore();
   const { diagrams } = useDiagramStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');

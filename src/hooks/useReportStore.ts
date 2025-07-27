@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -30,6 +29,7 @@ export interface ExternalContext {
 
 export interface ReportState {
   sections: { [key in SectionName]?: string };
+  translatedSections: { [key in SectionName]?: string }; // To store translations
   evaluation: EvaluateReportOutput | null;
   // UI States
   externalContext: ExternalContext[];
@@ -43,9 +43,11 @@ export interface ReportState {
 
 interface ReportActions {
     newSession: () => void;
-    loadState: (state: Partial<Pick<ReportState, 'sections' | 'evaluation' | 'externalContext'>>) => void;
+    loadState: (state: Partial<Pick<ReportState, 'sections' | 'evaluation' | 'externalContext' | 'translatedSections'>>) => void;
     setSection: (key: SectionName, content: string) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
+    setTranslatedSection: (key: SectionName, content: string) => void;
+    setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
     addExternalContext: (fileName: string, content: string) => void;
     removeExternalContext: (index: number) => void;
@@ -82,6 +84,7 @@ const defaultControlState = {
 
 const initialState: ReportState = {
   sections: {},
+  translatedSections: {},
   evaluation: null,
   externalContext: [],
   guidelineState: getDefaultGuidelineState(),
@@ -99,6 +102,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
       newSession: () => set(initialState),
       loadState: (newState) => {
         if (newState.sections) set({ sections: newState.sections });
+        if (newState.translatedSections) set({ translatedSections: newState.translatedSections });
         if (newState.evaluation) set({ evaluation: newState.evaluation });
         if (newState.externalContext) set({ externalContext: newState.externalContext });
       },
@@ -110,6 +114,19 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set(state => ({
             sections: {
                 ...state.sections,
+                ...newSections
+            }
+        }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setTranslatedSection: (key, content) => {
+        set(state => ({ translatedSections: { ...state.translatedSections, [key]: content } }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setAllTranslatedSections: (newSections) => {
+        set(state => ({
+            translatedSections: {
+                ...state.translatedSections,
                 ...newSections
             }
         }));
