@@ -7,33 +7,25 @@ import { CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Search, Plus, Coffee, Briefcase, Bot, Pencil, Link as LinkIcon, AlertCircle } from 'lucide-react';
-
-const mockTools = [
-  {
-    icon: Coffee,
-    name: 'Proposal Automation',
-    description: 'Runs Run Agent Command, Run Agent Command',
-    isActive: true,
-  },
-  {
-    icon: Briefcase,
-    name: 'Taskade Actions',
-    description: 'Use your agent to manage tasks in your projects, update due dates, assignments, and more.',
-    isActive: true,
-  },
-  {
-    icon: Bot,
-    name: 'Taskade AI',
-    description: '4 actions',
-    isActive: false,
-  },
-];
+import { Search, Plus } from 'lucide-react';
+import { AVAILABLE_TOOLS, type AgentTool } from '@/lib/tools';
 
 export default function ToolsTab() {
   const [activeFilter, setActiveFilter] = useState('All');
+  const [tools, setTools] = useState<AgentTool[]>(AVAILABLE_TOOLS);
+
   const filters = ['All', 'Active', 'Taskade', 'Apps', 'Custom'];
+
+  const handleToggle = (toolId: string) => {
+    setTools(prevTools =>
+      prevTools.map(tool =>
+        tool.id === toolId ? { ...tool, isActive: !tool.isActive } : tool
+      )
+    );
+  };
   
+  const activeCount = tools.filter(t => t.isActive).length;
+
   return (
     <div className="space-y-6">
       <CardTitle>Tools</CardTitle>
@@ -50,11 +42,8 @@ export default function ToolsTab() {
             className="rounded-full"
           >
             {filter}
-            {filter === 'All' && <Badge className="ml-2 bg-background text-foreground">19</Badge>}
-            {filter === 'Active' && <Badge className="ml-2 bg-background text-foreground">2</Badge>}
-            {filter === 'Taskade' && <Badge className="ml-2 bg-background text-foreground">3</Badge>}
-            {filter === 'Apps' && <Badge className="ml-2 bg-background text-foreground">15</Badge>}
-            {filter === 'Custom' && <Badge className="ml-2 bg-background text-foreground">1</Badge>}
+            {filter === 'All' && <Badge className="ml-2 bg-background text-foreground">{tools.length}</Badge>}
+            {filter === 'Active' && <Badge className="ml-2 bg-background text-foreground">{activeCount}</Badge>}
           </Button>
         ))}
       </div>
@@ -68,9 +57,9 @@ export default function ToolsTab() {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">All</h3>
-        {mockTools.map((tool, index) => (
-          <div key={index} className="flex items-center justify-between rounded-lg border p-4">
+        <h3 className="text-lg font-semibold">Available Tools</h3>
+        {tools.map((tool) => (
+          <div key={tool.id} className="flex items-center justify-between rounded-lg border p-4">
             <div className="flex items-center gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                 <tool.icon className="h-6 w-6" />
@@ -81,8 +70,7 @@ export default function ToolsTab() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon"><Pencil className="h-4 w-4" /></Button>
-              <Switch checked={tool.isActive} />
+              <Switch checked={tool.isActive} onCheckedChange={() => handleToggle(tool.id)} />
             </div>
           </div>
         ))}
