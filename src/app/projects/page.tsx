@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { fetchProjects } from '@/services/project-service';
@@ -8,9 +9,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, FolderOpen, PlusCircle } from 'lucide-react';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useRouter } from 'next/navigation';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from '@/components/ui/dialog';
+import { UploadManager } from '@/components/UploadManager';
 
 function ProjectsPageSkeleton() {
     return (
@@ -22,10 +33,57 @@ function ProjectsPageSkeleton() {
     );
 }
 
-export default function MyProjectsPage() {
-    const { firebaseUser, isLoading: authLoading } = useAuth();
+function CreateProjectDialog() {
+    const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
     const newSession = useBuilderStore(state => state.newSession);
+
+    const handleStartBuilding = () => {
+        // newSession is already called from the project card or main button
+        // so here we just navigate
+        router.push('/generate');
+        setIsOpen(false);
+    }
+    
+    // This is a proxy for the main button's action
+    const handleCreateNewProject = () => {
+        newSession();
+        setIsOpen(true);
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                 <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Create New Project
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Create New Project</DialogTitle>
+                    <DialogDescription>
+                        Upload context for your new project. You can upload files, paste text, or provide URLs. This context will be available in the builder.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 max-h-[60vh] overflow-y-auto">
+                   <UploadManager />
+                </div>
+                <DialogFooter>
+                    <DialogClose asChild>
+                        <Button variant="ghost">Cancel</Button>
+                    </DialogClose>
+                    <Button onClick={handleStartBuilding}>
+                        Start Building
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+export default function MyProjectsPage() {
+    const { firebaseUser, isLoading: authLoading } = useAuth();
     
     const { data: projects, isLoading, isError, error } = useQuery({
         queryKey: projectKeys.lists(),
@@ -37,10 +95,6 @@ export default function MyProjectsPage() {
         enabled: !authLoading && !!firebaseUser,
     });
 
-    const handleCreateNewProject = () => {
-        newSession();
-        router.push('/generate');
-    }
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
@@ -54,10 +108,7 @@ export default function MyProjectsPage() {
                         Load, manage, and continue working on your saved projects.
                     </p>
                 </div>
-                <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Create New Project
-                </Button>
+                <CreateProjectDialog />
             </div>
             
             {isLoading || authLoading ? (
@@ -81,7 +132,7 @@ export default function MyProjectsPage() {
                     <FolderOpen className="mx-auto h-12 w-12 text-muted-foreground" />
                     <h3 className="mt-4 text-lg font-semibold">No projects found</h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        You haven't saved any projects yet. Go to the builder to get started.
+                        You haven't saved any projects yet. Get started by creating a new one.
                     </p>
                 </div>
             )}
