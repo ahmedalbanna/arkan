@@ -5,7 +5,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { type ProjectProposal, ProjectProposalSchema } from "@/ai/schemas";
+import { type AnyProjectProposal, AnyProjectProposalSchema } from "@/ai/schemas";
 import { toast } from "@/hooks/use-toast";
 import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";
@@ -27,7 +27,7 @@ import { z } from "zod";
 export interface BuilderState {
   name?: string;
   projectIdea: string;
-  proposal: ProjectProposal | null;
+  proposal: AnyProjectProposal | null;
   currentProjectId: string | null; // To track if we are editing a saved project
   hasUnsavedChanges: boolean; // To track if a save is needed
   // UI States for proposal generation
@@ -46,7 +46,7 @@ interface BuilderActions {
   setHasUnsavedChanges: (status: boolean) => void;
   getFullState: () => ProjectState;
   // Proposal Actions
-  setProposal: (proposal: ProjectProposal | null) => void;
+  setProposal: (proposal: AnyProjectProposal | null) => void;
   handleProposalUpdate: (path: string, value: any) => void;
   // UI State Actions
   setSelectedTemplateId: (id: string) => void;
@@ -87,10 +87,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         });
       },
       loadState: (newState) => {
-        let loadedProposal: ProjectProposal | null = null;
+        let loadedProposal: AnyProjectProposal | null = null;
         if (newState.proposal) {
-          // Attempt to parse the loaded proposal with the schema to ensure type correctness
-          const parseResult = ProjectProposalSchema.safeParse(newState.proposal);
+          // Attempt to parse the loaded proposal with the flexible schema
+          const parseResult = AnyProjectProposalSchema.safeParse(newState.proposal);
           if (parseResult.success) {
             loadedProposal = parseResult.data;
           } else {
@@ -214,9 +214,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         const merged: any = { ...currentState, ...persistedState };
 
         // Attempt to parse the loaded proposal with the schema during merge
-        let loadedProposal: ProjectProposal | null = null;
+        let loadedProposal: AnyProjectProposal | null = null;
         if (persistedState.proposal) {
-           const parseResult = ProjectProposalSchema.safeParse(persistedState.proposal);
+           const parseResult = AnyProjectProposalSchema.safeParse(persistedState.proposal);
             if (parseResult.success) {
                 loadedProposal = parseResult.data;
             } else {

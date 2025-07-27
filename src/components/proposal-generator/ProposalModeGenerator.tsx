@@ -11,7 +11,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ProjectProposal } from '@/ai/schemas';
+import type { AnyProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
@@ -47,7 +47,7 @@ function ProposalSkeleton() {
 }
 
 // The async function for the mutation
-async function generateProposal(variables: { body: any; token: string; }): Promise<ProjectProposal> {
+async function generateProposal(variables: { body: any; token: string; }): Promise<AnyProjectProposal> {
     const response = await fetch('/api/generate-proposal', {
         method: 'POST',
         headers: {
@@ -63,7 +63,7 @@ async function generateProposal(variables: { body: any; token: string; }): Promi
     return await response.json();
 }
 
-async function translateProposal(variables: { proposal: ProjectProposal, targetLang: string, token: string }): Promise<ProjectProposal> {
+async function translateProposal(variables: { proposal: AnyProjectProposal, targetLang: string, token: string }): Promise<AnyProjectProposal> {
     const response = await fetch('/api/translate-proposal', {
         method: 'POST',
         headers: {

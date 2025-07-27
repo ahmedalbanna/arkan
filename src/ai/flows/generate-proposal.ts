@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
+import { AnyProjectProposalSchema, type AnyProjectProposal } from '@/ai/schemas';
 
 const GenerateProposalInputSchema = z.object({
   projectIdea: z.string().describe('A short description of the project idea.'),
@@ -17,7 +17,7 @@ const GenerateProposalInputSchema = z.object({
 });
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
-export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
+export async function generateProposal(input: GenerateProposalInput): Promise<AnyProjectProposal> {
   return generateProposalFlow(input);
 }
 
@@ -25,13 +25,13 @@ const generateProposalFlow = ai.defineFlow(
   {
     name: 'generateProposalFlow',
     inputSchema: GenerateProposalInputSchema,
-    outputSchema: ProjectProposalSchema,
+    outputSchema: AnyProjectProposalSchema, // Use the more flexible schema
   },
   async (input) => {
     const generateProposalPrompt = ai.definePrompt({
       name: 'generateProposalPrompt',
       input: { schema: GenerateProposalInputSchema },
-      output: { schema: ProjectProposalSchema },
+      output: { schema: AnyProjectProposalSchema }, // Use the more flexible schema for output validation
       prompt: input.prompt,
     });
     

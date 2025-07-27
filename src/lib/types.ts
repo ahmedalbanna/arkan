@@ -1,6 +1,6 @@
 
 
-import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, TranslateTextInput, TranslateTextOutput } from '@/ai/schemas';
+import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, TranslateTextInput, TranslateTextOutput, AnyProjectProposal } from '@/ai/schemas';
 export type {
   ProjectProposal,
   DiagramType,
@@ -10,6 +10,7 @@ export type {
   ManipulateTextOutput,
   TranslateTextInput,
   TranslateTextOutput,
+  AnyProjectProposal,
 };
 export type {
   HistoryEntry,
@@ -32,3 +33,5 @@ export type { AgentData, Agent } from '@/lib/agents';
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
 export type { HomeworkHistoryEntry } from '@/hooks/useHomeworkSolverStore';
 export type { Team, TeamMember, TeamWithMembers } from '@/services/team-service';
+export type { DocxTemplate } from '@/services/template-service';
+export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
