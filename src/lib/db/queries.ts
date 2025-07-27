@@ -1,4 +1,3 @@
-
 // This file is now intended for Firebase queries.
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
@@ -181,6 +180,15 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
     const hasNextPage = snapshot.docs.length > limit;
 
     return { transactions, hasNextPage };
+}
+
+export async function getTransactionsByUserId(userId: string): Promise<TransactionData[]> {
+    const snapshot = await adminDb.collection('transactions')
+        .where('userId', '==', userId)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as TransactionData);
 }
 
 export async function getTransactionsByDateRange(startDate: string, endDate: string): Promise<TransactionData[]> {

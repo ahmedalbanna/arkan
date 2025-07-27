@@ -172,6 +172,12 @@ export function Header() {
                       My Dashboard
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/payment-history">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Payment History
+                    </Link>
+                  </DropdownMenuItem>
                    <DropdownMenuItem asChild>
                     <Link href="/team/manage">
                       <Users className="mr-2 h-4 w-4" />
