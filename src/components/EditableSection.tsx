@@ -22,7 +22,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
-import BlockEditor from './BlockEditor';
+
+const BlockEditor = dynamic(() => import('./BlockEditor'), {
+    ssr: false,
+    loading: () => <p>Loading editor...</p>,
+});
+
 
 interface EditableSectionProps {
     sectionKey: SectionName;
