@@ -17,6 +17,7 @@ import {
   Settings,
   SlidersHorizontal,
   Workflow,
+  Library,
 } from 'lucide-react';
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname, notFound } from 'next/navigation';
@@ -54,6 +55,7 @@ const adminNavLinks = [
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
     { href: '/automations/builder', labelKey: 'Automations', icon: Workflow },
     { href: '/admin/manage-generation-templates', labelKey: 'Generation Templates', icon: PencilRuler },
+    { href: '/admin/manage-prompt-templates', labelKey: 'Prompt Templates', icon: Library },
     { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
     { href: '/admin/manage-pptx-templates', labelKey: 'header.pptxTemplates', icon: FileImage },
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },

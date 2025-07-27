@@ -21,7 +21,6 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';
-import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 import AutomationTab from './AutomationTab';
 import { toast } from '@/hooks/use-toast';
 import ContextTab from './ContextTab';
@@ -114,10 +113,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     { id: 'automation', label: 'Automation', icon: BotMessageSquare },
   ];
 
-  const discoverItems = [
-    { id: 'templates', label: 'Prompt Templates', icon: Library },
-  ];
-
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
@@ -194,10 +189,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <ContextTab />;
        case 'automation':
         return <AutomationTab />;
-       case 'templates':
-        return <PromptTemplateLibrary />
       default:
-        return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label || discoverItems.find(d => d.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
+        return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }
   };
 
@@ -213,14 +206,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
                     {navItems.map(item => (
                       <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
                     ))}
-                  </div>
-                  <div>
-                    <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
-                    <div className="space-y-1">
-                      {discoverItems.map(item => (
-                        <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
-                      ))}
-                    </div>
                   </div>
                 </div>
               </div>

@@ -8,11 +8,13 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/prompt-templates';
-import { HelpCircle, Search } from 'lucide-react';
+import { HelpCircle, Search, Copy } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export function PromptTemplateLibrary() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Taskade AI');
+  const { toast } = useToast();
 
   const filteredCategories = PROMPT_CATEGORIES.filter(cat =>
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -24,9 +26,14 @@ export function PromptTemplateLibrary() {
       (template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         template.prompt.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+  
+  const handleCopyPrompt = (prompt: string) => {
+    navigator.clipboard.writeText(prompt);
+    toast({ title: 'Prompt Copied!', description: 'The template has been copied to your clipboard.' });
+  }
 
   return (
-    <div className="flex flex-col h-full">
+    <Card className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">AI Prompt Templates</h2>
         <div className="flex items-center gap-2">
@@ -64,9 +71,12 @@ export function PromptTemplateLibrary() {
         <ScrollArea className="flex-1">
             <div className="p-6 space-y-4">
                 {filteredTemplates.map((template, index) => (
-                    <Card key={index} className="hover:bg-muted/50 cursor-pointer">
-                        <CardHeader>
+                    <Card key={index} className="group hover:bg-muted/50">
+                        <CardHeader className="flex flex-row justify-between items-start">
                             <CardTitle className="text-base">{template.title}</CardTitle>
+                             <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleCopyPrompt(template.prompt)}>
+                                <Copy className="h-4 w-4"/>
+                            </Button>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground">{template.prompt}</p>
@@ -76,6 +86,6 @@ export function PromptTemplateLibrary() {
             </div>
         </ScrollArea>
       </div>
-    </div>
+    </Card>
   );
 }
