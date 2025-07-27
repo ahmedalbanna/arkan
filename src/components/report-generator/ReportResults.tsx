@@ -16,7 +16,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useTranslate } from '@/hooks/use-translation';
-import { toast } from '../ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
