@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered, BookCheck, GitGraph, Presentation } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -138,6 +138,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const {
         sections,
         externalContext,
+        addExternalContext,
         controlState,
         guidelineState,
         customGuidelineInput,
@@ -297,12 +298,12 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </Button>
                                     </div>
                                 </TooltipTrigger>
-                                {!canGenerateFullReport && userProfile && userProfile.credits < fullReportCreditCost && (
+                                {userProfile && userProfile.credits < fullReportCreditCost && (
                                     <TooltipContent>
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
                                     </TooltipContent>
                                 )}
-                                {!canGenerateFullReport && !(!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (
+                                {!(!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (
                                      <TooltipContent>
                                         <p>Please create a proposal or add external context first.</p>
                                     </TooltipContent>
@@ -320,7 +321,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || externalContext.length > 0;
+                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (externalContext && externalContext.length > 0 && currentSelection.externalContext.some(v => v));
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -483,7 +484,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                   ))}
                                                               </div>
                                                             )}
-                                                            {externalContext.length > 0 && (
+                                                            {externalContext && externalContext.length > 0 && (
                                                                 <div className="space-y-2 pt-2 border-t">
                                                                     <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
                                                                      {externalContext.map((contextItem, index) => (
@@ -556,12 +557,30 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             <TabsTrigger value="example" className="gap-2"><Files className="h-4 w-4" /> Add as Example</TabsTrigger>
                         </TabsList>
                         <TabsContent value="context" className="mt-4">
-                             <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
-                             <FileUploader type="context" />
+                            <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
+                            <Tabs defaultValue="pdf" className="w-full">
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
+                                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
+                                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="pdf" className="mt-2"><FileUploader type="context" /></TabsContent>
+                                <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
+                                <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
+                            </Tabs>
                         </TabsContent>
                         <TabsContent value="example" className="mt-4">
-                              <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
-                             <FileUploader type="example" />
+                            <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
+                            <Tabs defaultValue="pdf" className="w-full">
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
+                                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
+                                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="pdf" className="mt-2"><FileUploader type="example" /></TabsContent>
+                                <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
+                                <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
+                            </Tabs>
                         </TabsContent>
                     </Tabs>
                 </div>
