@@ -1,8 +1,9 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users, Palette, Workflow } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [
@@ -62,28 +63,40 @@ const features = [
     ],
   },
   {
-    id: 'exam-solver',
-    title: 'docs.examSolver.title',
+    id: 'academic-solver',
+    title: 'docs.academicSolver.title',
     icon: FileQuestion,
-    description: 'docs.examSolver.description',
+    description: 'docs.academicSolver.description',
     steps: [
-        'docs.examSolver.step1',
-        'docs.examSolver.step2',
-        'docs.examSolver.step3',
+        'docs.academicSolver.step1',
+        'docs.academicSolver.step2',
+        'docs.academicSolver.step3',
     ],
   },
   {
-    id: 'homework-solver',
-    title: 'docs.homeworkSolver.title',
-    icon: BookCheck,
-    description: 'docs.homeworkSolver.description',
-    steps: [
-        'docs.homeworkSolver.step1',
-        'docs.homeworkSolver.step2',
-        'docs.homeworkSolver.step3',
-    ],
+      id: 'team-management',
+      title: 'Team Management',
+      icon: Users,
+      description: 'Collaborate with others by creating teams, inviting members, and sharing projects.',
+      steps: [
+          "Navigate to 'Manage Team' from your user profile dropdown.",
+          "Create a new team by giving it a name.",
+          "Invite members to your team using their email address.",
+          "Team projects will appear alongside your personal projects on the 'My Projects' page.",
+      ],
   },
-    {
+  {
+      id: 'design-studio',
+      title: 'Design Studio',
+      icon: Palette,
+      description: 'Customize the visual appearance of your exported documents using a live template editor.',
+      steps: [
+          "Click on the 'Design' link in the main header.",
+          "Use the controls in the left panel to change fonts, colors, and other styles.",
+          "The live preview on the right will instantly update to show your changes.",
+      ],
+  },
+  {
     id: 'admin',
     title: 'docs.admin.title',
     icon: ShieldCheck,

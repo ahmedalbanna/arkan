@@ -1,8 +1,9 @@
+
 This code defines several custom React hooks using TanStack Query to manage user authentication and profile data.
 
 **1. Purpose**
 
-- The `use-user.ts` file is the central location for all user-related hooks. It handles authentication (login, logout, signup, etc.), profile data fetching, and other user-specific actions like purchasing credits. It follows a clean architecture by separating direct API and Firebase SDK calls into a service file (`src/services/user-service.ts`).
+- The `use-user.ts` file is the central location for all user-related hooks. It handles authentication (login, logout, signup, etc.), profile data fetching, and other user-specific actions. It follows a clean architecture by separating direct API and Firebase SDK calls into a service file (`src/services/user-service.ts`).
 
 **2. Core Concepts**
 
@@ -22,7 +23,6 @@ This code defines several custom React hooks using TanStack Query to manage user
 -   **`useLogout()`**: A mutation hook that calls the `logoutUser` service and clears all cached data on success.
 -   **`useSignup()`**: A mutation hook for creating a new user account via the backend API.
 -   **`usePhoneSignIn()`**: A more complex hook that manages the multi-step phone authentication flow (sending and verifying the OTP) using Firebase's `RecaptchaVerifier`.
--   **`usePurchaseCredits()`**: A mutation hook for the (now deprecated) direct credit purchase flow.
 
 **In summary:**
 

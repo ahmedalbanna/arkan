@@ -1,3 +1,4 @@
+
 This document breaks down the `useAcademicSolverStore` Zustand store, which manages the state for the unified Academic Solver feature.
 
 ## 1. Purpose
@@ -23,4 +24,6 @@ The `useAcademicSolverStore` is the central state management unit for the entire
 -   **`removeQuestionDocument`**: Removes a specific question document from the list.
 -   **`addExternalContext`**: Adds a new document to the `externalContext` array.
 -   **`removeExternalContext`**: Removes a specific context document from the list.
+-   **`newSession`**: Resets the store to its initial state, allowing the user to start a new academic solving session.
+-   **`loadState`**: Loads a saved academic solver state from a larger project state object, which is useful when loading a saved project.
 -   **`resetCurrent`**: Clears the store and resets the UI to its initial state, ready for a new session.

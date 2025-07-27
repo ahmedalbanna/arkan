@@ -1,3 +1,4 @@
+
 This code defines custom React hooks using TanStack Query to manage AI agent data. Let's break it down:
 
 **1. Purpose**
@@ -23,6 +24,8 @@ This code defines custom React hooks using TanStack Query to manage AI agent dat
     -   It uses `useMutation` to handle the update operation.
     -   It calls the `updateAgentApi` service function to send the update request.
     -   On success, it invalidates the `agentKeys` queries to refetch the updated data and displays a success toast.
+-   **`useCreateAgent()`**: This hook provides a mutation to create a new agent. It calls the `createAgentApi` service and, upon success, invalidates the agent list to include the new agent.
+-   **`useDeleteAgent()`**: This hook offers a mutation to delete an agent. It calls the `deleteAgentApi` service and invalidates the agent list upon success.
 
 **4. Agent Editor**
 
