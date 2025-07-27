@@ -11,7 +11,11 @@ export const ProjectStateSchema = z.object({
     projectIdea: z.string().optional(),
     proposal: z.lazy(() => ProjectProposalSchema).nullable(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
-    diagrams: z.record(DiagramTypeSchema, z.object({ plantUmlCode: z.string(), imageUrl: z.string() })).optional(),
+    diagrams: z.record(DiagramTypeSchema, z.object({
+        plantUmlCode: z.string(),
+        imageUrl: z.string(),
+        explanation: z.string().optional(),
+    })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
     codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string() }).optional(),
     codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable().optional(),
