@@ -1,9 +1,9 @@
 
 'use client';
 
-import AgentEditor from '@/components/AgentEditor';
+import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AlertCircle, Bot } from 'lucide-react';
+import { AlertCircle, Bot, Pencil } from 'lucide-react';
 import React, { use } from 'react';
 import { useAgent } from '@/hooks/use-agents';
 import { Card, CardContent, CardFooter, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
@@ -79,12 +79,12 @@ export default function EditAgentPage({ params: paramsPromise }: { params: Promi
             <div className="flex justify-between items-center">
                  <div className="flex items-center gap-2">
                      <Bot className="h-6 w-6" />
-                     <h1 className="text-xl font-semibold">{agent.name}</h1>
+                     <h1 className="text-xl font-semibold">{`Edit Agent: ${agent.name}`}</h1>
                  </div>
                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">Edit</Button>
-                    <Button variant="outline" size="sm">Chat</Button>
-                    <Button variant="outline" size="sm">Share</Button>
+                    <Button variant="outline" size="sm" disabled>Edit</Button>
+                    <Button variant="outline" size="sm" disabled>Chat</Button>
+                    <Button variant="outline" size="sm" disabled>Share</Button>
                  </div>
             </div>
         </CardHeader>

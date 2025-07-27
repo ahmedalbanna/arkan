@@ -118,9 +118,8 @@ export function useUpdateAgent() {
     onSuccess: (data, variables) => {
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: agentKeys.detail(variables.agentId),
-      });
+      queryClient.setQueryData(agentKeys.detail(variables.agentId), data);
+
 
       toast({
         title: "Agent Updated",

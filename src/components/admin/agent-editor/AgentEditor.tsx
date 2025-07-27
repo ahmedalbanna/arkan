@@ -15,16 +15,17 @@ import Link from 'next/link';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import CommandsTab from './CommandsTab';
 import ShareEmbedTab from './ShareEmbedTab';
 import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 import AutomationTab from './AutomationTab';
+import { toast } from '@/hooks/use-toast';
 
 interface AgentEditorProps {
   agentId: string;
@@ -95,12 +96,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   }, [initialData, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    updateAgentMutation.mutate({ agentId, payload: data }, {
-      onSuccess: () => {
-        router.push('/admin/manage-agents');
-        // toast({ title: 'Agent Updated', description: `Agent "${data.name}" has been successfully updated.` });
-      }
-    });
+    updateAgentMutation.mutate({ agentId, payload: data });
   };
 
   const navItems = [
