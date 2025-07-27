@@ -48,6 +48,7 @@ type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
 const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
   <Button
+    type="button"
     variant="ghost"
     onClick={onClick}
     className={cn(
