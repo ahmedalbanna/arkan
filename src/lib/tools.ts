@@ -5,6 +5,9 @@ import {
   GanttChartSquare,
   Package,
   FilePenLine,
+  Search,
+  FileCode,
+  Youtube,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -51,5 +54,33 @@ export const AVAILABLE_TOOLS: AgentTool[] = [
     icon: Package,
     description: 'Scaffolds a complete boilerplate codebase for the project based on the proposal.',
     isActive: false,
+  },
+  {
+    id: 'searchWeb',
+    name: 'Search Web',
+    icon: Search,
+    description: 'Search the web for information.',
+    isActive: true,
+  },
+  {
+    id: 'scrapeWebpage',
+    name: 'Scrape Webpage',
+    icon: FileCode,
+    description: 'Get content from any webpage link.',
+    isActive: true,
+  },
+  {
+    id: 'convertFileToText',
+    name: 'Convert File to Text',
+    icon: FileText,
+    description: 'Extract content from PDF.',
+    isActive: true,
+  },
+  {
+    id: 'transcribeYouTube',
+    name: 'Transcribe YouTube Video',
+    icon: Youtube,
+    description: 'Get a transcription from a YouTube video URL.',
+    isActive: true,
   },
 ];
