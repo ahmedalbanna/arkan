@@ -1,3 +1,6 @@
+
+'use client';
+
 import { toast } from "@/hooks/use-toast";
 
 /**
@@ -8,18 +11,32 @@ import { toast } from "@/hooks/use-toast";
  * @param context - An optional string to provide context for the error message title (e.g., "Login Failed").
  */
 export const handleErrorUtility = (error: any, context?: string) => {
-  let title = context || 'Error';
+  let title = context || 'An Error Occurred';
   let description = 'An unexpected error occurred. Please try again.';
 
   if (error && error.message) {
-    // Standard JavaScript Error object
+    // For standard JavaScript Error objects
     description = error.message;
-  } else if (error && error.error && error.error._form && error.error._form[0]) {
-    // Zod error from a form action
-    description = error.error._form[0];
+  } else if (error && typeof error === 'object' && error.error) {
+    // For structured errors from form actions or APIs
+    const formError = error.error._form;
+    if (formError && Array.isArray(formError) && formError.length > 0) {
+      description = formError.join(', ');
+    } else if (error.message) {
+        description = error.message;
+    }
   } else if (typeof error === 'string') {
-    // Plain string error
+    // For plain string errors
     description = error;
+  }
+
+  // Set a more specific title based on known error messages
+  if (description.toLowerCase().includes('credit')) {
+    title = "Insufficient Credits";
+  } else if (description.toLowerCase().includes('auth') || description.toLowerCase().includes('unauthorized')) {
+    title = "Authentication Error";
+  } else if (description.toLowerCase().includes('not found')) {
+      title = "Not Found"
   }
 
   toast({

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
     if (body.uid) {
         const validation = providerSignupSchema.safeParse(body);
         if (!validation.success) {
-             return NextResponse.json({ error: validation.error.flatten().fieldErrors }, { status: 400 });
+             return NextResponse.json({ message: "Invalid payload for provider sign-up.", errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
         const { uid, email, name, phoneNumber } = validation.data;
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
         const validation = signupSchema.safeParse(body);
 
         if (!validation.success) {
-          return NextResponse.json({ error: validation.error.flatten().fieldErrors }, { status: 400 });
+          return NextResponse.json({ message: "Invalid signup data.", errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
 
         const { email, password, name } = validation.data;
@@ -112,19 +112,23 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Signup error:", error);
+    let message = "An unexpected server error occurred. Please try again later.";
 
     if (error.code === 'auth/email-already-exists') {
-      return NextResponse.json({ error: { _form: ["Email address already in use"] } }, { status: 409 });
+      message = "Email address is already in use by another account.";
+      return NextResponse.json({ message }, { status: 409 });
     } else if (error.code === 'auth/invalid-email') {
-      return NextResponse.json({ error: { email: ["Invalid email format"] } }, { status: 400 });
+      message = "The email address is not valid.";
+      return NextResponse.json({ message }, { status: 400 });
     } else if (error.code === 'auth/weak-password') {
-       return NextResponse.json({ error: { password: ["Password is too weak. It must be at least 6 characters long."] } }, { status: 400 });
+       message = "The password is too weak. It must be at least 6 characters long.";
+       return NextResponse.json({ message }, { status: 400 });
     }
 
     if (error instanceof z.ZodError) {
-        return NextResponse.json({ error: error.flatten().fieldErrors }, { status: 400 });
+        return NextResponse.json({ message: "Invalid data provided.", errors: error.flatten().fieldErrors }, { status: 400 });
     }
 
-    return NextResponse.json({ error: { _form: ["An unexpected server error occurred. Please try again later."] } }, { status: 500 });
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

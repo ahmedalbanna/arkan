@@ -83,7 +83,7 @@ export async function createAgent(data: CreateAgentVariables, token: string): Pr
     });
     if (!response.ok) {
         const error = await response.json();
-        throw error; // Throw the structured error from the API
+        throw new Error(error.message || 'Failed to create agent');
     }
     return response.json();
 }

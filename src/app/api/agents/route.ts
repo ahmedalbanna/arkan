@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         const doc = await agentRef.get();
 
         if (doc.exists) {
-            return NextResponse.json({ errors: { id: ["An agent with this ID already exists."] } }, { status: 409 });
+            return NextResponse.json({ message: 'An agent with this ID already exists.' }, { status: 409 });
         }
 
         const newAgent = {
