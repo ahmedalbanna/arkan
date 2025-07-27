@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType, ProjectPlanSchema } from '@/ai/schemas';
@@ -26,7 +25,7 @@ const generateSectionSchema = z.object({
       content: z.string(),
       type: z.enum(['context', 'example'])
   })).optional(),
-  templateId: z.string().optional(), // Pass template to know the ToC
+  tableOfContents: z.array(z.string()).optional(), // Add ToC to the single section schema
 });
 
 // Schema for generating a full report based on a template
@@ -148,8 +147,8 @@ export async function POST(request: Request) {
         const agentInput = singleSectionValidation.data;
 
         // A proposal or external context is required to generate a section.
-        if (!agentInput.proposal && (!agentInput.externalContext || agentInput.externalContext.length === 0)) {
-            return NextResponse.json({ message: "A proposal or external context is required to generate a report section." }, { status: 400 });
+        if (!agentInput.proposal && (!agentInput.externalContext || agentInput.externalContext.length === 0) && !agentInput.projectPlan) {
+            return NextResponse.json({ message: "A proposal, project plan, or external context is required to generate a report section." }, { status: 400 });
         }
 
         const agentInfo = sectionConfig[agentInput.sectionToGenerate];
@@ -158,17 +157,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
 
-        // Construct the Table of Contents if a templateId was provided
-        let tableOfContents: string[] | undefined = undefined;
-        if (agentInput.templateId) {
-            const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(agentInput.templateId).get();
-            if (templateDoc.exists) {
-                const template = templateDoc.data() as ReportGenerationTemplate;
-                tableOfContents = template.agentIds.map(agentId => sectionConfig[Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName]?.title);
-            }
-        }
-        
-        const result = await generateReportSection({ ...agentInput, tableOfContents });
+        const result = await generateReportSection({ ...agentInput });
 
         const transformedOutput = { [result.sectionName]: result.content };
         

@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -41,6 +40,7 @@ export interface ReportState {
   contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean[]; proposal: boolean; projectPlan: boolean }>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
+  manualTableOfContents: string;
 }
 
 interface ReportActions {
@@ -61,6 +61,7 @@ interface ReportActions {
     toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal' | 'projectPlan', contextKey: string | number | null, isSelected: boolean) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
+    setManualTableOfContents: (toc: string) => void;
 }
 
 const getDefaultGuidelineState = () => {
@@ -95,6 +96,7 @@ const initialState: ReportState = {
   contextSelection: {},
   selectedReportTemplateId: REPORT_GENERATION_TEMPLATES[0].id,
   selectedPresentationTemplateId: 'software-presentation',
+  manualTableOfContents: '',
 };
 
 
@@ -232,5 +234,8 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set({ selectedPresentationTemplateId: id });
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
+      setManualTableOfContents: (toc: string) => {
+        set({ manualTableOfContents: toc, hasUnsavedChanges: true });
+      }
     })
 );

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -15,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -124,6 +123,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
         toggleContextSelection,
+        manualTableOfContents,
+        setManualTableOfContents,
     } = useReportStore();
     
     const handleGenerationResult = (data: any, variables: any) => {
@@ -190,7 +191,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContext: selectedExternalContexts,
-            templateId: selectedReportTemplateId, // Pass template ID to get ToC
+            tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
@@ -222,7 +223,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         .map(agentId => (Object.keys(sectionConfig) as SectionName[]).find(key => sectionConfig[key].agentId === agentId))
         .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !sections[sectionKey]) || [];
     const fullReportCreditCost = sectionsToGenerate.length;
-    const canGenerateFullReport = (!!proposal || !!projectPlan || externalContext.length > 0) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
+    const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
     if (!agentsLoaded) {
@@ -287,7 +288,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
                                     </TooltipContent>
                                 )}
-                                {!canGenerateFullReport && !(!!proposal || !!projectPlan || externalContext.length > 0) && (
+                                {!canGenerateFullReport && !(!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (
                                      <TooltipContent>
                                         <p>Please create a proposal or add external context first.</p>
                                     </TooltipContent>
@@ -316,9 +317,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </AccordionTrigger>
                                         <AccordionContent className="space-y-4 p-4">
                                             <Tabs defaultValue="prompt" className="w-full">
-                                                <TabsList className="grid w-full grid-cols-3">
+                                                <TabsList className="grid w-full grid-cols-4">
                                                     <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
                                                     <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
+                                                    <TabsTrigger value="structure">Structure</TabsTrigger>
                                                     <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                                 </TabsList>
                                                 <TabsContent value="prompt" className="pt-4 space-y-4">
@@ -400,6 +402,19 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                             <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
                                                             <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
                                                         </div>
+                                                    </div>
+                                                </TabsContent>
+                                                 <TabsContent value="structure" className="pt-4">
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="toc-input">Table of Contents</Label>
+                                                        <Textarea
+                                                            id="toc-input"
+                                                            placeholder="Enter each chapter title on a new line..."
+                                                            rows={8}
+                                                            value={manualTableOfContents}
+                                                            onChange={(e) => setManualTableOfContents(e.target.value)}
+                                                        />
+                                                        <p className="text-xs text-muted-foreground">Provide the full report structure to give the AI better context.</p>
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
