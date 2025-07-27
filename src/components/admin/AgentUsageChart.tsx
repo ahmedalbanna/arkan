@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -20,7 +21,7 @@ export function AgentUsageChart({ data }: AgentUsageChartProps) {
     const fillColor = resolvedTheme === 'dark' ? '#8884d8' : '#2563eb';
 
     return (
-        <Card className="lg:col-span-4">
+        <Card className="lg:col-span-7">
             <CardHeader>
                 <CardTitle>{t('adminDashboard.agentUsageTitle')}</CardTitle>
             </CardHeader>

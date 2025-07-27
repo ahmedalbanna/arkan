@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -108,7 +109,7 @@ export default function Dashboard() {
                 <StatCard title={t('adminDashboard.pendingPayments')} value={data?.pendingPayments.toString()} icon={CreditCard} />
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
+            <div className="grid gap-8 md:grid-cols-1 lg:grid-cols-7">
                 <AgentUsageChart data={data?.agentUsageChartData || []} />
                 <RecentActivity data={data?.recentActivity || []} />
             </div>
