@@ -1,4 +1,5 @@
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid } from 'lucide-react';
+
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid, Scale, Megaphone } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -18,6 +19,8 @@ export enum AgentCategory {
   DiagramGeneration = 'Diagram Generation',
   PresentationGeneration = 'Presentation Generation',
   CodeGeneration = 'Code Generation',
+  Marketing = 'Marketing',
+  Legal = 'Legal',
   AdminTools = 'Admin Tools',
 }
 
@@ -94,13 +97,45 @@ User Prompt: {{{prompt}}}
     icon: FileText,
     pageUrl: '/generate',
     isEnabled: true,
-    prompt: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
+    prompt: {
+        base: `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
 
 The proposal should be well-structured, realistic, and detailed. Fill out all the fields in the required output format with plausible information. Make sure the start and end dates in the timeline are logical based on today's date. Also, provide a list of 3 to 5 relevant tags for the project based on its content.
 
 IMPORTANT: For all fields that contain descriptive text (like 'objective', 'methodology', 'evaluation', 'interest', 'description', and 'mitigation'), you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
 
-Project Idea: {{{projectIdea}}}`
+Project Idea: {{{projectIdea}}}`,
+        guidelines: []
+    }
+  },
+   {
+    id: 'generate-ad-copy',
+    name: 'Marketing Ad Copy Agent',
+    description: 'Generates compelling ad copy for a product or service.',
+    category: AgentCategory.Marketing,
+    icon: Megaphone,
+    pageUrl: '/generate', // This could be a new page later
+    isEnabled: true,
+    prompt: `You are a professional copywriter specializing in high-converting ad copy. A user will provide a product name and description. Your task is to generate 3 distinct ad copy variations (Headline and Body) for a social media campaign.
+
+Product Name: {{{productName}}}
+Product Description: {{{productDescription}}}
+Target Audience: {{{targetAudience}}}`
+  },
+  {
+    id: 'generate-nda',
+    name: 'Legal NDA Agent',
+    description: 'Generates a standard Non-Disclosure Agreement between two parties.',
+    category: AgentCategory.Legal,
+    icon: Scale,
+    pageUrl: '/generate', // This could be a new page later
+    isEnabled: true,
+    prompt: `You are a legal assistant AI. Based on the user's input, generate a standard, basic Non-Disclosure Agreement (NDA).
+Disclosing Party: {{{disclosingParty}}}
+Receiving Party: {{{receivingParty}}}
+Effective Date: {{{effectiveDate}}}
+
+Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.`
   },
   // Report Section Agents
   {
@@ -561,3 +596,5 @@ You will be provided with the full project proposal in JSON format, and may also
     prompt: ''
   },
 ];
+
+    
