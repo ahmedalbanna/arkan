@@ -343,7 +343,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                                     <div key={index} className="flex items-center space-x-2">
                                                                         <Checkbox
                                                                             id={`context-external-${'presentation'}-${index}`}
-                                                                            checked={!!currentSelection.externalContext[index]}
+                                                                            checked={!!currentSelection.externalContext?.[index]}
                                                                             onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', index, !!checked)}
                                                                         />
                                                                         <Label htmlFor={`context-external-${'presentation'}-${index}`} className="text-sm font-normal">
