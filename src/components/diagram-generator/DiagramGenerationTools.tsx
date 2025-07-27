@@ -13,7 +13,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -169,7 +169,7 @@ export const DiagramGenerationTools = () => {
             otherSections,
             otherDiagrams,
             guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
-            externalContextContent: selectedExternalContexts.map(c => c.content).join('')};
+            externalContext: selectedExternalContexts};
         setActiveMutationKey(diagramType);
         diagramMutation.mutate({ body, token });
     };
@@ -366,21 +366,19 @@ export const DiagramGenerationTools = () => {
                     })}
                 </Accordion>
                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
-                    <Tabs defaultValue="file" className="w-full">
-                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
-                            <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                            <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                    <h3 className="text-sm font-semibold mb-2">Add Context / Examples</h3>
+                     <Tabs defaultValue="context" className="w-full">
+                         <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="context" className="gap-2"><FileSymlink className="h-4 w-4" /> Add as Context</TabsTrigger>
+                            <TabsTrigger value="example" className="gap-2"><Files className="h-4 w-4" /> Add as Example</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="file" className="mt-4">
-                            <FileUploader />
+                        <TabsContent value="context" className="mt-4">
+                             <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
+                             <FileUploader type="context" />
                         </TabsContent>
-                         <TabsContent value="text" className="mt-4">
-                            <PasteTextUploader />
-                        </TabsContent>
-                        <TabsContent value="image" className="mt-4">
-                            <ImageUploader />
+                        <TabsContent value="example" className="mt-4">
+                              <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
+                             <FileUploader type="example" />
                         </TabsContent>
                     </Tabs>
                 </div>

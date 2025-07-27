@@ -9,15 +9,15 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useReportStore } from '@/hooks/useReportStore';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { ScrollArea } from './ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
 
-export function FileUploader() {
+interface FileUploaderProps {
+    type: 'context' | 'example';
+}
+
+export function FileUploader({ type }: FileUploaderProps) {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
-    const { externalContext, addExternalContext, removeExternalContext } = useReportStore();
+    const { addExternalContext } = useReportStore();
     const [isLoading, setIsLoading] = useState(false);
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -52,9 +52,9 @@ export function FileUploader() {
             }
             
             const result = await response.json();
-            addExternalContext(file.name, result.markdown);
+            addExternalContext(file.name, result.markdown, type);
 
-            toast({ title: "File Processed", description: `${file.name} has been successfully added as context.` });
+            toast({ title: "File Processed", description: `${file.name} has been successfully added as ${type}.` });
 
         } catch (err: any) {
             toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
@@ -62,7 +62,7 @@ export function FileUploader() {
             setIsLoading(false);
         }
 
-    }, [firebaseUser, toast, addExternalContext]);
+    }, [firebaseUser, toast, addExternalContext, type]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -77,17 +77,17 @@ export function FileUploader() {
                 className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'
                     } hover:border-primary/80 transition-colors cursor-pointer`}
             >
-                <CardContent className="flex flex-col items-center justify-center p-12 text-center">
+                <CardContent className="flex flex-col items-center justify-center p-6 text-center">
                     <input {...getInputProps()} />
                     {isLoading ? (
                         <>
-                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                            <p className="mt-4 text-muted-foreground">Processing file...</p>
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
                         </>
                     ) : (
                         <>
-                            <UploadCloud className="h-12 w-12 text-muted-foreground" />
-                            <p className="mt-4 font-semibold">
+                            <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                            <p className="mt-2 text-sm font-semibold">
                                 {isDragActive ? 'Drop the file here...' : 'Drag & drop a PDF here, or click to select'}
                             </p>
                             <p className="text-xs text-muted-foreground">PDF only (Max 5MB)</p>
@@ -95,42 +95,6 @@ export function FileUploader() {
                     )}
                 </CardContent>
             </Card>
-
-            {externalContext && externalContext.length > 0 && (
-                <div className="mt-4">
-                    <h3 className="text-sm font-semibold mb-2">Uploaded Context Files:</h3>
-                    <ul className="space-y-2">
-                        {externalContext.map((item, index) => (
-                            <li key={index} className="flex items-center justify-between p-2 border rounded-md bg-muted/50 text-sm">
-                                <div className="flex items-center gap-2 truncate">
-                                    <File className="h-4 w-4 shrink-0" />
-                                    <span className="truncate">{item.fileName}</span>
-                                </div>
-                                <div className="flex items-center">
-                                    <Dialog>
-                                        <DialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-3xl">
-                                            <DialogHeader>
-                                                <DialogTitle>{item.fileName}</DialogTitle>
-                                            </DialogHeader>
-                                            <ScrollArea className="h-[60vh] rounded-md border p-4">
-                                                <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
-                                            </ScrollArea>
-                                        </DialogContent>
-                                    </Dialog>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}>
-                                        <X className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </div>
     );
 }

@@ -24,7 +24,11 @@ const GenerateSectionInputSchema = z.object({
   otherDiagrams: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF of a similar report) to use as a primary reference for style, tone, and structure."),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+      type: z.enum(['context', 'example'])
+  })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
 });
@@ -74,11 +78,23 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContextContent}}
---- IMPORTANT EXTERNAL CONTEXT / EXAMPLE ---
+{{#if externalContext}}
+    {{#each externalContext}}
+        {{#if (eq this.type "example")}}
+--- IMPORTANT EXAMPLE (STYLE REFERENCE) ---
 You MUST heavily reference the following content for style, tone, and structure.
-{{{externalContextContent}}}
+File: {{this.fileName}}
+{{{this.content}}}
 ---
+        {{/if}}
+        {{#if (eq this.type "context")}}
+--- FACTUAL CONTEXT ---
+Use the following content for information and data.
+File: {{this.fileName}}
+{{{this.content}}}
+---
+        {{/if}}
+    {{/each}}
 {{/if}}
 {{#if otherSections}}
 --- PREVIOUSLY GENERATED SECTIONS ---

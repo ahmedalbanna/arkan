@@ -19,9 +19,13 @@ const generateSectionSchema = z.object({
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(),
+  guidelines: z.array(z.string()).optional(), 
   instructionText: z.string().optional(),
-  externalContextContent: z.string().optional(),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+      type: z.enum(['context', 'example'])
+  })).optional(),
 });
 
 // Schema for generating a full report based on a template
@@ -31,7 +35,11 @@ const generateFullReportSchema = z.object({
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-    externalContextContent: z.string().optional(),
+    externalContext: z.array(z.object({
+        fileName: z.string(),
+        content: z.string(),
+        type: z.enum(['context', 'example'])
+    })).optional(),
 });
 
 
@@ -51,10 +59,10 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {}, externalContextContent } = fullReportValidation.data;
+        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {}, externalContext } = fullReportValidation.data;
 
         // A proposal or external context is required to generate a report.
-        if (!proposal && !externalContextContent) {
+        if (!proposal && (!externalContext || externalContext.length === 0)) {
             return NextResponse.json({ message: "A proposal or external context is required to generate a report." }, { status: 400 });
         }
 
@@ -80,7 +88,7 @@ export async function POST(request: Request) {
         }
         
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate, externalContextContent };
+        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate, externalContext };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
@@ -118,7 +126,7 @@ export async function POST(request: Request) {
                 otherDiagrams: currentContextDiagrams,
                 guidelines: config.guidelines,
                 instructionText,
-                externalContextContent
+                externalContext,
             };
 
             const result = await generateReportSection(agentInput);
@@ -138,7 +146,7 @@ export async function POST(request: Request) {
         const agentInput = singleSectionValidation.data;
 
         // A proposal or external context is required to generate a section.
-        if (!agentInput.proposal && !agentInput.externalContextContent) {
+        if (!agentInput.proposal && (!agentInput.externalContext || agentInput.externalContext.length === 0)) {
             return NextResponse.json({ message: "A proposal or external context is required to generate a report section." }, { status: 400 });
         }
 

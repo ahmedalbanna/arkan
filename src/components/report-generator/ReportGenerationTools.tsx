@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -189,7 +189,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
-            externalContextContent: selectedExternalContexts.map(c => c.content).join('\n\n---\n\n'),
+            externalContext: selectedExternalContexts,
         };
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
@@ -207,7 +207,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            externalContextContent: externalContext.map(c => c.content).join('\n\n---\n\n'),
+            externalContext: externalContext,
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportGenerationMutation.mutate({ body, token });
@@ -283,16 +283,15 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </Button>
                                     </div>
                                 </TooltipTrigger>
-                                {!hasEnoughCreditsForFullReport && (
+                                {!hasEnoughCreditsForFullReport ? (
                                     <TooltipContent>
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
                                     </TooltipContent>
-                                )}
-                                 {!(!!proposal || externalContext.length > 0) && (
-                                    <TooltipContent>
+                                ) : !(!!proposal || externalContext.length > 0) ? (
+                                     <TooltipContent>
                                         <p>Please create a proposal or add external context first.</p>
                                     </TooltipContent>
-                                )}
+                                ) : null}
                             </Tooltip>
                         </TooltipProvider>
 
@@ -524,23 +523,18 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                  </Tabs>
                  <div className="pt-4 mt-4 border-t">
                     <h3 className="text-sm font-semibold mb-2">Add Context / Examples</h3>
-                    <p className="text-xs text-muted-foreground mb-2">
-                        Provide existing documents or reports as examples. The AI will learn from their style, tone, and structure to improve accuracy.
-                    </p>
-                    <Tabs defaultValue="file" className="w-full">
-                         <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
-                            <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                            <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                    <Tabs defaultValue="context" className="w-full">
+                         <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="context" className="gap-2"><FileSymlink className="h-4 w-4" /> Add as Context</TabsTrigger>
+                            <TabsTrigger value="example" className="gap-2"><Files className="h-4 w-4" /> Add as Example</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="file" className="mt-4">
-                            <FileUploader />
+                        <TabsContent value="context" className="mt-4">
+                             <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
+                             <FileUploader type="context" />
                         </TabsContent>
-                         <TabsContent value="text" className="mt-4">
-                            <PasteTextUploader />
-                        </TabsContent>
-                        <TabsContent value="image" className="mt-4">
-                            <ImageUploader />
+                        <TabsContent value="example" className="mt-4">
+                              <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
+                             <FileUploader type="example" />
                         </TabsContent>
                     </Tabs>
                 </div>

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -25,6 +26,7 @@ export interface ControlState {
 export interface ExternalContext {
     fileName: string;
     content: string;
+    type: 'context' | 'example';
 }
 
 export interface ReportState {
@@ -49,7 +51,7 @@ interface ReportActions {
     setTranslatedSection: (key: SectionName, content: string) => void;
     setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
-    addExternalContext: (fileName: string, content: string) => void;
+    addExternalContext: (fileName: string, content: string, type: 'context' | 'example') => void;
     removeExternalContext: (index: number) => void;
     handleControlChange: (section: SectionName, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
@@ -136,8 +138,8 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set({ evaluation });
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      addExternalContext: (fileName, content) => {
-        set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
+      addExternalContext: (fileName, content, type) => {
+        set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type }] }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       removeExternalContext: (index) => {

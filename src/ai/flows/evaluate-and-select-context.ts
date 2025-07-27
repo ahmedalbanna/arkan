@@ -23,7 +23,11 @@ const EvaluateContextInputSchema = z.object({
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
   sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
-  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF of a similar report) to use as a style and content guide."),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+      type: z.enum(['context', 'example'])
+  })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
 });
 export type EvaluateContextInput = z.infer<typeof EvaluateContextInputSchema>;
 
@@ -77,26 +81,24 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     name: 'evaluateAndSelectContextPrompt',
     input: { schema: EvaluateContextInputSchema },
     output: { schema: EvaluateContextOutputSchema },
-    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state (proposal, project plan, existing sections, diagrams, and external context) and create an optimal generation plan for a list of target sections.
-
-For each target section in the \`sectionsToGenerate\` list, you must determine the best configuration for its generation.
+    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state and create an optimal generation plan for a list of target sections.
 
 **Your Analysis Process:**
 
 1.  **Review All Available Context:**
-    *   Thoroughly examine the \`proposal\`.
-    *   Analyze the \`projectPlan\` to understand the breakdown of tasks and phases.
-    *   Read through all \`existingSections\` to understand what has already been written.
-    *   Analyze any \`existingDiagrams\` to understand the system structure.
-    *   **Crucially, review the \`externalContextContent\`. This content (e.g., from an uploaded similar report) should be treated as a primary example for style, tone, and structure.**
+    *   Thoroughly examine the \`proposal\` and \`projectPlan\`.
+    *   Read through all \`existingSections\` and \`existingDiagrams\`.
+    *   **Crucially, differentiate between external files marked as 'example' and 'context'.**
+    *   **Style and Tone**: Use files marked as \`example\` as the primary reference for writing style, tone, and structure.
+    *   **Factual Information**: Use files marked as \`context\` for factual data and information.
 
 2.  **Consult Agent Capabilities:**
-    *   For each target section, I will provide you with the AI agent's "Base Prompt" and its "Available Guidelines". Use this to understand what the agent is designed to do.
+    *   For each target section, I will provide you with the AI agent's "Base Prompt" and its "Available Guidelines".
 
 3.  **Determine Optimal Configuration for EACH Target Section:**
-    *   **Context Selection**: From the list of \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent write its target section. The proposal, project plan, and external context are always available, so you only need to select which *other* generated items are relevant. Less is more; only select context that is directly useful.
-    *   **Guideline Selection**: From the "Available Guidelines" for that agent, select the ones that are most appropriate given the project proposal. You can also CREATE NEW, specific guidelines if you believe they will improve the output.
-    *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` for the section based on the project's nature and the style of the external context.
+    *   **Context Selection**: From \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent.
+    *   **Guideline Selection**: From the "Available Guidelines" for that agent, select the most appropriate ones. You can also CREATE NEW, specific guidelines if needed.
+    *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` based on the project's nature and any provided 'example' files.
 
 **CRITICAL INSTRUCTIONS:**
 - Your final output must be a JSON object that strictly adheres to the provided schema.
@@ -145,13 +147,16 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 (No diagrams have been generated yet)
 {{/if}}
 
-**External Context / Examples:**
-{{#if externalContextContent}}
-{{{externalContextContent}}}
+**External Files:**
+{{#if externalContext}}
+{{#each externalContext}}
+--- External File ({{this.type}}): {{this.fileName}} ---
+{{{this.content}}}
+---
+{{/each}}
 {{else}}
-(No external context provided.)
+(No external files provided.)
 {{/if}}
-
 
 --- AGENT CAPABILITIES FOR REFERENCE ---
 ${agentDetailsContext}
