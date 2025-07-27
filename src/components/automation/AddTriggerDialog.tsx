@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import {
-  Eye, Apps, Bot, Wrench, Search, Rss, Clock, Webhook, Mail, Calendar, MessageSquare, FileText, Check, ListChecks, MessageCircle, FilePen, UserPlus, FileUp, ListPlus, Wand2
+  Eye, LayoutGrid, Bot, Wrench, Search, Rss, Clock, Webhook, Mail, Calendar, MessageSquare, FileText, Check, ListChecks, MessageCircle, FilePen, UserPlus, FileUp, ListPlus, Wand2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -62,7 +62,7 @@ export function AddTriggerDialog() {
 
   const filters = [
       { id: 'Show all', icon: Eye },
-      { id: 'Apps', icon: Apps },
+      { id: 'Apps', icon: LayoutGrid },
       { id: 'Utilities', icon: Wrench },
       { id: 'Taskade', icon: TaskadeLogo },
   ];

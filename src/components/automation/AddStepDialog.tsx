@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import {
-  Eye, Apps, Bot, Wrench, ListFilter, GitBranch, Hourglass, Repeat, Search, Globe, FileCode, Youtube, Send,
+  Eye, LayoutGrid, Bot, Wrench, ListFilter, GitBranch, Hourglass, Repeat, Search, Globe, FileCode, Youtube, Send,
   Check, File, Image as ImageIcon, Briefcase, MessageSquare, Calendar, Zap, Rocket, Pen, Mail, User, List, ShoppingCart, Newspaper, BarChart, Settings, SearchCode, Beaker, GraduationCap, Building, Landmark, Phone, BrainCircuit, Filter, Sparkles, FolderKanban, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -65,7 +65,7 @@ export function AddStepDialog() {
 
   const filters = [
       { id: 'Show all', icon: Eye },
-      { id: 'Apps', icon: Apps },
+      { id: 'Apps', icon: LayoutGrid },
       { id: 'AI', icon: Bot },
       { id: 'Utilities', icon: Wrench },
       { id: 'Taskade', icon: TaskadeLogo },
