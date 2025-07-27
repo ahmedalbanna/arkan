@@ -12,6 +12,7 @@ export interface ChatSession {
   title: string;
   lastMessage: string;
   timestamp: Date;
+  agentId?: string; // agentId is optional for general chats
   messages: { role: 'user' | 'assistant'; content: string }[];
 }
 

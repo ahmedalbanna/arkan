@@ -23,7 +23,7 @@ interface ChatActions {
   addMessage: (message: ChatMessage) => void;
   updateLastMessage: (contentChunk: string, isTool?: boolean) => void;
   setInput: (input: string) => void;
-  createNewChat: () => void;
+  createNewChat: (options?: { agentId?: string, title?: string }) => void;
   setSelectedChat: (chat: ChatSession | null) => void;
 }
 
@@ -40,12 +40,13 @@ export const useChatStore = create<ChatState & ChatActions>()(
     (set, get) => ({
       ...getInitialState(),
 
-      createNewChat: () => {
+      createNewChat: (options) => {
         const newChat: ChatSession = {
           id: new Date().toISOString(),
-          title: 'New Chat',
+          title: options?.title || 'New Chat',
           timestamp: new Date(),
           lastMessage: '...',
+          agentId: options?.agentId,
           messages: [{ role: 'assistant', content: 'How can I help you today?' }],
         };
         set(state => ({

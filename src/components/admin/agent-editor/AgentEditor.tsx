@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link, MessageSquare, Plus } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link as LinkIcon, MessageSquare, Plus } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -128,7 +128,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
     { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
     { id: 'tools', label: 'Tools', icon: Wrench },
-    { id: 'context', label: 'Context', icon: Link },
+    { id: 'context', label: 'Context', icon: LinkIcon },
     { id: 'automation', label: 'Automation', icon: BotMessageSquare },
   ];
 

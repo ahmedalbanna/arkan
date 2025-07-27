@@ -80,7 +80,7 @@ export default function EditAgentPage({ params: paramsPromise }: { params: Promi
         </div>
         <div className="flex items-center gap-2">
            <Button asChild variant="outline" size="sm">
-            <Link href="/chat">
+            <Link href={`/chat?agentId=${agent.id}`}>
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Chat
             </Link>
