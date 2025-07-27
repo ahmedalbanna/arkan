@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
@@ -14,7 +14,6 @@ import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { Card, CardContent } from '../ui/card';
 import type { DiagramData } from '@/hooks/useDiagramStore';
 import type { DiagramType } from '@/ai/schemas';
@@ -83,11 +82,8 @@ export default function DiagramViewer({
             setIsDownloading(false);
         }
     };
-    
-    const handleExplain = async () => {
-        setViewMode('explanation'); // Switch to explanation view immediately
-        if (diagramData.explanation) return; // Don't re-fetch if already exists
 
+    const fetchExplanation = async () => {
         if (!firebaseUser) {
             toast({ title: 'Authentication Required', variant: 'destructive' });
             return;
@@ -111,6 +107,13 @@ export default function DiagramViewer({
              setIsExplaining(false);
         }
     };
+    
+    // Auto-fetch explanation if view is switched and no explanation exists
+    useEffect(() => {
+        if (viewMode === 'explanation' && !diagramData.explanation && !isExplaining) {
+            fetchExplanation();
+        }
+    }, [viewMode, diagramData.explanation, isExplaining]);
 
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
@@ -144,7 +147,13 @@ export default function DiagramViewer({
                                          <p>The AI is analyzing the diagram...</p>
                                     </div>
                                 ) : (
-                                    <ReactMarkdown components={markdownComponents}>{diagramData.explanation || "No explanation available yet."}</ReactMarkdown>
+                                    <>
+                                        <Button onClick={fetchExplanation} variant="outline" size="sm" className="float-right" disabled={isExplaining}>
+                                            {isExplaining ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Wand2 className="h-4 w-4 mr-2" />}
+                                            Regenerate
+                                        </Button>
+                                        <ReactMarkdown components={markdownComponents}>{diagramData.explanation || "No explanation available yet."}</ReactMarkdown>
+                                    </>
                                 )}
                             </div>
                         </ScrollArea>
@@ -159,8 +168,8 @@ export default function DiagramViewer({
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
                         <PenSquare className="h-4 w-4 mr-2"/> Edit
                     </Button>
-                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplain} disabled={isExplaining}>
-                         {isExplaining ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <FileText className="h-4 w-4 mr-2"/>} Explain
+                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('explanation')} disabled={isExplaining}>
+                         {isExplaining && viewMode !== 'explanation' ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <FileText className="h-4 w-4 mr-2"/>} Explain
                     </Button>
                 </div>
                  <div className="flex items-center gap-1">
