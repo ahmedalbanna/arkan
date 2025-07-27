@@ -109,7 +109,7 @@ export function CreateUserDialog() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Name</FormLabel>
-                        <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
+                        <FormControl><Input id="name" {...field} disabled={mutation.isPending} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -120,7 +120,7 @@ export function CreateUserDialog() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Email</FormLabel>
-                        <FormControl><Input type="email" {...field} disabled={mutation.isPending} /></FormControl>
+                        <FormControl><Input id="email" type="email" {...field} disabled={mutation.isPending} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -131,7 +131,7 @@ export function CreateUserDialog() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Password</FormLabel>
-                        <FormControl><Input type="password" {...field} disabled={mutation.isPending} /></FormControl>
+                        <FormControl><Input id="password" type="password" {...field} disabled={mutation.isPending} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
@@ -142,9 +142,9 @@ export function CreateUserDialog() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={mutation.isPending}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} name={field.name} disabled={mutation.isPending}>
                             <FormControl>
-                                <SelectTrigger><SelectValue placeholder="Select a role" /></SelectTrigger>
+                                <SelectTrigger id="role"><SelectValue placeholder="Select a role" /></SelectTrigger>
                             </FormControl>
                             <SelectContent>
                                 <SelectItem value="user">User</SelectItem>
@@ -161,7 +161,7 @@ export function CreateUserDialog() {
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Credits</FormLabel>
-                        <FormControl><Input type="number" {...field} disabled={mutation.isPending} /></FormControl>
+                        <FormControl><Input id="credits" type="number" {...field} disabled={mutation.isPending} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )}

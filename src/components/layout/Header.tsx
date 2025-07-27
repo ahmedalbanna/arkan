@@ -92,9 +92,8 @@ export function Header() {
         <div className="md:hidden">
           <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" aria-label={isClient ? t('header.openMenu') : 'Open Menu'}>
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm flex flex-col">
@@ -152,7 +151,7 @@ export function Header() {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="Toggle user menu">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
