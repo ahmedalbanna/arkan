@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
+import React from 'react';
 
 // --- Type Definition ---
 interface AppSettings {
@@ -68,6 +69,21 @@ export default function AdminSettingsPage() {
     },
     enabled: !!firebaseUser,
   });
+  
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: { // Set default values to avoid uncontrolled inputs
+        newUserCredits: 0,
+    }
+  });
+
+  // Use useEffect to reset the form when the data is fetched
+  React.useEffect(() => {
+    if (settings) {
+      form.reset(settings);
+    }
+  }, [settings, form]);
+
 
   const mutation = useMutation({
     mutationFn: updateSettings,
@@ -80,10 +96,6 @@ export default function AdminSettingsPage() {
     }
   });
 
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsSchema),
-    values: settings, // Populate form with fetched data
-  });
 
   const onSubmit = async (data: SettingsFormValues) => {
     const token = await getAuthenticatedToken(firebaseUser);
