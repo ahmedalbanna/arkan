@@ -1,38 +1,32 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUpdateAgent, useDeleteAgent, type UpdateAgentPayload } from '@/hooks/use-agents';
-import { type Agent, AGENTS, AgentPrompt } from '@/lib/agents';
+import { useUpdateAgent } from '@/hooks/use-agents';
+import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Loader2, Save, AlertCircle, ArrowLeft, Trash2, PlusCircle } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import Link from 'next/link';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from './ui/alert-dialog';
-import { useForm, useFieldArray, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from './ui/form';
-
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Tooltip, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface AgentEditorProps {
   agentId: string;
   initialData: Agent;
 }
 
-const agentGuidelineSchema = z.object({
-  text: z.string().min(1, 'Guideline text cannot be empty.'),
-  isDefault: z.boolean(),
-});
-
 const agentPromptSchema = z.object({
   base: z.string().min(10, "Base prompt must be at least 10 characters."),
-  guidelines: z.array(agentGuidelineSchema).optional(),
 });
 
 const agentEditorSchema = z.object({
@@ -45,12 +39,27 @@ const agentEditorSchema = z.object({
 
 type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
+const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
+  <Button
+    variant="ghost"
+    onClick={onClick}
+    className={cn(
+      'w-full justify-start',
+      isActive && 'bg-accent text-accent-foreground'
+    )}
+  >
+    <Icon className="mr-2 h-4 w-4" />
+    {label}
+  </Button>
+);
+
 export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
   const { t } = useLocalization();
+  const [activeTab, setActiveTab] = useState('general');
+  const [promptLength, setPromptLength] = useState(0);
   
   const updateAgentMutation = useUpdateAgent();
-  const deleteAgentMutation = useDeleteAgent();
 
   const form = useForm<AgentEditorFormValues>({
       resolver: zodResolver(agentEditorSchema),
@@ -60,180 +69,164 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       }
   });
 
-  const { fields, append, remove } = useFieldArray({
-      control: form.control,
-      name: "prompt.guidelines"
-  });
+  const promptValue = form.watch('prompt');
+  const isComplexPrompt = typeof promptValue === 'object';
 
-  // Find the static agent config to get the non-configurable parts like the icon
-  const staticAgentConfig = AGENTS.find(a => a.id === agentId);
-  const Icon = staticAgentConfig ? staticAgentConfig.icon : AlertCircle;
-  const isDefaultAgent = AGENTS.some(a => a.id === agentId);
+  useEffect(() => {
+    if (isComplexPrompt) {
+      setPromptLength((promptValue as AgentPrompt).base.length);
+    } else {
+      setPromptLength((promptValue as string).length);
+    }
+  }, [promptValue, isComplexPrompt]);
+
 
   useEffect(() => {
     form.reset({
       name: initialData.name,
       prompt: initialData.prompt,
-    })
+    });
   }, [initialData, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    const payload: UpdateAgentPayload = {
-      name: data.name,
-      prompt: data.prompt as any, // Pass the whole prompt object/string
-    };
-    updateAgentMutation.mutate({ agentId, payload }, {
+    updateAgentMutation.mutate({ agentId, payload: data }, {
       onSuccess: () => {
         router.push('/admin/manage-agents');
+        toast({ title: 'Agent Updated', description: `Agent "${data.name}" has been successfully updated.` });
       }
     });
   };
 
-  const handleDelete = () => {
-    deleteAgentMutation.mutate(agentId, {
-        onSuccess: () => {
-            router.push('/admin/manage-agents');
-        }
-    });
-  };
+  const navItems = [
+    { id: 'general', label: 'General', icon: Bot },
+    { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
+    { id: 'tools', label: 'Tools', icon: Wrench },
+    { id: 'commands', label: 'Commands', icon: Terminal },
+    { id: 'share', label: 'Share & Embed', icon: Share2 },
+  ];
 
-  const isComplexPrompt = typeof form.getValues().prompt === 'object' && form.getValues().prompt !== null;
-  const isProcessing = updateAgentMutation.isPending || deleteAgentMutation.isPending;
+  const discoverItems = [
+    { id: 'templates', label: 'Prompt Templates', icon: Library },
+    { id: 'automation', label: 'Automation', icon: BotMessageSquare },
+  ];
 
-  return (
-    <>
-      <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-4">
-              {Icon && <Icon className="w-8 h-8 text-primary" />}
-              <div>
-                <CardTitle className="font-headline">{initialData.name}</CardTitle>
-                <CardDescription>
-                  {t('agentEditor.idLabel')}: {initialData.id} | {t('agentEditor.categoryLabel')}: {initialData.category}
-                </CardDescription>
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'general':
+        return (
+          <div className='space-y-6'>
+            <CardTitle>General</CardTitle>
+            <p className="text-sm text-muted-foreground">Select an image or emoji for your agent, serving as a visual identifier for tasks it manages in project backgrounds.</p>
+            
+            <div>
+              <FormLabel>Avatar</FormLabel>
+              <div className="mt-2 flex items-center gap-4">
+                  <Avatar className='h-16 w-16'>
+                      <AvatarImage src="" />
+                      <AvatarFallback><Bot className='h-8 w-8' /></AvatarFallback>
+                  </Avatar>
+                  <Button type="button" variant="outline">Upload</Button>
               </div>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
+
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl><Input {...field} disabled={updateAgentMutation.isPending} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {isComplexPrompt ? (
               <FormField
                 control={form.control}
-                name="name"
+                name="prompt.base"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('agentEditor.nameLabel')}</FormLabel>
-                    <FormControl><Input {...field} required disabled={isProcessing} /></FormControl>
+                    <FormLabel className='flex justify-between items-center'>
+                      <span>Prompt</span>
+                      <span className='text-xs text-muted-foreground'>{promptLength}/10000</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={10} className="font-mono text-sm" disabled={updateAgentMutation.isPending} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            ) : (
+              <FormField
+                control={form.control}
+                name="prompt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='flex justify-between items-center'>
+                      <span>Prompt</span>
+                      <span className='text-xs text-muted-foreground'>{promptLength}/10000</span>
+                    </FormLabel>
+                    <FormControl><Textarea {...field} value={field.value as string} rows={10} className="font-mono text-sm" disabled={updateAgentMutation.isPending} /></FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+        );
+      default:
+        return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label || discoverItems.find(d => d.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
+    }
+  };
 
-              {isComplexPrompt ? (
-                <>
-                   <FormField
-                    control={form.control}
-                    name="prompt.base"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('agentEditor.basePromptLabel')}</FormLabel>
-                        <FormControl><Textarea {...field} required rows={10} className="font-mono text-sm" disabled={isProcessing} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div>
-                    <Label>Guidelines</Label>
-                    <div className="space-y-2 mt-2">
-                      {fields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-2">
-                           <FormField
-                            control={form.control}
-                            name={`prompt.guidelines.${index}.text`}
-                            render={({ field }) => (
-                              <FormItem className="flex-grow">
-                                <FormControl><Input {...field} disabled={isProcessing} /></FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isProcessing}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button type="button" variant="outline" size="sm" onClick={() => append({ text: '', isDefault: false })} disabled={isProcessing}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add Guideline
-                      </Button>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                 <FormField
-                  control={form.control}
-                  name="prompt"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
-                      <FormControl><Textarea {...field} value={field.value as string} required rows={20} className="font-mono text-sm" disabled={isProcessing} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
+  return (
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left Sidebar */}
+          <div className="col-span-3">
+            <div className="space-y-4">
+              <div className="space-y-1">
+                {navItems.map(item => (
+                  <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                ))}
+              </div>
+              <div>
+                <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
+                <div className="space-y-1">
+                  {discoverItems.map(item => (
+                    <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
 
-          </CardContent>
-          <CardFooter className="justify-between">
-             <Button asChild variant="outline">
-              <Link href="/admin/manage-agents">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Return to Manage Agents
-              </Link>
-            </Button>
-            <Button type="submit" disabled={isProcessing || !form.formState.isDirty} className="font-headline">
-              {updateAgentMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              {t('agentEditor.saveButton')}
-            </Button>
-          </CardFooter>
-        </Card>
-      </form>
-      </FormProvider>
-
-       {!isDefaultAgent && (
-         <div className="mt-8 pt-6 border-t border-destructive/20">
-            <h3 className="text-lg font-semibold text-destructive">{t('editUser.dangerZoneTitle')}</h3>
-            <p className="text-sm text-muted-foreground mt-1 mb-4">
-               Deleting a custom agent is a permanent action and cannot be undone.
-            </p>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                  <Button variant="destructive" type="button" disabled={isProcessing}>
-                      {deleteAgentMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                      Delete Agent
-                  </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the agent "{form.getValues().name}".
-                  </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} disabled={isProcessing}>
-                    {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Delete'}
-                  </AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+          {/* Right Content */}
+          <div className="col-span-9">
+            <div className="p-6">{renderContent()}</div>
+          </div>
         </div>
-      )}
-    </>
+        <CardFooter className="justify-end gap-2 border-t pt-6 mt-8">
+          <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
+          <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button type="button" variant="outline" disabled>Preview</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>Preview is coming soon.</p>
+                </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <Button type="submit" disabled={updateAgentMutation.isPending}>
+            {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Update
+          </Button>
+        </CardFooter>
+      </form>
+    </FormProvider>
   );
 }
