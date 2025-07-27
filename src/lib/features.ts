@@ -15,4 +15,5 @@ export const defaultFeatures: Feature[] = [
     { id: 'presentation', name: 'Presentation Generator', description: 'Allows users to generate PPTX presentations.', isEnabled: true },
     { id: 'chat', name: 'AI Project Chat', description: 'Enables the interactive AI chat for refining projects.', isEnabled: true },
     { id: 'codebase', name: 'Codebase Scaffolding', description: 'Allows the AI to generate a boilerplate codebase from a proposal.', isEnabled: true },
+    { id: 'academic', name: 'Academic Solver', description: 'Enables the academic document analysis and solving tools.', isEnabled: true },
 ];

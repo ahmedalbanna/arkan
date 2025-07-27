@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, Package } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, Package, BookCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -59,6 +59,10 @@ const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/Pro
 const CodebaseGenerator = dynamic(() => import('@/components/codebase-generator/CodebaseGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
+});
+const AcademicSolver = dynamic(() => import('@/components/academic-solver/AcademicSolver'), {
+    ssr: false,
+    loading: () => <LoadingSkeleton />,
 });
 
 
@@ -143,6 +147,7 @@ function GeneratePageContent() {
       { id: 'codebase', enabled: isFeatureEnabled('codebase') },
       { id: 'code', enabled: isFeatureEnabled('code') },
       { id: 'presentation', enabled: isFeatureEnabled('presentation') },
+      { id: 'academic', enabled: isFeatureEnabled('academic') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
 
 
@@ -167,7 +172,7 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-7">
+                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-8">
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
@@ -203,6 +208,11 @@ function GeneratePageContent() {
                                 <Presentation className="h-4 w-4" /> {t('builder.tabs.presentation')}
                             </TabsTrigger>
                         )}
+                        {isFeatureEnabled('academic') && (
+                             <TabsTrigger value="academic" className="gap-2">
+                                <BookCheck className="h-4 w-4" /> {t('header.academicSolver')}
+                            </TabsTrigger>
+                        )}
                     </TabsList>
 
                     <div className="w-full flex-grow mt-4">
@@ -226,6 +236,9 @@ function GeneratePageContent() {
                         </TabsContent>
                         <TabsContent value="presentation" className="h-full">
                             {activeTab === 'presentation' && <PresentationGenerator />}
+                        </TabsContent>
+                         <TabsContent value="academic" className="h-full">
+                            {activeTab === 'academic' && <AcademicSolver />}
                         </TabsContent>
                     </div>
                  </Tabs>

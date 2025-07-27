@@ -48,7 +48,7 @@ const fontCairo = Cairo({
 })
 
 // List of public paths that do not require authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password'];
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design'];
 
 // This function runs on the server for every request
 async function checkAuth(pathname: string, sessionCookieValue: string | undefined) {
