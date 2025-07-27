@@ -1,7 +1,7 @@
 
 'use client';
 
-import PptxTemplateManager from '@/components/PptxTemplateManager';
+import PptxTemplateManager from '@/components/admin/PptxTemplateManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { FileImage } from 'lucide-react';
 

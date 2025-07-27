@@ -1,17 +1,15 @@
 
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentPrompt } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle } from 'lucide-react';
-import { useLocalization } from '@/context/LocalizationContext';
-import Link from 'next/link';
+import { CardFooter } from '@/components/ui/card';
+import { Loader2, Save, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare } from 'lucide-react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,6 +21,9 @@ import KnowledgeTab from './admin/agent-editor/KnowledgeTab';
 import ToolsTab from './admin/agent-editor/ToolsTab';
 import CommandsTab from './admin/agent-editor/CommandsTab';
 import ShareEmbedTab from './admin/agent-editor/ShareEmbedTab';
+import { PromptTemplateLibrary } from './admin/agent-editor/PromptTemplateLibrary';
+import AutomationTab from './admin/agent-editor/AutomationTab';
+import { Card, CardContent, CardTitle, CardDescription } from './ui/card';
 
 interface AgentEditorProps {
   agentId: string;
@@ -45,6 +46,7 @@ type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
 const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
   <Button
+    type="button"
     variant="ghost"
     onClick={onClick}
     className={cn(
@@ -59,7 +61,6 @@ const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.Element
 
 export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
-  const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
   const [promptLength, setPromptLength] = useState(0);
   
@@ -93,12 +94,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   }, [initialData, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    updateAgentMutation.mutate({ agentId, payload: data }, {
-      onSuccess: () => {
-        router.push('/admin/manage-agents');
-        toast({ title: 'Agent Updated', description: `Agent "${data.name}" has been successfully updated.` });
-      }
-    });
+    updateAgentMutation.mutate({ agentId, payload: data });
   };
 
   const navItems = [
@@ -188,6 +184,10 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <CommandsTab />;
       case 'share':
         return <ShareEmbedTab />;
+       case 'automation':
+        return <AutomationTab />;
+       case 'templates':
+        return <PromptTemplateLibrary />
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label || discoverItems.find(d => d.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }
@@ -195,50 +195,52 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <div className="grid grid-cols-12 gap-8">
-          {/* Left Sidebar */}
-          <div className="col-span-3">
-            <div className="space-y-4">
-              <div className="space-y-1">
-                {navItems.map(item => (
-                  <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
-                ))}
-              </div>
-              <div>
-                <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
-                <div className="space-y-1">
-                  {discoverItems.map(item => (
-                    <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
-                  ))}
+      <Card>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-12 gap-8">
+              <div className="col-span-3 border-r p-4">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    {navItems.map(item => (
+                      <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                    ))}
+                  </div>
+                  <div>
+                    <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
+                    <div className="space-y-1">
+                      {discoverItems.map(item => (
+                        <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Right Content */}
-          <div className="col-span-9">
-            <div className="p-6">{renderContent()}</div>
-          </div>
-        </div>
-        <CardFooter className="justify-end gap-2 border-t pt-6 mt-8">
-          <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
-          <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button type="button" variant="outline" disabled>Preview</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Preview is coming soon.</p>
-                </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <Button type="submit" disabled={updateAgentMutation.isPending}>
-            {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update
-          </Button>
-        </CardFooter>
-      </form>
+              <div className="col-span-9">
+                <div className="p-6 min-h-[500px]">{renderContent()}</div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="justify-end gap-2 border-t pt-6 mt-0">
+            <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
+            <TooltipProvider>
+              <Tooltip>
+                  <TooltipTrigger asChild>
+                      <Button type="button" variant="outline" disabled>Preview</Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                      <p>Preview is coming soon.</p>
+                  </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Button type="submit" disabled={updateAgentMutation.isPending}>
+              {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </FormProvider>
   );
 }

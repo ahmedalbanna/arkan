@@ -3,10 +3,10 @@
 
 import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AlertCircle, Bot, Pencil } from 'lucide-react';
+import { AlertCircle, Bot } from 'lucide-react';
 import React, { use } from 'react';
 import { useAgent } from '@/hooks/use-agents';
-import { Card, CardContent, CardFooter, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 
@@ -23,24 +23,20 @@ function EditAgentPageSkeleton() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0">
         <div className="grid grid-cols-12 gap-8">
-          <div className="col-span-3 space-y-2">
+          <div className="col-span-3 border-r p-4 space-y-2">
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
             <Skeleton className="h-8 w-full" />
           </div>
-          <div className="col-span-9 space-y-4">
+          <div className="col-span-9 p-6 space-y-4">
             <Skeleton className="h-8 w-32" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-32 w-full" />
           </div>
         </div>
       </CardContent>
-      <CardFooter className="justify-end">
-        <Skeleton className="h-10 w-24" />
-        <Skeleton className="h-10 w-24" />
-      </CardFooter>
     </Card>
   );
 }
@@ -74,23 +70,19 @@ export default function EditAgentPage({ params: paramsPromise }: { params: Promi
   }
 
   return (
-    <Card>
-        <CardHeader>
-            <div className="flex justify-between items-center">
-                 <div className="flex items-center gap-2">
-                     <Bot className="h-6 w-6" />
-                     <h1 className="text-xl font-semibold">{`Edit Agent: ${agent.name}`}</h1>
-                 </div>
-                 <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" disabled>Edit</Button>
-                    <Button variant="outline" size="sm" disabled>Chat</Button>
-                    <Button variant="outline" size="sm" disabled>Share</Button>
-                 </div>
-            </div>
-        </CardHeader>
-        <CardContent>
-             <AgentEditor agentId={params.id} initialData={agent} />
-        </CardContent>
-    </Card>
+    <div>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+            <Bot className="h-6 w-6" />
+            <h1 className="text-xl font-semibold">{agent.name}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+           <Button variant="outline" size="sm" disabled>Edit</Button>
+           <Button variant="outline" size="sm" disabled>Chat</Button>
+           <Button variant="outline" size="sm" disabled>Share</Button>
+        </div>
+      </div>
+      <AgentEditor agentId={params.id} initialData={agent} />
+    </div>
   );
 }

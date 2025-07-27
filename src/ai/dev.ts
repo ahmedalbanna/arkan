@@ -1,3 +1,4 @@
+
 'use server';
 
 import { config } from 'dotenv';
@@ -23,6 +24,7 @@ import '@/ai/flows/image-to-text.ts';
 import '@/ai/flows/generate-project-plan.ts';
 import '@/ai/flows/project-chat.ts';
 import '@/ai/flows/generate-codebase.ts';
+import '@/ai/flows/academic-solver.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';

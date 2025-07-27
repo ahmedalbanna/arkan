@@ -6,37 +6,32 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ChatSession } from '@/components/chat/ChatList';
 import { format } from 'date-fns';
 
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  isToolResponse?: boolean;
+}
+
 interface ChatState {
   chats: ChatSession[];
   selectedChat: ChatSession | null;
   input: string;
+  messages: ChatMessage[];
 }
 
 interface ChatActions {
-  addMessage: (chatId: string, message: ChatMessage) => void;
+  addMessage: (message: ChatMessage) => void;
+  updateLastMessage: (contentChunk: string, isTool?: boolean) => void;
   setInput: (input: string) => void;
   createNewChat: () => void;
   setSelectedChat: (chat: ChatSession | null) => void;
 }
 
-interface ChatMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-
 const getInitialState = (): ChatState => ({
-  chats: [
-     {
-      id: '1',
-      title: 'Appendices',
-      lastMessage: 'Hi there! How can I assist you today?',
-      timestamp: new Date('2025-07-27T11:03:00'),
-      messages: [{ role: 'assistant', content: 'Hi there! How can I assist you today?' }]
-    }
-  ],
+  chats: [],
   selectedChat: null,
   input: '',
+  messages: [],
 });
 
 
@@ -56,32 +51,41 @@ export const useChatStore = create<ChatState & ChatActions>()(
         set(state => ({
           chats: [newChat, ...state.chats],
           selectedChat: newChat,
+          messages: newChat.messages, // Set messages for the new chat
         }));
       },
 
-      setSelectedChat: (chat) => set({ selectedChat: chat }),
-
-      addMessage: (chatId, message) =>
-        set(state => {
-          const updatedChats = state.chats.map(chat => {
-            if (chat.id === chatId) {
-              return {
-                ...chat,
-                messages: [...chat.messages, message],
-                lastMessage: message.content,
-                timestamp: new Date(),
-              };
+      setSelectedChat: (chat) => {
+        set({ selectedChat: chat, messages: chat ? chat.messages : [] });
+      },
+      
+      addMessage: (message) => {
+        set((state) => ({ messages: [...state.messages, message] }));
+      },
+      
+      updateLastMessage: (contentChunk, isTool = false) => {
+        set((state) => {
+            const newMessages = [...state.messages];
+            const lastMessage = newMessages[newMessages.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+                // If it's the first chunk, just set it. Otherwise, append.
+                if (lastMessage.content === '') {
+                     lastMessage.content = contentChunk;
+                } else {
+                     lastMessage.content += contentChunk;
+                }
+                lastMessage.isToolResponse = isTool;
+                return { messages: newMessages };
             }
-            return chat;
-          });
-          return { chats: updatedChats };
-        }),
+            return { messages: [...newMessages, { role: 'assistant', content: contentChunk, isToolResponse: isTool }] };
+        });
+      },
         
       setInput: (input) => set({ input }),
 
     }),
     {
-      name: 'arkan-chat-store-v2', // new name to avoid conflicts
+      name: 'arkan-chat-store-v3', // new name to avoid conflicts
       storage: createJSONStorage(() => sessionStorage), 
     }
   )

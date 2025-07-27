@@ -1,13 +1,13 @@
 
 'use client';
 
-import { usePptxStyles, useCreatePptxTemplate, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
+import { usePptxStyles, useCreatePptxTemplate, useDeletePptxTemplate, useRefreshTemplateImage } from '@/hooks/use-templates';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
-import type { PptxTemplateKey, PptxStyleOptions } from '@/lib/pptx-styles';
+import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
+import type { PptxTemplateKey, PptxStyleOptions, PptxTemplate } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -20,6 +20,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
+import Image from 'next/image';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
@@ -154,6 +155,7 @@ function PptxTemplatePreview({ styles }: { styles: PptxStyleOptions }) {
 export default function PptxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
   const deleteMutation = useDeletePptxTemplate();
+  const refreshImageMutation = useRefreshTemplateImage('pptx');
   const { t } = useLocalization();
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
@@ -167,6 +169,10 @@ export default function PptxTemplateManager() {
   const handleDelete = (key: PptxTemplateKey) => {
     deleteMutation.mutate(key);
   }
+  
+  const handleRefreshImage = (templateId: string, prompt: string) => {
+    refreshImageMutation.mutate({ templateType: 'pptx', templateId, prompt });
+  };
 
   if (!isLoaded) {
     return (
@@ -224,7 +230,22 @@ export default function PptxTemplateManager() {
                     </div>
                 </CardHeader>
                 <CardContent className="flex-grow space-y-4">
-                <PptxTemplatePreview styles={styles} />
+                <div className="relative group">
+                    <PptxTemplatePreview styles={styles} />
+                     <Button
+                        size="icon"
+                        variant="secondary"
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRefreshImage(template.id, template.dataAiHint)}
+                        disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id}
+                      >
+                         {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                    </Button>
+                </div>
                 <Accordion type="multiple" className="w-full" defaultValue={['general']}>
                     <AccordionItem value="general">
                     <AccordionTrigger>{t('pptxTemplates.generalStyles')}</AccordionTrigger>
@@ -295,9 +316,9 @@ export default function PptxTemplateManager() {
                     <AccordionContent className="space-y-4">
                         <div className="space-y-2">
                             <Label>{t('pptxTemplates.fontFamily')}</Label>
-                            <Select
-                            value={styles.body.fontFace}
-                            onValueChange={(value) => handleStyleChange(key, 'body.fontFace', value)}
+                             <Select
+                              value={styles.body.fontFace}
+                              onValueChange={(value) => handleStyleChange(key, 'body.fontFace', value)}
                             >
                                 <SelectTrigger><SelectValue/></SelectTrigger>
                                 <SelectContent>
@@ -305,42 +326,42 @@ export default function PptxTemplateManager() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2">
-                            <Label>{t('pptxTemplates.fontSize')}</Label>
-                            <Input
-                            type="number"
-                            value={styles.body.fontSize}
-                            onChange={(e) => handleStyleChange(key, 'body.fontSize', Number(e.target.value))}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                        <Label>{t('pptxTemplates.fontColor')}</Label>
-                        <div className="flex items-center gap-2">
-                            <Input
-                            type="color"
-                            value={`#${styles.body.color}`}
-                            onChange={(e) => handleStyleChange(key, 'body.color', e.target.value.substring(1))}
-                            className="w-10 h-10 p-1"
-                            />
-                            <Input
-                            type="text"
-                            value={styles.body.color}
-                            onChange={(e) => handleStyleChange(key, 'body.color', e.target.value)}
-                            placeholder="e.g., 4f4f4f"
-                            />
-                        </div>
-                        </div>
-                    </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-                </CardContent>
-                <CardFooter>
-                <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
-                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                    {t('pptxTemplates.saveButton')}
-                </Button>
-                </CardFooter>
-            </Card>
+                       <div className="space-y-2">
+                        <Label>{t('pptxTemplates.fontSize')}</Label>
+                        <Input
+                          type="number"
+                          value={styles.body.fontSize}
+                          onChange={(e) => handleStyleChange(key, 'body.fontSize', Number(e.target.value))}
+                        />
+                      </div>
+                    <div className="space-y-2">
+                      <Label>{t('pptxTemplates.fontColor')}</Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="color"
+                          value={`#${styles.body.color}`}
+                          onChange={(e) => handleStyleChange(key, 'body.color', e.target.value.substring(1))}
+                          className="w-10 h-10 p-1"
+                        />
+                         <Input
+                          type="text"
+                          value={styles.body.color}
+                          onChange={(e) => handleStyleChange(key, 'body.color', e.target.value)}
+                          placeholder="e.g., 4f4f4f"
+                        />
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {t('pptxTemplates.saveButton')}
+              </Button>
+            </CardFooter>
+          </Card>
             );
         })}
         </div>

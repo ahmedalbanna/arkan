@@ -1,153 +1,158 @@
 
-// code explantion in docs/hooks/use-docx-styles.md
-
-"use client";
+'use client';
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Template, TemplateKey } from "@/lib/docx-styles";
-import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { createDocxTemplate, deleteDocxTemplate, fetchDocxTemplates, updateDocxTemplate as updateDocxTemplateApi } from "@/services/template-service";
+import {
+  fetchDocxTemplates,
+  updateDocxTemplate,
+  createDocxTemplate,
+  deleteDocxTemplate,
+  refreshTemplateImage,
+  type DocxTemplate,
+} from "@/services/template-service";
+import type { IStylesOptions } from 'docx';
 
-const DOCX_TEMPLATES_QUERY_KEY = "docx-templates";
+export const docxTemplateKeys = {
+  all: ["docx-templates"] as const,
+  lists: () => [...docxTemplateKeys.all, "list"] as const,
+  detail: (id: string) => [...docxTemplateKeys.all, "detail", id] as const,
+};
 
-// Define types for mutation variables
-interface UpdateDocxTemplateVariables {
-  key: TemplateKey;
-  styles: any;
-}
-
-interface CreateDocxTemplateVariables {
-    id: string;
-    name: string;
-    description: string;
-}
-
-
-// --- Custom Hooks ---
 
 export function useDocxStyles() {
-  const { data: templates, isLoading: isLoaded } = useQuery<
-    Record<TemplateKey, Template>
-  >({
-    queryKey: [DOCX_TEMPLATES_QUERY_KEY],
-    queryFn: fetchDocxTemplates,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    refetchOnWindowFocus: false,
-    meta: {
-      // Add this meta property
-      onError: (error: Error) => {
-        handleErrorUtility(error, "Failed to fetch DOCX templates");
-      },
-    },
-  });
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+    const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
-  const queryClient = useQueryClient();
-  const { firebaseUser } = useAuth();
-
-  const mutation = useMutation<any, Error, UpdateDocxTemplateVariables>({
-    mutationFn: async (variables) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return updateDocxTemplateApi(variables, token);
-    },
-    onSuccess: (data, variables) => {
-      queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          [variables.key]: { ...oldData[variables.key], styles: data.styles },
-        };
-      });
-      toast({
-        title: "Template Saved",
-        description: `Your changes to the "${data.name}" template have been saved.`,
-      });
-    },
-    onError: (error: Error) => {
-      handleErrorUtility(error, "Update DOCX Template Failed");
-    },
-  });
-
-  const updateStyle = (
-    templateKey: TemplateKey,
-    path: string,
-    value: string | number | boolean
-  ) => {
-    queryClient.setQueryData([DOCX_TEMPLATES_QUERY_KEY], (oldData: any) => {
-      if (!oldData) return oldData;
-      const newTemplates = JSON.parse(JSON.stringify(oldData));
-      const templateToUpdate = newTemplates[templateKey];
-
-      const keys = path.split(".");
-      let current = templateToUpdate.styles.default;
-      for (let i = 0; i < keys.length - 1; i++) {
-        const key = keys[i];
-        if (typeof current[key] === "undefined") {
-          current[key] = {};
-        }
-        current = current[key];
-      }
-      current[keys[keys.length - 1]] = value;
-
-      return newTemplates;
+    const { data: templates, isLoading, isError } = useQuery<Record<string, DocxTemplate>>({
+        queryKey: docxTemplateKeys.lists(),
+        queryFn: fetchDocxTemplates,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        meta: {
+            onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
+        },
     });
-  };
 
-  const saveChanges = (templateKey: TemplateKey) => {
-    if (templates) {
-      mutation.mutate({
-        key: templateKey,
-        styles: templates[templateKey].styles,
-      });
-    }
-  };
+    const updateMutation = useMutation({
+        mutationFn: async (variables: { key: string, styles: IStylesOptions }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return updateDocxTemplate(variables, token);
+        },
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
+            toast({ title: "Template Saved", description: `Template "${variables.key}" has been updated.` });
+            setLocalChanges(prev => {
+                const newChanges = { ...prev };
+                delete newChanges[variables.key];
+                return newChanges;
+            });
+        },
+        onError: (error) => {
+            handleErrorUtility(error, "Failed to save template");
+        }
+    });
 
-  return {
-    templates,
-    isLoaded: !isLoaded,
-    updateStyle,
-    saveChanges,
-    isSaving: mutation.isPending,
-  };
+    const updateStyle = (templateKey: string, path: string, value: any) => {
+        setLocalChanges(prev => {
+            const newStyles = JSON.parse(JSON.stringify(prev[templateKey] || templates?.[templateKey]?.styles || {}));
+            
+            let current = newStyles;
+            const keys = path.split('.');
+            for (let i = 0; i < keys.length - 1; i++) {
+                if (!current[keys[i]]) current[keys[i]] = {};
+                current = current[keys[i]];
+            }
+            current[keys[keys.length - 1]] = value;
+
+            return { ...prev, [templateKey]: newStyles };
+        });
+    };
+    
+    const saveChanges = (key: string) => {
+        if (localChanges[key]) {
+            updateMutation.mutate({ key, styles: localChanges[key] });
+        }
+    };
+    
+    const combinedTemplates = React.useMemo(() => {
+        if (!templates) return {};
+        const combined = { ...templates };
+        for (const key in localChanges) {
+            if (combined[key]) {
+                combined[key] = { ...combined[key], styles: localChanges[key] };
+            }
+        }
+        return combined;
+    }, [templates, localChanges]);
+
+
+    return { 
+        templates: combinedTemplates, 
+        isLoaded: !isLoading, 
+        isSaving: updateMutation.isPending,
+        updateStyle,
+        saveChanges
+    };
 }
 
 export function useCreateDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-
-    return useMutation<Template, Error, CreateDocxTemplateVariables>({
-        mutationFn: async (variables) => {
+    return useMutation({
+        mutationFn: async (data: {id: string, name: string, description: string}) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return createDocxTemplate(variables, token);
+            return createDocxTemplate(data, token);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [DOCX_TEMPLATES_QUERY_KEY] });
-            toast({ title: 'Success', description: 'New DOCX template created.' });
+            queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
         },
-        onError: (error: Error) => {
-            handleErrorUtility(error, "Create DOCX Template Failed");
-            throw error; // Re-throw to be caught by form
-        },
+        onError: (error: any) => {
+            // Re-throw for form handling
+            throw error;
+        }
     });
 }
 
 export function useDeleteDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-
-    return useMutation<any, Error, TemplateKey>({
-        mutationFn: async (templateKey) => {
+    return useMutation({
+        mutationFn: async (templateKey: string) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return deleteDocxTemplate(templateKey, token);
         },
         onSuccess: (data, templateKey) => {
-            queryClient.invalidateQueries({ queryKey: [DOCX_TEMPLATES_QUERY_KEY] });
+            queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
             toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
         },
         onError: (error: Error) => {
-            handleErrorUtility(error, "Delete Template Failed");
+            handleErrorUtility(error, "Failed to delete template");
+        }
+    });
+}
+
+export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
+    const queryClient = useQueryClient();
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (variables: { templateId: string; prompt: string }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return refreshTemplateImage({ ...variables, templateType }, token);
+        },
+        onSuccess: () => {
+            if (templateType === 'docx') {
+                queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
+            }
+            // Add similar logic for pptx if needed
+            toast({ title: 'Success', description: 'Template image has been refreshed.' });
+        },
+        onError: (error) => {
+            handleErrorUtility(error, 'Image Refresh Failed');
         },
     });
 }
