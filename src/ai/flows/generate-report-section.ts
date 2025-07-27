@@ -24,7 +24,7 @@ const GenerateSectionInputSchema = z.object({
   otherDiagrams: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF) to use as additional context."),
+  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF of a similar report) to use as a primary reference for style, tone, and structure."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
 });
@@ -75,7 +75,8 @@ CRITICAL: Your final output must be a JSON object where the 'sectionName' field 
 
 --- Context from Project ---
 {{#if externalContextContent}}
---- ADDITIONAL EXTERNAL CONTEXT ---
+--- IMPORTANT EXTERNAL CONTEXT / EXAMPLE ---
+You MUST heavily reference the following content for style, tone, and structure.
 {{{externalContextContent}}}
 ---
 {{/if}}

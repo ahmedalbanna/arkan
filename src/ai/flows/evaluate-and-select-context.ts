@@ -14,7 +14,7 @@ import { AGENTS, type AgentPrompt } from '@/lib/agents';
 
 // Define the input schema for the context evaluation flow
 const EvaluateContextInputSchema = z.object({
-  proposal: ProjectProposalSchema.describe("The original project proposal."),
+  proposal: ProjectProposalSchema.optional().describe("The original project proposal."),
   projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   existingSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
@@ -23,6 +23,7 @@ const EvaluateContextInputSchema = z.object({
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
   sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
+  externalContextContent: z.string().optional().describe("Content from an external document (e.g., a PDF of a similar report) to use as a style and content guide."),
 });
 export type EvaluateContextInput = z.infer<typeof EvaluateContextInputSchema>;
 
@@ -76,7 +77,7 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     name: 'evaluateAndSelectContextPrompt',
     input: { schema: EvaluateContextInputSchema },
     output: { schema: EvaluateContextOutputSchema },
-    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state (proposal, project plan, existing sections, diagrams) and create an optimal generation plan for a list of target sections.
+    prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state (proposal, project plan, existing sections, diagrams, and external context) and create an optimal generation plan for a list of target sections.
 
 For each target section in the \`sectionsToGenerate\` list, you must determine the best configuration for its generation.
 
@@ -87,14 +88,15 @@ For each target section in the \`sectionsToGenerate\` list, you must determine t
     *   Analyze the \`projectPlan\` to understand the breakdown of tasks and phases.
     *   Read through all \`existingSections\` to understand what has already been written.
     *   Analyze any \`existingDiagrams\` to understand the system structure.
+    *   **Crucially, review the \`externalContextContent\`. This content (e.g., from an uploaded similar report) should be treated as a primary example for style, tone, and structure.**
 
 2.  **Consult Agent Capabilities:**
     *   For each target section, I will provide you with the AI agent's "Base Prompt" and its "Available Guidelines". Use this to understand what the agent is designed to do.
 
 3.  **Determine Optimal Configuration for EACH Target Section:**
-    *   **Context Selection**: From the list of \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent write its target section. The proposal and project plan are always available, so you only need to select which *other* generated items are relevant. Less is more; only select context that is directly useful.
+    *   **Context Selection**: From the list of \`existingSections\` and \`existingDiagrams\`, choose ONLY the most relevant items that will help the agent write its target section. The proposal, project plan, and external context are always available, so you only need to select which *other* generated items are relevant. Less is more; only select context that is directly useful.
     *   **Guideline Selection**: From the "Available Guidelines" for that agent, select the ones that are most appropriate given the project proposal. You can also CREATE NEW, specific guidelines if you believe they will improve the output.
-    *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` for the section based on the project's nature.
+    *   **Instruction Selection**: Choose the best \`tone\` and \`formality\` for the section based on the project's nature and the style of the external context.
 
 **CRITICAL INSTRUCTIONS:**
 - Your final output must be a JSON object that strictly adheres to the provided schema.
@@ -103,9 +105,14 @@ For each target section in the \`sectionsToGenerate\` list, you must determine t
 --- AVAILABLE PROJECT DATA ---
 
 **Project Proposal:**
+{{#if proposal}}
 \`\`\`json
 ${JSON.stringify(proposal, null, 2)}
 \`\`\`
+{{else}}
+(No project proposal has been generated yet)
+{{/if}}
+
 
 **Project Plan:**
 {{#if projectPlan}}
@@ -137,6 +144,14 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 {{else}}
 (No diagrams have been generated yet)
 {{/if}}
+
+**External Context / Examples:**
+{{#if externalContextContent}}
+{{{externalContextContent}}}
+{{else}}
+(No external context provided.)
+{{/if}}
+
 
 --- AGENT CAPABILITIES FOR REFERENCE ---
 ${agentDetailsContext}

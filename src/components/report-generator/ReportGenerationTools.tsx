@@ -154,7 +154,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
 
     const isAnythingGenerating = reportGenerationMutation.isPending;
-    const isDisabled = isAnythingGenerating;
+    const isDisabled = isAnythingGenerating || isTranslating;
         
     const onGenerateSection = async (section: SectionName) => {
         if (!firebaseUser) {
@@ -173,6 +173,12 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
         
         const selectedExternalContexts = externalContext.filter((_, index) => selection.externalContext[index]);
+
+        const hasContext = !!proposal || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
+        if (!hasContext) {
+            toast({ title: "No Context Provided", description: "Please generate a proposal or upload a document to provide context for generation.", variant: "destructive" });
+            return;
+        }
 
 
         const body = {
@@ -201,6 +207,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+            externalContextContent: externalContext.map(c => c.content).join('\n\n---\n\n'),
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportGenerationMutation.mutate({ body, token });
@@ -216,6 +223,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const fullReportCreditCost = sectionsToGenerate.length;
     const hasEnoughCreditsForFullReport = userProfile ? userProfile.credits >= fullReportCreditCost : false;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
+    const canGenerateFullReport = (!!proposal || externalContext.length > 0) && hasEnoughCreditsForFullReport && fullReportCreditCost > 0 && !isAnythingGenerating;
+
 
     if (!agentsLoaded) {
         return (
@@ -267,7 +276,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         <Button 
                                             onClick={onGenerateFullReport} 
                                             className="w-full mb-4 font-headline" 
-                                            disabled={!proposal || !hasEnoughCreditsForFullReport || fullReportCreditCost === 0 || isAnythingGenerating}
+                                            disabled={!canGenerateFullReport}
                                         >
                                             {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                             {fullReportCreditCost > 0 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
@@ -277,6 +286,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 {!hasEnoughCreditsForFullReport && (
                                     <TooltipContent>
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
+                                    </TooltipContent>
+                                )}
+                                 {!(!!proposal || externalContext.length > 0) && (
+                                    <TooltipContent>
+                                        <p>Please create a proposal or add external context first.</p>
                                     </TooltipContent>
                                 )}
                             </Tooltip>
@@ -292,7 +306,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                                const hasSelectedContext = currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || currentSelection.externalContext.some(v => v);
+                                const hasSelectedContext = !!proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || externalContext.length > 0;
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -396,7 +410,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         <div className="space-y-4 pr-4">
                                                             <div className="space-y-2">
                                                                 <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-                                                                <div className="flex items-center space-x-2">
+                                                                  <div className="flex items-center space-x-2">
                                                                     <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
                                                                     <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
                                                                 </div>
@@ -483,11 +497,15 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                 </Button>
                                                             </div>
                                                         </TooltipTrigger>
-                                                        {!hasCreditsForSingleSection && (
+                                                        {!hasCreditsForSingleSection ? (
                                                             <TooltipContent>
                                                                 <p>{t('builder.toasts.insufficientCredits')}</p>
                                                             </TooltipContent>
-                                                        )}
+                                                        ) : !hasSelectedContext ? (
+                                                            <TooltipContent>
+                                                                 <p>Please select a context (like the proposal) to generate this section.</p>
+                                                            </TooltipContent>
+                                                        ) : null}
                                                     </Tooltip>
                                                 </TooltipProvider>
                                             </div>
@@ -505,7 +523,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                     </TabsContent>
                  </Tabs>
                  <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">{t('builder.diagramGenerator.externalContext')}</h3>
+                    <h3 className="text-sm font-semibold mb-2">Add Context / Examples</h3>
+                    <p className="text-xs text-muted-foreground mb-2">
+                        Provide existing documents or reports as examples. The AI will learn from their style, tone, and structure to improve accuracy.
+                    </p>
                     <Tabs defaultValue="file" className="w-full">
                          <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
