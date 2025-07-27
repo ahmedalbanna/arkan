@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -94,6 +95,34 @@ interface GenerationToolsProps {
     isTranslating: boolean;
 }
 
+function ToolsSkeleton() {
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+                <CardFooter>
+                    <Skeleton className="h-10 w-full" />
+                </CardFooter>
+            </Card>
+        </div>
+    )
+}
+
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -165,15 +194,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         const token = await firebaseUser.getIdToken();
         const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const otherSections = Object.entries(selection.sections)
-            .filter(([, isSelected]) => isSelected)
-            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+        const otherSections = Object.entries(selection.sections) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
 
-        const otherDiagrams = Object.entries(selection.diagrams)
-            .filter(([, isSelected]) => isSelected)
-            .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+        const otherDiagrams = Object.entries(selection.diagrams) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
         
-        const selectedExternalContexts = externalContext.filter((item, index) => selection.externalContext[index]);
+        const selectedExternalContexts = externalContext ? externalContext.filter((_, index) => selection.externalContext[index]) : [];
         
         const hasContext = !!proposal || !!projectPlan || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
         if (!hasContext) {
@@ -190,7 +215,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             otherDiagrams,
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
-            externalContext: selectedExternalContexts,
+            externalContext: selectedExternalContexts.length > 0 ? selectedExternalContexts : undefined,
             tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
         setActiveMutationKey(section);
@@ -227,18 +252,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
     if (!agentsLoaded) {
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-            </Card>
-        );
+        return <ToolsSkeleton />;
     }
 
     return (
