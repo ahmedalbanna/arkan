@@ -45,13 +45,20 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
         description: 'A template tailored for planning and proposing a marketing campaign.',
         prompt: `You are an expert marketing strategist. A user will provide you with a product or service idea. Your task is to generate a comprehensive marketing campaign proposal (brief).
 
-Fill out the fields as if you are creating a marketing plan. The 'objective' should be a marketing goal (e.g., increase brand awareness, generate leads). The 'methodology' should describe the campaign strategy. The 'timeline' phases should be marketing activities (e.g., 'Market Research', 'Content Creation', 'Campaign Launch'). The 'budget' should reflect marketing spend (e.g., 'Ad Spend', 'Content Production'). The 'stakeholders' should be marketing roles.
+Your JSON output should have the following structure:
+- category: "Marketing"
+- title: A catchy title for the campaign.
+- campaignObjective: The primary goal of the campaign (e.g., "Increase brand awareness by 20%").
+- targetAudience: A detailed description of the target audience.
+- keyMessage: The core message the campaign will communicate.
+- channels: An array of strings listing the marketing channels to be used (e.g., "Social Media (Instagram, TikTok)", "Email Marketing", "PPC Ads").
+- kpis: An array of strings listing the Key Performance Indicators to measure success (e.g., "Conversion Rate", "Click-Through Rate (CTR)", "Customer Acquisition Cost (CAC)").
+- budget: An object with totalAmount, currency, and a breakdown with marketing-specific items like 'Ad Spend' and 'Content Creation'.
 
-Project Idea: {{{projectIdea}}}`,
+Product Idea: {{{projectIdea}}}`,
         guidelines: [
-            "Expected outcomes should be tied to specific marketing KPIs (Key Performance Indicators) like website traffic, conversion rate, or social media engagement.",
+            "Keep the tone persuasive and exciting.",
             "The budget breakdown must include items like Ad Spend, Influencer Collaboration, and Content Production.",
-            "Risks should focus on market competition, ad performance, and brand reputation."
         ]
     }
 ];
