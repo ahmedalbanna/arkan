@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
@@ -6,7 +7,7 @@ import { ActionPanel } from './ActionPanel';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
-import { ChevronRight, Play, Wrench, History, HelpCircle, Bell } from 'lucide-react';
+import { ChevronRight, Play, Wrench, History, HelpCircle, Bell, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 
 function AutomationHeader() {
@@ -48,7 +49,11 @@ export default function AutomationBuilder() {
         <ResizablePanel defaultSize={70}>
             <WorkflowCanvas />
         </ResizablePanel>
-        <ResizableHandle withHandle />
+        <ResizableHandle>
+            <div className="w-2.5 h-full bg-transparent flex items-center justify-center">
+                 <GripVertical className="h-4 w-2.5 text-muted-foreground" />
+            </div>
+        </ResizableHandle>
         <ResizablePanel defaultSize={30} minSize={25} maxSize={35}>
             <ActionPanel />
         </ResizablePanel>
