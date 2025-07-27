@@ -21,11 +21,8 @@ const generateSectionSchema = z.object({
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(), 
   instructionText: z.string().optional(),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-      type: z.enum(['context', 'example'])
-  })).optional(),
+  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
   tableOfContents: z.array(z.string()).optional(),
 });
 
@@ -36,11 +33,8 @@ const generateFullReportSchema = z.object({
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-        type: z.enum(['context', 'example'])
-    })).optional(),
+    exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+    contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
 });
 
 
@@ -60,11 +54,11 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {}, externalContext } = fullReportValidation.data;
+        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {}, exampleFiles, contextFiles } = fullReportValidation.data;
 
-        // A proposal or external context is required to generate a report.
-        if (!proposal && (!externalContext || externalContext.length === 0)) {
-            return NextResponse.json({ message: "A proposal or external context is required to generate a report." }, { status: 400 });
+        // A proposal, plan, or external context is required to generate a report.
+        if (!proposal && !projectPlan && (!exampleFiles || exampleFiles.length === 0) && (!contextFiles || contextFiles.length === 0)) {
+            return NextResponse.json({ message: "A proposal, plan, or external context is required to generate a report." }, { status: 400 });
         }
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
@@ -89,7 +83,7 @@ export async function POST(request: Request) {
         }
         
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate, externalContext };
+        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate, externalContext: [...(exampleFiles || []), ...(contextFiles || [])] };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
@@ -117,10 +111,6 @@ export async function POST(request: Request) {
                 }
                 return acc;
             }, {} as Record<DiagramType, string | undefined>);
-
-            // Separate context files from example files
-            const contextFiles = externalContext?.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
-            const exampleFiles = externalContext?.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
 
 
             const agentInput = {
@@ -150,28 +140,18 @@ export async function POST(request: Request) {
     const singleSectionValidation = generateSectionSchema.safeParse(body);
     if (singleSectionValidation.success) {
         await deductCredit(userId, 1);
-        const { externalContext, ...restOfInput } = singleSectionValidation.data;
+        const agentInput = singleSectionValidation.data;
 
-        // A proposal or external context is required to generate a section.
-        if (!restOfInput.proposal && !restOfInput.projectPlan && (!externalContext || externalContext.length === 0)) {
+        // A proposal, plan, or external context is required to generate a section.
+        if (!agentInput.proposal && !agentInput.projectPlan && (!agentInput.exampleFiles || agentInput.exampleFiles.length === 0) && (!agentInput.contextFiles || agentInput.contextFiles.length === 0)) {
             return NextResponse.json({ message: "A proposal, project plan, or external context is required to generate a report section." }, { status: 400 });
         }
 
-        const agentInfo = sectionConfig[restOfInput.sectionToGenerate];
+        const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
-
-        // Separate context files from example files
-        const contextFiles = externalContext?.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
-        const exampleFiles = externalContext?.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
-
-        const agentInput = {
-            ...restOfInput,
-            contextFiles,
-            exampleFiles,
-        };
         
         const result = await generateReportSection(agentInput);
 

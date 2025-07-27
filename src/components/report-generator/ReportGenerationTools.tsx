@@ -5,7 +5,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +37,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
 
 
 const orderedSections = SectionNameSchema.options;
