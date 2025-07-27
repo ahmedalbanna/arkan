@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, TranslateTextInput, TranslateTextOutput } from '@/ai/schemas';
 export type {
   ProjectProposal,

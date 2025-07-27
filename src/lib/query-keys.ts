@@ -80,4 +80,3 @@ export const homeworkKeys = {
     all: ['homework'] as const,
     history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
 };
-

@@ -23,7 +23,7 @@ export const ProjectStateSchema = z.object({
         fileName: z.string(),
         content: z.string(),
     })).nullable().optional(),
-    teamId: z.string().optional(), // Add teamId to associate project with a team
+    teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
     projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
     academicSolver: z.object({
         stage: z.enum(["idle", "parsing", "analyzing", "readyToSolve", "solving", "solved"]),
