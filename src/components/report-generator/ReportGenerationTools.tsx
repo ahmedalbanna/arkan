@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, CheckCircle, FileSpreadsheet, Image as ImageIcon, GanttChartSquare } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -38,6 +38,7 @@ import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -103,6 +104,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
     const { proposal } = useBuilderStore();
+    const { projectPlan } = useProjectPlanStore();
     const { diagrams } = useDiagramStore();
 
     const {
@@ -161,7 +163,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         };
 
         const token = await firebaseUser.getIdToken();
-        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const otherSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
@@ -175,6 +177,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         const body = {
             proposal: selection.proposal ? proposal : undefined,
+            projectPlan: selection.projectPlan ? projectPlan : undefined,
             sectionToGenerate: section,
             otherSections,
             otherDiagrams,
@@ -194,6 +197,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const token = await firebaseUser.getIdToken();
         const body = {
             proposal,
+            projectPlan,
             templateId: selectedReportTemplateId,
             existingSections: sections,
             existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
@@ -287,7 +291,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
                                 const hasSelectedContext = currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || currentSelection.externalContext.some(v => v);
 
                                 return (
@@ -392,9 +396,13 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         <div className="space-y-4 pr-4">
                                                             <div className="space-y-2">
                                                                 <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-                                                                  <div className="flex items-center space-x-2">
-                                                                     <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
-                                                                     <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
+                                                                    <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                                                                </div>
+                                                                <div className="flex items-center space-x-2">
+                                                                    <Checkbox id={`context-plan-${key}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
+                                                                    <Label htmlFor={`context-plan-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
                                                                 </div>
                                                                 {orderedSections.filter(sKey => sKey !== key && sections[sKey]).map(contextKey => (
                                                                     <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">

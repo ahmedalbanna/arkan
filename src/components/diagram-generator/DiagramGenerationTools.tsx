@@ -267,11 +267,11 @@ export const DiagramGenerationTools = () => {
                                                     <div className="space-y-2">
                                                         <Label className="font-semibold">{t('builder.diagramGenerator.contextSections')}</Label>
                                                           <div className="flex items-center space-x-2">
-                                                            <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
+                                                            <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key, 'proposal', null, !!checked)} />
                                                             <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
                                                         </div>
                                                         <div className="flex items-center space-x-2">
-                                                            <Checkbox id={`context-plan-${key}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
+                                                            <Checkbox id={`context-plan-${key}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(key, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
                                                             <Label htmlFor={`context-plan-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
                                                         </div>
                                                         {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
