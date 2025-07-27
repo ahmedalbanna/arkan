@@ -1,9 +1,13 @@
 
+
 'use client';
 
 import { UploadManager } from '@/components/UploadManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Upload } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 export default function UploadProjectPage() {
   const { t } = useLocalization();
@@ -20,6 +24,14 @@ export default function UploadProjectPage() {
         </p>
       </div>
       <UploadManager />
+       <div className="mt-8 text-center">
+            <Button asChild variant="outline">
+                <Link href="/generate">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Builder
+                </Link>
+            </Button>
+        </div>
     </div>
   );
 }

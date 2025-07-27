@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
@@ -46,7 +47,7 @@ export function UploadManager() {
             <CardHeader>
                 <CardTitle>Context Manager</CardTitle>
                 <CardDescription>
-                    Add context from various sources. Uploaded context will be available in the "Context" tab of the generation tools.
+                    Add context from various sources. Uploaded context will be available in the generation tools when you return to the builder.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -56,7 +57,7 @@ export function UploadManager() {
                         <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
                         <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
                         <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
-                        <TabsTrigger value="dropbox"><DropboxIcon /> Dropbox</TabsTrigger>
+                        <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
                     </TabsList>
                     <TabsContent value="file" className="mt-4">
                        <FileUploader />
