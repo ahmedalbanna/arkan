@@ -9,6 +9,7 @@ import { Loader2, Download, Copy, Check, Share2, RefreshCw } from 'lucide-react'
 import { saveAs } from 'file-saver';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useLocalization } from '@/context/LocalizationContext';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 
 interface DiagramViewerProps {
     title: string;
@@ -32,8 +33,6 @@ export default function DiagramViewer({
     const { t } = useLocalization();
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
-    const hasChanges = onCodeChange && plantUmlCode !== (localStorage.getItem(`puml-${title}`) || '');
-
 
     const handleCopy = () => {
         navigator.clipboard.writeText(plantUmlCode).then(() => {
@@ -45,10 +44,9 @@ export default function DiagramViewer({
     const handleDownload = async () => {
         setIsDownloading(true);
         try {
-            // We use the proxied URL for the download to leverage caching
             const response = await fetch(imageUrl);
             const blob = await response.blob();
-            saveAs(blob, `${title.replace(/ /g, '_')}.png`);
+            saveAs(blob, `${title.replace(/\s+/g, '_')}.png`);
         } catch (error) {
             console.error('Download failed:', error);
         } finally {
@@ -57,69 +55,80 @@ export default function DiagramViewer({
     };
 
     return (
-        <div className="space-y-4">
-            <Image
-                src={imageUrl}
-                alt={`Rendered ${title}`}
-                width={800}
-                height={600}
-                className="w-full h-auto object-contain rounded-md border bg-white p-2"
-                unoptimized // Since the image is from an external URL and can change, don't use Next.js image optimization
-            />
-            <div className="relative">
-                <Textarea
-                    readOnly={isReadOnly}
-                    value={plantUmlCode}
-                    onChange={(e) => onCodeChange?.(e.target.value)}
-                    rows={10}
-                    className="bg-muted p-4 rounded-md overflow-x-auto text-sm text-left font-mono"
-                    dir="ltr"
-                />
-                <div className="absolute top-2 right-2 flex gap-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={isDownloading} aria-label="Download Image">
-                                    {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy} type="button" aria-label="Copy Code">
-                                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" asChild type="button" className="h-7 w-7">
-                                    <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
-                                        <Share2 className="h-4 w-4" />
-                                    </a>
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>{t('builder.diagramGenerator.tooltips.openRenderer')}</p></TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+        <ResizablePanelGroup
+            direction="horizontal"
+            className="min-h-[600px] w-full rounded-lg border"
+        >
+            <ResizablePanel defaultSize={50}>
+                <div className="flex h-full items-center justify-center p-6">
+                    <Image
+                        src={imageUrl}
+                        alt={`Rendered ${title}`}
+                        width={800}
+                        height={600}
+                        className="w-full h-auto object-contain"
+                        unoptimized
+                    />
                 </div>
-            </div>
-             {onUpdate && (
-                <Button
-                    onClick={onUpdate}
-                    className="font-headline"
-                    disabled={isUpdating}
-                    >
-                    {isUpdating ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : <RefreshCw className="ml-2 h-4 w-4" />}
-                    {t('builder.diagramGenerator.updateDiagram')}
-                </Button>
-            )}
-        </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={50}>
+                <div className="flex h-full flex-col">
+                    <div className="flex items-center justify-end p-2 border-b">
+                         <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload} disabled={isDownloading} aria-label="Download Image">
+                                        {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleCopy} type="button" aria-label="Copy Code">
+                                        {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" asChild type="button" className="h-7 w-7">
+                                        <a href="https://www.planttext.com/" target="_blank" rel="noopener noreferrer" aria-label="Open PlantUML renderer">
+                                            <Share2 className="h-4 w-4" />
+                                        </a>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{t('builder.diagramGenerator.tooltips.openRenderer')}</p></TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
+                    <Textarea
+                        readOnly={isReadOnly}
+                        value={plantUmlCode}
+                        onChange={(e) => onCodeChange?.(e.target.value)}
+                        className="flex-grow p-4 bg-muted/30 text-left font-mono text-xs rounded-none border-0 h-full resize-none"
+                        dir="ltr"
+                    />
+                     {onUpdate && (
+                        <div className="p-2 border-t">
+                            <Button
+                                onClick={onUpdate}
+                                className="w-full font-headline"
+                                disabled={isUpdating}
+                                >
+                                {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                                {t('builder.diagramGenerator.updateDiagram')}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </ResizablePanel>
+        </ResizablePanelGroup>
     );
 }
