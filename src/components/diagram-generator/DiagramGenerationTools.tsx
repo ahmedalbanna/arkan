@@ -207,6 +207,15 @@ export const DiagramGenerationTools = () => {
                                             <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
+                                            {userProfile?.role === 'admin' && (
+                                                <div className="space-y-2">
+                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
+                                                    <div className="p-3 rounded-md border bg-muted text-xs">
+                                                        <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {hasGuidelines && (
                                                 <div className="space-y-2">
                                                     <Label className="text-xs font-semibold text-muted-foreground">{t('builder.diagramGenerator.guidelines')}</Label>

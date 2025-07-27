@@ -19,6 +19,7 @@ import { Skeleton } from '../ui/skeleton';
 import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalActions } from './ProposalActions';
+import { useAuth } from '@/context/AuthContext';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -56,6 +57,7 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
+    const { userProfile } = useAuth();
     const { data: templates, isLoading: templatesLoading, isError } = useProposalTemplates();
     const { proposal } = useBuilderStore();
 
@@ -156,12 +158,14 @@ export const ProposalGenerationTools = ({
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.basePromptLabel')}</Label>
-                                        <div className="p-3 rounded-md border bg-muted text-xs">
-                                            <ReactMarkdown components={markdownComponents}>{currentTemplate?.prompt || 'Loading...'}</ReactMarkdown>
+                                    {userProfile?.role === 'admin' && (
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.basePromptLabel')}</Label>
+                                            <div className="p-3 rounded-md border bg-muted text-xs">
+                                                <ReactMarkdown components={markdownComponents}>{currentTemplate?.prompt || 'Loading...'}</ReactMarkdown>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
                                     <div className="space-y-2">
                                         <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
                                         {customGuidelines.map((custom, index) => (
