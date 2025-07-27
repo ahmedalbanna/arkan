@@ -4,18 +4,17 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files, ListOrdered, BookCheck, GitGraph, Presentation, Eye, X } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, FileText, FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, Eye, X } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -34,11 +33,9 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '.
 import { Slider } from '../ui/slider';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
-import { FileUploader } from '../FileUploader';
-import { PasteTextUploader } from '../PasteTextUploader';
-import { ImageUploader } from '../ImageUploader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -299,7 +296,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </Button>
                                     </div>
                                 </TooltipTrigger>
-                                {userProfile && userProfile.credits < fullReportCreditCost && (
+                                {!canGenerateFullReport && userProfile && userProfile.credits < fullReportCreditCost && (
                                     <TooltipContent>
                                         <p>{t('builder.toasts.insufficientCredits')}</p>
                                     </TooltipContent>
@@ -551,70 +548,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                     </TabsContent>
                  </Tabs>
                  <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">Uploaded Context</h3>
-                     {externalContext.length > 0 ? (
-                        <div className="space-y-2">
-                            {externalContext.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between p-2 text-sm border rounded-md bg-muted/50">
-                                    <span className="truncate pr-2">{item.fileName}</span>
-                                    <div className="flex items-center">
-                                        <Dialog>
-                                            <DialogTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="h-6 w-6"><Eye className="h-4 w-4" /></Button>
-                                            </DialogTrigger>
-                                            <DialogContent className="max-w-2xl">
-                                                <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
-                                                <ScrollArea className="h-[60vh] p-4 border rounded-md">
-                                                    <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
-                                                </ScrollArea>
-                                            </DialogContent>
-                                        </Dialog>
-                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}>
-                                            <X className="h-4 w-4 text-destructive" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                     ) : (
-                         <p className="text-xs text-muted-foreground text-center p-2">No context uploaded.</p>
-                     )}
-                </div>
-                 <div className="pt-4 mt-4 border-t">
-                    <h3 className="text-sm font-semibold mb-2">Add Context / Examples</h3>
-                    <Tabs defaultValue="context" className="w-full">
-                         <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="context" className="gap-2"><FileSymlink className="h-4 w-4" /> Add as Context</TabsTrigger>
-                            <TabsTrigger value="example" className="gap-2"><Files className="h-4 w-4" /> Add as Example</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="context" className="mt-4">
-                            <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
-                            <Tabs defaultValue="pdf" className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
-                                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
-                                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="pdf" className="mt-2"><FileUploader type="context" /></TabsContent>
-                                <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
-                                <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
-                            </Tabs>
-                        </TabsContent>
-                        <TabsContent value="example" className="mt-4">
-                            <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
-                            <Tabs defaultValue="pdf" className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
-                                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
-                                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="pdf" className="mt-2"><FileUploader type="example" /></TabsContent>
-                                <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
-                                <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
-                            </Tabs>
-                        </TabsContent>
-                    </Tabs>
-                </div>
+                    <AcademicUploaders
+                        title="Uploaded Context & Examples"
+                        onContentAdded={addExternalContext}
+                        onContentRemoved={removeExternalContext}
+                        isProcessing={isDisabled}
+                        uploadedContent={externalContext}
+                    />
+                 </div>
             </CardContent>
         </Card>
     );

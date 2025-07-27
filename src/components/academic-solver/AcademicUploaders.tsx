@@ -4,170 +4,26 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { useAcademicSolverStore, type ExternalContext } from '@/hooks/useAcademicSolverStore';
-
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { type ExternalContext } from '@/hooks/useReportStore';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Input } from '../ui/input';
 import { PlusCircle, File, Eye, X, Loader2 } from 'lucide-react';
+import { FileUploader } from '../FileUploader';
+import { PasteTextUploader } from '../PasteTextUploader';
+import { ImageUploader } from '../ImageUploader';
+import { Badge } from '../ui/badge';
 
-interface SingleUploaderProps {
-    onContentAdded: (fileName: string, content: string) => void;
-    isProcessing: boolean;
-}
 
-
-const PDFUploader = ({ onContentAdded, isProcessing }: SingleUploaderProps) => {
-    const { toast } = useToast();
-    const { firebaseUser } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
-        if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to upload files.", variant: "destructive" });
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const token = await firebaseUser.getIdToken();
-            await Promise.all(acceptedFiles.map(async (file) => {
-                if (file.type !== 'application/pdf') {
-                    toast({ title: "Invalid File Type", description: `${file.name} is not a PDF.`, variant: "destructive" });
-                    return;
-                }
-                
-                const formData = new FormData();
-                formData.append('file', file);
-
-                const response = await fetch('/api/pdf-to-markdown', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || `Failed to process ${file.name}.`);
-                }
-                
-                const result = await response.json();
-                onContentAdded(file.name, result.markdown);
-                toast({ title: "File Processed", description: `${file.name} has been successfully processed.` });
-            }));
-
-        } catch (err: any) {
-            toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [firebaseUser, toast, onContentAdded]);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: true, accept: { 'application/pdf': ['.pdf'] } });
-
-    return (
-        <Card {...getRootProps()} className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'} hover:border-primary/80 transition-colors cursor-pointer text-center p-6`}>
-            <input {...getInputProps()} disabled={isProcessing || isLoading} />
-            {isLoading ? <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /> : <UploadCloud className="h-8 w-8 mx-auto text-muted-foreground" />}
-            <p className="mt-2 text-sm font-semibold">{isDragActive ? 'Drop PDF files here...' : 'Drag & drop PDFs or click'}</p>
-        </Card>
-    );
-};
-
-const TextPaster = ({ onContentAdded, isProcessing }: SingleUploaderProps) => {
-    const [text, setText] = useState('');
-    const fileName = 'Pasted Text';
-    const { toast } = useToast();
-
-    const handleAdd = () => {
-        if (!text.trim()) {
-            toast({ title: "No Content", description: "Please paste some text.", variant: "destructive" });
-            return;
-        }
-        onContentAdded(`${fileName}.md`, text);
-        setText('');
-    };
-
-    return (
-        <div className="space-y-2">
-            <Textarea placeholder="Paste content here..." value={text} onChange={(e) => setText(e.target.value)} rows={4} disabled={isProcessing} />
-            <div className="flex justify-end">
-                <Button onClick={handleAdd} disabled={isProcessing || !text.trim()}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Text
-                </Button>
-            </div>
-        </div>
-    );
-};
-
-const ImageTextExtractor = ({ onContentAdded, isProcessing }: SingleUploaderProps) => {
-    const { toast } = useToast();
-    const { firebaseUser } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
-        if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
-            return;
-        }
-        
-        setIsLoading(true);
-        try {
-            const token = await firebaseUser.getIdToken();
-             await Promise.all(acceptedFiles.map(async (file) => {
-                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-                    toast({ title: "Invalid File Type", description: "Only JPG, PNG, and WebP images are supported.", variant: "destructive" });
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-                const response = await fetch('/api/image-to-text', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData,
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.message || `Failed to process ${file.name}.`);
-                }
-                const result = await response.json();
-                onContentAdded(`Image: ${file.name}`, result.text);
-                toast({ title: "Image Processed", description: `Text from ${file.name} has been added.` });
-            }));
-        } catch (err: any) {
-            toast({ title: "Processing Failed", description: err.message, variant: "destructive" });
-        } finally {
-            setIsLoading(false);
-        }
-    }, [firebaseUser, toast, onContentAdded]);
-
-    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: true, accept: { 'image/jpeg': [], 'image/png': [], 'image/webp': [] } });
-
-     return (
-        <Card {...getRootProps()} className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'} hover:border-primary/80 transition-colors cursor-pointer text-center p-6`}>
-            <input {...getInputProps()} disabled={isProcessing || isLoading} />
-            {isLoading ? <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /> : <ImageIcon className="h-8 w-8 mx-auto text-muted-foreground" />}
-            <p className="mt-2 text-sm font-semibold">{isDragActive ? 'Drop images here...' : 'Drag & drop images or click'}</p>
-        </Card>
-    );
-};
-
-export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: { title: string, onContentAdded: (fileName: string, content: string) => void, onContentRemoved: (index: number) => void, isProcessing: boolean, isContext?: boolean, uploadedContent: ExternalContext[] }) => {
+export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: { title: string, onContentAdded: (fileName: string, content: string, type: 'context' | 'example') => void, onContentRemoved: (index: number) => void, isProcessing: boolean, isContext?: boolean, uploadedContent: ExternalContext[] }) => {
     
     return (
         <Card>
             <CardContent className="p-4 space-y-2">
-                 <Label className="font-semibold">{title}</Label>
+                 <h3 className="font-semibold text-sm">{title}</h3>
                  {uploadedContent.length > 0 && (
                       <ul className="space-y-2 list-none p-0">
                         {uploadedContent.map((item, index) => (
@@ -175,6 +31,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                                 <div className="flex items-center gap-2 truncate">
                                     <File className="h-4 w-4 shrink-0" />
                                     <span className="truncate">{item.fileName}</span>
+                                    <Badge variant={item.type === 'context' ? 'secondary' : 'outline'}>{item.type}</Badge>
                                 </div>
                                 <div className="flex items-center">
                                     <Dialog>
@@ -187,15 +44,37 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                         ))}
                     </ul>
                  )}
-                <Tabs defaultValue="pdf" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4" /> PDF</TabsTrigger>
-                        <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Text</TabsTrigger>
-                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Image</TabsTrigger>
+                <Tabs defaultValue="context" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="context">Add as Context</TabsTrigger>
+                        <TabsTrigger value="example">Add as Example</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="pdf" className="mt-2"><PDFUploader onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
-                    <TabsContent value="text" className="mt-2"><TextPaster onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
-                    <TabsContent value="image" className="mt-2"><ImageTextExtractor onContentAdded={onContentAdded} isProcessing={isProcessing} /></TabsContent>
+                    <TabsContent value="context" className="mt-4">
+                        <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
+                        <Tabs defaultValue="pdf" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
+                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
+                                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="pdf" className="mt-2"><FileUploader type="context" /></TabsContent>
+                            <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
+                            <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
+                        </Tabs>
+                    </TabsContent>
+                    <TabsContent value="example" className="mt-4">
+                        <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
+                        <Tabs defaultValue="pdf" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
+                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
+                                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="pdf" className="mt-2"><FileUploader type="example" /></TabsContent>
+                            <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
+                            <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
+                        </Tabs>
+                    </TabsContent>
                 </Tabs>
             </CardContent>
         </Card>
