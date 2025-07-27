@@ -8,6 +8,7 @@ import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { explainDiagramApi } from "@/services/diagram-service";
 import { toast } from "./use-toast";
+import { ExplainDiagramOutput } from "@/ai/flows/explain-diagram";
 
 /**
  * Custom mutation hook to explain a diagram image using an AI flow.
@@ -18,20 +19,17 @@ export function useExplainDiagram() {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
-  return useMutation({
+  return useMutation<ExplainDiagramOutput, Error, string>({
     mutationFn: async (imageDataUri: string) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return explainDiagramApi(imageDataUri, token);
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Invalidate user query to refetch credits
       if (firebaseUser) {
         queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
       }
-      toast({
-        title: "Explanation Ready",
-        description: "The AI has finished explaining the diagram.",
-      });
+      return data;
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Explanation Failed");

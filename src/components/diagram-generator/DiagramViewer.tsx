@@ -45,10 +45,7 @@ export default function DiagramViewer({
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
-    const { firebaseUser } = useAuth();
     
-    const explainMutation = useExplainDiagram();
-
     const handleCopy = () => {
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
@@ -70,38 +67,7 @@ export default function DiagramViewer({
             setIsDownloading(false);
         }
     };
-
-    const fetchExplanation = async () => {
-        if (!firebaseUser) {
-            toast({ title: 'Authentication Required', variant: 'destructive' });
-            return;
-        }
-        try {
-            const response = await fetch(diagramData.imageUrl);
-            const blob = await response.blob();
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = async () => {
-                const base64data = reader.result as string;
-                explainMutation.mutate(base64data, {
-                    onSuccess: (data) => {
-                        onExplanationSave(data.explanation);
-                    }
-                });
-            };
-        } catch (error: any) {
-            toast({ title: 'Explanation Failed', description: 'Could not prepare image for analysis.', variant: 'destructive' });
-        }
-    };
     
-    const handleExplainClick = () => {
-        setViewMode('explanation');
-        // Only fetch if no explanation exists and we aren't already fetching one.
-        if (!diagramData.explanation && !explainMutation.isPending) {
-            fetchExplanation();
-        }
-    };
-
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
             <CardContent className="flex-grow p-4 md:p-6">
@@ -128,19 +94,13 @@ export default function DiagramViewer({
                     {viewMode === 'explanation' && (
                         <ScrollArea className="h-full w-full">
                              <div className="prose dark:prose-invert max-w-none p-4">
-                                {explainMutation.isPending && !diagramData.explanation ? (
-                                    <div className="text-center p-8 text-muted-foreground">
-                                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                                         <p>The AI is analyzing the diagram...</p>
-                                    </div>
+                                {diagramData.explanation ? (
+                                    <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
                                 ) : (
-                                    <>
-                                        <Button onClick={fetchExplanation} variant="outline" size="sm" className="float-right" disabled={explainMutation.isPending}>
-                                            {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Wand2 className="h-4 w-4 mr-2" />}
-                                            Regenerate
-                                        </Button>
-                                        <ReactMarkdown components={markdownComponents}>{diagramData.explanation || "No explanation available yet."}</ReactMarkdown>
-                                    </>
+                                    <div className="text-center p-8 text-muted-foreground">
+                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                                        <p>The AI is analyzing the diagram...</p>
+                                   </div>
                                 )}
                             </div>
                         </ScrollArea>
@@ -155,8 +115,8 @@ export default function DiagramViewer({
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
                         <PenSquare className="h-4 w-4 mr-2"/> Edit
                     </Button>
-                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={explainMutation.isPending}>
-                         {explainMutation.isPending && viewMode !== 'explanation' ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <FileText className="h-4 w-4 mr-2"/>} Explain
+                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('explanation')}>
+                        <FileText className="h-4 w-4 mr-2"/> Explain
                     </Button>
                 </div>
                  <div className="flex items-center gap-1">

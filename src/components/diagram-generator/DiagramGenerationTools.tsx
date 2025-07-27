@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -17,7 +18,6 @@ import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -30,6 +30,7 @@ import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
+import { useExplainDiagram } from '@/hooks/use-diagrams';
 
 
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -77,10 +78,11 @@ export const DiagramGenerationTools = () => {
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
+    const explainMutation = useExplainDiagram();
 
     const { proposal } = useBuilderStore();
     const { sections } = useReportStore();
-    const { diagrams, setDiagram } = useDiagramStore();
+    const { diagrams, setDiagram, setDiagramExplanation } = useDiagramStore();
 
     const {
         externalContext,
@@ -96,13 +98,39 @@ export const DiagramGenerationTools = () => {
         
     const diagramMutation = useMutation({
         mutationFn: generateDiagram,
-        onSuccess: (data, variables) => {
+        onSuccess: async (data, variables) => {
             const diagramKey = variables.body.diagramToGenerate as DiagramType;
             const translatedTitle = t(diagramConfig[diagramKey].title);
-            setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+            
+            // Set the diagram code and image URL first
+            setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
             queryClient.invalidateQueries({ queryKey: ['user'] });
             toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle }) });
             setActiveMutationKey(null);
+
+            // Now, automatically trigger the explanation
+            try {
+                const response = await fetch(data.imageUrl);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = async () => {
+                    const base64data = reader.result as string;
+                    explainMutation.mutate(base64data, {
+                        onSuccess: (explanationData) => {
+                            setDiagramExplanation(diagramKey, explanationData.explanation);
+                            toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
+                        },
+                        onError: (error) => {
+                            // Don't throw a blocking error, just log it. The diagram is still useful.
+                            console.error("Failed to auto-explain diagram:", error);
+                            toast({ title: "Explanation Failed", description: "Could not automatically explain the new diagram.", variant: "destructive" });
+                        }
+                    });
+                };
+            } catch (error) {
+                 console.error("Failed to prepare image for explanation:", error);
+            }
         },
         onError: (error: Error, variables) => {
             const diagramKey = variables.body.diagramToGenerate as DiagramType;
@@ -114,7 +142,7 @@ export const DiagramGenerationTools = () => {
     
     
     const isAnythingGenerating = diagramMutation.isPending;
-    const isDisabled = isAnythingGenerating;
+    const isDisabled = isAnythingGenerating || explainMutation.isPending;
     
     const onGenerateDiagram = async (diagramType: DiagramType) => {
         if (!firebaseUser) {
@@ -136,7 +164,8 @@ export const DiagramGenerationTools = () => {
             otherSections,
             otherDiagrams,
             guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
-            externalContextContent: selectedExternalContexts.map(c => c.content).join('')}; setActiveMutationKey(diagramType);
+            externalContextContent: selectedExternalContexts.map(c => c.content).join('')};
+        setActiveMutationKey(diagramType);
         diagramMutation.mutate({ body, token });
     };
 
