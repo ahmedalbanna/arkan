@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
@@ -7,7 +6,7 @@ import { ActionPanel } from './ActionPanel';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
-import { ChevronRight, Play, Build, History, HelpCircle, Bell } from 'lucide-react';
+import { ChevronRight, Play, Wrench, History, HelpCircle, Bell } from 'lucide-react';
 import Link from 'next/link';
 
 function AutomationHeader() {
@@ -21,7 +20,7 @@ function AutomationHeader() {
             <div className="flex-1" />
             <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" className="gap-2"><Play className="h-4 w-4"/> Preview</Button>
-                <Button variant="outline" size="sm" className="gap-2"><Build className="h-4 w-4"/> Build</Button>
+                <Button variant="outline" size="sm" className="gap-2"><Wrench className="h-4 w-4"/> Build</Button>
                 <Button variant="outline" size="sm" className="gap-2"><History className="h-4 w-4"/> History</Button>
             </div>
             <div className="flex-1 flex justify-end items-center gap-4">
