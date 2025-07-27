@@ -1,31 +1,25 @@
 
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link as LinkIcon, MessageSquare, Plus } from 'lucide-react';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';
 import AutomationTab from './AutomationTab';
-import { toast } from '@/hooks/use-toast';
 import ContextTab from './ContextTab';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { X } from 'lucide-react';
+import GeneralTab from './GeneralTab';
 
 interface AgentEditorProps {
   agentId: string;
@@ -95,15 +89,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       }
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "conversationStarters",
-  });
-
-  const promptValue = form.watch('prompt');
-  const introductionValue = form.watch('introduction');
-  const introLength = introductionValue?.length || 0;
-  const isComplexPrompt = typeof promptValue === 'object';
+  const isComplexPrompt = typeof form.watch('prompt') === 'object';
 
   useEffect(() => {
     form.reset({
@@ -135,148 +121,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
-        return (
-          <div className='space-y-6'>
-            <CardTitle>General</CardTitle>
-            
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl><Input {...field} disabled={updateAgentMutation.isPending} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {isComplexPrompt ? (
-              <FormField
-                control={form.control}
-                name="prompt.base"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prompt</FormLabel>
-                    <FormControl>
-                      <Textarea {...field} rows={8} className="font-mono text-sm" disabled={updateAgentMutation.isPending} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            ) : (
-              <FormField
-                control={form.control}
-                name="prompt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prompt</FormLabel>
-                    <FormControl><Textarea {...field} value={field.value as string} rows={8} className="font-mono text-sm" disabled={updateAgentMutation.isPending} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            <FormField
-              control={form.control}
-              name="introduction"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex justify-between items-center">
-                    <span>Introduction</span>
-                    <span className="text-xs text-muted-foreground">{introLength}/500</span>
-                  </FormLabel>
-                  <FormControl><Textarea {...field} placeholder="Set your agent's introduction message here..." rows={3} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-             <FormField
-              control={form.control}
-              name="placeholder"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Input Placeholder</FormLabel>
-                  <FormControl><Input {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormItem>
-                <FormLabel>Conversation Starters</FormLabel>
-                <div className="space-y-2">
-                    {fields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-2">
-                           <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                           <Input {...form.register(`conversationStarters.${index}.value`)} className="flex-grow" />
-                           <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}><X className="h-4 w-4" /></Button>
-                        </div>
-                    ))}
-                </div>
-                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="mr-2 h-4 w-4"/> Add message</Button>
-            </FormItem>
-
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="tone"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Tone</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    {['Default', 'Professional', 'Creative', 'Inspiring', 'Casual', 'Confident', 'Authoritative', 'Formal', 'Informal'].map(tone => <SelectItem key={tone} value={tone}>{tone}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="language"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Language</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                                <SelectContent>
-                                    {['English (US)', 'English (UK)', 'Русский', 'Deutsch', 'Español', 'Français', 'Italiano', '日本語', '한국어', 'Nederlands', 'Polski', 'Português', 'Svenska', 'Türk', 'Tiếng Việt', '中文 (简体)', '中文 (繁體)', 'اَلْعَرَبِيَّة', 'Suomi', 'עברית', 'Norsk', 'فارسی', 'Românește', 'தமிழ்', 'ภาษาไทย', 'українська мова', 'Bahasa Indonesia', 'Czech', 'Slovak', 'Hungarian', 'Danish'].map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="model"
-              render={({ field }) => (
-                  <FormItem>
-                      <FormLabel>AI Model</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                          <SelectContent>
-                              <SelectItem value="googleai/gemini-2.0-flash">Gemini 2.0 Flash</SelectItem>
-                              <SelectItem value="googleai/gemini-2.0-pro">Gemini 2.0 Pro</SelectItem>
-                              <SelectItem value="googleai/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
-                              <SelectItem value="googleai/gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                          </SelectContent>
-                      </Select>
-                      <FormMessage />
-                  </FormItem>
-              )}
-            />
-
-          </div>
-        );
+        return <GeneralTab isComplexPrompt={isComplexPrompt} isPending={updateAgentMutation.isPending} />;
       case 'guidelines':
         return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
       case 'knowledge':
