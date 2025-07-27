@@ -22,6 +22,7 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from './ui/t
 import KnowledgeTab from './admin/agent-editor/KnowledgeTab';
 import ToolsTab from './admin/agent-editor/ToolsTab';
 import CommandsTab from './admin/agent-editor/CommandsTab';
+import ShareEmbedTab from './admin/agent-editor/ShareEmbedTab';
 
 interface AgentEditorProps {
   agentId: string;
@@ -185,6 +186,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <ToolsTab />;
       case 'commands':
         return <CommandsTab />;
+      case 'share':
+        return <ShareEmbedTab />;
       default:
         return <div><CardTitle>{navItems.find(n => n.id === activeTab)?.label || discoverItems.find(d => d.id === activeTab)?.label}</CardTitle><p>Coming soon...</p></div>;
     }
