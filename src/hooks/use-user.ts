@@ -200,6 +200,7 @@ export function useLogout() {
     mutationFn: logoutUser,
     onSuccess: () => {
       queryClient.clear();
+      localStorage.clear();
       router.push("/login");
       toast({
         title: "Logged Out",
