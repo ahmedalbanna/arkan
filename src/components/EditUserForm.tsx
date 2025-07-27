@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, use, useActionState } from 'react';
+import { useEffect, use, useActionState, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, Trash2, AlertCircle, ArrowLeft, MailQuestion } from 'lucide-react';
+import { Loader2, Save, Trash2, AlertCircle, ArrowLeft, MailQuestion, Upload, Camera } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,8 @@ import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { useSendPasswordReset } from '@/hooks/use-user';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { userKeys } from '@/lib/query-keys';
 
 const editUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -59,12 +62,34 @@ async function deleteUserApi(variables: { userId: string, token: string }) {
     return await response.json();
 }
 
+async function uploadProfilePictureApi(variables: { userId: string, file: File, token: string }) {
+    const formData = new FormData();
+    formData.append('file', variables.file);
+
+    const response = await fetch(`/api/users/${variables.userId}/upload-profile-picture`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload image');
+    }
+    return response.json();
+}
+
 
 export default function EditUserForm({ user }: { user: UserProfile }) {
   const { toast } = useToast();
   const { t } = useLocalization();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { firebaseUser, userProfile: currentUserProfile } = useAuth();
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(user.profilePictureUrl || null);
+
   
   const [updateState, updateFormAction] = useActionState(handleUpdateUser, { errors: {} });
   const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: '' });
@@ -96,7 +121,33 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
       toast({ title: t('editUser.deleteErrorToastTitle'), description: deleteState.error, variant: 'destructive' });
     }
   }, [deleteState, toast, t]);
+
+  const uploadMutation = useMutation({
+    mutationFn: uploadProfilePictureApi,
+    onSuccess: (data) => {
+        toast({ title: "Image Uploaded", description: "Your profile picture has been updated."});
+        setPreviewImageUrl(data.profilePictureUrl);
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(user.id) });
+    },
+    onError: (error: Error) => {
+        toast({ title: "Upload Failed", description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProfileImageFile(file);
+      setPreviewImageUrl(URL.createObjectURL(file));
+    }
+  };
   
+  const handleUploadImage = async () => {
+      if (!profileImageFile || !firebaseUser) return;
+      const token = await firebaseUser.getIdToken();
+      uploadMutation.mutate({ userId: user.id, file: profileImageFile, token });
+  }
+
   // This mutation is kept for client-side actions that don't fit Server Actions well, like deletion with optimistic UI
   const deleteUserMutation = useMutation({
       mutationFn: deleteUserApi,
@@ -122,7 +173,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   };
 
   const isAdmin = currentUserProfile?.role === 'admin';
-  const isPending = deleteUserMutation.isPending || passwordResetMutation.isPending;
+  const isPending = deleteUserMutation.isPending || passwordResetMutation.isPending || uploadMutation.isPending;
 
   return (
     <>
@@ -137,6 +188,26 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                  </CardDescription>
             </CardHeader>
             <CardContent className="p-6 grid gap-6">
+                <div className="flex flex-col items-center gap-4">
+                    <Avatar className="h-32 w-32 border-4 border-primary/20">
+                        <AvatarImage src={previewImageUrl || undefined} alt={user.name} />
+                        <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex gap-2">
+                        <Button asChild variant="outline">
+                            <Label htmlFor="profile-picture-upload">
+                                <Camera className="mr-2 h-4 w-4" />
+                                Change Picture
+                            </Label>
+                        </Button>
+                        <Input id="profile-picture-upload" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/webp" />
+                         <Button onClick={handleUploadImage} disabled={!profileImageFile || uploadMutation.isPending}>
+                            {uploadMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                            Upload
+                        </Button>
+                    </div>
+                </div>
+
                 <FormField
                     control={form.control}
                     name="name"
