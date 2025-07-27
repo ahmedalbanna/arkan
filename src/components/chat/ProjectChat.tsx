@@ -14,23 +14,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useReportStore } from '@/hooks/useReportStore';
-import { Badge } from '../ui/badge';
-
-async function sendChatMessage(body: { message: string, projectState: any }, token: string) {
-    const response = await fetch('/api/project-chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to get response from chat assistant');
-    }
-    return response.json();
-}
 
 // Separate API function for generating a section when a tool is called
 async function generateSectionFromTool(variables: { sectionName: string, projectState: any, token: string }): Promise<any> {
@@ -56,12 +39,12 @@ async function generateSectionFromTool(variables: { sectionName: string, project
 
 export default function ProjectChat() {
     const [isOpen, setIsOpen] = useState(false);
-    const { messages, addMessage, input, setInput } = useChatStore();
+    const { messages, addMessage, updateLastMessage, input, setInput } = useChatStore();
     const { firebaseUser, refetchUser } = useAuth();
     const { getFullState, handleProposalUpdate } = useBuilderStore();
     const setSection = useReportStore(s => s.setSection);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const queryClient = useQueryClient();
+    const [isStreaming, setIsStreaming] = useState(false);
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -71,48 +54,6 @@ export default function ProjectChat() {
             });
         }
     }, [messages]);
-
-    const handleApiResponse = (response: any) => {
-        if (response?.toolRequest) {
-            const tool = response.toolRequest;
-            const toolName = tool.name;
-
-            addMessage({
-                role: 'assistant',
-                content: `Thinking... Calling tool: \`${toolName}\``,
-                isToolResponse: true
-            });
-
-            if (toolName === 'generateReportSection') {
-                const sectionName = tool.input.section;
-                generateSectionMutation.mutate(sectionName);
-            } else if (toolName === 'updateProposalField') {
-                const { path, value } = tool.input;
-                handleProposalUpdate(path, value);
-                toast({ title: "Proposal Updated", description: `Field '${path}' was updated.`});
-                // After updating, we can send a simple confirmation back to the chat.
-                // For simplicity, we'll just add a manual confirmation message.
-                addMessage({
-                    role: 'assistant',
-                    content: `I've updated the '${path}' for you.`
-                });
-            }
-
-        } else if (response?.text) {
-            addMessage({ role: 'assistant', content: response.text });
-        }
-    };
-    
-    const chatMutation = useMutation({
-        mutationFn: (variables: { message: string, projectState: any }) => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            return firebaseUser.getIdToken().then(token => sendChatMessage(variables, token));
-        },
-        onSuccess: handleApiResponse,
-        onError: (error: Error) => {
-            toast({ title: 'Error', description: error.message, variant: 'destructive' });
-        }
-    });
 
     const generateSectionMutation = useMutation({
         mutationFn: async (sectionName: string) => {
@@ -135,24 +76,86 @@ export default function ProjectChat() {
         }
     });
 
-
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || !firebaseUser) return;
         
         const userMessage = { role: 'user' as const, content: input };
         addMessage(userMessage);
-        setInput('');
-
         const projectState = getFullState();
+        setInput('');
+        setIsStreaming(true);
+        addMessage({ role: 'assistant', content: '' }); // Add empty message to update
 
-        chatMutation.mutate({
-          message: input,
-          projectState
-        });
+        try {
+            const token = await firebaseUser.getIdToken();
+            const response = await fetch('/api/project-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    message: input,
+                    projectState,
+                }),
+            });
+
+            if (!response.body) return;
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let finalResponse: any = {};
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const jsonStr = line.substring(6);
+                        if (jsonStr === '[DONE]') {
+                            break;
+                        }
+                        try {
+                            const parsed = JSON.parse(jsonStr);
+                            if (parsed.text) {
+                                updateLastMessage(parsed.text);
+                            }
+                            if (parsed.toolRequest) {
+                                const tool = parsed.toolRequest;
+                                updateLastMessage(`Thinking... Calling tool: \`${tool.name}\``, true);
+                                if (tool.name === 'generateReportSection') {
+                                    generateSectionMutation.mutate(tool.input.section);
+                                } else if (tool.name === 'updateProposalField') {
+                                    const { path, value } = tool.input;
+                                    handleProposalUpdate(path, value);
+                                    toast({ title: "Proposal Updated", description: `Field '${path}' was updated.` });
+                                    addMessage({ role: 'assistant', content: `I've updated the '${path}' for you.` });
+                                }
+                            }
+                            // Store the final structured response if available
+                            if (parsed.finishReason) {
+                                finalResponse = parsed;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing stream chunk:', e, jsonStr);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Streaming chat failed:', error);
+            updateLastMessage("Sorry, I encountered an error. Please try again.", false);
+        } finally {
+            setIsStreaming(false);
+        }
     };
-
-    const isPending = chatMutation.isPending || generateSectionMutation.isPending;
+    
+    const isPending = isStreaming || generateSectionMutation.isPending;
 
     return (
       <>
@@ -205,7 +208,7 @@ export default function ProjectChat() {
                                     {message.role === 'user' && <Avatar className="bg-secondary text-secondary-foreground"><User /></Avatar>}
                                 </div>
                             ))}
-                            {isPending && (
+                            {isPending && !messages[messages.length - 1]?.content && (
                                 <div className="flex items-start gap-3 justify-start">
                                     <Avatar className="bg-primary text-primary-foreground"><Bot /></Avatar>
                                     <div className="p-3 rounded-lg bg-muted">
@@ -251,5 +254,3 @@ function Avatar({ children, className }: { children: React.ReactNode, className?
         </div>
     )
 }
-
-    

@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth } from '@/lib/firebase/admin';
@@ -5,7 +6,7 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { projectChat } from '@/ai/flows/project-chat';
-import { GenerateResponse } from 'genkit';
+import { toJSON, streamFlow } from 'genkit/next';
 
 const chatRequestSchema = z.object({
   message: z.string(),
@@ -33,40 +34,25 @@ export async function POST(request: Request) {
     await deductCredit(userId, 1);
 
     const agentInput = validation.data;
-    const result: GenerateResponse = await projectChat(agentInput);
+    
+    // Stream the flow's response
+    return streamFlow(projectChat, agentInput, {
+      onDone: async (response) => {
+        // This block runs after the stream is complete
+        // We log the generation here with the final, complete response
+        const serializableResult = toJSON(response);
 
-    // Convert the complex GenerateResponse object to a plain serializable object for Firestore
-    const serializableResult = {
-      text: result.text,
-      toolRequests: result.toolRequests ?? null, // Corrected from toolRequest to toolRequests
-      candidates: (result.candidates || []).map((c: any) => ({ // Added explicit 'any' type for simplicity
-          index: c.index,
-          finishReason: c.finishReason,
-          message: {
-              role: c.message.role,
-              content: (c.message.content || []).map((p: any) => ({ // Added explicit 'any' type for simplicity
-                  text: p.text,
-                  toolRequest: p.toolRequest ?? null
-              }))
-          },
-          // Include usage information per candidate if available and serializable
-          usage: c.usage ?? null
-      })),
-      // Include overall usage information if available and serializable
-      usage: result.usage ?? null
-    };
-
-    // Clean up undefined values recursively before logging
-    const cleanSerializableResult = JSON.parse(JSON.stringify(serializableResult));
-
-    await logGeneration({
-      agentId: 'project-chat-agent',
-      userId,
-      input: { message: agentInput.message }, // Log only the message for brevity
-      output: cleanSerializableResult,
+        await logGeneration({
+          agentId: 'project-chat-agent',
+          userId,
+          input: { message: agentInput.message }, // Log only the message for brevity
+          output: serializableResult,
+        });
+      },
+      onError: (err) => {
+        console.error("Error during chat stream:", err);
+      }
     });
-
-    return NextResponse.json(serializableResult, { status: 200 });
 
   } catch (error: any) {
     console.error('Error in project chat API:', error);

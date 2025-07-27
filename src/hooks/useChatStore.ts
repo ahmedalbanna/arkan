@@ -17,6 +17,7 @@ interface ChatState {
 
 interface ChatActions {
   addMessage: (message: ChatMessage) => void;
+  updateLastMessage: (chunk: string, isToolResponse?: boolean) => void;
   setInput: (input: string) => void;
   clearChat: () => void;
 }
@@ -32,6 +33,19 @@ export const useChatStore = create<ChatState & ChatActions>()(
       ...initialState,
       addMessage: (message) =>
         set((state) => ({ messages: [...state.messages, message] })),
+      updateLastMessage: (chunk, isToolResponse = false) =>
+        set((state) => {
+            const lastMessage = state.messages[state.messages.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+                const updatedMessage = {
+                    ...lastMessage,
+                    content: lastMessage.content + chunk,
+                    isToolResponse: lastMessage.isToolResponse || isToolResponse,
+                };
+                return { messages: [...state.messages.slice(0, -1), updatedMessage] };
+            }
+            return state; // No change if last message isn't from assistant
+        }),
       setInput: (input) => set({ input }),
       clearChat: () => set({ messages: [initialState.messages[0]], input: '' }),
     }),

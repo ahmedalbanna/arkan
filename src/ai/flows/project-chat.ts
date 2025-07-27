@@ -1,3 +1,4 @@
+
 'use server';
 
 import { ai } from '@/ai/genkit';
@@ -52,15 +53,18 @@ const ChatOutputSchema = z.object({
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;
 
-export async function projectChat(input: z.infer<typeof ChatInputSchema>): Promise<any> {
-  const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
+export const projectChat = ai.defineFlow(
+  {
+    name: 'projectChat',
+    inputSchema: ChatInputSchema,
+    outputSchema: z.any(),
+    streamSchema: z.any(),
+  },
+  async (input, { sendChunk }) => {
+    const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
 
-  const chatPrompt = ai.definePrompt({
-    name: 'projectChatPrompt',
-    input: { schema: ChatInputSchema },
-    // No output schema needed here as we will handle tool requests
-    tools: [generateSectionTool, updateProposalFieldTool],
-    prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
+    const { stream } = ai.generateStream({
+        prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
 
 Your task is to be as helpful as possible. Analyze the user's message and decide if you should:
 1.  Respond with a simple text message.
@@ -79,7 +83,14 @@ Current Project State:
 ${stringifiedProjectState}
 ---
 `,
-  });
+        model: 'googleai/gemini-2.0-flash',
+        input: { message: input.message },
+        tools: [generateSectionTool, updateProposalFieldTool]
+    });
 
-  return await chatPrompt(input);
-}
+    for await (const chunk of stream) {
+        sendChunk(chunk);
+    }
+  }
+);
+
