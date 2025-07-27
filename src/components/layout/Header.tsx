@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare, Bell } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -42,6 +42,7 @@ export function Header() {
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
     { href: '/design', label: t('header.design'), icon: Palette },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
+    { href: '/notifications', label: t('header.pushNotifications'), icon: Bell },
   ];
   
   const adminLinks = [

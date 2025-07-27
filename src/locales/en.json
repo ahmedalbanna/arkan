@@ -25,7 +25,8 @@
     "logout": "Logout",
     "academicSolver": "Academic Solver",
     "adminSettings": "Settings",
-    "documentation": "Documentation"
+    "documentation": "Documentation",
+    "pushNotifications": "Push Notifications"
   },
   "docs": {
     "pageTitle": "Application Documentation",
@@ -589,7 +590,7 @@
       "toasts": {
         "success": "Successfully generated {{title}} diagram!",
         "failed": "Failed to generate {{title}} diagram.",
-        "generateButton": "Generate {{title}}",
+        "generateButton":"Generate {{title}}",
         "updateSuccess": "Diagram updated successfully!",
         "updateFailed": "Diagram Update Failed"
       },

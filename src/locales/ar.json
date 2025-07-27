@@ -25,7 +25,8 @@
     "logout": "تسجيل الخروج",
     "academicSolver": "الحل الأكاديمي",
     "adminSettings": "الإعدادات",
-    "documentation": "التوثيق"
+    "documentation": "التوثيق",
+    "pushNotifications": "الإشعارات"
   },
   "docs": {
     "pageTitle": "توثيق التطبيق",
