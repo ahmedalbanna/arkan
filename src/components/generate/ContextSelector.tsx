@@ -1,0 +1,115 @@
+
+'use client';
+
+import React from 'react';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { SectionName, DiagramType } from '@/ai/schemas';
+import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
+import { useLocalization } from '@/context/LocalizationContext';
+
+const orderedSections = SectionName.options;
+const orderedDiagrams = DiagramType.options;
+
+interface ContextSelectorProps {
+    itemKey: string;
+    currentSelection: {
+        sections: Record<string, boolean>;
+        diagrams: Record<string, boolean>;
+        externalContext: boolean[];
+        proposal: boolean;
+        projectPlan: boolean;
+    };
+}
+
+export function ContextSelector({ itemKey, currentSelection }: ContextSelectorProps) {
+    const { t } = useLocalization();
+    const { proposal } = useBuilderStore();
+    const { projectPlan } = useProjectPlanStore();
+    const { sections, externalContext, toggleContextSelection } = useReportStore();
+    const { diagrams } = useDiagramStore();
+
+    return (
+        <ScrollArea className="h-60 w-full">
+            <div className="space-y-4 pr-4">
+                <div className="space-y-2">
+                    <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id={`context-proposal-${itemKey}`} checked={!!currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(itemKey, 'proposal', null, !!checked)} disabled={!proposal} />
+                        <Label htmlFor={`context-proposal-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox id={`context-plan-${itemKey}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(itemKey, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
+                        <Label htmlFor={`context-plan-${itemKey}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
+                    </div>
+                    {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
+                        <div key={`ctx-s-${itemKey}-${contextKey}`} className="flex items-center space-x-2">
+                            <Checkbox
+                                id={`context-section-${itemKey}-${contextKey}`}
+                                checked={!!currentSelection.sections[contextKey]}
+                                onCheckedChange={(checked) => toggleContextSelection(itemKey, 'sections', contextKey, !!checked)}
+                            />
+                            <Label htmlFor={`context-section-${itemKey}-${contextKey}`} className="text-sm font-normal">
+                                <div className="flex items-center gap-2">
+                                    <BookCheck className="h-4 w-4" />
+                                    {t(sectionConfig[contextKey].title)}
+                                </div>
+                            </Label>
+                        </div>
+                    ))}
+                    {Object.keys(sections).length === 0 && (
+                        <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.noOtherSections')}</p>
+                    )}
+                </div>
+
+                {Object.keys(diagrams || {}).length > 0 && (
+                    <div className="space-y-2 pt-2 border-t">
+                        <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
+                        {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
+                            <div key={`ctx-d-${itemKey}-${contextKey}`} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`context-diagram-${itemKey}-${contextKey}`}
+                                    checked={!!currentSelection.diagrams[contextKey]}
+                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'diagrams', contextKey, !!checked)}
+                                />
+                                <Label htmlFor={`context-diagram-${itemKey}-${contextKey}`} className="text-sm font-normal">
+                                    <div className="flex items-center gap-2">
+                                        <GitGraph className="h-4 w-4" />
+                                        {t(diagramConfig[contextKey].title)}
+                                    </div>
+                                </Label>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                
+                {externalContext && externalContext.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t">
+                        <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
+                        {externalContext.map((item, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                                <Checkbox
+                                    id={`context-external-${itemKey}-${index}`}
+                                    checked={!!currentSelection.externalContext?.[index]}
+                                    onCheckedChange={(checked) => toggleContextSelection(itemKey, 'externalContext', index, !!checked)}
+                                />
+                                <Label htmlFor={`context-external-${itemKey}-${index}`} className="text-sm font-normal">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4" />
+                                        {item.fileName}
+                                    </div>
+                                </Label>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </ScrollArea>
+    );
+}

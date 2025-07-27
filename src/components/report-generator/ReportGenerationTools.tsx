@@ -1,34 +1,22 @@
 
-
 'use client';
 
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig, sectionConfig } from '@/lib/report-config';
-import { DiagramTypeSchema, SectionNameSchema, type DiagramType, type SectionName } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Eye, X, UploadCloud, FileText, FileSpreadsheet, Image as ImageIcon, GanttChartSquare, FileSymlink, Files } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { sectionConfig } from '@/lib/report-config';
+import { SectionName, type SectionName as SectionNameType } from '@/ai/schemas';
+import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import type { GuidelineState } from '@/hooks/useReportStore';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 import { Slider } from '../ui/slider';
 import { ReportActions } from './ReportActions';
@@ -38,31 +26,11 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
+import { GuidelineEditor } from '../generate/GuidelineEditor';
+import { ContextSelector } from '../generate/ContextSelector';
+import { Label } from '../ui/label';
 
-
-const orderedSections = SectionNameSchema.options;
-const orderedDiagrams = DiagramTypeSchema.options;
-
-// Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
-    const agentIdSuffix = `generate-${itemKey}-section`;
-    const agent = agents.find(a => a.id.endsWith(agentIdSuffix));
-    const currentGuidelineState = guidelineState[itemKey];
-
-    if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
-
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
-        return currentGuidelineState.custom || [];
-    }
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
-    });
-    guidelines.push(...currentGuidelineState.custom);
-    return guidelines;
-};
+const orderedSections = SectionName.options;
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -99,23 +67,23 @@ function ToolsSkeleton() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
+                    <div className="h-6 w-3/4 bg-muted rounded-md" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
+                    <div className="h-10 w-full bg-muted rounded-md" />
+                    <div className="h-10 w-full bg-muted rounded-md" />
                 </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <Skeleton className="h-6 w-1/2" />
-                    <Skeleton className="h-4 w-full" />
+                    <div className="h-6 w-1/2 bg-muted rounded-md" />
+                    <div className="h-4 w-full bg-muted rounded-md" />
                 </CardHeader>
                 <CardContent>
-                    <Skeleton className="h-10 w-full" />
+                    <div className="h-10 w-full bg-muted rounded-md" />
                 </CardContent>
                 <CardFooter>
-                    <Skeleton className="h-10 w-full" />
+                    <div className="h-10 w-full bg-muted rounded-md" />
                 </CardFooter>
             </Card>
         </div>
@@ -124,15 +92,12 @@ function ToolsSkeleton() {
 
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
-    const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
     const { firebaseUser, userProfile } = useAuth();
-    const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
-    const { diagrams } = useDiagramStore();
 
     const {
         sections,
@@ -140,19 +105,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         addExternalContext,
         removeExternalContext,
         controlState,
-        guidelineState,
-        customGuidelineInput,
-        contextSelection,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         setSection,
         setAllSections,
         handleControlChange,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
-        toggleContextSelection,
         manualTableOfContents,
         setManualTableOfContents,
     } = useReportStore();
@@ -162,12 +119,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             setAllSections(data.sections);
             toast({ title: `Full report generated successfully!` });
         } else { // Single section
-            const sectionKey = variables.body.sectionToGenerate as SectionName;
+            const sectionKey = variables.body.sectionToGenerate as SectionNameType;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
             toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
         }
-        queryClient.invalidateQueries({ queryKey: ['user'] });
         setActiveMutationKey(null);
     };
 
@@ -187,41 +143,33 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const isAnythingGenerating = reportGenerationMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating;
         
-    const onGenerateSection = async (section: SectionName) => {
+    const onGenerateSection = async (section: SectionNameType) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
             return;
         };
 
         const token = await firebaseUser.getIdToken();
-        const selection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const otherSections = Object.entries(selection.sections) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+        const { getFullState } = useBuilderStore.getState();
+        const { guidelineState, contextSelection } = useReportStore.getState();
 
-        const otherDiagrams = Object.entries(selection.diagrams) .filter(([, isSelected]) => isSelected) .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
-        
-        const selectedExternalContexts = externalContext ? externalContext.filter((_, index) => selection.externalContext[index]) : [];
-        const exampleFiles = selectedExternalContexts.filter(f => f.type === 'example').map(({ fileName, content }) => ({ fileName, content }));
-        const contextFiles = selectedExternalContexts.filter(f => f.type === 'context').map(({ fileName, content }) => ({ fileName, content }));
+        const fullState = getFullState();
 
-        const hasContext = !!proposal || !!projectPlan || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
-        if (!hasContext) {
-            toast({ title: "No Context Provided", description: "Please generate a proposal or upload a document to provide context for generation.", variant: "destructive" });
-            return;
-        }
-
+        const selectedContext = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
         const body = {
-            proposal: selection.proposal ? proposal : undefined,
-            projectPlan: selection.projectPlan ? projectPlan : undefined,
+            proposal: selectedContext.proposal ? fullState.proposal : undefined,
+            projectPlan: selectedContext.projectPlan ? fullState.projectPlan : undefined,
             sectionToGenerate: section,
-            otherSections,
-            otherDiagrams,
-            guidelines: getSelectedGuidelines(section, guidelineState, agents),
+            otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionNameType]}), {}),
+            otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
+            guidelines: getSelectedGuidelines(section, guidelineState, fullState.agents || []),
             instructionText: generateInstructionText(controlState[section]),
-            exampleFiles: exampleFiles.length > 0 ? exampleFiles : undefined,
-            contextFiles: contextFiles.length > 0 ? contextFiles : undefined,
+            exampleFiles: fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example'),
+            contextFiles: fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context'),
             tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
+        
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
     };
@@ -232,18 +180,19 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             return;
         }
         const token = await firebaseUser.getIdToken();
+        const fullState = useBuilderStore.getState().getFullState();
         
-        const exampleFiles = externalContext ? externalContext.filter(f => f.type === 'example') : [];
-        const contextFiles = externalContext ? externalContext.filter(f => f.type === 'context') : [];
+        const exampleFiles = fullState.externalContext?.filter(f => f.type === 'example');
+        const contextFiles = fullState.externalContext?.filter(f => f.type === 'context');
         
         const body = {
-            proposal,
-            projectPlan,
+            proposal: fullState.proposal,
+            projectPlan: fullState.projectPlan,
             templateId: selectedReportTemplateId,
-            existingSections: sections,
-            existingDiagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            exampleFiles: exampleFiles.length > 0 ? exampleFiles : undefined,
-            contextFiles: contextFiles.length > 0 ? contextFiles : undefined,
+            existingSections: fullState.sections,
+            existingDiagrams: Object.fromEntries(Object.entries(fullState.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
+            exampleFiles: exampleFiles && exampleFiles.length > 0 ? exampleFiles : undefined,
+            contextFiles: contextFiles && contextFiles.length > 0 ? contextFiles : undefined,
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportGenerationMutation.mutate({ body, token });
@@ -252,10 +201,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
     const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
     
-    // Calculate credits needed for full report
     const sectionsToGenerate = selectedTemplate?.agentIds
-        .map(agentId => (Object.keys(sectionConfig) as SectionName[]).find(key => sectionConfig[key].agentId === agentId))
-        .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !sections[sectionKey]) || [];
+        .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
+        .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]) || [];
     const fullReportCreditCost = sectionsToGenerate.length;
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
@@ -281,9 +229,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <div className="space-y-2 mb-4">
                             <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
                             <Select value={selectedReportTemplateId} onValueChange={(val) => setSelectedReportTemplateId(val)}>
-                                <SelectTrigger id="report-template-select">
-                                    <SelectValue placeholder={t('builder.reportGenerator.Select_template')} />
-                                </SelectTrigger>
+                                <SelectTrigger id="report-template-select"><SelectValue placeholder={t('reportGenerator.Select_template')} /></SelectTrigger>
                                 <SelectContent>
                                     {REPORT_GENERATION_TEMPLATES.map(template => (
                                         <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
@@ -321,15 +267,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
                         <Accordion type="multiple" className="w-full space-y-1">
                             {availableSections.map((key) => {
-                                const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
-                                if (!agent) return null;
-
-                                const promptConfig = agent.prompt as AgentPrompt;
-                                const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
-                                const { title, icon: Icon } = sectionConfig[key];
+                                const { title, icon: Icon, agentId } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (externalContext && externalContext.length > 0 && currentSelection.externalContext.some(v => v));
+                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(contextSelection[key]?.sections || {}).some(v => v) || Object.values(contextSelection[key]?.diagrams || {}).some(v => v) || (externalContext && externalContext.length > 0 && contextSelection[key]?.externalContext.some(v => v));
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -347,62 +287,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                                 </TabsList>
                                                 <TabsContent value="prompt" className="pt-4 space-y-4">
-                                                    {userProfile?.role === 'admin' && (
-                                                        <div className="space-y-2">
-                                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                                                            <div className="p-3 rounded-md border bg-muted text-xs">
-                                                                <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {hasGuidelines && (
-                                                        <div className="space-y-2">
-                                                            <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
-                                                            <div className="space-y-2 p-3 rounded-md border">
-                                                                {promptConfig.guidelines!.map((guideline, index) => (
-                                                                    <div key={index} className="flex items-start gap-2">
-                                                                        <Checkbox
-                                                                            id={`guideline-${key}-${index}`}
-                                                                            checked={guidelineState[key]?.checked[index] ?? false}
-                                                                            onCheckedChange={(checked) => handleGuidelineToggle(key, index, !!checked)}
-                                                                        />
-                                                                        <Label htmlFor={`guideline-${key}-${index}`} className="font-normal text-sm flex-1">
-                                                                            <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
-                                                                        </Label>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    <div className="space-y-2">
-                                                        <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                                                        {guidelineState[key]?.custom.map((custom, index) => (
-                                                            <div key={index} className="flex items-center gap-2 text-sm">
-                                                                <span>- {custom}</span>
-                                                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>                                                                    <Trash2 className="h-3 w-3 text-destructive" />
-                                                                </Button>
-                                                            </div>
-                                                        ))}
-                                                        <div className="flex gap-2">
-                                                            <Input
-                                                                placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
-                                                                value={customGuidelineInput[key] || ''}
-                                                                onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
-                                                                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
-                                                            />
-                                                            <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>                                                                <Plus className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </div>
+                                                    <GuidelineEditor itemKey={key} agentId={agentId} isAdmin={userProfile?.role === 'admin'} />
                                                 </TabsContent>
 
                                                 <TabsContent value="controls" className="pt-4">
                                                     <div className="space-y-6">
                                                         <div className="space-y-3">
                                                             <Label htmlFor={`formality-${key}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionName].formality]} onValueChange={(val) => handleControlChange(key as SectionName, 'formality', val[0])} max={100} step={1} />
+                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType].formality]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
                                                             <div className="flex justify-between text-xs text-muted-foreground">
                                                                 <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
                                                                 <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
@@ -411,7 +303,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`tone-${key}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                                                            <Select name={`tone_${key}`} value={controlState[key as SectionName].tone} onValueChange={(val) => handleControlChange(key as SectionName, 'tone', val)}>
+                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType].tone} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
                                                                 <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                                 <SelectContent>
                                                                     <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
@@ -423,7 +315,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
-                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionName].wordCount} onChange={(e) => handleControlChange(key as SectionName, 'wordCount', e.target.value)} />
+                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType].wordCount} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
                                                         </div>
                                                     </div>
                                                 </TabsContent>
@@ -441,79 +333,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
-                                                    <ScrollArea className="h-60 w-full">
-                                                    <div className="space-y-4 pr-4">
-                                                            <div className="space-y-2">
-                                                                <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-                                                                  <div className="flex items-center space-x-2">
-                                                                    <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
-                                                                    <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
-                                                                </div>
-                                                                <div className="flex items-center space-x-2">
-                                                                    <Checkbox id={`context-plan-${key}`} checked={!!currentSelection.projectPlan} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'projectPlan', null, !!checked)} disabled={!projectPlan} />
-                                                                    <Label htmlFor={`context-plan-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><GanttChartSquare className="h-4 w-4" /> Project Plan</div></Label>
-                                                                </div>
-                                                                {orderedSections.filter(sKey => sKey !== key && sections[sKey]).map(contextKey => (
-                                                                    <div key={`ctx-s-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                        <Checkbox
-                                                                            id={`context-section-${key}-${contextKey}`}
-                                                                            checked={!!currentSelection.sections[contextKey]}
-                                                                            onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'sections', contextKey, !!checked)}
-                                                                        />
-                                                                        <Label htmlFor={`context-section-${key}-${contextKey}`} className="text-sm font-normal">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <BookCheck className="h-4 w-4" />
-                                                                                {t(sectionConfig[contextKey].title)}
-                                                                            </div>
-                                                                        </Label>
-                                                                    </div>
-                                                                ))}
-                                                                {Object.values(sections).filter(Boolean).length <= 1 && orderedSections.filter(sKey => sKey !== key).length > 0 && (
-                                                                    <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.noOtherSections')}</p>
-                                                                )}
-                                                            </div>
-                                                            {Object.keys(diagrams || {}).length > 0 && (
-                                                              <div className="space-y-2 pt-2 border-t">
-                                                                    <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
-                                                                  {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
-                                                                      <div key={`ctx-d-${key}-${contextKey}`} className="flex items-center space-x-2">
-                                                                          <Checkbox
-                                                                              id={`context-diagram-${key}-${contextKey}`}
-                                                                              checked={!!currentSelection.diagrams[contextKey]}
-                                                                              onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'diagrams', contextKey, !!checked)}
-                                                                          />
-                                                                          <Label htmlFor={`context-diagram-${key}-${contextKey}`} className="text-sm font-normal">
-                                                                              <div className="flex items-center gap-2">
-                                                                                  <GitGraph className="h-4 w-4" />
-                                                                                  {t(diagramConfig[contextKey].title)}
-                                                                              </div>
-                                                                          </Label>
-                                                                      </div>
-                                                                  ))}
-                                                              </div>
-                                                            )}
-                                                            {externalContext && externalContext.length > 0 && (
-                                                                <div className="space-y-2 pt-2 border-t">
-                                                                    <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
-                                                                     {externalContext.map((contextItem, index) => (
-                                                                        <div key={index} className="flex items-center space-x-2">
-                                                                            <Checkbox
-                                                                                id={`context-external-${key}-${index}`}
-                                                                                checked={!!currentSelection.externalContext?.[index]}
-                                                                                onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'externalContext', index, !!checked)}
-                                                                            />
-                                                                            <Label htmlFor={`context-external-${key}-${index}`} className="text-sm font-normal">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <FileText className="h-4 w-4" />
-                                                                                    {contextItem.fileName}
-                                                                                </div>
-                                                                            </Label>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                              )}
-                                                        </div>
-                                                    </ScrollArea>
+                                                    <ContextSelector itemKey={key} currentSelection={contextSelection[key]} />
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">
@@ -524,7 +344,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                 <Button
                                                                     type="button"
                                                                     onClick={() => onGenerateSection(key)}
-                                                                    disabled={isAnythingGenerating || !agent?.isEnabled || !hasSelectedContext || !hasCreditsForSingleSection}
+                                                                    disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
                                                                     className="font-headline w-full"
                                                                 >
                                                                     {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
