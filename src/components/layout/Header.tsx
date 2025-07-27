@@ -40,8 +40,6 @@ export function Header() {
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
-    { href: '/ui-agent', label: 'UI Agent', icon: LayoutGrid },
-    { href: '/chat', label: 'Chat', icon: MessageSquare },
     { href: '/academic-solver', label: t('header.academicSolver'), icon: BookCheck },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
   ];
