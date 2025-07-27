@@ -6,7 +6,7 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { projectChat } from '@/ai/flows/project-chat';
-import { toJSON, streamFlow } from 'genkit/next';
+import { toJSON, streamFlow } from '@genkit-ai/next';
 
 const chatRequestSchema = z.object({
   message: z.string(),
