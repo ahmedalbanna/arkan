@@ -198,50 +198,52 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)}>
-        <div className="grid grid-cols-12 gap-8">
-          {/* Left Sidebar */}
-          <div className="col-span-3">
-            <div className="space-y-4">
-              <div className="space-y-1">
-                {navItems.map(item => (
-                  <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
-                ))}
-              </div>
-              <div>
-                <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
-                <div className="space-y-1">
-                  {discoverItems.map(item => (
-                    <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
-                  ))}
+      <Card>
+        <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <CardContent className="p-0">
+            <div className="grid grid-cols-12 gap-8">
+              <div className="col-span-3 border-r p-4">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    {navItems.map(item => (
+                      <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                    ))}
+                  </div>
+                  <div>
+                    <h3 className="px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">Discover</h3>
+                    <div className="space-y-1">
+                      {discoverItems.map(item => (
+                        <NavItem key={item.id} {...item} isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Right Content */}
-          <div className="col-span-9">
-            <div className="p-6">{renderContent()}</div>
-          </div>
-        </div>
-        <CardFooter className="justify-end gap-2 border-t pt-6 mt-8">
-          <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
-          <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button type="button" variant="outline" disabled>Preview</Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Preview is coming soon.</p>
-                </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <Button type="submit" disabled={updateAgentMutation.isPending}>
-            {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Update
-          </Button>
-        </CardFooter>
-      </form>
+              <div className="col-span-9">
+                <div className="p-6 min-h-[500px]">{renderContent()}</div>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="justify-end gap-2 border-t pt-6 mt-0">
+            <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
+            <TooltipProvider>
+              <Tooltip>
+                  <TooltipTrigger asChild>
+                      <Button type="button" variant="outline" disabled>Preview</Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                      <p>Preview is coming soon.</p>
+                  </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Button type="submit" disabled={updateAgentMutation.isPending}>
+              {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Update
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
     </FormProvider>
   );
 }
