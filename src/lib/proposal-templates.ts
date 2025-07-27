@@ -38,27 +38,5 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
             "The timeline should be structured into short, iterative phases called 'Sprints', each lasting 2-4 weeks.",
             "Success criteria should emphasize continuous delivery, stakeholder feedback, and adaptability to change."
         ]
-    },
-    {
-        id: 'marketing-campaign',
-        name: 'Marketing Campaign Brief',
-        description: 'A template tailored for planning and proposing a marketing campaign.',
-        prompt: `You are an expert marketing strategist. A user will provide you with a product or service idea. Your task is to generate a comprehensive marketing campaign proposal (brief).
-
-Your JSON output should have the following structure:
-- category: "Marketing"
-- title: A catchy title for the campaign.
-- campaignObjective: The primary goal of the campaign (e.g., "Increase brand awareness by 20%").
-- targetAudience: A detailed description of the target audience.
-- keyMessage: The core message the campaign will communicate.
-- channels: An array of strings listing the marketing channels to be used (e.g., "Social Media (Instagram, TikTok)", "Email Marketing", "PPC Ads").
-- kpis: An array of strings listing the Key Performance Indicators to measure success (e.g., "Conversion Rate", "Click-Through Rate (CTR)", "Customer Acquisition Cost (CAC)").
-- budget: An object with totalAmount, currency, and a breakdown with marketing-specific items like 'Ad Spend' and 'Content Creation'.
-
-Product Idea: {{{projectIdea}}}`,
-        guidelines: [
-            "Keep the tone persuasive and exciting.",
-            "The budget breakdown must include items like Ad Spend, Influencer Collaboration, and Content Production.",
-        ]
     }
 ];

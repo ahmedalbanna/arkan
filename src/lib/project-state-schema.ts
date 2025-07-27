@@ -18,8 +18,7 @@ export const ProjectStateSchema = z.object({
         explanation: z.string().optional(),
     })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
-    codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string() }).optional(),
-    codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable().optional(),
+    codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string(), codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable() }).optional(),
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
