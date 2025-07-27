@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
@@ -161,7 +161,7 @@ export const DiagramGenerationTools = () => {
     };
 
     if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardContent><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
     }
     
     return (

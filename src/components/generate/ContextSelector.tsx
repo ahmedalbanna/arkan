@@ -10,12 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionName, DiagramType } from '@/ai/schemas';
+import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
-const orderedSections = SectionName.options;
-const orderedDiagrams = DiagramType.options;
+const orderedSections = Object.keys(sectionConfig) as SectionName[];
+const orderedDiagrams = DiagramTypeSchema.options;
 
 interface ContextSelectorProps {
     itemKey: string;
