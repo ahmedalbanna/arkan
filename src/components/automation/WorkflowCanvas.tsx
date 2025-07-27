@@ -6,6 +6,7 @@ import { Plus } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
 import { AddStepDialog } from './AddStepDialog';
+import { AddTriggerDialog } from './AddTriggerDialog';
 
 export function WorkflowCanvas() {
   return (
@@ -21,7 +22,7 @@ export function WorkflowCanvas() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl h-[80vh] p-0">
-                  <AddStepDialog />
+                  <AddTriggerDialog />
               </DialogContent>
           </Dialog>
         </div>
