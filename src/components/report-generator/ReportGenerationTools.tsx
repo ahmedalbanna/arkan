@@ -69,23 +69,23 @@ function ToolsSkeleton() {
         <div className="space-y-6">
             <Card>
                 <CardHeader>
-                    <div className="h-6 w-3/4 bg-muted rounded-md" />
+                    <Skeleton className="h-6 w-3/4" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="h-10 w-full bg-muted rounded-md" />
-                    <div className="h-10 w-full bg-muted rounded-md" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
             <Card>
                 <CardHeader>
-                    <div className="h-6 w-1/2 bg-muted rounded-md" />
-                    <div className="h-4 w-full bg-muted rounded-md" />
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
                 </CardHeader>
                 <CardContent>
-                    <div className="h-10 w-full bg-muted rounded-md" />
+                    <Skeleton className="h-10 w-full" />
                 </CardContent>
                 <CardFooter>
-                    <div className="h-10 w-full bg-muted rounded-md" />
+                    <Skeleton className="h-10 w-full" />
                 </CardFooter>
             </Card>
         </div>
@@ -114,6 +114,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
+        contextSelection,
     } = useReportStore();
     
     const handleGenerationResult = (data: any, variables: any) => {
