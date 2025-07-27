@@ -1,7 +1,8 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, BrainCircuit, FileSpreadsheet, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileSpreadsheet, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
@@ -35,7 +36,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                 <div className="container mx-auto px-4 text-center">
                     <div className="inline-block mb-4">
                         <div className="text-6xl font-headline font-bold text-primary animate-fade-in-up">
-                            {t('home.heroTitle.main')}
+                            {t('header.title')}
                         </div>
                     </div>
                     <div className="inline-block">
@@ -60,7 +61,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                     >
                         <Button asChild size="lg" className="font-headline w-full sm:w-auto">
                             <Link href="/generate">
-                                {t('home.exploreProjects')} <ArrowLeft className="mr-2 rtl:mr-0 rtl:ml-2" />
+                                {t('home.exploreProjects')} <ArrowRight className="ml-2 rtl:ml-0 rtl:mr-2" />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline w-full sm:w-auto">
