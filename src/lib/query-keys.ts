@@ -35,7 +35,6 @@ export const featureKeys = {
 export const teamKeys = {
     all: ['teams'] as const,
     lists: () => [...teamKeys.all, 'list'] as const,
-    list: (filters: { userId: string }) => [...teamKeys.lists(), filters] as const,
     details: () => [...teamKeys.all, 'detail'] as const,
     detail: (teamId: string) => [...teamKeys.details(), teamId] as const,
 }

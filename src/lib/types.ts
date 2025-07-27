@@ -31,3 +31,4 @@ export type { AgentData, Agent } from '@/lib/agents';
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
 export type { HomeworkHistoryEntry } from '@/hooks/useHomeworkSolverStore';
+export type { Team, TeamMember, TeamWithMembers } from '@/services/team-service';
