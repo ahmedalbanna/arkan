@@ -136,16 +136,16 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>لوحة التخصيص</CardTitle>
+        <CardTitle>Customization Panel</CardTitle>
         <CardDescription>
-          يسمح للمستخدمين بتعديل الأنماط المرئية للقالب ، مثل الخطوط والألوان والخلفيات.
+          Allows users to modify the visual styles of a template, such as fonts, colors, and backgrounds.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         
         {/* Template Selector */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">اختر القالب</h3>
+          <h3 className="text-lg font-semibold mb-2">Select Template</h3>
            <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
                 <SelectTrigger>
                     <SelectValue placeholder="Select a proposal template" />
@@ -162,10 +162,10 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
         
         {/* Style Editor */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">محرر الأنماط</h3>
+          <h3 className="text-lg font-semibold mb-2">Style Editor</h3>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="font-family">الخط</Label>
+              <Label htmlFor="font-family">Font</Label>
               <Select defaultValue="Inter" onValueChange={(value) => handleStyleChange('fontFamily', value)}>
                 <SelectTrigger id="font-family">
                   <SelectValue />
@@ -178,7 +178,7 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="font-size">حجم الخط</Label>
+              <Label htmlFor="font-size">Font Size</Label>
               <Select defaultValue="16px" onValueChange={(value) => handleStyleChange('fontSize', value)}>
                 <SelectTrigger id="font-size">
                   <SelectValue />
@@ -191,15 +191,15 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="h1-color">لون العنوان H1</Label>
+              <Label htmlFor="h1-color">H1 Color</Label>
               <Input id="h1-color" type="color" defaultValue={styles.h1Color} onChange={(e) => handleStyleChange('h1Color', e.target.value)} />
             </div>
              <div className="space-y-2">
-              <Label htmlFor="h2-color">لون العنوان H2</Label>
+              <Label htmlFor="h2-color">H2 Color</Label>
               <Input id="h2-color" type="color" defaultValue={styles.h2Color} onChange={(e) => handleStyleChange('h2Color', e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="text-color">لون النص</Label>
+              <Label htmlFor="text-color">Text Color</Label>
               <Input id="text-color" type="color" defaultValue={styles.textColor} onChange={(e) => handleStyleChange('textColor', e.target.value)} />
             </div>
           </div>
@@ -209,7 +209,7 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
 
         {/* Component Library */}
         <div>
-          <h3 className="text-lg font-semibold mb-2">مكتبة المكونات</h3>
+          <h3 className="text-lg font-semibold mb-2">Component Library</h3>
           <div className="grid grid-cols-3 gap-2">
             {components.map((component) => (
               <div key={component.name} className="flex flex-col items-center justify-center p-2 border rounded-md bg-muted/50 cursor-grab">
@@ -224,7 +224,7 @@ function CustomizationPanel({ styles, setStyles, content, setContent, selectedTe
         
         {/* Export Options */}
         <div>
-           <h3 className="text-lg font-semibold mb-2">خيارات التصدير</h3>
+           <h3 className="text-lg font-semibold mb-2">Export Options</h3>
            <div className="flex gap-2">
               <Button variant="outline" className="w-full">
                 <Download className="mr-2 h-4 w-4" /> DOCX
@@ -356,8 +356,8 @@ function PreviewPanel({ styles, content, setContent, templateId }: { styles: any
     <Card className="h-full min-h-[500px] lg:h-[calc(100vh-160px)]">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-            <CardTitle>معاينة القالب</CardTitle>
-            <CardDescription>تعرض معاينة حية للقالب المحدد ، وتعرض كيف سيبدو مع البيانات المخصصة.</CardDescription>
+            <CardTitle>Template Preview</CardTitle>
+            <CardDescription>A live preview of the selected template, showing how it would look with customized data.</CardDescription>
         </div>
         <Button variant="outline" size="icon" onClick={() => setViewMode(viewMode === 'preview' ? 'editor' : 'preview')}>
             {viewMode === 'preview' ? <PenSquare className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -402,10 +402,10 @@ export default function DesignPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <Palette className="w-10 h-10" />
-          استوديو التصميم
+          Design Studio
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          أنشئ وخصص ميزاتك الجديدة هنا.
+          Create and customize your new features here.
         </p>
       </div>
 

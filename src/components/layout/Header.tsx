@@ -40,6 +40,7 @@ export function Header() {
     { href: '/', label: t('header.home'), icon: HomeIcon },
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
+    { href: '/design', label: t('header.design'), icon: Palette },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
   ];
   
