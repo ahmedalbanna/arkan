@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, Package } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -53,6 +53,10 @@ const PresentationGenerator = dynamic(() => import('@/components/presentation-ge
   loading: () => <LoadingSkeleton />,
 });
 const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/ProjectPlanGenerator'), {
+  ssr: false,
+  loading: () => <LoadingSkeleton />,
+});
+const CodebaseGenerator = dynamic(() => import('@/components/codebase-generator/CodebaseGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -136,6 +140,7 @@ function GeneratePageContent() {
       { id: 'plan', enabled: isFeatureEnabled('plan') },
       { id: 'report', enabled: isFeatureEnabled('report') },
       { id: 'diagram', enabled: isFeatureEnabled('diagram') },
+      { id: 'codebase', enabled: isFeatureEnabled('codebase') },
       { id: 'code', enabled: isFeatureEnabled('code') },
       { id: 'presentation', enabled: isFeatureEnabled('presentation') },
   ].filter(tab => tab.enabled).map(tab => tab.id);
@@ -162,7 +167,7 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-6">
+                    <TabsList className="grid w-full h-auto pb-2 grid-cols-2 sm:grid-cols-4 md:grid-cols-7">
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
@@ -181,6 +186,11 @@ function GeneratePageContent() {
                         {isFeatureEnabled('diagram') && (
                             <TabsTrigger value="diagram" className="gap-2" disabled={!proposal}>
                                 <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
+                            </TabsTrigger>
+                        )}
+                         {isFeatureEnabled('codebase') && (
+                            <TabsTrigger value="codebase" className="gap-2" disabled={!proposal}>
+                                <Package className="h-4 w-4" /> Codebase
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('code') && (
@@ -207,6 +217,9 @@ function GeneratePageContent() {
                         </TabsContent>
                         <TabsContent value="diagram" className="h-full">
                             {activeTab === 'diagram' && <DiagramGenerator />}
+                        </TabsContent>
+                        <TabsContent value="codebase" className="h-full">
+                            {activeTab === 'codebase' && <CodebaseGenerator />}
                         </TabsContent>
                         <TabsContent value="code" className="h-full">
                             {activeTab === 'code' && <CodeGenerator />}
