@@ -24,7 +24,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
+import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 
 
 interface CommandModeSelectorProps {
@@ -73,6 +74,7 @@ function CommandModeSelector({ value, onChange }: CommandModeSelectorProps) {
 
 export function CreateCommandDialog({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [commandMode, setCommandMode] = useState<'default' | 'plan-and-execute'>('default');
 
   return (
@@ -98,7 +100,14 @@ export function CreateCommandDialog({ children }: { children: React.ReactNode })
             <div className="grid grid-cols-2 gap-4">
                  <CommandModeSelector value={commandMode} onChange={setCommandMode} />
                  <div className="flex items-center justify-center">
-                    <Button variant="outline"><BookOpen className="mr-2 h-4 w-4" /> View prompts</Button>
+                    <Dialog open={isLibraryOpen} onOpenChange={setIsLibraryOpen}>
+                        <DialogTrigger asChild>
+                           <Button variant="outline"><BookOpen className="mr-2 h-4 w-4" /> View prompts</Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-5xl h-[90vh]">
+                            <PromptTemplateLibrary />
+                        </DialogContent>
+                    </Dialog>
                  </div>
             </div>
 
