@@ -36,6 +36,7 @@ import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
+import { Textarea } from '../ui/textarea';
 
 
 const orderedSections = SectionNameSchema.options;
