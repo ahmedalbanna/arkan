@@ -88,9 +88,52 @@ export async function GET(
   }
 }
 
-// PUT is no longer used for form submissions, which now use a Server Action.
-// This endpoint can be kept for other API-based updates or removed if not needed.
-// For now, we will leave it but note that the primary edit form does not use it.
+const updateUserSchema = z.object({
+  name: z.string().min(1, 'Name is required').optional(),
+  email: z.string().email('Invalid email address').optional(),
+  bio: z.string().optional(),
+  credits: z.coerce.number().int().min(0).optional(),
+  role: z.enum(['user', 'admin']).optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
+});
+
+// PUT (update) a user profile
+export async function PUT(request: Request, { params }: { params: { id: string } }) {
+    try {
+        const { id: userId } = params;
+        const accessCheck = await verifyAccess(request, userId);
+        if (!accessCheck.authorized) {
+            return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
+        }
+
+        const body = await request.json();
+        const validation = updateUserSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
+
+        const updateData = {
+            ...validation.data,
+            updatedAt: new Date().toISOString()
+        };
+
+        await adminDb.collection("users").doc(userId).update(updateData);
+
+        // Revalidate paths to update cached data
+        revalidatePath(`/profile/${userId}`);
+        if(accessCheck.isAdmin) {
+             revalidatePath('/admin/manage-users');
+        }
+
+        const updatedUser = await getUserProfile(userId);
+
+        return NextResponse.json(updatedUser, { status: 200 });
+    } catch (error) {
+        console.error(`Error updating user ${params.id}:`, error);
+        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    }
+}
+
 
 export async function DELETE(
   req: Request,

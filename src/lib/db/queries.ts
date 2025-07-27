@@ -137,7 +137,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
     });
 }
 
-export async function updateUserByAdmin(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
+export async function updateUserByAdmin(userId: string, data: Partial<Omit<UserProfile, 'id'>>): Promise<UserProfile> {
   const updatePayload = {
       ...data,
       updatedAt: new Date().toISOString()
