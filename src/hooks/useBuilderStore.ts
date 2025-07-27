@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -11,6 +12,7 @@ import { useDiagramStore } from "./useDiagramStore";
 import { usePresentationStore } from "./usePresentationStore";
 import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
 import { useProjectPlanStore } from "./useProjectPlanStore";
+import { useCodebaseStore } from "./useCodebaseStore";
 import type { ProjectState } from "@/lib/types";
 import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
 import { z } from "zod";
@@ -76,6 +78,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         usePresentationStore.getState().newSession();
         useCodeGeneratorStore.getState().newSession();
         useProjectPlanStore.getState().newSession();
+        useCodebaseStore.getState().newSession();
         toast({
           title: "New Session Started",
           description: "All project content has been cleared.",
@@ -106,7 +109,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useReportStore.getState().loadState(newState);
         useDiagramStore.getState().loadState(newState);
         usePresentationStore.getState().loadState(newState);
+        useCodeGeneratorStore.getState().loadState(newState);
         useProjectPlanStore.getState().loadState(newState);
+        useCodebaseStore.getState().loadState(newState);
 
         toast({
           title: "Project Loaded",
@@ -123,6 +128,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
+        codebase: useCodebaseStore.getState().codebase,
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
       }),
@@ -146,6 +152,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useDiagramStore.getState().newSession();
         usePresentationStore.getState().newSession();
         useProjectPlanStore.getState().newSession();
+        useCodebaseStore.getState().newSession();
       },
       handleProposalUpdate: (path, value) => {
         const { proposal } = get();
@@ -183,7 +190,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
     }),
     {
-      name: "arkan-builder-state-v2", // Bump version to avoid conflicts
+      name: "arkan-builder-state-v3", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         name: state.name,
@@ -194,6 +201,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
+        codebase: useCodebaseStore.getState().codebase,
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
       }),
@@ -218,6 +226,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         usePresentationStore.getState().loadState(persistedState);
         useCodeGeneratorStore.getState().loadState(persistedState);
         useProjectPlanStore.getState().loadState(persistedState);
+        useCodebaseStore.getState().loadState(persistedState);
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },
