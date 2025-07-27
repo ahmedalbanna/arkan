@@ -37,6 +37,8 @@ import { EvaluationTools } from '../EvaluationTools';
 import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+
 
 const orderedSections = SectionNameSchema.options;
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -96,7 +98,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const { t, locale } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, userProfile } = useAuth();
     const queryClient = useQueryClient();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
@@ -200,6 +202,17 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         reportGenerationMutation.mutate({ body, token });
     };
 
+    const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
+    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
+    
+    // Calculate credits needed for full report
+    const sectionsToGenerate = selectedTemplate?.agentIds
+        .map(agentId => (Object.keys(sectionConfig) as SectionName[]).find(key => sectionConfig[key].agentId === agentId))
+        .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !sections[sectionKey]) || [];
+    const fullReportCreditCost = sectionsToGenerate.length;
+    const hasEnoughCreditsForFullReport = userProfile ? userProfile.credits >= fullReportCreditCost : false;
+    const hasCreditsForSingleSection = userProfile ? userProfile.credits > 0 : false;
+
     if (!agentsLoaded) {
         return (
             <Card>
@@ -214,9 +227,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             </Card>
         );
     }
-
-    const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
-    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
@@ -246,12 +256,28 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             </Select>
                             <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
                         </div>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="w-full">
+                                        <Button 
+                                            onClick={onGenerateFullReport} 
+                                            className="w-full mb-4 font-headline" 
+                                            disabled={!proposal || !hasEnoughCreditsForFullReport || fullReportCreditCost === 0 || isAnythingGenerating}
+                                        >
+                                            {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            {fullReportCreditCost > 0 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
+                                        </Button>
+                                    </div>
+                                </TooltipTrigger>
+                                {!hasEnoughCreditsForFullReport && (
+                                    <TooltipContent>
+                                        <p>{t('builder.toasts.insufficientCredits')}</p>
+                                    </TooltipContent>
+                                )}
+                            </Tooltip>
+                        </TooltipProvider>
 
-                        <Button onClick={onGenerateFullReport} className="w-full mb-4 font-headline" disabled={!proposal}>
-                            {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                            {t('builder.reportGenerator.GenerateFullReport')}
-                        </Button>
-                        
                         <Accordion type="multiple" className="w-full space-y-1">
                             {availableSections.map((key) => {
                                 const agent = agents.find(a => a.id === sectionConfig[key as SectionName]?.agentId);
@@ -432,16 +458,28 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">
-                                               <Button
-                                                    type="button"
-                                                    onClick={() => onGenerateSection(key)}
-                                                    disabled={isAnythingGenerating || !agent?.isEnabled || !hasSelectedContext}
-                                                    className="font-headline"
-                                                    title={!agent?.isEnabled ? 'This agent is disabled' : !hasSelectedContext ? "Please select at least one context item" : `Generate ${t(title)}`}
-                                                >
-                                                    {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                                    {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
-                                                </Button>
+                                               <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="w-full">
+                                                                <Button
+                                                                    type="button"
+                                                                    onClick={() => onGenerateSection(key)}
+                                                                    disabled={isAnythingGenerating || !agent?.isEnabled || !hasSelectedContext || !hasCreditsForSingleSection}
+                                                                    className="font-headline w-full"
+                                                                >
+                                                                    {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                                    {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
+                                                                </Button>
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        {!hasCreditsForSingleSection && (
+                                                            <TooltipContent>
+                                                                <p>{t('builder.toasts.insufficientCredits')}</p>
+                                                            </TooltipContent>
+                                                        )}
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                             </div>
                                         </AccordionContent>
                                     </AccordionItem>
