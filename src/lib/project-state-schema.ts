@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema } from '@/ai/schemas';
+import type { Codebase } from '@/ai/flows/generate-codebase';
 
 // This schema is defined in a separate, server-only file to prevent circular dependencies
 // that can occur when client and server modules import from the same files (e.g., types.ts and schemas.ts).
