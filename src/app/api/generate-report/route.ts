@@ -19,18 +19,19 @@ const generateSectionSchema = z.object({
   sectionToGenerate: SectionNameSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(), 
+  guidelines: z.array(z.string()).optional(),
   instructionText: z.string().optional(),
   externalContextContent: z.string().optional(),
 });
 
 // Schema for generating a full report based on a template
 const generateFullReportSchema = z.object({
-    proposal: ProjectProposalSchema,
+    proposal: ProjectProposalSchema.optional(),
     projectPlan: ProjectPlanSchema.optional().nullable(),
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+    externalContextContent: z.string().optional(),
 });
 
 
@@ -50,7 +51,12 @@ export async function POST(request: Request) {
     // Check if it's a full report generation request
     const fullReportValidation = generateFullReportSchema.safeParse(body);
     if (fullReportValidation.success) {
-        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {} } = fullReportValidation.data;
+        const { proposal, projectPlan, templateId, existingSections = {}, existingDiagrams = {}, externalContextContent } = fullReportValidation.data;
+
+        // A proposal or external context is required to generate a report.
+        if (!proposal && !externalContextContent) {
+            return NextResponse.json({ message: "A proposal or external context is required to generate a report." }, { status: 400 });
+        }
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
@@ -74,7 +80,7 @@ export async function POST(request: Request) {
         }
         
         // Call the new evaluation agent to get the optimal configuration
-        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate };
+        const evalInput = { proposal, projectPlan, existingSections, existingDiagrams, sectionsToGenerate, externalContextContent };
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
@@ -82,24 +88,43 @@ export async function POST(request: Request) {
 
         const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
+        // Sequentially generate each section, adding the result to the context for the next one
         for (const config of evalResult.configs) {
             const agentInfo = sectionConfig[config.section as SectionName];
             
             const instructionText = `- The writing style should be ${config.instructions.formality}.\n- Adopt a ${config.instructions.tone} tone.`;
             
+            // For each section, provide the context that has been generated SO FAR.
+            const currentContextSections = config.context.sections?.reduce((acc, key) => {
+                if (generatedSections[key as SectionName]) {
+                    acc[key as SectionName] = generatedSections[key as SectionName];
+                }
+                return acc;
+            }, {} as Record<SectionName, string | undefined>);
+
+             const currentContextDiagrams = config.context.diagrams?.reduce((acc, key) => {
+                if (existingDiagrams[key as DiagramType]) {
+                    acc[key as DiagramType] = existingDiagrams[key as DiagramType];
+                }
+                return acc;
+            }, {} as Record<DiagramType, string | undefined>);
+
+
             const agentInput = {
                 proposal,
                 projectPlan,
                 sectionToGenerate: config.section,
-                otherSections: config.context.sections?.reduce((acc, key) => ({ ...acc, [key]: generatedSections[key as SectionName] }), {}),
-                otherDiagrams: config.context.diagrams?.reduce((acc, key) => ({ ...acc, [key]: existingDiagrams[key as DiagramType] }), {}),
+                otherSections: currentContextSections,
+                otherDiagrams: currentContextDiagrams,
                 guidelines: config.guidelines,
                 instructionText,
+                externalContextContent
             };
 
             const result = await generateReportSection(agentInput);
             await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { [result.sectionName]: result.content } });
     
+            // Add the newly generated section to our collected content
             generatedSections[result.sectionName as SectionName] = result.content;
         }
 
@@ -111,6 +136,12 @@ export async function POST(request: Request) {
     if (singleSectionValidation.success) {
         await deductCredit(userId, 1);
         const agentInput = singleSectionValidation.data;
+
+        // A proposal or external context is required to generate a section.
+        if (!agentInput.proposal && !agentInput.externalContextContent) {
+            return NextResponse.json({ message: "A proposal or external context is required to generate a report section." }, { status: 400 });
+        }
+
         const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
         if (!agentInfo) {
