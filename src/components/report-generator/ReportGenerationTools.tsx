@@ -32,37 +32,10 @@ import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
-import { type GuidelineState } from '@/hooks/useReportStore';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import type { GuidelineState } from '@/hooks/useReportStore';
 
 const orderedSections = SectionNameSchema.options;
-
-// Helper function to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
-    const agent = agents.find(a => a.id === sectionConfig[itemKey as SectionNameType]?.agentId);
-    const currentGuidelineState = guidelineState[itemKey];
-
-    if (!agent || !currentGuidelineState) {
-        return guidelineState[itemKey]?.custom || [];
-    }
-
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
-        return currentGuidelineState.custom || [];
-    }
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (currentGuidelineState.checked[index]) {
-            guidelines.push(g.text);
-        }
-    });
-
-    if (currentGuidelineState.custom) {
-        guidelines.push(...currentGuidelineState.custom);
-    }
-    
-    return guidelines;
-};
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -137,6 +110,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         addExternalContext,
         removeExternalContext,
         controlState,
+        guidelineState,
+        contextSelection,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         setSection,
@@ -144,8 +119,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
-        contextSelection,
-        guidelineState
     } = useReportStore();
     
     const handleGenerationResult = (data: any, variables: any) => {
@@ -185,7 +158,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         const token = await firebaseUser.getIdToken();
         const { getFullState } = useBuilderStore.getState();
-        const { guidelineState, contextSelection } = useReportStore.getState();
 
         const fullState = getFullState();
 
@@ -193,6 +165,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         
         const exampleFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context');
+        
+        const agent = fullState.agents?.find(a => a.id === sectionConfig[section as SectionNameType]?.agentId);
 
         const body = {
             proposal: selectedContext.proposal ? fullState.proposal : undefined,
@@ -200,7 +174,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             sectionToGenerate: section,
             otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionNameType]}), {}),
             otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
-            guidelines: getSelectedGuidelines(section, guidelineState, fullState.agents || []),
+            guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: generateInstructionText(controlState[section]),
             exampleFiles,
             contextFiles,
@@ -228,8 +202,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             templateId: selectedReportTemplateId,
             existingSections: fullState.sections,
             existingDiagrams: Object.fromEntries(Object.entries(fullState.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            exampleFiles: exampleFiles && exampleFiles.length > 0 ? exampleFiles : undefined,
-            contextFiles: contextFiles && contextFiles.length > 0 ? contextFiles : undefined,
+            exampleFiles,
+            contextFiles,
         };
         setActiveMutationKey(selectedReportTemplateId);
         reportGenerationMutation.mutate({ body, token });
@@ -308,8 +282,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             {availableSections.map((key) => {
                                 const { title, icon: Icon, agentId } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (externalContext.length > 0 && currentSelection.externalContext.some(v => v));
+                                const currentSelection = contextSelection[key];
+                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -373,7 +347,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
-                                                    <ContextSelector itemKey={key} currentSelection={contextSelection[key]} />
+                                                    <ContextSelector itemKey={key} />
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">

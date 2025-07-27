@@ -17,39 +17,17 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateDiagramOutput } from '@/ai/flows/generate-diagrams';
-import type { GuidelineState } from '@/hooks/useReportStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
 
 const orderedDiagrams = DiagramTypeSchema.options;
-
-// Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
-    const agent = agents.find(a => a.id.startsWith('generate-') && a.id.endsWith('-diagram') && a.id.includes(itemKey));
-
-    const currentGuidelineState = guidelineState[itemKey];
-    
-    if (!agent || !currentGuidelineState) return guidelineState[itemKey]?.custom || [];
-
-    const promptConfig = agent.prompt as AgentPrompt;
-    if (typeof promptConfig === 'string' || !promptConfig.guidelines) {
-        return currentGuidelineState.custom || [];
-    }
-
-    const guidelines: string[] = [];
-    promptConfig.guidelines.forEach((g, index) => {
-        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
-    });
-    guidelines.push(...currentGuidelineState.custom);
-    return guidelines;
-};
 
 async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateDiagramOutput & { imageUrl: string }> {
     const response = await fetch('/api/generate-diagrams', {
@@ -73,7 +51,6 @@ export const DiagramGenerationTools = () => {
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const explainMutation = useExplainDiagram();
 
-    const { projectPlan } = useProjectPlanStore();
     const { setDiagram, setDiagramExplanation } = useDiagramStore();
 
     const {
@@ -145,6 +122,8 @@ export const DiagramGenerationTools = () => {
         
         const exampleFiles = fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example');
         const contextFiles = fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context');
+        
+        const agent = agents.find(a => a.id === diagramConfig[diagramType as DiagramType]?.agentId);
 
         const body = {
             proposal: selectedContext.proposal ? fullState.proposal : undefined,
@@ -152,7 +131,7 @@ export const DiagramGenerationTools = () => {
             diagramToGenerate: diagramType,
             otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionName]}), {}),
             otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
-            guidelines: getSelectedGuidelines(diagramType, guidelineState, agents),
+            guidelines: getSelectedGuidelines(agent, guidelineState[diagramType]),
             exampleFiles,
             contextFiles,
         };
@@ -161,7 +140,7 @@ export const DiagramGenerationTools = () => {
     };
 
     if (!agentsLoaded) {
-        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle></CardHeader><CardContent><Loader2 className="animate-spin" /></CardContent></Card>;
+        return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle><CardContent><Loader2 className="animate-spin" /></CardContent></CardHeader></Card>;
     }
     
     return (
@@ -179,7 +158,7 @@ export const DiagramGenerationTools = () => {
                         const { title, icon: Icon, agentId } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         const currentSelection = useReportStore.getState().contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                        const hasSelectedContext = !!useBuilderStore.getState().proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (useReportStore.getState().externalContext.length > 0 && currentSelection.externalContext.some(v => v));
+                        const hasSelectedContext = !!useBuilderStore.getState().proposal || !!useProjectPlanStore.getState().projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (useReportStore.getState().externalContext.length > 0 && currentSelection.externalContext.some(v => v));
 
                         return (
                             <AccordionItem value={key} key={key}>
@@ -199,7 +178,7 @@ export const DiagramGenerationTools = () => {
                                         </TabsContent>
                                         
                                         <TabsContent value="context" className="pt-4">
-                                            <ContextSelector itemKey={key} currentSelection={currentSelection} />
+                                            <ContextSelector itemKey={key} />
                                         </TabsContent>
                                     </Tabs>
                                     <div className="pt-2">
