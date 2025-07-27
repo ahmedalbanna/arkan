@@ -71,8 +71,21 @@ export async function GET(request: Request) {
             ...doc.data()
         }));
         
+        // --- Correct Credits Used Calculation ---
         const defaultCredits = await getNewUserCredits();
-        const creditsUsed = defaultCredits - userProfile.credits;
+        
+        // Fetch all verified transactions for the user
+        const verifiedTransactionsSnapshot = await adminDb.collection('transactions')
+            .where('userId', '==', userCheck.userId)
+            .where('status', '==', 'verified')
+            .get();
+            
+        const purchasedCredits = verifiedTransactionsSnapshot.docs.reduce((sum, doc) => {
+            return sum + (doc.data().credits || 0);
+        }, 0);
+
+        const totalCreditsGranted = defaultCredits + purchasedCredits;
+        const creditsUsed = totalCreditsGranted - userProfile.credits;
 
 
         return NextResponse.json({
