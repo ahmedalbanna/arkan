@@ -45,6 +45,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useLogout } from '@/hooks/use-user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageToggle } from '@/components/LanguageToggle';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const adminNavLinks = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
@@ -61,6 +62,39 @@ const adminNavLinks = [
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
 
+function AdminLayoutSkeleton() {
+    return (
+        <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+            <aside className="hidden border-r bg-sidebar md:block">
+                <div className="flex h-full max-h-screen flex-col gap-2">
+                    <header className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                        <Skeleton className="h-6 w-32" />
+                    </header>
+                    <nav className="flex-1 p-4 space-y-2">
+                        {Array.from({ length: 8 }).map((_, i) => (
+                            <Skeleton key={i} className="h-8 w-full" />
+                        ))}
+                    </nav>
+                </div>
+            </aside>
+            <div className="flex flex-col">
+                <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+                    <Skeleton className="h-8 w-8 md:hidden" />
+                    <div className="w-full flex-1" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                </header>
+                <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/40">
+                    <Skeleton className="h-32 w-full" />
+                    <Skeleton className="h-64 w-full" />
+                </main>
+            </div>
+        </div>
+    );
+}
+
+
 function AdminLayoutContent({ children }: { children: ReactNode }) {
     const pathname = usePathname();
     const { t } = useLocalization();
@@ -74,12 +108,8 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         }
     }, [isAuthLoading, userProfile]);
 
-    if (isAuthLoading || userProfile?.role !== 'admin') {
-        return (
-             <div className="flex h-screen w-full items-center justify-center">
-                <p>Loading...</p>
-             </div>
-        );
+    if (isAuthLoading || !userProfile || userProfile.role !== 'admin') {
+        return <AdminLayoutSkeleton />;
     }
     
     const renderNavLinks = (isMobile = false) => adminNavLinks.map(link => (
