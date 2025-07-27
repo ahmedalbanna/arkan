@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand, Download, X, Package, Code } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand, Download, X, Package, Code, File, Folder } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,13 +15,118 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
 import type { Codebase } from '@/ai/flows/generate-codebase';
-import FileTreeView from './FileTreeView';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+
+// --- Start of inlined FileTreeView component logic ---
+
+// Helper function to build a tree structure from file paths
+const buildFileTree = (files: { path: string; content: string }[]) => {
+  const tree: any = {};
+  files.forEach(file => {
+    const parts = file.path.split('/');
+    let current = tree;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (i === parts.length - 1) {
+        current[part] = file.content;
+      } else {
+        current[part] = current[part] || {};
+        current = current[part];
+      }
+    }
+  });
+  return tree;
+};
+
+// Recursive component to render the tree
+const Tree = ({ data, level = 0 }: { data: any; level?: number }) => {
+  return (
+    <div style={{ paddingLeft: `${level * 1}rem` }}>
+      {Object.entries(data).map(([name, content]) => (
+        <div key={name}>
+          {typeof content === 'string' ? (
+            <div className="flex items-center gap-2 p-1 text-sm">
+              <File className="h-4 w-4 shrink-0" />
+              <span>{name}</span>
+            </div>
+          ) : (
+            <Accordion type="single" collapsible>
+              <AccordionItem value={name} className="border-none">
+                <AccordionTrigger className="p-1 hover:no-underline [&[data-state=open]>svg]:rotate-90">
+                  <div className="flex items-center gap-2">
+                    <Folder className="h-4 w-4" />
+                    <span className="font-semibold">{name}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <Tree data={content} level={level + 1} />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+function FileTreeView({ codebase }: { codebase: Codebase }) {
+  const [isZipping, setIsZipping] = useState(false);
+  const { toast } = useToast();
+  const fileTree = buildFileTree(codebase.files);
+
+  const handleDownload = async () => {
+    setIsZipping(true);
+    try {
+      const zip = new JSZip();
+      codebase.files.forEach(file => {
+        zip.file(file.path, file.content);
+      });
+      const blob = await zip.generateAsync({ type: 'blob' });
+      saveAs(blob, 'generated-codebase.zip');
+    } catch (error) {
+      console.error('Error creating ZIP file:', error);
+      toast({
+        title: 'Download Failed',
+        description: 'An error occurred while creating the ZIP file.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
+  return (
+    <Card className="h-full flex flex-col">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+            <div>
+                <CardTitle className="font-headline text-2xl text-primary">Generated Codebase</CardTitle>
+                <CardDescription>Review the generated files and download the ZIP archive.</CardDescription>
+            </div>
+            <Button onClick={handleDownload} disabled={isZipping}>
+                {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                Download .ZIP
+            </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-grow overflow-hidden">
+        <ScrollArea className="h-full border rounded-md p-4">
+            <Tree data={fileTree} />
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
+
+// --- End of inlined FileTreeView component logic ---
+
 
 async function generateCodeApi(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate-code', {
