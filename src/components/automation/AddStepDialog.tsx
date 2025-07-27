@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +7,7 @@ import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import {
   Eye, Apps, Bot, Wrench, ListFilter, GitBranch, Hourglass, Repeat, Search, Globe, FileCode, Youtube, Send,
-  Check, File, Image as ImageIcon, Briefcase, MessageSquare, Calendar, Zap, Rocket, Pen, Mail, User, List, ShoppingCart, Newspaper, BarChart, Settings, SearchCode, Beaker, GraduationCap, Building, Landmark, Phone, BrainCircuit, Filter
+  Check, File, Image as ImageIcon, Briefcase, MessageSquare, Calendar, Zap, Rocket, Pen, Mail, User, List, ShoppingCart, Newspaper, BarChart, Settings, SearchCode, Beaker, GraduationCap, Building, Landmark, Phone, BrainCircuit, Filter, Sparkles, FolderKanban, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
