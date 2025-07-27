@@ -7,6 +7,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  isToolResponse?: boolean; // New optional field
 }
 
 interface ChatState {
