@@ -11,7 +11,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogTrigger } from '../ui/dialog';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '../ui/scroll-area';
@@ -59,12 +58,10 @@ export default function DiagramViewer({
     const { t } = useLocalization();
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
-    const [viewMode, setViewMode] = useState<'image' | 'code'>('image');
+    const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
     const [isExplaining, setIsExplaining] = useState(false);
-    const [isExplainDialogOpen, setIsExplainDialogOpen] = useState(false);
     const { firebaseUser, refetchUser } = useAuth();
     
-
     const handleCopy = () => {
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
@@ -88,17 +85,14 @@ export default function DiagramViewer({
     };
     
     const handleExplain = async () => {
-        if (diagramData.explanation) {
-            setIsExplainDialogOpen(true);
-            return;
-        }
+        setViewMode('explanation'); // Switch to explanation view immediately
+        if (diagramData.explanation) return; // Don't re-fetch if already exists
 
         if (!firebaseUser) {
             toast({ title: 'Authentication Required', variant: 'destructive' });
             return;
         }
         setIsExplaining(true);
-        setIsExplainDialogOpen(true);
         try {
             const response = await fetch(diagramData.imageUrl);
             const blob = await response.blob();
@@ -113,7 +107,6 @@ export default function DiagramViewer({
             };
         } catch (error: any) {
             toast({ title: 'Explanation Failed', description: error.message, variant: 'destructive' });
-            setIsExplainDialogOpen(false); // Close dialog on error
         } finally {
              setIsExplaining(false);
         }
@@ -122,8 +115,8 @@ export default function DiagramViewer({
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
             <CardContent className="flex-grow p-4 md:p-6">
-                 <div className="flex h-full items-center justify-center relative group">
-                    {viewMode === 'image' ? (
+                <div className="flex h-full items-center justify-center relative group">
+                    {viewMode === 'image' && (
                         <Image
                             src={diagramData.imageUrl}
                             alt={`Rendered ${diagramTitle}`}
@@ -132,7 +125,8 @@ export default function DiagramViewer({
                             className="w-full h-auto object-contain"
                             unoptimized
                         />
-                     ) : (
+                    )}
+                    {viewMode === 'code' && (
                         <Textarea
                             readOnly={isReadOnly || isUpdating}
                             value={diagramData.plantUmlCode}
@@ -140,7 +134,21 @@ export default function DiagramViewer({
                             className="h-full p-4 bg-muted/30 text-left font-mono text-xs rounded-md border-0 resize-none focus-visible:ring-1"
                             dir="ltr"
                         />
-                     )}
+                    )}
+                    {viewMode === 'explanation' && (
+                        <ScrollArea className="h-full w-full">
+                             <div className="prose dark:prose-invert max-w-none p-4">
+                                {isExplaining && !diagramData.explanation ? (
+                                    <div className="text-center p-8 text-muted-foreground">
+                                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+                                         <p>The AI is analyzing the diagram...</p>
+                                    </div>
+                                ) : (
+                                    <ReactMarkdown components={markdownComponents}>{diagramData.explanation || "No explanation available yet."}</ReactMarkdown>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    )}
                 </div>
             </CardContent>
              <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
@@ -151,40 +159,11 @@ export default function DiagramViewer({
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
                         <PenSquare className="h-4 w-4 mr-2"/> Edit
                     </Button>
+                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplain} disabled={isExplaining}>
+                         {isExplaining ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <FileText className="h-4 w-4 mr-2"/>} Explain
+                    </Button>
                 </div>
                  <div className="flex items-center gap-1">
-                     <Dialog open={isExplainDialogOpen} onOpenChange={setIsExplainDialogOpen}>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleExplain} disabled={isExplaining}>
-                                            {isExplaining ? <Loader2 className="h-4 w-4 animate-spin"/> : <Wand2 className="h-4 w-4" />}
-                                        </Button>
-                                    </DialogTrigger>
-                                </TooltipTrigger>
-                                <TooltipContent><p>Explain Diagram</p></TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                        <DialogContent className="max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2"><FileText /> Diagram Explanation</DialogTitle>
-                            </DialogHeader>
-                            <ScrollArea className="max-h-[60vh] pr-4">
-                                <div className="prose dark:prose-invert max-w-none">
-                                    {isExplaining && !diagramData.explanation ? (
-                                        <div className="text-center p-8 text-muted-foreground">
-                                             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                                             <p>The AI is analyzing the diagram...</p>
-                                        </div>
-                                    ) : (
-                                        <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
-                                    )}
-                                </div>
-                            </ScrollArea>
-                        </DialogContent>
-                    </Dialog>
-
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -195,7 +174,6 @@ export default function DiagramViewer({
                             <TooltipContent><p>{isCopied ? t('builder.diagramGenerator.tooltips.copied') : t('builder.diagramGenerator.tooltips.copy')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-
                      <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -206,7 +184,6 @@ export default function DiagramViewer({
                             <TooltipContent><p>{t('builder.diagramGenerator.tooltips.download')}</p></TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
-
                     {onUpdate && (
                          <Button
                             onClick={onUpdate}
