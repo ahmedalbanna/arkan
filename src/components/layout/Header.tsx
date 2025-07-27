@@ -5,7 +5,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -41,6 +41,7 @@ export function Header() {
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
     { href: '/ui-agent', label: 'UI Agent', icon: LayoutGrid },
+    { href: '/chat', label: 'Chat', icon: MessageSquare },
     { href: '/academic-solver', label: t('header.academicSolver'), icon: BookCheck },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck },
   ];
