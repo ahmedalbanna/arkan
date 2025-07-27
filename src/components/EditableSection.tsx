@@ -22,6 +22,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 
 const BlockEditor = dynamic(() => import('./BlockEditor'), {
     ssr: false,
@@ -127,11 +128,11 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         manipulateMutation.mutate({ data, token });
     };
     
-    const handleTranslate = async () => {
+    const handleTranslate = async (targetLang: 'en' | 'ar') => {
         if (!firebaseUser) return;
         translateMutation.mutate({ 
             text: String(currentContent),
-            targetLang: locale === 'en' ? 'ar' : 'en' 
+            targetLang
         }, {
             onSuccess: (data) => {
                 setAiSuggestion(data.translatedText);
@@ -285,9 +286,17 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                                     <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
                                         <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.checkGrammar')}
                                     </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={handleTranslate}>
-                                        <Languages className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.translate')}
-                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                             <Button variant="ghost" className="w-full justify-start">
+                                                <Languages className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.translate')}
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent side="right" align="start">
+                                            <DropdownMenuItem onClick={() => handleTranslate('en')}>To English</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => handleTranslate('ar')}>To Arabic</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             )}
                         </PopoverContent>
