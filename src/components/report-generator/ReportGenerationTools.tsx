@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,9 +19,9 @@ import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookChe
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -96,7 +96,7 @@ interface GenerationToolsProps {
 }
 
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
-    const { t, locale } = useLocalization();
+    const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
     const { firebaseUser, userProfile } = useAuth();
@@ -172,9 +172,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
         
-        const selectedExternalContexts = externalContext.filter((_, index) => selection.externalContext[index]);
-
-        const hasContext = !!proposal || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
+        const selectedExternalContexts = externalContext.filter((item, index) => selection.externalContext[index]);
+        
+        const hasContext = !!proposal || !!projectPlan || Object.keys(otherSections).length > 0 || Object.keys(otherDiagrams).length > 0 || selectedExternalContexts.length > 0;
         if (!hasContext) {
             toast({ title: "No Context Provided", description: "Please generate a proposal or upload a document to provide context for generation.", variant: "destructive" });
             return;
@@ -190,6 +190,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             guidelines: getSelectedGuidelines(section, guidelineState, agents),
             instructionText: generateInstructionText(controlState[section]),
             externalContext: selectedExternalContexts,
+            templateId: selectedReportTemplateId, // Pass template ID to get ToC
         };
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
@@ -221,10 +222,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         .map(agentId => (Object.keys(sectionConfig) as SectionName[]).find(key => sectionConfig[key].agentId === agentId))
         .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !sections[sectionKey]) || [];
     const fullReportCreditCost = sectionsToGenerate.length;
-    const hasEnoughCreditsForFullReport = userProfile ? userProfile.credits >= fullReportCreditCost : false;
+    const canGenerateFullReport = (!!proposal || !!projectPlan || externalContext.length > 0) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
-    const canGenerateFullReport = (!!proposal || externalContext.length > 0) && hasEnoughCreditsForFullReport && fullReportCreditCost > 0 && !isAnythingGenerating;
-
 
     if (!agentsLoaded) {
         return (
@@ -305,7 +304,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 const { title, icon: Icon } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-                                const hasSelectedContext = !!proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || externalContext.length > 0;
+                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || externalContext.length > 0;
 
                                 return (
                                     <AccordionItem value={key} key={key}>
@@ -356,8 +355,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         {guidelineState[key]?.custom.map((custom, index) => (
                                                             <div key={index} className="flex items-center gap-2 text-sm">
                                                                 <span>- {custom}</span>
-                                                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>
-                                                                    <Trash2 className="h-3 w-3 text-destructive" />
+                                                                <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(key, index)}>                                                                    <Trash2 className="h-3 w-3 text-destructive" />
                                                                 </Button>
                                                             </div>
                                                         ))}
@@ -368,8 +366,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                 onChange={(e) => setCustomGuidelineInputForItem(key, e.target.value)}
                                                                 onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem(key))}
                                                             />
-                                                            <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>
-                                                                <Plus className="h-4 w-4" />
+                                                            <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem(key)}>                                                                <Plus className="h-4 w-4" />
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -406,7 +403,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
                                                     <ScrollArea className="h-60 w-full">
-                                                        <div className="space-y-4 pr-4">
+                                                    <div className="space-y-4 pr-4">
                                                             <div className="space-y-2">
                                                                 <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
                                                                   <div className="flex items-center space-x-2">

@@ -26,6 +26,7 @@ const generateSectionSchema = z.object({
       content: z.string(),
       type: z.enum(['context', 'example'])
   })).optional(),
+  templateId: z.string().optional(), // Pass template to know the ToC
 });
 
 // Schema for generating a full report based on a template
@@ -127,6 +128,7 @@ export async function POST(request: Request) {
                 guidelines: config.guidelines,
                 instructionText,
                 externalContext,
+                tableOfContents: template.agentIds.map(agentId => sectionConfig[Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName]?.title)
             };
 
             const result = await generateReportSection(agentInput);
@@ -155,8 +157,18 @@ export async function POST(request: Request) {
         if (!agentInfo) {
             return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
         }
+
+        // Construct the Table of Contents if a templateId was provided
+        let tableOfContents: string[] | undefined = undefined;
+        if (agentInput.templateId) {
+            const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(agentInput.templateId).get();
+            if (templateDoc.exists) {
+                const template = templateDoc.data() as ReportGenerationTemplate;
+                tableOfContents = template.agentIds.map(agentId => sectionConfig[Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === agentId) as SectionName]?.title);
+            }
+        }
         
-        const result = await generateReportSection(agentInput);
+        const result = await generateReportSection({ ...agentInput, tableOfContents });
 
         const transformedOutput = { [result.sectionName]: result.content };
         

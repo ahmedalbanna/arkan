@@ -16,7 +16,7 @@ import type { AgentPrompt } from '@/lib/agents';
 // The `sectionToGenerate` field tells the flow which agent's prompt to use.
 const GenerateSectionInputSchema = z.object({
   proposal: AnyProjectProposalSchema.optional(),
-  projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
+  projectPlan: ProjectPlanSchema.optional().nullable(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
@@ -31,6 +31,7 @@ const GenerateSectionInputSchema = z.object({
   })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
+  tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
 });
 export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
 
@@ -64,6 +65,15 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     prompt: `${basePrompt}
 
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '${sectionToGenerate}'.
+
+{{#if tableOfContents}}
+--- FULL REPORT STRUCTURE (TABLE OF CONTENTS) ---
+{{#each tableOfContents}}
+- {{{this}}}
+{{/each}}
+Your section, '{{sectionToGenerate}}', fits into this overall structure. Write your content accordingly.
+---
+{{/if}}
 
 {{#if guidelines}}
 --- Guidelines ---
