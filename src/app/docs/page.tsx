@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users, Palette, Workflow } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users, Palette, Workflow, Bell } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [
@@ -95,6 +95,13 @@ const features = [
           "Use the controls in the left panel to change fonts, colors, and other styles.",
           "The live preview on the right will instantly update to show your changes.",
       ],
+  },
+  {
+    id: 'push-notifications',
+    title: 'Push Notifications',
+    icon: Bell,
+    description: 'Implement push notifications for task reminders, feedback requests, or marketing updates.',
+    steps: [],
   },
   {
     id: 'admin',
