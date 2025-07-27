@@ -117,20 +117,20 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
 
               return (
                  <Card key={key} className="bg-background rounded-lg border">
-                    <Tabs defaultValue="view">
-                        <AccordionItem value={key} className="border-b-0">
-                             <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
-                                <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-2">
-                                        <Icon className="mr-2 h-5 w-5 text-primary" /> {t(title)}
-                                    </div>
-                                    <TabsList className="mr-2" onClick={(e) => e.stopPropagation()}>
-                                        <TabsTrigger value="view">View</TabsTrigger>
-                                        <TabsTrigger value="translate">Translate</TabsTrigger>
-                                    </TabsList>
+                    <AccordionItem value={key} className="border-b-0">
+                         <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
+                            <div className="flex items-center justify-between w-full">
+                                <div className="flex items-center gap-2">
+                                    <Icon className="mr-2 h-5 w-5 text-primary" /> {t(title)}
                                 </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-4 border-t">
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="p-4 border-t">
+                             <Tabs defaultValue="view">
+                                 <TabsList className="mb-4">
+                                    <TabsTrigger value="view">View</TabsTrigger>
+                                    <TabsTrigger value="translate">Translate</TabsTrigger>
+                                </TabsList>
                                 <TabsContent value="view">
                                      <EditableSection
                                         sectionKey={key}
@@ -143,9 +143,9 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                                 <TabsContent value="translate">
                                     <TranslationView sectionKey={key} originalContent={content} />
                                 </TabsContent>
-                            </AccordionContent>
-                        </AccordionItem>
-                    </Tabs>
+                            </Tabs>
+                        </AccordionContent>
+                    </AccordionItem>
                 </Card>
               )
             })}
