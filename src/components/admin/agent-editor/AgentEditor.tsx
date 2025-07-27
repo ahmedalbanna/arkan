@@ -9,9 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks } from 'lucide-react';
+import { Loader2, Save, ArrowLeft, Bot, BookOpen, Wrench, Terminal, Share2, Library, BotMessageSquare, AlertCircle, ListChecks, Link } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import Link from 'next/link';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,6 +24,7 @@ import GuidelinesTab from './GuidelinesTab';
 import { PromptTemplateLibrary } from './PromptTemplateLibrary';
 import AutomationTab from './AutomationTab';
 import { toast } from '@/hooks/use-toast';
+import ContextTab from './ContextTab';
 
 interface AgentEditorProps {
   agentId: string;
@@ -110,6 +110,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
     { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
     { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
     { id: 'tools', label: 'Tools', icon: Wrench },
+    { id: 'context', label: 'Context', icon: Link },
     { id: 'automation', label: 'Automation', icon: BotMessageSquare },
   ];
 
@@ -189,6 +190,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <KnowledgeTab />;
       case 'tools':
         return <ToolsTab />;
+      case 'context':
+        return <ContextTab />;
        case 'automation':
         return <AutomationTab />;
        case 'templates':
