@@ -392,7 +392,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         <div className="space-y-4 pr-4">
                                                             <div className="space-y-2">
                                                                 <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-                                                                <div className="flex items-center space-x-2">
+                                                                  <div className="flex items-center space-x-2">
                                                                      <Checkbox id={`context-proposal-${key}`} checked={currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(key as SectionName, 'proposal', null, !!checked)} />
                                                                      <Label htmlFor={`context-proposal-${key}`} className="text-sm font-normal"><div className="flex items-center gap-2"><FileSpreadsheet className="h-4 w-4" /> Project Proposal</div></Label>
                                                                 </div>
