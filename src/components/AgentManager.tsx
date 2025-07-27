@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState } from 'react';
@@ -64,7 +64,7 @@ function CreateAgentDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New Agent</Button>
+                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />New Agent</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
@@ -140,93 +140,48 @@ function CreateAgentDialog() {
 
 function AgentSkeleton() {
   return (
-    <Card role="listitem">
-      <CardHeader>
-        <div className="flex items-center gap-4">
-          <Skeleton className="w-8 h-8 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-24" />
-          </div>
+    <Card role="listitem" className="p-4 flex items-center gap-4 animate-pulse">
+        <Skeleton className="h-6 w-6" />
+        <Skeleton className="h-8 w-8 rounded-full" />
+        <div className="flex-grow space-y-2">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-4 w-full" />
         </div>
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5 mt-2" />
-      </CardContent>
-      <CardFooter className="justify-between">
-        <Skeleton className="h-9 w-32" />
-        <Skeleton className="h-8 w-20" />
-      </CardFooter>
+        <Skeleton className="h-9 w-24" />
     </Card>
-  )
+  );
 }
 
 
 function AgentCard({ agent }: { agent: Agent }) {
-  const { t } = useLocalization();
-  const { id, name, description, category, isEnabled, pageUrl } = agent;
-  const updateAgentMutation = useUpdateAgent();
+  const { id, name, description } = agent;
   
   const localAgentConfig = AGENTS.find(a => a.id === id);
   const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
 
-
-  const handleToggle = (checked: boolean) => {
-    updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
-  }
-
   return (
-    <Card className="flex flex-col">
-      <CardHeader>
-        <div className="flex justify-between items-start gap-4">
-          <div className="flex items-center gap-4">
-            <Icon className="w-8 h-8 text-primary" />
-            <div>
-              <CardTitle className="font-headline text-xl">{name}</CardTitle>
-              <Badge variant="outline" className="mt-1">{category}</Badge>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              id={`switch-${id}`}
-              checked={isEnabled}
-              onCheckedChange={handleToggle}
-              disabled={updateAgentMutation.isPending}
-              aria-label={`Enable ${name}`}
-            />
-            <Label htmlFor={`switch-${id}`}>{isEnabled ? t('agentManager.enabled') : t('agentManager.disabled')}</Label>
-          </div>
+    <Card className="p-4 flex items-center gap-4">
+        <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
+        <Icon className="w-8 h-8 text-primary" />
+        <div className="flex-grow">
+            <p className="font-semibold">{name}</p>
+            <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-      </CardHeader>
-      <CardContent className="flex-grow">
-        <CardDescription>{description}</CardDescription>
-      </CardContent>
-      <CardFooter className="justify-between">
-        <Button asChild variant="ghost" className="font-headline">
-          <Link href={pageUrl}>
-            {t('agentManager.goToTool')}
-            <ExternalLink className="mx-2 rtl:mx-0 rtl:mr-2 h-4 w-4" />
-          </Link>
-        </Button>
-        <Button asChild variant="outline" size="sm" className="font-headline">
+        <Button asChild variant="outline">
           <Link href={`/admin/manage-agents/${id}/edit`}>
-            <Pencil className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
-            {t('agentManager.editButton')}
+            Configure
           </Link>
         </Button>
-      </CardFooter>
     </Card>
   );
 }
 
 export default function AgentManager() {
-  const { t } = useLocalization();
   const { agents, isLoaded, isError } = useAgents();
 
   if (!isLoaded) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="space-y-4">
         <AgentSkeleton />
         <AgentSkeleton />
         <AgentSkeleton />
@@ -239,21 +194,31 @@ export default function AgentManager() {
     return (
         <Card className="p-8 text-center text-destructive">
             <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-            <p>{t('agentManager.errorLoading')}</p>
+            <p>Failed to load agent configurations.</p>
         </Card>
     );
   }
 
+  // Filter for agents that generate content, as per the design's focus
+  const completionAgents = agents.filter(agent => 
+    agent.category === AgentCategory.ReportGeneration ||
+    agent.category === AgentCategory.ProposalGeneration ||
+    agent.category === AgentCategory.DiagramGeneration
+  );
+
   return (
-    <>
-      <div className="flex justify-end mb-4">
+    <div className="space-y-6">
+      <div className="flex justify-end">
         <CreateAgentDialog />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {agents.map((agent) => (
+      <div className="space-y-4">
+        {completionAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}
       </div>
-    </>
+       <div className="flex justify-center mt-8">
+        <Button size="lg">Run Agents</Button>
+      </div>
+    </div>
   );
 }
