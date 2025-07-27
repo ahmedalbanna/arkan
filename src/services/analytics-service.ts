@@ -3,6 +3,7 @@
 
 export interface UserDashboardStats {
     totalGenerations: number;
+    creditsUsed: number;
     agentUsageChartData: { name: string; count: number }[];
     recentActivity: {
         id: string;

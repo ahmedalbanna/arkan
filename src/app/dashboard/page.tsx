@@ -6,7 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { StatCard } from '@/components/admin/StatCard';
 import { AgentUsageChart } from '@/components/admin/AgentUsageChart';
 import { RecentActivity } from '@/components/admin/RecentActivity';
-import { AlertCircle, Bot, History, AreaChart } from 'lucide-react';
+import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -14,6 +14,7 @@ function DashboardSkeleton() {
     return (
         <div className="space-y-8">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <Card><CardHeader><Skeleton className="h-6 w-2/3" /></CardHeader><CardContent><Skeleton className="h-8 w-1/4" /></CardContent></Card>
                 <Card><CardHeader><Skeleton className="h-6 w-2/3" /></CardHeader><CardContent><Skeleton className="h-8 w-1/4" /></CardContent></Card>
                 <Card><CardHeader><Skeleton className="h-6 w-2/3" /></CardHeader><CardContent><Skeleton className="h-8 w-1/4" /></CardContent></Card>
             </div>
@@ -64,7 +65,8 @@ export default function UserDashboardPage() {
                 <div className="space-y-8">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         <StatCard title="Total AI Generations" value={stats.totalGenerations.toString()} icon={Bot} />
-                        <StatCard title="Credits Remaining" value={userProfile?.credits.toString()} icon={Bot} />
+                        <StatCard title="Credits Remaining" value={userProfile?.credits.toString()} icon={Gem} />
+                        <StatCard title="Total Credits Used" value={stats.creditsUsed.toString()} icon={TrendingDown} />
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">

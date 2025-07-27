@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { AGENTS } from '@/lib/agents';
+import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyUser(request: Request) {
     const adminAuth = getAdminAuth();
@@ -18,6 +19,20 @@ async function verifyUser(request: Request) {
     }
 }
 
+async function getNewUserCredits(): Promise<number> {
+    try {
+        const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
+        if (settingsDoc.exists) {
+            return settingsDoc.data()?.newUserCredits || 10;
+        }
+        return 10; // Fallback default
+    } catch (error) {
+        console.error("Could not fetch default settings, falling back to 10 credits.", error);
+        return 10;
+    }
+}
+
+
 export async function GET(request: Request) {
     const userCheck = await verifyUser(request);
     if (!userCheck.authorized || !userCheck.userId) {
@@ -25,6 +40,11 @@ export async function GET(request: Request) {
     }
 
     try {
+        const userProfile = await getUserProfile(userCheck.userId);
+        if (!userProfile) {
+            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
+        }
+
         const generationsSnapshot = await adminDb.collection('agent_generations')
             .where('userId', '==', userCheck.userId)
             .orderBy('createdAt', 'desc')
@@ -50,9 +70,14 @@ export async function GET(request: Request) {
             id: doc.id,
             ...doc.data()
         }));
+        
+        const defaultCredits = await getNewUserCredits();
+        const creditsUsed = defaultCredits - userProfile.credits;
+
 
         return NextResponse.json({
             totalGenerations,
+            creditsUsed,
             agentUsageChartData,
             recentActivity,
         }, { status: 200 });
