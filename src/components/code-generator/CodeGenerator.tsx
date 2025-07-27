@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand, Download, X } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, Tv, Camera, Expand, Download, X, Package, Code } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -19,8 +19,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
+import type { Codebase } from '@/ai/flows/generate-codebase';
+import FileTreeView from './FileTreeView';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
-async function generateCode(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
+async function generateCodeApi(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate-code', {
         method: 'POST',
         headers: { 
@@ -34,6 +37,22 @@ async function generateCode(variables: { prompt: string; token: string }): Promi
         throw new Error(error.message || 'Failed to generate code');
     }
     return response.json();
+}
+
+async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {
+  const response = await fetch('/api/generate-codebase', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${variables.token}`,
+    },
+    body: JSON.stringify({ proposal: variables.proposal }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to generate codebase');
+  }
+  return response.json();
 }
 
 function CodeDisplay({ code, language }: { code: string; language: string; }) {
@@ -65,7 +84,7 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
     );
 }
 
-export default function CodeGenerator() {
+function ComponentGenerator() {
     const { t } = useLocalization();
     const { 
         prompt,
@@ -77,7 +96,6 @@ export default function CodeGenerator() {
     } = useCodeGeneratorStore();
     
     const { firebaseUser, refetchUser } = useAuth();
-    const queryClient = useQueryClient();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [isCapturing, setIsCapturing] = useState(false);
@@ -86,7 +104,7 @@ export default function CodeGenerator() {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const mutation = useMutation({
-        mutationFn: generateCode,
+        mutationFn: generateCodeApi,
         onSuccess: (data) => {
             setGeneratedCode(data);
             refetchUser(); // Invalidate user query to update credits
@@ -209,70 +227,10 @@ export default function CodeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-250px)]">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    {(html || css || javascript) && (
-                        <Card>
-                            <CardHeader className="flex-row items-center justify-between">
-                                <CardTitle className="font-headline">{t('builder.codeGenerator.generatedCode')}</CardTitle>
-                                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
-                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    {t('builder.codeGenerator.downloadZip')}
-                                </Button>
-                            </CardHeader>
-                            <CardContent>
-                                <Tabs defaultValue="html" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-3">
-                                        <TabsTrigger value="html">HTML</TabsTrigger>
-                                        <TabsTrigger value="css">CSS</TabsTrigger>
-                                        <TabsTrigger value="javascript">JS</TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="html" className="mt-4">
-                                        <CodeDisplay code={html || ''} language="html" />
-                                    </TabsContent>
-                                    <TabsContent value="css" className="mt-4">
-                                        <CodeDisplay code={css || ''} language="css" />
-                                    </TabsContent>
-                                    <TabsContent value="javascript" className="mt-4">
-                                        <CodeDisplay code={javascript || t('builder.codeGenerator.noJs')} language="javascript" />
-                                    </TabsContent>
-                                </Tabs>
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-
-                {/* Center Column */}
-                <div className="lg:col-span-6 lg:overflow-y-auto lg:pr-2">
-                    <Card className="h-full">
-                        <CardHeader>
-                            <div className="flex justify-between items-center">
-                                <CardTitle className="font-headline flex items-center gap-2">
-                                    <Tv className="w-6 h-6" />
-                                    {t('builder.codeGenerator.livePreview')}
-                                </CardTitle>
-                                {srcDoc && (
-                                    <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.tooltips.screenshot')}>
-                                            {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-                                        </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.tooltips.expand')}>
-                                            <Expand className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                )}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                        {renderPreview(false)}
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Right Column */}
-                <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    <Card>
+                     <Card>
                         <CardHeader>
                             <CardTitle className="font-headline">{t('builder.codeGenerator.toolsTitle')}</CardTitle>
                             <CardDescription>{t('builder.codeGenerator.toolsDesc')}</CardDescription>
@@ -309,6 +267,66 @@ export default function CodeGenerator() {
                     </Card>
                 </div>
 
+                {/* Center Column */}
+                <div className="lg:col-span-5 lg:overflow-y-auto lg:pr-2">
+                    <Card className="h-full">
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="font-headline flex items-center gap-2">
+                                    <Tv className="w-6 h-6" />
+                                    {t('builder.codeGenerator.livePreview')}
+                                </CardTitle>
+                                {srcDoc && (
+                                    <div className="flex items-center gap-1">
+                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.tooltips.screenshot')}>
+                                            {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.tooltips.expand')}>
+                                            <Expand className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                        {renderPreview(false)}
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Right Column */}
+                <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
+                    {(html || css || javascript) && (
+                        <Card>
+                            <CardHeader className="flex-row items-center justify-between">
+                                <CardTitle className="font-headline">{t('builder.codeGenerator.generatedCode')}</CardTitle>
+                                <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
+                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    {t('builder.codeGenerator.downloadZip')}
+                                </Button>
+                            </CardHeader>
+                            <CardContent>
+                                <Tabs defaultValue="html" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-3">
+                                        <TabsTrigger value="html">HTML</TabsTrigger>
+                                        <TabsTrigger value="css">CSS</TabsTrigger>
+                                        <TabsTrigger value="javascript">JS</TabsTrigger>
+                                    </TabsList>
+                                    <TabsContent value="html" className="mt-4">
+                                        <CodeDisplay code={html || ''} language="html" />
+                                    </TabsContent>
+                                    <TabsContent value="css" className="mt-4">
+                                        <CodeDisplay code={css || ''} language="css" />
+                                    </TabsContent>
+                                    <TabsContent value="javascript" className="mt-4">
+                                        <CodeDisplay code={javascript || t('builder.codeGenerator.noJs')} language="javascript" />
+                                    </TabsContent>
+                                </Tabs>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+
                 <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
                     <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
                         <DialogHeader className="flex-row items-center justify-between border-b pb-2">
@@ -321,5 +339,102 @@ export default function CodeGenerator() {
                 </Dialog>
             </div>
         </form>
+    );
+}
+
+
+function FullCodebaseGenerator() {
+  const { toast } = useToast();
+  const { firebaseUser, refetchUser } = useAuth();
+  const { proposal } = useBuilderStore();
+  const { codebase, setCodebase } = useCodeGeneratorStore();
+
+  const mutation = useMutation({
+    mutationFn: generateCodebaseApi,
+    onSuccess: (data) => {
+      setCodebase(data);
+      refetchUser(); // To update credits
+      toast({
+        title: 'Codebase Generated',
+        description: 'Your project structure has been scaffolded.',
+      });
+    },
+    onError: (error: Error) => {
+      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  const handleGenerate = () => {
+    if (!proposal || !firebaseUser) {
+      toast({
+        title: 'Cannot Generate Codebase',
+        description: 'A project proposal must be generated first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    const token = firebaseUser.getIdToken();
+    token.then(t => mutation.mutate({ proposal, token: t }));
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-250px)]">
+      <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Codebase Scaffolding</CardTitle>
+            <CardDescription>Generate a complete boilerplate for your project based on the generated proposal.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
+              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              Generate Codebase
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
+        {mutation.isPending && (
+          <Card className="flex items-center justify-center h-full min-h-[400px]">
+            <div className="text-center text-muted-foreground p-8">
+              <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
+              <h3 className="text-lg font-semibold">Generating Codebase...</h3>
+              <p>The AI is building your project structure. This may take a moment.</p>
+            </div>
+          </Card>
+        )}
+        {!mutation.isPending && codebase ? (
+          <FileTreeView codebase={codebase} />
+        ) : (
+          !mutation.isPending && (
+            <Card className="flex items-center justify-center h-full min-h-[400px]">
+              <div className="text-center text-muted-foreground p-8">
+                <Package className="w-16 h-16 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold">Your Codebase Will Appear Here</h3>
+                <p>Click "Generate Codebase" to scaffold your project files.</p>
+              </div>
+            </Card>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+export default function CodeGenerator() {
+    return (
+        <Tabs defaultValue="component" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="component" className="gap-2"><Code className="h-4 w-4" /> Component</TabsTrigger>
+                <TabsTrigger value="codebase" className="gap-2"><Package className="h-4 w-4" /> Full Codebase</TabsTrigger>
+            </TabsList>
+            <TabsContent value="component" className="mt-4">
+                <ComponentGenerator />
+            </TabsContent>
+            <TabsContent value="codebase" className="mt-4">
+                <FullCodebaseGenerator />
+            </TabsContent>
+        </Tabs>
     );
 }

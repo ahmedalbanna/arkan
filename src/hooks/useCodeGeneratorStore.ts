@@ -1,16 +1,18 @@
-// code explantion in docs/hooks/useCodeGeneratorStore.md
+
 
 "use client";
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { GenerateCodeOutput } from "@/ai/flows/generate-code";
+import type { Codebase } from '@/ai/flows/generate-codebase';
 
 export interface CodeGeneratorState {
   prompt: string;
   html: string;
   css: string;
   javascript: string;
+  codebase: Codebase | null;
 }
 
 interface CodeGeneratorActions {
@@ -18,6 +20,7 @@ interface CodeGeneratorActions {
   loadState: (state: Partial<{ codeGenerator: CodeGeneratorState }>) => void;
   setCodePrompt: (prompt: string) => void;
   setGeneratedCode: (code: GenerateCodeOutput) => void;
+  setCodebase: (codebase: Codebase | null) => void;
 }
 
 const initialState: CodeGeneratorState = {
@@ -25,6 +28,7 @@ const initialState: CodeGeneratorState = {
   html: "",
   css: "",
   javascript: "",
+  codebase: null,
 };
 
 export const useCodeGeneratorStore = create<
@@ -46,9 +50,10 @@ export const useCodeGeneratorStore = create<
           css: code.css,
           javascript: code.javascript || "",
         }),
+      setCodebase: (codebase) => set({ codebase }),
     }),
     {
-      name: "arkan-code-generator-store",
+      name: "arkan-code-generator-store-v2",
       storage: createJSONStorage(() => localStorage),
     }
   )

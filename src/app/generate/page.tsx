@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, Package, BookCheck } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, BookCheck } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -53,10 +53,6 @@ const PresentationGenerator = dynamic(() => import('@/components/presentation-ge
   loading: () => <LoadingSkeleton />,
 });
 const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/ProjectPlanGenerator'), {
-  ssr: false,
-  loading: () => <LoadingSkeleton />,
-});
-const CodebaseGenerator = dynamic(() => import('@/components/codebase-generator/CodebaseGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
@@ -144,7 +140,6 @@ function GeneratePageContent() {
       { id: 'plan', enabled: isFeatureEnabled('plan') },
       { id: 'report', enabled: isFeatureEnabled('report') },
       { id: 'diagram', enabled: isFeatureEnabled('diagram') },
-      { id: 'codebase', enabled: isFeatureEnabled('codebase') },
       { id: 'code', enabled: isFeatureEnabled('code') },
       { id: 'presentation', enabled: isFeatureEnabled('presentation') },
       { id: 'academic', enabled: isFeatureEnabled('academic') },
@@ -193,11 +188,6 @@ function GeneratePageContent() {
                                 <GitGraph className="h-4 w-4" /> {t('builder.tabs.diagram')}
                             </TabsTrigger>
                         )}
-                         {isFeatureEnabled('codebase') && (
-                            <TabsTrigger value="codebase" className="gap-2" disabled={!proposal}>
-                                <Package className="h-4 w-4" /> Codebase
-                            </TabsTrigger>
-                        )}
                         {isFeatureEnabled('code') && (
                             <TabsTrigger value="code" className="gap-2">
                                 <Laptop className="h-4 w-4" /> {t('builder.tabs.code')}
@@ -227,9 +217,6 @@ function GeneratePageContent() {
                         </TabsContent>
                         <TabsContent value="diagram" className="h-full">
                             {activeTab === 'diagram' && <DiagramGenerator />}
-                        </TabsContent>
-                        <TabsContent value="codebase" className="h-full">
-                            {activeTab === 'codebase' && <CodebaseGenerator />}
                         </TabsContent>
                         <TabsContent value="code" className="h-full">
                             {activeTab === 'code' && <CodeGenerator />}
