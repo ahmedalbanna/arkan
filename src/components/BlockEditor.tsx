@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useBlockNote } from '@blocknote/react';
-import { BlockNoteView } from '@blocknote/mantine';
-import { type BlockNoteEditor } from '@blocknote/core';
+import { BlockNoteView, useBlockNote } from "@blocknote/react";
+import { BlockNoteEditor } from "@blocknote/core";
 import { useTheme } from 'next-themes';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -13,45 +12,29 @@ interface EditorProps {
   editable?: boolean;
 }
 
-// Wrapper component that ensures hooks are only called on the client
-const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
+export default function BlockEditor({ onChange, initialContent, editable }: EditorProps) {
     const { resolvedTheme } = useTheme();
-
+    
+    // Creates a new editor instance.
     const editor: BlockNoteEditor | null = useBlockNote({
-        onEditorContentChange: (editor: BlockNoteEditor) => {
+        onEditorContentChange: (editor) => {
             onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
         },
         initialContent: initialContent ? JSON.parse(initialContent) : undefined,
     });
 
     if (!editor) {
-        return <div className="prose dark:prose-invert max-w-none">Loading Editor...</div>;
+        return <div>Loading Editor...</div>;
     }
-
+    
+    // Renders the editor instance using a React component.
     return (
         <div className="prose dark:prose-invert max-w-none">
-            <BlockNoteView
+            <BlockNoteView 
                 editor={editor}
                 editable={editable}
                 theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
             />
         </div>
     );
-}
-
-
-export default function BlockEditor(props: EditorProps) {
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    // Render a placeholder on the server and initial client render
-    if (!isMounted) {
-        return <div className="prose dark:prose-invert max-w-none">Loading Editor...</div>;
-    }
-    
-    // Render the actual editor only on the client
-    return <Editor {...props} />;
 }
