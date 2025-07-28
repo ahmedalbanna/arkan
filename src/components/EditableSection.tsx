@@ -81,6 +81,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
+    const [showAudioPlayer, setShowAudioPlayer] = useState(false);
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
@@ -119,10 +120,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     // Effect to play audio when src changes
     useEffect(() => {
-        if (audioSrc && audioRef.current) {
+        if (audioSrc && showAudioPlayer && audioRef.current) {
             audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
         }
-    }, [audioSrc]);
+    }, [audioSrc, showAudioPlayer]);
 
     const handleSave = () => {
         onUpdate(sectionKey, currentContent);
@@ -141,9 +142,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     };
     
     const handleReadAloud = () => {
+        if (audioSrc) {
+            setShowAudioPlayer(true);
+            return;
+        }
         ttsMutation.mutate({ text: content }, {
             onSuccess: (data) => {
                 setAudioSrc(data.audioDataUri);
+                setShowAudioPlayer(true);
                 toast({ title: "Reading Aloud", description: "Audio generation successful."});
             },
         });
@@ -257,7 +263,14 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     return (
         <div className="group relative">
-            {audioSrc && <audio ref={audioRef} src={audioSrc} />}
+            {showAudioPlayer && audioSrc && (
+                <div className="flex items-center gap-2 my-2 p-2 rounded-md bg-muted">
+                    <audio ref={audioRef} src={audioSrc} controls className="w-full h-8" />
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAudioPlayer(false)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
             <div
                 ref={contentRef}
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
