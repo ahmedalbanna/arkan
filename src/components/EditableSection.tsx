@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare, Languages } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare, Languages, Volume2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -23,6 +23,7 @@ import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 
 const BlockEditor = dynamic(() => import('./BlockEditor'), {
     ssr: false,
@@ -74,15 +75,19 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const [isEditing, setIsEditing] = useState(false);
     const [currentContent, setCurrentContent] = useState(content);
     const contentRef = useRef<HTMLDivElement>(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
 
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+    const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
     const { t, locale } = useLocalization();
     const translateMutation = useTranslate();
+    const ttsMutation = useTextToSpeech();
+
 
     const manipulateMutation = useMutation({
         mutationFn: manipulateTextApi,
@@ -104,13 +109,20 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
     });
 
-    const isProcessingAi = translateMutation.isPending || manipulateMutation.isPending;
+    const isProcessingAi = translateMutation.isPending || manipulateMutation.isPending || ttsMutation.isPending;
 
     useEffect(() => {
         if (!isEditing && aiSuggestion === null) {
             setCurrentContent(content);
         }
     }, [content, isEditing, aiSuggestion]);
+
+    // Effect to play audio when src changes
+    useEffect(() => {
+        if (audioSrc && audioRef.current) {
+            audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
+        }
+    }, [audioSrc]);
 
     const handleSave = () => {
         onUpdate(sectionKey, currentContent);
@@ -128,6 +140,15 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         manipulateMutation.mutate({ data, token });
     };
     
+    const handleReadAloud = () => {
+        ttsMutation.mutate({ text: content }, {
+            onSuccess: (data) => {
+                setAudioSrc(data.audioDataUri);
+                toast({ title: "Reading Aloud", description: "Audio generation successful."});
+            },
+        });
+    };
+
     const handleTranslate = async (targetLang: 'en' | 'ar') => {
         if (!firebaseUser) return;
         translateMutation.mutate({ 
@@ -236,6 +257,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     return (
         <div className="group relative">
+            {audioSrc && <audio ref={audioRef} src={audioSrc} />}
             <div
                 ref={contentRef}
                 onDoubleClick={() => !isEditing && setIsEditing(true)}
@@ -250,6 +272,11 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     <span>{chars} characters</span>
                 </div>
                 <div className="flex items-center">
+                    <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={isProcessingAi || !content}>
+                        {ttsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4 mr-2" />}
+                        Read Aloud
+                    </Button>
+
                     <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                         <PopoverTrigger asChild>
                             <Button

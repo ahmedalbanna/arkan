@@ -11,7 +11,6 @@ import '@/ai/flows/generate-diagrams.ts';
 import '@/ai/flows/manipulate-text.ts';
 import '@/ai/flows/generate-presentation.ts';
 import '@/ai/flows/generate-code.ts';
-import '@/ai/flows/generate-ui.ts';
 import '@/ai/flows/rewrite-to-markdown.ts';
 import '@/ai/flows/evaluate-report.ts';
 import '@/ai/flows/translate-text.ts';
@@ -26,6 +25,7 @@ import '@/ai/flows/project-chat.ts';
 import '@/ai/flows/generate-codebase.ts';
 import '@/ai/flows/academic-solver.ts';
 import '@/ai/flows/explain-diagram.ts';
+import '@/ai/flows/text-to-speech.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';
