@@ -31,7 +31,6 @@ export type { AgentData, Agent } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
-export type { HomeworkHistoryEntry } from '@/hooks/useHomeworkSolverStore';
 export type { Team, TeamMember, TeamWithMembers } from '@/services/team-service';
-export type { DocxTemplate } from '@/services/template-service';
+export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
