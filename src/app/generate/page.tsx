@@ -206,25 +206,25 @@ function GeneratePageContent() {
                     </TabsList>
 
                     <div className="w-full flex-grow mt-4">
-                        <TabsContent value="proposal" className="h-full">
+                        <TabsContent value="proposal" className="h-full animate-fade-in">
                             {activeTab === 'proposal' && <ProposalModeGenerator />}
                         </TabsContent>
-                         <TabsContent value="plan" className="h-full">
+                         <TabsContent value="plan" className="h-full animate-fade-in">
                             {activeTab === 'plan' && <ProjectPlanGenerator />}
                         </TabsContent>
-                        <TabsContent value="report" className="h-full">
+                        <TabsContent value="report" className="h-full animate-fade-in">
                             {activeTab === 'report' && <ReportGenerator />}
                         </TabsContent>
-                        <TabsContent value="diagram" className="h-full">
+                        <TabsContent value="diagram" className="h-full animate-fade-in">
                             {activeTab === 'diagram' && <DiagramGenerator />}
                         </TabsContent>
-                        <TabsContent value="code" className="h-full">
+                        <TabsContent value="code" className="h-full animate-fade-in">
                             {activeTab === 'code' && <CodeGenerator />}
                         </TabsContent>
-                        <TabsContent value="presentation" className="h-full">
+                        <TabsContent value="presentation" className="h-full animate-fade-in">
                             {activeTab === 'presentation' && <PresentationGenerator />}
                         </TabsContent>
-                         <TabsContent value="academic" className="h-full">
+                         <TabsContent value="academic" className="h-full animate-fade-in">
                             {activeTab === 'academic' && <AcademicSolver />}
                         </TabsContent>
                     </div>
