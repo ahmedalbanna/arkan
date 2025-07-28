@@ -15,20 +15,14 @@ interface EditorProps {
 
 export default function BlockEditor({ onChange, initialContent, editable }: EditorProps) {
   const { resolvedTheme } = useTheme();
-  const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
-
+  
   // useBlockNote must be called conditionally after mount
-  const editorInstance = useBlockNote({
-    editable,
+  const editor: BlockNoteEditor | null = useBlockNote({
     initialContent: initialContent ? JSON.parse(initialContent) : undefined,
-    onEditorContentChange: (editor) => {
+    onEditorContentChange: (editor: BlockNoteEditor) => {
       onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
     },
   });
-
-  useEffect(() => {
-    setEditor(editorInstance);
-  }, [editorInstance]);
 
 
   if (!editor) {
@@ -39,6 +33,7 @@ export default function BlockEditor({ onChange, initialContent, editable }: Edit
     <div className="prose dark:prose-invert max-w-none">
       <BlockNoteView
         editor={editor}
+        editable={editable}
         theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
       />
     </div>
