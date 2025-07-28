@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, Languages, Loader2, X, Check, Trash2, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,7 +14,7 @@ import { Card, CardContent } from './ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { markdownComponents } from '@/lib/markdown-components';
-import { type BlockNoteEditor } from "@blocknote/core";
+import { BlockNoteEditor, insertOrUpdateBlock } from "@blocknote/core";
 import dynamic from 'next/dynamic';
 
 const BlockEditor = dynamic(() => import("./BlockEditor"), { ssr: false });
@@ -49,12 +49,9 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
 
   useEffect(() => {
-    async function loadEditor() {
-      const { BlockNoteEditor } = await import("@blocknote/core");
+    // Initialize editor only on the client-side when editing starts
+    if (isEditing && !editor) {
       setEditor(new BlockNoteEditor());
-    }
-    if(isEditing && !editor){
-        loadEditor();
     }
   }, [isEditing, editor]);
 
@@ -69,7 +66,6 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         const updateEditorContent = async () => {
             try {
                 const blocks = value ? JSON.parse(value) : [];
-                const { insertOrUpdateBlock } = await import("@blocknote/core");
                 editor.removeBlocks(editor.topLevelBlocks);
                 insertOrUpdateBlock(editor, blocks);
             } catch (e) {
