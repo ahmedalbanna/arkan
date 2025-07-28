@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, Languages, FileText } from 'lucide-react';
-import ProposalViewer, { EditableField } from './ProposalViewer';
+import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -173,15 +174,13 @@ export function ProposalModeGenerator() {
                  <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-2">
                     {proposal ? (
                          <Card>
-                            <CardHeader className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                <div className="space-y-1.5">
-                                    <CardTitle className="font-headline text-2xl text-primary">
-                                        <EditableField value={proposal.title} path="title" onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
-                                    </CardTitle>
-                                    <CardDescription>
-                                        <EditableField value={proposal.category} path="category" onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
-                                    </CardDescription>
-                                </div>
+                            <CardHeader>
+                                <CardTitle className="font-headline text-2xl text-primary">
+                                    {(proposal as any).title || "Generated Proposal"}
+                                </CardTitle>
+                                <CardDescription>
+                                    {(proposal as any).category || "Review the generated proposal"}
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="lg:h-[calc(100vh-270px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>

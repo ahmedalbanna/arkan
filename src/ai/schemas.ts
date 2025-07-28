@@ -79,10 +79,8 @@ export const ProjectProposalSchema = z.object({
 
 export type ProjectProposal = z.infer<typeof ProjectProposalSchema>;
 
-// Revert to a less flexible schema to fix the API error.
-// The previous schema with a union and an empty object was causing a validation error
-// with the Google AI API, which does not allow empty object schemas.
-export const AnyProjectProposalSchema = ProjectProposalSchema;
+// A flexible schema to accommodate different project proposal structures.
+export const AnyProjectProposalSchema = z.object({}).passthrough();
 export type AnyProjectProposal = z.infer<typeof AnyProjectProposalSchema>;
 
 
