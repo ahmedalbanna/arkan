@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useForm, FormProvider } from 'react-hook-form';

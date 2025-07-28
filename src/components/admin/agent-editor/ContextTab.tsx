@@ -6,6 +6,8 @@ import { useAgents } from '@/hooks/use-agents';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { AGENTS } from '@/lib/agents';
+import { AlertCircle } from 'lucide-react';
 
 function ContextSkeleton() {
     return (
@@ -40,15 +42,19 @@ export default function ContextTab() {
         <h3 className="font-semibold">Available Agents</h3>
          {!isLoaded ? <ContextSkeleton /> : (
             <div className="grid grid-cols-2 gap-4">
-                {agents.map(({ id, name, icon: Icon }) => (
-                    <div key={id} className="flex items-center space-x-2">
-                        <Checkbox id={`agent-context-${id}`} />
-                        <Label htmlFor={`agent-context-${id}`} className="font-normal flex items-center gap-2">
-                           <Icon className="h-4 w-4" />
-                           {name}
-                        </Label>
-                    </div>
-                ))}
+                {agents.map(({ id, name }) => {
+                    const defaultAgent = AGENTS.find(a => a.id === id);
+                    const Icon = defaultAgent ? defaultAgent.icon : AlertCircle;
+                    return (
+                        <div key={id} className="flex items-center space-x-2">
+                            <Checkbox id={`agent-context-${id}`} />
+                            <Label htmlFor={`agent-context-${id}`} className="font-normal flex items-center gap-2">
+                               <Icon className="h-4 w-4" />
+                               {name}
+                            </Label>
+                        </div>
+                    )
+                })}
             </div>
         )}
       </div>
