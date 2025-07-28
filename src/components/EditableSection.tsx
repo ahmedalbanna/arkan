@@ -27,7 +27,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import { cn } from '@/lib/utils';
 
-const BlockEditor = dynamic(() => import('./BlockEditor'), {
+const BlockEditor = dynamic(() => import('./BlockEditor').then(mod => mod.default), {
     ssr: false,
     loading: () => <p>Loading editor...</p>,
 });
