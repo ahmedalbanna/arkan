@@ -19,23 +19,18 @@ const orderedDiagrams = DiagramTypeSchema.options;
 
 interface ContextSelectorProps {
     itemKey: string;
-    currentSelection: {
-        sections: Record<string, boolean>;
-        diagrams: Record<string, boolean>;
-        externalContext: boolean[];
-        proposal: boolean;
-        projectPlan: boolean;
-    };
 }
 
 const defaultSelection = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
-export function ContextSelector({ itemKey, currentSelection = defaultSelection }: ContextSelectorProps) {
+export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const { t } = useLocalization();
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
-    const { sections, externalContext, toggleContextSelection } = useReportStore();
+    const { sections, externalContext, toggleContextSelection, contextSelection } = useReportStore();
     const { diagrams } = useDiagramStore();
+
+    const currentSelection = contextSelection[itemKey] || defaultSelection;
 
     return (
         <ScrollArea className="h-60 w-full">
