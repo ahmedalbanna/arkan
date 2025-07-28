@@ -15,8 +15,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
-import { cn } from '@/lib/utils';
-import { EditableField } from './EditableField';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 
 interface EditableSectionProps {
@@ -136,10 +136,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
         setIsEditorPopoverOpen(false);
     };
-
-    const handleUpdateContent = (newContent: string) => {
-        onUpdate(sectionKey, newContent);
-    };
     
     const { words, chars } = calculateCounts(content);
 
@@ -153,12 +149,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     </Button>
                 </div>
             )}
-            <div ref={contentRef}>
-                <EditableField 
-                    value={content}
-                    onUpdate={handleUpdateContent}
-                    multiline
-                />
+            <div ref={contentRef} className="prose dark:prose-invert max-w-none">
+                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                    {content}
+                </ReactMarkdown>
             </div>
             
              <div className="mt-4 flex items-center justify-between gap-4 text-xs text-muted-foreground">

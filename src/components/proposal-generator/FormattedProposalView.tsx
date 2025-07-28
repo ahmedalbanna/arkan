@@ -1,13 +1,15 @@
 
+
 'use client';
 
 import React from 'react';
 import { type AnyProjectProposal } from '@/ai/schemas';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { EditableField } from '../EditableField';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+import remarkGfm from 'remark-gfm';
 
 interface FormattedProposalViewProps {
   proposal: AnyProjectProposal;
@@ -18,56 +20,52 @@ interface FormattedProposalViewProps {
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
     <div className="space-y-2">
         <h3 className="font-semibold text-lg text-primary/90">{title}</h3>
-        <div className="pl-2 border-l-2 border-primary/20">{children}</div>
+        <div className="pl-2 border-l-2 border-primary/20 prose dark:prose-invert max-w-none">{children}</div>
     </div>
 );
 
 export default function FormattedProposalView({ proposal, onUpdate, readOnly }: FormattedProposalViewProps) {
     if (!proposal) return null;
 
-    const handleUpdate = (path: string) => (newValue: any) => {
-        onUpdate(path, newValue);
-    };
-
     return (
         <div className="space-y-6">
             <Section title="Objective">
-                <EditableField value={proposal.objective} onUpdate={handleUpdate('objective')} multiline readOnly={readOnly} />
+                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{proposal.objective}</ReactMarkdown>
             </Section>
             
             <Separator />
 
             <Section title="Methodology">
-                <EditableField value={proposal.methodology} onUpdate={handleUpdate('methodology')} multiline readOnly={readOnly} />
+                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{proposal.methodology}</ReactMarkdown>
             </Section>
 
              <Separator />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Section title="Expected Outcomes">
-                    
+                    <ul className="list-disc pl-5 space-y-1">
                         {proposal.expected_outcome?.map((item: string, index: number) => (
-                            <div key={index}>
-                                <EditableField value={item} onUpdate={handleUpdate(`expected_outcome.${index}`)} readOnly={readOnly} />
-                            </div>
+                            <li key={index}>
+                                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{item}</ReactMarkdown>
+                            </li>
                         ))}
-                   
+                    </ul>
                 </Section>
                 <Section title="Success Criteria">
-                     
+                    <ul className="list-disc pl-5 space-y-1">
                         {proposal.success_criteria?.map((item: string, index: number) => (
-                            <div key={index}>
-                                <EditableField value={item} onUpdate={handleUpdate(`success_criteria.${index}`)} readOnly={readOnly} />
-                            </div>
+                            <li key={index}>
+                                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{item}</ReactMarkdown>
+                            </li>
                         ))}
-                    
+                    </ul>
                 </Section>
             </div>
             
              <Separator />
 
             <Section title="Evaluation">
-                <EditableField value={proposal.evaluation} onUpdate={handleUpdate('evaluation')} multiline readOnly={readOnly} />
+                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{proposal.evaluation}</ReactMarkdown>
             </Section>
             
              <Separator />
@@ -79,17 +77,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
                  <ul className="list-disc list-inside space-y-2">
                     {proposal.timeline?.phases?.map((phase: any, index: number) => (
                         <li key={index}>
-                            <EditableField 
-                                value={`${phase.name} (${phase.durationWeeks} weeks)`} 
-                                onUpdate={(val) => {
-                                    // Basic parsing, would need more robust logic for complex edits
-                                    const nameMatch = val.match(/^(.*)\s\(/);
-                                    const durationMatch = val.match(/\((\d+)\sweeks\)/);
-                                    if(nameMatch) onUpdate(`timeline.phases.${index}.name`, nameMatch[1]);
-                                    if(durationMatch) onUpdate(`timeline.phases.${index}.durationWeeks`, parseInt(durationMatch[1]));
-                                }} 
-                                readOnly={readOnly} 
-                            />
+                           {`${phase.name} (${phase.durationWeeks} weeks)`}
                         </li>
                     ))}
                 </ul>
