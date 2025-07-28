@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, Languages, Loader2, X, Check, Trash2, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -46,14 +46,13 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const { firebaseUser } = useAuth();
   const translateMutation = useTranslate();
   
-  const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
-
-  useEffect(() => {
-    // Initialize editor only on the client-side when editing starts
-    if (isEditing && !editor) {
-      setEditor(new BlockNoteEditor());
+  const editor = useMemo(() => {
+    // BlockNoteEditor is client-side only.
+    if (typeof window === "undefined") {
+      return null;
     }
-  }, [isEditing, editor]);
+    return new BlockNoteEditor();
+  }, []);
 
 
   const isProcessingAi = translateMutation.isPending;
@@ -65,19 +64,32 @@ export const EditableField: React.FC<EditableFieldProps> = ({
         // Function to safely parse and update editor content
         const updateEditorContent = async () => {
             try {
-                const blocks = value ? JSON.parse(value) : [];
-                editor.removeBlocks(editor.topLevelBlocks);
-                insertOrUpdateBlock(editor, blocks);
+                // Check if the value is a non-empty string before parsing
+                const blocks = (value && typeof value === 'string' && value.trim().startsWith('[')) ? JSON.parse(value) : [];
+                // It's safer to remove existing blocks before inserting new ones
+                if (editor.topLevelBlocks.length > 0) {
+                    editor.removeBlocks(editor.topLevelBlocks);
+                }
+                // Check if there are any blocks to insert
+                if (blocks.length > 0) {
+                    insertOrUpdateBlock(editor, blocks);
+                } else {
+                    // If 'value' is not a block array, treat it as plain text.
+                    editor.insertBlocks([{ type: 'paragraph', content: value || "" }], editor.topLevelBlocks[0], "before");
+                }
             } catch (e) {
-                console.warn("Failed to parse initial JSON content for editor, falling back to text.");
+                console.warn("Failed to parse initial JSON content for editor, falling back to text.", e);
                 // Fallback for non-JSON or malformed JSON content
-                editor.removeBlocks(editor.topLevelBlocks);
-                editor.insertBlocks([{ type: 'paragraph', content: value }], editor.topLevelBlocks[0], "before");
+                if (editor.topLevelBlocks.length > 0) {
+                    editor.removeBlocks(editor.topLevelBlocks);
+                }
+                editor.insertBlocks([{ type: 'paragraph', content: value || "" }], editor.topLevelBlocks[0], "before");
             }
         };
         updateEditorContent();
     }
-  }, [value, isEditing, editor]);
+}, [value, isEditing, editor]);
+
 
   const handleSave = () => {
     if (readOnly || !editor) return;
