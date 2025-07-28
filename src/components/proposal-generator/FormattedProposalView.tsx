@@ -44,22 +44,22 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Section title="Expected Outcomes">
-                    <ul className="list-disc list-inside space-y-2">
+                    
                         {proposal.expected_outcome?.map((item: string, index: number) => (
-                            <li key={index}>
+                            <div key={index}>
                                 <EditableContent value={item} onUpdate={handleUpdate(`expected_outcome.${index}`)} readOnly={readOnly} />
-                            </li>
+                            </div>
                         ))}
-                    </ul>
+                   
                 </Section>
                 <Section title="Success Criteria">
-                     <ul className="list-disc list-inside space-y-2">
+                     
                         {proposal.success_criteria?.map((item: string, index: number) => (
-                            <li key={index}>
+                            <div key={index}>
                                 <EditableContent value={item} onUpdate={handleUpdate(`success_criteria.${index}`)} readOnly={readOnly} />
-                            </li>
+                            </div>
                         ))}
-                    </ul>
+                    
                 </Section>
             </div>
             
@@ -113,7 +113,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
              <Section title="Stakeholders">
                 {proposal.stakeholders?.map((stakeholder: any, index: number) => (
                     <div key={index} className="mb-4">
-                        <p className="font-semibold">{stakeholder.name} <Badge variant="secondary">{stakeholder.role}</Badge></p>
+                        <div className="font-semibold">{stakeholder.name} <Badge variant="secondary">{stakeholder.role}</Badge></div>
                         <p className="text-sm text-muted-foreground pl-2">{stakeholder.interest}</p>
                     </div>
                 ))}
@@ -124,7 +124,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
              <Section title="Risks and Mitigations">
                 {proposal.risks?.map((risk: any, index: number) => (
                     <div key={index} className="mb-4">
-                        <p className="font-semibold">Risk: {risk.description}</p>
+                        <div className="font-semibold">Risk: {risk.description}</div>
                         <p className="text-sm text-muted-foreground pl-2">Mitigation: {risk.mitigation}</p>
                     </div>
                 ))}
