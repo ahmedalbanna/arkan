@@ -26,11 +26,7 @@ import { useTranslate } from '@/hooks/use-translation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import { cn } from '@/lib/utils';
-
-const BlockEditor = dynamic(() => import('./BlockEditor').then(mod => mod.default), {
-    ssr: false,
-    loading: () => <p>Loading editor...</p>,
-});
+import { EditableField } from './EditableField';
 
 
 interface EditableSectionProps {
@@ -75,7 +71,6 @@ const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
 });
 export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [currentContent, setCurrentContent] = useState(content);
     const contentRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -114,12 +109,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
     const isProcessingAi = translateMutation.isPending || manipulateMutation.isPending || ttsMutation.isPending;
 
-    useEffect(() => {
-        if (!isEditing && aiSuggestion === null) {
-            setCurrentContent(content);
-        }
-    }, [content, isEditing, aiSuggestion]);
-
     // Effect to play audio when src changes
     useEffect(() => {
         if (audioSrc && showAudioPlayer && audioRef.current) {
@@ -127,10 +116,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
     }, [audioSrc, showAudioPlayer]);
 
-    const handleSave = () => {
-        onUpdate(sectionKey, currentContent);
-        setIsEditing(false);
-    };
 
     const handleAiAction = async (command: string) => {
         if (!firebaseUser) {
@@ -139,7 +124,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
         setAiSuggestion(null);
         const token = await firebaseUser.getIdToken();
-        const data = { textToManipulate: currentContent, command };
+        const data = { textToManipulate: content, command };
         manipulateMutation.mutate({ data, token });
     };
     
@@ -156,52 +141,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
             },
         });
     };
-
-    const handleTranslate = async (targetLang: 'en' | 'ar') => {
-        if (!firebaseUser) return;
-        translateMutation.mutate({ 
-            text: String(currentContent),
-            targetLang
-        }, {
-            onSuccess: (data) => {
-                setAiSuggestion(data.translatedText);
-                toast({ title: t('builder.editableSection.toasts.translateSuccess') });
-            },
-            onError: (error) => {
-                const isCreditError = error.message.toLowerCase().includes('credit');
-                toast({ 
-                    title: t('builder.editableSection.toasts.translateFailed'), 
-                    description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
-                    variant: 'destructive' 
-                });
-            },
-            onSettled: () => setIsAiPopoverOpen(false),
-        });
-    };
-
-    const handleAcceptSuggestion = () => {
-        if (aiSuggestion !== null) {
-            onUpdate(sectionKey, aiSuggestion);
-        }
-        setAiSuggestion(null);
-    };
-
-    const handleRejectSuggestion = () => {
-        setAiSuggestion(null);
-    };
-    
-    const handleCopyMarkdown = () => {
-        navigator.clipboard.writeText(content);
-        toast({ title: t('builder.editableSection.toasts.copiedMd') });
-        setIsEditorPopoverOpen(false);
-    };
-
-    const handleCopyText = () => {
-        const text = contentRef.current?.innerText || '';
-        navigator.clipboard.writeText(text);
-        toast({ title: t('builder.editableSection.toasts.copiedText') });
-        setIsEditorPopoverOpen(false);
-    };
     
     const handleExportDocx = async () => {
         await exportSectionAsDocx(title, content, 'modern');
@@ -215,53 +154,9 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         setIsEditorPopoverOpen(false);
     };
 
-    const renderEditableContent = () => {
-        if (aiSuggestion !== null) {
-            return (
-                <div className="p-2 -m-2 rounded-md border-2 border-dashed border-accent bg-accent/10 my-2">
-                    <p className="text-xs font-semibold text-accent-foreground mb-2">{t('builder.editableSection.aiSuggestion')}</p>
-                    <div className="p-2 rounded bg-background max-h-60 overflow-y-auto">
-                        <DynamicReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-                            {aiSuggestion}
-                        </DynamicReactMarkdown>
-
-                    </div>
-                    <div className="flex justify-end gap-2 mt-2">
-                        <Button variant="ghost" size="sm" onClick={handleRejectSuggestion}>
-                            <X className="mr-2 h-4 w-4" />
-                            {t('builder.editableSection.reject')}
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={handleAcceptSuggestion}>
-                            <Check className="mr-2 h-4 w-4" />
-                            {t('builder.editableSection.accept')}
-                        </Button>
-                    </div>
-                </div>
-            );
-        }
-        
-        return (
-            <div>
-                {/* Viewer */}
-                <div className={cn(isEditing && "hidden")}>
-                     <DynamicReactMarkdown
-                        components={markdownComponents}
-                        remarkPlugins={[remarkGfm]}>
-                        {content}
-                    </DynamicReactMarkdown>
-                </div>
-                {/* Editor - always mounted but hidden */}
-                <div className={cn(!isEditing && "hidden")}>
-                    <BlockEditor 
-                        initialContent={currentContent}
-                        onChange={setCurrentContent}
-                        editable={true}
-                    />
-                    <Button onClick={handleSave} className="mt-2">Save</Button>
-                </div>
-            </div>
-        );
-    }
+    const handleUpdateContent = (newContent: string) => {
+        onUpdate(sectionKey, newContent);
+    };
     
     const { words, chars } = calculateCounts(content);
 
@@ -275,12 +170,12 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     </Button>
                 </div>
             )}
-            <div
-                ref={contentRef}
-                onDoubleClick={() => !isEditing && setIsEditing(true)}
-                className="max-w-none p-1 -m-1 rounded-md text-muted-foreground group relative cursor-pointer hover:bg-muted/50"
-            >
-              {renderEditableContent()}
+            <div ref={contentRef}>
+                <EditableField 
+                    value={content}
+                    onUpdate={handleUpdateContent}
+                    multiline
+                />
             </div>
             
              <div className="mt-4 flex items-center justify-between gap-4 text-xs text-muted-foreground">
@@ -339,12 +234,6 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                         </PopoverTrigger>
                         <PopoverContent className="w-56 p-2">
                             <div className="grid gap-1">
-                                <Button variant="ghost" className="justify-start" onClick={handleCopyMarkdown}>
-                                    <Copy className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.copyMd')}
-                                </Button>
-                                <Button variant="ghost" className="justify-start" onClick={handleCopyText}>
-                                    <FileText className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.copyText')}
-                                </Button>
                                 <Button variant="ghost" className="justify-start" onClick={handleExportDocx}>
                                     <FileDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.downloadDocx')}
                                 </Button>

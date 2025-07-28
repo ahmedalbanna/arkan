@@ -1,9 +1,10 @@
+
 'use client';
 
 import React from 'react';
 import { type AnyProjectProposal } from '@/ai/schemas';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { EditableContent } from '../EditableContent';
+import { EditableField } from '../EditableField';
 import { Separator } from '../ui/separator';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
@@ -31,13 +32,13 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
     return (
         <div className="space-y-6">
             <Section title="Objective">
-                <EditableContent value={proposal.objective} onUpdate={handleUpdate('objective')} multiline readOnly={readOnly} />
+                <EditableField value={proposal.objective} onUpdate={handleUpdate('objective')} multiline readOnly={readOnly} />
             </Section>
             
             <Separator />
 
             <Section title="Methodology">
-                <EditableContent value={proposal.methodology} onUpdate={handleUpdate('methodology')} multiline readOnly={readOnly} />
+                <EditableField value={proposal.methodology} onUpdate={handleUpdate('methodology')} multiline readOnly={readOnly} />
             </Section>
 
              <Separator />
@@ -47,7 +48,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
                     
                         {proposal.expected_outcome?.map((item: string, index: number) => (
                             <div key={index}>
-                                <EditableContent value={item} onUpdate={handleUpdate(`expected_outcome.${index}`)} readOnly={readOnly} />
+                                <EditableField value={item} onUpdate={handleUpdate(`expected_outcome.${index}`)} readOnly={readOnly} />
                             </div>
                         ))}
                    
@@ -56,7 +57,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
                      
                         {proposal.success_criteria?.map((item: string, index: number) => (
                             <div key={index}>
-                                <EditableContent value={item} onUpdate={handleUpdate(`success_criteria.${index}`)} readOnly={readOnly} />
+                                <EditableField value={item} onUpdate={handleUpdate(`success_criteria.${index}`)} readOnly={readOnly} />
                             </div>
                         ))}
                     
@@ -66,7 +67,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
              <Separator />
 
             <Section title="Evaluation">
-                <EditableContent value={proposal.evaluation} onUpdate={handleUpdate('evaluation')} multiline readOnly={readOnly} />
+                <EditableField value={proposal.evaluation} onUpdate={handleUpdate('evaluation')} multiline readOnly={readOnly} />
             </Section>
             
              <Separator />
@@ -78,7 +79,7 @@ export default function FormattedProposalView({ proposal, onUpdate, readOnly }: 
                  <ul className="list-disc list-inside space-y-2">
                     {proposal.timeline?.phases?.map((phase: any, index: number) => (
                         <li key={index}>
-                            <EditableContent 
+                            <EditableField 
                                 value={`${phase.name} (${phase.durationWeeks} weeks)`} 
                                 onUpdate={(val) => {
                                     // Basic parsing, would need more robust logic for complex edits

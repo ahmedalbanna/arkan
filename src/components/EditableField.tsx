@@ -4,20 +4,21 @@
 import React, { useState, useEffect } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { MoreVertical, Languages, Loader2, X, Check, Trash2, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
-import remarkGfm from 'remark-gfm';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import BlockEditor from './BlockEditor';
+import { Card, CardContent } from './ui/card';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { markdownComponents } from '@/lib/markdown-components';
 
-interface EditableContentProps {
+
+interface EditableFieldProps {
   value: string;
   onUpdate: (newValue: string) => void;
   onDelete?: () => void;
@@ -26,7 +27,7 @@ interface EditableContentProps {
   readOnly?: boolean;
 }
 
-export const EditableContent: React.FC<EditableContentProps> = ({
+export const EditableField: React.FC<EditableFieldProps> = ({
   value,
   onUpdate,
   onDelete,
@@ -128,10 +129,16 @@ export const EditableContent: React.FC<EditableContentProps> = ({
         );
     }
     if (isEditing && !readOnly) {
-      if (multiline) {
-        return <Textarea value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleSave} autoFocus rows={3} />;
-      }
-      return <Input value={currentValue} onChange={(e) => setCurrentValue(e.target.value)} onBlur={handleSave} autoFocus />;
+      return (
+        <Card>
+            <CardContent className="p-1">
+                <BlockEditor initialContent={currentValue} onChange={setCurrentValue} />
+            </CardContent>
+            <div className="flex justify-end p-2">
+                 <Button onClick={handleSave} size="sm">Save</Button>
+            </div>
+        </Card>
+      );
     }
     return multiline ? (
       <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
@@ -144,11 +151,11 @@ export const EditableContent: React.FC<EditableContentProps> = ({
 
   return (
     <div
-      onDoubleClick={() => !readOnly && setIsEditing(true)}
+      onDoubleClick={() => !readOnly && !isEditing && setIsEditing(true)}
       className={cn('group relative p-1 -m-1 rounded-md', className, !readOnly && 'hover:bg-muted/50 cursor-pointer')}
     >
       {renderContent()}
-      {!readOnly && (
+      {!readOnly && !isEditing &&(
         <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
             <PopoverTrigger asChild>
