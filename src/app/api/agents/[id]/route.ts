@@ -59,6 +59,7 @@ const agentGuidelineSchema = z.object({
 const agentPromptSchema = z.object({
   base: z.string().min(1),
   guidelines: z.array(agentGuidelineSchema).optional(),
+  jsonStructure: z.any().optional(),
 });
 
 // PUT /api/agents/[id]
