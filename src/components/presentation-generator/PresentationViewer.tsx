@@ -10,7 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { EditableContent } from '../EditableContent';
+import { EditableField } from '../EditableField';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -121,7 +121,7 @@ export default function PresentationViewer({ activePresentation }: PresentationV
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex justify-between items-center flex-wrap gap-2">
-            <EditableContent 
+            <EditableField 
                 value={activePresentation.name} 
                 onUpdate={(newName) => replacePresentationInHistory({ ...activePresentation, name: newName })}
                 className="font-headline text-2xl text-primary"
@@ -145,7 +145,7 @@ export default function PresentationViewer({ activePresentation }: PresentationV
       <CardContent className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto">
         <div className="md:col-span-2 prose dark:prose-invert max-w-none">
           <h3 className="font-semibold mb-2">
-             <EditableContent 
+             <EditableField 
                 value={slide.title} 
                 onUpdate={(newTitle) => updatePresentationSlide(currentSlide, 'title', newTitle)}
             />
@@ -153,7 +153,7 @@ export default function PresentationViewer({ activePresentation }: PresentationV
           <ul className="list-disc pl-5 space-y-2 text-lg">
             {slide.content.map((item, index) => (
               <li key={index}>
-                <EditableContent 
+                <EditableField 
                     value={item}
                     onUpdate={(newValue) => updatePresentationSlide(currentSlide, 'content', newValue, index)}
                     multiline
