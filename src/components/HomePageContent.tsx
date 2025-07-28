@@ -32,7 +32,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
 
     return (
         <div className="flex flex-col">
-            <section className="py-20 md:py-32 bg-card overflow-hidden">
+            <section className="py-20 md:py-32 bg-background overflow-hidden">
                 <div className="container mx-auto px-4 text-center">
                     <div className="inline-block mb-4">
                         <div className="text-6xl font-headline font-bold text-primary animate-fade-in-up">
@@ -71,13 +71,13 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                 </div>
             </section>
 
-            <section className="py-16 md:py-24 bg-background">
+            <section className="py-16 md:py-24 bg-muted/20">
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                         {features.map((feature, index) => (
                            <Card 
                             key={index} 
-                            className="p-8 flex flex-col items-center group hover:shadow-lg hover:-translate-y-2 transition-transform duration-300 animate-fade-in-up"
+                            className="p-8 flex flex-col items-center group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-in-up bg-card"
                             style={{ animationDelay: `${2.8 + index * 0.1}s` }}
                            >
                               <div className="p-5 bg-primary/10 rounded-full mb-6 transition-colors group-hover:bg-primary">

@@ -7,7 +7,6 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -35,14 +34,8 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <Card>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <CardHeader>
-            <CardTitle className="font-headline text-2xl">Reset Your Password</CardTitle>
-            <CardDescription>We'll send a reset link to your email.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
               control={form.control}
               name="email"
@@ -56,21 +49,14 @@ export default function ForgotPasswordForm() {
                 </FormItem>
               )}
             />
-          </CardContent>
-          <CardFooter className="flex flex-col gap-4">
-            <Button type="submit" className="w-full font-headline" disabled={forgotPasswordMutation.isPending}>
+            <Button type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
               {forgotPasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Send Reset Link
             </Button>
-            <p className="text-sm text-muted-foreground">
-              Remembered your password?{' '}
-              <Link href="/login" className="font-semibold text-primary hover:underline">
-                Back to Login
-              </Link>
-            </p>
-          </CardFooter>
+            <Button variant="outline" className="w-full" asChild>
+                <Link href="/login">Back to Login</Link>
+            </Button>
         </form>
       </Form>
-    </Card>
   );
 }

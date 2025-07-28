@@ -4,24 +4,35 @@
 import SignupForm from '@/components/SignupForm';
 import { useLocalization } from '@/context/LocalizationContext';
 import { UserPlus } from 'lucide-react';
+import Image from 'next/image';
+
 
 export default function SignupPage() {
   const { t } = useLocalization();
 
   return (
-    <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-200px)] py-12">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-headline font-bold text-primary flex items-center justify-center gap-4">
-            <UserPlus className="w-10 h-10" />
-            {t('signup.pageTitle')}
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            {t('signup.pageSubtitle')}
-          </p>
+    <div className="w-full lg:grid lg:min-h-[calc(100vh-65px)] lg:grid-cols-2 xl:min-h-[calc(100vh-65px)]">
+        <div className="flex items-center justify-center py-12">
+            <div className="mx-auto grid w-[350px] gap-6">
+                <div className="grid gap-2 text-center">
+                    <h1 className="text-3xl font-bold text-primary">{t('signup.formTitle')}</h1>
+                    <p className="text-balance text-muted-foreground">
+                        {t('signup.formDescription')}
+                    </p>
+                </div>
+                <SignupForm />
+            </div>
         </div>
-        <SignupForm />
-      </div>
+        <div className="hidden bg-muted lg:block">
+            <Image
+                src="https://placehold.co/1920x1080.png"
+                alt="Image"
+                width="1920"
+                height="1080"
+                className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+                data-ai-hint="signup illustration"
+            />
+        </div>
     </div>
   );
 }
