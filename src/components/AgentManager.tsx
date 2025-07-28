@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState } from 'react';
@@ -178,6 +178,7 @@ function AgentCard({ agent }: { agent: Agent }) {
 
 export default function AgentManager() {
   const { agents, isLoaded, isError } = useAgents();
+  const [searchTerm, setSearchTerm] = useState('');
 
   if (!isLoaded) {
     return (
@@ -199,22 +200,41 @@ export default function AgentManager() {
     );
   }
 
-  // Filter for agents that generate content, as per the design's focus
-  const completionAgents = agents.filter(agent => 
-    agent.category === AgentCategory.ReportGeneration ||
-    agent.category === AgentCategory.ProposalGeneration ||
-    agent.category === AgentCategory.DiagramGeneration
-  );
+  // Filter for agents that generate content and match search term
+  const filteredAgents = agents.filter(agent => {
+    const isCompletionAgent = agent.category === AgentCategory.ReportGeneration ||
+                              agent.category === AgentCategory.ProposalGeneration ||
+                              agent.category === AgentCategory.DiagramGeneration;
+    if (!isCompletionAgent) return false;
+
+    const lowercasedTerm = searchTerm.toLowerCase();
+    return (
+        agent.name.toLowerCase().includes(lowercasedTerm) ||
+        agent.description.toLowerCase().includes(lowercasedTerm)
+    );
+  });
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center gap-4">
+        <div className="relative flex-grow">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+                placeholder="Search agents..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+            />
+        </div>
         <CreateAgentDialog />
       </div>
       <div className="space-y-4">
-        {completionAgents.map((agent) => (
+        {filteredAgents.map((agent) => (
           <AgentCard key={agent.id} agent={agent} />
         ))}
+        {filteredAgents.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No agents found.</p>
+        )}
       </div>
        <div className="flex justify-center mt-8">
         <Button size="lg">Run Agents</Button>
