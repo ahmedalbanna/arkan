@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -24,6 +25,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
+import { cn } from '@/lib/utils';
 
 const BlockEditor = dynamic(() => import('./BlockEditor'), {
     ssr: false,
@@ -237,10 +239,19 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                 </div>
             );
         }
-
-        if (isEditing) {
-            return (
-                <div className="my-2">
+        
+        return (
+            <div>
+                {/* Viewer */}
+                <div className={cn(isEditing && "hidden")}>
+                     <DynamicReactMarkdown
+                        components={markdownComponents}
+                        remarkPlugins={[remarkGfm]}>
+                        {content}
+                    </DynamicReactMarkdown>
+                </div>
+                {/* Editor - always mounted but hidden */}
+                <div className={cn(!isEditing && "hidden")}>
                     <BlockEditor 
                         initialContent={currentContent}
                         onChange={setCurrentContent}
@@ -248,15 +259,8 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     />
                     <Button onClick={handleSave} className="mt-2">Save</Button>
                 </div>
-            );
-        }
-        
-        return (
-            <DynamicReactMarkdown
-                components={markdownComponents}
-                remarkPlugins={[remarkGfm]}>
-                {content}
-            </DynamicReactMarkdown>);
+            </div>
+        );
     }
     
     const { words, chars } = calculateCounts(content);
