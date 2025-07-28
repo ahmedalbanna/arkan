@@ -16,6 +16,8 @@ import type { AnyProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import FormattedProposalView from './FormattedProposalView';
 
 function ProposalSkeleton() {
     return (
@@ -175,17 +177,40 @@ export function ProposalModeGenerator() {
                     {proposal ? (
                          <Card>
                             <CardHeader>
-                                <CardTitle className="font-headline text-2xl text-primary">
-                                    {(proposal as any).title || "Generated Proposal"}
-                                </CardTitle>
-                                <CardDescription>
-                                    {(proposal as any).category || "Review the generated proposal"}
-                                </CardDescription>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <CardTitle className="font-headline text-2xl text-primary">
+                                            {(proposal as any).title || "Generated Proposal"}
+                                        </CardTitle>
+                                        <CardDescription>
+                                            {(proposal as any).category || "Review the generated proposal"}
+                                        </CardDescription>
+                                    </div>
+                                    <Tabs defaultValue="user-view" className="w-[200px]">
+                                        <TabsList className="grid w-full grid-cols-2 h-9">
+                                            <TabsTrigger value="user-view" className="text-xs">User View</TabsTrigger>
+                                            <TabsTrigger value="dev-view" className="text-xs">JSON View</TabsTrigger>
+                                        </TabsList>
+                                    </Tabs>
+                                </div>
                             </CardHeader>
                             <CardContent>
-                                <div className="lg:h-[calc(100vh-270px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                   <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
-                                </div>
+                                <Tabs defaultValue="user-view" className="w-full">
+                                    <TabsContent value="user-view">
+                                        <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                            <FormattedProposalView
+                                                proposal={proposal}
+                                                onUpdate={handleProposalUpdate}
+                                                readOnly={generationMutation.isPending || translateMutation.isPending}
+                                            />
+                                        </div>
+                                    </TabsContent>
+                                     <TabsContent value="dev-view">
+                                        <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                           <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
                             </CardContent>
                         </Card>
                     ) : generationMutation.isPending ? (

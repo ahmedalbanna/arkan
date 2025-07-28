@@ -16,7 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useReportStore } from '@/hooks/useReportStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '../ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
