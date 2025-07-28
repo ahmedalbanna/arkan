@@ -18,7 +18,7 @@ const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
     const { resolvedTheme } = useTheme();
 
     const editor: BlockNoteEditor | null = useBlockNote({
-        onEditorContentChange: (editor) => {
+        onEditorContentChange: (editor: BlockNoteEditor) => {
             onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
         },
         initialContent: initialContent ? JSON.parse(initialContent) : undefined,
