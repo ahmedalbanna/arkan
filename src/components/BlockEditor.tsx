@@ -13,29 +13,45 @@ interface EditorProps {
   editable?: boolean;
 }
 
-export default function BlockEditor({ onChange, initialContent, editable }: EditorProps) {
-  const { resolvedTheme } = useTheme();
-  
-  // useBlockNote must be called conditionally after mount
-  const editor: BlockNoteEditor | null = useBlockNote({
-    initialContent: initialContent ? JSON.parse(initialContent) : undefined,
-    onEditorContentChange: (editor: BlockNoteEditor) => {
-      onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
-    },
-  });
+// Wrapper component that ensures hooks are only called on the client
+const Editor = ({ onChange, initialContent, editable }: EditorProps) => {
+    const { resolvedTheme } = useTheme();
+
+    const editor: BlockNoteEditor | null = useBlockNote({
+        onEditorContentChange: (editor) => {
+            onChange(JSON.stringify(editor.topLevelBlocks, null, 2));
+        },
+        initialContent: initialContent ? JSON.parse(initialContent) : undefined,
+    });
+
+    if (!editor) {
+        return <div className="prose dark:prose-invert max-w-none">Loading Editor...</div>;
+    }
+
+    return (
+        <div className="prose dark:prose-invert max-w-none">
+            <BlockNoteView
+                editor={editor}
+                editable={editable}
+                theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
+            />
+        </div>
+    );
+}
 
 
-  if (!editor) {
-    return <div className="prose dark:prose-invert max-w-none">Loading Editor...</div>;
-  }
+export default function BlockEditor(props: EditorProps) {
+    const [isMounted, setIsMounted] = useState(false);
 
-  return (
-    <div className="prose dark:prose-invert max-w-none">
-      <BlockNoteView
-        editor={editor}
-        editable={editable}
-        theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
-      />
-    </div>
-  );
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Render a placeholder on the server and initial client render
+    if (!isMounted) {
+        return <div className="prose dark:prose-invert max-w-none">Loading Editor...</div>;
+    }
+    
+    // Render the actual editor only on the client
+    return <Editor {...props} />;
 }
