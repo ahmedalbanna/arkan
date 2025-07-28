@@ -21,6 +21,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { useState } from 'react';
 import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import dynamic from 'next/dynamic';
+import { useTheme } from 'next-themes';
+
+const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 
 const proposalTemplateSchema = z.object({
@@ -29,6 +33,7 @@ const proposalTemplateSchema = z.object({
     description: z.string().min(1, "Description is required"),
     prompt: z.string().min(1, "Prompt is required"),
     guidelines: z.array(z.string()).optional(),
+    jsonStructure: z.any().optional(),
 });
 
 type ProposalFormValues = z.infer<typeof proposalTemplateSchema>;
@@ -40,11 +45,13 @@ type CreateProposalFormValues = z.infer<typeof createProposalTemplateSchema>;
 
 
 function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ProposalTemplate, onSave: (data: ProposalFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+    const { resolvedTheme } = useTheme();
     const form = useForm<ProposalFormValues>({
         resolver: zodResolver(proposalTemplateSchema),
         defaultValues: {
             ...template,
             guidelines: template.guidelines || [],
+            jsonStructure: template.jsonStructure || {},
         },
     });
 
@@ -93,6 +100,23 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>Add Guideline</Button>
                     </div>
                 </div>
+                 <Accordion type="single" collapsible className="w-full">
+                    <AccordionItem value="json-structure">
+                        <AccordionTrigger>JSON Structure</AccordionTrigger>
+                        <AccordionContent>
+                             <div className="p-2 border rounded-md bg-background">
+                                 <ReactJson 
+                                    src={template.jsonStructure || {}} 
+                                    theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
+                                    displayDataTypes={false}
+                                    name={false}
+                                    collapsed={2}
+                                />
+                             </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
+
 
                 <div className="flex justify-end gap-2">
                      {!isDefaultTemplate && (
