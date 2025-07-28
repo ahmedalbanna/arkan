@@ -124,11 +124,11 @@ export const ProposalGenerationTools = ({
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
                         <div>
-                            <Label htmlFor="project-idea">{t('builder.proposalGenerator.title')}</Label>
+                            <Label htmlFor="project-idea">Main Subject or Idea</Label>
                             <Textarea
                                 id="project-idea"
                                 name="projectIdea"
-                                placeholder={t('builder.proposalGenerator.placeholder')}
+                                placeholder="e.g., A training report on new data analysis techniques in the banking sector."
                                 rows={5}
                                 required
                                 value={projectIdea || ''}
