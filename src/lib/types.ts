@@ -22,12 +22,8 @@ export type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/ho
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { SavedProject, ProjectState } from '@/services/project-service';
-
-export type TranslateVariables = {
-    text: string;
-    targetLang: 'en' | 'ar';
-};
-export type { AgentData, Agent } from '@/lib/agents';
+export type { Codebase } from '@/ai/flows/generate-codebase';
+export type { AgentData, Agent, AgentPrompt } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';

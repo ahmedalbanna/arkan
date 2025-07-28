@@ -7,7 +7,7 @@ import { useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare } from 'lucide-react';
+import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -20,6 +20,7 @@ import GuidelinesTab from './GuidelinesTab';
 import AutomationTab from './AutomationTab';
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
+import OutputTab from './OutputTab';
 
 interface AgentEditorProps {
   agentId: string;
@@ -34,6 +35,7 @@ const agentGuidelineSchema = z.object({
 const agentPromptSchema = z.object({
   base: z.string().min(10, "Base prompt must be at least 10 characters."),
   guidelines: z.array(agentGuidelineSchema).optional(),
+  jsonStructure: z.any().optional(),
 });
 
 const agentEditorSchema = z.object({
@@ -112,6 +114,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const navItems = [
     { id: 'general', label: 'General', icon: Bot },
     { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
+    { id: 'output', label: 'Output', icon: PencilRuler },
     { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
     { id: 'tools', label: 'Tools', icon: Wrench },
     { id: 'context', label: 'Context', icon: LinkIcon },
@@ -124,6 +127,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
         return <GeneralTab isComplexPrompt={isComplexPrompt} isPending={updateAgentMutation.isPending} />;
       case 'guidelines':
         return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
+      case 'output':
+        return <OutputTab isComplexPrompt={isComplexPrompt} />;
       case 'knowledge':
         return <KnowledgeTab />;
       case 'tools':

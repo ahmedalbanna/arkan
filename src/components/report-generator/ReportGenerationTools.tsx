@@ -345,13 +345,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
-                                                    <ContextSelector itemKey={key} currentSelection={{
-                                                        sections: currentSelection?.sections || {},
-                                                        diagrams: currentSelection?.diagrams || {},
-                                                        externalContext: [],
-                                                        proposal: false,
-                                                        projectPlan: false
-                                                    }} />
+                                                    <ContextSelector itemKey={key} />
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">
