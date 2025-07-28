@@ -22,6 +22,7 @@ export const ProjectStateSchema = z.object({
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
+        type: z.enum(['context', 'example']),
     })).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
     projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
