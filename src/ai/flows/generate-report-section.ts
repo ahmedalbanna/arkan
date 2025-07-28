@@ -64,7 +64,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '${sectionToGenerate}'.
 
 {{#if tableOfContents}}
---- FULL REPORT STRUCTURE (TABLE OF CONTENTS) ---
+--- SECTION REPORT STRUCTURE (TABLE OF CONTENTS) ---
 {{#each tableOfContents}}
 - {{{this}}}
 {{/each}}

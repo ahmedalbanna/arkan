@@ -164,7 +164,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
         
-        const agent = fullState.agents?.find(a => a.id === sectionConfig[section as SectionNameType]?.agentId);
+        const agent = fullState.agents?.find((a: { id: string; }) => a.id === sectionConfig[section as SectionNameType]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
@@ -345,7 +345,13 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     </div>
                                                 </TabsContent>
                                                 <TabsContent value="context" className="pt-4">
-                                                    <ContextSelector itemKey={key} />
+                                                    <ContextSelector itemKey={key} currentSelection={{
+                                                        sections: currentSelection?.sections || {},
+                                                        diagrams: currentSelection?.diagrams || {},
+                                                        externalContext: [],
+                                                        proposal: false,
+                                                        projectPlan: false
+                                                    }} />
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">

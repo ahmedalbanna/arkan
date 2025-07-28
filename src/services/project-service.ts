@@ -5,6 +5,8 @@ import type { AnyProjectProposal } from "@/ai/schemas";
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
 export interface ProjectState {
+    agents: any;
+    projectPlan: any;
     name?: string;
     projectIdea?: string;
     proposal: AnyProjectProposal | null;
