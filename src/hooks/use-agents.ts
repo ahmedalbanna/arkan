@@ -60,16 +60,7 @@ export function useAgents() {
     },
   });
 
-  /**
-   * Finds and returns a single agent from the cached list by its ID.
-   * @param id The ID of the agent to find.
-   * @returns The agent object if found, otherwise undefined.
-   */
-  const getAgent = (id: string): Agent | undefined => {
-    return agents?.find((agent) => agent.id === id);
-  };
-
-  return { agents: agents || [], isLoaded: !isLoading, isError, getAgent };
+  return { agents: agents || [], isLoaded: !isLoading, isError };
 }
 
 type UseAgentOptions = Omit<
