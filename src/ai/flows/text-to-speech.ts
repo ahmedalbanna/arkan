@@ -36,7 +36,7 @@ async function toWav(
   });
 }
 
-function chunkText(text: string, chunkSize = 250): string[] {
+function chunkText(text: string, chunkSize = 4500): string[] {
     const sentences = text.match(/[^.!?]+[.!?]*/g) || [];
     const chunks: string[] = [];
     let currentChunk = '';
