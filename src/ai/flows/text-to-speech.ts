@@ -36,6 +36,26 @@ async function toWav(
   });
 }
 
+function chunkText(text: string, chunkSize = 250): string[] {
+    const sentences = text.match(/[^.!?]+[.!?]*/g) || [];
+    const chunks: string[] = [];
+    let currentChunk = '';
+
+    for (const sentence of sentences) {
+        if ((currentChunk + sentence).length > chunkSize) {
+            chunks.push(currentChunk);
+            currentChunk = sentence;
+        } else {
+            currentChunk += sentence;
+        }
+    }
+    if (currentChunk) {
+        chunks.push(currentChunk);
+    }
+    return chunks;
+}
+
+
 export const textToSpeech = ai.defineFlow(
   {
     name: 'textToSpeechFlow',
@@ -45,29 +65,38 @@ export const textToSpeech = ai.defineFlow(
     }),
   },
   async (text) => {
-    const { media } = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-preview-tts',
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Algenib' },
+    const textChunks = chunkText(text);
+    const audioBuffers: Buffer[] = [];
+
+    for (const chunk of textChunks) {
+        const { media } = await ai.generate({
+          model: 'googleai/gemini-2.5-flash-preview-tts',
+          config: {
+            responseModalities: ['AUDIO'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: { voiceName: 'Algenib' },
+              },
+            },
           },
-        },
-      },
-      prompt: text,
-    });
+          prompt: chunk,
+        });
+
+        if (media && media.url) {
+            const audioBuffer = Buffer.from(
+              media.url.substring(media.url.indexOf(',') + 1),
+              'base64'
+            );
+            audioBuffers.push(audioBuffer);
+        }
+    }
     
-    if (!media || !media.url) {
-      throw new Error("Text-to-speech generation failed to produce audio.");
+    if (audioBuffers.length === 0) {
+      throw new Error("Text-to-speech generation failed to produce any audio.");
     }
 
-    const audioBuffer = Buffer.from(
-      media.url.substring(media.url.indexOf(',') + 1),
-      'base64'
-    );
-    
-    const wavBase64 = await toWav(audioBuffer);
+    const combinedBuffer = Buffer.concat(audioBuffers);
+    const wavBase64 = await toWav(combinedBuffer);
 
     return { audioDataUri: `data:audio/wav;base64,${wavBase64}` };
   }

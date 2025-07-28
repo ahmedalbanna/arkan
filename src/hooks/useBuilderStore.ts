@@ -197,11 +197,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     {
       name: "arkan-builder-state-v4", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
-      // onRehydrateStorage: () => (state) => {
-      //   if (state) {
-      //     state.setHasUnsavedChanges(false);
-      //   }
-      // },
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHasUnsavedChanges(false);
+        }
+      },
       partialize: (state) => ({
         name: state.name,
         projectIdea: state.projectIdea,
