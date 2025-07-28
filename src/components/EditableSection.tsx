@@ -3,27 +3,17 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
-import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import type { SectionName } from '@/ai/schemas';
-import { Textarea } from '@/components/ui/textarea';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, X, Check, MoreVertical, Copy, FileText, FileDown, PenSquare, Languages, Volume2 } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, MoreVertical, FileDown, PenSquare, Volume2, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
 import { Button } from '@/components/ui/button';
-import dynamic from 'next/dynamic';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
-import { Pluggable } from 'unified';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ManipulateTextOutput, ManipulateTextInput } from '@/ai/schemas';
+import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate } from '@/hooks/use-translation';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import { cn } from '@/lib/utils';
 import { EditableField } from './EditableField';
@@ -64,13 +54,7 @@ async function manipulateTextApi(variables: { data: ManipulateTextInput, token: 
 }
 
 
-// Dynamically import react-markdown and remark-gfm
-const DynamicReactMarkdown = dynamic(() => import('react-markdown'), {
-    ssr: false,
-    loading: () => <Loader2 className="h-6 w-6 animate-spin text-primary" />,
-});
 export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
-    const [isEditing, setIsEditing] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -82,8 +66,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
-    const { t, locale } = useLocalization();
-    const translateMutation = useTranslate();
+    const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
 
 
@@ -107,7 +90,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
     });
 
-    const isProcessingAi = translateMutation.isPending || manipulateMutation.isPending || ttsMutation.isPending;
+    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending;
 
     // Effect to play audio when src changes
     useEffect(() => {

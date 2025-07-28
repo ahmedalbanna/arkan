@@ -1,8 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useFormStatus } from 'react-dom';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { MoreVertical, Languages, Loader2, X, Check, Trash2, Copy } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -11,11 +10,14 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import BlockEditor from './BlockEditor';
 import { Card, CardContent } from './ui/card';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { markdownComponents } from '@/lib/markdown-components';
+import { type BlockNoteEditor } from "@blocknote/core";
+import dynamic from 'next/dynamic';
+
+const BlockEditor = dynamic(() => import("./BlockEditor"), { ssr: false });
 
 
 interface EditableFieldProps {
@@ -43,19 +45,49 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const { toast } = useToast();
   const { firebaseUser } = useAuth();
   const translateMutation = useTranslate();
+  
+  const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
+
+  useEffect(() => {
+    async function loadEditor() {
+      const { BlockNoteEditor } = await import("@blocknote/core");
+      setEditor(new BlockNoteEditor());
+    }
+    if(isEditing && !editor){
+        loadEditor();
+    }
+  }, [isEditing, editor]);
+
 
   const isProcessingAi = translateMutation.isPending;
 
   useEffect(() => {
     if (!isEditing) {
       setCurrentValue(value);
+    } else if (editor) {
+        // Function to safely parse and update editor content
+        const updateEditorContent = async () => {
+            try {
+                const blocks = value ? JSON.parse(value) : [];
+                const { insertOrUpdateBlock } = await import("@blocknote/core");
+                editor.removeBlocks(editor.topLevelBlocks);
+                insertOrUpdateBlock(editor, blocks);
+            } catch (e) {
+                console.warn("Failed to parse initial JSON content for editor, falling back to text.");
+                // Fallback for non-JSON or malformed JSON content
+                editor.removeBlocks(editor.topLevelBlocks);
+                editor.insertBlocks([{ type: 'paragraph', content: value }], editor.topLevelBlocks[0], "before");
+            }
+        };
+        updateEditorContent();
     }
-  }, [value, isEditing]);
+  }, [value, isEditing, editor]);
 
   const handleSave = () => {
-    if (readOnly) return;
-    if (currentValue !== value) {
-      onUpdate(currentValue);
+    if (readOnly || !editor) return;
+    const newContent = JSON.stringify(editor.topLevelBlocks, null, 2);
+    if (newContent !== value) {
+      onUpdate(newContent);
     }
     setIsEditing(false);
   };
@@ -132,7 +164,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       return (
         <Card>
             <CardContent className="p-1">
-                <BlockEditor initialContent={currentValue} onChange={setCurrentValue} />
+                 {editor ? <BlockEditor editor={editor} editable={true} /> : <Loader2 className="h-6 w-6 animate-spin"/>}
             </CardContent>
             <div className="flex justify-end p-2">
                  <Button onClick={handleSave} size="sm">Save</Button>
