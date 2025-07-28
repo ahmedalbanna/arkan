@@ -107,29 +107,7 @@ The proposal should be well-structured, realistic, and detailed. Fill out all th
 IMPORTANT: For all fields that contain descriptive text (like 'objective', 'methodology', 'evaluation', 'interest', 'description', and 'mitigation'), you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
 
 Project Idea: {{{projectIdea}}}`,
-        guidelines: [],
-        jsonStructure: {
-            category: 'string',
-            title: 'string',
-            objective: 'string',
-            methodology: 'string',
-            expected_outcome: ['string'],
-            timeline: {
-                startDate: 'string',
-                endDate: 'string',
-                phases: [{ name: 'string', durationWeeks: 'number' }]
-            },
-            budget: {
-                totalAmount: 'number',
-                currency: 'string',
-                breakdown: [{ item: 'string', cost: 'number' }]
-            },
-            stakeholders: [{ name: 'string', role: 'string', interest: 'string' }],
-            success_criteria: ['string'],
-            evaluation: 'string',
-            tags: ['string'],
-            risks: [{ description: 'string', mitigation: 'string' }]
-        }
+        guidelines: []
     }
   },
    {

@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Languages, Loader2 } from 'lucide-react';
+import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -13,6 +13,11 @@ import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useAuth } from '@/context/AuthContext';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from '../ui/use-toast';
+import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -22,11 +27,59 @@ interface ProposalActionsProps {
     onTranslate: (targetLang: 'en' | 'ar') => void;
 }
 
+async function summarizeProjectApi(variables: { body: any; token: string }): Promise<SummarizeFullProjectOutput> {
+    const response = await fetch('/api/summarize-project', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`
+        },
+        body: JSON.stringify(variables.body)
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to summarize project');
+    }
+    return await response.json();
+}
+
 export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: ProposalActionsProps) => {
   const { t } = useLocalization();
   const { proposal } = useBuilderStore();
+  const { sections } = useReportStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+  const [isCopied, setIsCopied] = useState(false);
+  const { firebaseUser, refetchUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  const summarizeMutation = useMutation({
+    mutationFn: summarizeProjectApi,
+    onSuccess: (data) => {
+        refetchUser();
+        toast({
+            title: "Project Summary Ready",
+            description: (
+                <div className="space-y-2">
+                    <p>The AI has generated a summary of your project.</p>
+                    <textarea readOnly className="w-full h-32 p-2 border rounded-md bg-muted text-xs" value={data.summary} />
+                    <Button size="sm" variant="outline" onClick={() => {
+                        navigator.clipboard.writeText(data.summary);
+                        setIsCopied(true);
+                        setTimeout(() => setIsCopied(false), 2000);
+                    }}>
+                        {isCopied ? <ClipboardCheck className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
+                        Copy Summary
+                    </Button>
+                </div>
+            ),
+            duration: 15000,
+        })
+    },
+    onError: (error: Error) => {
+        toast({ title: "Summarization Failed", description: error.message, variant: "destructive" });
+    }
+  });
 
   useEffect(() => {
     const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
@@ -46,12 +99,21 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
     }
   }
 
+  const handleSummarizeProject = async () => {
+      if (!proposal || !firebaseUser) return;
+      const reportMarkdown = Object.values(sections).filter(Boolean).join('\n\n---\n\n');
+      const token = await firebaseUser.getIdToken();
+      summarizeMutation.mutate({ body: { proposal, reportMarkdown }, token });
+  }
+
+  const isBusy = isGenerating || isTranslating || summarizeMutation.isPending;
+
   return (
     <div className="space-y-4">
         <div className="space-y-2">
             <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
             {docxLoaded ? (
-              <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange}>
+              <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange} disabled={isBusy}>
                   <SelectTrigger id="docx-template-select">
                       <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
@@ -64,13 +126,17 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
             ) : <p>Loading templates...</p> }
         </div>
         <div className='flex flex-col space-y-2'>
-            <Button onClick={handleExportDocx} disabled={isGenerating || !proposal} className="w-full font-headline">
+            <Button onClick={handleExportDocx} disabled={isBusy || !proposal} className="w-full font-headline">
               <Download className="mr-2 h-4 w-4" />
               {t('builder.proposalGenerator.exportDocx')}
             </Button>
+            <Button onClick={handleSummarizeProject} variant="outline" className="w-full" disabled={isBusy || !proposal}>
+                {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
+                Summarize Project
+            </Button>
              <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" className='w-full' disabled={isTranslating}>
+                    <Button variant="secondary" className='w-full' disabled={isBusy || !proposal}>
                         {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                         {t('builder.proposalGenerator.translateAllButton')}
                     </Button>

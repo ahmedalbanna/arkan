@@ -10,6 +10,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { AnyProjectProposalSchema, ProjectProposalSchema } from '../schemas';
 
 const SummarizeProjectInputSchema = z.object({
   projectDescription: z
@@ -51,3 +52,48 @@ const summarizeProjectFlow = ai.defineFlow(
     };
   }
 );
+
+
+// New flow for summarizing a full project
+const SummarizeFullProjectInputSchema = z.object({
+  proposal: AnyProjectProposalSchema.describe("The full JSON of the project proposal."),
+  reportMarkdown: z.string().describe("The concatenated markdown content of all generated report sections.")
+});
+export type SummarizeFullProjectInput = z.infer<typeof SummarizeFullProjectInputSchema>;
+
+const SummarizeFullProjectOutputSchema = z.object({
+  summary: z.string().describe('A concise executive summary of the entire project.'),
+});
+export type SummarizeFullProjectOutput = z.infer<typeof SummarizeFullProjectOutputSchema>;
+
+
+export async function summarizeFullProject(input: SummarizeFullProjectInput): Promise<SummarizeFullProjectOutput> {
+  const { proposal, reportMarkdown } = input;
+  const stringifiedProposal = JSON.stringify(proposal, null, 2);
+
+  const prompt = ai.definePrompt({
+    name: 'summarizeFullProjectPrompt',
+    input: { schema: SummarizeFullProjectInputSchema },
+    output: { schema: SummarizeFullProjectOutputSchema },
+    prompt: `You are an expert project analyst. Your task is to create a high-level executive summary based on a full project proposal (JSON) and a generated report (Markdown).
+
+**Analysis Steps:**
+1.  **Understand the Goal**: Read the \`objective\` and \`title\` from the proposal to grasp the project's core purpose.
+2.  **Review the Plan**: Look at the \`timeline\` and \`budget\` to understand the project's scope and scale.
+3.  **Synthesize the Report**: Read the provided report sections to understand the detailed analysis, design, and conclusions.
+4.  **Draft the Summary**: Write a concise executive summary that covers the problem, the proposed solution, key findings from the report, and the final conclusion.
+
+--- PROJECT PROPOSAL (JSON) ---
+\`\`\`json
+${stringifiedProposal}
+\`\`\`
+
+--- FULL REPORT (Markdown) ---
+${reportMarkdown}
+---
+`,
+  });
+
+  const { output } = await prompt({ proposal, reportMarkdown });
+  return output!;
+}
