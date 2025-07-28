@@ -65,7 +65,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline w-full sm:w-auto">
-                            <Link href="/generate">{t('home.trySummarizer')}</Link>
+                            <Link href="/generate?tab=code">{t('home.trySummarizer')}</Link>
                         </Button>
                     </div>
                 </div>

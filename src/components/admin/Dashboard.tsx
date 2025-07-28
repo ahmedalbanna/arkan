@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -39,8 +38,7 @@ function RecentActivitySkeleton() {
                     <div key={i} className="flex items-center gap-4">
                         <Skeleton className="h-9 w-9 rounded-full" />
                         <div className="grid gap-1 flex-grow">
-                            <Skeleton className="h-4 w-4/5" />
-                            <Skeleton className="h-3 w-3/5" />
+                            <Skeleton className="h-4 w-4/5" /><Skeleton className="h-3 w-3/5" />
                         </div>
                     </div>
                 ))}
