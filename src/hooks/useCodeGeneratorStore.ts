@@ -21,6 +21,7 @@ interface CodeGeneratorActions {
   setCodePrompt: (prompt: string) => void;
   setGeneratedCode: (code: GenerateCodeOutput) => void;
   setCodebase: (codebase: Codebase | null) => void;
+  codebase: Codebase | null;
 }
 
 const initialState: CodeGeneratorState = {

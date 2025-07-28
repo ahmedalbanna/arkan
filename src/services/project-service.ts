@@ -15,6 +15,10 @@ export interface ProjectState {
     presentation?: any; // Define a more specific type if needed
     externalContext?: any[]; // Define a more specific type if needed
     teamId?: string;
+    codeGenerator?: any;
+    academicSolver?: any;
+    codebase?: any;
+
 }
 
 // Represents a project document saved in Firestore

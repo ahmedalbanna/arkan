@@ -108,23 +108,23 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           hasUnsavedChanges: false, // Loading a project means it's saved
         });
 
-        useReportStore.getState().loadState(newState);
-        useDiagramStore.getState().loadState(newState);
-        usePresentationStore.getState().loadState(newState);
-        useCodeGeneratorStore.getState().loadState(newState);
-        useProjectPlanStore.getState().loadState(newState);
-        useCodebaseStore.getState().loadState(newState);
-        useAcademicSolverStore.getState().loadState(newState);
+        useReportStore.getState().loadState({ ...newState });
+        useDiagramStore.getState().loadState({ ...newState });
+        usePresentationStore.getState().loadState({ ...newState });
+        useCodeGeneratorStore.getState().loadState({ ...newState.codeGenerator });
+        useProjectPlanStore.getState().loadState({ ...newState.projectPlan });
+        useCodebaseStore.getState().loadState({ codebase: newState.codebase });
+        useAcademicSolverStore.getState().loadState({ ...newState.academicSolver });
 
         toast({
           title: "Project Loaded",
-          description: `Successfully loaded "${
-            newState.name || newState.proposal?.title || "project"
-          }".`,
+          description: `Successfully loaded "${newState.name || newState.proposal?.title || "project"
+            }".`,
         });
       },
+      // This method gathers the necessary data from different stores to form a complete ProjectState object.
       getFullState: () => ({
-        name: get().name,
+        name: get().name!, // Assuming name will be set before saving/getting full state
         projectIdea: get().projectIdea,
         proposal: get().proposal,
         sections: useReportStore.getState().sections,
@@ -135,6 +135,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
         academicSolver: useAcademicSolverStore.getState(),
+        agents: useReportStore.getState().agents, // Add agents from report store
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
@@ -145,8 +146,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
         set({
-          proposal,
-          name: proposal?.title,
+          proposal: proposal,
+          name: proposal?.title || undefined, // Ensure name is string or undefined
           // When a new proposal is generated, it's not a saved project yet.
           currentProjectId: null,
           hasUnsavedChanges: true,
@@ -196,48 +197,48 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
     {
       name: "arkan-builder-state-v4", // Bump version to avoid conflicts
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHasUnsavedChanges(false);
-        }
-      },
+      // onRehydrateStorage: () => (state) => {
+      //   if (state) {
+      //     state.setHasUnsavedChanges(false);
+      //   }
+      // },
       partialize: (state) => ({
         name: state.name,
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
-        sections: useReportStore.getState().sections,
-        diagrams: useDiagramStore.getState().diagrams,
-        presentation: usePresentationStore.getState().presentation,
-        codeGenerator: useCodeGeneratorStore.getState(),
-        codebase: useCodebaseStore.getState().codebase,
-        externalContext: useReportStore.getState().externalContext,
-        projectPlan: useProjectPlanStore.getState().projectPlan,
-        academicSolver: useAcademicSolverStore.getState(),
+        // Downstream states are loaded in the merge function, not part of the main builder store partial
       }),
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
 
+        // Ensure name is treated as string | undefined
+        if (typeof persistedState.name !== 'string' && persistedState.name !== undefined) {
+          merged.name = undefined; // Reset invalid name
+          console.warn("Invalid 'name' type found in persisted state. Resetting to undefined.");
+        }
+
+
         // Attempt to parse the loaded proposal with the schema during merge
         let loadedProposal: AnyProjectProposal | null = null;
         if (persistedState.proposal) {
-           const parseResult = AnyProjectProposalSchema.safeParse(persistedState.proposal);
-            if (parseResult.success) {
-                loadedProposal = parseResult.data;
-            } else {
-                console.error("Failed to parse persisted proposal state during merge:", parseResult.error);
-                // Optionally show a toast or handle the error appropriately
-                toast({ title: "Error loading saved proposal", description: "The saved proposal data was invalid.", variant: "destructive" });
-            }
+          const parseResult = AnyProjectProposalSchema.safeParse(persistedState.proposal);
+          if (parseResult.success) {
+            loadedProposal = parseResult.data;
+          } else {
+            console.error("Failed to parse persisted proposal state during merge:", parseResult.error);
+            // Optionally show a toast or handle the error appropriately
+            toast({ title: "Error loading saved proposal", description: "The saved proposal data was invalid.", variant: "destructive" });
+          }
         }
 
-        useReportStore.getState().loadState(persistedState);
-        useDiagramStore.getState().loadState(persistedState);
-        usePresentationStore.getState().loadState(persistedState);
-        useCodeGeneratorStore.getState().loadState(persistedState);
-        useProjectPlanStore.getState().loadState(persistedState);
-        useCodebaseStore.getState().loadState(persistedState);
-        useAcademicSolverStore.getState().loadState(persistedState);
+        useReportStore.getState().loadState({ ...persistedState });
+        useDiagramStore.getState().loadState({ ...persistedState });
+        usePresentationStore.getState().loadState({ ...persistedState });
+        useCodeGeneratorStore.getState().loadState({ ...persistedState.codeGenerator });
+        useProjectPlanStore.getState().loadState({ ...persistedState.projectPlan });
+        useCodebaseStore.getState().loadState({ codebase: persistedState.codebase });
+        useAcademicSolverStore.getState().loadState({ ...persistedState.academicSolver });
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },
