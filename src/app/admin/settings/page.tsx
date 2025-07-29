@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 
-import { Settings, Loader2, Save } from 'lucide-react';
+import { Settings, Loader2, Save, Banknote } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -17,15 +17,22 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import React from 'react';
+import { Separator } from '@/components/ui/separator';
 
 // --- Type Definition ---
 interface AppSettings {
   newUserCredits: number;
+  bankName?: string;
+  accountHolder?: string;
+  iban?: string;
 }
 
 // --- Zod Schema for Validation ---
 const settingsSchema = z.object({
   newUserCredits: z.coerce.number().int().min(0, "Credits cannot be negative."),
+  bankName: z.string().min(1, 'Bank name is required.'),
+  accountHolder: z.string().min(1, 'Account holder name is required.'),
+  iban: z.string().min(1, 'IBAN is required.'),
 });
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
@@ -72,8 +79,11 @@ export default function AdminSettingsPage() {
   
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
-    defaultValues: { // Set default values to avoid uncontrolled inputs
-        newUserCredits: 0,
+    defaultValues: {
+        newUserCredits: 10,
+        bankName: '',
+        accountHolder: '',
+        iban: '',
     }
   });
 
@@ -117,6 +127,11 @@ export default function AdminSettingsPage() {
                 <CardContent className="space-y-4">
                     <Skeleton className="h-5 w-1/4" />
                     <Skeleton className="h-10 w-full" />
+                    <Separator/>
+                    <Skeleton className="h-6 w-1/3" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-5 w-1/4" />
+                    <Skeleton className="h-10 w-full" />
                 </CardContent>
                 <CardFooter>
                     <Skeleton className="h-10 w-32" />
@@ -156,6 +171,48 @@ export default function AdminSettingsPage() {
                                 <FormControl>
                                     <Input type="number" {...field} disabled={mutation.isPending} />
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+                <Separator className="my-6" />
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> Bank Payment Details</CardTitle>
+                    <CardDescription>
+                        Set the bank details that users will see on the payment page.
+                    </CardDescription>
+                </CardHeader>
+                 <CardContent className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="bankName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Bank Name</FormLabel>
+                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="accountHolder"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Account Holder Name</FormLabel>
+                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="iban"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>IBAN</FormLabel>
+                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}

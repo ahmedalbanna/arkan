@@ -9,11 +9,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, UploadCloud } from 'lucide-react';
+import { Loader2, UploadCloud, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Skeleton } from './ui/skeleton';
 
 const formSchema = z.object({
   file: z
@@ -26,6 +27,15 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+// This function now fetches public settings, no token needed.
+async function fetchPublicSettings() {
+    const response = await fetch('/api/settings');
+    if (!response.ok) {
+        throw new Error('Failed to fetch payment details');
+    }
+    return response.json();
+}
 
 async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
@@ -45,12 +55,34 @@ async function submitPaymentProof({ formData, token }: { formData: FormData, tok
     return response.json();
 }
 
+function BankDetailsSkeleton() {
+    return (
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-7 w-48" />
+                <Skeleton className="h-4 w-full" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-5 w-4/5" />
+                <Skeleton className="h-5 w-full" />
+            </CardContent>
+        </Card>
+    )
+}
+
 export default function SubmitPaymentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { firebaseUser } = useAuth();
   const { toast } = useToast();
   const { t } = useLocalization();
+
+  const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = useQuery({
+      queryKey: ['publicSettings'],
+      queryFn: fetchPublicSettings,
+      staleTime: 1000 * 60 * 60, // 1 hour
+  });
 
   const planId = searchParams.get('planId');
   const planName = searchParams.get('planName');
@@ -107,18 +139,30 @@ export default function SubmitPaymentForm() {
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-headline">{t('submitPayment.bankDetailsTitle')}</CardTitle>
-          <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm bg-muted p-4 rounded-lg">
-          <p><strong>{t('submitPayment.bankNameLabel')}:</strong> Arkan National Bank</p>
-          <p><strong>{t('submitPayment.accountHolderLabel')}:</strong> Arkan Professional Platform</p>
-          <p><strong>{t('submitPayment.ibanLabel')}:</strong> SA03 8000 0000 6080 1016 7519</p>
-          <p><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
-        </CardContent>
-      </Card>
+      {isLoadingSettings ? (
+          <BankDetailsSkeleton />
+      ) : isSettingsError ? (
+          <Card className="border-destructive">
+             <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive"><AlertCircle /> Error</CardTitle>
+                <CardDescription>Could not load payment information. Please try again later.</CardDescription>
+             </CardHeader>
+          </Card>
+      ) : (
+        <Card>
+            <CardHeader>
+            <CardTitle className="font-headline">{t('submitPayment.bankDetailsTitle')}</CardTitle>
+            <CardDescription>{t('submitPayment.bankDetailsDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm bg-muted p-4 rounded-lg">
+            <p><strong>{t('submitPayment.bankNameLabel')}:</strong> {settings?.bankName}</p>
+            <p><strong>{t('submitPayment.accountHolderLabel')}:</strong> {settings?.accountHolder}</p>
+            <p><strong>{t('submitPayment.ibanLabel')}:</strong> {settings?.iban}</p>
+            <p><strong>{t('submitPayment.referenceLabel')}:</strong> {t('submitPayment.yourUserIdLabel')} ({firebaseUser?.uid || t('submitPayment.pleaseLogin')})</p>
+            </CardContent>
+        </Card>
+      )}
+
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
@@ -149,7 +193,7 @@ export default function SubmitPaymentForm() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={mutation.isPending} className="w-full">
+            <Button type="submit" disabled={mutation.isPending || isLoadingSettings} className="w-full">
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
               {t('submitPayment.submitButton')}
             </Button>

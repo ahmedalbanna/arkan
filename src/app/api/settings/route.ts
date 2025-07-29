@@ -24,19 +24,19 @@ async function verifyAdmin(request: Request) {
     }
 }
 
-// GET /api/settings
+// GET /api/settings - This endpoint is now public
 export async function GET(request: Request) {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
     try {
         const settingsRef = adminDb.collection('settings').doc('defaults');
         const doc = await settingsRef.get();
         if (!doc.exists) {
             // If settings don't exist, create them with default values
-            const defaultSettings = { newUserCredits: 10 };
+            const defaultSettings = { 
+                newUserCredits: 10,
+                bankName: 'Arkan National Bank',
+                accountHolder: 'Arkan Professional Platform',
+                iban: 'SA03 8000 0000 6080 1016 7519',
+            };
             await settingsRef.set(defaultSettings);
             return NextResponse.json(defaultSettings, { status: 200 });
         }
@@ -48,9 +48,12 @@ export async function GET(request: Request) {
 }
 
 
-// PUT /api/settings
+// PUT /api/settings - This endpoint remains admin-only
 const settingsSchema = z.object({
   newUserCredits: z.coerce.number().int().min(0),
+  bankName: z.string().optional(),
+  accountHolder: z.string().optional(),
+  iban: z.string().optional(),
 });
 
 export async function PUT(request: Request) {
