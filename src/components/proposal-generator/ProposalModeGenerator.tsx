@@ -52,7 +52,7 @@ function ProposalSkeleton() {
 
 // The async function for the mutation
 async function generateProposal(variables: { body: any; token: string; }): Promise<AnyProjectProposal> {
-    const response = await fetch('/api/generate-proposal', {
+    const response = await fetch('/api/generate/proposal', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
