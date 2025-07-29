@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,7 @@ const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.Element
 
 export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
   
@@ -94,9 +96,21 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const isComplexPrompt = typeof form.watch('prompt') === 'object';
 
   useEffect(() => {
+    const promptFromUrl = searchParams.get('prompt');
+    const newPromptValue = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
+
+    const currentPrompt = form.getValues('prompt');
+    
+    let updatedPrompt;
+    if (typeof currentPrompt === 'object' && typeof newPromptValue === 'string') {
+        updatedPrompt = { ...currentPrompt, base: newPromptValue };
+    } else {
+        updatedPrompt = newPromptValue;
+    }
+
     form.reset({
       name: initialData.name,
-      prompt: initialData.prompt,
+      prompt: updatedPrompt,
       introduction: '',
       placeholder: 'Ask me anything about TypeScript...',
       conversationStarters: [],
@@ -104,7 +118,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       language: 'English (US)',
       model: 'googleai/gemini-2.0-flash',
     });
-  }, [initialData, form]);
+  }, [initialData, searchParams, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
     // We only update name and prompt for now

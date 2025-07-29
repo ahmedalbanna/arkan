@@ -17,6 +17,7 @@ export interface PromptTemplate {
   category: string;
   title: string;
   prompt: string;
+  targetAgentIds?: string[];
 }
 
 export const PROMPT_CATEGORIES: PromptCategory[] = [
@@ -53,6 +54,18 @@ export const PROMPT_CATEGORIES: PromptCategory[] = [
 ];
 
 export const PROMPT_TEMPLATES: PromptTemplate[] = [
+    {
+        category: 'Report Generation',
+        title: 'Generate an Introduction',
+        prompt: `You are an expert technical writer specializing in project proposals. Based on the provided project proposal and any additional context, write a complete and professional introduction section for the formal report. Synthesize the information from the entire proposal and the provided context to create this introduction. Infer the problem from the objective and risks. Infer the limitations of existing systems from the project's goals. Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.`,
+        targetAgentIds: ['generate-introduction-section']
+    },
+    {
+        category: 'Diagram Generation',
+        title: 'Create a Use Case Diagram',
+        prompt: `Based on the project's stakeholders and objectives, create a PlantUML use case diagram that shows the primary actors and their interactions with the system. Use rectangles to group related use cases within a system boundary.`,
+        targetAgentIds: ['generate-use-case-diagram']
+    },
     {
         category: 'Taskade AI',
         title: 'Create Task',

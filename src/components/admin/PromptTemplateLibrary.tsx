@@ -8,51 +8,83 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/prompt-templates';
-import { HelpCircle, Search, Copy } from 'lucide-react';
+import { AGENTS } from '@/lib/agents';
+import { HelpCircle, Search, Copy, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useRouter } from 'next/navigation';
 
 export function PromptTemplateLibrary() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Taskade AI');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedAgent, setSelectedAgent] = useState('all');
   const { toast } = useToast();
+  const router = useRouter();
 
-  const filteredCategories = PROMPT_CATEGORIES.filter(cat =>
-    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCategories = PROMPT_CATEGORIES;
 
-  const filteredTemplates = PROMPT_TEMPLATES.filter(
-    (template) =>
-      template.category === selectedCategory &&
-      (template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        template.prompt.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredTemplates = PROMPT_TEMPLATES.filter((template) => {
+    const categoryMatch = selectedCategory === 'All' || template.category === selectedCategory;
+    const agentMatch = selectedAgent === 'all' || template.targetAgentIds?.includes(selectedAgent);
+    const searchMatch =
+      template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      template.prompt.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return categoryMatch && agentMatch && searchMatch;
+  });
   
   const handleCopyPrompt = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
     toast({ title: 'Prompt Copied!', description: 'The template has been copied to your clipboard.' });
   }
 
+  const handleUseTemplate = (agentId: string, prompt: string) => {
+    // This is a simplified approach. A more robust implementation might use a state management
+    // solution to pass the prompt to the editor page to avoid long URL params.
+    router.push(`/admin/manage-agents/${agentId}/edit?prompt=${encodeURIComponent(prompt)}`);
+  }
+
   return (
     <Card className="flex flex-col h-full">
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b gap-4 flex-wrap">
         <h2 className="text-lg font-semibold">AI Prompt Templates</h2>
-        <div className="flex items-center gap-2">
-            <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4" />Learn More</Button>
+        <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                     placeholder="Search templates..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-8"
+                    className="pl-8 w-48"
                 />
             </div>
+             <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+              <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Filter by Agent" />
+              </SelectTrigger>
+              <SelectContent>
+                  <SelectItem value="all">All Agents</SelectItem>
+                  {AGENTS.map(agent => (
+                      <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4" />Learn More</Button>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar: Categories */}
         <ScrollArea className="w-64 border-r">
             <div className="p-2">
+                 <Button
+                    variant={selectedCategory === 'All' ? "secondary" : "ghost"}
+                    onClick={() => setSelectedCategory('All')}
+                    className="w-full justify-start gap-2"
+                >
+                    <Bot className="h-4 w-4" />
+                    <span className="flex-grow text-left">All</span>
+                     <Badge variant="outline" className="text-xs">{PROMPT_TEMPLATES.length}</Badge>
+                </Button>
                 {filteredCategories.map(category => (
                     <Button
                         key={category.id}
@@ -71,18 +103,34 @@ export function PromptTemplateLibrary() {
         <ScrollArea className="flex-1">
             <div className="p-6 space-y-4">
                 {filteredTemplates.map((template, index) => (
-                    <Card key={index} className="group hover:bg-muted/50">
+                    <Card key={index} className="group hover:bg-muted/50 transition-colors">
                         <CardHeader className="flex flex-row justify-between items-start">
-                            <CardTitle className="text-base">{template.title}</CardTitle>
-                             <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleCopyPrompt(template.prompt)}>
-                                <Copy className="h-4 w-4"/>
-                            </Button>
+                            <div>
+                                <CardTitle className="text-base">{template.title}</CardTitle>
+                                <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                                    <Bot className="h-3 w-3" />
+                                    <span>{AGENTS.find(a => a.id === template.targetAgentIds?.[0])?.name || template.category}</span>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Button variant="ghost" size="sm" onClick={() => handleCopyPrompt(template.prompt)}>
+                                    <Copy className="mr-2 h-4 w-4"/> Copy
+                                </Button>
+                                {template.targetAgentIds && (
+                                    <Button size="sm" onClick={() => handleUseTemplate(template.targetAgentIds![0], template.prompt)}>Use Template</Button>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground">{template.prompt}</p>
                         </CardContent>
                     </Card>
                 ))}
+                 {filteredTemplates.length === 0 && (
+                    <div className="text-center text-muted-foreground py-16">
+                        <p>No prompt templates found matching your criteria.</p>
+                    </div>
+                )}
             </div>
         </ScrollArea>
       </div>
