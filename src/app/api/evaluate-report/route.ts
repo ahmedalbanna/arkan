@@ -1,11 +1,12 @@
 
-import { NextResponse } from 'next/server';
+'use server';
+
 import { z } from 'zod';
 import { evaluateReport } from '@/ai/flows/evaluate-report';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const evaluateReportSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -14,50 +15,30 @@ const evaluateReportSchema = z.object({
   acceptanceCriteria: z.array(z.string()),
 });
 
-export async function POST(request: Request) {
-  const auth = await getAdminAuth();
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-
     const body = await request.json();
     const validation = evaluateReportSchema.safeParse(body);
-
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError(validation.error);
     }
 
     const agentInput = validation.data;
     const result = await evaluateReport(agentInput);
 
     // Only deduct credit after a successful generation
-    await deductCredit(userId, 1);
+    await deductCredit(user.id, 1);
     
     // Log the successful generation
     await logGeneration({
         agentId: 'evaluate-report',
-        userId,
+        userId: user.id,
         input: agentInput,
         output: result,
     });
     
-    return NextResponse.json(result, { status: 200 });
+    return createApiResponse(result, 200);
   } catch (error) {
-    console.error(`Error evaluating report:`, error);
-    if (error instanceof Error) {
-        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-        if (error.message.includes("credit")) {
-            return NextResponse.json({ message: error.message }, { status: 402 }); // Payment Required
-        }
-        return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred while evaluating the report.' }, { status: 500 });
+    return handleApiError(error);
   }
-}
+});
