@@ -1,3 +1,4 @@
+// This file was moved from /api/transactions/route.ts
 
 import { getTransactionsByStatus } from '@/lib/db/queries';
 import { z } from 'zod';
@@ -19,9 +20,9 @@ export const GET = withAuth(async ({ request }) => {
     }
 
     const { limit, lastVisibleId, status } = queryValidation.data;
-    const { transactions, hasNextPage } = await getTransactionsByStatus({ status, limit, lastVisibleId });
+    const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit, lastVisibleId });
     
-    return createApiResponse({ transactions, hasNextPage }, 200);
+    return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
   } catch (error) {
     return handleApiError(error);
   }

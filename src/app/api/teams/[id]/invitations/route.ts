@@ -1,51 +1,37 @@
 // src/app/api/teams/[id]/invitations/route.ts
-import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const inviteMemberSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
 // Helper to verify if the requester is the owner of the team
-async function verifyTeamOwner(request: Request, teamId: string) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token, true);
-    const requesterId = decodedToken.uid;
-
+async function verifyTeamOwner(requesterId: string, teamId: string) {
     const teamDoc = await adminDb.collection('teams').doc(teamId).get();
     if (!teamDoc.exists) {
-        return { authorized: false, message: 'Team not found' };
+        throw { status: 404, message: 'Team not found' };
     }
     const team = teamDoc.data() as Team;
     
     if (team.ownerId !== requesterId) {
-        return { authorized: false, message: 'Forbidden: Only the team owner can invite members' };
+        throw { status: 403, message: 'Forbidden: Only the team owner can invite members' };
     }
-
-    return { authorized: true, requesterId };
+    return team;
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export const POST = withAuth(async ({ request, params, user }) => {
     const teamId = params.id;
     try {
-        const ownerCheck = await verifyTeamOwner(request, teamId);
-        if (!ownerCheck.authorized) {
-            return NextResponse.json({ message: ownerCheck.message }, { status: ownerCheck.message === 'Forbidden' ? 403 : 401 });
-        }
+        await verifyTeamOwner(user.id, teamId);
 
         const body = await request.json();
         const validation = inviteMemberSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
         const { email } = validation.data;
@@ -53,21 +39,20 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         // Find user by email
         const userQuery = await adminDb.collection('users').where('email', '==', email).limit(1).get();
         if (userQuery.empty) {
-            return NextResponse.json({ message: 'User with this email not found.' }, { status: 404 });
+            return handleApiError({ message: 'User with this email not found.' }, 404);
         }
         const userDoc = userQuery.docs[0];
         const userId = userDoc.id;
         const userProfile = await getUserProfile(userId);
 
         if (!userProfile) {
-            return NextResponse.json({ message: 'User profile not found.' }, { status: 404 });
+            return handleApiError({ message: 'User profile not found.' }, 404);
         }
-
 
         // Check if user is already a member
         const memberDoc = await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).get();
         if (memberDoc.exists) {
-            return NextResponse.json({ message: 'User is already a member of this team.' }, { status: 409 });
+            return handleApiError({ message: 'User is already a member of this team.' }, 409);
         }
 
         // Add user to the team with denormalized data
@@ -76,9 +61,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
             teamId: teamId,
             role: 'member',
             joinedAt: new Date().toISOString(),
-            name: userProfile.name || 'Unknown User', // Denormalized field
-            email: userProfile.email || 'N/A', // Denormalized field
-            profilePictureUrl: userProfile.profilePictureUrl || '', // Denormalized field
+            name: userProfile.name || 'Unknown User',
+            email: userProfile.email || 'N/A',
+            profilePictureUrl: userProfile.profilePictureUrl || '',
         };
         await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).set(newMember);
         
@@ -87,13 +72,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
             teams: FieldValue.arrayUnion(teamId)
         });
         
-        return NextResponse.json(newMember, { status: 201 });
+        return createApiResponse(newMember, 201);
         
     } catch (error) {
-        console.error(`Error inviting member to team ${teamId}:`, error);
-        if (error instanceof Error && error.message.includes('token')) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+});

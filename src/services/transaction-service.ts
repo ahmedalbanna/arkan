@@ -11,7 +11,7 @@ interface FetchTransactionsParams {
   lastVisibleId?: string;
 }
 
-export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean }> {
+export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string }> {
     const { token: tokenPromise, status, limit, lastVisibleId } = params;
     const token = await tokenPromise;
     if (!token) {
@@ -25,7 +25,7 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
 
     if(lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/transactions?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
