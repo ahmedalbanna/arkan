@@ -1,9 +1,34 @@
 
 'use client';
 
-import PdfToMarkdownConverter from "@/components/PdfToMarkdownConverter";
 import { useLocalization } from "@/context/LocalizationContext";
 import { FileText } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const ConverterSkeleton = () => (
+    <div className="space-y-8">
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-6 w-1/4" />
+                <Skeleton className="h-4 w-1/2" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-10 w-full" />
+            </CardContent>
+            <CardFooter>
+                 <Skeleton className="h-10 w-48" />
+            </CardFooter>
+        </Card>
+    </div>
+);
+
+
+const PdfToMarkdownConverter = dynamic(() => import("@/components/PdfToMarkdownConverter"), {
+    ssr: false,
+    loading: () => <ConverterSkeleton />
+});
 
 export default function PdfToMarkdownPage() {
   const { t } = useLocalization();

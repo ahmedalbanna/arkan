@@ -1,6 +1,25 @@
 
-import HandwritingGenerator from '@/components/HandwritingGenerator';
-import { PencilLine } from 'lucide-react';
+'use client';
+
+import { PencilLine, Loader2 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const HandwritingSkeleton = () => (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+            <Skeleton className="h-[600px] w-full" />
+        </div>
+        <div>
+            <Skeleton className="h-[600px] w-full" />
+        </div>
+    </div>
+);
+
+const HandwritingGenerator = dynamic(() => import('@/components/HandwritingGenerator'), {
+  ssr: false,
+  loading: () => <HandwritingSkeleton />,
+});
 
 export default function HandwritingPage() {
   return (
