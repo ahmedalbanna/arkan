@@ -7,7 +7,7 @@ import { logGeneration } from '@/services/generation-service';
 import { agentChat } from '@/ai/flows/agent-chat';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
-import { serverTimestamp } from 'firebase/database';
+import { push, serverTimestamp, update } from 'firebase/database';
 
 const chatSchema = z.object({
   agentId: z.string(),
@@ -22,51 +22,60 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
-
+    
     const { agentId, message, conversationId } = validation.data;
-    const agentInput = { agentId, message };
-    const result = await agentChat(agentInput);
+    const isAgentChat = agentId !== 'user-chat';
 
-    // --- Save messages to Realtime Database ---
     const db = adminRealtimeDb;
     const messagesRef = db.ref(`messages/${conversationId}`);
     
-    // User message
+    // Always save the user's message first
     const userMessage = {
         senderId: user.id,
         content: message,
-        role: 'user',
+        role: 'user' as const,
         timestamp: serverTimestamp(),
     };
     await push(messagesRef, userMessage);
-
-    // AI message
-    const aiMessage = {
-        senderId: agentId,
-        content: result.response,
-        role: 'assistant',
-        timestamp: serverTimestamp(),
-    };
-    await push(messagesRef, aiMessage);
     
-    // Update last message in conversation
+    let result = { response: '' };
+
+    if (isAgentChat) {
+      // If it's an agent chat, deduct credit and invoke the AI flow
+      await deductCredit(user.id, 1);
+      const agentInput = { agentId, message };
+      result = await agentChat(agentInput);
+
+      // Save the AI's response
+      const aiMessage = {
+          senderId: agentId,
+          content: result.response,
+          role: 'assistant' as const,
+          timestamp: serverTimestamp(),
+      };
+      await push(messagesRef, aiMessage);
+      
+      await logGeneration({
+        agentId: agentId,
+        userId: user.id,
+        input: { message: message },
+        output: result,
+      });
+    }
+
+    // Update last message in conversation for sorting
     const conversationRef = db.ref(`conversations/${conversationId}`);
-    await conversationRef.update({
-        lastMessage: result.response,
-        lastMessageTimestamp: new Date().toISOString()
-    });
-    // --- End DB saving ---
-
-    await logGeneration({
-      agentId: agentId,
-      userId: user.id,
-      input: { message: message },
-      output: result,
-    });
-
+    const lastMessage = isAgentChat ? result.response : message;
+    
+    if (lastMessage) {
+        await update(conversationRef, {
+            lastMessage: lastMessage,
+            lastMessageTimestamp: new Date().toISOString()
+        });
+    }
+    
     return createApiResponse(result, 200);
+
   } catch (error) {
     return handleApiError(error);
   }

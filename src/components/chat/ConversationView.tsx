@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks/useChatStore';
-import { getDatabase, ref, onValue, off, push, serverTimestamp } from 'firebase/database';
+import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib/firebase';
 
 interface ConversationViewProps {
@@ -117,35 +117,21 @@ export function ConversationView({ chat }: ConversationViewProps) {
 
     const messageContent = input;
     setInput('');
+    
+    // All message sends now go through the backend agentChat API.
+    // The backend will handle distinguishing between agent and user-to-user chats.
+    // For user-to-user, it will just save the message. For agents, it will invoke the flow.
+    const token = await getAuthenticatedToken(firebaseUser);
+    
+    // We use a "placeholder" agentId for user chats. The backend will ignore it.
+    const agentId = chat.agent?.id || 'user-chat';
 
-    if (chat.agent) {
-        // Handle agent chat
-        const token = await getAuthenticatedToken(firebaseUser);
-        agentChatMutation.mutate({ 
-            agentId: chat.agent.id, 
-            message: messageContent,
-            conversationId: chat.id,
-            token 
-        });
-    } else {
-        // Handle real-time database user-to-user chat
-        const userMessage: Omit<ChatMessage, 'timestamp'> & { timestamp: any } = { 
-            role: 'user', 
-            content: messageContent, 
-            senderId: firebaseUser.uid, 
-            timestamp: serverTimestamp() 
-        };
-        const db = getDatabase(app);
-        const messagesRef = ref(db, `messages/${chat.id}`);
-        await push(messagesRef, userMessage);
-        
-        // Update last message in conversation for sorting
-        const conversationRef = ref(db, `conversations/${chat.id}`);
-        await update(conversationRef, { 
-            lastMessage: messageContent, 
-            lastMessageTimestamp: new Date().toISOString() 
-        });
-    }
+    agentChatMutation.mutate({ 
+        agentId: agentId, 
+        message: messageContent,
+        conversationId: chat.id,
+        token 
+    });
   }
 
 
