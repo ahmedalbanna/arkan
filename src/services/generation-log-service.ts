@@ -12,26 +12,27 @@ export interface GenerationLog {
 
 interface FetchLogsParams {
     token: string;
-    page: number;
+    page: number; // Page is kept for conceptual clarity but not used in API call
     limit: number;
     agentId?: string;
     userId?: string;
+    lastVisibleId?: string;
 }
 
-export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ logs: GenerationLog[], hasNextPage: boolean }> {
-    const { token, page, limit, agentId, userId } = params;
+export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ logs: GenerationLog[], hasNextPage: boolean, lastVisibleId: string | null }> {
+    const { token, limit, agentId, userId, lastVisibleId } = params;
 
     if (!token) {
         throw new Error("Authentication token is required.");
     }
 
     const queryParams = new URLSearchParams({
-        page: page.toString(),
         limit: limit.toString(),
     });
 
     if (agentId) queryParams.append('agentId', agentId);
     if (userId) queryParams.append('userId', userId);
+    if (lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
     
     const response = await fetch(`/api/admin/generations?${queryParams.toString()}`, {
         headers: {

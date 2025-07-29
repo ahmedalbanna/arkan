@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, Fragment } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
 import { fetchGenerationLogs } from '@/services/generation-log-service';
 import type { GenerationLog } from '@/services/generation-log-service';
-import { AlertCircle, ChevronLeft, ChevronRight, Eye, Loader2, Search } from 'lucide-react';
+import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,7 @@ function LogTableSkeleton() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {Array.from({ length: 10 }).map((_, i) => (
+                {Array.from({ length: LOGS_PER_PAGE }).map((_, i) => (
                     <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
@@ -91,7 +91,6 @@ function LogDetailView({ log }: { log: GenerationLog }) {
 }
 
 export default function GenerationLogViewer() {
-    const [page, setPage] = useState(1);
     const [agentIdFilter, setAgentIdFilter] = useState('');
     const [userIdFilter, setUserIdFilter] = useState('');
     const debouncedAgentId = useDebounce(agentIdFilter, 500);
@@ -99,23 +98,30 @@ export default function GenerationLogViewer() {
 
     const { firebaseUser, isLoading: authLoading } = useAuth();
     
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedAgentId, debouncedUserId]);
-
-    const { data, isLoading, isError, error, isFetching } = useQuery({
-        queryKey: generationLogKeys.list({ page, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId }),
-        queryFn: async () => {
+    const { 
+      data, 
+      error, 
+      fetchNextPage, 
+      hasNextPage, 
+      isFetching,
+      isFetchingNextPage, 
+      status,
+    } = useInfiniteQuery({
+        queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
+        queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchGenerationLogs({ token, page, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId });
+            return fetchGenerationLogs({ token, page: 0, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
         enabled: !!firebaseUser,
-        placeholderData: (previousData) => previousData,
+        staleTime: 1000 * 60, // 1 minute
     });
 
+    const allLogs = data?.pages.flatMap(page => page.logs) ?? [];
 
-    if (authLoading || isLoading) {
+    if (status === 'pending' || authLoading) {
         return (
             <Card>
                 <CardHeader><CardTitle>Generation Log</CardTitle></CardHeader>
@@ -124,7 +130,7 @@ export default function GenerationLogViewer() {
         );
     }
 
-    if (isError) {
+    if (status === 'error') {
         return (
             <Card>
                 <CardContent className="p-8 text-center text-destructive">
@@ -140,7 +146,7 @@ export default function GenerationLogViewer() {
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
                     <span>Generation Log</span>
-                    {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                    {isFetching && !isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
                 </CardTitle>
                 <div className="flex flex-col md:flex-row gap-4 pt-4">
                     <div className="relative flex-1">
@@ -175,8 +181,8 @@ export default function GenerationLogViewer() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {data?.logs && data.logs.length > 0 ? (
-                                data.logs.map((log) => (
+                            {allLogs && allLogs.length > 0 ? (
+                                allLogs.map((log) => (
                                     <TableRow key={log.id}>
                                         <TableCell className="font-medium">{log.agentId}</TableCell>
                                         <TableCell className="truncate max-w-[200px]">{log.userId}</TableCell>
@@ -205,25 +211,15 @@ export default function GenerationLogViewer() {
                         </TableBody>
                     </Table>
                 </div>
-                <div className="flex items-center justify-end space-x-2 py-4">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => Math.max(p - 1, 1))}
-                        disabled={page === 1}
+                <div className="flex items-center justify-center pt-8">
+                     <Button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
                     >
-                        <ChevronLeft className="mr-2 rtl:mr-0 rtl:ml-2 h-4 w-4" />
-                        Previous
-                    </Button>
-                    <span className="text-sm font-medium">Page {page}</span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage(p => p + 1)}
-                        disabled={!data?.hasNextPage}
-                    >
-                        Next
-                        <ChevronRight className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
+                        {isFetchingNextPage ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : null}
+                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
                     </Button>
                 </div>
             </CardContent>
