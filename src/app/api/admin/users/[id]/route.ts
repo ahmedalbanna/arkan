@@ -10,8 +10,8 @@ import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
 // A more robust implementation might move the ownership check into withAuth itself.
 export const GET = withAuth(async ({ params, user: requester, token }) => {
     try {
-        const targetUserId = params.id;
-        
+        const {id:targetUserId} = await params;
+
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
             return handleApiError({ message: "Forbidden" }, 403);
@@ -66,7 +66,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
         }
 
         const updatedUser = await updateUser(userId, validatedData);
-        
+
         revalidatePath(`/profile/${userId}`);
         revalidatePath('/admin/manage-users');
         revalidatePath(`/admin/manage-users/${userId}/edit`);

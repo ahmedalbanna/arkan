@@ -13,8 +13,8 @@ import { getAdminAuth } from "@/lib/firebase/admin";
 // A more robust implementation might move the ownership check into withAuth itself.
 export const GET = withAuth(async ({ params, user: requester, token }) => {
     try {
-        const targetUserId = params.id;
-        
+        const {id:targetUserId} = await params;
+
         // Authorization check: either admin or self
         if (requester.role !== 'admin' && requester.id !== targetUserId) {
             return handleApiError({ message: "Forbidden" }, 403);
