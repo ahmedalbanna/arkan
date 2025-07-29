@@ -5,8 +5,8 @@
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
-import type { UserProfile, LoginCredentials } from "@/lib/db/queries";
-import type { PricingPlan } from "@/components/PricingCard";
+import type { UserProfile, LoginCredentials } from '@/lib/db/queries';
+import type { PricingPlan } from '@/components/PricingCard';
 import type { SignupCredentials } from "@/components/SignupForm";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
@@ -25,7 +25,7 @@ import {
   loginWithGoogle,
   serviceLogoutUser,
   serviceSignupUser,
-  fetchUserProfile as fetchUserProfileApi,
+  fetchUserProfileApi,
   type UserListResponse,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
