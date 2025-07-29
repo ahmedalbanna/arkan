@@ -1,4 +1,5 @@
 
+
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -21,7 +22,7 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
-import { fetchUserProfile as fetchUserProfileApi } from "@/services/user-service";
+import { fetchUsers as fetchUsersApi, fetchUserProfile as fetchUserProfileApi, createUserService } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -33,19 +34,6 @@ export interface LoginCredentials {
 }
 
 // --- Query Functions ---
-
-async function fetchUsersApi(token: string): Promise<UserProfile[]> {
-    const response = await fetch('/api/users', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch users');
-    }
-    return response.json();
-}
 
 async function loginUser(credentials: LoginCredentials) {
   try {
@@ -143,7 +131,7 @@ export function useUsers() {
         queryKey: userKeys.lists(),
         queryFn: async () => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return fetchUsersApi(token);
+            return fetchUsersApi(1, 10, token); // Default to page 1, limit 10
         },
         enabled: !!firebaseUser
     });
@@ -151,7 +139,7 @@ export function useUsers() {
 
 export function useUserProfile(userId: string) {
   const { firebaseUser } = useAuth(); // We need this to get the auth token
-  return useQuery({
+  return useQuery<UserProfile | null>({
     queryKey: userKeys.profile(userId),
     queryFn: async () => {
       if (!firebaseUser) return null;

@@ -1,8 +1,9 @@
 
+
 'use client';
 
 import { useState } from 'react';
-import type { UserProfile } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import {
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
+import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, MessageSquare } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';

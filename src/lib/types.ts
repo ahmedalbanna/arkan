@@ -23,12 +23,14 @@ export type { Codebase } from '@/ai/flows/generate-codebase';
 export type { AgentData, Agent, AgentPrompt } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
-export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
-export type { Team, TeamMember, TeamWithMembers } from '@/lib/db/queries';
+export type { AcademicSolverState, ExternalContext as AcademicContextFile } from '@/hooks/useAcademicSolverStore';
+export type { Team, TeamMember } from '@/lib/db/queries';
+export type { TeamWithMembers } from '@/services/team-service';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
 export type { UserProfile } from '@/lib/db/queries';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
+export type { ExternalContext } from '@/hooks/useReportStore';
 
 export interface Notification {
   id: string;

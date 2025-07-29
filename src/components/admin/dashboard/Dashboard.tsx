@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -8,7 +9,7 @@ import { fetchDashboardStats, type DashboardStats } from '@/services/admin-servi
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
-import { RecentActivity, Activity } from './RecentActivity';
+import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardContent } from '../../ui/card';

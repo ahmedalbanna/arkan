@@ -6,6 +6,7 @@ export interface ProposalTemplate {
     description: string;
     prompt: string;
     guidelines?: string[];
+    jsonStructure?: any;
 }
 
 const basePrompt = `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
