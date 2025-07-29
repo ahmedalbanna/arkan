@@ -2,11 +2,12 @@
 // src/app/api/templates/refresh-image/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
 import { getUserProfile } from '@/lib/db/queries';
 import { logGeneration } from '@/services/generation-service';
+import { adminDb } from '@/lib/firebase/server-init';
 
 const refreshImageSchema = z.object({
   templateType: z.enum(['docx', 'pptx', 'proposal', 'report', 'presentation']),
@@ -15,7 +16,7 @@ const refreshImageSchema = z.object({
 });
 
 async function verifyAdmin(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', adminId: null };

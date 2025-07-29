@@ -2,12 +2,13 @@
 // src/app/api/templates/report/[id]/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { adminDb } from '@/lib/firebase/server-init';
 
 async function verifyAdmin(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) return { authorized: false, message: 'Unauthorized' };
     const token = authorization.substring(7);

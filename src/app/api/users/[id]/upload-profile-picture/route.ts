@@ -1,11 +1,12 @@
 
 import { NextResponse } from 'next/server';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { getUserProfile } from '@/lib/db/queries';
+import { adminDb } from '@/lib/firebase/server-init';
 
 async function verifyAccess(request: Request, targetUserId: string) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return { authorized: false, message: "Unauthorized" };

@@ -2,7 +2,7 @@
 // src/app/api/notifications/mark-as-read/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { getDatabase } from 'firebase-admin/database';
 
 const markAsReadSchema = z.object({
@@ -10,7 +10,7 @@ const markAsReadSchema = z.object({
 });
 
 export async function POST(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

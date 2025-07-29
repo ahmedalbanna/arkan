@@ -6,11 +6,12 @@ import { getAgent } from '@/lib/db/queries';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ReportGenerationTemplate } from '@/services/template-service';
 import { getUserProfile } from '@/lib/db/queries';
 import { sectionConfig } from '@/lib/report-config';
+import { adminDb } from '@/lib/firebase/server-init';
 
 // Schema for generating a single section
 const generateSectionSchema = z.object({
@@ -39,7 +40,7 @@ const generateFullReportSchema = z.object({
 
 
 export async function POST(request: Request) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

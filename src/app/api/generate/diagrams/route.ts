@@ -53,7 +53,7 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
 }
 
 export async function POST(request: Request) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

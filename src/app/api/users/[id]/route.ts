@@ -5,13 +5,14 @@ import {
   updateUser,
   updateUserByAdmin,
 } from "@/lib/db/queries";
-import { getAdminAuth, adminDb } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
 import type { UserRole } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
+import { adminDb } from "@/lib/firebase/server-init";
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return {
@@ -139,7 +140,7 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const {id:targetUserId} = await params;
     const authHeader = req.headers.get("Authorization");

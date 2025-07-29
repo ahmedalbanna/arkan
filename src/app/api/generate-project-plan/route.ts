@@ -12,7 +12,7 @@ const planSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const auth = getAdminAuth();
+  const auth = await getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

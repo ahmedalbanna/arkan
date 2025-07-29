@@ -4,9 +4,10 @@ import { z } from 'zod';
 import { generateProposal } from '@/ai/flows/generate-proposal';
 import { translateProposal } from '@/ai/flows/translate-proposal';
 import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ProposalTemplate } from '@/services/template-service';
+import { adminDb } from '@/lib/firebase/server-init';
 
 const generateProposalSchema = z.object({
   projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
@@ -15,7 +16,7 @@ const generateProposalSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const auth = getAdminAuth();
+  const auth = await getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

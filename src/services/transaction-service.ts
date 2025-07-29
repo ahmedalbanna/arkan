@@ -25,7 +25,7 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
 
     if(lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
+    const response = await fetch(`/api/transactions?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
