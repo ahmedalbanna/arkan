@@ -1,37 +1,9 @@
-
 // src/app/api/admin/dashboard-stats/route.ts
-import { NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
 import { AGENTS } from '@/lib/agents';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { adminDb } from '@/lib/firebase/server-init';
 
-// Helper to verify admin role
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-    const token = authorization.substring(7);
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden' };
-        }
-        return { authorized: true };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-}
-
-export async function GET(request: Request) {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const GET = withAuth(async () => {
     try {
         // Fetch all stats in parallel for efficiency
         const [
@@ -71,16 +43,17 @@ export async function GET(request: Request) {
             ...doc.data()
         }));
 
-        return NextResponse.json({
+        const stats = {
             totalUsers,
             totalGenerations,
             pendingPayments,
             agentUsageChartData,
             recentActivity
-        }, { status: 200 });
+        };
+
+        return createApiResponse(stats, 200);
 
     } catch (error) {
-        console.error('Error fetching dashboard stats:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });
