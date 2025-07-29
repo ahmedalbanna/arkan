@@ -1,8 +1,7 @@
 
-import { getPaginatedUsers } from '@/lib/db/queries';
+import { getPaginatedUsers, createUser } from '@/lib/db/queries';
 import { z } from 'zod';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { createUserService } from '@/services/user-service';
 
 const userListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(10),
@@ -35,14 +34,14 @@ const createUserSchema = z.object({
   credits: z.coerce.number().int().min(0).default(10),
 });
 
-export const POST = withAuth(async ({ request, token }) => {
+export const POST = withAuth(async ({ request }) => {
   try {
     const body = await request.json();
     const validation = createUserSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    const newUser = await createUserService(validation.data, token);
+    const newUser = await createUser(validation.data);
     return createApiResponse(newUser, 201);
   } catch (error) {
     return handleApiError(error);

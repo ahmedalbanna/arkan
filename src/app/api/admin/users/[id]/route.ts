@@ -1,17 +1,11 @@
 
 import { z } from "zod";
-import { getUserProfile, deleteUser } from "@/lib/db/queries";
-import { adminDb } from '@/lib/firebase/server-init';
+import { getUserProfile, updateUser, deleteUser } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
-import { getAdminAuth } from "@/lib/firebase/admin";
-
 
 // GET a single user profile.
-// This route is now protected by the verifyAccess logic within withAuth,
-// but for simplicity, we'll keep the direct GET like this.
-// A more robust implementation might move the ownership check into withAuth itself.
-export const GET = withAuth(async ({ params, user: requester, token }) => {
+export const GET = withAuth(async ({ params, user: requester }) => {
     try {
         const targetUserId = params.id;
         
@@ -45,34 +39,35 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
         const { id: userId } = params;
         const body = await request.json();
+        let validatedData;
 
         // An admin can update any field. A regular user can only update their own name/bio.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
                 return handleApiError({ message: "Forbidden" }, 403);
             }
-            // If not admin, only allow name and bio updates
-            const { name, bio, hasCompletedOnboarding } = body;
-            const validation = updateUserSchema.safeParse({ name, bio, hasCompletedOnboarding });
-             if (!validation.success) {
+            // If not admin, only allow specific fields
+            const userUpdateSchema = updateUserSchema.pick({ name: true, bio: true, hasCompletedOnboarding: true });
+            const validation = userUpdateSchema.safeParse(body);
+            if (!validation.success) {
                 return handleApiError(validation.error);
             }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
+            validatedData = validation.data;
         } else {
+             // Admin can update more fields
              const validation = updateUserSchema.safeParse(body);
              if (!validation.success) {
                 return handleApiError(validation.error);
             }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
+            validatedData = validation.data;
         }
 
-
+        const updatedUser = await updateUser(userId, validatedData);
+        
         revalidatePath(`/profile/${userId}`);
         revalidatePath('/admin/manage-users');
+        revalidatePath(`/admin/manage-users/${userId}/edit`);
 
-        const updatedUser = await getUserProfile(userId);
         return createApiResponse(updatedUser, 200);
     } catch (error) {
         return handleApiError(error);

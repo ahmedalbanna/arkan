@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { updateUserByAdmin, deleteUser, getUserProfile } from '@/lib/db/queries';
+import { updateUser, deleteUser, getUserProfile } from '@/lib/db/queries';
 import { cookies } from 'next/headers';
 import { getAdminAuth } from '@/lib/firebase/admin';
 
@@ -54,7 +54,7 @@ export async function handleUpdateUser(prevState: any, formData: FormData) {
   const { userId, ...updateData } = validatedFields.data;
 
   try {
-    await updateUserByAdmin(userId, updateData);
+    await updateUser(userId, updateData);
     revalidatePath('/admin/manage-users');
     revalidatePath(`/admin/manage-users/${userId}/edit`);
     return { success: true, message: 'User updated successfully.' };

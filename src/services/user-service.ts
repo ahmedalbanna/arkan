@@ -15,22 +15,6 @@ import {
 } from "firebase/auth";
 import { SignupCredentials } from '@/components/SignupForm';
 
-export async function createUserService(data: any, token: string): Promise<any> {
-    const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create user.');
-    }
-    return response.json();
-}
-
 export interface UserListResponse {
     users: UserProfile[];
     hasNextPage: boolean;
@@ -138,4 +122,20 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
     throw errorData;
   }
   return response.json();
+}
+
+export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }, token: string) {
+    const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create user.');
+    }
+    return response.json();
 }
