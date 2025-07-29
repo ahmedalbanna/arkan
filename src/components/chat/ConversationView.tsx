@@ -1,9 +1,10 @@
 
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import type { ChatSession } from './ChatList';
 import { Button } from '../ui/button';
-import { Plus, MessageSquare, Edit2, RotateCcw, Expand, X, Bot, User, Send, Paperclip, Info, Settings2 } from 'lucide-react';
+import { Plus, MessageSquare, Edit2, RotateCcw, Expand, X, Bot, User, Send, Paperclip, Info, Settings2, Loader2 } from 'lucide-react';
 import { CardHeader } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
@@ -15,7 +16,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ChevronDown } from 'lucide-react';
-
+import { useAuth } from '@/context/AuthContext';
+import { getDatabase, ref, push, onValue, off } from 'firebase/database';
+import { app } from '@/lib/firebase';
+import { toast } from '@/hooks/use-toast';
+import { useChatStore } from '@/hooks/useChatStore';
 
 interface ConversationViewProps {
   chat: ChatSession | null;
@@ -43,6 +48,61 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
 }
 
 export function ConversationView({ chat }: ConversationViewProps) {
+  const { firebaseUser } = useAuth();
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState<any[]>([]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const addMessageToStore = useChatStore(state => state.addMessage);
+  
+  useEffect(() => {
+    if (!chat || chat.isTemporary) {
+      setMessages(chat?.messages || []);
+      return;
+    };
+
+    const db = getDatabase(app);
+    const messagesRef = ref(db, `messages/${chat.id}`);
+    
+    const unsubscribe = onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        const messagesList = data ? Object.values(data) : [];
+        setMessages(messagesList as any[]);
+    });
+
+    return () => off(messagesRef, 'value', unsubscribe);
+  }, [chat]);
+  
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTo({
+            top: scrollAreaRef.current.scrollHeight,
+            behavior: 'smooth',
+        });
+    }
+  }, [messages]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || !firebaseUser || !chat) return;
+
+    const messageData = {
+      senderId: firebaseUser.uid,
+      content: input,
+      timestamp: new Date().toISOString(),
+      role: 'user', // In a real app, this might be 'admin'
+    };
+
+    const db = getDatabase(app);
+    try {
+        await push(ref(db, `messages/${chat.id}`), messageData);
+        setInput('');
+        addMessageToStore(chat.id, messageData as any);
+    } catch(err) {
+        toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
+    }
+  }
+
+
   if (!chat) {
     return (
       <div className="flex h-full flex-col items-center justify-center bg-background p-8">
@@ -81,25 +141,35 @@ export function ConversationView({ chat }: ConversationViewProps) {
         </div>
       </CardHeader>
       
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
-            <Message role="assistant" content={`Hi there! How can I assist you today?`} />
-            <div className="text-center text-xs text-muted-foreground">This chat is only visible to you.</div>
-            {/* Additional messages would be mapped here */}
+            {messages.map((msg, index) => (
+                <Message key={index} role={msg.senderId === firebaseUser?.uid ? 'user' : 'assistant'} content={msg.content} />
+            ))}
         </div>
       </ScrollArea>
        
        <div className="p-4 border-t bg-background">
-         <div className="relative">
-            <Textarea
-                placeholder="Ask me anything..."
-                className="w-full resize-none rounded-lg border border-input bg-muted pr-16 py-3"
-                rows={1}
-            />
-            <Button size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground">
-                <Send className="h-4 w-4"/>
-            </Button>
-         </div>
+         <form onSubmit={handleSendMessage}>
+            <div className="relative">
+                <Textarea
+                    placeholder="Ask me anything..."
+                    className="w-full resize-none rounded-lg border border-input bg-muted pr-16 py-3"
+                    rows={1}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                     onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            handleSendMessage(e);
+                        }
+                    }}
+                />
+                <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground">
+                    <Send className="h-4 w-4"/>
+                </Button>
+            </div>
+         </form>
          <div className="flex items-center gap-2 mt-2">
             <Button variant="outline" size="sm" className="gap-1.5"><Settings2 className="h-4 w-4" /> General</Button>
             <Button variant="ghost" size="icon"><Paperclip className="h-4 w-4" /></Button>

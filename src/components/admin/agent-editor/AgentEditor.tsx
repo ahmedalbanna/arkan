@@ -21,6 +21,7 @@ import AutomationTab from './AutomationTab';
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
+import Link from 'next/link';
 
 interface AgentEditorProps {
   agentId: string;
@@ -165,16 +166,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           </CardContent>
           <CardFooter className="justify-end gap-2 border-t pt-6 mt-0">
             <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
-            <TooltipProvider>
-              <Tooltip>
-                  <TooltipTrigger asChild>
-                      <Button type="button" variant="outline" disabled>Preview</Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                      <p>Preview is coming soon.</p>
-                  </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
             <Button type="submit" disabled={updateAgentMutation.isPending}>
               {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Update

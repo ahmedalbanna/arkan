@@ -1,50 +1,68 @@
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
-import { MessageSquare, Send, X, Bot, User, Loader2, PenToolIcon } from 'lucide-react';
+import { MessageSquare, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useReportStore } from '@/hooks/useReportStore';
+import { getDatabase, ref, onValue, off, push } from 'firebase/database';
+import { app } from '@/lib/firebase';
 
-// Separate API function for generating a section when a tool is called
-async function generateSectionFromTool(variables: { sectionName: string, projectState: any, token: string }): Promise<any> {
-    const response = await fetch('/api/generate-report', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify({
-            sectionToGenerate: variables.sectionName,
-            proposal: variables.projectState.proposal,
-            otherSections: variables.projectState.sections,
-            otherDiagrams: variables.projectState.diagrams
-        })
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Tool execution failed');
-    }
-    return await response.json();
+function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
+    const isUser = role === 'user';
+    const Icon = isUser ? User : Bot;
+    const bubbleClasses = isUser ? 'bg-primary text-primary-foreground' : 'bg-muted';
+    const justifyClass = isUser ? 'justify-end' : 'justify-start';
+
+    return (
+        <div className={cn("flex items-start gap-3", justifyClass)}>
+            {!isUser && (
+                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5"/>
+                </div>
+            )}
+            <div className={cn("p-3 rounded-lg max-w-lg", bubbleClasses)}>
+                <p className="text-sm">{content}</p>
+            </div>
+             {isUser && (
+                 <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5"/>
+                </div>
+            )}
+        </div>
+    )
 }
 
-export default function ProjectChat() {
-    const [isOpen, setIsOpen] = useState(false);
-    const { messages, addMessage, updateLastMessage, input, setInput } = useChatStore();
-    const { firebaseUser, refetchUser } = useAuth();
-    const { getFullState, handleProposalUpdate } = useBuilderStore();
-    const setSection = useReportStore(s => s.setSection);
+
+export default function SupportChatWidget() {
+    const { isChatOpen, closeChat, toggleChat, selectedChat } = useChatStore();
+    const { firebaseUser } = useAuth();
+    const [input, setInput] = useState('');
+    const [messages, setMessages] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const [isStreaming, setIsStreaming] = useState(false);
+    const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
+
+     useEffect(() => {
+        if (!selectedChat) return;
+
+        const db = getDatabase(app);
+        const messagesRef = ref(db, `messages/${selectedChat.id}`);
+        
+        const unsubscribe = onValue(messagesRef, (snapshot) => {
+            const data = snapshot.val();
+            const messagesList = data ? Object.values(data) : [];
+            setMessages(messagesList as any[]);
+        });
+
+        return () => off(messagesRef, 'value', unsubscribe);
+
+    }, [selectedChat]);
+
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -55,127 +73,53 @@ export default function ProjectChat() {
         }
     }, [messages]);
 
-    const generateSectionMutation = useMutation({
-        mutationFn: async (sectionName: string) => {
-            if (!firebaseUser) throw new Error("Not authenticated");
-            const token = await firebaseUser.getIdToken();
-            const projectState = getFullState();
-            return generateSectionFromTool({ sectionName, projectState, token });
-        },
-        onSuccess: (data, sectionName) => {
-            const content = Object.values(data)[0] as string;
-            setSection(sectionName as any, content);
-            addMessage({
-                role: 'assistant',
-                content: `I've finished writing the **${sectionName}** section. You can see it in the Report Generator tab.`
-            });
-            refetchUser();
-        },
-        onError: (error: Error) => {
-            addMessage({ role: 'assistant', content: `Sorry, I failed to generate that section. Error: ${error.message}` });
-        }
-    });
-
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || !firebaseUser) return;
+        if (!input.trim() || !firebaseUser || !selectedChat) return;
         
-        const userMessage = { role: 'user' as const, content: input };
-        addMessage(userMessage);
-        const projectState = getFullState();
-        setInput('');
-        setIsStreaming(true);
-        addMessage({ role: 'assistant', content: '' }); // Add empty message to update
-
+        const messageData = {
+            senderId: firebaseUser.uid,
+            content: input,
+            timestamp: new Date().toISOString(),
+            role: 'user',
+        };
+        
+        const db = getDatabase(app);
+        const messagesRef = ref(db, `messages/${selectedChat.id}`);
+        
         try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/project-chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    message: input,
-                    projectState,
-                }),
-            });
-
-            if (!response.body) return;
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let finalResponse: any = {};
-
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n\n');
-
-                for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                        const jsonStr = line.substring(6);
-                        if (jsonStr === '[DONE]') {
-                            break;
-                        }
-                        try {
-                            const parsed = JSON.parse(jsonStr);
-                            if (parsed.text) {
-                                updateLastMessage(parsed.text);
-                            }
-                            if (parsed.toolRequest) {
-                                const tool = parsed.toolRequest;
-                                updateLastMessage(`Thinking... Calling tool: \`${tool.name}\``, true);
-                                if (tool.name === 'generateReportSection') {
-                                    generateSectionMutation.mutate(tool.input.section);
-                                } else if (tool.name === 'updateProposalField') {
-                                    const { path, value } = tool.input;
-                                    handleProposalUpdate(path, value);
-                                    toast({ title: "Proposal Updated", description: `Field '${path}' was updated.` });
-                                    addMessage({ role: 'assistant', content: `I've updated the '${path}' for you.` });
-                                }
-                            }
-                            // Store the final structured response if available
-                            if (parsed.finishReason) {
-                                finalResponse = parsed;
-                            }
-                        } catch (e) {
-                            console.error('Error parsing stream chunk:', e, jsonStr);
-                        }
-                    }
-                }
-            }
+            await push(messagesRef, messageData);
+            setInput('');
         } catch (error) {
-            console.error('Streaming chat failed:', error);
-            updateLastMessage("Sorry, I encountered an error. Please try again.", false);
-        } finally {
-            setIsStreaming(false);
+            console.error("Failed to send message:", error);
         }
     };
     
-    const isPending = isStreaming || generateSectionMutation.isPending;
 
     return (
       <>
-        {!isOpen && (
+        {!isChatOpen && (
             <Button
-                onClick={() => setIsOpen(true)}
+                onClick={toggleChat}
                 className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-lg z-50"
             >
                 <MessageSquare className="h-8 w-8" />
             </Button>
         )}
         
-        {isOpen && (
+        {isChatOpen && (
             <Card className="fixed bottom-8 right-8 w-[400px] h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 font-headline">
-                        <Bot />
-                        AI Project Assistant
-                    </CardTitle>
-                    <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                     <div className="flex flex-col">
+                        <CardTitle className="flex items-center gap-2 font-headline">
+                            <Bot />
+                            {selectedChat?.title || 'Support Chat'}
+                        </CardTitle>
+                        <p className="text-xs text-muted-foreground truncate max-w-[250px]">
+                            Participants: {participants.join(', ')}
+                        </p>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={closeChat}>
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
@@ -183,34 +127,13 @@ export default function ProjectChat() {
                     <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
                         <div className="space-y-4">
                             {messages.map((message, index) => (
-                                <div
-                                    key={index}
-                                    className={cn(
-                                        "flex items-start gap-3",
-                                        message.role === 'user' ? 'justify-end' : 'justify-start'
-                                    )}
-                                >
-                                    {message.role === 'assistant' && <Avatar className="bg-primary text-primary-foreground"><Bot /></Avatar>}
-                                    <div className={cn(
-                                        "p-3 rounded-lg max-w-xs",
-                                        message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted',
-                                        message.isToolResponse && 'bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200'
-                                    )}>
-                                        {message.isToolResponse ? (
-                                            <div className="flex items-center gap-2 text-sm italic">
-                                                <PenToolIcon className="h-4 w-4" />
-                                                <p>{message.content}</p>
-                                            </div>
-                                        ) : (
-                                            <p className="text-sm">{message.content}</p>
-                                        )}
-                                    </div>
-                                    {message.role === 'user' && <Avatar className="bg-secondary text-secondary-foreground"><User /></Avatar>}
-                                </div>
+                                <Message key={index} role={message.role} content={message.content} />
                             ))}
-                            {isPending && !messages[messages.length - 1]?.content && (
+                            {isLoading && (
                                 <div className="flex items-start gap-3 justify-start">
-                                    <Avatar className="bg-primary text-primary-foreground"><Bot /></Avatar>
+                                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                                        <Bot className="h-5 w-5"/>
+                                    </div>
                                     <div className="p-3 rounded-lg bg-muted">
                                         <Loader2 className="h-5 w-5 animate-spin" />
                                     </div>
@@ -230,12 +153,12 @@ export default function ProjectChat() {
                                     handleSendMessage(e);
                                 }
                             }}
-                            placeholder="Ask to refine your project..."
+                            placeholder="Type your message..."
                             className="min-h-0"
                             rows={1}
-                            disabled={isPending}
+                            disabled={isLoading}
                         />
-                        <Button type="submit" size="icon" disabled={!input.trim() || isPending}>
+                        <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
                             <Send className="h-4 w-4" />
                         </Button>
                     </form>
@@ -244,13 +167,4 @@ export default function ProjectChat() {
         )}
       </>
     );
-}
-
-// Simple Avatar component for chat
-function Avatar({ children, className }: { children: React.ReactNode, className?: string }) {
-    return (
-        <div className={cn("h-8 w-8 rounded-full flex items-center justify-center shrink-0", className)}>
-            {children}
-        </div>
-    )
 }

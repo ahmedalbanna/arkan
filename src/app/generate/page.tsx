@@ -16,7 +16,7 @@ import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
-import ProjectChat from '@/components/chat/ProjectChat';
+import SupportChatWidget from '@/components/chat/SupportChatWidget';
 
 
 const LoadingSkeleton = () => (
@@ -232,7 +232,7 @@ function GeneratePageContent() {
             )}
         </div>
       </div>
-      {isFeatureEnabled('chat') && <ProjectChat />}
+      <SupportChatWidget />
     </div>
   );
 }

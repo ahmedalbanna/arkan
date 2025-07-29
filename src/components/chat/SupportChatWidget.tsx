@@ -1,0 +1,344 @@
+
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import { Button } from '../ui/button';
+import { MessageSquare, Send, X, Bot, User, Loader2, LifeBuoy, ChevronDown, ChevronLeft } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '../ui/card';
+import { Textarea } from '../ui/textarea';
+import { ScrollArea } from '../ui/scroll-area';
+import { useChatStore } from '@/hooks/useChatStore';
+import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
+import { getDatabase, ref, onValue, off, push, serverTimestamp } from 'firebase/database';
+import { app } from '@/lib/firebase';
+import type { ChatMessage, ChatSession } from '@/hooks/useChatStore';
+import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
+import { toast } from '@/hooks/use-toast';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import type { UserProfile } from '@/lib/types';
+import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
+
+
+function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
+    const isUser = role === 'user';
+    const Icon = isUser ? User : Bot;
+    const bubbleClasses = isUser ? 'bg-primary text-primary-foreground' : 'bg-muted';
+    const justifyClass = isUser ? 'justify-end' : 'justify-start';
+
+    return (
+        <div className={cn("flex items-start gap-3", justifyClass)}>
+            {!isUser && (
+                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5"/>
+                </div>
+            )}
+            <div className={cn("p-3 rounded-lg max-w-lg", bubbleClasses)}>
+                <p className="text-sm">{content}</p>
+            </div>
+             {isUser && (
+                 <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5"/>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProfile) => void }) {
+    const [admins, setAdmins] = useState<UserProfile[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchAdmins() {
+            try {
+                const response = await fetch('/api/admins');
+                if (!response.ok) throw new Error('Failed to fetch admins.');
+                const data = await response.json();
+                setAdmins(data);
+            } catch (error) {
+                console.error(error);
+                toast({ title: 'Error', description: 'Could not load available admins.', variant: 'destructive' });
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        fetchAdmins();
+    }, []);
+
+    return (
+         <div className="p-4">
+            <h3 className="font-semibold text-center mb-4">Start a new chat with...</h3>
+            {isLoading ? (
+                <div className="flex justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>
+            ) : (
+                <ScrollArea className="h-[450px]">
+                    <div className="space-y-2">
+                        {admins.map(admin => (
+                            <Button key={admin.id} variant="ghost" className="w-full justify-start h-auto" onClick={() => onSelectAdmin(admin)}>
+                                <div className="flex items-center gap-3">
+                                    <Avatar>
+                                        <AvatarImage src={admin.profilePictureUrl} />
+                                        <AvatarFallback>{admin.name.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <p>{admin.name}</p>
+                                </div>
+                            </Button>
+                        ))}
+                    </div>
+                </ScrollArea>
+            )}
+        </div>
+    )
+}
+
+
+export default function SupportChatWidget() {
+    const { 
+      isChatOpen, 
+      closeChat, 
+      toggleChat, 
+      selectedChat, 
+      setSelectedChat,
+      chats,
+      createConversation,
+      initialize, 
+      isInitialized,
+      addMessage,
+    } = useChatStore();
+    const { firebaseUser, userProfile } = useAuth();
+    const [input, setInput] = useState('');
+    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const [view, setView] = useState<'chat' | 'new_chat_selection'>('chat');
+
+
+    // Initialize the store with server data once user is available
+    useEffect(() => {
+        if (firebaseUser && !isInitialized) {
+            initialize(firebaseUser);
+        }
+    }, [firebaseUser, isInitialized, initialize]);
+
+     useEffect(() => {
+        if (!selectedChat) {
+            setMessages([]);
+            return;
+        }
+
+        const db = getDatabase(app);
+        const messagesRef = ref(db, `messages/${selectedChat.id}`);
+        
+        const unsubscribe = onValue(messagesRef, (snapshot) => {
+            const data = snapshot.val();
+            const messagesList: ChatMessage[] = data ? Object.values(data) : [];
+            setMessages(messagesList);
+        });
+
+        return () => off(messagesRef, 'value', unsubscribe);
+
+    }, [selectedChat]);
+
+
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTo({
+                top: scrollAreaRef.current.scrollHeight,
+                behavior: 'smooth',
+            });
+        }
+    }, [messages]);
+
+    const handleToggleChat = () => {
+        if (!isChatOpen && !selectedChat) {
+            const latestChat = chats.length > 0 ? chats[0] : null;
+            setSelectedChat(latestChat);
+            setView('chat');
+        }
+        toggleChat();
+    }
+    
+    const handleNewChatSelection = () => {
+        setView('new_chat_selection');
+    }
+
+    const handleAdminSelected = async (admin: UserProfile) => {
+        if (!firebaseUser || !userProfile) return;
+        
+        try {
+            const token = await firebaseUser.getIdToken();
+            const newConversation = await createConversationApi({
+                participantIds: [firebaseUser.uid, admin.id],
+                participantNames: { [firebaseUser.uid]: userProfile.name, [admin.id]: admin.name },
+                title: `Chat with ${admin.name}`,
+                isSupportChat: true
+            }, token);
+            createConversation(newConversation);
+            setView('chat'); // Switch back to chat view
+        } catch (error: any) {
+             toast({ title: 'Error starting chat', description: error.message, variant: 'destructive' });
+        }
+    }
+
+
+    const handleSendMessage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || !firebaseUser || !selectedChat) return;
+        
+        setIsLoading(true);
+        const messageToSend = input;
+        setInput('');
+        
+        const messageData = {
+            senderId: firebaseUser.uid,
+            content: messageToSend,
+            timestamp: serverTimestamp(),
+            role: 'user',
+        };
+        
+        const db = getDatabase(app);
+        const messagesRef = ref(db, `messages/${selectedChat.id}`);
+        
+        try {
+            await push(messagesRef, messageData);
+            addMessage(selectedChat.id, {
+                ...messageData,
+                timestamp: new Date().toISOString()
+            });
+            
+        } catch (error) {
+            console.error("Failed to send message:", error);
+            toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
+            setInput(messageToSend); // Restore input on failure
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
+    
+
+    return (
+      <>
+        {!isChatOpen && (
+            <Button
+                onClick={handleToggleChat}
+                className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-lg z-50"
+            >
+                <LifeBuoy className="h-8 w-8" />
+            </Button>
+        )}
+        
+        {isChatOpen && (
+            <Card className="fixed bottom-8 right-8 w-[400px] h-[600px] shadow-lg z-50 flex flex-col">
+                <CardHeader className="flex flex-row items-center justify-between">
+                     <div className="flex items-center gap-1">
+                        {view === 'new_chat_selection' && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setView('chat')}>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                        )}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="flex items-start gap-2 h-auto flex-col p-1 text-left">
+                                    <div className="flex items-center gap-2">
+                                        <Bot />
+                                        <h2 className="text-lg font-semibold">{selectedChat?.title || 'Support Chat'}</h2>
+                                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                    </div>
+                                     {selectedChat && (
+                                        <p className="text-xs text-muted-foreground truncate max-w-[250px] font-normal">
+                                            {`Participants: ${participants.join(', ')}`}
+                                        </p>
+                                     )}
+                                </Button>
+                            </DropdownMenuTrigger>
+                             <DropdownMenuContent>
+                                <DropdownMenuLabel>Recent Chats</DropdownMenuLabel>
+                                <DropdownMenuSeparator/>
+                                {chats.map(chat => (
+                                    <DropdownMenuItem key={chat.id} onSelect={() => { setSelectedChat(chat); setView('chat'); }}>
+                                        {chat.title}
+                                    </DropdownMenuItem>
+                                ))}
+                                 <DropdownMenuSeparator/>
+                                 <DropdownMenuItem onSelect={handleNewChatSelection}>
+                                    New Support Chat
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                     </div>
+
+                    <Button variant="ghost" size="icon" onClick={closeChat}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </CardHeader>
+
+                {view === 'new_chat_selection' ? (
+                     <AdminSelectionView onSelectAdmin={handleAdminSelected} />
+                ) : !selectedChat ? (
+                     <div className="flex h-full flex-col items-center justify-center bg-background p-8">
+                        <div className="text-center">
+                            <h2 className="text-2xl font-semibold">Start a conversation</h2>
+                            <p className="mt-2 text-muted-foreground max-w-sm">
+                                Select "New Support Chat" from the menu above to begin.
+                            </p>
+                        </div>
+                    </div>
+                ) : (
+                <>
+                    <CardContent className="flex-grow overflow-hidden">
+                        <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+                            <div className="space-y-4">
+                                {messages.map((message, index) => (
+                                    <Message key={index} role={message.senderId === firebaseUser?.uid ? 'user' : 'assistant'} content={message.content} />
+                                ))}
+                                {isLoading && (
+                                    <div className="flex items-start gap-3 justify-start">
+                                        <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                                            <Bot className="h-5 w-5"/>
+                                        </div>
+                                        <div className="p-3 rounded-lg bg-muted">
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </CardContent>
+                    <CardFooter>
+                        <form onSubmit={handleSendMessage} className="flex w-full items-center gap-2">
+                            <Textarea
+                                value={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendMessage(e);
+                                    }
+                                }}
+                                placeholder="Type your message..."
+                                className="min-h-0"
+                                rows={1}
+                                disabled={isLoading}
+                            />
+                            <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
+                                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
+                        </form>
+                    </CardFooter>
+                </>
+                )}
+            </Card>
+        )}
+      </>
+    );
+}

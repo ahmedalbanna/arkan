@@ -1,0 +1,34 @@
+
+{
+  "rules": {
+    "notifications": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "messages": {
+      "$conversationId": {
+        ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        "$messageId": {
+          ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+          ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role'])"
+        }
+      }
+    },
+    "userConversations": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "conversations": {
+      "$conversationId": {
+        ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+        ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'"
+      }
+    },
+    ".read": false,
+    ".write": false
+  }
+}

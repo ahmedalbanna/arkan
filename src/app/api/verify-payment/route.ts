@@ -1,5 +1,6 @@
 
 
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
 
         t.update(transactionRef, {
           status: 'verified',
-          adminNotes: adminNotes || 'Payment verified and credits granted.',
+          adminNotes: adminNotes || 'Payment approved.',
           verifiedAt: new Date().toISOString(),
           verifiedBy: adminCheck.adminId
         });
@@ -78,7 +79,8 @@ export async function POST(request: Request) {
             description: `Your purchase of ${creditsToGrant} credits has been approved.`,
             icon: "credit-card",
             isRead: false,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            link: '/payment-history'
         });
 
     } else { // 'rejected'
@@ -96,7 +98,8 @@ export async function POST(request: Request) {
             description: `Your recent purchase could not be verified. Please contact support.`,
             icon: "credit-card",
             isRead: false,
-            createdAt: new Date().toISOString()
+            createdAt: new Date().toISOString(),
+            link: '/payment-history'
         });
     }
 

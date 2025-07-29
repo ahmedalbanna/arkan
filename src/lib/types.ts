@@ -33,10 +33,10 @@ export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-sty
 
 export interface Notification {
   id: string;
-  userId: string;
   title: string;
   description: string;
-  icon: 'credit-card' | 'bot' | 'file-text';
+  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus';
   isRead: boolean;
   createdAt: string;
+  link?: string;
 }

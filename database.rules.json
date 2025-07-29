@@ -1,3 +1,4 @@
+
 {
   "rules": {
     "notifications": {
@@ -6,7 +7,27 @@
         ".write": "auth != null && auth.uid == $uid"
       }
     },
-    // Keep existing rules if any, for example:
+    "messages": {
+      "$conversationId": {
+        ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
+        ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role']) && newData.child('senderId').val() === auth.uid"
+        }
+      }
+    },
+    "userConversations": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "conversations": {
+        "$conversationId": {
+            ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
+            ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists()"
+        }
+    },
     ".read": false,
     ".write": false
   }

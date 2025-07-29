@@ -1,4 +1,5 @@
 
+
 // src/app/api/purchase-request/route.ts
 import { NextResponse } from 'next/server';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
@@ -77,6 +78,7 @@ export async function POST(request: Request) {
                 icon: "credit-card",
                 isRead: false,
                 createdAt: new Date().toISOString(),
+                link: '/admin/manage-payments'
             };
 
             const notificationPromises = adminsSnapshot.docs.map(adminDoc => {

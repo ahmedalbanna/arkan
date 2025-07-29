@@ -4,8 +4,8 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare, Bell, Trash2 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare, Bell, Trash2, UserPlus, LifeBuoy, Loader2 } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -19,7 +19,10 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { useNotifications, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
-import type { Notification } from '@/lib/types';
+import type { Notification, UserProfile } from '@/lib/types';
+import { useChatStore } from '@/hooks/useChatStore';
+import { toast } from '@/hooks/use-toast';
+import { initiateSupportChat } from '@/services/chat-service';
 
 function NotificationIcon({ icon }: { icon: Notification['icon']}) {
   switch (icon) {
@@ -29,6 +32,8 @@ function NotificationIcon({ icon }: { icon: Notification['icon']}) {
       return <Bot className="h-5 w-5 text-primary mt-1" />;
     case 'file-text':
         return <FileText className="h-5 w-5 text-secondary-foreground mt-1" />;
+    case 'user-plus':
+        return <UserPlus className="h-5 w-5 text-blue-500 mt-1" />;
     default:
       return <Bell className="h-5 w-5 text-muted-foreground mt-1" />;
   }
@@ -36,6 +41,7 @@ function NotificationIcon({ icon }: { icon: Notification['icon']}) {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t, locale, setLocale } = useLocalization();
   const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();  
   const logoutMutation = useLogout();
@@ -44,6 +50,8 @@ export function Header() {
   const { data: notifications } = useNotifications();
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
+  const { createConversation, openChat } = useChatStore();
+
 
   useEffect(() => {
     setIsClient(true);
@@ -51,11 +59,14 @@ export function Header() {
 
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
 
-  const handleMarkAsRead = (notificationId: string) => {
-    // Find the specific notification to check its status
-    const notification = notifications?.find(n => n.id === notificationId);
-    if (notification && !notification.isRead) {
-        markAsReadMutation.mutate([notificationId]);
+  const handleNotificationClick = (notification: Notification) => {
+    // Mark as read only if it's currently unread
+    if (!notification.isRead) {
+        markAsReadMutation.mutate([notification.id]);
+    }
+    // Navigate if a link exists
+    if (notification.link) {
+        router.push(notification.link);
     }
   };
 
@@ -66,6 +77,7 @@ export function Header() {
         clearAllMutation.mutate(notificationIds);
     }
   };
+  
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -259,7 +271,7 @@ export function Header() {
                     <ScrollArea className="h-auto max-h-80">
                       {notifications && notifications.length > 0 ? (
                         notifications.map(notification => (
-                          <DropdownMenuItem key={notification.id} className="items-start" onSelect={(e) => { e.preventDefault(); handleMarkAsRead(notification.id); }}>
+                          <DropdownMenuItem key={notification.id} className="items-start" onSelect={(e) => { e.preventDefault(); handleNotificationClick(notification); }}>
                               <div className="flex items-start gap-3">
                                   <div className="relative">
                                     <NotificationIcon icon={notification.icon} />

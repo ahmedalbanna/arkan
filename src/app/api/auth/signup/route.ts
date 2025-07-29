@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -6,6 +7,7 @@ import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import type { UserRole } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
+import { getDatabase } from 'firebase-admin/database';
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -33,6 +35,29 @@ async function getNewUserCredits(): Promise<number> {
         console.error("Could not fetch default settings, falling back to 10 credits.", error);
         return 10;
     }
+}
+
+async function notifyAdminsOfNewUser(user: { name?: string | null, email?: string | null }) {
+    const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
+    if (adminsSnapshot.empty) return;
+
+    const rtdb = getDatabase();
+    const notificationPayload = {
+        title: "New User Signed Up",
+        description: `A new user, ${user.name || user.email}, has joined the platform.`,
+        icon: "user-plus",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        link: '/admin/manage-users'
+    };
+
+    const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
+        const adminId = adminDoc.id;
+        const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+        return notificationRef.set(notificationPayload);
+    });
+
+    await Promise.all(notificationPromises);
 }
 
 export async function POST(req: Request) {
@@ -69,6 +94,7 @@ export async function POST(req: Request) {
         };
         
         await adminDb.collection('users').doc(uid).set(newUserProfile);
+        await notifyAdminsOfNewUser(newUserProfile);
         return NextResponse.json({ user: { uid, ...newUserProfile } }, { status: 201 });
 
     } else {
@@ -101,6 +127,7 @@ export async function POST(req: Request) {
         };
 
         await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
+        await notifyAdminsOfNewUser(newUserProfile);
         
         return NextResponse.json({ 
           user: {

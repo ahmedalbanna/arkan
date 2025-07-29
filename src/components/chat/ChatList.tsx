@@ -11,8 +11,11 @@ export interface ChatSession {
   id: string;
   title: string;
   lastMessage: string;
-  timestamp: Date;
-  agentId?: string; // agentId is optional for general chats
+  lastMessageTimestamp: string;
+  participantIds: string[];
+  participantNames: Record<string, string>;
+  isSupportChat?: boolean; // To identify support chats for the user widget
+  isTemporary?: boolean; // To identify chats not yet saved to DB
   messages: { role: 'user' | 'assistant'; content: string }[];
 }
 
@@ -26,7 +29,10 @@ interface ChatListProps {
 export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatListProps) {
   // Group chats by date
   const groupedChats = chats.reduce((groups, chat) => {
-    const date = format(chat.timestamp, 'yyyy-MM-dd');
+    // Don't show temporary chats in the admin list
+    if (chat.isTemporary) return groups;
+
+    const date = format(new Date(chat.lastMessageTimestamp), 'yyyy-MM-dd');
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -69,7 +75,7 @@ export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatL
                          <div className="flex w-full items-center">
                             <div className="font-semibold">{chat.title}</div>
                             <div className="ml-auto text-xs text-muted-foreground">
-                                {format(chat.timestamp, 'p')}
+                                {format(new Date(chat.lastMessageTimestamp), 'p')}
                             </div>
                         </div>
                     </button>
@@ -79,7 +85,7 @@ export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatL
         ))}
         {chats.length === 0 && (
             <div className="text-center text-sm text-muted-foreground p-8">
-                <p>No chats yet. Start a new one!</p>
+                <p>No chats yet.</p>
             </div>
         )}
       </div>
