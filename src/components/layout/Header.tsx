@@ -44,7 +44,6 @@ export function Header() {
   const { data: notifications } = useNotifications();
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
-  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -52,13 +51,13 @@ export function Header() {
 
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
 
-  const handleNotificationMenuOpenChange = (isOpen: boolean) => {
-    setIsNotificationMenuOpen(isOpen);
-    if (isOpen && unreadCount > 0) {
-      const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
-      markAsReadMutation.mutate(unreadIds);
+  const handleMarkAsRead = (notificationId: string) => {
+    // Find the specific notification to check its status
+    const notification = notifications?.find(n => n.id === notificationId);
+    if (notification && !notification.isRead) {
+        markAsReadMutation.mutate([notificationId]);
     }
-  }
+  };
 
   const handleClearAll = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -237,7 +236,7 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu open={isNotificationMenuOpen} onOpenChange={handleNotificationMenuOpenChange}>
+              <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-5 w-5" />
@@ -260,7 +259,7 @@ export function Header() {
                     <ScrollArea className="h-auto max-h-80">
                       {notifications && notifications.length > 0 ? (
                         notifications.map(notification => (
-                          <DropdownMenuItem key={notification.id} className="items-start">
+                          <DropdownMenuItem key={notification.id} className="items-start" onSelect={(e) => { e.preventDefault(); handleMarkAsRead(notification.id); }}>
                               <div className="flex items-start gap-3">
                                   <div className="relative">
                                     <NotificationIcon icon={notification.icon} />
