@@ -1,3 +1,4 @@
+
 // src/app/api/teams/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -6,7 +7,7 @@ import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
 
 // GET /api/teams
 export async function GET(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {
@@ -34,7 +35,7 @@ const createTeamSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {

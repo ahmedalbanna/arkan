@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { NextResponse } from 'next/server';
@@ -62,7 +61,7 @@ async function notifyAdminsOfNewUser(user: { name?: string | null, email?: strin
 }
 
 export async function POST(req: Request) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const body = await req.json();
     const defaultCredits = await getNewUserCredits();

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,11 +15,11 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, MessageSquare } from 'lucide-react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfile, fetchUsers } from '@/services/user-service';
+import { fetchUserProfile, fetchUsers, type UserListResponse } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
@@ -46,7 +47,7 @@ function UserTableSkeleton() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {Array.from({ length: USERS_PER_PAGE }).map((_, i) => (
+                {Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
@@ -77,14 +78,14 @@ export default function UserManagementConsole() {
     isFetching, 
     isFetchingNextPage, 
     status 
-  } = useInfiniteQuery({
+  } = useInfiniteQuery<UserListResponse>({
       queryKey: userKeys.lists(),
       queryFn: async ({ pageParam }) => {
           if (!firebaseUser) throw new Error("User not authenticated");
           const token = await firebaseUser.getIdToken();
           return fetchUsers(USERS_PER_PAGE, pageParam, token);
       },
-      initialPageParam: undefined,
+      initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => {
           if (!lastPage.hasNextPage) return undefined;
           return lastPage.lastVisibleId;
@@ -192,9 +193,7 @@ export default function UserManagementConsole() {
                         onClick={() => fetchNextPage()}
                         disabled={!hasNextPage || isFetchingNextPage}
                     >
-                        {isFetchingNextPage
-                            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            : null}
+                        {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                         {isFetchingNextPage ? 'Loading more...' : 'Load More'}
                     </Button>
                 </div>

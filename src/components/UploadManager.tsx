@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,13 +59,13 @@ export function UploadManager() {
                         <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
                     </TabsList>
                     <TabsContent value="file" className="mt-4">
-                       <FileUploader />
+                       <FileUploader type="context" />
                     </TabsContent>
                      <TabsContent value="text" className="mt-4">
                         <PasteTextUploader />
                     </TabsContent>
                     <TabsContent value="image" className="mt-4">
-                         <ImageUploader />
+                         <ImageUploader type="context" />
                     </TabsContent>
                     <TabsContent value="drive" className="mt-4">
                         <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />

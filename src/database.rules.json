@@ -23,10 +23,10 @@
       }
     },
     "conversations": {
-      "$conversationId": {
-        ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
-        ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'"
-      }
+        "$conversationId": {
+            ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
+            ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'"
+        }
     },
     ".read": false,
     ".write": false

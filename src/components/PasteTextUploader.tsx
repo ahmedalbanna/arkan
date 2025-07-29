@@ -27,7 +27,7 @@ export function PasteTextUploader() {
             return;
         }
 
-        addExternalContext(`${fileName.trim()}.md`, text);
+        addExternalContext(`${fileName.trim()}.md`, text, 'context');
         toast({
             title: "Context Added",
             description: `"${fileName.trim()}.md" has been added to the context.`

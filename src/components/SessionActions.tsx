@@ -286,7 +286,7 @@ export const SessionActions = () => {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-as-name" className="text-right">Name</Label>
-                                <Input id="save-as-name" defaultValue={store.name || store.proposal?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
+                                <Input id="save-as-name" defaultValue={store.name || (store.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <AlertDialogFooter>

@@ -180,7 +180,7 @@ export function useCreateProposalTemplate() {
   return useMutation<
     ProposalTemplate,
     Error,
-    Omit<ProposalTemplate, 'createdAt'>
+    Omit<ProposalTemplate, 'id' | 'createdAt'> & {id: string}
   >({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -203,7 +203,7 @@ export function useCreateReportTemplate() {
   return useMutation<
     ReportGenerationTemplate,
     Error,
-    Omit<ReportGenerationTemplate, 'createdAt'>
+    Omit<ReportGenerationTemplate, 'createdAt'> & {id: string}
   >({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -225,7 +225,7 @@ export function useCreatePresentationTemplate() {
   return useMutation<
     PresentationGenerationTemplate,
     Error,
-    Omit<PresentationGenerationTemplate, 'createdAt'>
+    Omit<PresentationGenerationTemplate, 'createdAt'> & {id: string}
   >({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);

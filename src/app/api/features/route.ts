@@ -1,7 +1,7 @@
 
 // src/app/api/features/route.ts
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { defaultFeatures } from '@/lib/features';
 
 // This is a public endpoint that does not require authentication.

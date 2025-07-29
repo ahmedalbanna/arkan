@@ -1,3 +1,4 @@
+
 // src/app/api/projects/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -8,7 +9,7 @@ import { getUserProfile } from '@/lib/db/queries';
 
 // GET /api/projects - Fetches all projects for the authenticated user and their teams
 export async function GET(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {
@@ -41,11 +42,11 @@ export async function GET(request: Request) {
         
         const projectsMap = new Map();
         
-        personalProjectsSnapshot.docs.forEach(doc => {
+        personalProjectsSnapshot.docs.forEach((doc: any) => {
             projectsMap.set(doc.id, { id: doc.id, ...doc.data() });
         });
         
-        teamProjectsSnapshot?.docs.forEach(doc => {
+        teamProjectsSnapshot?.docs.forEach((doc: any) => {
             projectsMap.set(doc.id, { id: doc.id, ...doc.data() });
         });
         
@@ -66,7 +67,7 @@ export async function GET(request: Request) {
 
 // POST /api/projects - Creates a new project
 export async function POST(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {

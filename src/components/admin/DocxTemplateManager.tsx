@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
-import type { TemplateKey } from '@/lib/docx-styles';
+import type { DocxTemplate, TemplateKey } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -185,7 +185,7 @@ export default function DocxTemplateManager() {
   }
 
   const handleRefreshImage = (templateId: string, prompt: string) => {
-    refreshImageMutation.mutate({ templateType: 'docx', templateId, prompt });
+    refreshImageMutation.mutate({ templateId, prompt });
   };
 
 

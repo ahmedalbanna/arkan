@@ -1,22 +1,8 @@
 
 'use client';
 
-export interface PptxStyleOptions {
-    background: { color: string; };
-    title: { color: string; fontFace: string; fontSize: number; bold?: boolean; align?: 'left' | 'center' | 'right'; };
-    body: { color: string; fontFace: string; fontSize: number; align?: 'left' | 'center' | 'right'; };
-    bullet: { type: 'bullet' | 'number'; style?: string;};
-}
-
-export interface PptxTemplate {
-    name: string;
-    description: string;
-    styles: PptxStyleOptions;
-    imageUrl: string;
-    dataAiHint: string;
-}
-
-export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
+import type { PptxStyleOptions, PptxTemplate, PptxTemplateKey } from '@/lib/types';
+export type { PptxTemplateKey };
 
 const modern: PptxStyleOptions = {
     background: { color: "FFFFFF" },
@@ -42,6 +28,7 @@ const professional: PptxStyleOptions = {
 
 export const templates: Record<PptxTemplateKey, PptxTemplate> = {
     modern: {
+        id: 'modern',
         name: 'pptxTemplates.modern.name',
         styles: modern,
         description: 'pptxTemplates.modern.description',
@@ -49,6 +36,7 @@ export const templates: Record<PptxTemplateKey, PptxTemplate> = {
         dataAiHint: 'presentation modern',
     },
     dark: {
+        id: 'dark',
         name: 'pptxTemplates.dark.name',
         styles: dark,
         description: 'pptxTemplates.dark.description',
@@ -56,6 +44,7 @@ export const templates: Record<PptxTemplateKey, PptxTemplate> = {
         dataAiHint: 'presentation dark',
     },
     professional: {
+        id: 'professional',
         name: 'pptxTemplates.professional.name',
         styles: professional,
         description: 'pptxTemplates.professional.description',

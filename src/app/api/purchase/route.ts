@@ -10,7 +10,7 @@ const purchaseSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const sessionCookie = (await cookies()).get("__session")?.value;
     if (!sessionCookie) {

@@ -1,7 +1,7 @@
 
 // src/app/api/templates/presentation/route.ts
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { PRESENTATION_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/presentation-generation-templates';
 
 // This is a public endpoint
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
             snapshot = await collectionRef.get();
         }
         
-        const templates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const templates = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
         return NextResponse.json(templates, { status: 200 });
     } catch (error) {
         console.error('Error fetching presentation templates:', error);

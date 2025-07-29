@@ -7,7 +7,8 @@ import { Bot, Inbox, User, Search, MessageSquare, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { AGENTS, Agent } from '@/lib/agents';
-import { useUsers } from '@/hooks/use-user';
+import { useQuery } from '@tanstack/react-query';
+import { userKeys } from '@/lib/query-keys';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -16,8 +17,8 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useRouter } from 'next/navigation';
-import type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
-
+import type { ChatSession, ChatMessage, AgentChatSession, UserProfile } from '@/lib/types';
+import { fetchUsers, type UserListResponse } from '@/services/user-service';
 
 interface ChatListProps {
   agents: Agent[];
@@ -28,12 +29,21 @@ interface ChatListProps {
 
 function NewChatDialog() {
     const [open, setOpen] = useState(false);
-    const { data: users, isLoading: usersLoading } = useUsers();
     const { firebaseUser, userProfile: adminProfile } = useAuth();
+    const { data, isLoading: usersLoading } = useQuery<UserListResponse>({
+        queryKey: userKeys.lists(),
+        queryFn: async () => {
+            const token = await firebaseUser!.getIdToken();
+            return fetchUsers(100, undefined, token)
+        },
+        enabled: !!firebaseUser
+    });
+    const allUsers = data?.users ?? [];
+
     const { createConversation, openChat } = useChatStore();
     const [isCreating, setIsCreating] = useState(false);
 
-    const onSelectUser = async (user: any) => {
+    const onSelectUser = async (user: UserProfile) => {
         if (!firebaseUser || !adminProfile) return;
         setIsCreating(true);
         try {
@@ -68,7 +78,7 @@ function NewChatDialog() {
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
                             {usersLoading && <CommandItem><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...</CommandItem>}
-                            {users?.map(user => (
+                            {allUsers?.map((user: UserProfile) => (
                                 <CommandItem key={user.id} onSelect={() => onSelectUser(user)}>
                                     <Avatar className="mr-2 h-6 w-6">
                                         <AvatarImage src={user.profilePictureUrl}/>

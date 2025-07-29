@@ -10,7 +10,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { getDatabase, ref, onValue, off, push, serverTimestamp } from 'firebase/database';
+import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib/firebase';
 import type { ChatMessage, ChatSession } from '@/hooks/useChatStore';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
@@ -115,7 +115,7 @@ export default function SupportChatWidget() {
     } = useChatStore();
     const { firebaseUser, userProfile } = useAuth();
     const [input, setInput] = useState('');
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [messages, setMessages] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     const [view, setView] = useState<'chat' | 'new_chat_selection'>('chat');
@@ -139,8 +139,8 @@ export default function SupportChatWidget() {
         
         const unsubscribe = onValue(messagesRef, (snapshot) => {
             const data = snapshot.val();
-            const messagesList: ChatMessage[] = data ? Object.values(data) : [];
-            setMessages(messagesList);
+            const messagesList = data ? Object.values(data) : [];
+            setMessages(messagesList as any[]);
         });
 
         return () => off(messagesRef, 'value', unsubscribe);
@@ -201,7 +201,7 @@ export default function SupportChatWidget() {
             senderId: firebaseUser.uid,
             content: messageToSend,
             timestamp: serverTimestamp(),
-            role: 'user',
+            role: 'user' as 'user',
         };
         
         const db = getDatabase(app);

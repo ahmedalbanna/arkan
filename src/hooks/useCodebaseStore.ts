@@ -3,6 +3,7 @@
 
 import { create } from 'zustand';
 import type { Codebase } from '@/ai/flows/generate-codebase';
+import { ProjectState } from '@/lib/types';
 
 export interface CodebaseState {
   codebase: Codebase | null;
@@ -11,7 +12,7 @@ export interface CodebaseState {
 interface CodebaseActions {
   setCodebase: (codebase: Codebase | null) => void;
   newSession: () => void;
-  loadState: (state: Partial<CodebaseState>) => void;
+  loadState: (state: Partial<ProjectState>) => void;
 }
 
 const initialState: CodebaseState = {

@@ -4,7 +4,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { type ExternalContext } from '@/hooks/useReportStore';
+import type { AcademicContextFile } from '@/lib/types';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
@@ -16,9 +16,19 @@ import { FileUploader } from '../FileUploader';
 import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
 import { Badge } from '../ui/badge';
+import { useReportStore } from '@/hooks/useReportStore';
+
+interface AcademicUploadersProps {
+    title: string;
+    onContentAdded: (fileName: string, content: string, type: 'context' | 'example') => void;
+    onContentRemoved: (index: number) => void;
+    isProcessing: boolean;
+    isContext?: boolean;
+    uploadedContent: { fileName: string; content: string; type?: 'context' | 'example' }[];
+}
 
 
-export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: { title: string, onContentAdded: (fileName: string, content: string, type: 'context' | 'example') => void, onContentRemoved: (index: number) => void, isProcessing: boolean, isContext?: boolean, uploadedContent: ExternalContext[] }) => {
+export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: AcademicUploadersProps) => {
     
     return (
         <Card>
@@ -31,7 +41,6 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                                 <div className="flex items-center gap-2 truncate">
                                     <File className="h-4 w-4 shrink-0" />
                                     <span className="truncate">{item.fileName}</span>
-                                    <Badge variant={item.type === 'context' ? 'secondary' : 'outline'}>{item.type}</Badge>
                                 </div>
                                 <div className="flex items-center">
                                     <Dialog>
@@ -44,37 +53,16 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                         ))}
                     </ul>
                  )}
-                <Tabs defaultValue="context" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="context">Add as Context</TabsTrigger>
-                        <TabsTrigger value="example">Add as Example</TabsTrigger>
+                 <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
+                <Tabs defaultValue="pdf" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
+                        <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
+                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="context" className="mt-4">
-                        <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
-                        <Tabs defaultValue="pdf" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
-                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
-                                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="pdf" className="mt-2"><FileUploader type="context" /></TabsContent>
-                            <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
-                            <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
-                        </Tabs>
-                    </TabsContent>
-                    <TabsContent value="example" className="mt-4">
-                        <p className="text-xs text-muted-foreground mb-2">Provide well-written documents as examples. The AI will learn from their style, tone, and structure.</p>
-                        <Tabs defaultValue="pdf" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
-                                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
-                                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="pdf" className="mt-2"><FileUploader type="example" /></TabsContent>
-                            <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
-                            <TabsContent value="image" className="mt-2"><ImageUploader /></TabsContent>
-                        </Tabs>
-                    </TabsContent>
+                    <TabsContent value="pdf" className="mt-2"><FileUploader type={isContext ? 'context' : 'example'} /></TabsContent>
+                    <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
+                    <TabsContent value="image" className="mt-2"><ImageUploader type={isContext ? 'context' : 'example'} /></TabsContent>
                 </Tabs>
             </CardContent>
         </Card>

@@ -5,6 +5,8 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { ProjectPlan } from '@/ai/schemas';
 import { useBuilderStore } from './useBuilderStore';
+import type { ProjectState } from '@/lib/types';
+
 
 export interface ProjectPlanState {
   projectPlan: ProjectPlan | null;
@@ -13,7 +15,7 @@ export interface ProjectPlanState {
 interface ProjectPlanActions {
   setProjectPlan: (plan: ProjectPlan | null) => void;
   newSession: () => void;
-  loadState: (state: Partial<{ projectPlan: ProjectPlanState }>) => void;
+  loadState: (state: Partial<ProjectState>) => void;
 }
 
 const initialState: ProjectPlanState = {

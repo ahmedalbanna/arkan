@@ -1,7 +1,9 @@
+
 // src/app/api/teams/[id]/invitations/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 
@@ -11,7 +13,7 @@ const inviteMemberSchema = z.object({
 
 // Helper to verify if the requester is the owner of the team
 async function verifyTeamOwner(request: Request, teamId: string) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };

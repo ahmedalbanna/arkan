@@ -1,7 +1,7 @@
+
 'use client';
 
-import type { UserProfile } from '@/lib/types';
-import type { LoginCredentials, SignupCredentials } from '@/hooks/use-user';
+import type { UserProfile, LoginCredentials } from '@/lib/types';
 import { auth, app } from '@/lib/firebase';
 import {
   signInWithEmailAndPassword,
@@ -13,6 +13,7 @@ import {
   signInWithPhoneNumber,
   type ConfirmationResult,
 } from "firebase/auth";
+import { SignupCredentials } from '@/components/SignupForm';
 
 export async function createUserService(data: any, token: string): Promise<any> {
     const response = await fetch('/api/admin/users', {
@@ -30,7 +31,7 @@ export async function createUserService(data: any, token: string): Promise<any> 
     return response.json();
 }
 
-interface UserListResponse {
+export interface UserListResponse {
     users: UserProfile[];
     hasNextPage: boolean;
     lastVisibleId: string | null;

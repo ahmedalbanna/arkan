@@ -18,6 +18,8 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { AcademicUploaders } from './AcademicUploaders';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
+import type { AcademicContextFile, AcademicSolverStage } from '@/lib/types';
+
 
 async function analyzeApi(variables: { markdown: string, documentType: 'exam' | 'homework', token: string }): Promise<any> {
     const { markdown, documentType, token } = variables;
@@ -150,7 +152,7 @@ export default function AcademicSolver() {
 
              <AcademicUploaders
                 title="Questions Document"
-                onContentAdded={addQuestionDocument}
+                onContentAdded={(fileName, content) => addQuestionDocument(fileName, content)}
                 onContentRemoved={removeQuestionDocument}
                 isProcessing={isProcessing}
                 uploadedContent={questionDocuments}
@@ -159,7 +161,7 @@ export default function AcademicSolver() {
              
              <AcademicUploaders
                 title="Context/Syllabus Document (Optional)"
-                onContentAdded={addExternalContext}
+                onContentAdded={(fileName, content) => addExternalContext(fileName, content)}
                 onContentRemoved={removeExternalContext}
                 isProcessing={isProcessing}
                 uploadedContent={externalContext}

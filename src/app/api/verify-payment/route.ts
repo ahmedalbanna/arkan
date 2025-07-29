@@ -1,17 +1,16 @@
 
-
-
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
 
 
 // Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', adminId: null };
@@ -62,7 +61,7 @@ export async function POST(request: Request) {
     const notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
     if (status === 'verified') {
-      await adminDb.runTransaction(async (t) => {
+      await adminDb.runTransaction(async (t: any) => {
         const userRef = adminDb.collection('users').doc(userId);
         t.update(userRef, { credits: FieldValue.increment(creditsToGrant) });
 
@@ -84,7 +83,7 @@ export async function POST(request: Request) {
         });
 
     } else { // 'rejected'
-      await adminDb.runTransaction(async (t) => {
+      await adminDb.runTransaction(async (t: any) => {
           t.update(transactionRef, {
             status: 'rejected',
             adminNotes: adminNotes || 'Payment could not be verified.',

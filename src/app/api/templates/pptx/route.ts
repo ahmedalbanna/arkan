@@ -1,7 +1,7 @@
 
 // src/app/api/templates/pptx/route.ts
 import { NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 
 // This endpoint is public and does not require authentication
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         }
         
         const templates: { [key: string]: any } = {};
-        snapshot.docs.forEach(doc => {
+        snapshot.docs.forEach((doc: any) => {
             templates[doc.id] = doc.data();
         });
 

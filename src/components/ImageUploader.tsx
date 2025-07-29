@@ -10,7 +10,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useReportStore } from '@/hooks/useReportStore';
 
-export function ImageUploader() {
+interface FileUploaderProps {
+    type: 'context' | 'example';
+}
+
+export function ImageUploader({ type }: FileUploaderProps) {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
     const { addExternalContext } = useReportStore();
@@ -48,7 +52,7 @@ export function ImageUploader() {
             }
             
             const result = await response.json();
-            addExternalContext(file.name, result.text);
+            addExternalContext(file.name, result.text, type);
 
             toast({ title: "Image Processed", description: `Text from ${file.name} has been successfully added as context.` });
 
@@ -58,7 +62,7 @@ export function ImageUploader() {
             setIsLoading(false);
         }
 
-    }, [firebaseUser, toast, addExternalContext]);
+    }, [firebaseUser, toast, addExternalContext, type]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,

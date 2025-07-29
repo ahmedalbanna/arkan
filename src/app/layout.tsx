@@ -63,7 +63,7 @@ async function checkAuth(pathname: string, sessionCookieValue: string | undefine
   }
 
   try {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     // Verify the cookie is valid
     await adminAuth.verifySessionCookie(sessionCookieValue, true);
   } catch (error) {

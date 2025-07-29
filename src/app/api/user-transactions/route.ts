@@ -4,7 +4,7 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 import { getTransactionsByUserId } from '@/lib/db/queries';
 
 export async function GET(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {

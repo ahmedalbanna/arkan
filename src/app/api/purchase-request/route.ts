@@ -1,11 +1,10 @@
 
-
 // src/app/api/purchase-request/route.ts
 import { NextResponse } from 'next/server';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/lib/db/queries';
-import { getDatabase } from 'firebase-admin/database';
 
 export const config = {
     api: {
@@ -14,7 +13,7 @@ export const config = {
 };
 
 export async function POST(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     try {
         const authorization = request.headers.get('Authorization');
         if (!authorization?.startsWith('Bearer ')) {
@@ -71,7 +70,7 @@ export async function POST(request: Request) {
         // Notify all admins about the new pending payment
         const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
         if (!adminsSnapshot.empty) {
-            const rtdb = getDatabase();
+            const rtdb = adminRealtimeDb;
             const notificationPayload = {
                 title: "New Payment Request",
                 description: `User ${userName || userEmail} submitted a payment request for $${price}.`,

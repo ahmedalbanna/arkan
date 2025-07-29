@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
-import type { PptxTemplateKey, PptxStyleOptions, PptxTemplate } from '@/lib/types';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -22,6 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
+import type { PptxStyleOptions, PptxTemplate, PptxTemplateKey } from '@/lib/types';
+
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
@@ -172,7 +173,7 @@ export default function PptxTemplateManager() {
   }
   
   const handleRefreshImage = (templateId: string, prompt: string) => {
-    refreshImageMutation.mutate({ templateType: 'pptx', templateId, prompt });
+    refreshImageMutation.mutate({ templateId, prompt });
   };
 
   if (!isLoaded) {

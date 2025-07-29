@@ -1,10 +1,11 @@
+
 // code explantion in docs/hooks/use-user.md
 
 "use client";
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
-import type { UserProfile } from "@/lib/db/queries";
+import type { UserProfile, LoginCredentials } from "@/lib/db/queries";
 import type { PricingPlan } from "@/components/PricingCard";
 import type { SignupCredentials } from "@/components/SignupForm";
 import { toast } from "@/hooks/use-toast";
@@ -24,16 +25,12 @@ import {
   loginWithGoogle,
   serviceLogoutUser,
   serviceSignupUser,
+  type UserListResponse,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
 
 // --- API Service Functions ---
 
@@ -76,13 +73,13 @@ const USERS_PER_PAGE = 10;
 
 export function useUsers() {
     const { firebaseUser } = useAuth();
-    return useInfiniteQuery({
+    return useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
-        queryFn: async ({ pageParam }) => {
+        queryFn: async ({ pageParam = undefined }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return fetchUsersApi(USERS_PER_PAGE, pageParam, token);
         },
-        initialPageParam: undefined as string | undefined,
+        initialPageParam: undefined,
         getNextPageParam: (lastPage) => {
             if (!lastPage.hasNextPage) return undefined;
             return lastPage.lastVisibleId;
