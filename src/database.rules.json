@@ -5,7 +5,8 @@
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
-      }
+      },
+      ".indexOn": "createdAt"
     },
     "messages": {
       "$conversationId": {
@@ -26,7 +27,8 @@
         "$conversationId": {
             ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'",
             ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'"
-        }
+        },
+        ".indexOn": ["lastMessageTimestamp"]
     },
     ".read": false,
     ".write": false
