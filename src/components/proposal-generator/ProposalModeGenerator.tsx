@@ -1,11 +1,9 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, Languages, FileText } from 'lucide-react';
-import ProposalViewer from './ProposalViewer';
 import { useToast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -17,7 +15,9 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import FormattedProposalView from './FormattedProposalView';
+import { lazy, Suspense } from 'react';
+
+const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
 function ProposalSkeleton() {
     return (
@@ -186,11 +186,13 @@ export function ProposalModeGenerator() {
                             </CardHeader>
                             <CardContent>
                                 <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                    <FormattedProposalView
-                                        proposal={proposal}
-                                        onUpdate={handleProposalUpdate}
-                                        readOnly={generationMutation.isPending || translateMutation.isPending}
-                                    />
+                                    <Suspense fallback={<ProposalSkeleton/>}>
+                                        <FormattedProposalView
+                                            proposal={proposal}
+                                            onUpdate={handleProposalUpdate}
+                                            readOnly={generationMutation.isPending || translateMutation.isPending}
+                                        />
+                                    </Suspense>
                                 </div>
                             </CardContent>
                         </Card>

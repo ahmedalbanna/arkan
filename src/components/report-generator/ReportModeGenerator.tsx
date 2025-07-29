@@ -1,7 +1,6 @@
 
 'use client';
 
-import { ReportResults } from './ReportResults';
 import { AlertCircle } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './ReportGenerationTools';
@@ -9,9 +8,28 @@ import { Card } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { toast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { SectionName } from '@/ai/schemas';
 import { useReportStore } from '@/hooks/useReportStore';
+import { Skeleton } from '../ui/skeleton';
+
+const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
+
+function ReportResultsSkeleton() {
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                   <Skeleton className="h-6 w-1/2" />
+                </CardHeader>
+                <CardContent className="p-4 space-y-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
 
 export default function ReportGenerator() {
     const { t, locale } = useLocalization();
@@ -74,7 +92,9 @@ export default function ReportGenerator() {
 
       {/* Right Column: Report Results */}
       <div className="lg:col-span-8 overflow-y-auto pr-2">
-        <ReportResults onSectionUpdate={handleSectionUpdate} />
+        <Suspense fallback={<ReportResultsSkeleton />}>
+            <ReportResults onSectionUpdate={handleSectionUpdate} />
+        </Suspense>
       </div>
     </div>
   );

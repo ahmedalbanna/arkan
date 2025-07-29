@@ -1,15 +1,16 @@
 
 'use client';
 
-import EditUserForm from '@/components/EditUserForm';
 import { useUserProfile } from '@/hooks/use-user';
 import { notFound } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
-import { useEffect, use } from 'react';
+import { useEffect, use, lazy, Suspense } from 'react';
 
+// Dynamically import the EditUserForm
+const EditUserForm = lazy(() => import('@/components/EditUserForm'));
 
 function EditUserPageSkeleton() {
   return (
@@ -50,7 +51,9 @@ function EditUserPageContent({ userId }: { userId: string }) {
     return (
         <div className="container mx-auto max-w-2xl px-4 py-12">
             <HeaderSection userName={user.name} />
-            <EditUserForm user={user} />
+            <Suspense fallback={<EditUserPageSkeleton />}>
+                <EditUserForm user={user} />
+            </Suspense>
         </div>
     );
 }
