@@ -1,3 +1,4 @@
+
 // src/app/api/users/[id]/reset-password/route.ts
 import { getUserProfile } from '@/lib/db/queries';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
