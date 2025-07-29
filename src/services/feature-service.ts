@@ -8,7 +8,8 @@ import type { Feature, UpdateFeatureVariables } from '@/lib/types';
  * @returns A promise that resolves to an array of Feature objects.
  */
 export async function fetchFeatures(): Promise<Feature[]> {
-    const response = await fetch('/api/admin/features');
+    // This now points to the public endpoint
+    const response = await fetch('/api/features'); 
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch features');
@@ -27,7 +28,8 @@ export async function updateFeature(
     token: string
 ): Promise<Feature> {
     const { featureId, payload } = variables;
-    const response = await fetch(`/api/admin/features/${featureId}`, {
+    // This still points to the protected admin endpoint
+    const response = await fetch(`/api/admin/features/${featureId}`, { 
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
