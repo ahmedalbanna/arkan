@@ -1,6 +1,4 @@
-
 // src/app/api/templates/proposal/route.ts
-import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
 import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/proposal-templates';
 import { createApiResponse, handleApiError } from '@/lib/api-utils';

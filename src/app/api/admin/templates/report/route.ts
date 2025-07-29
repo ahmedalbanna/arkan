@@ -1,6 +1,4 @@
-
 // src/app/api/templates/report/route.ts
-import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
 import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-generation-templates';
 import { createApiResponse, handleApiError } from '@/lib/api-utils';
@@ -21,7 +19,7 @@ export async function GET() {
             snapshot = await collectionRef.get();
         }
         
-        const templates = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }));
+        const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         return createApiResponse(templates, 200);
     } catch (error) {
         return handleApiError(error);

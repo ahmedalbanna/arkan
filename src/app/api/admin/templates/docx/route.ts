@@ -1,6 +1,4 @@
-
 // src/app/api/templates/docx/route.ts
-import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type TemplateKey } from '@/lib/docx-styles';
 import { createApiResponse, handleApiError } from '@/lib/api-utils';
@@ -25,7 +23,7 @@ export async function GET() {
         }
         
         const templates: { [key: string]: any } = {};
-        snapshot.docs.forEach((doc: any) => {
+        snapshot.docs.forEach((doc) => {
             templates[doc.id] = doc.data();
         });
 
