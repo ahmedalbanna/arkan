@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useState, useEffect, Fragment } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
 import { fetchGenerationLogs } from '@/services/generation-log-service';
@@ -19,6 +18,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useTheme } from 'next-themes';
 import { useDebounce } from '@/hooks/use-debounce';
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -111,7 +111,7 @@ export default function GenerationLogViewer() {
         queryFn: async ({ pageParam }) => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
-            return fetchGenerationLogs({ token, page: 0, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
+            return fetchGenerationLogs({ token, limit: LOGS_PER_PAGE, agentId: debouncedAgentId, userId: debouncedUserId, lastVisibleId: pageParam });
         },
         initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,

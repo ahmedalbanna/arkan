@@ -47,7 +47,7 @@ export const GET = withAuth(async ({ request }) => {
         return createApiResponse({
             logs,
             hasNextPage,
-            lastVisibleId: hasNextPage ? logs[logs.length - 1].id : null,
+            lastVisibleId: hasNextPage && logs.length > 0 ? logs[logs.length - 1].id : null,
         }, 200);
 
     } catch (error) {

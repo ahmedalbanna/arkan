@@ -12,7 +12,6 @@ export interface GenerationLog {
 
 interface FetchLogsParams {
     token: string;
-    page: number; // Page is kept for conceptual clarity but not used in API call
     limit: number;
     agentId?: string;
     userId?: string;
