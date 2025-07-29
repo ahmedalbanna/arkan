@@ -1,10 +1,8 @@
-
-
 // code explantion in docs/hooks/use-user.md
 
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
 import type { UserProfile } from "@/lib/db/queries";
 import type { PricingPlan } from "@/components/PricingCard";
@@ -13,16 +11,20 @@ import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import {
-  signInWithEmailAndPassword,
-  signOut,
   sendPasswordResetEmail,
-  GoogleAuthProvider,
-  signInWithPopup,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
-import { fetchUsers as fetchUsersApi, fetchUserProfile as fetchUserProfileApi, createUserService } from "@/services/user-service";
+import { 
+  fetchUsers as fetchUsersApi, 
+  fetchUserProfile as fetchUserProfileApi, 
+  createUserService,
+  loginWithEmail,
+  loginWithGoogle,
+  serviceLogoutUser,
+  serviceSignupUser,
+} from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -33,64 +35,10 @@ export interface LoginCredentials {
   password: string;
 }
 
-// --- Query Functions ---
-
-async function loginUser(credentials: LoginCredentials) {
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      credentials.email,
-      credentials.password
-    );
-    return userCredential.user;
-  } catch (error: any) {
-    if (
-      error.code === "auth/invalid-credential" ||
-      error.code === "auth/user-not-found" ||
-      error.code === "auth/wrong-password"
-    ) {
-      throw new Error("Invalid email or password.");
-    }
-    throw new Error(error.message || "Login failed. Please try again.");
-  }
-}
-
-async function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  try {
-    const result = await signInWithPopup(auth, provider);
-    return result.user;
-  } catch (error: any) {
-    throw new Error(error.message || "Google Sign-In failed.");
-  }
-}
-
-async function logoutUser() {
-  await signOut(auth);
-  const response = await fetch("/api/auth/logout", { method: "POST" });
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || "Logout failed.");
-  }
-  return response.json();
-}
-
-async function signupUser(credentials: SignupCredentials) {
-  const response = await fetch("/api/auth/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(credentials),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw errorData;
-  }
-  return response.json();
-}
+// --- API Service Functions ---
 
 async function sendPasswordResetEmailApi(userId: string, token: string) {
-  const response = await fetch(`/api/users/${userId}/reset-password`, {
+  const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -124,14 +72,20 @@ async function purchaseCreditsApi(
 }
 
 // --- Custom Hooks ---
+const USERS_PER_PAGE = 10;
 
 export function useUsers() {
     const { firebaseUser } = useAuth();
-    return useQuery({
+    return useInfiniteQuery({
         queryKey: userKeys.lists(),
-        queryFn: async () => {
+        queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return fetchUsersApi(1, 10, token); // Default to page 1, limit 10
+            return fetchUsersApi(USERS_PER_PAGE, pageParam, token);
+        },
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage) => {
+            if (!lastPage.hasNextPage) return undefined;
+            return lastPage.lastVisibleId;
         },
         enabled: !!firebaseUser
     });
@@ -157,7 +111,7 @@ export function useLogin() {
   const { refetchUser } = useAuth();
 
   return useMutation({
-    mutationFn: loginUser,
+    mutationFn: loginWithEmail,
     onSuccess: (user) => {
       if (user) {
         // After successful login, refetch user data to ensure context is updated
@@ -187,7 +141,7 @@ export function useGoogleSignIn() {
   const { refetchUser } = useAuth();
 
   return useMutation({
-    mutationFn: signInWithGoogle,
+    mutationFn: loginWithGoogle,
     onSuccess: (user) => {
       if (user) {
         refetchUser();
@@ -211,7 +165,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logoutUser,
+    mutationFn: serviceLogoutUser,
     onSuccess: () => {
       queryClient.clear();
       localStorage.clear();
@@ -231,7 +185,7 @@ export function useSignup() {
   const router = useRouter();
 
   return useMutation({
-    mutationFn: signupUser,
+    mutationFn: serviceSignupUser,
     onSuccess: () => {
       toast({
         title: "Account Created!",

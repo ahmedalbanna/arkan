@@ -1,8 +1,6 @@
-
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { UserProfile } from '@/lib/types';
 import Link from 'next/link';
 import { format } from 'date-fns';
@@ -17,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
 import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, MessageSquare } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUserProfile, fetchUsers } from '@/services/user-service';
@@ -48,7 +46,7 @@ function UserTableSkeleton() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {Array.from({ length: 5 }).map((_, i) => (
+                {Array.from({ length: USERS_PER_PAGE }).map((_, i) => (
                     <TableRow key={i}>
                         <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                         <TableCell><Skeleton className="h-4 w-48" /></TableCell>
@@ -64,7 +62,6 @@ function UserTableSkeleton() {
 }
 
 export default function UserManagementConsole() {
-  const [page, setPage] = useState(1);
   const { t } = useLocalization();
   const queryClient = useQueryClient();
   const { firebaseUser, userProfile: adminProfile, isLoading: authIsLoading } = useAuth();
@@ -72,18 +69,30 @@ export default function UserManagementConsole() {
   const { toast } = useToast();
   const { createConversation, openChat } = useChatStore();
 
-
-  const { data: users, isLoading, isError, isFetching } = useQuery({
-      queryKey: userKeys.list(page),
-      queryFn: async () => {
+  const { 
+    data, 
+    error, 
+    fetchNextPage, 
+    hasNextPage, 
+    isFetching, 
+    isFetchingNextPage, 
+    status 
+  } = useInfiniteQuery({
+      queryKey: userKeys.lists(),
+      queryFn: async ({ pageParam }) => {
           if (!firebaseUser) throw new Error("User not authenticated");
           const token = await firebaseUser.getIdToken();
-          return fetchUsers(page, USERS_PER_PAGE, token);
+          return fetchUsers(USERS_PER_PAGE, pageParam, token);
       },
-      placeholderData: (previousData) => previousData,
-      staleTime: 1000 * 60, // 1 minute
+      initialPageParam: undefined,
+      getNextPageParam: (lastPage) => {
+          if (!lastPage.hasNextPage) return undefined;
+          return lastPage.lastVisibleId;
+      },
       enabled: !!firebaseUser
   });
+
+  const allUsers = data?.pages.flatMap(page => page.users) ?? [];
 
   // Prefetch user profile on hover for a smoother navigation experience
   const prefetchUser = async (userId: string) => {
@@ -115,32 +124,8 @@ export default function UserManagementConsole() {
     }
   }
 
-  if (authIsLoading || isLoading) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex justify-between items-center">
-                    <span>{t('manageUsers.cardTitle')}</span>
-                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                </CardTitle>
-            </CardHeader>
-            <CardContent>
-                <UserTableSkeleton />
-            </CardContent>
-        </Card>
-    )
-  }
-
-  if (isError) {
-    return (
-        <Card>
-            <CardContent className="p-8 text-center text-destructive">
-                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                <p>{t('manageUsers.errorLoading')}</p>
-            </CardContent>
-        </Card>
-    )
-  }
+  const isLoading = status === 'pending' || authIsLoading;
+  const isError = status === 'error';
 
   return (
     <Card>
@@ -148,74 +133,73 @@ export default function UserManagementConsole() {
         <div className="flex justify-between items-center">
             <CardTitle className="flex items-center gap-2">
                 <span>{t('manageUsers.cardTitle')}</span>
-                 {isFetching && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
+                 {isFetching && !isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
             </CardTitle>
             <CreateUserDialog />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
-                  <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
-                  <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
-                  <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
-                  <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
-                  <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {t(`roles.${user.role}`)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{user.credits}</TableCell>
-                    <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
-                    <TableCell className="text-right">
-                       <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="sr-only">Chat with user</span>
-                        </Button>
-                      <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
-                        <Link href={`/admin/manage-users/${user.id}/edit`}>
-                           <Pencil className="h-4 w-4" />
-                           <span className="sr-only">{t('manageUsers.editUserSr')}</span>
-                        </Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(p => Math.max(p - 1, 1))}
-                disabled={page === 1 || isFetching}
-            >
-                <ChevronLeft className="mr-2 rtl:mr-0 rtl:ml-2 h-4 w-4" />
-                {t('manageUsers.previousButton')}
-            </Button>
-            <span className="text-sm font-medium">{t('manageUsers.pageLabel')} {page}</span>
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage(p => p + 1)}
-                disabled={!users || users.length < USERS_PER_PAGE || isFetching}
-            >
-                {t('manageUsers.nextButton')}
-                <ChevronRight className="ml-2 rtl:ml-0 rtl:mr-2 h-4 w-4" />
-            </Button>
-        </div>
+        {isLoading ? (
+            <UserTableSkeleton />
+        ) : isError ? (
+            <div className="p-8 text-center text-destructive">
+                 <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+                <p>{t('manageUsers.errorLoading')}: {error?.message}</p>
+            </div>
+        ) : (
+            <>
+                <div className="border rounded-lg">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
+                          <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
+                          <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
+                          <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
+                          <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
+                          <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {allUsers?.map((user) => (
+                          <TableRow key={user.id}>
+                            <TableCell className="font-medium">{user.name}</TableCell>
+                            <TableCell>{user.email}</TableCell>
+                            <TableCell>
+                              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                                {t(`roles.${user.role}`)}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{user.credits}</TableCell>
+                            <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
+                            <TableCell className="text-right">
+                               <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)} aria-label={`Chat with ${user.name}`}>
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
+                              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
+                                <Link href={`/admin/manage-users/${user.id}/edit`}>
+                                   <Pencil className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                </div>
+                <div className="flex items-center justify-center pt-8">
+                    <Button
+                        onClick={() => fetchNextPage()}
+                        disabled={!hasNextPage || isFetchingNextPage}
+                    >
+                        {isFetchingNextPage
+                            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            : null}
+                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                    </Button>
+                </div>
+            </>
+        )}
       </CardContent>
     </Card>
   );

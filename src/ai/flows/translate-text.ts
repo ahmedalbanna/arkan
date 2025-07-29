@@ -13,6 +13,7 @@ const TranslateTextInputSchema = z.object({
   text: z.string().describe('The text to be translated.'),
   targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
 });
+export type TranslateVariables = z.infer<typeof TranslateTextInputSchema>;
 export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
 
 const TranslateTextOutputSchema = z.object({

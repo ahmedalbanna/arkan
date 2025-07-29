@@ -1,7 +1,18 @@
-
 'use client';
 
-import type { UserProfile } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/types';
+import type { LoginCredentials, SignupCredentials } from '@/hooks/use-user';
+import { auth, app } from '@/lib/firebase';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithPopup,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
+} from "firebase/auth";
 
 export async function createUserService(data: any, token: string): Promise<any> {
     const response = await fetch('/api/admin/users', {
@@ -18,14 +29,25 @@ export async function createUserService(data: any, token: string): Promise<any> 
     }
     return response.json();
 }
+
+interface UserListResponse {
+    users: UserProfile[];
+    hasNextPage: boolean;
+    lastVisibleId: string | null;
+}
+
 /**
- * Fetches the list of all users from the API.
+ * Fetches a paginated list of users from the API.
  * Requires admin authentication.
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of UserProfile objects.
  */
-export async function fetchUsers(page: number, limit: number, token: string): Promise<UserProfile[]> {
-    const response = await fetch(`/api/admin/users?page=${page}&limit=${limit}`, {
+export async function fetchUsers(limit: number, lastVisibleId: string | undefined, token: string): Promise<UserListResponse> {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (lastVisibleId) {
+        params.append('lastVisibleId', lastVisibleId);
+    }
+    const response = await fetch(`/api/admin/users?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
@@ -60,4 +82,59 @@ export async function fetchUserProfile(userId: string, token: string): Promise<U
     throw new Error(errorData.message || 'Failed to fetch user profile');
   }
   return await response.json();
+}
+
+
+export async function loginWithEmail(credentials: LoginCredentials) {
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      credentials.email,
+      credentials.password
+    );
+    return userCredential.user;
+  } catch (error: any) {
+    if (
+      error.code === "auth/invalid-credential" ||
+      error.code === "auth/user-not-found" ||
+      error.code === "auth/wrong-password"
+    ) {
+      throw new Error("Invalid email or password.");
+    }
+    throw new Error(error.message || "Login failed. Please try again.");
+  }
+}
+
+export async function loginWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (error: any) {
+    throw new Error(error.message || "Google Sign-In failed.");
+  }
+}
+
+export async function serviceLogoutUser() {
+  await signOut(auth);
+  const response = await fetch("/api/auth/logout", { method: "POST" });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Logout failed.");
+  }
+  return response.json();
+}
+
+export async function serviceSignupUser(credentials: SignupCredentials) {
+  const response = await fetch("/api/auth/signup", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw errorData;
+  }
+  return response.json();
 }

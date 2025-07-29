@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, AnyProjectProposal } from '@/ai/schemas';
 export type {
   ProjectProposal,
@@ -19,7 +20,6 @@ export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { SavedProject, ProjectState } from '@/services/project-service';
 export type { Codebase } from '@/ai/flows/generate-codebase';
-export type { AgentData, Agent, AgentPrompt } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext as AcademicContextFile } from '@/hooks/useAcademicSolverStore';
@@ -30,6 +30,7 @@ export type { PptxTemplate, PptxStyleOptions } from './pptx-styles';
 export type { UserProfile } from '@/lib/db/queries';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext } from '@/hooks/useReportStore';
+export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
 
 export interface Notification {
   id: string;
@@ -40,11 +41,3 @@ export interface Notification {
   createdAt: string;
   link?: string;
 }
-
-export type TranslateVariables = {
-    text: string;
-    targetLang: string;
-};
-export type TranslateTextOutput = {
-    translatedText: string;
-};

@@ -1,4 +1,3 @@
-
 // This file is now intended for Firebase queries.
 // The SQLite setup is separate and not used by the live application.
 // We will restore the original Firebase-based queries.
@@ -70,25 +69,26 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
     return { id: userDoc.id, ...data } as UserProfile;
 }
 
-export async function getPaginatedUsers({ page, limit }: { page: number; limit: number; }) {
+export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: number, lastVisibleId?: string }) {
     let query = adminDb.collection('users')
       .orderBy('createdAt', 'desc')
-      .limit(limit);
+      .limit(limit + 1); // Fetch one extra to check for hasNextPage
 
-    if (page > 1) {
-      const snapshot = await adminDb.collection('users')
-        .orderBy('createdAt', 'desc')
-        .limit((page - 1) * limit)
-        .get();
-      const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-      if (lastDoc) {
-        query = query.startAfter(lastDoc);
+    if (lastVisibleId) {
+      const lastDoc = await adminDb.collection('users').doc(lastVisibleId).get();
+      if (lastDoc.exists) {
+          query = query.startAfter(lastDoc);
       }
     }
     
     const snapshot = await query.get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+    const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
+    const hasNextPage = snapshot.docs.length > limit;
+    const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
+    
+    return { users, hasNextPage, lastVisibleId: newLastVisibleId };
 }
+
 
 export async function updateUser(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
     const updatePayload = {
