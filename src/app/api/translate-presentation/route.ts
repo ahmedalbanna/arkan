@@ -17,6 +17,7 @@ export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = translatePresentationSchema.safeParse(body);
+
     if (!validation.success) {
       return handleApiError(validation.error);
     }

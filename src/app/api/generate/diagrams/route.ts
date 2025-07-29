@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server';
+
+'use server';
+
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
@@ -52,38 +54,27 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
   return `/api/proxy-image?url=${encodeURIComponent(plantUmlUrl)}`;
 }
 
-export async function POST(request: Request) {
-  const adminAuth = await getAdminAuth();
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-    
     const body = await request.json();
     
     if (body.intent === 'update_diagram') {
       if (!body.plantUmlCode) {
-          return NextResponse.json({ message: 'PlantUML code is required for an update.'}, { status: 400 });
+          return handleApiError({ message: 'PlantUML code is required for an update.' }, 400);
       }
       const imageUrl = await getPlantUmlImageUrl(body.plantUmlCode);
-      return NextResponse.json({ plantUmlCode: body.plantUmlCode, imageUrl }, { status: 200 });
+      return createApiResponse({ plantUmlCode: body.plantUmlCode, imageUrl }, 200);
     }
 
     const validation = generateDiagramSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError(validation.error);
     }
     
-    await deductCredit(userId, 1);
+    await deductCredit(user.id, 1);
 
     const agentInput = validation.data;
-
     const result = await generateDiagram(agentInput);
-
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
     
     const finalOutput = {
@@ -93,25 +84,13 @@ export async function POST(request: Request) {
 
     await logGeneration({
         agentId: `generate-${validation.data.diagramToGenerate}-diagram`,
-        userId,
+        userId: user.id,
         input: agentInput,
         output: finalOutput,
     });
 
-
-    return NextResponse.json(finalOutput, { status: 200 });
-
+    return createApiResponse(finalOutput, 200);
   } catch (error) {
-    console.error(`Error generating diagram:`, error);
-    if (error instanceof Error) {
-        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-         if (error.message.includes("credit")) {
-            return NextResponse.json({ message: error.message }, { status: 402 });
-        }
-        return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred while generating the diagram.' }, { status: 500 });
+    return handleApiError(error);
   }
-}
+});

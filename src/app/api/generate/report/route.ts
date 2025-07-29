@@ -1,15 +1,17 @@
-import { NextResponse } from 'next/server';
+
+'use server';
+
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType, ProjectPlanSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { evaluateAndSelectContext } from '@/ai/flows/evaluate-and-select-context';
 import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { logGeneration } from '@/services/generation-service';
 import type { ReportGenerationTemplate } from '@/services/template-service';
 import { getUserProfile } from '@/lib/db/queries';
 import { sectionConfig } from '@/lib/report-config';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 
 // Schema for generating a single section
@@ -21,8 +23,8 @@ const generateSectionSchema = z.object({
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(), 
   instructionText: z.string().optional(),
-  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
-  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })).optional(),
+  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })).optional(),
   tableOfContents: z.array(z.string()).optional(),
 });
 
@@ -33,22 +35,12 @@ const generateFullReportSchema = z.object({
     templateId: z.string(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-    exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
-    contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+    exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })).optional(),
+    contextFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })).optional(),
 });
 
-
-export async function POST(request: Request) {
-  const adminAuth = await getAdminAuth();
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-    
     const body = await request.json();
 
     // Check if it's a full report generation request
@@ -58,12 +50,12 @@ export async function POST(request: Request) {
 
         // A proposal, plan, or external context is required to generate a report.
         if (!proposal && !projectPlan && (!exampleFiles || exampleFiles.length === 0) && (!contextFiles || contextFiles.length === 0)) {
-            return NextResponse.json({ message: "A proposal, plan, or external context is required to generate a report." }, { status: 400 });
+            return handleApiError({ message: "A proposal, plan, or external context is required to generate a report." }, 400);
         }
 
         const templateDoc = await adminDb.collection('templates').doc('report').collection('items').doc(templateId).get();
         if (!templateDoc.exists) {
-             return NextResponse.json({ message: 'Invalid report template ID.' }, { status: 400 });
+             return handleApiError({ message: 'Invalid report template ID.' }, 400);
         }
         const template = templateDoc.data() as ReportGenerationTemplate;
 
@@ -73,13 +65,13 @@ export async function POST(request: Request) {
             .filter((sectionKey): sectionKey is SectionName => !!sectionKey && !existingSections[sectionKey]);
         
         if (sectionsToGenerate.length === 0) {
-            return NextResponse.json({ sections: existingSections, message: "All report sections have already been generated." }, { status: 200 });
+            return createApiResponse({ sections: existingSections, message: "All report sections have already been generated." }, 200);
         }
         
         // Check user credits before proceeding
-        const userProfile = await getUserProfile(userId);
+        const userProfile = await getUserProfile(user.id);
         if (!userProfile || userProfile.credits < sectionsToGenerate.length) {
-            return NextResponse.json({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, { status: 402 });
+            return handleApiError({ message: `Insufficient credits. You need ${sectionsToGenerate.length} credits but have ${userProfile?.credits || 0}.` }, 402);
         }
         
         // Call the new evaluation agent to get the optimal configuration
@@ -87,7 +79,7 @@ export async function POST(request: Request) {
         const evalResult = await evaluateAndSelectContext(evalInput);
         
         // Deduct credits for all sections at once
-        await deductCredit(userId, sectionsToGenerate.length);
+        await deductCredit(user.id, sectionsToGenerate.length);
 
         const generatedSections: { [key in SectionName]?: string } = { ...existingSections };
       
@@ -127,30 +119,30 @@ export async function POST(request: Request) {
             };
 
             const result = await generateReportSection(agentInput);
-            await logGeneration({ agentId: agentInfo.agentId, userId, input: agentInput, output: { [result.sectionName]: result.content } });
+            await logGeneration({ agentId: agentInfo.agentId, userId: user.id, input: agentInput, output: { [result.sectionName]: result.content } });
     
             // Add the newly generated section to our collected content
             generatedSections[result.sectionName as SectionName] = result.content;
         }
 
-        return NextResponse.json({ sections: generatedSections }, { status: 200 });
+        return createApiResponse({ sections: generatedSections }, 200);
     }
 
     // Check if it's a single section generation request
     const singleSectionValidation = generateSectionSchema.safeParse(body);
     if (singleSectionValidation.success) {
-        await deductCredit(userId, 1);
+        await deductCredit(user.id, 1);
         const agentInput = singleSectionValidation.data;
 
         // A proposal, plan, or external context is required to generate a section.
         if (!agentInput.proposal && !agentInput.projectPlan && (!agentInput.exampleFiles || agentInput.exampleFiles.length === 0) && (!agentInput.contextFiles || agentInput.contextFiles.length === 0)) {
-            return NextResponse.json({ message: "A proposal, project plan, or external context is required to generate a report section." }, { status: 400 });
+            return handleApiError({ message: "A proposal, project plan, or external context is required to report section." }, 400);
         }
 
         const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
         if (!agentInfo) {
-            return NextResponse.json({ message: 'Unknown section requested.' }, { status: 400 });
+            return handleApiError({ message: 'Unknown section requested.' }, 400);
         }
         
         const result = await generateReportSection(agentInput);
@@ -159,28 +151,18 @@ export async function POST(request: Request) {
         
         await logGeneration({ 
             agentId: agentInfo.agentId, 
-            userId, 
+            userId: user.id, 
             input: agentInput, 
             output: transformedOutput 
         });
   
-        return NextResponse.json(transformedOutput, { status: 200 });
+        return createApiResponse(transformedOutput, 200);
     }
 
     // If neither validation passes, return a validation error
-    return NextResponse.json({ errors: fullReportValidation.error?.flatten().fieldErrors || singleSectionValidation.error?.flatten().fieldErrors, message: 'Invalid request body.' }, { status: 400 });
+    return handleApiError({ errors: fullReportValidation.error?.flatten().fieldErrors || singleSectionValidation.error?.flatten().fieldErrors, message: 'Invalid request body.' }, 400);
 
   } catch (error) {
-    console.error(`Error generating report:`, error);
-    if (error instanceof Error) {
-        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-         if (error.message.includes("credit")) {
-            return NextResponse.json({ message: error.message }, { status: 402 }); // Payment Required
-        }
-        return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred while generating the report.' }, { status: 500 });
+    return handleApiError(error);
   }
-}
+});
