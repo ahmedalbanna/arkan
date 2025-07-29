@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -25,10 +26,14 @@ async function markNotificationsAsReadApi(notificationIds: string[], token: stri
     return response.json();
 }
 
-async function clearAllNotificationsApi(token: string): Promise<any> {
+async function clearNotificationsApi(notificationIds: string[], token: string): Promise<any> {
     const response = await fetch('/api/notifications/clear', {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ notificationIds }),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -58,7 +63,6 @@ export function useNotifications() {
     setError(null);
 
     const db = getDatabase(app);
-    // Fetch the last 20 notifications, regardless of read status
     const notificationsRef = query(
         ref(db, 'notifications/' + firebaseUser.uid),
         orderByChild('createdAt'),
@@ -75,7 +79,6 @@ export function useNotifications() {
             ...data[key]
           } as Notification);
         });
-        // Sort descending by date, as limitToLast fetches in ascending order
         notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
       setNotifications(notificationsList);
@@ -114,15 +117,16 @@ export function useMarkNotificationsAsRead() {
 
 
 /**
- * Custom mutation hook to clear all notifications for the current user.
+ * Custom mutation hook to clear a specific list of notifications for the current user.
  */
 export function useClearAllNotifications() {
     const { firebaseUser } = useAuth();
     
-    return useMutation<any, Error, void>({
-        mutationFn: async () => {
+    return useMutation<any, Error, string[]>({
+        mutationFn: async (notificationIds) => {
+            if (notificationIds.length === 0) return;
             const token = await getAuthenticatedToken(firebaseUser);
-            return clearAllNotificationsApi(token);
+            return clearNotificationsApi(notificationIds, token);
         },
         onError: (error) => {
             handleErrorUtility(error, "Could not clear notifications");

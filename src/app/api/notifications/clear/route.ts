@@ -1,9 +1,16 @@
+
 // src/app/api/notifications/clear/route.ts
 import { NextResponse } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { getDatabase } from 'firebase-admin/database';
+import { z } from 'zod';
 
-export async function DELETE(request: Request) {
+const clearSchema = z.object({
+  notificationIds: z.array(z.string()).min(1, "At least one notification ID is required."),
+});
+
+
+export async function POST(request: Request) {
     const adminAuth = getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
@@ -15,12 +22,23 @@ export async function DELETE(request: Request) {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const userId = decodedToken.uid;
         
+        const body = await request.json();
+        const validation = clearSchema.safeParse(body);
+        if (!validation.success) {
+            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+        }
+
+        const { notificationIds } = validation.data;
+        
         const db = getDatabase();
-        const notificationsRef = db.ref(`notifications/${userId}`);
+        const updates: { [key: string]: null } = {};
+        notificationIds.forEach(id => {
+            updates[`/notifications/${userId}/${id}`] = null; // Setting to null deletes the key in RTDB
+        });
 
-        await notificationsRef.remove();
+        await db.ref().update(updates);
 
-        return NextResponse.json({ message: 'All notifications cleared.' }, { status: 200 });
+        return NextResponse.json({ message: 'Notifications cleared.' }, { status: 200 });
 
     } catch (error) {
         console.error('Error clearing notifications:', error);

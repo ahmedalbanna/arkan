@@ -38,7 +38,7 @@ export function Header() {
   const pathname = usePathname();
   const { t, locale, setLocale } = useLocalization();
   const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();  
-  const logoutMutation = useLogout(); // Use the useLogout mutation hook
+  const logoutMutation = useLogout();
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { data: notifications } = useNotifications();
@@ -46,7 +46,6 @@ export function Header() {
   const clearAllMutation = useClearAllNotifications();
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
 
-  // This prevents hydration mismatches by ensuring the component only renders on the client
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -55,7 +54,6 @@ export function Header() {
 
   const handleNotificationMenuOpenChange = (isOpen: boolean) => {
     setIsNotificationMenuOpen(isOpen);
-    // Only mark as read if there are unread notifications
     if (isOpen && unreadCount > 0) {
       const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
       markAsReadMutation.mutate(unreadIds);
@@ -64,7 +62,10 @@ export function Header() {
 
   const handleClearAll = (e: React.MouseEvent) => {
     e.stopPropagation();
-    clearAllMutation.mutate();
+    if (notifications && notifications.length > 0) {
+        const notificationIds = notifications.map(n => n.id);
+        clearAllMutation.mutate(notificationIds);
+    }
   };
 
   const toggleLocale = () => {
@@ -112,12 +113,10 @@ export function Header() {
       </Button>
     ));
     
-  // Handle logout
   const handleLogout = async () => {
-    await logoutMutation.mutate(); // Trigger the logout mutation
+    await logoutMutation.mutate();
   };
 
-  // The condition `!isClient || isLoadingAuth` ensures we show a skeleton until client has mounted and auth state is determined.
   const showSkeleton = !isClient || isLoadingAuth;
 
   return (
