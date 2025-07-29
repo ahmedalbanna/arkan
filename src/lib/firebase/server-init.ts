@@ -1,10 +1,10 @@
-
 // src/lib/firebase/server-init.ts
 import admin from 'firebase-admin';
 
 // This function initializes the Firebase Admin SDK if it hasn't been already.
 function initializeFirebaseAdmin() {
   if (admin.apps.length === 0) {
+    // Explicitly provide the databaseURL to prevent errors in local script environments.
     admin.initializeApp({
         databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL
     });
