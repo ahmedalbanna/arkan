@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, BookCheck } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, BookCheck, MessageSquare } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -16,6 +16,7 @@ import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
+import ProjectChat from '@/components/chat/ProjectChat';
 
 
 const LoadingSkeleton = () => (
@@ -231,6 +232,7 @@ function GeneratePageContent() {
             )}
         </div>
       </div>
+      <ProjectChat />
     </div>
   );
 }

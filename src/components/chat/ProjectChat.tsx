@@ -10,8 +10,9 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { getDatabase, ref, onValue, off, push } from 'firebase/database';
-import { app } from '@/lib/firebase';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useRunFlow } from '@genkit-ai/next/client';
+import { projectChat } from '@/ai/flows/project-chat';
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -39,31 +40,31 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
 }
 
 
-export default function SupportChatWidget() {
-    const { isChatOpen, closeChat, toggleChat, selectedChat } = useChatStore();
-    const { firebaseUser } = useAuth();
-    const [input, setInput] = useState('');
+export default function ProjectChat() {
+    const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
+    const [input, setInput] = useState('');
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
+    
+    const getFullState = useBuilderStore(state => state.getFullState);
+    const { stream, run, isRunning, error } = useRunFlow(projectChat, {
+        onChunk: (chunk) => {
+             setMessages((prev) => {
+                const last = prev[prev.length - 1];
+                if (last && last.role === 'assistant') {
+                    // Append text to the last assistant message
+                    const updatedLast = { ...last, content: last.content + chunk.content };
+                    return [...prev.slice(0, -1), updatedLast];
+                } else {
+                    // Start a new assistant message
+                    return [...prev, { role: 'assistant', content: chunk.content }];
+                }
+            });
+        }
+    });
 
-     useEffect(() => {
-        if (!selectedChat) return;
-
-        const db = getDatabase(app);
-        const messagesRef = ref(db, `messages/${selectedChat.id}`);
-        
-        const unsubscribe = onValue(messagesRef, (snapshot) => {
-            const data = snapshot.val();
-            const messagesList = data ? Object.values(data) : [];
-            setMessages(messagesList as any[]);
-        });
-
-        return () => off(messagesRef, 'value', unsubscribe);
-
-    }, [selectedChat]);
-
+    const handleToggleChat = () => setIsChatOpen(prev => !prev);
+    const handleCloseChat = () => setIsChatOpen(false);
 
     useEffect(() => {
         if (scrollAreaRef.current) {
@@ -76,32 +77,22 @@ export default function SupportChatWidget() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || !firebaseUser || !selectedChat) return;
+        if (!input.trim()) return;
         
-        const messageData = {
-            senderId: firebaseUser.uid,
-            content: input,
-            timestamp: new Date().toISOString(),
-            role: 'user',
-        };
+        const userMessage = { role: 'user', content: input };
+        setMessages(prev => [...prev, userMessage]);
         
-        const db = getDatabase(app);
-        const messagesRef = ref(db, `messages/${selectedChat.id}`);
+        const projectState = getFullState();
+        run({ message: input, projectState });
         
-        try {
-            await push(messagesRef, messageData);
-            setInput('');
-        } catch (error) {
-            console.error("Failed to send message:", error);
-        }
+        setInput('');
     };
-    
 
     return (
       <>
         {!isChatOpen && (
             <Button
-                onClick={toggleChat}
+                onClick={handleToggleChat}
                 className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-lg z-50"
             >
                 <MessageSquare className="h-8 w-8" />
@@ -111,16 +102,11 @@ export default function SupportChatWidget() {
         {isChatOpen && (
             <Card className="fixed bottom-8 right-8 w-[400px] h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
-                     <div className="flex flex-col">
-                        <CardTitle className="flex items-center gap-2 font-headline">
-                            <Bot />
-                            {selectedChat?.title || 'Support Chat'}
-                        </CardTitle>
-                        <p className="text-xs text-muted-foreground truncate max-w-[250px]">
-                            Participants: {participants.join(', ')}
-                        </p>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={closeChat}>
+                    <CardTitle className="flex items-center gap-2 font-headline">
+                        <Bot />
+                        Project Assistant
+                    </CardTitle>
+                    <Button variant="ghost" size="icon" onClick={handleCloseChat}>
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
@@ -130,7 +116,7 @@ export default function SupportChatWidget() {
                             {messages.map((message, index) => (
                                 <Message key={index} role={message.role} content={message.content} />
                             ))}
-                            {isLoading && (
+                            {isRunning && messages[messages.length-1]?.role !== 'assistant' && (
                                 <div className="flex items-start gap-3 justify-start">
                                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                                         <Bot className="h-5 w-5"/>
@@ -154,13 +140,13 @@ export default function SupportChatWidget() {
                                     handleSendMessage(e);
                                 }
                             }}
-                            placeholder="Type your message..."
+                            placeholder="e.g., Change the title..."
                             className="min-h-0"
                             rows={1}
-                            disabled={isLoading}
+                            disabled={isRunning}
                         />
-                        <Button type="submit" size="icon" disabled={!input.trim() || isLoading}>
-                            <Send className="h-4 w-4" />
+                        <Button type="submit" size="icon" disabled={!input.trim() || isRunning}>
+                            {isRunning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         </Button>
                     </form>
                 </CardFooter>
