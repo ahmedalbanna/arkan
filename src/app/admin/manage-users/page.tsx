@@ -1,7 +1,7 @@
 
 'use client';
 
-import UserManagementConsole from '@/components/UserManagementConsole';
+import UserManagementConsole from '@/components/admin/users/UserManagementConsole';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Users } from 'lucide-react';
 

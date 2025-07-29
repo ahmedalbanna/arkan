@@ -1,7 +1,7 @@
 
 'use client';
 
-import { PaymentVerificationConsole } from "@/components/admin/PaymentVerificationConsole";
+import { PaymentVerificationConsole } from "@/components/admin/payments/PaymentVerificationConsole";
 import { useLocalization } from "@/context/LocalizationContext";
 import { CreditCard } from "lucide-react";
 

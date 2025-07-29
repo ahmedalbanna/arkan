@@ -1,7 +1,7 @@
 
 'use client';
 
-import Dashboard from '@/components/admin/Dashboard';
+import Dashboard from '@/components/admin/dashboard/Dashboard';
 import { useLocalization } from '@/context/LocalizationContext';
 import { LayoutDashboard } from 'lucide-react';
 
