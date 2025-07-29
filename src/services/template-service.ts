@@ -40,7 +40,7 @@ export interface DocxTemplate {
 
 // --- Proposal Templates ---
 export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
-    const response = await fetch('/api/templates/proposal');
+    const response = await fetch('/api/admin/templates/proposal');
     if (!response.ok) {
         throw new Error('Failed to fetch proposal templates');
     }
@@ -48,7 +48,7 @@ export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
 }
 
 export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' | 'createdAt'> & { id: string }, token: string): Promise<ProposalTemplate> {
-    const response = await fetch('/api/templates/proposal', {
+    const response = await fetch('/api/admin/templates/proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -61,7 +61,7 @@ export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' |
 }
 
 export async function updateProposalTemplate(id: string, data: Partial<ProposalTemplate>, token: string): Promise<ProposalTemplate> {
-    const response = await fetch(`/api/templates/proposal/${id}`, {
+    const response = await fetch(`/api/admin/templates/proposal/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export async function updateProposalTemplate(id: string, data: Partial<ProposalT
 }
 
 export async function deleteProposalTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/templates/proposal/${id}`, {
+    const response = await fetch(`/api/admin/templates/proposal/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -90,7 +90,7 @@ export async function deleteProposalTemplate(id: string, token: string): Promise
 
 // --- Report Templates ---
 export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]> {
-    const response = await fetch('/api/templates/report');
+    const response = await fetch('/api/admin/templates/report');
     if (!response.ok) {
         throw new Error('Failed to fetch report templates');
     }
@@ -98,7 +98,7 @@ export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]
 }
 
 export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'createdAt'>, token: string): Promise<ReportGenerationTemplate> {
-     const response = await fetch('/api/templates/report', {
+     const response = await fetch('/api/admin/templates/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -112,7 +112,7 @@ export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 
 
 
 export async function updateReportTemplate(id: string, data: Partial<ReportGenerationTemplate>, token: string): Promise<ReportGenerationTemplate> {
-    const response = await fetch(`/api/templates/report/${id}`, {
+    const response = await fetch(`/api/admin/templates/report/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -128,7 +128,7 @@ export async function updateReportTemplate(id: string, data: Partial<ReportGener
 }
 
 export async function deleteReportTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/templates/report/${id}`, {
+    const response = await fetch(`/api/admin/templates/report/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -141,7 +141,7 @@ export async function deleteReportTemplate(id: string, token: string): Promise<{
 
 // --- Presentation Templates ---
 export async function fetchPresentationTemplates(): Promise<PresentationGenerationTemplate[]> {
-    const response = await fetch('/api/templates/presentation');
+    const response = await fetch('/api/admin/templates/presentation');
     if (!response.ok) {
         throw new Error('Failed to fetch presentation templates');
     }
@@ -149,7 +149,7 @@ export async function fetchPresentationTemplates(): Promise<PresentationGenerati
 }
 
 export async function createPresentationTemplate(data: Omit<PresentationGenerationTemplate, 'createdAt'>, token: string): Promise<PresentationGenerationTemplate> {
-     const response = await fetch('/api/templates/presentation', {
+     const response = await fetch('/api/admin/templates/presentation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -162,7 +162,7 @@ export async function createPresentationTemplate(data: Omit<PresentationGenerati
 }
 
 export async function updatePresentationTemplate(id: string, data: Partial<PresentationGenerationTemplate>, token: string): Promise<PresentationGenerationTemplate> {
-    const response = await fetch(`/api/templates/presentation/${id}`, {
+    const response = await fetch(`/api/admin/templates/presentation/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ export async function updatePresentationTemplate(id: string, data: Partial<Prese
 }
 
 export async function deletePresentationTemplate(id: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/templates/presentation/${id}`, {
+    const response = await fetch(`/api/admin/templates/presentation/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -193,7 +193,7 @@ export async function deletePresentationTemplate(id: string, token: string): Pro
 // --- DOCX Templates ---
 
 export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>> {
-  const response = await fetch("/api/templates/docx");
+  const response = await fetch("/api/admin/templates/docx");
   if (!response.ok) {
     throw new Error("Failed to fetch DOCX templates");
   }
@@ -201,7 +201,7 @@ export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>
 }
 
 export async function createDocxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<DocxTemplate> {
-    const response = await fetch('/api/templates/docx', {
+    const response = await fetch('/api/admin/templates/docx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -218,7 +218,7 @@ export async function updateDocxTemplate(
   variables: {key: string, styles: any},
   token: string
 ) {
-  const response = await fetch(`/api/templates/docx/${variables.key}`, {
+  const response = await fetch(`/api/admin/templates/docx/${variables.key}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -234,7 +234,7 @@ export async function updateDocxTemplate(
 }
 
 export async function deleteDocxTemplate(templateKey: string, token: string) {
-    const response = await fetch(`/api/templates/docx/${templateKey}`, {
+    const response = await fetch(`/api/admin/templates/docx/${templateKey}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -249,7 +249,7 @@ export async function deleteDocxTemplate(templateKey: string, token: string) {
 
 // --- PPTX Templates ---
 export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
-  const response = await fetch("/api/templates/pptx");
+  const response = await fetch("/api/admin/templates/pptx");
   if (!response.ok) {
     throw new Error("Failed to fetch PPTX templates");
   }
@@ -257,7 +257,7 @@ export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>
 }
 
 export async function createPptxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<PptxTemplate> {
-    const response = await fetch('/api/templates/pptx', {
+    const response = await fetch('/api/admin/templates/pptx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -274,7 +274,7 @@ export async function updatePptxTemplate(
   variables: {key: string, styles: any},
   token: string
 ) {
-  const response = await fetch(`/api/templates/pptx/${variables.key}`, {
+  const response = await fetch(`/api/admin/templates/pptx/${variables.key}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -290,7 +290,7 @@ export async function updatePptxTemplate(
 }
 
 export async function deletePptxTemplate(templateKey: string, token: string) {
-    const response = await fetch(`/api/templates/pptx/${templateKey}`, {
+    const response = await fetch(`/api/admin/templates/pptx/${templateKey}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -308,7 +308,7 @@ export async function refreshTemplateImage(
   variables: { templateType: string; templateId: string; prompt: string },
   token: string
 ) {
-  const response = await fetch("/api/templates/refresh-image", {
+  const response = await fetch("/api/admin/templates/refresh-image", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

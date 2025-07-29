@@ -8,27 +8,29 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resi
 import { cn } from '@/lib/utils';
 import { useAgents } from '@/hooks/use-agents';
 import { Agent } from '@/lib/agents';
+import { useAuth } from '@/context/AuthContext';
+import { useChatStore } from '@/hooks/useChatStore';
 
 export default function ChatInterface() {
   const { agents, isLoaded } = useAgents();
   const [agentChatSessions, setAgentChatSessions] = useState<AgentChatSession[]>([]);
-  const [selectedChat, setSelectedChat] = useState<AgentChatSession | null>(null);
-
-  useEffect(() => {
-    if (isLoaded && agents) {
-      const sessions = agents.map(agent => ({
-        id: agent.id,
-        title: agent.name,
-        agent: agent,
-        messages: [],
-      }));
-      setAgentChatSessions(sessions);
-      if (sessions.length > 0) {
-        setSelectedChat(sessions[0]);
-      }
-    }
-  }, [isLoaded, agents]);
+  const { 
+    selectedChat, 
+    setSelectedChat,
+    chats,
+    createConversation,
+    openChat,
+    initialize,
+    isInitialized
+  } = useChatStore();
+  const { firebaseUser, userProfile } = useAuth();
   
+  useEffect(() => {
+    if (firebaseUser && !isInitialized) {
+        initialize(firebaseUser);
+    }
+  }, [firebaseUser, isInitialized, initialize]);
+
   const addMessageToSession = (agentId: string, message: any) => {
       setAgentChatSessions(prev => 
         prev.map(session => 
@@ -37,6 +39,18 @@ export default function ChatInterface() {
                 : session
         )
       );
+  }
+
+  const handleSelectAgent = (agent: Agent) => {
+    // This is for the admin agent training chat.
+    // We create a temporary client-side session to hold the conversation.
+    const tempSession: AgentChatSession = {
+        id: agent.id,
+        title: agent.name,
+        agent: agent,
+        messages: [],
+    };
+    setSelectedChat(tempSession);
   }
 
   return (
@@ -51,9 +65,9 @@ export default function ChatInterface() {
         className={cn("min-w-[250px] max-w-[400px]")}
       >
         <ChatList
-          chats={agentChatSessions}
-          selectedChat={selectedChat}
-          onSelectChat={setSelectedChat}
+          agents={agents}
+          selectedAgent={selectedChat?.agent}
+          onSelectAgent={handleSelectAgent}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

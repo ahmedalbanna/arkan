@@ -25,7 +25,7 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
 
     if(lastVisibleId) queryParams.append('lastVisibleId', lastVisibleId);
 
-    const response = await fetch(`/api/transactions?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }
@@ -43,7 +43,7 @@ export async function verifyPayment(variables: VerifyPaymentVariables, token: st
     if (!token) {
         throw new Error("Authentication token is required.");
     }
-    const response = await fetch('/api/verify-payment', {
+    const response = await fetch('/api/admin/verify-payment', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
         throw new Error("Authentication token is required.");
     }
     const queryParams = new URLSearchParams({ startDate, endDate });
-    const response = await fetch(`/api/transactions/report?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/transactions/report?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

@@ -10,7 +10,7 @@ import type { Agent, UpdateAgentVariables, CreateAgentVariables } from '@/lib/ty
  * @returns A promise that resolves to an array of Agent objects.
  */
 export async function fetchAgents(token: string): Promise<Agent[]> {
-    const response = await fetch('/api/agents', {
+    const response = await fetch('/api/admin/agents', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
@@ -29,7 +29,7 @@ export async function fetchAgents(token: string): Promise<Agent[]> {
  */
 export async function fetchAgent(agentId: string, token: string): Promise<Agent | null> {
     if (!agentId) return null;
-    const response = await fetch(`/api/agents/${agentId}`, {
+    const response = await fetch(`/api/admin/agents/${agentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
@@ -52,7 +52,7 @@ export async function updateAgent(
     token: string
 ): Promise<Agent> {
     const { agentId, payload } = variables;
-    const response = await fetch(`/api/agents/${agentId}`, {
+    const response = await fetch(`/api/admin/agents/${agentId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export async function updateAgent(
  * @returns A promise that resolves to the newly created Agent object.
  */
 export async function createAgent(data: CreateAgentVariables, token: string): Promise<Agent> {
-    const response = await fetch('/api/agents', {
+    const response = await fetch('/api/admin/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify(data),
@@ -96,7 +96,7 @@ export async function createAgent(data: CreateAgentVariables, token: string): Pr
  * @returns A promise that resolves when the deletion is successful.
  */
 export async function deleteAgent(agentId: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/agents/${agentId}`, {
+    const response = await fetch(`/api/admin/agents/${agentId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
     });

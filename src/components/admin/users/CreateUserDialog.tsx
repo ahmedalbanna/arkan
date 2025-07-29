@@ -27,7 +27,7 @@ const createUserSchema = z.object({
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
 async function createUserApi(data: CreateUserFormValues, token: string) {
-    const response = await fetch('/api/users', {
+    const response = await fetch('/api/admin/users', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',

@@ -33,7 +33,7 @@ export async function fetchGenerationLogs(params: FetchLogsParams): Promise<{ lo
     if (agentId) queryParams.append('agentId', agentId);
     if (userId) queryParams.append('userId', userId);
     
-    const response = await fetch(`/api/generations?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/generations?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

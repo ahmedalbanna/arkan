@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
@@ -6,7 +7,7 @@ import { adminKeys } from '@/lib/query-keys';
 import { fetchDashboardStats, type DashboardStats } from '@/services/admin-service';
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
-import { AgentUsageChart } from '../AgentUsageChart';
+import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';

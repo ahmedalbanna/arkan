@@ -10,7 +10,7 @@ import type { UserProfile } from '@/lib/db/queries';
  * @returns A promise that resolves to an array of UserProfile objects.
  */
 export async function fetchUsers(page: number, limit: number, token: string): Promise<UserProfile[]> {
-    const response = await fetch(`/api/users?page=${page}&limit=${limit}`, {
+    const response = await fetch(`/api/admin/users?page=${page}&limit=${limit}`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
@@ -31,7 +31,7 @@ export async function fetchUserProfile(userId: string, token: string): Promise<U
     return null;
   }
 
-  const response = await fetch(`/api/users/${userId}`, {
+  const response = await fetch(`/api/admin/users/${userId}`, {
       headers: {
           'Authorization': `Bearer ${token}`
       }
