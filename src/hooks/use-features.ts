@@ -37,13 +37,18 @@ export interface UpdateFeatureVariables {
  * @returns An object containing the list of features, loading status, and error status.
  */
 export function useFeatures() {
+  const { firebaseUser } = useAuth();
   const {
     data: features,
     isLoading,
     isError,
   } = useQuery<Feature[]>({
     queryKey: featureKeys.lists(),
-    queryFn: fetchFeaturesApi,
+    queryFn: async () => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchFeaturesApi(token);
+    },
+    enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     meta: {
       onError: (error: Error) =>

@@ -5,11 +5,14 @@ import type { Feature, UpdateFeatureVariables } from '@/lib/types';
 
 /**
  * Fetches the list of all feature flags from the API.
+ * Requires admin authentication.
+ * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of Feature objects.
  */
-export async function fetchFeatures(): Promise<Feature[]> {
-    // This now points to the public endpoint
-    const response = await fetch('/api/features'); 
+export async function fetchFeatures(token: string): Promise<Feature[]> {
+    const response = await fetch('/api/admin/features', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    }); 
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch features');
@@ -28,7 +31,6 @@ export async function updateFeature(
     token: string
 ): Promise<Feature> {
     const { featureId, payload } = variables;
-    // This still points to the protected admin endpoint
     const response = await fetch(`/api/admin/features/${featureId}`, { 
         method: 'PUT',
         headers: {
