@@ -15,6 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, PlusCircle } from 'lucide-react';
+import { createUserService } from '@/services/user-service';
 
 const createUserSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -25,22 +26,6 @@ const createUserSchema = z.object({
 });
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
-
-async function createUserApi(data: CreateUserFormValues, token: string) {
-    const response = await fetch('/api/admin/users', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to create user.');
-    }
-    return response.json();
-}
 
 export function CreateUserDialog() {
   const [isOpen, setIsOpen] = useState(false);
@@ -62,7 +47,7 @@ export function CreateUserDialog() {
   const mutation = useMutation({
     mutationFn: (data: CreateUserFormValues) => {
         if (!firebaseUser) throw new Error("Not authenticated");
-        return firebaseUser.getIdToken().then(token => createUserApi(data, token));
+        return firebaseUser.getIdToken().then(token => createUserService(data, token));
     },
     onSuccess: (data) => {
       toast({

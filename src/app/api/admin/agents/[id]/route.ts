@@ -1,6 +1,6 @@
 
 // src/app/api/agents/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
@@ -27,8 +27,8 @@ async function verifyAdmin(request: Request) {
 }
 
 // GET /api/agents/[id]
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const { id: agentId } = await params;
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+    const agentId = params.id;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
@@ -70,8 +70,8 @@ const updateAgentSchema = z.object({
 });
 
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
-    const { id: agentId } = await params;
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+    const agentId = params.id;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
@@ -112,8 +112,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE /api/agents/[id]
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    const { id: agentId } = await params;
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+    const agentId = params.id;
     const adminCheck = await verifyAdmin(request);
     if (!adminCheck.authorized) {
         return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });

@@ -16,6 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useRouter } from 'next/navigation';
+import type { ChatSession, ChatMessage } from '@/hooks/useChatStore';
 
 export interface AgentChatSession {
   id: string;

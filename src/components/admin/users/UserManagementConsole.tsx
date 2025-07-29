@@ -182,10 +182,10 @@ export default function UserManagementConsole() {
                           <MessageSquare className="h-4 w-4" />
                           <span className="sr-only">Chat with user</span>
                         </Button>
-                      <Button asChild variant="ghost" size="icon">
-                        <Link href={`/admin/manage-users/${user.id}/edit`} onMouseEnter={() => prefetchUser(user.id)}>
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">{t('manageUsers.editUserSr')}</span>
+                      <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
+                        <Link href={`/admin/manage-users/${user.id}/edit`}>
+                           <Pencil className="h-4 w-4" />
+                           <span className="sr-only">{t('manageUsers.editUserSr')}</span>
                         </Link>
                       </Button>
                     </TableCell>

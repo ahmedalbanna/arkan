@@ -33,7 +33,6 @@ const proposalTemplateSchema = z.object({
     description: z.string().min(1, "Description is required"),
     prompt: z.string().min(1, "Prompt is required"),
     guidelines: z.array(z.string()).optional(),
-    jsonStructure: z.any().optional(),
 });
 
 type ProposalFormValues = z.infer<typeof proposalTemplateSchema>;
@@ -51,7 +50,6 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
         defaultValues: {
             ...template,
             guidelines: template.guidelines || [],
-            jsonStructure: template.jsonStructure || {},
         },
     });
 
@@ -106,15 +104,12 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <AccordionContent>
                              <div className="p-2 border rounded-md bg-background">
                                  <ReactJson 
-                                    src={template.jsonStructure || {}} 
+                                    src={{}} 
                                     theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                                     displayDataTypes={false}
                                     name={false}
                                     quotesOnKeys={false}
                                     displayObjectSize={false}
-                                    onEdit={({ updated_src }) => form.setValue('jsonStructure', updated_src, { shouldDirty: true })}
-                                    onAdd={({ updated_src }) => form.setValue('jsonStructure', updated_src, { shouldDirty: true })}
-                                    onDelete={({ updated_src }) => form.setValue('jsonStructure', updated_src, { shouldDirty: true })}
                                 />
                              </div>
                         </AccordionContent>

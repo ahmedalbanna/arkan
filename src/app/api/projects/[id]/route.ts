@@ -1,5 +1,5 @@
 // src/app/api/projects/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
@@ -31,9 +31,9 @@ async function verifyProjectOwner(request: Request, projectId: string) {
 
 
 // GET a single project
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const {id:projectId} = await params;
+        const projectId = params.id;
         const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
@@ -43,16 +43,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
         // We already checked for existence in verifyProjectOwner
         return NextResponse.json({ id: projectDoc.id, ...projectDoc.data() }, { status: 200 });
     } catch (error) {
-        console.error(`Error fetching project ${await params.id}:`, error);
+        console.error(`Error fetching project ${params.id}:`, error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }
 
 
 // PUT (update) a project
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { id: projectId } = await params;
+        const projectId = params.id;
         const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
@@ -85,9 +85,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
 
 // DELETE a project
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     try {
-        const { id: projectId } = await params;
+        const projectId = params.id;
         const accessCheck = await verifyProjectOwner(request, projectId);
         if (!accessCheck.authorized) {
             return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });

@@ -3,6 +3,21 @@
 
 import type { UserProfile } from '@/lib/db/queries';
 
+export async function createUserService(data: any, token: string): Promise<any> {
+    const response = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create user.');
+    }
+    return response.json();
+}
 /**
  * Fetches the list of all users from the API.
  * Requires admin authentication.

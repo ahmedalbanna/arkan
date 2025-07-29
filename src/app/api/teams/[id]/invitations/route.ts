@@ -1,5 +1,5 @@
 // src/app/api/teams/[id]/invitations/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
@@ -33,7 +33,7 @@ async function verifyTeamOwner(request: Request, teamId: string) {
     return { authorized: true, requesterId };
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     const teamId = params.id;
     try {
         const ownerCheck = await verifyTeamOwner(request, teamId);

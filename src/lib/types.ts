@@ -1,6 +1,6 @@
 
 
-import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, TranslateTextInput, TranslateTextOutput, AnyProjectProposal } from '@/ai/schemas';
+import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, AnyProjectProposal } from '@/ai/schemas';
 export type {
   ProjectProposal,
   DiagramType,
@@ -8,8 +8,6 @@ export type {
   PresentationHistoryEntry,
   ManipulateTextInput,
   ManipulateTextOutput,
-  TranslateTextInput,
-  TranslateTextOutput,
   AnyProjectProposal,
 };
 export type {
@@ -27,7 +25,8 @@ export type { AgentData, Agent, AgentPrompt } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
-export type { Team, TeamMember, TeamWithMembers } from '@/services/team-service';
+export type { Team, TeamMember } from '@/lib/db/queries';
+export type { TeamWithMembers } from '@/services/team-service';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
 
@@ -40,3 +39,12 @@ export interface Notification {
   createdAt: string;
   link?: string;
 }
+
+export type UserProfile = import('@/lib/db/queries').UserProfile;
+export type TranslateVariables = {
+    text: string;
+    targetLang: string;
+};
+export type TranslateTextOutput = {
+    translatedText: string;
+};

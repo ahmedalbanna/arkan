@@ -1,6 +1,6 @@
 
 // src/app/api/conversations/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { getAdminAuth, adminRealtimeDb } from '@/lib/firebase/admin';
 
 // Helper to verify user can delete the conversation
@@ -32,7 +32,7 @@ async function verifyAccess(request: Request, conversationId: string) {
     }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     const conversationId = params.id;
     try {
         const accessCheck = await verifyAccess(request, conversationId);
