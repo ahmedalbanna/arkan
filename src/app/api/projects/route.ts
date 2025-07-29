@@ -2,7 +2,8 @@
 // src/app/api/projects/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { revalidatePath } from 'next/cache';
 import { getUserProfile } from '@/lib/db/queries';
