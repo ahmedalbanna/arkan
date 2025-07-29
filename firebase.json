@@ -1,7 +1,26 @@
 {
+  "hosting": {
+    "public": ".next", 
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      { "source": "**",
+        "function": "nextjsApp" 
+      }
+    ]
+  },
   "emulators": {
     "dataconnect": {
       "dataDir": "dataconnect/.dataconnect/pgliteData"
+    },
+    "functions": { 
+      "port": 5001
+    },
+    "hosting": { 
+      "port": 5000
     }
   },
   "dataconnect": {
