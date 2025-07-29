@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
 
