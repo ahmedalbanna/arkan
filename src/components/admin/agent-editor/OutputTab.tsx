@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useFormContext } from 'react-hook-form';
@@ -6,7 +5,7 @@ import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import { CardTitle } from '@/components/ui/card';
 import { AlertCircle, PlusCircle } from 'lucide-react';
-import type { AgentEditorFormValues } from './AgentEditor';
+import type { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
 import type { AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 

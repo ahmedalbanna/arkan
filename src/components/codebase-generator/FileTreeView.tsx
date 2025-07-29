@@ -1,16 +1,14 @@
-
-
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { File, Folder, Download, FolderOpen, Loader2 } from 'lucide-react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Codebase } from '@/ai/flows/generate-codebase';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 
 interface FileTreeViewProps {

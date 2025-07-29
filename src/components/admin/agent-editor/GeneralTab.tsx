@@ -1,8 +1,7 @@
-
 'use client';
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import { AgentEditorFormValues } from './AgentEditor';
+import { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
 import { CardTitle } from '@/components/ui/card';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';

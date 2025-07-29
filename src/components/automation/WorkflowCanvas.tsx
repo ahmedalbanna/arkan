@@ -1,11 +1,10 @@
-
 'use client';
 
 import React from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Badge } from '../ui/badge';
-import { Dialog, DialogContent, DialogTrigger } from '../ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddStepDialog } from './AddStepDialog';
 import { AddTriggerDialog } from './AddTriggerDialog';
 

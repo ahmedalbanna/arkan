@@ -1,16 +1,15 @@
-
 'use client';
 
 import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Eye, LayoutGrid, Bot, Wrench, ListFilter, GitBranch, Hourglass, Repeat, Search, Globe, FileCode, Youtube, Send,
   Check, File, Image as ImageIcon, Briefcase, MessageSquare, Calendar, Zap, Rocket, Pen, Mail, User, List, ShoppingCart, Newspaper, BarChart, Settings, SearchCode, Beaker, GraduationCap, Building, Landmark, Phone, BrainCircuit, Filter, Sparkles, FolderKanban, FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '../ui/badge';
+import { Badge } from '@/components/ui/badge';
 
 const TaskadeLogo = () => (
     <svg width="16" height="16" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="url(#paint0_angular_1_1)"></circle><defs><radialGradient id="paint0_angular_1_1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(20 20) rotate(90) scale(20)"><stop stopColor="#F97316"></stop><stop offset="0.16" stopColor="#F9A72B"></stop><stop offset="0.32" stopColor="#4ADE80"></stop><stop offset="0.48" stopColor="#3B82F6"></stop><stop offset="0.66" stopColor="#8B5CF6"></stop><stop offset="0.8" stopColor="#EC4899"></stop><stop offset="1" stopColor="#EF4444"></stop></radialGradient></defs></svg>

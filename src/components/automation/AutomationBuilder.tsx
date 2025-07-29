@@ -1,7 +1,6 @@
-
 'use client';
 
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { ActionPanel } from './ActionPanel';
 import { Button } from '../ui/button';
