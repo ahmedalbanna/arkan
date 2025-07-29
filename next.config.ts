@@ -2,6 +2,25 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true, // Enable React strict mode for better development experience
+  swcMinify: true, // Enable SWC minification for faster builds
+  // Add any custom configurations here
+  // For example:
+  // env: {
+  //   CUSTOM_VARIABLE: process.env.CUSTOM_VARIABLE,
+  // },
+  // images: {
+  //   domains: ['example.com'], // Allow images from this domain
+  // },
+  // async redirects() {
+  //   return [
+  //     {
+  //       source: '/old-path',
+  //       destination: '/new-path',
+  //       permanent: true,
+  //     },
+  //   ];
+  // },
   /* config options here */
   experimental: {
     // prefetchInRender: true,

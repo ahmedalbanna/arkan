@@ -19,6 +19,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { Skeleton } from '../ui/skeleton';
 import { useReportStore } from '@/hooks/useReportStore';
+import { generatePresentationApi } from '@/services/presentation-service';
 
 function ViewerSkeleton() {
     return (
@@ -36,22 +37,6 @@ function ViewerSkeleton() {
 
 const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 
-async function generatePresentation(variables: { body: any, token: string }): Promise<GeneratePresentationOutput> {
-    const response = await fetch('/api/generate-presentation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify(variables.body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate presentation');
-    }
-    return await response.json();
-}
-
 export default function PresentationGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
@@ -66,7 +51,7 @@ export default function PresentationGenerator() {
     } = usePresentationStore();
 
     const mutation = useMutation({
-        mutationFn: generatePresentation,
+        mutationFn: generatePresentationApi,
         onSuccess: (data) => {
             const newEntry: PresentationHistoryEntry = {
                 id: new Date().toISOString(),
