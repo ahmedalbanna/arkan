@@ -29,7 +29,7 @@ export function usePptxStyles() {
 
     const { data: templates, isLoading, isError } = useQuery<Record<string, PptxTemplate>>({
         queryKey: pptxTemplateKeys.lists(),
-        queryFn: fetchPptxTemplates,
+        queryFn: fetchPptxTemplates, // This is a public endpoint now, no token needed
         staleTime: 1000 * 60 * 5, // 5 minutes
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch PPTX templates"),

@@ -6,7 +6,6 @@ import admin from 'firebase-admin';
 function initializeFirebaseAdmin() {
   if (admin.apps.length === 0) {
     admin.initializeApp({
-       credential: admin.credential.applicationDefault(),
         databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL
     });
     console.log("Firebase Admin SDK initialized successfully.");

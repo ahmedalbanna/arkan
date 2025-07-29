@@ -30,7 +30,7 @@ export function useDocxStyles() {
 
     const { data: templates, isLoading, isError } = useQuery<Record<string, DocxTemplate>>({
         queryKey: docxTemplateKeys.lists(),
-        queryFn: fetchDocxTemplates,
+        queryFn: fetchDocxTemplates, // This is a public endpoint now, no token needed
         staleTime: 1000 * 60 * 5, // 5 minutes
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),

@@ -41,12 +41,10 @@ interface UpdateTemplateVariables<T> {
 }
 
 export function useProposalTemplates() {
-  const { firebaseUser } = useAuth();
   return useQuery<ProposalTemplate[]>({
     queryKey: templateKeys.proposals(),
     queryFn: fetchProposalTemplates,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    enabled: !!firebaseUser,
     meta: {
       onError: (error: Error) => {
         handleErrorUtility(error, "Failed to fetch proposal templates");
@@ -56,12 +54,10 @@ export function useProposalTemplates() {
 }
 
 export function useReportTemplates() {
-  const { firebaseUser } = useAuth();
   return useQuery<ReportGenerationTemplate[]>({
     queryKey: templateKeys.reports(),
     queryFn: fetchReportTemplates,
     staleTime: 1000 * 60 * 5,
-    enabled: !!firebaseUser,
     meta: {
       onError: (error: Error) => {
         handleErrorUtility(error, "Failed to fetch report templates");
@@ -71,12 +67,10 @@ export function useReportTemplates() {
 }
 
 export function usePresentationTemplates() {
-  const { firebaseUser } = useAuth();
   return useQuery<PresentationGenerationTemplate[]>({
     queryKey: templateKeys.presentations(),
     queryFn: fetchPresentationTemplates,
     staleTime: 1000 * 60 * 5,
-    enabled: !!firebaseUser,
     meta: {
       onError: (error: Error) => {
         handleErrorUtility(error, "Failed to fetch presentation templates");
