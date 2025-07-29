@@ -1,5 +1,6 @@
 
 import { NextResponse } from 'next/server';
+import { handleApiError } from '@/lib/api-utils';
 
 export async function POST(req: Request) {
   try {
@@ -14,7 +15,6 @@ export async function POST(req: Request) {
     response.cookies.set(options);
     return response;
   } catch (error: any) {
-    console.error("Logout error:", error);
-    return NextResponse.json({ error: "An unexpected error occurred during logout." }, { status: 500 });
+    return handleApiError(error);
   }
 }

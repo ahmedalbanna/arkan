@@ -1,34 +1,9 @@
 
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
-
-
-// Helper to verify admin role from Authorization header
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized', adminId: null };
-    }
-    const token = authorization.substring(7);
-    
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden', adminId: null };
-        }
-        return { authorized: true, adminId: decodedToken.uid };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized', adminId: null };
-    }
-}
-
+import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 
 const verifyPaymentSchema = z.object({
   transactionId: z.string(),
@@ -38,25 +13,19 @@ const verifyPaymentSchema = z.object({
   adminNotes: z.string().optional(),
 });
 
-export async function POST(request: Request) {
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized || !adminCheck.adminId) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
     const body = await request.json();
     const validation = verifyPaymentSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
     }
 
     const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
+    const adminId = user.id;
 
     const transactionRef = adminDb.collection('transactions').doc(transactionId);
-    
-    // Get a reference to the Realtime Database
     const rtdb = getDatabase();
     const notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
@@ -69,42 +38,37 @@ export async function POST(request: Request) {
           status: 'verified',
           adminNotes: adminNotes || 'Payment approved.',
           verifiedAt: new Date().toISOString(),
-          verifiedBy: adminCheck.adminId
+          verifiedBy: adminId
         });
       });
-      // Send notification to Realtime Database
       await notificationRef.set({
-            title: "Payment Approved",
-            description: `Your purchase of ${creditsToGrant} credits has been approved.`,
-            icon: "credit-card",
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            link: '/payment-history'
-        });
+        title: "Payment Approved",
+        description: `Your purchase of ${creditsToGrant} credits has been approved.`,
+        icon: "credit-card",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        link: '/payment-history'
+      });
 
     } else { // 'rejected'
-      await adminDb.runTransaction(async (t: any) => {
-          t.update(transactionRef, {
-            status: 'rejected',
-            adminNotes: adminNotes || 'Payment could not be verified.',
-            verifiedAt: new Date().toISOString(),
-            verifiedBy: adminCheck.adminId,
-          });
+      await transactionRef.update({
+        status: 'rejected',
+        adminNotes: adminNotes || 'Payment could not be verified.',
+        verifiedAt: new Date().toISOString(),
+        verifiedBy: adminId,
       });
-       // Send notification to Realtime Database
       await notificationRef.set({
-            title: "Payment Rejected",
-            description: `Your recent purchase could not be verified. Please contact support.`,
-            icon: "credit-card",
-            isRead: false,
-            createdAt: new Date().toISOString(),
-            link: '/payment-history'
-        });
+        title: "Payment Rejected",
+        description: `Your recent purchase could not be verified. Please contact support.`,
+        icon: "credit-card",
+        isRead: false,
+        createdAt: new Date().toISOString(),
+        link: '/payment-history'
+      });
     }
 
-    return NextResponse.json({ message: `Transaction ${status} successfully.` }, { status: 200 });
-  } catch (error: any) {
-    console.error('Error verifying payment:', error);
-    return NextResponse.json({ message: error.message || 'An unexpected error occurred.' }, { status: 500 });
+    return createApiResponse({ message: `Transaction ${status} successfully.` }, 200);
+  } catch (error) {
+    return handleApiError(error);
   }
-}
+}, { requireAdmin: true });
