@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -22,6 +23,9 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { UploadManager } from '@/components/UploadManager';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 function ProjectsPageSkeleton() {
     return (
@@ -37,10 +41,15 @@ function CreateProjectDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
     const newSession = useBuilderStore(state => state.newSession);
+    const setProjectName = useBuilderStore(state => state.setProjectName);
+    const setProjectIdea = useBuilderStore(state => state.setProjectIdea);
+    
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
 
     const handleStartBuilding = () => {
-        // newSession is already called from the project card or main button
-        // so here we just navigate
+        setProjectName(name);
+        setProjectIdea(description);
         router.push('/generate');
         setIsOpen(false);
     }
@@ -48,6 +57,8 @@ function CreateProjectDialog() {
     // This is a proxy for the main button's action
     const handleCreateNewProject = () => {
         newSession();
+        setName('');
+        setDescription('');
         setIsOpen(true);
     };
 
@@ -63,17 +74,27 @@ function CreateProjectDialog() {
                 <DialogHeader>
                     <DialogTitle>Create New Project</DialogTitle>
                     <DialogDescription>
-                        Upload context for your new project. You can upload files, paste text, or provide URLs. This context will be available in the builder.
+                        Give your new project a name and a brief description to get started. You can also add context files below.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-4 max-h-[60vh] overflow-y-auto">
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="project-name">Project Name</Label>
+                        <Input id="project-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Q4 Marketing Campaign" />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="project-description">Project Description / Idea</Label>
+                        <Textarea id="project-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g., A mobile app for tracking personal fitness goals..." />
+                    </div>
+                </div>
+                <div className="py-4 max-h-[40vh] overflow-y-auto">
                    <UploadManager />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
                         <Button variant="ghost">Cancel</Button>
                     </DialogClose>
-                    <Button onClick={handleStartBuilding}>
+                    <Button onClick={handleStartBuilding} disabled={!name || !description}>
                         Start Building
                     </Button>
                 </DialogFooter>
