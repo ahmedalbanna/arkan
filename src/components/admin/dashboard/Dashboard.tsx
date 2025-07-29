@@ -9,9 +9,9 @@ import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Card, CardHeader, CardContent } from '../ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 function StatCardSkeleton() {
     return (

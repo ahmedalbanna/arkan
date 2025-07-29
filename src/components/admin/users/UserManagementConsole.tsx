@@ -191,12 +191,14 @@ export default function UserManagementConsole() {
                     <TableCell>{user.credits}</TableCell>
                     <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
                     <TableCell className="text-right">
-                       <Button asChild variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="sr-only">Chat with user</span>
+                       <Button asChild variant="ghost" size="icon">
+                         <button onClick={() => handleStartChat(user)}>
+                            <MessageSquare className="h-4 w-4" />
+                            <span className="sr-only">Chat with user</span>
+                          </button>
                         </Button>
-                      <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)}>
-                        <Link href={`/admin/manage-users/${user.id}/edit`}>
+                      <Button asChild variant="ghost" size="icon">
+                        <Link href={`/admin/manage-users/${user.id}/edit`} onMouseEnter={() => prefetchUser(user.id)}>
                           <Pencil className="h-4 w-4" />
                           <span className="sr-only">{t('manageUsers.editUserSr')}</span>
                         </Link>
