@@ -16,7 +16,6 @@ import { useFeatures } from '@/hooks/use-features';
 import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
-import SupportChatWidget from '@/components/chat/SupportChatWidget';
 
 
 const LoadingSkeleton = () => (
@@ -232,7 +231,6 @@ function GeneratePageContent() {
             )}
         </div>
       </div>
-      <SupportChatWidget />
     </div>
   );
 }

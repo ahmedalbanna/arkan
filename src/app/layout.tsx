@@ -17,6 +17,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { NextResponse } from 'next/server'; // Assuming you're using NextResponse
+import SupportChatWidget from '@/components/chat/SupportChatWidget';
 
 export const metadata: Metadata = {
   title: 'Arkan - Professional Portfolio Platform',
@@ -106,6 +107,7 @@ export default async function RootLayout({
                 <LanguageDirectionManager>
                   <Header />
                   <main className="flex-grow">{children}</main>
+                  <SupportChatWidget />
                   <Toaster />
                 </LanguageDirectionManager>
               </AuthProvider>
