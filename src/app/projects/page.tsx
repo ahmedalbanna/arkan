@@ -1,11 +1,10 @@
 
+
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useProjects } from '@/hooks/use-projects'; // Changed from useQuery
 import { useAuth } from '@/context/AuthContext';
-import { fetchProjects } from '@/services/project-service';
-import { projectKeys } from '@/lib/query-keys';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, FolderOpen, PlusCircle } from 'lucide-react';
 import { ProjectCard } from '@/components/project/ProjectCard';
@@ -104,17 +103,9 @@ function CreateProjectDialog() {
 }
 
 export default function MyProjectsPage() {
-    const { firebaseUser, isLoading: authLoading } = useAuth();
+    const { isLoading: authLoading } = useAuth();
     
-    const { data: projects, isLoading, isError, error } = useQuery({
-        queryKey: projectKeys.lists(),
-        queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchProjects(token);
-        },
-        enabled: !authLoading && !!firebaseUser,
-    });
+    const { data: projects, isLoading, isError, error } = useProjects();
 
 
     return (

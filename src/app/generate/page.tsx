@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
 import ProjectChat from '@/components/chat/ProjectChat';
 import { formatDistanceToNow } from 'date-fns';
+import { useAutosave } from '@/hooks/use-autosave';
 
 
 const LoadingSkeleton = () => (
@@ -89,6 +90,9 @@ function GeneratePageContent() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasLoadedProject, setHasLoadedProject] = useState(false);
+  
+  // Initialize the autosave hook
+  useAutosave();
 
   useEffect(() => {
     // Show the onboarding guide if the user profile is loaded and the flag is false

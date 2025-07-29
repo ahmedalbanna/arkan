@@ -1,6 +1,8 @@
 
 'use client';
 import type { AnyProjectProposal } from "@/ai/schemas";
+import { app } from '@/lib/firebase';
+import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
@@ -29,6 +31,39 @@ export interface SavedProject extends ProjectState {
     createdAt: string;
     updatedAt: string;
     proposal: AnyProjectProposal | null;
+}
+
+
+/**
+ * Subscribes to real-time updates for a user's projects.
+ * @param userId The ID of the user whose projects to listen for.
+ * @param callback A function to call with the updated list of projects.
+ * @returns An unsubscribe function.
+ */
+export function subscribeToProjects(userId: string, callback: (projects: SavedProject[]) => void) {
+    if (!userId) {
+        // Immediately call back with empty array if no user
+        callback([]);
+        return () => {}; // Return a no-op unsubscribe function
+    }
+
+    const db = getFirestore(app);
+    const projectsRef = collection(db, "projects");
+    const q = query(projectsRef, where("userId", "==", userId), orderBy("updatedAt", "desc"));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const projects: SavedProject[] = [];
+        querySnapshot.forEach((doc) => {
+            projects.push({ id: doc.id, ...doc.data() } as SavedProject);
+        });
+        callback(projects);
+    }, (error) => {
+        console.error("Error listening to projects:", error);
+        // Optionally, handle the error more gracefully in the UI
+        callback([]); // Send empty array on error
+    });
+
+    return unsubscribe;
 }
 
 
