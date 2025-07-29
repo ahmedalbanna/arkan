@@ -79,3 +79,8 @@ export const homeworkKeys = {
     all: ['homework'] as const,
     history: (userId?: string) => [...homeworkKeys.all, 'history', userId] as const,
 };
+
+export const notificationKeys = {
+  all: ['notifications'] as const,
+  lists: () => [...notificationKeys.all, 'list'] as const,
+};

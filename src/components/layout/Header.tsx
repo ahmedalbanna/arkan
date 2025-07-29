@@ -17,7 +17,22 @@ import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
+import { useNotifications, useMarkNotificationsAsRead } from '@/hooks/use-notifications';
+import { formatDistanceToNow } from 'date-fns';
+import type { Notification } from '@/lib/types';
 
+function NotificationIcon({ icon }: { icon: Notification['icon']}) {
+  switch (icon) {
+    case 'credit-card':
+      return <CreditCard className="h-5 w-5 text-green-500 mt-1" />;
+    case 'bot':
+      return <Bot className="h-5 w-5 text-primary mt-1" />;
+    case 'file-text':
+        return <FileText className="h-5 w-5 text-secondary-foreground mt-1" />;
+    default:
+      return <Bell className="h-5 w-5 text-muted-foreground mt-1" />;
+  }
+}
 
 export function Header() {
   const pathname = usePathname();
@@ -26,11 +41,22 @@ export function Header() {
   const logoutMutation = useLogout(); // Use the useLogout mutation hook
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: notifications } = useNotifications();
+  const markAsReadMutation = useMarkNotificationsAsRead();
+  const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
 
   // This prevents hydration mismatches by ensuring the component only renders on the client
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const handleNotificationMenuOpenChange = (isOpen: boolean) => {
+    setIsNotificationMenuOpen(isOpen);
+    if (isOpen && notifications && notifications.length > 0) {
+      const unreadIds = notifications.map(n => n.id);
+      markAsReadMutation.mutate(unreadIds);
+    }
+  }
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -84,6 +110,7 @@ export function Header() {
 
   // The condition `!isClient || isLoadingAuth` ensures we show a skeleton until client has mounted and auth state is determined.
   const showSkeleton = !isClient || isLoadingAuth;
+  const notificationCount = notifications?.length ?? 0;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -203,43 +230,36 @@ export function Header() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <DropdownMenu>
+              <DropdownMenu open={isNotificationMenuOpen} onOpenChange={handleNotificationMenuOpenChange}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-5 w-5" />
-                      <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">3</Badge>
+                      {notificationCount > 0 && (
+                        <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{notificationCount}</Badge>
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
                     <DropdownMenuLabel>Notifications</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                        <div className="flex items-start gap-3">
-                            <Bot className="h-5 w-5 text-primary mt-1" />
-                            <div>
-                                <p className="font-semibold">New Agent Available!</p>
-                                <p className="text-xs text-muted-foreground">The "Legal NDA Agent" has been added to your toolkit.</p>
+                    {notifications && notifications.length > 0 ? (
+                      notifications.map(notification => (
+                        <DropdownMenuItem key={notification.id}>
+                            <div className="flex items-start gap-3">
+                                <NotificationIcon icon={notification.icon} />
+                                <div>
+                                    <p className="font-semibold">{notification.title}</p>
+                                    <p className="text-xs text-muted-foreground">{notification.description}</p>
+                                    <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
+                                </div>
                             </div>
-                        </div>
-                    </DropdownMenuItem>
-                     <DropdownMenuItem>
-                        <div className="flex items-start gap-3">
-                            <CreditCard className="h-5 w-5 text-green-500 mt-1" />
-                            <div>
-                                <p className="font-semibold">Payment Approved</p>
-                                <p className="text-xs text-muted-foreground">Your recent purchase of 200 credits was successful.</p>
-                            </div>
-                        </div>
-                    </DropdownMenuItem>
-                     <DropdownMenuItem>
-                        <div className="flex items-start gap-3">
-                            <FileText className="h-5 w-5 text-secondary-foreground mt-1" />
-                            <div>
-                                <p className="font-semibold">Your Report is Ready</p>
-                                <p className="text-xs text-muted-foreground">"Project Alpha" report has finished generating.</p>
-                            </div>
-                        </div>
-                    </DropdownMenuItem>
+                        </DropdownMenuItem>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        You have no new notifications.
+                      </div>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
             </>

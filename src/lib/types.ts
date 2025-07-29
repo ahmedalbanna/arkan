@@ -30,3 +30,13 @@ export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSo
 export type { Team, TeamMember, TeamWithMembers } from '@/services/team-service';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  icon: 'credit-card' | 'bot' | 'file-text';
+  isRead: boolean;
+  createdAt: string;
+}

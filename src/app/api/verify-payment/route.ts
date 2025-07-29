@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -52,6 +53,7 @@ export async function POST(request: Request) {
     const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
 
     const transactionRef = adminDb.collection('transactions').doc(transactionId);
+    const notificationRef = adminDb.collection('notifications').doc(); // New notification
 
     if (status === 'verified') {
       await adminDb.runTransaction(async (t) => {
@@ -64,14 +66,35 @@ export async function POST(request: Request) {
           verifiedAt: new Date().toISOString(),
           verifiedBy: adminCheck.adminId
         });
+        
+        // Create a notification for the user
+        t.set(notificationRef, {
+            userId: userId,
+            title: "Payment Approved",
+            description: `Your purchase of ${creditsToGrant} credits has been approved.`,
+            icon: "credit-card",
+            isRead: false,
+            createdAt: new Date().toISOString()
+        });
       });
 
     } else { // 'rejected'
-      await transactionRef.update({
-        status: 'rejected',
-        adminNotes: adminNotes || 'Payment could not be verified.',
-        verifiedAt: new Date().toISOString(),
-        verifiedBy: adminCheck.adminId,
+      await adminDb.runTransaction(async (t) => {
+          t.update(transactionRef, {
+            status: 'rejected',
+            adminNotes: adminNotes || 'Payment could not be verified.',
+            verifiedAt: new Date().toISOString(),
+            verifiedBy: adminCheck.adminId,
+          });
+          
+          t.set(notificationRef, {
+            userId: userId,
+            title: "Payment Rejected",
+            description: `Your recent purchase could not be verified. Please contact support.`,
+            icon: "credit-card",
+            isRead: false,
+            createdAt: new Date().toISOString()
+        });
       });
     }
 
