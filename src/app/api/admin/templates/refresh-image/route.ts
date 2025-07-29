@@ -1,12 +1,12 @@
 
 // src/app/api/templates/refresh-image/route.ts
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminDb, getAdminAuth } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/server-init';
 import { getStorage } from 'firebase-admin/storage';
 import { generateImage } from '@/ai/flows/generate-image';
-import { getUserProfile } from '@/lib/db/queries';
 import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+
 
 const refreshImageSchema = z.object({
   templateType: z.enum(['docx', 'pptx', 'proposal', 'report', 'presentation']),
@@ -14,37 +14,12 @@ const refreshImageSchema = z.object({
   prompt: z.string(),
 });
 
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized', adminId: null };
-    }
-    const token = authorization.substring(7);
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden', adminId: null };
-        }
-        return { authorized: true, adminId: decodedToken.uid };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized', adminId: null };
-    }
-}
-
-
-export async function POST(request: Request) {
-  const adminCheck = await verifyAdmin(request);
-  if (!adminCheck.authorized || !adminCheck.adminId) {
-    return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-  }
-
+export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
     const validation = refreshImageSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError(validation.error);
     }
     
     const { templateType, templateId, prompt } = validation.data;
@@ -58,7 +33,7 @@ export async function POST(request: Request) {
 
     await logGeneration({
         agentId: 'generate-template-image',
-        userId: adminCheck.adminId,
+        userId: user.id,
         input: agentInput,
         output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
     });
@@ -90,13 +65,9 @@ export async function POST(request: Request) {
     
     const updatedDoc = await templateRef.get();
 
-    return NextResponse.json({ ...updatedDoc.data() }, { status: 200 });
+    return createApiResponse({ ...updatedDoc.data() }, 200);
 
   } catch (error) {
-    console.error('Error refreshing template image:', error);
-    if (error instanceof Error) {
-        return NextResponse.json({ message: 'An unexpected error occurred during image refresh.', details: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    return handleApiError(error);
   }
-}
+}, { requireAdmin: true });
