@@ -25,6 +25,7 @@ import { fetchUserProfile as fetchUserProfileApi } from "@/services/user-service
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
+import { getAuthenticatedToken } from "@/lib/authUtils";
 
 export interface LoginCredentials {
   email: string;
@@ -32,6 +33,19 @@ export interface LoginCredentials {
 }
 
 // --- Query Functions ---
+
+async function fetchUsersApi(token: string): Promise<UserProfile[]> {
+    const response = await fetch('/api/users', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch users');
+    }
+    return response.json();
+}
 
 async function loginUser(credentials: LoginCredentials) {
   try {
@@ -122,6 +136,18 @@ async function purchaseCreditsApi(
 }
 
 // --- Custom Hooks ---
+
+export function useUsers() {
+    const { firebaseUser } = useAuth();
+    return useQuery({
+        queryKey: userKeys.lists(),
+        queryFn: async () => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return fetchUsersApi(token);
+        },
+        enabled: !!firebaseUser
+    });
+}
 
 export function useUserProfile(userId: string) {
   const { firebaseUser } = useAuth(); // We need this to get the auth token

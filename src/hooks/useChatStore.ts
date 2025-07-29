@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { getDatabase, ref, onValue, off, push, serverTimestamp, query, orderByChild, limitToLast } from 'firebase/database';
+import { getDatabase, ref, onValue, off, push, serverTimestamp, query, orderByChild, limitToLast, update } from 'firebase/database';
 import { app } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
@@ -86,28 +86,20 @@ export const useChatStore = create<ChatState & ChatActions>()(
     },
 
     createConversation: (conversation) => {
-      set(state => {
-          // Check if a conversation with the same ID already exists.
-          const existingChatIndex = state.chats.findIndex(c => c.id === conversation.id);
-          let updatedChats;
-
-          if (existingChatIndex > -1) {
-              // If it exists, update it. This is useful if the title or participants changed.
-              updatedChats = [...state.chats];
-              updatedChats[existingChatIndex] = conversation;
-          } else {
-              // If it doesn't exist, add it to the start of the list.
-              updatedChats = [conversation, ...state.chats];
-          }
-
-          // Sort chats by lastMessageTimestamp to ensure the most recent is first
-          updatedChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-
-          return {
-              chats: updatedChats,
-              selectedChat: conversation,
-          };
-      });
+        set((state) => {
+            const existingChatIndex = state.chats.findIndex((c) => c.id === conversation.id);
+            if (existingChatIndex !== -1) {
+                // If a chat with the same ID exists, do nothing.
+                // This prevents duplicates if the API and a local action both trigger creation.
+                return { chats: state.chats };
+            }
+            const updatedChats = [conversation, ...state.chats];
+            updatedChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
+            return {
+                chats: updatedChats,
+                selectedChat: conversation,
+            };
+        });
     },
 
     setSelectedChat: (chat) => {
@@ -115,6 +107,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
     },
     
     addMessage: (chatId, message) => {
+      // Update the last message and timestamp in the specific chat session
+      const db = getDatabase(app);
+      const chatRef = ref(db, `conversations/${chatId}`);
+      update(chatRef, {
+        lastMessage: message.content,
+        lastMessageTimestamp: new Date().toISOString()
+      });
+
+      // Also update the local state for immediate UI feedback
       set((state) => {
         const newChats = state.chats.map(chat => 
           chat.id === chatId 
@@ -152,8 +153,9 @@ export const useChatStore = create<ChatState & ChatActions>()(
     },
     
     replaceTemporaryChat: (temporaryId, realConversation) => {
-        set(state => {
-            const updatedChats = state.chats.map(chat => 
+       set((state) => {
+            const filteredChats = state.chats.filter((c) => c.id !== realConversation.id);
+            const updatedChats = filteredChats.map((chat) =>
                 chat.id === temporaryId ? realConversation : chat
             );
             return {

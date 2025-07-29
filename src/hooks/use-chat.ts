@@ -2,7 +2,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { deleteConversationApi } from '@/services/chat-service';
 import { useChatStore } from './useChatStore';

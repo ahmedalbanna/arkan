@@ -18,28 +18,107 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-
-export interface ChatSession {
-  id: string;
-  title: string;
-  lastMessage: string;
-  lastMessageTimestamp: string;
-  participantIds: string[];
-  participantNames: Record<string, string>;
-  isSupportChat?: boolean; // To identify support chats for the user widget
-  isTemporary?: boolean; // To identify chats not yet saved to DB
-  messages: { role: 'user' | 'assistant'; content: string }[];
-}
+import { useAuth } from '@/context/AuthContext';
+import { useChatStore } from '@/hooks/useChatStore';
+import { useState } from 'react';
+import { useUsers } from '@/hooks/use-user';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { createConversationApi } from '@/services/chat-service';
+import { toast } from '@/hooks/use-toast';
+import type { ChatSession } from '@/hooks/useChatStore';
 
 interface ChatListProps {
   chats: ChatSession[];
   selectedChat: ChatSession | null;
   onSelectChat: (chat: ChatSession) => void;
-  onNewChat: () => void;
 }
 
-export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatListProps) {
+
+function NewChatDialog() {
+  const [open, setOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
+  const { data: users = [], isLoading: isLoadingUsers } = useUsers();
+  const { createConversation } = useChatStore();
+  const [isCreating, setIsCreating] = useState(false);
+  const { firebaseUser, userProfile: adminProfile } = useAuth();
+
+  const handleCreateChat = async () => {
+    if (!selectedUser || !firebaseUser || !adminProfile) return;
+    setIsCreating(true);
+    try {
+        const token = await firebaseUser.getIdToken();
+        const conversation = await createConversationApi({
+            participantIds: [firebaseUser.uid, selectedUser.id],
+            participantNames: {
+                [firebaseUser.uid]: adminProfile.name,
+                [selectedUser.id]: selectedUser.name
+            },
+            title: `Chat with ${selectedUser.name}`
+        }, token);
+        createConversation(conversation);
+        setOpen(false);
+        setSelectedUser(null);
+    } catch (error: any) {
+        toast({ title: 'Error', description: `Failed to create chat: ${error.message}`, variant: 'destructive' });
+    } finally {
+        setIsCreating(false);
+    }
+  }
+  
+  return (
+      <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Edit2 className="h-4 w-4" />
+              </Button>
+          </DialogTrigger>
+          <DialogContent>
+              <DialogHeader>
+                  <DialogTitle>Start New Conversation</DialogTitle>
+              </DialogHeader>
+              <Command>
+                <CommandInput placeholder="Search for a user..." />
+                <CommandList>
+                  <CommandEmpty>{isLoadingUsers ? "Loading..." : "No users found."}</CommandEmpty>
+                  <CommandGroup>
+                    {users.map((user) => (
+                      <CommandItem
+                        key={user.id}
+                        value={user.name}
+                        onSelect={() => {
+                          setSelectedUser(user);
+                          handleCreateChat();
+                        }}
+                        className="flex items-center gap-2"
+                      >
+                         <Avatar className="h-6 w-6">
+                            <AvatarImage src={user.profilePictureUrl} />
+                            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <span>{user.name}</span>
+                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+            </Command>
+            {isCreating && (
+                <div className="flex items-center justify-center p-4">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <p>Creating chat...</p>
+                </div>
+            )}
+          </DialogContent>
+      </Dialog>
+  );
+}
+
+
+export function ChatList({ chats, selectedChat, onSelectChat }: ChatListProps) {
   const deleteChatMutation = useDeleteChat();
+  const { userProfile } = useAuth();
 
   const handleDeleteChat = (e: React.MouseEvent, chatId: string) => {
     e.stopPropagation(); // Prevent the chat from being selected
@@ -70,9 +149,7 @@ export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatL
                 <TabsTrigger value="inbox" disabled><Inbox className="h-4 w-4" /> Inbox</TabsTrigger>
             </TabsList>
          </Tabs>
-         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onNewChat}>
-            <Edit2 className="h-4 w-4" />
-         </Button>
+         {userProfile?.role === 'admin' && <NewChatDialog />}
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">
