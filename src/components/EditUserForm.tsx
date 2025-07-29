@@ -49,7 +49,7 @@ type EditUserFormValues = z.infer<typeof editUserSchema>;
 
 // The async function for deleting a user (for the client-side mutation)
 async function deleteUserApi(variables: { userId: string, token: string }) {
-     const response = await fetch(`/api/users/${variables.userId}`, {
+     const response = await fetch(`/api/admin/users/${variables.userId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${variables.token}`,
@@ -66,7 +66,7 @@ async function uploadProfilePictureApi(variables: { userId: string, file: File, 
     const formData = new FormData();
     formData.append('file', variables.file);
 
-    const response = await fetch(`/api/users/${variables.userId}/upload-profile-picture`, {
+    const response = await fetch(`/api/admin/users/${variables.userId}/upload-profile-picture`, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${variables.token}`,

@@ -19,12 +19,13 @@ import {
 } from "firebase/auth";
 import { 
   fetchUsers as fetchUsersApi, 
-  fetchUserProfile as fetchUserProfileApi, 
+  subscribeToUserProfile,
   createUserService,
   loginWithEmail,
   loginWithGoogle,
   serviceLogoutUser,
   serviceSignupUser,
+  fetchUserProfile as fetchUserProfileApi,
   type UserListResponse,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
@@ -89,16 +90,33 @@ export function useUsers() {
 }
 
 export function useUserProfile(userId: string) {
-  const { firebaseUser } = useAuth(); // We need this to get the auth token
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const unsubscribe = subscribeToUserProfile(userId, (user) => {
+      // When new data comes from the real-time listener,
+      // we update the TanStack Query cache directly.
+      queryClient.setQueryData(userKeys.profile(userId), user);
+    });
+
+    // Cleanup the subscription when the component unmounts
+    return () => unsubscribe();
+  }, [userId, queryClient]);
+
+  // The component will use the data from the cache, which is kept up-to-date
+  // by the real-time listener.
   return useQuery<UserProfile | null>({
     queryKey: userKeys.profile(userId),
+    // Fallback fetch function for initial load or if the listener fails for some reason
     queryFn: async () => {
-      if (!firebaseUser) return null;
-      const token = await firebaseUser.getIdToken();
-      return fetchUserProfileApi(userId, token);
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchUserProfileApi(userId, token);
     },
-    staleTime: 1000 * 60 * 5, // Cache user data for 5 minutes
-    enabled: !!userId && !!firebaseUser, // Only run if both userId and firebaseUser are available
+    staleTime: Infinity,
+    enabled: !!userId && !!firebaseUser,
   });
 }
 

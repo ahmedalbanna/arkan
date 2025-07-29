@@ -14,6 +14,7 @@ import {
   type ConfirmationResult,
 } from "firebase/auth";
 import { SignupCredentials } from '@/components/SignupForm';
+import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 
 export interface UserListResponse {
     users: UserProfile[];
@@ -43,30 +44,48 @@ export async function fetchUsers(limit: number, lastVisibleId: string | undefine
 }
 
 /**
- * Fetches a user's profile from the database via the API.
- * @param userId - The ID of the user to fetch.
- * @param token - The authentication token of the currently logged-in user (for authorization).
+ * Subscribes to real-time updates for a user's profile from Firestore.
+ * This is a client-side function that uses the Firebase JS SDK.
+ * @param userId - The ID of the user to subscribe to.
+ * @param callback - A function to call with the user profile data whenever it changes.
+ * @returns An unsubscribe function to stop listening for updates.
+ */
+export function subscribeToUserProfile(userId: string, callback: (user: UserProfile | null) => void) {
+    const db = getFirestore(app);
+    const userDocRef = doc(db, "users", userId);
+    
+    const unsubscribe = onSnapshot(userDocRef, (doc) => {
+        if (doc.exists()) {
+            callback({ id: doc.id, ...doc.data() } as UserProfile);
+        } else {
+            callback(null);
+        }
+    }, (error) => {
+        console.error("Error listening to user profile:", error);
+        callback(null);
+    });
+
+    return unsubscribe;
+}
+
+/**
+ * Fetches the profile for a single user from the API.
+ * Requires authentication.
+ * @param userId - The ID of the user whose profile is to be fetched.
+ * @param token - The authentication token of the requester.
  * @returns A promise that resolves to the UserProfile object or null if not found.
  */
 export async function fetchUserProfile(userId: string, token: string): Promise<UserProfile | null> {
-  if (!userId || !token) {
-    return null;
-  }
-
-  const response = await fetch(`/api/admin/users/${userId}`, {
-      headers: {
-          'Authorization': `Bearer ${token}`
-      }
-  });
-  
-  if (!response.ok) {
-    if (response.status === 404) {
-      return null;
+    if (!userId) return null;
+    const response = await fetch(`/api/admin/users/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        if(response.status === 404) return null;
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch user profile');
     }
-    const errorData = await response.json().catch(() => ({ message: 'Failed to fetch user profile' }));
-    throw new Error(errorData.message || 'Failed to fetch user profile');
-  }
-  return await response.json();
+    return response.json();
 }
 
 

@@ -5,7 +5,7 @@ import React, { createContext, useContext, ReactNode, useState, useEffect, useCa
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { fetchUserProfile } from '@/services/user-service';
+import { subscribeToUserProfile } from '@/services/user-service';
 import type { UserProfile } from '@/lib/db/queries';
 import { userKeys } from '@/lib/query-keys';
 
@@ -58,16 +58,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authIsLoading, setAuthIsLoading] = useState(true);
   const queryClient = useQueryClient();
 
-  // Use React Query to fetch the user profile
-  const { data: userProfile, isLoading: isProfileLoading, refetch } = useQuery<UserProfile | null>({
+  useEffect(() => {
+    if (firebaseUser?.uid) {
+      const unsubscribe = subscribeToUserProfile(firebaseUser.uid, (user) => {
+        queryClient.setQueryData(userKeys.profile(firebaseUser.uid), user);
+      });
+      return () => unsubscribe();
+    }
+  }, [firebaseUser, queryClient]);
+
+  // Use React Query to get the user profile from the cache
+  const { data: userProfile, isLoading: isProfileLoading } = useQuery<UserProfile | null>({
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
-    queryFn: async () => {
-        if (!firebaseUser) return null;
-        const token = await firebaseUser.getIdToken();
-        return await fetchUserProfile(firebaseUser.uid, token);
-    },
-    enabled: !!firebaseUser, // Only fetch if firebaseUser exists
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!firebaseUser,
+    staleTime: Infinity,
   });
 
   const refetchUser = useCallback(() => {
