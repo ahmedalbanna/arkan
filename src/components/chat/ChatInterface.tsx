@@ -2,62 +2,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChatList, type ChatSession } from './ChatList';
+import { ChatList, type AgentChatSession } from './ChatList';
 import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import { cn } from '@/lib/utils';
-import { useChatStore } from '@/hooks/useChatStore';
-import { useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { createConversationApi } from '@/services/chat-service';
+import { useAgents } from '@/hooks/use-agents';
+import { Agent } from '@/lib/agents';
 
 export default function ChatInterface() {
-  const { selectedChat, setSelectedChat, createConversation, chats, isInitialized, initialize } = useChatStore();
-  const searchParams = useSearchParams();
-  const { firebaseUser, userProfile } = useAuth();
-  
-  // Initialize the store with server data once user is available
-  useEffect(() => {
-    if (firebaseUser && !isInitialized) {
-        initialize(firebaseUser);
-    }
-  }, [firebaseUser, isInitialized, initialize]);
-
+  const { agents, isLoaded } = useAgents();
+  const [agentChatSessions, setAgentChatSessions] = useState<AgentChatSession[]>([]);
+  const [selectedChat, setSelectedChat] = useState<AgentChatSession | null>(null);
 
   useEffect(() => {
-    // This effect can be adapted to deep links into specific conversations if needed
-    const conversationId = searchParams.get('conversationId');
-    if (conversationId) {
-      const existingChat = chats.find(c => c.id === conversationId);
-      if (existingChat) {
-        setSelectedChat(existingChat);
+    if (isLoaded && agents) {
+      const sessions = agents.map(agent => ({
+        id: agent.id,
+        title: agent.name,
+        agent: agent,
+        messages: [],
+      }));
+      setAgentChatSessions(sessions);
+      if (sessions.length > 0) {
+        setSelectedChat(sessions[0]);
       }
     }
-  }, [searchParams, chats, setSelectedChat]);
-
-  const handleCreateNewChat = async () => {
-    if (!firebaseUser || !userProfile) return;
-    // This logic is simplified; a real app would have a user selection modal
-    const targetUserId = prompt("Enter User ID to chat with:");
-    if (!targetUserId) return;
-    
-    try {
-        const token = await firebaseUser.getIdToken();
-        const conversation = await createConversationApi({
-            participantIds: [firebaseUser.uid, targetUserId],
-            participantNames: {
-                [firebaseUser.uid]: userProfile.name || 'Admin',
-                [targetUserId]: 'User' // In a real app, fetch the user's name
-            },
-            title: `Chat with User ${targetUserId.slice(0,6)}`
-        }, token);
-        createConversation(conversation);
-    } catch(error: any) {
-        toast({title: "Error", description: `Failed to create chat: ${error.message}`, variant: "destructive"})
-    }
-
-  };
+  }, [isLoaded, agents]);
+  
+  const addMessageToSession = (agentId: string, message: any) => {
+      setAgentChatSessions(prev => 
+        prev.map(session => 
+            session.id === agentId 
+                ? { ...session, messages: [...session.messages, message] }
+                : session
+        )
+      );
+  }
 
   return (
     <ResizablePanelGroup
@@ -71,15 +51,17 @@ export default function ChatInterface() {
         className={cn("min-w-[250px] max-w-[400px]")}
       >
         <ChatList
-          chats={chats}
+          chats={agentChatSessions}
           selectedChat={selectedChat}
           onSelectChat={setSelectedChat}
-          onNewChat={handleCreateNewChat}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={75}>
-        <ConversationView chat={selectedChat} />
+        <ConversationView 
+            chat={selectedChat} 
+            onNewMessage={addMessageToSession}
+        />
       </ResizablePanel>
     </ResizablePanelGroup>
   );

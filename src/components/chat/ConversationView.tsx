@@ -2,31 +2,45 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { ChatSession } from './ChatList';
+import type { AgentChatSession } from './ChatList';
 import { Button } from '../ui/button';
-import { Plus, MessageSquare, Edit2, RotateCcw, Expand, X, Bot, User, Send, Paperclip, Info, Settings2, Loader2 } from 'lucide-react';
+import { Bot, User, Send, Paperclip, Info, Settings2, Loader2, RotateCcw } from 'lucide-react';
 import { CardHeader } from '../ui/card';
 import { Textarea } from '../ui/textarea';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { getDatabase, ref, push, onValue, off } from 'firebase/database';
-import { app } from '@/lib/firebase';
 import { toast } from '@/hooks/use-toast';
-import { useChatStore } from '@/hooks/useChatStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 interface ConversationViewProps {
-  chat: ChatSession | null;
+  chat: AgentChatSession | null;
+  onNewMessage: (agentId: string, message: any) => void;
 }
 
-function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
+interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+async function agentChatApi(variables: { agentId: string; message: string; token: string }) {
+    const response = await fetch('/api/agent-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify({ agentId: variables.agentId, message: variables.message }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get response from agent.');
+    }
+    return await response.json();
+}
+
+function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
     return (
         <div className={cn("flex items-start gap-3", isUser && "justify-end")}>
@@ -36,7 +50,7 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
                 </div>
             )}
             <div className={cn("p-3 rounded-lg max-w-lg", isUser ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                <p className="text-sm">{content}</p>
+                <p className="text-sm whitespace-pre-wrap">{content}</p>
             </div>
              {isUser && (
                  <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
@@ -47,31 +61,12 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
     )
 }
 
-export function ConversationView({ chat }: ConversationViewProps) {
-  const { firebaseUser } = useAuth();
+export function ConversationView({ chat, onNewMessage }: ConversationViewProps) {
+  const { firebaseUser, refetchUser } = useAuth();
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<any[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const addMessageToStore = useChatStore(state => state.addMessage);
-  
-  useEffect(() => {
-    if (!chat || chat.isTemporary) {
-      setMessages(chat?.messages || []);
-      return;
-    };
+  const queryClient = useQueryClient();
 
-    const db = getDatabase(app);
-    const messagesRef = ref(db, `messages/${chat.id}`);
-    
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
-        const messagesList = data ? Object.values(data) : [];
-        setMessages(messagesList as any[]);
-    });
-
-    return () => off(messagesRef, 'value', unsubscribe);
-  }, [chat]);
-  
   useEffect(() => {
     if (scrollAreaRef.current) {
         scrollAreaRef.current.scrollTo({
@@ -79,27 +74,31 @@ export function ConversationView({ chat }: ConversationViewProps) {
             behavior: 'smooth',
         });
     }
-  }, [messages]);
+  }, [chat?.messages]);
+  
+  const agentChatMutation = useMutation({
+    mutationFn: agentChatApi,
+    onSuccess: (data, variables) => {
+        const aiMessage = { role: 'assistant', content: data.response };
+        onNewMessage(variables.agentId, aiMessage);
+        refetchUser(); // Update credits
+    },
+    onError: (error: Error) => {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
+
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || !firebaseUser || !chat) return;
 
-    const messageData = {
-      senderId: firebaseUser.uid,
-      content: input,
-      timestamp: new Date().toISOString(),
-      role: 'user', // In a real app, this might be 'admin'
-    };
-
-    const db = getDatabase(app);
-    try {
-        await push(ref(db, `messages/${chat.id}`), messageData);
-        setInput('');
-        addMessageToStore(chat.id, messageData as any);
-    } catch(err) {
-        toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
-    }
+    const userMessage = { role: 'user', content: input };
+    onNewMessage(chat.id, userMessage);
+    
+    setInput('');
+    const token = await getAuthenticatedToken(firebaseUser);
+    agentChatMutation.mutate({ agentId: chat.id, message: input, token });
   }
 
 
@@ -107,9 +106,9 @@ export function ConversationView({ chat }: ConversationViewProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center bg-background p-8">
         <div className="text-center">
-            <h2 className="text-2xl font-semibold">Start a conversation</h2>
+            <h2 className="text-2xl font-semibold">Select an Agent</h2>
             <p className="mt-2 text-muted-foreground max-w-sm">
-                Select a chat from the sidebar or start a new one to begin.
+                Choose an AI agent from the sidebar to start a conversation.
             </p>
         </div>
       </div>
@@ -119,33 +118,27 @@ export function ConversationView({ chat }: ConversationViewProps) {
   return (
     <div className="flex h-full flex-col">
       <CardHeader className="flex flex-row items-center justify-between border-b p-4">
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                    <Bot className="h-5 w-5" />
-                    <h2 className="text-lg font-semibold">{chat.title}</h2>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem>Option 1</DropdownMenuItem>
-                <DropdownMenuItem>Option 2</DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-
+        <h2 className="text-lg font-semibold">{chat.title}</h2>
         <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8"><Edit2 className="h-4 w-4" /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8"><RotateCcw className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8"><Expand className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8"><X className="h-4 w-4" /></Button>
         </div>
       </CardHeader>
       
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
-            {messages.map((msg, index) => (
-                <Message key={index} role={msg.senderId === firebaseUser?.uid ? 'user' : 'assistant'} content={msg.content} />
+            {chat.messages.map((msg, index) => (
+                <MessageBubble key={index} role={msg.role} content={msg.content} />
             ))}
+            {agentChatMutation.isPending && (
+                <div className="flex items-start gap-3 justify-start">
+                    <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
+                        <Bot className="h-5 w-5"/>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted">
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                    </div>
+                </div>
+            )}
         </div>
       </ScrollArea>
        
@@ -153,7 +146,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
          <form onSubmit={handleSendMessage}>
             <div className="relative">
                 <Textarea
-                    placeholder="Ask me anything..."
+                    placeholder={`Chat with ${chat.title}...`}
                     className="w-full resize-none rounded-lg border border-input bg-muted pr-16 py-3"
                     rows={1}
                     value={input}
@@ -164,8 +157,9 @@ export function ConversationView({ chat }: ConversationViewProps) {
                             handleSendMessage(e);
                         }
                     }}
+                    disabled={agentChatMutation.isPending}
                 />
-                <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground">
+                <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground" disabled={!input.trim() || agentChatMutation.isPending}>
                     <Send className="h-4 w-4"/>
                 </Button>
             </div>
