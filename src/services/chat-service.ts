@@ -2,12 +2,14 @@
 'use client';
 
 import type { ChatSession } from "@/hooks/useChatStore";
+import type { Agent } from "@/lib/agents";
 
 interface CreateConversationData {
     participantIds: string[];
     participantNames: Record<string, string>;
     title?: string;
     isSupportChat?: boolean;
+    agent?: Agent;
 }
 
 export async function createConversationApi(data: CreateConversationData, token: string): Promise<ChatSession> {

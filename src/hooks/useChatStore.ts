@@ -26,8 +26,6 @@ export interface ChatSession {
   participantIds: string[];
   participantNames: Record<string, string>;
   isSupportChat?: boolean;
-  isTemporary?: boolean; // To identify chats not yet saved to DB
-  messages: ChatMessage[];
   agent?: Agent; // For agent training chats
 }
 
@@ -54,8 +52,6 @@ interface ChatActions {
   openChat: () => void;
   closeChat: () => void;
   toggleChat: () => void;
-  createSupportChat: () => void;
-  replaceTemporaryChat: (temporaryId: string, realConversation: ChatSession) => void;
   removeChat: (chatId: string) => void;
 }
 
@@ -141,37 +137,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
     openChat: () => set({ isChatOpen: true }),
     closeChat: () => set({ isChatOpen: false }), 
     toggleChat: () => set(state => ({ isChatOpen: !state.isChatOpen })),
-
-    createSupportChat: () => {
-        const temporaryId = `temp-${uuidv4()}`;
-        const newChat: ChatSession = {
-            id: temporaryId,
-            isTemporary: true,
-            title: "New Support Chat",
-            lastMessage: "Starting a new conversation...",
-            lastMessageTimestamp: new Date().toISOString(),
-            participantIds: [],
-            participantNames: {},
-            messages: [],
-        };
-        set(state => ({
-            chats: [newChat, ...state.chats],
-            selectedChat: newChat,
-        }));
-    },
-    
-    replaceTemporaryChat: (temporaryId, realConversation) => {
-       set((state) => {
-            const filteredChats = state.chats.filter((c) => c.id !== realConversation.id);
-            const updatedChats = filteredChats.map((chat) =>
-                chat.id === temporaryId ? realConversation : chat
-            );
-            return {
-                chats: updatedChats,
-                selectedChat: realConversation,
-            };
-        });
-    },
 
     removeChat: (chatId) => {
         set(state => {

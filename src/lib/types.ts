@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal } from '@/ai/schemas';
 export type {
   ProjectProposal,
@@ -12,7 +13,7 @@ export type {
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { LoginCredentials, SignupCredentials } from '@/hooks/use-user';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables, Agent } from '@/hooks/use-agents';
-export type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/hooks/use-features';
+export type { Feature, UpdateFeaturePayload, UpdateFeatureVariables } from '@/lib/types';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { SavedProject, ProjectState } from '@/services/project-service';
@@ -35,4 +36,20 @@ export interface Notification {
   isRead: boolean;
   createdAt: string;
   link?: string;
+}
+
+export interface Feature {
+    id: string;
+    name: string;
+    description: string;
+    isEnabled: boolean;
+}
+
+export interface UpdateFeaturePayload {
+    isEnabled: boolean;
+}
+
+export interface UpdateFeatureVariables {
+    featureId: string;
+    payload: UpdateFeaturePayload;
 }

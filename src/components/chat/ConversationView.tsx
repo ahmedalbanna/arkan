@@ -20,14 +20,18 @@ interface ConversationViewProps {
   chat: ChatSession | AgentChatSession | null;
 }
 
-async function agentChatApi(variables: { agentId: string; message: string; token: string }) {
+async function agentChatApi(variables: { agentId: string; message: string; conversationId: string; token: string }) {
     const response = await fetch('/api/agent-chat', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${variables.token}`,
         },
-        body: JSON.stringify({ agentId: variables.agentId, message: variables.message }),
+        body: JSON.stringify({ 
+            agentId: variables.agentId, 
+            message: variables.message,
+            conversationId: variables.conversationId 
+        }),
     });
     if (!response.ok) {
         const error = await response.json();
@@ -69,18 +73,16 @@ export function ConversationView({ chat }: ConversationViewProps) {
         return;
     };
     
-    // Agent chats are client-side only and not in the DB
-    if ('agent' in chat) {
-        setMessages(chat.messages || []);
-        return;
-    }
-
+    // For all chats (including agent chats now), we listen to the DB
     const db = getDatabase(app);
     const messagesRef = ref(db, `messages/${chat.id}`);
     const unsubscribe = onValue(messagesRef, (snapshot) => {
         const data = snapshot.val();
         const messagesList: ChatMessage[] = data ? Object.values(data) : [];
         setMessages(messagesList);
+    }, (error) => {
+        console.error("Error listening to messages:", error);
+        setMessages([]); // Clear messages on error
     });
 
     return () => off(messagesRef, 'value', unsubscribe);
@@ -100,8 +102,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
   const agentChatMutation = useMutation({
     mutationFn: agentChatApi,
     onSuccess: (data, variables) => {
-        const aiMessage = { role: 'assistant', content: data.response, senderId: 'ai', timestamp: new Date().toISOString() };
-        setMessages(prev => [...prev, aiMessage]); // Simulate local state update for agent chats
+        // The DB listener will handle message updates, so no need to set local state here.
         refetchUser(); // Update credits
     },
     onError: (error: Error) => {
@@ -114,24 +115,36 @@ export function ConversationView({ chat }: ConversationViewProps) {
     e.preventDefault();
     if (!input.trim() || !firebaseUser || !chat) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: input, senderId: firebaseUser.uid, timestamp: new Date().toISOString() };
-
+    const messageContent = input;
     setInput('');
 
-    if ('agent' in chat) {
-        // Handle client-side agent training chat
-        setMessages(prev => [...prev, userMessage]);
+    if (chat.agent) {
+        // Handle agent chat
         const token = await getAuthenticatedToken(firebaseUser);
-        agentChatMutation.mutate({ agentId: chat.id, message: input, token });
+        agentChatMutation.mutate({ 
+            agentId: chat.agent.id, 
+            message: messageContent,
+            conversationId: chat.id,
+            token 
+        });
     } else {
-        // Handle real-time database chat
+        // Handle real-time database user-to-user chat
+        const userMessage: Omit<ChatMessage, 'timestamp'> & { timestamp: any } = { 
+            role: 'user', 
+            content: messageContent, 
+            senderId: firebaseUser.uid, 
+            timestamp: serverTimestamp() 
+        };
         const db = getDatabase(app);
         const messagesRef = ref(db, `messages/${chat.id}`);
         await push(messagesRef, userMessage);
         
         // Update last message in conversation for sorting
         const conversationRef = ref(db, `conversations/${chat.id}`);
-        await push(conversationRef, { lastMessage: input, lastMessageTimestamp: new Date().toISOString() });
+        await update(conversationRef, { 
+            lastMessage: messageContent, 
+            lastMessageTimestamp: new Date().toISOString() 
+        });
     }
   }
 
@@ -149,6 +162,8 @@ export function ConversationView({ chat }: ConversationViewProps) {
     );
   }
 
+  const isLoading = agentChatMutation.isPending;
+
   return (
     <div className="flex h-full flex-col">
       <CardHeader className="flex flex-row items-center justify-between border-b p-4">
@@ -160,10 +175,10 @@ export function ConversationView({ chat }: ConversationViewProps) {
       
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
-            {messages && messages.map((msg, index) => (
+            {messages.map((msg, index) => (
                 <MessageBubble key={index} role={msg.role} content={msg.content} />
             ))}
-            {agentChatMutation.isPending && (
+            {isLoading && (
                 <div className="flex items-start gap-3 justify-start">
                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                         <Bot className="h-5 w-5"/>
@@ -191,9 +206,9 @@ export function ConversationView({ chat }: ConversationViewProps) {
                             handleSendMessage(e);
                         }
                     }}
-                    disabled={agentChatMutation.isPending}
+                    disabled={isLoading}
                 />
-                <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground" disabled={!input.trim() || agentChatMutation.isPending}>
+                <Button type="submit" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-primary text-primary-foreground" disabled={!input.trim() || isLoading}>
                     <Send className="h-4 w-4"/>
                 </Button>
             </div>
