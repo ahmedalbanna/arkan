@@ -79,7 +79,7 @@ async function markOnboardingComplete(userId: string, token: string) {
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
-  const { proposal, currentProjectId, loadState } = useBuilderStore();
+  const { proposal, currentProjectId, loadState, name: projectName } = useBuilderStore();
   const { t } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
@@ -159,8 +159,15 @@ function GeneratePageContent() {
     <div className="relative h-full">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
-        <div className="flex justify-end items-center mb-4">
-          <SessionActions />
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex-1">
+             <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>
+              {projectName || 'New Project'}
+            </h1>
+          </div>
+          <div className="flex-none">
+            <SessionActions />
+          </div>
         </div>
         <div className="flex flex-col flex-grow">
             {!featuresLoaded ? (
