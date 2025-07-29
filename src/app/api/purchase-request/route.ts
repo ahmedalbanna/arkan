@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getStorage } from 'firebase-admin/storage';
 import { createTransaction } from '@/lib/db/queries';
+import { getDatabase } from 'firebase-admin/database';
 
 export const config = {
     api: {
@@ -65,6 +66,27 @@ export async function POST(request: Request) {
         };
 
         const { id: transactionId } = await createTransaction(transactionData);
+
+        // Notify all admins about the new pending payment
+        const adminsSnapshot = await adminDb.collection('users').where('role', '==', 'admin').get();
+        if (!adminsSnapshot.empty) {
+            const rtdb = getDatabase();
+            const notificationPayload = {
+                title: "New Payment Request",
+                description: `User ${userName || userEmail} submitted a payment request for $${price}.`,
+                icon: "credit-card",
+                isRead: false,
+                createdAt: new Date().toISOString(),
+            };
+
+            const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
+                const adminId = adminDoc.id;
+                const notificationRef = rtdb.ref(`notifications/${adminId}`).push();
+                return notificationRef.set(notificationPayload);
+            });
+
+            await Promise.all(notificationPromises);
+        }
 
         return NextResponse.json({ message: 'Request submitted successfully for review.', transactionId }, { status: 200 });
 
