@@ -7,7 +7,7 @@ import { Bot, Inbox, User, Search, MessageSquare, Loader2, PlusCircle } from 'lu
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { AGENTS, Agent } from '@/lib/agents';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -35,17 +35,27 @@ interface ChatListProps {
 function NewChatDialog() {
     const [open, setOpen] = useState(false);
     const { firebaseUser, userProfile: adminProfile } = useAuth();
-    const { data, isLoading: usersLoading } = useQuery<UserListResponse>({
+    
+    const { 
+        data, 
+        isLoading: usersLoading,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
-        queryFn: async () => {
+        queryFn: async ({ pageParam }) => {
             const token = await firebaseUser!.getIdToken();
-            return fetchUsers(100, undefined, token)
+            return fetchUsers(50, pageParam, token); // Fetch more users for the command list
         },
-        enabled: !!firebaseUser
+        initialPageParam: undefined,
+        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
+        enabled: !!firebaseUser && open // Only fetch when the dialog is open
     });
-    const allUsers = data?.users ?? [];
 
-    const { createConversation, setSelectedChat } = useChatStore();
+    const allUsers = data?.pages.flatMap(page => page.users) ?? [];
+
+    const { createConversation } = useChatStore();
     const [isCreating, setIsCreating] = useState(false);
 
     const onSelectUser = async (user: UserProfile) => {
@@ -83,21 +93,31 @@ function NewChatDialog() {
                   </DialogDescription>
                 </DialogHeader>
                 <Command>
-                    <CommandInput placeholder="Search users..." />
+                    <CommandInput placeholder="Search users by name or email..." />
                     <CommandList>
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
-                            {usersLoading && <CommandItem><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...</CommandItem>}
+                            {usersLoading && !data && <CommandItem><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
                             {allUsers?.map((user: UserProfile) => (
-                                <CommandItem key={user.id} onSelect={() => onSelectUser(user)}>
+                                <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
                                     <Avatar className="mr-2 h-6 w-6">
                                         <AvatarImage src={user.profilePictureUrl}/>
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <span>{user.name}</span>
+                                    <div className="flex-grow">
+                                        <span>{user.name}</span>
+                                        <span className="text-xs text-muted-foreground ml-2">{user.email}</span>
+                                    </div>
+                                    {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
                                 </CommandItem>
                             ))}
                         </CommandGroup>
+                        {hasNextPage && (
+                             <CommandItem onSelect={() => fetchNextPage()} className="justify-center text-sm text-muted-foreground cursor-pointer">
+                                {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                                Load More
+                            </CommandItem>
+                        )}
                     </CommandList>
                 </Command>
             </DialogContent>
@@ -121,9 +141,11 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: ChatSession, i
                 <p className="font-semibold truncate">{chat.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
             </div>
-            <p className="text-xs text-muted-foreground self-start">
-                {formatDistanceToNow(new Date(chat.lastMessageTimestamp), { addSuffix: true })}
-            </p>
+            {chat.lastMessageTimestamp && (
+                 <p className="text-xs text-muted-foreground self-start shrink-0">
+                    {formatDistanceToNow(new Date(chat.lastMessageTimestamp), { addSuffix: true })}
+                </p>
+            )}
         </button>
     )
 }

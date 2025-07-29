@@ -19,7 +19,7 @@ import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, Me
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfile, fetchUsers, type UserListResponse } from '@/services/user-service';
+import { fetchUserProfile as fetchUserProfileApi, fetchUsers, type UserListResponse } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
@@ -103,7 +103,7 @@ export default function UserManagementConsole() {
     const token = await firebaseUser.getIdToken();
     await queryClient.prefetchQuery({
         queryKey: userKeys.profile(userId),
-        queryFn: () => fetchUserProfile(userId, token),
+        queryFn: () => fetchUserProfileApi(userId, token),
         staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
     });
   }
@@ -176,8 +176,9 @@ export default function UserManagementConsole() {
                             <TableCell>{user.credits}</TableCell>
                             <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
                             <TableCell className="text-right">
-                               <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)} aria-label={`Chat with ${user.name}`}>
+                               <Button asChild variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
                                   <MessageSquare className="h-4 w-4" />
+                                  <span className="sr-only">Chat with user</span>
                                 </Button>
                               <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
                                 <Link href={`/admin/manage-users/${user.id}/edit`}>

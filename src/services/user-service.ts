@@ -75,7 +75,7 @@ export function subscribeToUserProfile(userId: string, callback: (user: UserProf
  * @param token - The authentication token of the requester.
  * @returns A promise that resolves to the UserProfile object or null if not found.
  */
-export async function fetchUserProfile(userId: string, token: string): Promise<UserProfile | null> {
+export async function fetchUserProfileApi(userId: string, token: string): Promise<UserProfile | null> {
     if (!userId) return null;
     const response = await fetch(`/api/admin/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }

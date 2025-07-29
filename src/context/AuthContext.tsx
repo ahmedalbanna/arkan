@@ -5,7 +5,7 @@ import React, { createContext, useContext, ReactNode, useState, useEffect, useCa
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { subscribeToUserProfile, fetchUserProfile as fetchUserProfileApi } from '@/services/user-service';
+import { subscribeToUserProfile, fetchUserProfileApi } from '@/services/user-service';
 import type { UserProfile } from '@/lib/db/queries';
 import { userKeys } from '@/lib/query-keys';
 import { getAuthenticatedToken } from '@/lib/authUtils';
