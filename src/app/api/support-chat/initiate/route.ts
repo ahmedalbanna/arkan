@@ -1,6 +1,7 @@
 
 import { NextResponse } from 'next/server';
-import { getAdminAuth, adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
 
 export async function POST(request: Request) {
