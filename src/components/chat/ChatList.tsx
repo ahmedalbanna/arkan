@@ -3,9 +3,21 @@
 
 import { format } from 'date-fns';
 import { Button } from '../ui/button';
-import { Edit2, MessageSquare, Inbox } from 'lucide-react';
+import { Edit2, MessageSquare, Inbox, Trash2, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import { useDeleteChat } from '@/hooks/use-chat';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export interface ChatSession {
   id: string;
@@ -27,6 +39,13 @@ interface ChatListProps {
 }
 
 export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatListProps) {
+  const deleteChatMutation = useDeleteChat();
+
+  const handleDeleteChat = (e: React.MouseEvent, chatId: string) => {
+    e.stopPropagation(); // Prevent the chat from being selected
+    deleteChatMutation.mutate(chatId);
+  }
+
   // Group chats by date
   const groupedChats = chats.reduce((groups, chat) => {
     // Don't show temporary chats in the admin list
@@ -68,7 +87,7 @@ export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatL
                         key={chat.id}
                         onClick={() => onSelectChat(chat)}
                         className={cn(
-                            'flex flex-col items-start gap-2 rounded-lg p-3 text-left text-sm transition-all hover:bg-accent',
+                            'group flex flex-col items-start gap-2 rounded-lg p-3 text-left text-sm transition-all hover:bg-accent',
                             selectedChat?.id === chat.id && 'bg-accent'
                         )}
                     >
@@ -77,6 +96,30 @@ export function ChatList({ chats, selectedChat, onSelectChat, onNewChat }: ChatL
                             <div className="ml-auto text-xs text-muted-foreground">
                                 {format(new Date(chat.lastMessageTimestamp), 'p')}
                             </div>
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6 ml-1 opacity-0 group-hover:opacity-100"
+                                    onClick={(e) => e.stopPropagation()} // Prevent card click
+                                  >
+                                    {deleteChatMutation.isPending && deleteChatMutation.variables === chat.id ? <Loader2 className="h-4 w-4 animate-spin"/> : <Trash2 className="h-4 w-4 text-destructive" />}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        This will permanently delete the chat conversation for all participants.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                      <AlertDialogAction onClick={(e) => handleDeleteChat(e, chat.id)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
                     </button>
                 ))}

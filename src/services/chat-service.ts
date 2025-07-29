@@ -43,3 +43,19 @@ export async function initiateSupportChat(token: string): Promise<ChatSession> {
     }
     return await response.json();
 }
+
+export async function deleteConversationApi(chatId: string, token: string): Promise<{ message: string }> {
+     if (!token) throw new Error("User not authenticated");
+     const response = await fetch(`/api/conversations/${chatId}`, {
+         method: 'DELETE',
+         headers: {
+             'Authorization': `Bearer ${token}`
+         },
+     });
+
+     if (!response.ok) {
+         const error = await response.json();
+         throw new Error(error.message || 'Failed to delete conversation');
+     }
+     return await response.json();
+}
