@@ -20,7 +20,7 @@ import { useReportStore } from '@/hooks/useReportStore';
 
 interface AcademicUploadersProps {
     title: string;
-    onContentAdded: (fileName: string, content: string, type: 'context' | 'example') => void;
+    onContentAdded: (fileName: string, content: string, type?: 'context' | 'example') => void;
     onContentRemoved: (index: number) => void;
     isProcessing: boolean;
     isContext?: boolean;
