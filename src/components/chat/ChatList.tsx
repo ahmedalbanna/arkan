@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Button } from '../ui/button';
-import { Bot, Inbox, User, Search, MessageSquare, Loader2 } from 'lucide-react';
+import { Bot, Inbox, User, Search, MessageSquare, Loader2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { AGENTS, Agent } from '@/lib/agents';
@@ -19,10 +19,15 @@ import { useChatStore } from '@/hooks/useChatStore';
 import { useRouter } from 'next/navigation';
 import type { ChatSession, ChatMessage, AgentChatSession, UserProfile } from '@/lib/types';
 import { fetchUsers, type UserListResponse } from '@/services/user-service';
+import { formatDistanceToNow } from 'date-fns';
+import { ScrollArea } from '../ui/scroll-area';
+
 
 interface ChatListProps {
   agents: Agent[];
-  selectedAgent: Agent | null | undefined;
+  liveChats: ChatSession[];
+  selectedChat: ChatSession | AgentChatSession | null;
+  onSelectChat: (chat: ChatSession) => void;
   onSelectAgent: (agent: Agent) => void;
 }
 
@@ -40,7 +45,7 @@ function NewChatDialog() {
     });
     const allUsers = data?.users ?? [];
 
-    const { createConversation, openChat } = useChatStore();
+    const { createConversation, setSelectedChat } = useChatStore();
     const [isCreating, setIsCreating] = useState(false);
 
     const onSelectUser = async (user: UserProfile) => {
@@ -57,7 +62,6 @@ function NewChatDialog() {
                 title: `Chat with ${user.name}`
             }, token);
             createConversation(conversation);
-            openChat();
             setOpen(false); // Close dialog on success
         } catch (error: any) {
             toast({ title: "Error starting chat", description: error.message, variant: "destructive" });
@@ -69,7 +73,7 @@ function NewChatDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm">New Chat</Button>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>New Chat</Button>
             </DialogTrigger>
             <DialogContent className="p-0">
                 <Command>
@@ -95,44 +99,94 @@ function NewChatDialog() {
     )
 }
 
-export function ChatList({ agents, selectedAgent, onSelectAgent }: ChatListProps) {
-  
+function LiveChatListItem({ chat, isSelected, onSelect }: { chat: ChatSession, isSelected: boolean, onSelect: () => void }) {
+    return (
+        <button
+            onClick={onSelect}
+            className={cn(
+                'group flex items-start gap-3 rounded-lg p-3 text-left text-sm transition-all hover:bg-accent w-full',
+                isSelected && 'bg-accent'
+            )}
+        >
+            <Avatar className="h-9 w-9 border">
+                <AvatarFallback>{chat.title?.charAt(0) || '?'}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 truncate">
+                <p className="font-semibold truncate">{chat.title}</p>
+                <p className="text-xs text-muted-foreground truncate">{chat.lastMessage}</p>
+            </div>
+            <p className="text-xs text-muted-foreground self-start">
+                {formatDistanceToNow(new Date(chat.lastMessageTimestamp), { addSuffix: true })}
+            </p>
+        </button>
+    )
+}
+
+function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelected: boolean, onSelect: () => void }) {
+    const Icon = AGENTS.find(a => a.id === agent.id)?.icon || Bot;
+    return (
+        <button
+            onClick={onSelect}
+            className={cn(
+                'group flex items-center gap-3 rounded-lg p-3 text-left text-sm transition-all hover:bg-accent w-full',
+                isSelected && 'bg-accent'
+            )}
+        >
+            <Icon className="h-5 w-5" />
+            <div className="font-semibold">{agent.name}</div>
+        </button>
+    )
+}
+
+export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSelectAgent }: ChatListProps) {
+  const [activeTab, setActiveTab] = useState('chats');
+
   return (
     <div className="flex h-full flex-col bg-muted/50">
       <div className="flex items-center justify-between p-4 border-b">
-         <Tabs defaultValue="chats">
+         <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
-                <TabsTrigger value="chats" className="gap-2"><Bot className="h-4 w-4" /> Agents</TabsTrigger>
-                <TabsTrigger value="inbox" disabled><Inbox className="h-4 w-4" /> Inbox</TabsTrigger>
+                <TabsTrigger value="chats" className="gap-2"><MessageSquare className="h-4 w-4" /> Chats</TabsTrigger>
+                <TabsTrigger value="agents" className="gap-2"><Bot className="h-4 w-4" /> Agents</TabsTrigger>
             </TabsList>
          </Tabs>
+         <NewChatDialog />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <ScrollArea className="flex-1 p-2">
          <nav className="grid gap-1">
-            {agents.map((agent) => {
-                const Icon = AGENTS.find(a => a.id === agent.id)?.icon || Bot;
-                return (
-                    <button
-                        key={agent.id}
-                        onClick={() => onSelectAgent(agent)}
-                        className={cn(
-                            'group flex items-center gap-3 rounded-lg p-3 text-left text-sm transition-all hover:bg-accent',
-                            selectedAgent?.id === agent.id && 'bg-accent'
-                        )}
-                    >
-                        <Icon className="h-5 w-5" />
-                        <div className="font-semibold">{agent.name}</div>
-                    </button>
+            {activeTab === 'chats' && (
+                liveChats.length > 0 ? liveChats.map(chat => (
+                    <LiveChatListItem 
+                        key={chat.id} 
+                        chat={chat} 
+                        isSelected={selectedChat?.id === chat.id} 
+                        onSelect={() => onSelectChat(chat)} 
+                    />
+                )) : (
+                    <div className="text-center text-sm text-muted-foreground p-8">
+                        <Inbox className="mx-auto h-8 w-8 mb-2" />
+                        <p>No active conversations.</p>
+                    </div>
                 )
-            })}
+            )}
+            {activeTab === 'agents' && (
+                agents.length > 0 ? agents.map((agent) => (
+                    <AgentListItem 
+                        key={agent.id}
+                        agent={agent}
+                        isSelected={selectedChat?.id === agent.id}
+                        onSelect={() => onSelectAgent(agent)}
+                    />
+                )) : (
+                    <div className="text-center text-sm text-muted-foreground p-8">
+                        <Loader2 className="mx-auto h-8 w-8 animate-spin mb-2" />
+                        <p>Loading agents...</p>
+                    </div>
+                )
+            )}
          </nav>
-        {agents.length === 0 && (
-            <div className="text-center text-sm text-muted-foreground p-8">
-                <p>No agents found.</p>
-            </div>
-        )}
-      </div>
+      </ScrollArea>
     </div>
   );
 }

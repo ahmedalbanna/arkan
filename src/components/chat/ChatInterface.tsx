@@ -13,7 +13,6 @@ import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks/u
 
 export default function ChatInterface() {
   const { agents, isLoaded } = useAgents();
-  const [agentChatSessions, setAgentChatSessions] = useState<AgentChatSession[]>([]);
   const { 
     selectedChat, 
     setSelectedChat,
@@ -31,14 +30,9 @@ export default function ChatInterface() {
     }
   }, [firebaseUser, isInitialized, initialize]);
 
-  const addMessageToSession = (agentId: string, message: any) => {
-      setAgentChatSessions(prev => 
-        prev.map(session => 
-            session.id === agentId 
-                ? { ...session, messages: [...session.messages, message] }
-                : session
-        )
-      );
+
+  const handleSelectChat = (chat: ChatSession | AgentChatSession) => {
+    setSelectedChat(chat);
   }
 
   const handleSelectAgent = (agent: Agent) => {
@@ -70,15 +64,16 @@ export default function ChatInterface() {
       >
         <ChatList
           agents={agents}
-          selectedAgent={selectedChat && 'agent' in selectedChat ? selectedChat.agent : null}
+          liveChats={chats}
+          selectedChat={selectedChat}
+          onSelectChat={handleSelectChat}
           onSelectAgent={handleSelectAgent}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={75}>
         <ConversationView 
-            chat={selectedChat as AgentChatSession | null}
-            onNewMessage={addMessageToSession}
+            chat={selectedChat}
         />
       </ResizablePanel>
     </ResizablePanelGroup>
