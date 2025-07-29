@@ -1,62 +1,44 @@
-// src/app/api/conversations/route.ts
-import { NextResponse } from 'next/server';
+
+'use server';
+
+import { NextRequest } from 'next/server';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 import { getUserProfile } from '@/lib/db/queries';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const createConversationSchema = z.object({
   participantIds: z.array(z.string()).min(2, "At least two participants are required."),
   title: z.string().optional(),
   participantNames: z.record(z.string()),
   isSupportChat: z.boolean().optional(),
+  agent: z.any().optional(), // Allow agent data
 });
 
-// Helper to verify that the requester is one of the participants OR an admin
-async function verifyAccess(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized', requesterId: null, isAdmin: false };
-    }
-    const token = authorization.substring(7);
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        const isAdmin = user?.role === 'admin';
-        
-        return { authorized: true, requesterId: decodedToken.uid, isAdmin };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized', requesterId: null, isAdmin: false };
-    }
-}
-
 function generateConversationId(participantIds: string[]): string {
+    // Sort to ensure consistency regardless of order
     return participantIds.sort().join('-');
 }
 
-export async function GET(request: Request) {
-    const accessCheck = await verifyAccess(request);
-    if (!accessCheck.authorized || !accessCheck.requesterId) {
-        return NextResponse.json({ message: accessCheck.message }, { status: 403 });
-    }
-    
-    const db = adminRealtimeDb;
+export async function GET(request: NextRequest) {
     try {
+        const { user } = await authenticateRequest(request);
+        const db = adminRealtimeDb;
+
         let conversations;
-        if (accessCheck.isAdmin) {
+        if (user.role === 'admin') {
             // Admin fetches all conversations
             const convosRef = db.ref('conversations');
-            const snapshot = await convosRef.get();
+            const snapshot = await convosRef.orderByChild('lastMessageTimestamp').get();
             conversations = snapshot.val() || {};
         } else {
             // User fetches their own conversations
-            const userConvoRef = db.ref(`userConversations/${accessCheck.requesterId}`);
+            const userConvoRef = db.ref(`userConversations/${user.id}`);
             const userConvoSnapshot = await userConvoRef.get();
             const conversationIds = userConvoSnapshot.val() ? Object.keys(userConvoSnapshot.val()) : [];
             
             if (conversationIds.length === 0) {
-                 return NextResponse.json([], { status: 200 });
+                 return createApiResponse([], 200);
             }
 
             const convoPromises = conversationIds.map(id => db.ref(`conversations/${id}`).get());
@@ -69,33 +51,30 @@ export async function GET(request: Request) {
             }, {} as Record<string, any>);
         }
 
-        const conversationsArray = Object.values(conversations);
-        return NextResponse.json(conversationsArray, { status: 200 });
+        const conversationsArray = Object.values(conversations).sort((a, b) => 
+            new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime()
+        );
+        return createApiResponse(conversationsArray, 200);
     } catch (error) {
-        console.error('Error fetching conversations:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
 }
 
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        const { user } = await authenticateRequest(request);
         const body = await request.json();
         const validation = createConversationSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
-        const { participantIds, title, participantNames, isSupportChat } = validation.data;
+        const { participantIds, title, participantNames, isSupportChat, agent } = validation.data;
         
-        const accessCheck = await verifyAccess(request);
-        if (!accessCheck.authorized || !accessCheck.requesterId) {
-            return NextResponse.json({ message: accessCheck.message }, { status: 403 });
-        }
-
         // Ensure the creator is part of the conversation
-        if (!participantIds.includes(accessCheck.requesterId)) {
-            return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+        if (!participantIds.includes(user.id)) {
+            return handleApiError({ message: 'Forbidden' }, 403);
         }
 
         const conversationId = generateConversationId(participantIds);
@@ -105,7 +84,7 @@ export async function POST(request: Request) {
         const snapshot = await conversationRef.get();
 
         if (snapshot.exists()) {
-             return NextResponse.json(snapshot.val(), { status: 200 });
+             return createApiResponse(snapshot.val(), 200);
         }
         
         const now = new Date().toISOString();
@@ -118,7 +97,7 @@ export async function POST(request: Request) {
             title: title || 'New Chat',
             participantNames,
             isSupportChat: isSupportChat || false,
-            messages: [], // Initialize with an empty messages array
+            agent: agent || null,
         };
 
         const updates: { [key: string]: any } = {};
@@ -129,10 +108,9 @@ export async function POST(request: Request) {
 
         await db.ref().update(updates);
         
-        return NextResponse.json(newConversation, { status: 201 });
+        return createApiResponse(newConversation, 201);
 
     } catch (error) {
-        console.error('Error creating conversation:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
 }

@@ -1,31 +1,41 @@
+'use server';
 
-// src/app/api/users/[id]/reset-password/route.ts
-import { getUserProfile } from '@/lib/db/queries';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { z } from 'zod';
+import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
+import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { NextRequest } from 'next/server';
 
-export const POST = withAuth(async ({ params }) => {
+// GET /api/teams - Fetches all teams for the authenticated user and their teams
+export async function GET(request: NextRequest) {
     try {
-        const { id: userId } = params;
-        if (!userId) {
-            return handleApiError({ message: 'User ID is required.' }, 400);
-        }
-
-        const user = await getUserProfile(userId);
-        if (!user || !user.email) {
-            return handleApiError({ message: 'User not found or has no email.' }, 404);
-        }
-        
-        // This is a placeholder for sending a reset email.
-        // Firebase Admin SDK does not directly send reset emails.
-        // A real implementation would use a service like SendGrid and a generated link:
-        // const link = await adminAuth.generatePasswordResetLink(user.email);
-        // await sendCustomEmail(user.email, link);
-        // For this demo, we'll just simulate success.
-        console.log(`Password reset email would be sent to ${user.email}`);
-
-        return createApiResponse({ message: `A password reset email has been sent to ${user.email}.` }, 200);
-
-    } catch (error: any) {
+        const { user } = await authenticateRequest(request);
+        const teams = await getUserTeams(user.id);
+        return createApiResponse(teams, 200);
+    } catch (error) {
         return handleApiError(error);
     }
-}, { requireAdmin: true });
+}
+
+
+// POST /api/teams - Creates a new project
+const createTeamSchema = z.object({
+  name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const { user } = await authenticateRequest(request);
+    const body = await request.json();
+    const validation = createTeamSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
+    }
+
+    const { name } = validation.data;
+    const newTeam = await createTeamForUser(user.id, name);
+    
+    return createApiResponse(newTeam, 201);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}

@@ -1,64 +1,41 @@
-import { NextResponse } from 'next/server';
-import { z } from 'zod';
-import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
-import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth } from '@/lib/firebase/admin';
-import { logGeneration } from '@/services/generation-service';
+'use server';
 
-const ApiGeneratePresentationSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(),
-  externalContextContent: z.string().optional(),
-  templateId: z.string(),
+import { z } from 'zod';
+import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
+import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { NextRequest } from 'next/server';
+
+// GET /api/teams - Fetches all teams for the authenticated user and their teams
+export async function GET(request: NextRequest) {
+    try {
+        const { user } = await authenticateRequest(request);
+        const teams = await getUserTeams(user.id);
+        return createApiResponse(teams, 200);
+    } catch (error) {
+        return handleApiError(error);
+    }
+}
+
+
+// POST /api/teams - Creates a new project
+const createTeamSchema = z.object({
+  name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
 });
 
-
-export async function POST(request: Request) {
-  const auth = await getAdminAuth();
+export async function POST(request: NextRequest) {
   try {
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-    
+    const { user } = await authenticateRequest(request);
     const body = await request.json();
-    const validation = ApiGeneratePresentationSchema.safeParse(body);
-
+    const validation = createTeamSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError(validation.error);
     }
-    
-    await deductCredit(userId, 1);
-    
-    const agentInput = validation.data;
 
-    const result = await generatePresentation(agentInput);
+    const { name } = validation.data;
+    const newTeam = await createTeamForUser(user.id, name);
     
-    await logGeneration({
-        agentId: 'generate-presentation',
-        userId,
-        input: agentInput,
-        output: result,
-    });
-
-    return NextResponse.json(result, { status: 200 });
+    return createApiResponse(newTeam, 201);
   } catch (error) {
-    console.error('Error generating presentation:', error);
-    if (error instanceof Error) {
-        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-        if (error.message.includes("credit")) {
-            return NextResponse.json({ message: error.message }, { status: 402 });
-        }
-        return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred while generating the presentation.' }, { status: 500 });
+    return handleApiError(error);
   }
 }

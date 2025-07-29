@@ -1,61 +1,41 @@
-
 'use server';
 
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { translateText } from '@/ai/flows/translate-text';
-import { deductCredit } from '@/services/credit-service';
-import { getAdminAuth } from '@/lib/firebase/admin';
-import { logGeneration } from '@/services/generation-service';
+import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
+import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { NextRequest } from 'next/server';
 
-const translateSchema = z.object({
-  text: z.string().min(1),
-  targetLang: z.string().min(2),
+// GET /api/teams - Fetches all teams for the authenticated user and their teams
+export async function GET(request: NextRequest) {
+    try {
+        const { user } = await authenticateRequest(request);
+        const teams = await getUserTeams(user.id);
+        return createApiResponse(teams, 200);
+    } catch (error) {
+        return handleApiError(error);
+    }
+}
+
+
+// POST /api/teams - Creates a new project
+const createTeamSchema = z.object({
+  name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
 });
 
-export async function POST(request: Request) {
-  const auth = await getAdminAuth();
+export async function POST(request: NextRequest) {
   try {
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-    const token = authorization.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
-    const userId = decodedToken.uid;
-
+    const { user } = await authenticateRequest(request);
     const body = await request.json();
-    const validation = translateSchema.safeParse(body);
-
+    const validation = createTeamSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+      return handleApiError(validation.error);
     }
 
-    await deductCredit(userId, 1);
-
-    const agentInput = validation.data;
-    const result = await translateText(agentInput);
-
-    await logGeneration({
-        agentId: 'translate-text',
-        userId,
-        input: agentInput,
-        output: result,
-    });
-
-    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
-    return NextResponse.json({ translatedText: cleanedTranslatedText }, { status: 200 });
+    const { name } = validation.data;
+    const newTeam = await createTeamForUser(user.id, name);
+    
+    return createApiResponse(newTeam, 201);
   } catch (error) {
-    console.error('Error translating text:', error);
-    if (error instanceof Error) {
-        if (error.message.includes("credit")) {
-            return NextResponse.json({ message: error.message }, { status: 402 }); // Payment Required
-        }
-        if (error.message.includes("Unauthorized") || error.message.includes("token")) {
-            return NextResponse.json({ message: 'Authentication failed.' }, { status: 401 });
-        }
-        return NextResponse.json({ message: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+    return handleApiError(error);
   }
 }

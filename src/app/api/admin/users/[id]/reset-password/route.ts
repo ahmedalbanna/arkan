@@ -1,10 +1,13 @@
 
-// src/app/api/users/[id]/reset-password/route.ts
-import { getUserProfile } from '@/lib/db/queries';
-import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+'use server';
 
-export const POST = withAuth(async ({ params }) => {
+import { getUserProfile } from '@/lib/db/queries';
+import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+
+export const POST = async (request: Request, { params }: { params: { id: string } }) => {
     try {
+        await authenticateRequest(request, { requireAdmin: true });
+        
         const { id: userId } = params;
         if (!userId) {
             return handleApiError({ message: 'User ID is required.' }, 400);
@@ -28,4 +31,4 @@ export const POST = withAuth(async ({ params }) => {
     } catch (error: any) {
         return handleApiError(error);
     }
-}, { requireAdmin: true });
+};
