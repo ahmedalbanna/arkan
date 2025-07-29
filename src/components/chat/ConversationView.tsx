@@ -121,7 +121,7 @@ export function ConversationView({ chat, onNewMessage }: ConversationViewProps) 
       
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
-            {chat.messages.map((msg, index) => (
+            {chat.messages && chat.messages.map((msg, index) => (
                 <MessageBubble key={index} role={msg.role} content={msg.content} />
             ))}
             {agentChatMutation.isPending && (
