@@ -1,93 +1,35 @@
-import { NextResponse } from "next/server";
+
 import { z } from "zod";
-import {
-  getUserProfile,
-  updateUser,
-  updateUserByAdmin,
-} from "@/lib/db/queries";
-import { getAdminAuth } from "@/lib/firebase/admin";
-import type { UserRole } from "@/lib/db/queries";
+import { getUserProfile, deleteUser } from "@/lib/db/queries";
+import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
-import { adminDb } from "@/lib/firebase/server-init";
+import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
+import { getAdminAuth } from "@/lib/firebase/admin";
 
-// Helper to verify if the requester is an admin OR the user themselves
-async function verifyAccess(request: Request, targetUserId: string) {
-  const adminAuth = await getAdminAuth();
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return {
-      authorized: false,
-      message: "Unauthorized",
-      isSelf: false,
-      isAdmin: false,
-    };
-  }
-  const token = authHeader.substring(7);
 
-  try {
-    const decodedToken = await adminAuth.verifyIdToken(token, true);
-    const requesterId = decodedToken.uid;
+// GET a single user profile.
+// This route is now protected by the verifyAccess logic within withAuth,
+// but for simplicity, we'll keep the direct GET like this.
+// A more robust implementation might move the ownership check into withAuth itself.
+export const GET = withAuth(async ({ params, user: requester, token }) => {
+    try {
+        const targetUserId = params.id;
+        
+        // Authorization check: either admin or self
+        if (requester.role !== 'admin' && requester.id !== targetUserId) {
+            return handleApiError({ message: "Forbidden" }, 403);
+        }
 
-    const requesterProfile = await getUserProfile(requesterId);
-    const isAdmin = requesterProfile?.role === "admin";
-    const isSelf = requesterId === targetUserId;
-
-    if (isAdmin || isSelf) {
-      return { authorized: true, userId: requesterId, isSelf, isAdmin };
+        const user = await getUserProfile(targetUserId);
+        if (!user) {
+            return handleApiError({ message: "User not found." }, 404);
+        }
+        return createApiResponse(user, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
+});
 
-    // If neither, forbid access
-    return {
-      authorized: false,
-      message: "Forbidden",
-      isSelf: false,
-      isAdmin: false,
-    };
-  } catch (error) {
-    return {
-      authorized: false,
-      message: "Unauthorized",
-      isSelf: false,
-      isAdmin: false,
-    };
-  }
-}
-
-// GET /api/users/[id]
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { id: userId } = await params;
-    if (!userId) {
-      return NextResponse.json(
-        { message: "User ID is required." },
-        { status: 400 }
-      );
-    }
-
-    const accessCheck = await verifyAccess(request, userId);
-    if (!accessCheck.authorized) {
-      return NextResponse.json(
-        { message: accessCheck.message },
-        { status: accessCheck.message === 'Forbidden' ? 403 : 401 }
-      );
-    }
-
-    const user = await getUserProfile(userId);
-    if (!user) {
-      return NextResponse.json({ message: "User not found." }, { status: 404 });
-    }
-    return NextResponse.json(user, { status: 200 });
-  } catch (error) {
-    console.error(`Error fetching user ${params.id}:`, error);
-    return NextResponse.json(
-      { message: "An unexpected error occurred." },
-      { status: 500 }
-    );
-  }
-}
 
 const updateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
@@ -99,77 +41,55 @@ const updateUserSchema = z.object({
 });
 
 // PUT (update) a user profile
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
         const { id: userId } = params;
-        const accessCheck = await verifyAccess(request, userId);
-        if (!accessCheck.authorized) {
-            return NextResponse.json({ message: accessCheck.message }, { status: accessCheck.message === 'Forbidden' ? 403 : 401 });
-        }
-
         const body = await request.json();
-        const validation = updateUserSchema.safeParse(body);
-        if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+
+        // An admin can update any field. A regular user can only update their own name/bio.
+        if (requester.role !== 'admin') {
+            if (userId !== requester.id) {
+                return handleApiError({ message: "Forbidden" }, 403);
+            }
+            // If not admin, only allow name and bio updates
+            const { name, bio, hasCompletedOnboarding } = body;
+            const validation = updateUserSchema.safeParse({ name, bio, hasCompletedOnboarding });
+             if (!validation.success) {
+                return handleApiError(validation.error);
+            }
+            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
+            await adminDb.collection("users").doc(userId).update(updateData);
+        } else {
+             const validation = updateUserSchema.safeParse(body);
+             if (!validation.success) {
+                return handleApiError(validation.error);
+            }
+            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
+            await adminDb.collection("users").doc(userId).update(updateData);
         }
 
-        const updateData = {
-            ...validation.data,
-            updatedAt: new Date().toISOString()
-        };
 
-        await adminDb.collection("users").doc(userId).update(updateData);
-
-        // Revalidate paths to update cached data
         revalidatePath(`/profile/${userId}`);
-        if(accessCheck.isAdmin) {
-             revalidatePath('/admin/manage-users');
-        }
+        revalidatePath('/admin/manage-users');
 
         const updatedUser = await getUserProfile(userId);
-
-        return NextResponse.json(updatedUser, { status: 200 });
+        return createApiResponse(updatedUser, 200);
     } catch (error) {
-        console.error(`Error updating user ${params.id}:`, error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+});
 
 
-export async function DELETE(
-  req: Request,
-  { params }: { params: { id: string } }
-) {
-  const adminAuth = await getAdminAuth();
-  try {
-    const {id:targetUserId} = await params;
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const DELETE = withAuth(async ({ params }) => {
+    try {
+        const { id: targetUserId } = params;
+        if (!targetUserId) {
+            return handleApiError({ message: "User ID is required" }, 400);
+        }
+        await deleteUser(targetUserId);
+        revalidatePath("/admin/manage-users");
+        return createApiResponse({ message: `User ${targetUserId} deleted successfully`}, 200);
+    } catch (error) {
+        return handleApiError(error);
     }
-    const token = authHeader.substring(7);
-
-    const decodedToken = await adminAuth.verifyIdToken(token, true);
-    const requesterId = decodedToken.uid;
-
-    const requesterProfile = await getUserProfile(requesterId);
-    if (requesterProfile?.role !== "admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    await adminAuth.deleteUser(targetUserId);
-    await adminDb.collection("users").doc(targetUserId).delete();
-
-    revalidatePath("/admin/manage-users");
-
-    return NextResponse.json({
-      message: `User ${targetUserId} deleted successfully`,
-    });
-  } catch (error: any) {
-    console.error("Error deleting user:", error);
-    return NextResponse.json(
-      { error: error.message || "An error occurred" },
-      { status: 500 }
-    );
-  }
-}
+}, { requireAdmin: true });

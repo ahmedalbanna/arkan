@@ -1,5 +1,4 @@
 
-import { NextResponse, type NextRequest } from 'next/server';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/server-init';
