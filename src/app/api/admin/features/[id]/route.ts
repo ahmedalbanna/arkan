@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { handleApiError, withAuth } from '@/lib/api-utils';
+import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 
 const updateFeatureSchema = z.object({
   isEnabled: z.boolean(),
@@ -25,13 +25,13 @@ export const PUT = withAuth(async ({ request, params }) => {
     const validation = updateFeatureSchema.safeParse(body);
 
     if (!validation.success) {
-      return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
+      return handleApiError(validation.error);
     }
 
     await featureRef.update({ isEnabled: validation.data.isEnabled });
     const updatedDoc = await featureRef.get();
 
-    return new Response(JSON.stringify(updatedDoc.data()), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return createApiResponse(updatedDoc.data(), 200);
   } catch (error) {
     return handleApiError(error);
   }

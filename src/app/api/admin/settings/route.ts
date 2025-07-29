@@ -1,32 +1,10 @@
 
-import { NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
 import { z } from 'zod';
+import { adminDb } from '@/lib/firebase/server-init';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// Helper to verify admin role
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-    const token = authorization.substring(7);
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden' };
-        }
-        return { authorized: true };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-}
-
-// GET /api/settings - This endpoint is now public
-export async function GET(request: Request) {
+// GET /api/settings - This endpoint is public
+export async function GET() {
     try {
         const settingsRef = adminDb.collection('settings').doc('defaults');
         const doc = await settingsRef.get();
@@ -39,12 +17,11 @@ export async function GET(request: Request) {
                 iban: 'SA03 8000 0000 6080 1016 7519',
             };
             await settingsRef.set(defaultSettings);
-            return NextResponse.json(defaultSettings, { status: 200 });
+            return createApiResponse(defaultSettings, 200);
         }
-        return NextResponse.json(doc.data(), { status: 200 });
+        return createApiResponse(doc.data(), 200);
     } catch (error) {
-        console.error('Error fetching settings:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
 }
 
@@ -57,25 +34,19 @@ const settingsSchema = z.object({
   iban: z.string().optional(),
 });
 
-export async function PUT(request: Request) {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const PUT = withAuth(async ({ request }) => {
     try {
         const body = await request.json();
         const validation = settingsSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
         const settingsRef = adminDb.collection('settings').doc('defaults');
         await settingsRef.set(validation.data, { merge: true });
         
-        return NextResponse.json(validation.data, { status: 200 });
+        return createApiResponse(validation.data, 200);
     } catch (error) {
-        console.error('Error updating settings:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });

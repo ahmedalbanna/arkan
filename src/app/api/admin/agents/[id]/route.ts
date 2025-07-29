@@ -1,55 +1,28 @@
 
 // src/app/api/agents/[id]/route.ts
-import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
 import { AGENTS } from '@/lib/agents';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-    const token = authorization.substring(7);
-
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (user?.role !== 'admin') {
-            return { authorized: false, message: 'Forbidden' };
-        }
-        return { authorized: true, userId: decodedToken.uid };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-}
 
 // GET /api/agents/[id]
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    const agentId = params.id;
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const GET = withAuth(async ({ params }) => {
     try {
+        const agentId = params.id;
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
-            return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
+            return handleApiError({ message: 'Agent not found.' }, 404);
         }
 
         const data = agentDoc.data();
         const defaultAgent = AGENTS.find((a) => a.id === agentId);
 
-        return NextResponse.json({ ...data, id: agentDoc.id, icon: defaultAgent?.icon }, { status: 200 });
+        return createApiResponse({ ...data, id: agentDoc.id, icon: defaultAgent?.icon }, 200);
     } catch (error) {
-        console.error(`Error fetching agent ${agentId}:`, error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });
 
 
 const agentGuidelineSchema = z.object({
@@ -71,74 +44,55 @@ const updateAgentSchema = z.object({
 });
 
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const agentId = params.id;
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const PUT = withAuth(async ({ request, params }) => {
     try {
+        const agentId = params.id;
         const agentRef = adminDb.collection('agents').doc(agentId);
         const agentDoc = await agentRef.get();
         if (!agentDoc.exists) {
-            return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
+            return handleApiError({ message: 'Agent not found.' }, 404);
         }
 
         const body = await request.json();
         const validation = updateAgentSchema.safeParse(body);
-
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
         const updateData: any = {};
-
         if (validation.data.name) updateData.name = validation.data.name;
         if (validation.data.isEnabled !== undefined) updateData.isEnabled = validation.data.isEnabled;
         if (validation.data.prompt) updateData.prompt = validation.data.prompt;
 
-
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();
-
         const defaultAgent = AGENTS.find(a => a.id === agentId);
 
-        return NextResponse.json({ ...updatedDoc.data(), icon: defaultAgent?.icon }, { status: 200 });
-
+        return createApiResponse({ ...updatedDoc.data(), icon: defaultAgent?.icon }, 200);
     } catch (error) {
-        console.error(`Error updating agent ${agentId}:`, error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });
 
 // DELETE /api/agents/[id]
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const agentId = params.id;
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
-    // Prevent deletion of default agents
-    const isDefaultAgent = AGENTS.some(agent => agent.id === agentId);
-    if (isDefaultAgent) {
-        return NextResponse.json({ message: 'Default agents cannot be deleted.' }, { status: 403 });
-    }
-
+export const DELETE = withAuth(async ({ params }) => {
     try {
+        const agentId = params.id;
+        // Prevent deletion of default agents
+        const isDefaultAgent = AGENTS.some(agent => agent.id === agentId);
+        if (isDefaultAgent) {
+            return handleApiError({ message: 'Default agents cannot be deleted.' }, 403);
+        }
+
         const agentRef = adminDb.collection('agents').doc(agentId);
         const doc = await agentRef.get();
-
         if (!doc.exists) {
-            return NextResponse.json({ message: 'Agent not found.' }, { status: 404 });
+            return handleApiError({ message: 'Agent not found.' }, 404);
         }
         
         await agentRef.delete();
-
-        return NextResponse.json({ message: `Agent '${agentId}' deleted successfully.` }, { status: 200 });
+        return createApiResponse({ message: `Agent '${agentId}' deleted successfully.` }, 200);
     } catch (error) {
-        console.error(`Error deleting agent ${agentId}:`, error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });

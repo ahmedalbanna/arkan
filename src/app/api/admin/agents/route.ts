@@ -1,40 +1,12 @@
 
 // src/app/api/agents/route.ts
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile } from '@/lib/db/queries';
-import { AGENTS as defaultAgents } from '@/lib/agents';
-
-// Helper to verify admin role from Authorization header
-async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
-    const authorization = request.headers.get('Authorization');
-    if (!authorization?.startsWith('Bearer ')) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-    const token = authorization.substring(7);
-    
-    try {
-        const decodedToken = await adminAuth.verifyIdToken(token, true);
-        const user = await getUserProfile(decodedToken.uid);
-        if (!user) {
-            return { authorized: false, message: 'Forbidden' };
-        }
-        return { authorized: true, userId: decodedToken.uid };
-    } catch (error) {
-        return { authorized: false, message: 'Unauthorized' };
-    }
-}
+import { AGENTS as defaultAgents, AgentCategory } from '@/lib/agents';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // GET /api/agents
-export async function GET(request: Request) {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const GET = withAuth(async () => {
     try {
         const agentsCollection = adminDb.collection('agents');
         let snapshot = await agentsCollection.get();
@@ -63,36 +35,30 @@ export async function GET(request: Request) {
             };
         });
 
-        return NextResponse.json(agents, { status: 200 });
+        return createApiResponse(agents, 200);
     } catch (error) {
-        console.error('Error fetching agents:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred while fetching agents.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });
 
 
 const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  category: z.string().min(1, "Category is required"),
+  category: z.nativeEnum(AgentCategory),
   pageUrl: z.string().min(1, "Page URL is required"),
   prompt: z.string().min(10, "Prompt must be at least 10 characters"),
 });
 
 
 // POST /api/agents
-export async function POST(request: Request) {
-    const adminCheck = await verifyAdmin(request);
-    if (!adminCheck.authorized) {
-        return NextResponse.json({ message: adminCheck.message }, { status: adminCheck.message === 'Forbidden' ? 403 : 401 });
-    }
-
+export const POST = withAuth(async ({ request }) => {
     try {
         const body = await request.json();
         const validation = createAgentSchema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
+            return handleApiError(validation.error);
         }
 
         const { id, ...agentData } = validation.data;
@@ -100,7 +66,7 @@ export async function POST(request: Request) {
         const doc = await agentRef.get();
 
         if (doc.exists) {
-            return NextResponse.json({ message: 'An agent with this ID already exists.' }, { status: 409 });
+            return handleApiError({ message: 'An agent with this ID already exists.' }, 409);
         }
 
         const newAgent = {
@@ -110,10 +76,8 @@ export async function POST(request: Request) {
 
         await agentRef.set(newAgent);
         
-        return NextResponse.json({ id: agentRef.id, ...newAgent }, { status: 201 });
-
+        return createApiResponse({ id: agentRef.id, ...newAgent }, 201);
     } catch (error) {
-        console.error('Error creating agent:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
+        return handleApiError(error);
     }
-}
+}, { requireAdmin: true });

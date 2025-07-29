@@ -3,17 +3,17 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
+import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
-export async function GET(request: Request) {
+export async function GET() {
     try {
         const stylesCollection = adminDb.collection('templates').doc('pptx').collection('styles');
         let snapshot = await stylesCollection.get();
 
         // Lazy seeding: If no templates exist, populate them from the default config.
         if (snapshot.empty) {
-            console.log('No PPTX templates found in Firestore, seeding...');
             const batch = adminDb.batch();
             (Object.keys(defaultTemplates) as PptxTemplateKey[]).forEach(key => {
                 const template = defaultTemplates[key];
@@ -21,7 +21,6 @@ export async function GET(request: Request) {
                 batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
             });
             await batch.commit();
-            console.log('PPTX templates seeded successfully.');
             snapshot = await stylesCollection.get(); // Re-fetch after seeding
         }
         
@@ -30,9 +29,8 @@ export async function GET(request: Request) {
             templates[doc.id] = doc.data();
         });
 
-        return NextResponse.json(templates, { status: 200 });
+        return createApiResponse(templates, 200);
     } catch (error) {
-        console.error('Error fetching PPTX templates:', error);
-        return NextResponse.json({ message: 'An unexpected error occurred while fetching PPTX templates.' }, { status: 500 });
+        return handleApiError(error);
     }
 }
