@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import FeatureManager from '@/components/admin/FeatureManager';
 import { useFeatures } from '@/hooks/use-features';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Feature } from '@/hooks/use-features';
+import { type Feature } from '@/lib/types';
 
 // Mock the useFeatures hook
 jest.mock('@/hooks/use-features');
@@ -30,7 +30,7 @@ describe('FeatureManager', () => {
     const skeletons = screen.getAllByRole('listitem');
     expect(skeletons.length).toBeGreaterThan(0);
      skeletons.forEach(skeleton => {
-        expect(skeleton).toHaveClass('animate-pulse');
+        expect(skeleton.classList.contains('animate-pulse')).toBe(true);
     });
   });
 

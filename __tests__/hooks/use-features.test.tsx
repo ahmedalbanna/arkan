@@ -2,8 +2,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useFeatures } from '@/hooks/use-features';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Feature } from '@/hooks/use-features';
+import { type Feature } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
+import fetchMock from 'jest-fetch-mock';
 
 
 jest.mock('@/context/AuthContext');

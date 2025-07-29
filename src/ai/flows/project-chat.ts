@@ -3,7 +3,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { toJSON, streamFlow } from '@genkit-ai/next';
+import { runFlow, type FlowResponse } from '@genkit-ai/next/client';
 import { ProjectStateSchema } from '@/lib/project-state-schema';
 import { generateSectionTool } from '@/ai/tools/generateReportSection';
 import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
@@ -21,13 +21,11 @@ export const projectChat = ai.defineFlow(
     name: 'projectChat',
     inputSchema: ChatInputSchema,
     outputSchema: z.any(),
-    streamSchema: z.any(),
   },
-  async (input, { stream }) => {
+  async (input): Promise<any> => {
     const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
 
-    const llmResponse = await stream(
-      {
+    const { stream, response } = await ai.generateStream({
         prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
 
 Your task is to be as helpful as possible. Analyze the user's message and decide if you should:
@@ -42,7 +40,7 @@ Base your actions on the user's intent.
 
 User's Message:
 ---
-{{{message}}}
+${input.message}
 ---
 
 Current Project State:
@@ -51,7 +49,6 @@ ${stringifiedProjectState}
 ---
 `,
         model: 'googleai/gemini-2.0-flash',
-        input: { message: input.message },
         tools: [
             generateSectionTool,
             updateProposalFieldTool,
@@ -60,7 +57,13 @@ ${stringifiedProjectState}
             generateCodebaseTool,
         ]
     });
+
+    for await (const chunk of stream) {
+      // In a real implementation, you'd stream chunks back to the client here.
+      // Since this is a server flow, we'll just log them.
+      console.log(chunk.text);
+    }
     
-    return llmResponse;
+    return await response;
   }
 );

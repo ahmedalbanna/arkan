@@ -2,7 +2,7 @@
 'use client';
 
 import { IStylesOptions } from 'docx';
-import type { PptxTemplate } from '@/lib/pptx-styles';
+import type { PptxTemplate } from '@/lib/types';
 
 // This file centralizes fetching and updating for generation templates.
 
@@ -48,7 +48,7 @@ export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
     return await response.json();
 }
 
-export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' | 'createdAt'> & { id: string }, token: string): Promise<ProposalTemplate> {
+export async function createProposalTemplate(data: Omit<ProposalTemplate, 'id' | 'createdAt'> & {id: string}, token: string): Promise<ProposalTemplate> {
     const response = await fetch('/api/admin/templates/proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

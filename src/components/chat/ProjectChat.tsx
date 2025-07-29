@@ -11,7 +11,7 @@ import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useRunFlow } from '@genkit-ai/next/client';
+import { runFlow } from '@genkit-ai/next/client';
 import { projectChat } from '@/ai/flows/project-chat';
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
@@ -44,24 +44,10 @@ export default function ProjectChat() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState<any[]>([]);
     const [input, setInput] = useState('');
+    const [isRunning, setIsRunning] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
     
     const getFullState = useBuilderStore(state => state.getFullState);
-    const { stream, run, isRunning, error } = useRunFlow(projectChat, {
-        onChunk: (chunk) => {
-             setMessages((prev) => {
-                const last = prev[prev.length - 1];
-                if (last && last.role === 'assistant') {
-                    // Append text to the last assistant message
-                    const updatedLast = { ...last, content: last.content + chunk.content };
-                    return [...prev.slice(0, -1), updatedLast];
-                } else {
-                    // Start a new assistant message
-                    return [...prev, { role: 'assistant', content: chunk.content }];
-                }
-            });
-        }
-    });
 
     const handleToggleChat = () => setIsChatOpen(prev => !prev);
     const handleCloseChat = () => setIsChatOpen(false);
@@ -77,15 +63,35 @@ export default function ProjectChat() {
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim()) return;
+        if (!input.trim() || isRunning) return;
         
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
         
         const projectState = getFullState();
-        run({ message: input, projectState });
-        
         setInput('');
+        setIsRunning(true);
+
+        try {
+            const flow = await runFlow(projectChat, { message: input, projectState });
+
+            let finalContent = '';
+            for await (const chunk of flow.stream()) {
+                if (chunk.output) {
+                    finalContent += chunk.output.text || JSON.stringify(chunk.output.toolRequest, null, 2);
+                }
+            }
+            if (finalContent) {
+                const assistantMessage = { role: 'assistant', content: finalContent };
+                setMessages(prev => [...prev, assistantMessage]);
+            }
+        } catch (error) {
+            console.error(error);
+            const errorMessage = { role: 'assistant', content: 'Sorry, I encountered an error.' };
+            setMessages(prev => [...prev, errorMessage]);
+        } finally {
+            setIsRunning(false);
+        }
     };
 
     return (
@@ -116,7 +122,7 @@ export default function ProjectChat() {
                             {messages.map((message, index) => (
                                 <Message key={index} role={message.role} content={message.content} />
                             ))}
-                            {isRunning && messages[messages.length-1]?.role !== 'assistant' && (
+                            {isRunning && messages[messages.length - 1]?.role === 'user' && (
                                 <div className="flex items-start gap-3 justify-start">
                                     <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shrink-0">
                                         <Bot className="h-5 w-5"/>

@@ -2,17 +2,18 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAgents } from '@/hooks/use-agents';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Agent } from '@/lib/agents';
+import { type Agent, AgentCategory } from '@/lib/agents';
 import { Bot } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import fetchMock from 'jest-fetch-mock';
 
 
 jest.mock('@/context/AuthContext');
 const mockedUseAuth = useAuth as jest.Mock;
 
 const mockAgents: Agent[] = [
-  { id: 'agent-1', name: 'Test Agent 1', description: 'Desc 1', category: 'Proposal Generation', pageUrl: '/test1', isEnabled: true, prompt: 'Prompt 1', icon: Bot },
-  { id: 'agent-2', name: 'Test Agent 2', description: 'Desc 2', category: 'Report Generation', pageUrl: '/test2', isEnabled: false, prompt: 'Prompt 2', icon: Bot },
+  { id: 'agent-1', name: 'Test Agent 1', description: 'Desc 1', category: AgentCategory.ProposalGeneration, pageUrl: '/test1', isEnabled: true, prompt: 'Prompt 1', icon: Bot },
+  { id: 'agent-2', name: 'Test Agent 2', description: 'Desc 2', category: AgentCategory.ReportGeneration, pageUrl: '/test2', isEnabled: false, prompt: 'Prompt 2', icon: Bot },
 ];
 
 const queryClient = new QueryClient({

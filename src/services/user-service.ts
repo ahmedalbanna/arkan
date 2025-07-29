@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { UserProfile, LoginCredentials } from '@/lib/types';
+import type { UserProfile } from '@/lib/types';
 import { auth, app } from '@/lib/firebase';
 import {
   signInWithEmailAndPassword,
@@ -13,7 +13,7 @@ import {
   signInWithPhoneNumber,
   type ConfirmationResult,
 } from "firebase/auth";
-import { SignupCredentials } from '@/components/SignupForm';
+import type { SignupCredentials } from "@/components/SignupForm";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 
 export interface UserListResponse {
@@ -40,7 +40,7 @@ export async function fetchUsers(limit: number, lastVisibleId: string | undefine
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch users');
     }
-    return response.json();
+    return await response.json();
 }
 
 /**
@@ -89,7 +89,7 @@ export async function fetchUserProfileApi(userId: string, token: string): Promis
 }
 
 
-export async function loginWithEmail(credentials: LoginCredentials) {
+export async function loginWithEmail(credentials: {email: string, password: string}) {
   try {
     const userCredential = await signInWithEmailAndPassword(
       auth,

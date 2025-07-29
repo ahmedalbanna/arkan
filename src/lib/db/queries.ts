@@ -124,7 +124,7 @@ export async function updateUser(userId: string, data: Partial<UserProfile>): Pr
 }
 
 export async function deleteUser(userId: string) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     await adminAuth.deleteUser(userId);
     await adminDb.collection('users').doc(userId).delete();
 }

@@ -8,6 +8,10 @@ interface ApiHandlerOptions {
   requireAdmin?: boolean;
 }
 
+interface RouteContext {
+    params: { [key: string]: string | string[] | undefined };
+}
+
 interface AuthContext {
   request: NextRequest;
   user: any; // Can be more specific, e.g., UserProfile from db/queries
