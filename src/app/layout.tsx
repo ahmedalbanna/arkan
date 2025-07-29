@@ -3,7 +3,6 @@
 import type { Metadata } from 'next';
 import { Poppins, PT_Sans, Cairo, Almarai } from 'next/font/google';
 import './globals.css';
-import '@/css/fonts.css';
 import { cn } from '@/lib/utils';
 import { Header } from '@/components/layout/Header';
 import { Toaster } from '@/components/ui/toaster';
@@ -27,13 +26,13 @@ export const metadata: Metadata = {
 const fontBody = PT_Sans({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  variable: '--font-body',
 });
 
 const fontHeadline = Poppins({
   subsets: ['latin'],
   weight: ['400', '600', '700'],
-  variable: '--font-poppins',
+  variable: '--font-headline',
 });
 
 const fontAlmarai = Almarai({
