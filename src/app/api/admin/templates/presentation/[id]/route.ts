@@ -8,7 +8,7 @@ import { getUserProfile } from '@/lib/db/queries';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 
 async function verifyAdmin(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) return { authorized: false, message: 'Unauthorized' };
     const token = authorization.substring(7);
