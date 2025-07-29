@@ -4,7 +4,8 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';

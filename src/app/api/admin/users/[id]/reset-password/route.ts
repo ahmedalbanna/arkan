@@ -5,7 +5,7 @@ import { getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyAdmin(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
 
     try {
+        const adminAuth = await getAdminAuth();
         const user = await getUserProfile(userId);
         if (!user || !user.email) {
             return NextResponse.json({ message: 'User not found or has no email.' }, { status: 404 });

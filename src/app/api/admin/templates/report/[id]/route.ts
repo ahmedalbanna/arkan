@@ -2,7 +2,8 @@
 // src/app/api/templates/report/[id]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
-import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 

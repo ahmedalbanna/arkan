@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { TranslateTextOutput, TranslateVariables } from '@/lib/types';
@@ -10,7 +9,7 @@ import type { TranslateTextOutput, TranslateVariables } from '@/lib/types';
  * @returns A promise that resolves to the translated text output.
  */
 export async function translateText(variables: TranslateVariables, token: string): Promise<TranslateTextOutput> {
-  const response = await fetch('/api/translate', {
+  const response = await fetch('/api/translate/text', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

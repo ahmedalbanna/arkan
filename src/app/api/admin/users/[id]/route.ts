@@ -1,15 +1,17 @@
+
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import {
   getUserProfile,
 } from "@/lib/db/queries";
-import { getAdminAuth, adminDb } from "@/lib/firebase/admin";
+import { getAdminAuth } from "@/lib/firebase/admin";
+import { adminDb } from '@/lib/firebase/server-init';
 import type { UserRole } from "@/lib/db/queries";
 import { revalidatePath } from "next/cache";
 
 // Helper to verify if the requester is an admin OR the user themselves
 async function verifyAccess(request: Request, targetUserId: string) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   const authHeader = request.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return {
@@ -137,7 +139,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const adminAuth = getAdminAuth();
+  const adminAuth = await getAdminAuth();
   try {
     const targetUserId = params.id;
     const authHeader = req.headers.get("Authorization");

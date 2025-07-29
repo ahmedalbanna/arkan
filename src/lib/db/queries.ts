@@ -3,7 +3,7 @@
 // We will restore the original Firebase-based queries.
 'use server';
 import { getAdminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { Agent, AgentData } from '@/lib/agents';
 import { AGENTS as defaultAgents } from '@/lib/agents';

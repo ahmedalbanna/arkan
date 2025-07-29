@@ -1,11 +1,12 @@
 
 // src/app/api/conversations/[id]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
-import { getAdminAuth, adminRealtimeDb } from '@/lib/firebase/admin';
+import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
 // Helper to verify user can delete the conversation
 async function verifyAccess(request: Request, conversationId: string) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', requesterId: null, conversation: null };
