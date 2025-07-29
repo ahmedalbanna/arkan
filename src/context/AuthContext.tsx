@@ -5,9 +5,10 @@ import React, { createContext, useContext, ReactNode, useState, useEffect, useCa
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { subscribeToUserProfile } from '@/services/user-service';
+import { subscribeToUserProfile, fetchUserProfile as fetchUserProfileApi } from '@/services/user-service';
 import type { UserProfile } from '@/lib/db/queries';
 import { userKeys } from '@/lib/query-keys';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 interface AuthContextType {
   firebaseUser: FirebaseUser | null;
@@ -47,8 +48,8 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
 
   } else {
     // Clear session cookie
-    await fetch('/api/auth/session', {
-      method: 'DELETE',
+    await fetch('/api/auth/logout', {
+      method: 'POST',
     });
   }
 }
@@ -70,6 +71,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Use React Query to get the user profile from the cache
   const { data: userProfile, isLoading: isProfileLoading } = useQuery<UserProfile | null>({
     queryKey: userKeys.profile(firebaseUser?.uid ?? ''),
+    queryFn: async () => {
+        if (!firebaseUser) return null;
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchUserProfileApi(firebaseUser.uid, token);
+    },
     enabled: !!firebaseUser,
     staleTime: Infinity,
   });
