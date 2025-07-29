@@ -1,4 +1,3 @@
-
 // src/app/api/features/route.ts
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/server-init';
