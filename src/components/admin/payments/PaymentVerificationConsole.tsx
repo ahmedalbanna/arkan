@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
