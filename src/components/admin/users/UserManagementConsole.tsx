@@ -19,7 +19,7 @@ import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, Me
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfile } from '@/services/user-service';
+import { fetchUserProfile, fetchUsers } from '@/services/user-service';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
@@ -31,19 +31,6 @@ import { createConversationApi } from '@/services/chat-service';
 
 
 const USERS_PER_PAGE = 10;
-
-async function fetchUsers(page: number, token: string): Promise<UserProfile[]> {
-    const response = await fetch(`/api/users?page=${page}&limit=${USERS_PER_PAGE}`, {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch users');
-    }
-    return response.json();
-}
 
 function UserTableSkeleton() {
     const { t } = useLocalization();
@@ -90,7 +77,7 @@ export default function UserManagementConsole() {
       queryFn: async () => {
           if (!firebaseUser) throw new Error("User not authenticated");
           const token = await firebaseUser.getIdToken();
-          return fetchUsers(page, token);
+          return fetchUsers(page, USERS_PER_PAGE, token);
       },
       placeholderData: (previousData) => previousData,
       staleTime: 1000 * 60, // 1 minute
@@ -191,11 +178,9 @@ export default function UserManagementConsole() {
                     <TableCell>{user.credits}</TableCell>
                     <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
                     <TableCell className="text-right">
-                       <Button asChild variant="ghost" size="icon">
-                         <button onClick={() => handleStartChat(user)}>
-                            <MessageSquare className="h-4 w-4" />
-                            <span className="sr-only">Chat with user</span>
-                          </button>
+                       <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
+                          <MessageSquare className="h-4 w-4" />
+                          <span className="sr-only">Chat with user</span>
                         </Button>
                       <Button asChild variant="ghost" size="icon">
                         <Link href={`/admin/manage-users/${user.id}/edit`} onMouseEnter={() => prefetchUser(user.id)}>

@@ -4,6 +4,23 @@
 import type { UserProfile } from '@/lib/db/queries';
 
 /**
+ * Fetches the list of all users from the API.
+ * Requires admin authentication.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to an array of UserProfile objects.
+ */
+export async function fetchUsers(page: number, limit: number, token: string): Promise<UserProfile[]> {
+    const response = await fetch(`/api/users?page=${page}&limit=${limit}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch users');
+    }
+    return response.json();
+}
+
+/**
  * Fetches a user's profile from the database via the API.
  * @param userId - The ID of the user to fetch.
  * @param token - The authentication token of the currently logged-in user (for authorization).
