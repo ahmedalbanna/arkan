@@ -96,7 +96,6 @@ export function ChatList({ agents, selectedAgent, onSelectAgent }: ChatListProps
                 <TabsTrigger value="inbox" disabled><Inbox className="h-4 w-4" /> Inbox</TabsTrigger>
             </TabsList>
          </Tabs>
-         <NewChatDialog />
       </div>
 
       <div className="flex-1 overflow-y-auto p-2">

@@ -2,14 +2,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChatList, type AgentChatSession } from './ChatList';
+import { ChatList } from './ChatList';
 import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import { cn } from '@/lib/utils';
 import { useAgents } from '@/hooks/use-agents';
 import { Agent } from '@/lib/agents';
 import { useAuth } from '@/context/AuthContext';
-import { useChatStore } from '@/hooks/useChatStore';
+import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks/useChatStore';
 
 export default function ChatInterface() {
   const { agents, isLoaded } = useAgents();
@@ -49,6 +49,10 @@ export default function ChatInterface() {
         title: agent.name,
         agent: agent,
         messages: [],
+        lastMessage: '',
+        lastMessageTimestamp: new Date().toISOString(),
+        participantIds: [],
+        participantNames: {},
     };
     setSelectedChat(tempSession);
   }
@@ -66,14 +70,14 @@ export default function ChatInterface() {
       >
         <ChatList
           agents={agents}
-          selectedAgent={selectedChat?.agent}
+          selectedAgent={selectedChat && 'agent' in selectedChat ? selectedChat.agent : null}
           onSelectAgent={handleSelectAgent}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={75}>
         <ConversationView 
-            chat={selectedChat} 
+            chat={selectedChat as AgentChatSession | null}
             onNewMessage={addMessageToSession}
         />
       </ResizablePanel>

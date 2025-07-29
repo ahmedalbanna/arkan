@@ -2,7 +2,6 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import type { AgentChatSession } from './ChatList';
 import { Button } from '../ui/button';
 import { Bot, User, Send, Paperclip, Info, Settings2, Loader2, RotateCcw } from 'lucide-react';
 import { CardHeader } from '../ui/card';
@@ -13,15 +12,11 @@ import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import type { AgentChatSession, ChatMessage } from '@/hooks/useChatStore';
 
 interface ConversationViewProps {
   chat: AgentChatSession | null;
   onNewMessage: (agentId: string, message: any) => void;
-}
-
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
 }
 
 async function agentChatApi(variables: { agentId: string; message: string; token: string }) {

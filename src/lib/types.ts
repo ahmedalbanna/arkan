@@ -1,5 +1,4 @@
 
-
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, ManipulateTextInput, ManipulateTextOutput, AnyProjectProposal } from '@/ai/schemas';
 export type {
   ProjectProposal,
@@ -27,7 +26,7 @@ export type { AcademicSolverState, ExternalContext as AcademicContextFile } from
 export type { Team, TeamMember } from '@/lib/db/queries';
 export type { TeamWithMembers } from '@/services/team-service';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
-export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
+export type { PptxTemplate, PptxStyleOptions } from './pptx-styles';
 export type { UserProfile } from '@/lib/db/queries';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext } from '@/hooks/useReportStore';
