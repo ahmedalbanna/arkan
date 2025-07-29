@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare, Bell } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, FileQuestion, BookCheck, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, Upload, AreaChart, LayoutGrid, MessageSquare, Bell, Trash2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,7 +17,7 @@ import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
-import { useNotifications, useMarkNotificationsAsRead } from '@/hooks/use-notifications';
+import { useNotifications, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
 import type { Notification } from '@/lib/types';
 
@@ -43,6 +43,7 @@ export function Header() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { data: notifications } = useNotifications();
   const markAsReadMutation = useMarkNotificationsAsRead();
+  const clearAllMutation = useClearAllNotifications();
   const [isNotificationMenuOpen, setIsNotificationMenuOpen] = useState(false);
 
   // This prevents hydration mismatches by ensuring the component only renders on the client
@@ -50,13 +51,21 @@ export function Header() {
     setIsClient(true);
   }, []);
 
+  const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
+
   const handleNotificationMenuOpenChange = (isOpen: boolean) => {
     setIsNotificationMenuOpen(isOpen);
-    if (isOpen && notifications && notifications.length > 0) {
-      const unreadIds = notifications.map(n => n.id);
+    // Only mark as read if there are unread notifications
+    if (isOpen && unreadCount > 0) {
+      const unreadIds = notifications.filter(n => !n.isRead).map(n => n.id);
       markAsReadMutation.mutate(unreadIds);
     }
   }
+
+  const handleClearAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    clearAllMutation.mutate();
+  };
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -110,7 +119,6 @@ export function Header() {
 
   // The condition `!isClient || isLoadingAuth` ensures we show a skeleton until client has mounted and auth state is determined.
   const showSkeleton = !isClient || isLoadingAuth;
-  const notificationCount = notifications?.length ?? 0;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -234,32 +242,47 @@ export function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-5 w-5" />
-                      {notificationCount > 0 && (
-                        <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{notificationCount}</Badge>
+                      {unreadCount > 0 && (
+                        <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0">{unreadCount}</Badge>
                       )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
-                    <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                    <DropdownMenuLabel className="flex justify-between items-center">
+                      <span>Notifications</span>
+                      {notifications && notifications.length > 0 && (
+                        <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={clearAllMutation.isPending}>
+                          <Trash2 className="mr-1 h-3 w-3" />
+                           Clear All
+                        </Button>
+                      )}
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {notifications && notifications.length > 0 ? (
-                      notifications.map(notification => (
-                        <DropdownMenuItem key={notification.id}>
-                            <div className="flex items-start gap-3">
-                                <NotificationIcon icon={notification.icon} />
-                                <div>
-                                    <p className="font-semibold">{notification.title}</p>
-                                    <p className="text-xs text-muted-foreground">{notification.description}</p>
-                                    <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
-                                </div>
-                            </div>
-                        </DropdownMenuItem>
-                      ))
-                    ) : (
-                      <div className="p-4 text-center text-sm text-muted-foreground">
-                        You have no new notifications.
-                      </div>
-                    )}
+                    <ScrollArea className="h-auto max-h-80">
+                      {notifications && notifications.length > 0 ? (
+                        notifications.map(notification => (
+                          <DropdownMenuItem key={notification.id} className="items-start">
+                              <div className="flex items-start gap-3">
+                                  <div className="relative">
+                                    <NotificationIcon icon={notification.icon} />
+                                    {!notification.isRead && (
+                                      <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-blue-500" />
+                                    )}
+                                  </div>
+                                  <div>
+                                      <p className="font-semibold">{notification.title}</p>
+                                      <p className="text-xs text-muted-foreground">{notification.description}</p>
+                                      <p className="text-xs text-muted-foreground/80 mt-1">{formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}</p>
+                                  </div>
+                              </div>
+                          </DropdownMenuItem>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          You have no new notifications.
+                        </div>
+                      )}
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
             </>

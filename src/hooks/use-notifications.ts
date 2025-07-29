@@ -1,16 +1,13 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import type { Notification } from '@/lib/types';
-import { getDatabase, ref, onValue, off, query, orderByChild, equalTo } from "firebase/database";
+import { getDatabase, ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
 import { app } from "@/lib/firebase";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import { toast } from './use-toast';
-import { notificationKeys } from '@/lib/query-keys';
 
 async function markNotificationsAsReadApi(notificationIds: string[], token: string): Promise<any> {
     const response = await fetch('/api/notifications/mark-as-read', {
@@ -28,8 +25,20 @@ async function markNotificationsAsReadApi(notificationIds: string[], token: stri
     return response.json();
 }
 
+async function clearAllNotificationsApi(token: string): Promise<any> {
+    const response = await fetch('/api/notifications/clear', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to clear notifications');
+    }
+    return response.json();
+}
+
 /**
- * Custom hook to fetch unread notifications for the current user using Realtime Database.
+ * Custom hook to fetch notifications for the current user using Realtime Database.
  */
 export function useNotifications() {
   const { firebaseUser } = useAuth();
@@ -49,10 +58,11 @@ export function useNotifications() {
     setError(null);
 
     const db = getDatabase(app);
+    // Fetch the last 20 notifications, regardless of read status
     const notificationsRef = query(
         ref(db, 'notifications/' + firebaseUser.uid),
-        orderByChild('isRead'),
-        equalTo(false)
+        orderByChild('createdAt'),
+        limitToLast(20)
     );
 
     const unsubscribe = onValue(notificationsRef, (snapshot) => {
@@ -65,6 +75,7 @@ export function useNotifications() {
             ...data[key]
           } as Notification);
         });
+        // Sort descending by date, as limitToLast fetches in ascending order
         notificationsList.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       }
       setNotifications(notificationsList);
@@ -91,12 +102,30 @@ export function useMarkNotificationsAsRead() {
     
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
+            if (notificationIds.length === 0) return;
             const token = await getAuthenticatedToken(firebaseUser);
             return markNotificationsAsReadApi(notificationIds, token);
         },
-        // No client-side invalidation needed; the real-time listener will update automatically.
         onError: (error) => {
             handleErrorUtility(error, "Could not update notifications");
+        }
+    });
+}
+
+
+/**
+ * Custom mutation hook to clear all notifications for the current user.
+ */
+export function useClearAllNotifications() {
+    const { firebaseUser } = useAuth();
+    
+    return useMutation<any, Error, void>({
+        mutationFn: async () => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return clearAllNotificationsApi(token);
+        },
+        onError: (error) => {
+            handleErrorUtility(error, "Could not clear notifications");
         }
     });
 }
