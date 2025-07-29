@@ -175,42 +175,25 @@ export function ProposalModeGenerator() {
                 {/* Right Column */}
                  <div className="lg:col-span-7 lg:overflow-y-auto lg:pr-2">
                     {proposal ? (
-                         <Tabs defaultValue="user-view" className="w-full">
-                            <Card>
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <CardTitle className="font-headline text-2xl text-primary">
-                                                {(proposal as any).title || "Generated Proposal"}
-                                            </CardTitle>
-                                            <CardDescription>
-                                                {(proposal as any).category || "Review the generated proposal"}
-                                            </CardDescription>
-                                        </div>
-                                        <TabsList className="grid w-full grid-cols-2 h-9 max-w-[200px]">
-                                            <TabsTrigger value="user-view" className="text-xs">User View</TabsTrigger>
-                                            <TabsTrigger value="dev-view" className="text-xs">JSON View</TabsTrigger>
-                                        </TabsList>
-                                    </div>
-                                </CardHeader>
-                                <CardContent>
-                                    <TabsContent value="user-view">
-                                        <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                            <FormattedProposalView
-                                                proposal={proposal}
-                                                onUpdate={handleProposalUpdate}
-                                                readOnly={generationMutation.isPending || translateMutation.isPending}
-                                            />
-                                        </div>
-                                    </TabsContent>
-                                        <TabsContent value="dev-view">
-                                        <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                        <ProposalViewer proposal={proposal} onUpdate={handleProposalUpdate} readOnly={generationMutation.isPending || translateMutation.isPending} />
-                                        </div>
-                                    </TabsContent>
-                                </CardContent>
-                            </Card>
-                        </Tabs>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="font-headline text-2xl text-primary">
+                                    {(proposal as any).title || "Generated Proposal"}
+                                </CardTitle>
+                                <CardDescription>
+                                    {(proposal as any).category || "Review the generated proposal"}
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                    <FormattedProposalView
+                                        proposal={proposal}
+                                        onUpdate={handleProposalUpdate}
+                                        readOnly={generationMutation.isPending || translateMutation.isPending}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
                     ) : generationMutation.isPending ? (
                         <ProposalSkeleton />
                     ) : (
