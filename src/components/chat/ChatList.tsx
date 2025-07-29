@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { AGENTS, Agent } from '@/lib/agents';
 import { useQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { createConversationApi } from '@/services/chat-service';
@@ -76,6 +76,12 @@ function NewChatDialog() {
                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>New Chat</Button>
             </DialogTrigger>
             <DialogContent className="p-0">
+                <DialogHeader className="p-4 border-b">
+                  <DialogTitle>Start a New Chat</DialogTitle>
+                  <DialogDescription>
+                    Select a user from the list to begin a conversation.
+                  </DialogDescription>
+                </DialogHeader>
                 <Command>
                     <CommandInput placeholder="Search users..." />
                     <CommandList>
