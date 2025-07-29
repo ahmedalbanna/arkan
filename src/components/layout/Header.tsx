@@ -216,6 +216,14 @@ export function Header() {
                       My Dashboard
                     </Link>
                   </DropdownMenuItem>
+                   {userProfile?.role === 'admin' && (
+                    <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Admin Panel
+                        </Link>
+                    </DropdownMenuItem>
+                   )}
                   <DropdownMenuItem asChild>
                     <Link href="/payment-history">
                         <CreditCard className="mr-2 h-4 w-4" />
@@ -240,6 +248,7 @@ export function Header() {
                       PDF to Markdown
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/generate">Go to Builder</Link></DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />

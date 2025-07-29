@@ -1,3 +1,4 @@
+
 'use server';
 
 import admin from 'firebase-admin';
@@ -8,4 +9,5 @@ export async function getAdminAuth() {
   return admin.auth();
 }
 
-export { adminDb, adminRealtimeDb };
+// NOTE: The non-async exports were removed from this file.
+// Other modules should import them directly from './server-init'.
