@@ -12,22 +12,7 @@ import {
   updateFeature as updateFeatureApi,
 } from "@/services/feature-service";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-
-export interface Feature {
-    id: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-}
-
-export interface UpdateFeaturePayload {
-    isEnabled: boolean;
-}
-
-export interface UpdateFeatureVariables {
-    featureId: string;
-    payload: UpdateFeaturePayload;
-}
+import type { Feature, UpdateFeatureVariables } from "@/lib/types";
 
 
 /**
@@ -37,18 +22,13 @@ export interface UpdateFeatureVariables {
  * @returns An object containing the list of features, loading status, and error status.
  */
 export function useFeatures() {
-  const { firebaseUser } = useAuth();
   const {
     data: features,
     isLoading,
     isError,
   } = useQuery<Feature[]>({
     queryKey: featureKeys.lists(),
-    queryFn: async () => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        return fetchFeaturesApi(token);
-    },
-    enabled: !!firebaseUser,
+    queryFn: fetchFeaturesApi, // Does not require a token
     staleTime: 1000 * 60 * 5, // 5 minutes
     meta: {
       onError: (error: Error) =>
