@@ -1,16 +1,14 @@
 
 'use client';
 
+import { Activity } from "@/components/admin/dashboard/RecentActivity";
+
 export interface DashboardStats {
     totalUsers: number;
     totalGenerations: number;
     pendingPayments: number;
     agentUsageChartData: { name: string; count: number }[];
-    recentActivity: {
-        userId: string;
-        agentId: string;
-        createdAt: string;
-    }[];
+    recentActivity: Activity[];
 }
 
 export async function fetchDashboardStats(token: string): Promise<DashboardStats> {

@@ -7,6 +7,7 @@ import { getDatabase, ref, onValue, off, push, serverTimestamp, query, orderByCh
 import { app } from '@/lib/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
+import { Agent } from '@/lib/agents';
 
 
 export interface ChatMessage {
@@ -27,11 +28,18 @@ export interface ChatSession {
   isSupportChat?: boolean;
   isTemporary?: boolean; // To identify chats not yet saved to DB
   messages: ChatMessage[];
+  agent?: Agent; // For agent training chats
 }
+
+
+export interface AgentChatSession extends ChatSession {
+  agent: Agent;
+}
+
 
 interface ChatState {
   chats: ChatSession[];
-  selectedChat: ChatSession | null;
+  selectedChat: ChatSession | AgentChatSession | null;
   input: string;
   isChatOpen: boolean; // To control the floating widget
   isInitialized: boolean;
@@ -42,7 +50,7 @@ interface ChatActions {
   addMessage: (chatId: string, message: ChatMessage) => void;
   setInput: (input: string) => void;
   createConversation: (conversation: ChatSession) => void;
-  setSelectedChat: (chat: ChatSession | null) => void;
+  setSelectedChat: (chat: ChatSession | AgentChatSession | null) => void;
   openChat: () => void;
   closeChat: () => void;
   toggleChat: () => void;

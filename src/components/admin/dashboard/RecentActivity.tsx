@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +14,7 @@ import dynamic from 'next/dynamic';
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 
-interface Activity {
+export interface Activity {
     userId: string;
     agentId: string;
     createdAt: string;

@@ -11,7 +11,7 @@ export interface CodebaseState {
 interface CodebaseActions {
   setCodebase: (codebase: Codebase | null) => void;
   newSession: () => void;
-  loadState: (state: Partial<{ codebase: CodebaseState }>) => void;
+  loadState: (state: Partial<CodebaseState>) => void;
 }
 
 const initialState: CodebaseState = {

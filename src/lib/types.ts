@@ -12,7 +12,6 @@ export type {
 };
 export type {
   HistoryEntry,
-  useHistory,
 } from '@/hooks/use-history';
 export type { LoginCredentials } from '@/hooks/use-user';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
@@ -25,10 +24,11 @@ export type { AgentData, Agent, AgentPrompt } from '@/lib/agents';
 
 // Define TranslateTextOutput here since it is no longer in schemas.ts
 export type { AcademicSolverState, ExternalContext } from '@/hooks/useAcademicSolverStore';
-export type { Team, TeamMember } from '@/lib/db/queries';
-export type { TeamWithMembers } from '@/services/team-service';
+export type { Team, TeamMember, TeamWithMembers } from '@/lib/db/queries';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { PptxTemplate, PptxStyleOptions, PptxTemplateKey } from './pptx-styles';
+export type { UserProfile } from '@/lib/db/queries';
+export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 
 export interface Notification {
   id: string;
@@ -40,7 +40,6 @@ export interface Notification {
   link?: string;
 }
 
-export type UserProfile = import('@/lib/db/queries').UserProfile;
 export type TranslateVariables = {
     text: string;
     targetLang: string;

@@ -98,24 +98,6 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>Add Guideline</Button>
                     </div>
                 </div>
-                 <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="json-structure">
-                        <AccordionTrigger>JSON Structure</AccordionTrigger>
-                        <AccordionContent>
-                             <div className="p-2 border rounded-md bg-background">
-                                 <ReactJson 
-                                    src={{}} 
-                                    theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
-                                    displayDataTypes={false}
-                                    name={false}
-                                    quotesOnKeys={false}
-                                    displayObjectSize={false}
-                                />
-                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Accordion>
-
 
                 <div className="flex justify-end gap-2">
                      {!isDefaultTemplate && (

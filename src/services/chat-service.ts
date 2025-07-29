@@ -1,12 +1,13 @@
 
 'use client';
 
-import type { ChatSession } from "@/components/chat/ChatList";
+import type { ChatSession } from "@/hooks/useChatStore";
 
 interface CreateConversationData {
     participantIds: string[];
     participantNames: Record<string, string>;
     title?: string;
+    isSupportChat?: boolean;
 }
 
 export async function createConversationApi(data: CreateConversationData, token: string): Promise<ChatSession> {

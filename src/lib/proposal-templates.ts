@@ -6,7 +6,6 @@ export interface ProposalTemplate {
     description: string;
     prompt: string;
     guidelines?: string[];
-    jsonStructure?: any;
 }
 
 const basePrompt = `You are an expert project manager. A user will provide you with a project idea. Your task is to generate a comprehensive and professional project proposal based on that idea.
@@ -30,29 +29,7 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
             "The methodology should be based on a hybrid approach, combining elements of Waterfall for planning and Agile for execution.",
             "The budget breakdown should include standard software development roles like Project Manager, UI/UX Designer, Frontend Developer, and Backend Developer.",
             "Risks should consider technical challenges, scope creep, and resource availability."
-        ],
-        jsonStructure: {
-            category: 'string',
-            title: 'string',
-            objective: 'string',
-            methodology: 'string',
-            expected_outcome: ['string'],
-            timeline: {
-                startDate: 'string',
-                endDate: 'string',
-                phases: [{ name: 'string', durationWeeks: 'number' }]
-            },
-            budget: {
-                totalAmount: 'number',
-                currency: 'string',
-                breakdown: [{ item: 'string', cost: 'number' }]
-            },
-            stakeholders: [{ name: 'string', role: 'string', interest: 'string' }],
-            success_criteria: ['string'],
-            evaluation: 'string',
-            tags: ['string'],
-            risks: [{ description: 'string', mitigation: 'string' }]
-        }
+        ]
     },
     {
         id: 'agile-project',
@@ -63,17 +40,6 @@ export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
             "The methodology must be explicitly defined as Agile, using frameworks like Scrum or Kanban.",
             "The timeline should be structured into short, iterative phases called 'Sprints', each lasting 2-4 weeks.",
             "Success criteria should emphasize continuous delivery, stakeholder feedback, and adaptability to change."
-        ],
-        jsonStructure: {
-            title: 'string',
-            productGoal: 'string',
-            productBacklog: [{ userStory: 'string', priority: 'string' }],
-            sprints: [{
-                name: 'string',
-                duration: 'string',
-                goals: ['string'],
-                tasks: ['string']
-            }]
-        }
+        ]
     }
 ];
