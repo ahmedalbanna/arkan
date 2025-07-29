@@ -16,25 +16,10 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { translatePresentationApi } from '@/services/translation-service';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
-}
-
-async function translatePresentationApi(variables: { presentation: PresentationHistoryEntry, targetLang: string, token: string }): Promise<PresentationHistoryEntry> {
-    const response = await fetch('/api/translate-presentation', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify({ presentation: variables.presentation, targetLang: variables.targetLang })
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to translate presentation');
-    }
-    return response.json();
 }
 
 export default function PresentationViewer({ activePresentation }: PresentationViewerProps) {

@@ -16,6 +16,7 @@ import { ProposalActions } from './ProposalActions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { lazy, Suspense } from 'react';
+import { translateProposalApi } from '@/services/translation-service';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -66,23 +67,6 @@ async function generateProposal(variables: { body: any; token: string; }): Promi
     return await response.json();
 }
 
-async function translateProposal(variables: { proposal: AnyProjectProposal, targetLang: string, token: string }): Promise<AnyProjectProposal> {
-    const response = await fetch('/api/translate-proposal', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify({ proposal: variables.proposal, targetLang: variables.targetLang })
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to translate proposal');
-    }
-    return await response.json();
-}
-
-
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { t, locale } = useLocalization();
@@ -112,7 +96,7 @@ export function ProposalModeGenerator() {
     });
 
     const translateMutation = useMutation({
-        mutationFn: translateProposal,
+        mutationFn: translateProposalApi,
         onSuccess: (data) => {
             setProposal(data);
             refetchUser(); // Invalidate to update credits
