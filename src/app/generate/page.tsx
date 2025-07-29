@@ -17,6 +17,7 @@ import type { Feature } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
 import ProjectChat from '@/components/chat/ProjectChat';
+import { formatDistanceToNow } from 'date-fns';
 
 
 const LoadingSkeleton = () => (
@@ -79,7 +80,7 @@ async function markOnboardingComplete(userId: string, token: string) {
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
-  const { proposal, currentProjectId, loadState, name: projectName } = useBuilderStore();
+  const { proposal, currentProjectId, loadState, name: projectName, projectIdea } = useBuilderStore();
   const { t } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
@@ -132,7 +133,7 @@ function GeneratePageContent() {
   const isFeatureEnabled = (featureId: string) => {
       if (!featuresLoaded) return false;
       const feature = features.find(f => f.id === featureId);
-      return feature?.isEnabled ?? false;
+      return feature?.isEnabled;
   };
 
   const enabledTabs = [
@@ -159,11 +160,19 @@ function GeneratePageContent() {
     <div className="relative h-full">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
       <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex-1">
+        <div className="flex justify-between items-start mb-4 gap-4">
+          <div className="flex-1 space-y-1">
              <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>
               {projectName || 'New Project'}
             </h1>
+            <p className="text-sm text-muted-foreground truncate" title={projectIdea}>
+              {projectIdea || 'No description provided.'}
+            </p>
+             {projectData?.updatedAt && (
+              <p className="text-xs text-muted-foreground">
+                Last updated: {formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true })}
+              </p>
+            )}
           </div>
           <div className="flex-none">
             <SessionActions />
