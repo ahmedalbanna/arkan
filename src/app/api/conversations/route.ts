@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 import { getUserProfile } from '@/lib/db/queries';
-import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const createConversationSchema = z.object({
   participantIds: z.array(z.string()).min(2, "At least two participants are required."),
@@ -20,9 +20,8 @@ function generateConversationId(participantIds: string[]): string {
     return participantIds.sort().join('-');
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async ({ user }) => {
     try {
-        const { user } = await authenticateRequest(request);
         const db = adminRealtimeDb;
 
         let conversations;
@@ -58,12 +57,11 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         return handleApiError(error);
     }
-}
+});
 
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async ({ request, user }) => {
     try {
-        const { user } = await authenticateRequest(request);
         const body = await request.json();
         const validation = createConversationSchema.safeParse(body);
         if (!validation.success) {
@@ -113,4 +111,4 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         return handleApiError(error);
     }
-}
+});

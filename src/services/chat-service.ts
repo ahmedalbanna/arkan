@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { ChatSession } from "@/hooks/useChatStore";
@@ -49,7 +48,7 @@ export async function initiateSupportChat(token: string): Promise<ChatSession> {
 
 export async function deleteConversationApi(chatId: string, token: string): Promise<{ message: string }> {
      if (!token) throw new Error("User not authenticated");
-     const response = await fetch(`/api/admin/conversations/${chatId}`, {
+     const response = await fetch(`/api/conversations/${chatId}`, {
          method: 'DELETE',
          headers: {
              'Authorization': `Bearer ${token}`
