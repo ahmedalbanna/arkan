@@ -3,6 +3,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
+import { getDatabase } from 'firebase-admin/database';
 
 const markAsReadSchema = z.object({
   notificationIds: z.array(z.string()).min(1),
@@ -28,16 +29,15 @@ export async function POST(request: Request) {
         }
         
         const { notificationIds } = validation.data;
-        const batch = adminDb.batch();
-
+        
+        // Use the Admin SDK to interact with the Realtime Database
+        const db = getDatabase();
+        const updates: { [key: string]: any } = {};
         notificationIds.forEach(id => {
-            const docRef = adminDb.collection('notifications').doc(id);
-            // We could add a check here to ensure the notification belongs to the user,
-            // but for simplicity, we'll assume the client sends valid IDs.
-            batch.update(docRef, { isRead: true });
+            updates[`/notifications/${userId}/${id}/isRead`] = true;
         });
 
-        await batch.commit();
+        await db.ref().update(updates);
 
         return NextResponse.json({ message: 'Notifications marked as read.' }, { status: 200 });
 

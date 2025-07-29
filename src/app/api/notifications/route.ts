@@ -1,5 +1,8 @@
 
 // src/app/api/notifications/route.ts
+// This file is no longer used for fetching notifications with the new real-time approach,
+// but it's kept here in case a non-real-time fetch is needed in the future.
+// The primary fetching logic is now in `src/hooks/use-notifications.ts`.
 import { NextResponse } from 'next/server';
 import { getAdminAuth, adminDb } from '@/lib/firebase/admin';
 
@@ -24,11 +27,13 @@ export async function GET(request: Request) {
     }
     
     try {
+        // This is a Firestore query. The app is now using RTDB for notifications.
+        // This endpoint would need to be updated to use the RTDB admin SDK if it were to be used.
         const snapshot = await adminDb.collection('notifications')
             .where('userId', '==', userId)
             .where('isRead', '==', false)
             .orderBy('createdAt', 'desc')
-            .limit(10) // Limit to the 10 most recent unread notifications
+            .limit(10)
             .get();
         
         const notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -36,7 +41,7 @@ export async function GET(request: Request) {
         return NextResponse.json(notifications, { status: 200 });
 
     } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error('Error fetching notifications (Firestore):', error);
         return NextResponse.json({ message: 'An unexpected error occurred.' }, { status: 500 });
     }
 }

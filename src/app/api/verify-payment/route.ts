@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb, getAdminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from '@/lib/db/queries';
+import { getDatabase } from 'firebase-admin/database';
+
 
 // Helper to verify admin role from Authorization header
 async function verifyAdmin(request: Request) {
@@ -53,7 +55,10 @@ export async function POST(request: Request) {
     const { transactionId, userId, creditsToGrant, status, adminNotes } = validation.data;
 
     const transactionRef = adminDb.collection('transactions').doc(transactionId);
-    const notificationRef = adminDb.collection('notifications').doc(); // New notification
+    
+    // Get a reference to the Realtime Database
+    const rtdb = getDatabase();
+    const notificationRef = rtdb.ref(`notifications/${userId}`).push();
 
     if (status === 'verified') {
       await adminDb.runTransaction(async (t) => {
@@ -66,17 +71,15 @@ export async function POST(request: Request) {
           verifiedAt: new Date().toISOString(),
           verifiedBy: adminCheck.adminId
         });
-        
-        // Create a notification for the user
-        t.set(notificationRef, {
-            userId: userId,
+      });
+      // Send notification to Realtime Database
+      await notificationRef.set({
             title: "Payment Approved",
             description: `Your purchase of ${creditsToGrant} credits has been approved.`,
             icon: "credit-card",
             isRead: false,
             createdAt: new Date().toISOString()
         });
-      });
 
     } else { // 'rejected'
       await adminDb.runTransaction(async (t) => {
@@ -86,16 +89,15 @@ export async function POST(request: Request) {
             verifiedAt: new Date().toISOString(),
             verifiedBy: adminCheck.adminId,
           });
-          
-          t.set(notificationRef, {
-            userId: userId,
+      });
+       // Send notification to Realtime Database
+      await notificationRef.set({
             title: "Payment Rejected",
             description: `Your recent purchase could not be verified. Please contact support.`,
             icon: "credit-card",
             isRead: false,
             createdAt: new Date().toISOString()
         });
-      });
     }
 
     return NextResponse.json({ message: `Transaction ${status} successfully.` }, { status: 200 });

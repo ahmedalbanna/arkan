@@ -1,19 +1,15 @@
+
 import admin from 'firebase-admin';
 
 // This function initializes the Firebase Admin SDK if it hasn't been already.
 function initializeFirebaseAdmin() {
   if (admin.apps.length === 0) {
     try {
-      const serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+      const serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS!);
 
-      if (!serviceAccount) {
-        throw new Error(
-          "The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set."
-        );
-      }
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_UL,
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
       });
 
       console.log("Firebase Admin SDK initialized successfully.");
