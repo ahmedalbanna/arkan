@@ -70,6 +70,7 @@ export default function UserManagementConsole() {
   const { toast } = useToast();
   const { createConversation, openChat } = useChatStore();
 
+
   const { 
     data, 
     error, 
@@ -94,6 +95,7 @@ export default function UserManagementConsole() {
   });
 
   const allUsers = data?.pages.flatMap(page => page.users) ?? [];
+
 
   // Prefetch user profile on hover for a smoother navigation experience
   const prefetchUser = async (userId: string) => {
