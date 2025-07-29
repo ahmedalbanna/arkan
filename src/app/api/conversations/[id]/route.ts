@@ -1,4 +1,3 @@
-
 // src/app/api/conversations/[id]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { getAdminAuth } from '@/lib/firebase/admin';

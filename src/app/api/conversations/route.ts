@@ -1,8 +1,9 @@
 // src/app/api/conversations/route.ts
 import { NextResponse } from 'next/server';
-import { getAdminAuth, adminRealtimeDb } from '@/lib/firebase/admin';
+import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
 import { getUserProfile } from '@/lib/db/queries';
+import { getAdminAuth } from '@/lib/firebase/admin';
 
 const createConversationSchema = z.object({
   participantIds: z.array(z.string()).min(2, "At least two participants are required."),
@@ -13,7 +14,7 @@ const createConversationSchema = z.object({
 
 // Helper to verify that the requester is one of the participants OR an admin
 async function verifyAccess(request: Request) {
-    const adminAuth = getAdminAuth();
+    const adminAuth = await getAdminAuth();
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', requesterId: null, isAdmin: false };
