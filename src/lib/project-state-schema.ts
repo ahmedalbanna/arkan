@@ -1,5 +1,4 @@
 
-
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema } from '@/ai/schemas';
 import type { Codebase } from '@/ai/flows/generate-codebase';
@@ -15,7 +14,10 @@ export const ProjectStateSchema = z.object({
     translatedSections: z.record(SectionNameSchema, z.string()).optional(),
     evaluation: z.object({
         evaluationScore: z.number(),
-        feedback: z.array(z.string()),
+        feedback: z.array(z.object({
+            point: z.string(),
+            status: z.enum(["Acceptable", "Weak", "Not Present"]),
+        })),
         summary: z.string(),
     }).nullable().optional(),
     diagrams: z.record(DiagramTypeSchema, z.object({
