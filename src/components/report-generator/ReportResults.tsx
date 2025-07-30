@@ -7,7 +7,7 @@ import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName, DiagramType } from '@/ai/schemas';
-import { FileText, CheckCircle, Frown, Meh, Smile } from 'lucide-react';
+import { FileText, CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle } from 'lucide-react';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
@@ -31,6 +31,20 @@ const getScoreIcon = (score: number) => {
     if (score < 75) return <Meh className="h-10 w-10" />;
     return <Smile className="h-10 w-10" />;
 }
+
+const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Present") => {
+  switch (status) {
+    case 'Acceptable':
+      return { icon: CheckCircle, color: 'text-green-500' };
+    case 'Weak':
+      return { icon: AlertTriangle, color: 'text-yellow-500' };
+    case 'Not Present':
+      return { icon: XCircle, color: 'text-destructive' };
+    default:
+      return { icon: CheckCircle, color: 'text-muted-foreground' };
+  }
+};
+
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const { sections, evaluation } = useReportStore();
@@ -109,12 +123,16 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                                 <h4 className="font-semibold">Summary & Feedback</h4>
                                 <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
                                 <ul className="space-y-2 text-sm list-none pl-0">
-                                    {evaluation.feedback.map((item, index) => (
+                                    {evaluation.feedback.map((item, index) => {
+                                      const StatusIcon = getFeedbackStatusInfo(item.status).icon;
+                                      const statusColor = getFeedbackStatusInfo(item.status).color;
+                                      return (
                                         <li key={index} className="flex items-start gap-2">
-                                            <CheckCircle className="h-4 w-4 mt-1 text-green-500 shrink-0"/>
-                                            <span>{item}</span>
+                                            <StatusIcon className={`h-4 w-4 mt-1 shrink-0 ${statusColor}`}/>
+                                            <span>{item.point}</span>
                                         </li>
-                                    ))}
+                                      )
+                                    })}
                                 </ul>
                             </div>
                         </div>

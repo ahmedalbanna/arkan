@@ -23,9 +23,14 @@ const EvaluateReportInputSchema = z.object({
 
 export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
 
+const FeedbackItemSchema = z.object({
+  point: z.string().describe("A specific feedback point related to one of the acceptance criteria."),
+  status: z.enum(["Acceptable", "Weak", "Not Present"]).describe("The status of the report regarding this feedback point."),
+});
+
 const EvaluateReportOutputSchema = z.object({
   evaluationScore: z.number().min(0).max(100).describe("A numerical score from 0 to 100 representing the report's quality against the criteria."),
-  feedback: z.array(z.string()).describe("A list of specific feedback points, including praise for met criteria and suggestions for areas of improvement."),
+  feedback: z.array(FeedbackItemSchema).describe("A list of specific feedback points, including praise for met criteria and suggestions for areas of improvement, each with a status."),
   summary: z.string().describe("A concise summary of the overall evaluation."),
 });
 
@@ -56,8 +61,13 @@ You will be provided with the full project proposal, all generated report sectio
 Your evaluation must be objective and thorough.
 1.  **Analyze the Report**: Carefully read through all the provided sections and diagrams to understand the full scope and content of the project documentation.
 2.  **Compare Against Criteria**: For each acceptance criterion, determine how well the report meets the requirement.
-3.  **Calculate Score**: Assign a numerical score from 0 to 100 based on the percentage of criteria met and the overall quality of the documentation. A report that perfectly meets all criteria should receive a score close to 100. A report that fails to meet most criteria should receive a low score.
-4.  **Provide Feedback**: Generate a list of feedback points. Each point should be a concise string. Include praise for criteria that are well-met and constructive criticism or suggestions for criteria that are partially met or missed.
+3.  **Provide Structured Feedback**: Generate a list of feedback points. For each point:
+    - State the feedback clearly in the 'point' field.
+    - Assign a 'status':
+        - **"Acceptable"**: If the criterion is fully met.
+        - **"Weak"**: If the criterion is partially met or needs improvement.
+        - **"Not Present"**: If the criterion is not addressed in the report.
+4.  **Calculate Score**: Assign a numerical score from 0 to 100 based on the percentage of criteria met and the overall quality of the documentation. A report that perfectly meets all criteria should receive a score close to 100.
 5.  **Summarize**: Write a brief summary of your findings.
 
 ---
