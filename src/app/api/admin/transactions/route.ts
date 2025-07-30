@@ -1,14 +1,15 @@
 
-// This file was moved from /api/transactions/route.ts
-
-import { getTransactionsByStatus } from '@/lib/db/queries';
+// src/app/api/admin/transactions/route.ts
+import { getTransactionsByStatus, getTransactionsByDateRange } from '@/lib/db/queries';
 import { z } from 'zod';
-import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const getTransactionsSchema = z.object({
-  limit: z.coerce.number().int().min(1).max(20).default(6),
+  status: z.enum(['pending', 'verified', 'rejected']).optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(6).optional(),
   lastVisibleId: z.string().optional(),
-  status: z.enum(['pending', 'verified', 'rejected']).default('pending'),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
 });
 
 export const GET = withAuth(async ({ request }) => {
@@ -20,10 +21,22 @@ export const GET = withAuth(async ({ request }) => {
       return handleApiError(queryValidation.error);
     }
 
-    const { limit, lastVisibleId, status } = queryValidation.data;
-    const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit, lastVisibleId });
+    const { limit, lastVisibleId, status, startDate, endDate } = queryValidation.data;
+
+    // Handle report generation request
+    if (startDate && endDate) {
+        const transactions = await getTransactionsByDateRange(startDate, endDate);
+        return createApiResponse(transactions, 200);
+    }
     
-    return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
+    // Handle status-based fetching for the console
+    if (status) {
+        const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit: limit!, lastVisibleId });
+        return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
+    }
+    
+    return handleApiError({ message: 'Missing required parameters. Provide either status or both startDate and endDate.' }, 400);
+
   } catch (error) {
     return handleApiError(error);
   }

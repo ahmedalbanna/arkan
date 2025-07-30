@@ -1,3 +1,5 @@
+
+// src/app/api/user-transactions/route.ts
 import { getTransactionsByUserId } from '@/lib/db/queries';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
