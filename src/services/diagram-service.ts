@@ -7,7 +7,7 @@
  * @returns A promise that resolves to the explanation object.
  */
 export async function explainDiagramApi(imageDataUri: string, token: string) {
-    const response = await fetch('/api/explain-diagram', {
+    const response = await fetch('/api/generate/explain-diagram', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

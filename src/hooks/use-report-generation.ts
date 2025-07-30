@@ -7,7 +7,6 @@ import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
-import { t } from 'i18next'; // Assuming i18next is used for translation
 import { useReportStore } from './useReportStore';
 
 export function useReportGeneration() {

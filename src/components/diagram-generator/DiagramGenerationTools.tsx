@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig } from '@/lib/report-config';
-import { DiagramTypeSchema, type DiagramType } from '@/ai/schemas';
+import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GitGraph } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
@@ -26,11 +26,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
 async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateDiagramOutput & { imageUrl: string }> {
-    const response = await fetch('/api/generate-diagrams', {
+    const response = await fetch('/api/generate/diagrams', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
         body: JSON.stringify(variables.body),
