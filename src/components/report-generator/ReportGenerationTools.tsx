@@ -35,6 +35,7 @@ import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { generateReport } from '@/services/report-service';
+import { auth } from '@/lib/firebase';
 
 const orderedSections = SectionNameSchema.options;
 
