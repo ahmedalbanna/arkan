@@ -4,7 +4,7 @@
 import { AlertCircle } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './ReportGenerationTools';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useTranslate } from '@/hooks/use-translation';
 import { toast } from '@/hooks/use-toast';
@@ -65,7 +65,7 @@ export default function ReportGenerator() {
     });
 
     const results = await Promise.all(translationPromises);
-    
+
     const translatedMap: { [key in SectionName]?: string } = {};
     results.forEach(result => {
         if ('content' in result) {

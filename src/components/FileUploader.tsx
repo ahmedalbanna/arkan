@@ -40,7 +40,7 @@ export function FileUploader({ type }: FileUploaderProps) {
 
         try {
             const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/pdf-to-markdown', {
+            const response = await fetch('/api/document-processing/pdf-to-markdown', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,
@@ -50,7 +50,7 @@ export function FileUploader({ type }: FileUploaderProps) {
                 const error = await response.json();
                 throw new Error(error.message || 'Failed to process file.');
             }
-            
+
             const result = await response.json();
             addExternalContext(file.name, result.markdown, type);
 

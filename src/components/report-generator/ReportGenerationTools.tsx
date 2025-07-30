@@ -48,7 +48,7 @@ const generateInstructionText = (controls: any): string => {
 };
 
 async function generateReportApi(variables: any): Promise<any> {
-    const response = await fetch('/api/generate-report', {
+    const response = await fetch('/api/generate/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
         body: JSON.stringify(variables.body),
@@ -118,7 +118,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         manualTableOfContents,
         setManualTableOfContents,
     } = useReportStore();
-    
+
     const handleGenerationResult = (data: any, variables: any) => {
         if (variables.body.templateId) { // Full report was generated
             setAllSections(data.sections);
@@ -137,7 +137,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
         setActiveMutationKey(null);
     };
-    
+
     const reportGenerationMutation = useMutation({
         mutationFn: generateReportApi,
         onSuccess: handleGenerationResult,
@@ -147,7 +147,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const isAnythingGenerating = reportGenerationMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating;
-        
+
     const onGenerateSection = async (section: SectionNameType) => {
         if (!firebaseUser) {
             toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
@@ -160,10 +160,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const fullState = getFullState();
 
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        
+
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-        
+
         const agent = fullState.agents?.find((a: { id: string; }) => a.id === sectionConfig[section as SectionNameType]?.agentId);
 
         const body = {
@@ -178,7 +178,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             contextFiles,
             tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
-        
+
         setActiveMutationKey(section);
         reportGenerationMutation.mutate({ body, token });
     };
@@ -190,10 +190,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         }
         const token = await firebaseUser.getIdToken();
         const fullState = useBuilderStore.getState().getFullState();
-        
+
         const exampleFiles = fullState.externalContext?.filter(f => f.type === 'example');
         const contextFiles = fullState.externalContext?.filter(f => f.type === 'context');
-        
+
         const body = {
             proposal: fullState.proposal,
             projectPlan: fullState.projectPlan,
@@ -209,7 +209,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
     const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
-    
+
     const sectionsToGenerate = selectedTemplate?.agentIds
         .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
         .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]) || [];
@@ -253,9 +253,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="w-full">
-                                        <Button 
-                                            onClick={onGenerateFullReport} 
-                                            className="w-full mb-4 font-headline" 
+                                        <Button
+                                            onClick={onGenerateFullReport}
+                                            className="w-full mb-4 font-headline"
                                             disabled={!canGenerateFullReport}
                                         >
                                             {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
