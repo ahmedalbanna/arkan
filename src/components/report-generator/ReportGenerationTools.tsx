@@ -8,9 +8,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { sectionConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, GitGraph } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -32,6 +33,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import Image from 'next/image';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -238,18 +240,37 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <TabsTrigger value="evaluate" disabled={!Object.values(sections).some(s => !!s)}>Evaluate</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6">
-                        <div className="space-y-2 mb-4">
+                        <div className="space-y-4 mb-4">
                             <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
-                            <Select value={selectedReportTemplateId} onValueChange={(val) => setSelectedReportTemplateId(val)}>
-                                <SelectTrigger id="report-template-select"><SelectValue placeholder={t('reportGenerator.Select_template')} /></SelectTrigger>
-                                <SelectContent>
-                                    {REPORT_GENERATION_TEMPLATES.map(template => (
-                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground">{selectedTemplate?.description}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {REPORT_GENERATION_TEMPLATES.map((template) => (
+                                    <Card
+                                        key={template.id}
+                                        onClick={() => setSelectedReportTemplateId(template.id)}
+                                        className={cn(
+                                            "cursor-pointer hover:border-primary transition-all",
+                                            selectedReportTemplateId === template.id && "border-primary ring-2 ring-primary/50"
+                                        )}
+                                    >
+                                        <CardHeader className="p-4">
+                                            <Image
+                                                src={`https://placehold.co/300x200.png`}
+                                                data-ai-hint="document template"
+                                                alt={template.name}
+                                                width={300}
+                                                height={200}
+                                                className="w-full h-auto rounded-md mb-2"
+                                            />
+                                            <CardTitle className="text-sm font-semibold">{template.name}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-4 pt-0">
+                                            <p className="text-xs text-muted-foreground">{template.description}</p>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
                         </div>
+
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
