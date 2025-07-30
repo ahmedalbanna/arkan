@@ -4,15 +4,14 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Presentation } from 'lucide-react';
-import type { PresentationSlide } from '@/ai/schemas';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
-import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { useExport } from '@/hooks/use-export';
 
 interface PresentationActionsProps {
   isGenerating: boolean;
@@ -24,6 +23,7 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
   const { t } = useLocalization();
   const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
   const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
+  const { exportPresentationPptx, isExporting } = useExport();
 
   const { presentation, activePresentationId } = usePresentationStore();
   const slides = presentation?.history.find(p => p.id === activePresentationId)?.slides;
@@ -42,8 +42,10 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
 
   const handleExportPresentation = () => {
     if (!slides) return;
-    exportPresentationAsPptx(slides, selectedPptxTemplate);
+    exportPresentationPptx(slides, selectedPptxTemplate);
   }
+
+  const isBusy = isGenerating || isExporting;
 
   return (
     <Card>
@@ -55,7 +57,7 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
         <div className="space-y-2">
             <Label htmlFor="pptx-template-select">{t('builder.presentationGenerator.exportStyleLabel')}</Label>
             {pptxLoaded ? (
-              <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange}>
+              <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange} disabled={isBusy}>
                   <SelectTrigger id="pptx-template-select">
                       <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
                   </SelectTrigger>
@@ -67,8 +69,8 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
               </Select>
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
-        <Button onClick={handleExportPresentation} disabled={isGenerating || !slides || slides.length === 0} className="w-full font-headline">
-          <Presentation className="mr-2 h-4 w-4" />
+        <Button onClick={handleExportPresentation} disabled={isBusy || !slides || slides.length === 0} className="w-full font-headline">
+          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Presentation className="mr-2 h-4 w-4" />}
           {t('builder.presentationGenerator.exportButton')}
         </Button>
       </CardContent>

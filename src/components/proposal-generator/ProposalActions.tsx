@@ -2,10 +2,8 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileJson, FileText } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
-import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -13,12 +11,13 @@ import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
-import { useReportStore } from '@/hooks/useReportStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
 import { saveAs } from 'file-saver';
+import { useReportStore } from '@/hooks/useReportStore';
+import { useExport } from '@/hooks/use-export';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -52,7 +51,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
   const [isCopied, setIsCopied] = useState(false);
   const { firebaseUser, refetchUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { exportProposalDocx, isExporting } = useExport();
 
   const summarizeMutation = useMutation({
     mutationFn: summarizeProjectApi,
@@ -96,7 +95,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
 
   const handleExportDocx = () => {
     if (proposal) {
-      exportProposalAsDocx(proposal, selectedDocxTemplate);
+      exportProposalDocx(proposal, selectedDocxTemplate);
     }
   }
   
@@ -115,7 +114,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
       summarizeMutation.mutate({ body: { proposal, reportMarkdown }, token });
   }
 
-  const isBusy = isGenerating || isTranslating || summarizeMutation.isPending;
+  const isBusy = isGenerating || isTranslating || summarizeMutation.isPending || isExporting;
 
   return (
     <div className="space-y-4">
@@ -138,7 +137,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button disabled={isBusy || !proposal} className="w-full font-headline">
-                        <Download className="mr-2 h-4 w-4" />
+                        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                         Export
                     </Button>
                 </DropdownMenuTrigger>

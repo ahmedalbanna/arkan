@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Languages, Loader2, Download, FileJson } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
-import { exportReportAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -17,6 +16,7 @@ import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
 import { sectionConfig } from '@/lib/report-config';
 import { SectionName } from '@/ai/schemas';
+import { useExport } from '@/hooks/use-export';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -28,10 +28,11 @@ interface ReportActionsProps {
 export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsProps) => {
   const { t } = useLocalization();
   const { proposal } = useBuilderStore();
-  const { sections, translatedSections } = useReportStore();
+  const { sections } = useReportStore();
   const { diagrams } = useDiagramStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+  const { exportReportDocx, isExporting } = useExport();
 
   const generatedSectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
   const [selectedSectionsForExport, setSelectedSectionsForExport] = useState<SectionName[]>(generatedSectionKeys);
@@ -39,7 +40,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
   // Update selection when generated sections change
   useEffect(() => {
     setSelectedSectionsForExport(generatedSectionKeys);
-  }, [sections]);
+  }, [JSON.stringify(generatedSectionKeys)]); // Use JSON.stringify to compare array content
 
   useEffect(() => {
     const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
@@ -74,9 +75,10 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
         return acc;
     }, {} as { [key in SectionName]?: string });
 
-    await exportReportAsDocx(sectionsToExport, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles, selectedSectionsForExport);
+    await exportReportDocx(sectionsToExport, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles, selectedSectionsForExport);
   };
 
+  const isBusy = isTranslating || isExporting;
 
   return (
     <Card>
@@ -88,7 +90,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
         <div className="space-y-2">
             <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
             {docxLoaded ? (
-              <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange}>
+              <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange} disabled={isBusy}>
                   <SelectTrigger id="docx-template-select">
                       <SelectValue placeholder="Select a template" />
                   </SelectTrigger>
@@ -103,8 +105,8 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
         <div className="flex flex-col space-y-2">
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button disabled={!hasContent || isTranslating} className="w-full font-headline">
-                      <Download className="mr-2 h-4 w-4" />
+                    <Button disabled={!hasContent || isBusy} className="w-full font-headline">
+                      {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
                       {t('builder.reportGenerator.exportReport')}
                     </Button>
                 </DropdownMenuTrigger>
@@ -117,7 +119,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                         <DropdownMenuSubContent className="p-0">
                             <div className="p-2">
                                 <DropdownMenuCheckboxItem
-                                    checked={selectedSectionsForExport.length === generatedSectionKeys.length}
+                                    checked={selectedSectionsForExport.length === generatedSectionKeys.length && generatedSectionKeys.length > 0}
                                     onSelect={(e) => {
                                         e.preventDefault();
                                         if (selectedSectionsForExport.length === generatedSectionKeys.length) {
@@ -161,7 +163,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
             </DropdownMenu>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" className='w-full' disabled={isTranslating || !hasContent}>
+                    <Button variant="secondary" className='w-full' disabled={isBusy || !hasContent}>
                         {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                         {t('builder.reportGenerator.translateAll')}
                     </Button>
