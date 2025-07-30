@@ -7,45 +7,18 @@ import { Loader2, Sparkles, GanttChartSquare } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ProjectPlan } from '@/ai/schemas';
 import ProjectPlanViewer from './ProjectPlanViewer';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 
-async function generatePlanApi(variables: { proposal: any; token: string }): Promise<ProjectPlan> {
-  const response = await fetch('/api/generate/project-plan', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${variables.token}`,
-    },
-    body: JSON.stringify({ proposal: variables.proposal }),
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Failed to generate project plan');
-  }
-  return response.json();
-}
 
 export default function ProjectPlanGenerator() {
   const { toast } = useToast();
-  const { firebaseUser, refetchUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
   const { proposal } = useBuilderStore();
-  const { projectPlan, setProjectPlan } = useProjectPlanStore();
-
-  const mutation = useMutation({
-    mutationFn: generatePlanApi,
-    onSuccess: (data) => {
-      setProjectPlan(data);
-      refetchUser(); // To update credits
-      toast({ title: 'Project Plan Generated', description: 'Your project has been broken down into phases and tasks.' });
-    },
-    onError: (error: Error) => {
-      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
-    },
-  });
+  const { projectPlan } = useProjectPlanStore();
+  
+  const mutation = useGenerateProjectPlan();
 
   const handleGeneratePlan = async () => {
     if (!proposal || !firebaseUser) {
@@ -56,8 +29,7 @@ export default function ProjectPlanGenerator() {
       });
       return;
     }
-    const token = await firebaseUser.getIdToken();
-    mutation.mutate({ proposal, token });
+    mutation.mutate({ proposal });
   };
 
   return (
