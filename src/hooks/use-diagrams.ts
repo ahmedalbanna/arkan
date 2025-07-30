@@ -6,14 +6,67 @@ import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { explainDiagramApi } from "@/services/diagram-service";
 import { toast } from "./use-toast";
-import { ExplainDiagramOutput } from "@/ai/flows/explain-diagram";
+import type { GenerateDiagramOutput } from "@/ai/flows/generate-diagrams";
+import type { ExplainDiagramOutput } from "@/ai/flows/explain-diagram";
+import { 
+    generateDiagramApi, 
+    updateDiagramApi, 
+    explainDiagramApi 
+} from "@/services/diagram-service";
+
+/**
+ * Custom mutation hook to generate a new diagram using an AI flow.
+ */
+export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOutput & { imageUrl: string }, variables: { body: any; token: string }) => void) {
+  const { firebaseUser } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (body: any) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return generateDiagramApi(body, token);
+    },
+    onSuccess: (data, variables) => {
+      if (firebaseUser) {
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+      }
+      if(onSuccessCallback) {
+        onSuccessCallback(data, { body: variables, token: ''});
+      }
+    },
+    onError: (error: Error, variables) => {
+      handleErrorUtility(error, `Failed to generate ${variables.diagramToGenerate} diagram`);
+    },
+  });
+}
+
+/**
+ * Custom mutation hook to update an existing diagram from PlantUML code.
+ */
+export function useUpdateDiagram(onSuccessCallback?: (data: { plantUmlCode: string; imageUrl: string }, variables: string) => void) {
+  const { firebaseUser } = useAuth();
+
+  return useMutation<any, Error, string>({
+    mutationFn: async (plantUmlCode: string) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return updateDiagramApi(plantUmlCode, token);
+    },
+    onSuccess: (data, variables) => {
+       toast({ title: "Diagram Updated", description: "The diagram image has been refreshed." });
+       if(onSuccessCallback) {
+           onSuccessCallback(data, variables);
+       }
+    },
+    onError: (error: Error) => {
+      handleErrorUtility(error, "Diagram update failed");
+    },
+  });
+}
+
 
 /**
  * Custom mutation hook to explain a diagram image using an AI flow.
- *
- * @returns The result of the useMutation hook.
  */
 export function useExplainDiagram() {
   const { firebaseUser } = useAuth();
@@ -24,12 +77,10 @@ export function useExplainDiagram() {
       const token = await getAuthenticatedToken(firebaseUser);
       return explainDiagramApi(imageDataUri, token);
     },
-    onSuccess: (data, variables) => {
-      // Invalidate user query to refetch credits
+    onSuccess: () => {
       if (firebaseUser) {
         queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
       }
-      return data;
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Explanation Failed");

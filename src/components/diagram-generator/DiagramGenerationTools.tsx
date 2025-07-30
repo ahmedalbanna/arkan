@@ -15,13 +15,11 @@ import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { GenerateDiagramOutput } from '@/ai/flows/generate-diagrams';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
-import { useExplainDiagram } from '@/hooks/use-diagrams';
+import { useExplainDiagram, useGenerateDiagram } from '@/hooks/use-diagrams';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
@@ -30,25 +28,11 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
-async function generateDiagram(variables: { body: any, token: string }): Promise<GenerateDiagramOutput & { imageUrl: string }> {
-    const response = await fetch('/api/generate/diagrams', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-        body: JSON.stringify(variables.body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate diagram');
-    }
-    return response.json();
-}
-
 export const DiagramGenerationTools = () => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
-    const { firebaseUser, userProfile } = useAuth();
-    const queryClient = useQueryClient();
+    const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const explainMutation = useExplainDiagram();
 
@@ -59,23 +43,18 @@ export const DiagramGenerationTools = () => {
         removeExternalContext,
     } = useReportStore();
         
-    const diagramMutation = useMutation({
-        mutationFn: generateDiagram,
-        onSuccess: async (data, variables) => {
-            const diagramKey = variables.body.diagramToGenerate as DiagramType;
-            const translatedTitle = t(diagramConfig[diagramKey].title);
-            
-            // Set the diagram code and image URL first
-            setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle }) });
-            setActiveMutationKey(null);
+    const diagramMutation = useGenerateDiagram((data, variables) => {
+        const diagramKey = variables.body.diagramToGenerate as DiagramType;
+        const translatedTitle = t(diagramConfig[diagramKey].title);
+        
+        setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
+        toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle }) });
+        setActiveMutationKey(null);
 
-            // Now, automatically trigger the explanation
-            try {
-                const response = await fetch(data.imageUrl);
-                const blob = await response.blob();
-                const reader = new FileReader();
+        // Now, automatically trigger the explanation
+        try {
+            const response = fetch(data.imageUrl).then(res => res.blob()).then(blob => {
+                 const reader = new FileReader();
                 reader.readAsDataURL(blob);
                 reader.onloadend = async () => {
                     const base64data = reader.result as string;
@@ -85,22 +64,16 @@ export const DiagramGenerationTools = () => {
                             toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
                         },
                         onError: (error) => {
-                            // Don't throw a blocking error, just log it. The diagram is still useful.
                             console.error("Failed to auto-explain diagram:", error);
                             toast({ title: "Explanation Failed", description: "Could not automatically explain the new diagram.", variant: "destructive" });
                         }
                     });
                 };
-            } catch (error) {
-                 console.error("Failed to prepare image for explanation:", error);
-            }
-        },
-        onError: (error: Error, variables) => {
-            const diagramKey = variables.body.diagramToGenerate as DiagramType;
-            const translatedTitle = t(diagramConfig[diagramKey].title);
-            toast({ title: t('builder.diagramGenerator.toasts.failed', { title: translatedTitle }), description: error.message, variant: "destructive" });
-            setActiveMutationKey(null);
-        },
+            });
+           
+        } catch (error) {
+             console.error("Failed to prepare image for explanation:", error);
+        }
     });
     
     
@@ -109,12 +82,6 @@ export const DiagramGenerationTools = () => {
     const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const onGenerateDiagram = async (diagramType: DiagramType) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
-            return;
-        }
-
-        const token = await firebaseUser.getIdToken();
         const { getFullState } = useBuilderStore.getState();
         const { guidelineState, contextSelection } = useReportStore.getState();
 
@@ -137,7 +104,7 @@ export const DiagramGenerationTools = () => {
             contextFiles,
         };
         setActiveMutationKey(diagramType);
-        diagramMutation.mutate({ body, token });
+        diagramMutation.mutate(body);
     };
 
     if (!agentsLoaded) {

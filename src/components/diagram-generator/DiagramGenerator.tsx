@@ -12,11 +12,10 @@ import { Accordion } from '@/components/ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '../ui/accordion';
 import type { DiagramType } from '@/ai/schemas';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useUpdateDiagram } from '@/hooks/use-diagrams';
 import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useReportStore } from '@/hooks/useReportStore';
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
@@ -29,27 +28,8 @@ function DiagramSkeleton() {
   )
 }
 
-async function updateDiagram(variables: { plantUmlCode: string, token: string }): Promise<{ plantUmlCode: string; imageUrl: string }> {
-    const response = await fetch('/api/generate-diagrams', {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify({ intent: 'update_diagram', plantUmlCode: variables.plantUmlCode }),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to update diagram');
-    }
-    return response.json();
-}
-
 export default function DiagramGenerator() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
-    const { proposal } = useBuilderStore();
-    const { externalContext } = useReportStore();
     const {
         diagrams,
         handleDiagramCodeUpdate,
@@ -57,30 +37,16 @@ export default function DiagramGenerator() {
         setDiagramExplanation,
     } = useDiagramStore();
     
-    const queryClient = useQueryClient();
-    const mutation = useMutation({
-        mutationFn: updateDiagram,
-        onSuccess: (data, variables) => {
-            // Find which diagram this mutation was for to update the correct one
-            const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === variables.plantUmlCode);
-            if(diagramKey) {
-                setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
-            }
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: t('builder.diagramGenerator.toasts.updateSuccess') });
-        },
-        onError: (error: Error) => {
-            toast({ title: t('builder.diagramGenerator.toasts.updateFailed'), description: error.message, variant: "destructive" });
-        },
+    const mutation = useUpdateDiagram((data, plantUmlCode) => {
+        // Find which diagram this mutation was for to update the correct one
+        const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === plantUmlCode);
+        if(diagramKey) {
+            setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+        }
     });
 
-    const handleUpdateDiagram = async (plantUmlCode: string) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: 'You must be logged in to update a diagram.', variant: 'destructive' });
-            return;
-        }
-        const token = await firebaseUser.getIdToken();
-        mutation.mutate({ plantUmlCode, token });
+    const handleUpdateDiagram = (plantUmlCode: string) => {
+        mutation.mutate(plantUmlCode);
     };
     
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
@@ -118,7 +84,7 @@ export default function DiagramGenerator() {
                                             onCodeChange={(code) => handleDiagramCodeUpdate(key, code)}
                                             onUpdate={() => handleUpdateDiagram(diagramData.plantUmlCode)}
                                             onExplanationSave={(explanation) => setDiagramExplanation(key, explanation)}
-                                            isUpdating={mutation.isPending && mutation.variables?.plantUmlCode === diagramData.plantUmlCode}
+                                            isUpdating={mutation.isPending && mutation.variables === diagramData.plantUmlCode}
                                             isReadOnly={mutation.isPending}
                                         />
                                       </AccordionContent>
