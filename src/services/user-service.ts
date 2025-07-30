@@ -14,7 +14,7 @@ import {
   type ConfirmationResult,
 } from "firebase/auth";
 import type { SignupCredentials } from "@/components/SignupForm";
-import { getFirestore, doc, onSnapshot } from "firebase/firestore";
+import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 export interface UserListResponse {
     users: UserProfile[];
@@ -157,4 +157,12 @@ export async function createUserService(data: Omit<UserProfile, 'id' | 'createdA
         throw new Error(error.message || 'Failed to create user.');
     }
     return response.json();
+}
+
+
+export async function saveDeviceToken(userId: string, token: string) {
+    if (!userId || !token) return;
+    const db = getFirestore(app);
+    const tokenRef = doc(db, 'deviceTokens', userId);
+    await setDoc(tokenRef, { token, updatedAt: new Date().toISOString() }, { merge: true });
 }

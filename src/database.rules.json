@@ -1,4 +1,5 @@
 
+
 {
   "rules": {
     "notifications": {
@@ -29,6 +30,13 @@
             ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists() || root.child('users').child(auth.uid).child('role').val() === 'admin'"
         },
         ".indexOn": ["lastMessageTimestamp"]
+    },
+     "deviceTokens": {
+      "$uid": {
+        // Only the authenticated user can write their own device token
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
     },
     ".read": false,
     ".write": false
