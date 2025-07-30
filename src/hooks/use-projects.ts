@@ -14,7 +14,6 @@ import {
   deleteProject,
   updateProject,
   type SavedProject,
-  subscribeToProjects,
 } from "@/services/project-service";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -33,32 +32,15 @@ type SaveProjectVariables = ProjectState & { name: string };
 
 export function useProjects() {
   const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (!firebaseUser) {
-        // Clear the cache if the user logs out
-        queryClient.setQueryData(projectKeys.lists(), []);
-        return;
-    };
-
-    const unsubscribe = subscribeToProjects(firebaseUser.uid, (projects) => {
-        queryClient.setQueryData(projectKeys.lists(), projects);
-    });
-
-    return () => unsubscribe();
-  }, [firebaseUser, queryClient]);
-
-
+  
   return useQuery<SavedProject[]>({
     queryKey: projectKeys.lists(),
     queryFn: async () => {
-      // The initial fetch is still useful for server rendering or if the listener is slow.
       const token = await getAuthenticatedToken(firebaseUser);
       return fetchProjectsApi(token);
     },
     enabled: !!firebaseUser,
-    staleTime: Infinity, // Data is now real-time, so it's always "fresh"
+    staleTime: 1000 * 60 * 5, // 5 minutes
     meta: {
       onError: (error: Error) => {
         handleErrorUtility(error, "Failed to fetch projects");
@@ -101,9 +83,7 @@ export function useSaveProject() {
       return createProject(data, token);
     },
     onSuccess: (newProject) => {
-      // Invalidation is handled by the real-time listener now.
-      // We can manually update the cache for an even faster UI response if desired.
-      queryClient.setQueryData(projectKeys.lists(), (old: SavedProject[] | undefined) => [...(old || []), newProject]);
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       setCurrentProjectId(newProject.id); // Set the ID in the store for subsequent saves
       setHasUnsavedChanges(false);
       toast({
@@ -130,8 +110,7 @@ export function useUpdateProject() {
       return updateProject(variables.projectId, variables.data, token);
     },
     onSuccess: (updatedProject) => {
-       // Invalidation is handled by the real-time listener now.
-       // We can manually update the specific project detail for a faster UI response.
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProject);
       setHasUnsavedChanges(false);
       // No toast needed for autosave, it would be too noisy.
@@ -152,9 +131,7 @@ export function useDeleteProject() {
       await deleteProject(projectId, token);
     },
     onSuccess: (_, projectId) => {
-      // Invalidation is handled by the real-time listener.
-      // We can manually remove from the cache for a faster UI response.
-      queryClient.setQueryData(projectKeys.lists(), (old: SavedProject[] | undefined) => old?.filter(p => p.id !== projectId) || []);
+      queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       toast({
         title: "Project Deleted",
         description: "The project has been successfully deleted.",

@@ -27,7 +27,7 @@ export function useAutosave() {
   stateRef.current = getFullState(); // Always keep it up-to-date
 
   // Debounce the unsaved changes flag
-  const debouncedHasUnsavedChanges = useDebounce(hasUnsavedChanges, 1500); // 1.5-second debounce delay
+  const debouncedHasUnsavedChanges = useDebounce(hasUnsavedChanges, 6000); // 1.5-second debounce delay
 
   useEffect(() => {
     // Trigger save only if there's a current project ID, debounced changes are true, and the user is logged in.
