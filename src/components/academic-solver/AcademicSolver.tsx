@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, Download, FileText } from 'lucide-react';
@@ -18,30 +17,8 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { AcademicUploaders } from './AcademicUploaders';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
-import type { AcademicContextFile, AcademicSolverStage } from '@/lib/types';
+import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks/use-academic-solver';
 
-
-async function analyzeApi(variables: { markdown: string, documentType: 'exam' | 'homework', token: string }): Promise<any> {
-    const { markdown, documentType, token } = variables;
-    const response = await fetch('/api/academic-solver/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ markdown, documentType }),
-    });
-    if (!response.ok) throw new Error((await response.json()).message || 'Analysis failed.');
-    return response.json();
-}
-
-async function solveApi(variables: { analyzedDocument: any, contextMarkdown?: string, token: string }): Promise<any> {
-    const { analyzedDocument, contextMarkdown, token } = variables;
-    const response = await fetch('/api/academic-solver/solve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify({ analyzedDocument, contextMarkdown }),
-    });
-    if (!response.ok) throw new Error((await response.json()).message || 'Solving failed.');
-    return response.json();
-}
 
 export default function AcademicSolver() {
   const { t } = useLocalization();
@@ -66,29 +43,30 @@ export default function AcademicSolver() {
     resetCurrent,
   } = useAcademicSolverStore();
 
-  const analyzeMutation = useMutation({ mutationFn: analyzeApi });
-  const solveMutation = useMutation({ mutationFn: solveApi });
+  const analyzeMutation = useAnalyzeAcademicDocument();
+  const solveMutation = useSolveAcademicDocument();
 
   const handleAnalyze = async () => {
     if (questionDocuments.length === 0 || !documentType || !firebaseUser) {
       toast({ title: t('builder.academicSolver.toasts.analysisError'), description: "Please provide the document content and select a document type.", variant: 'destructive' });
       return;
     }
-    const token = await firebaseUser.getIdToken();
     setStage('analyzing');
     
     const combinedQuestionContent = questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
 
-    try {
-      const analysisData = await analyzeMutation.mutateAsync({ markdown: combinedQuestionContent, documentType, token });
-      setAnalyzedDocument(analysisData);
-      setStage('readyToSolve');
-      refetchUser();
-      toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
-    } catch (error: any) {
-      toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
-      setStage('idle');
-    }
+    analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType }, {
+        onSuccess: (data) => {
+            setAnalyzedDocument(data);
+            setStage('readyToSolve');
+            refetchUser();
+            toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
+        },
+        onError: (error: any) => {
+            toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+            setStage('idle');
+        }
+    });
   };
 
   const handleSolve = async () => {
@@ -96,7 +74,6 @@ export default function AcademicSolver() {
       toast({ title: t('builder.academicSolver.toasts.analysisMissing'), variant: 'destructive' });
         return;
     }
-    const token = await firebaseUser.getIdToken();
     setStage('solving');
     
     let contextMarkdown: string | undefined = undefined;
@@ -104,16 +81,18 @@ export default function AcademicSolver() {
       contextMarkdown = externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
     }
     
-    try {
-      const solvedData = await solveMutation.mutateAsync({ analyzedDocument, contextMarkdown, token });
-      setSolvedDocument(solvedData);
-      setStage('solved');
-      refetchUser();
-      toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
-    } catch (error: any) {
-      toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
-      setStage('readyToSolve');
-    }
+    solveMutation.mutate({ analyzedDocument, contextMarkdown }, {
+        onSuccess: (data) => {
+            setSolvedDocument(data);
+            setStage('solved');
+            refetchUser();
+            toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
+        },
+        onError: (error: any) => {
+            toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+            setStage('readyToSolve');
+        }
+    });
   };
 
   const handleExportDocx = () => {
@@ -122,7 +101,7 @@ export default function AcademicSolver() {
       }
   }
 
-  const isProcessing = ['parsing', 'analyzing', 'solving'].includes(stage);
+  const isProcessing = analyzeMutation.isPending || solveMutation.isPending;
 
   const controlPanel = (
     <Card>
@@ -169,7 +148,7 @@ export default function AcademicSolver() {
              />
 
             <Button onClick={handleAnalyze} disabled={questionDocuments.length === 0 || !documentType || isProcessing} className="w-full">
-                {stage === 'analyzing' ? (
+                {analyzeMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
@@ -201,7 +180,7 @@ export default function AcademicSolver() {
           <TabsContent value="analysis" className="flex-grow">
              <CardContent>
                  <ScrollArea className="h-[calc(100vh-350px)] p-1">
-                      {stage === 'analyzing' ? (
+                      {stage === 'analyzing' || analyzeMutation.isPending ? (
                           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                               <Loader2 className="h-12 w-12 animate-spin mb-4" />
                               <p>{`Analyzing ${documentType}...`}</p>
@@ -218,8 +197,8 @@ export default function AcademicSolver() {
              </CardContent>
              <CardFooter>
                  {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-                      <Button onClick={handleSolve} disabled={stage !== 'readyToSolve'} className="w-full">
-                          {stage === 'solving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                      <Button onClick={handleSolve} disabled={stage !== 'readyToSolve' || solveMutation.isPending} className="w-full">
+                          {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                           {t('builder.academicSolver.solveButton')}
                       </Button>
                   )}
@@ -228,7 +207,7 @@ export default function AcademicSolver() {
            <TabsContent value="solution" className="flex-grow">
               <CardContent>
                   <ScrollArea className="h-[calc(100vh-350px)] p-1">
-                       {stage === 'solving' ? (
+                       {stage === 'solving' || solveMutation.isPending ? (
                         <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                           <Loader2 className="h-12 w-12 animate-spin mb-4" />
                           <p>{t('builder.academicSolver.solvingInProgress')}</p>
