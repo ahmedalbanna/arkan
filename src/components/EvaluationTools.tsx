@@ -35,7 +35,7 @@ async function evaluateReport(variables: { body: any; token: string }): Promise<
 
 export const EvaluationTools = () => {
     const { proposal } = useBuilderStore();
-    const { sections, evaluation, setEvaluation } = useReportStore();
+    const { sections, setEvaluation } = useReportStore();
     const { diagrams } = useDiagramStore();
     const { firebaseUser } = useAuth();
     const { t } = useLocalization();
@@ -125,18 +125,6 @@ export const EvaluationTools = () => {
         mutation.mutate({ body, token });
     }
   
-    const getScoreColor = (score: number) => {
-        if (score < 50) return 'text-destructive';
-        if (score < 75) return 'text-yellow-500';
-        return 'text-green-500';
-    }
-  
-    const getScoreIcon = (score: number) => {
-        if (score < 50) return <Frown className="h-10 w-10" />;
-        if (score < 75) return <Meh className="h-10 w-10" />;
-        return <Smile className="h-10 w-10" />;
-    }
-
   return (
     <form onSubmit={handleSubmit}>
         <Card className={mutation.isPending ? 'opacity-50 pointer-events-none' : ''}>
@@ -164,35 +152,6 @@ export const EvaluationTools = () => {
                     </Button>
                 </div>
             </div>
-            
-            {evaluation && !mutation.isPending && (
-            <div className="space-y-4 pt-4 border-t">
-                <h4 className="font-semibold">{t('builder.reportGenerator.evaluationResult')}</h4>
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-muted">
-                    <div className={getScoreColor(evaluation.evaluationScore)}>
-                        {getScoreIcon(evaluation.evaluationScore)}
-                    </div>
-                    <div className="flex-grow">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-sm font-medium">{t('builder.reportGenerator.qualityScore')}</span>
-                            <span className={`font-bold text-lg ${getScoreColor(evaluation.evaluationScore)}`}>
-                                {evaluation.evaluationScore} / 100
-                            </span>
-                        </div>
-                        <Progress value={evaluation.evaluationScore} className="h-2"/>
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
-                    <ul className="space-y-1 text-xs list-disc pl-4">
-                        {evaluation.feedback.map((item, index) => (
-                            <li key={index}>{item}</li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-            )}
-            
         </CardContent>
         <CardFooter>
             <Button

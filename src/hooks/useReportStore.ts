@@ -77,6 +77,11 @@ const getDefaultGuidelineState = () => {
             };
         }
     });
+    // Add a default for presentations
+    state['presentation'] = {
+        checked: AGENTS.find(a => a.id === 'generate-presentation')?.prompt.guidelines?.map((g: any) => g.isDefault) || [],
+        custom: []
+    }
     return state;
 };
 

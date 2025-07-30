@@ -12,7 +12,6 @@ import { useState, lazy, Suspense } from 'react';
 import { SectionName } from '@/ai/schemas';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Skeleton } from '../ui/skeleton';
-import { useReportGeneration } from '@/hooks/use-report-generation'; // Import the new hook
 
 const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
 
@@ -34,16 +33,13 @@ function ReportResultsSkeleton() {
 
 export default function ReportGenerator() {
     const { t, locale } = useLocalization();
-    const { proposal } = useBuilderStore();
     const {
         sections,
-        externalContext,
         setSection,
         setAllTranslatedSections
     } = useReportStore();
     const translateMutation = useTranslate();
     const [isTranslatingAll, setIsTranslatingAll] = useState(false);
-    const reportGenerationMutation = useReportGeneration(); // Use the new hook
 
   const handleSectionUpdate = (key: SectionName, value: string) => {
     setSection(key, value);
