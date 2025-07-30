@@ -1,5 +1,6 @@
 
-// src/app/api/users/[id]/reset-password/route.ts
+'use server';
+
 import { getUserProfile } from '@/lib/db/queries';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
@@ -16,7 +17,6 @@ export const POST = withAuth(async ({ params }) => {
         }
         
         // This is a placeholder for sending a reset email.
-        // Firebase Admin SDK does not directly send reset emails.
         // A real implementation would use a service like SendGrid and a generated link:
         // const link = await adminAuth.generatePasswordResetLink(user.email);
         // await sendCustomEmail(user.email, link);

@@ -77,7 +77,7 @@ export function subscribeToUserProfile(userId: string, callback: (user: UserProf
  */
 export async function fetchUserProfileApi(userId: string, token: string): Promise<UserProfile | null> {
     if (!userId) return null;
-    const response = await fetch(`/api/admin/users/${userId}`, {
+    const response = await fetch(`/api/users/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {
@@ -85,7 +85,7 @@ export async function fetchUserProfileApi(userId: string, token: string): Promis
         const error = await response.json();
         throw new Error(error.message || 'Failed to fetch user profile');
     }
-    return response.json();
+    return await response.json();
 }
 
 
@@ -165,4 +165,19 @@ export async function saveDeviceToken(userId: string, token: string) {
     const db = getFirestore(app);
     const tokenRef = doc(db, 'deviceTokens', userId);
     await setDoc(tokenRef, { token, updatedAt: new Date().toISOString() }, { merge: true });
+}
+
+
+export async function sendPasswordResetEmailApi(userId: string, token: string) {
+  const response = await fetch(`/api/users/${userId}/reset-password`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to send password reset email.");
+  }
+  return response.json();
 }

@@ -26,6 +26,7 @@ import {
   serviceLogoutUser,
   serviceSignupUser,
   fetchUserProfileApi,
+  sendPasswordResetEmailApi,
   type UserListResponse,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
@@ -33,41 +34,6 @@ import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 
-// --- API Service Functions ---
-
-async function sendPasswordResetEmailApi(userId: string, token: string) {
-  const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to send password reset email.");
-  }
-  return response.json();
-}
-
-async function purchaseCreditsApi(
-  plan: PricingPlan,
-  token: string
-): Promise<{ newBalance: number }> {
-  const response = await fetch("/api/purchase", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Purchase failed.");
-  }
-  return response.json();
-}
 
 // --- Custom Hooks ---
 const USERS_PER_PAGE = 10;
