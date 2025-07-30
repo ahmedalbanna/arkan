@@ -113,10 +113,14 @@ export function useUpdateProject() {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProject);
       setHasUnsavedChanges(false);
-      // No toast needed for autosave, it would be too noisy.
+      // Add a toast notification for manual saves.
+      toast({
+        title: "Project Updated",
+        description: `Your changes to "${updatedProject.name}" have been saved.`,
+      });
     },
     onError: (error: Error) => {
-      handleErrorUtility(error, "Autosave Failed");
+      handleErrorUtility(error, "Save Failed");
     },
   });
 }
