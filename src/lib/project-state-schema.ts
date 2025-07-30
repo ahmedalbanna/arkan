@@ -34,4 +34,5 @@ export const ProjectStateSchema = z.object({
         questionDocuments: z.array(z.object({ fileName: z.string(), content: z.string() })),
         externalContext: z.array(z.object({ fileName: z.string(), content: z.string() })),
     }).optional(),
+    agents: z.any().optional(),
 });

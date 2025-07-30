@@ -111,10 +111,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useReportStore.getState().loadState({ ...newState });
         useDiagramStore.getState().loadState({ ...newState });
         usePresentationStore.getState().loadState({ ...newState });
-        useCodeGeneratorStore.getState().loadState({ ...newState.codeGenerator });
-        useProjectPlanStore.getState().loadState({ ...newState.projectPlan });
+        useCodeGeneratorStore.getState().loadState({ codeGenerator: newState.codeGenerator });
+        useProjectPlanStore.getState().loadState({ projectPlan: newState.projectPlan });
         useCodebaseStore.getState().loadState({ codebase: newState.codebase });
-        useAcademicSolverStore.getState().loadState({ ...newState.academicSolver });
+        useAcademicSolverStore.getState().loadState({ academicSolver: newState.academicSolver });
 
         toast({
           title: "Project Loaded",
@@ -135,7 +135,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
         academicSolver: useAcademicSolverStore.getState(),
-        agents: useReportStore.getState().agents, // Add agents from report store
+        agents: useReportStore.getState().guidelineState, // Add agents from report store
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
@@ -235,10 +235,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         useReportStore.getState().loadState({ ...persistedState });
         useDiagramStore.getState().loadState({ ...persistedState });
         usePresentationStore.getState().loadState({ ...persistedState });
-        useCodeGeneratorStore.getState().loadState({ ...persistedState.codeGenerator });
-        useProjectPlanStore.getState().loadState({ ...persistedState.projectPlan });
+        useCodeGeneratorStore.getState().loadState({ codeGenerator: persistedState.codeGenerator });
+        useProjectPlanStore.getState().loadState({ projectPlan: persistedState.projectPlan });
         useCodebaseStore.getState().loadState({ codebase: persistedState.codebase });
-        useAcademicSolverStore.getState().loadState({ ...persistedState.academicSolver });
+        useAcademicSolverStore.getState().loadState({ academicSolver: persistedState.academicSolver });
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },
