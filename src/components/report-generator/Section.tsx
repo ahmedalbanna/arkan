@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
 import { Button } from '@/components/ui/button';
@@ -16,13 +16,13 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { ScrollArea } from './ui/scroll-area';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { ScrollArea } from '../ui/scroll-area';
 import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 
-interface EditableSectionProps {
+interface SectionProps {
     sectionKey: SectionName;
     title: string;
     icon: React.ElementType; // Icon component for the section
@@ -67,12 +67,12 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
         translateMutation.mutate({ text: originalContent, targetLang }, {
             onSuccess: (data) => {
                 setTranslatedSection(sectionKey, data.translatedText);
-                toast({ title: t('builder.editableSection.toasts.translateSuccess') });
+                toast({ title: t('builder.Section.toasts.translateSuccess') });
             },
             onError: (error) => {
                 const isCreditError = error.message.toLowerCase().includes('credit');
                 toast({ 
-                    title: t('builder.editableSection.toasts.translateFailed'), 
+                    title: t('builder.Section.toasts.translateFailed'), 
                     description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
                     variant: 'destructive' 
                 });
@@ -114,7 +114,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
     )
 }
 
-export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpdate }: EditableSectionProps) => {
+export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
     const contentRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -243,7 +243,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                          <Card className="mt-4 border-accent">
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
-                                   <Wand2 className="h-5 w-5 text-accent" /> {t('builder.editableSection.aiSuggestion')}
+                                   <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
@@ -253,10 +253,10 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                             </CardContent>
                             <CardFooter className="flex justify-end gap-2 pt-4">
                                 <Button variant="ghost" onClick={handleRejectSuggestion}>
-                                    <ThumbsDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.reject')}
+                                    <ThumbsDown className="mr-2 h-4 w-4" /> {t('builder.Section.reject')}
                                 </Button>
                                 <Button onClick={handleAcceptSuggestion}>
-                                    <Check className="mr-2 h-4 w-4" /> {t('builder.editableSection.accept')}
+                                    <Check className="mr-2 h-4 w-4" /> {t('builder.Section.accept')}
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -270,7 +270,7 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
 
                         <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
                             <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" title={t('builder.editableSection.tooltips.aiActions')}>
+                                <Button variant="ghost" size="sm" title={t('builder.Section.tooltips.aiActions')}>
                                     <Wand2 className="h-4 w-4 mr-2" /> AI Actions
                                 </Button>
                             </PopoverTrigger>
@@ -282,16 +282,16 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                                 ) : (
                                     <div className="grid gap-1">
                                         <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                            <BookText className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.summarize')}
+                                            <BookText className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.summarize')}
                                         </Button>
                                         <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                            <Maximize className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.expand')}
+                                            <Maximize className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.expand')}
                                         </Button>
                                         <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                            <PenLine className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.rewrite')}
+                                            <PenLine className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.rewrite')}
                                         </Button>
                                         <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
-                                            <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.editableSection.aiActions.checkGrammar')}
+                                            <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.checkGrammar')}
                                         </Button>
                                     </div>
                                 )}
@@ -299,17 +299,17 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                         </Popover>
                         <Popover open={isEditorPopoverOpen} onOpenChange={setIsEditorPopoverOpen}>
                             <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" title={t('builder.editableSection.tooltips.editorOptions')}>
+                                <Button variant="ghost" size="sm" title={t('builder.Section.tooltips.editorOptions')}>
                                     <PenSquare className="h-4 w-4 mr-2" /> Editor Tools
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-56 p-2">
                                 <div className="grid gap-1">
                                     <Button variant="ghost" className="justify-start" onClick={handleExportDocx}>
-                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.downloadDocx')}
+                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.Section.editorActions.downloadDocx')}
                                     </Button>
                                     <Button variant="ghost" className="justify-start" onClick={handleExportPdf}>
-                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.editorActions.downloadPdf')}
+                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.Section.editorActions.downloadPdf')}
                                     </Button>
                                 </div>
                             </PopoverContent>

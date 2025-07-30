@@ -5,7 +5,7 @@ This document describes the API endpoints for handling text and object translati
 -   **Purpose**: Translates a single piece of text to a specified target language.
 -   **AI Flow**: Wraps the `translateText` Genkit flow.
 -   **Key Feature**: It is carefully prompted to preserve all markdown formatting during translation, ensuring that headings, lists, bold text, etc., remain intact.
--   **Usage**: Called by the `useTranslate` hook, which is used for inline translations in components like `EditableSection` and `EditableField`.
+-   **Usage**: Called by the `useTranslate` hook, which is used for inline translations in components like `Section` and `EditableField`.
 
 ### POST `/api/translate-proposal`
 

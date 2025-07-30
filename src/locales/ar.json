@@ -659,7 +659,7 @@
         "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي."
       }
     },
-    "editableSection": {
+    "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",
       "reject": "رفض",
       "accept": "قبول",

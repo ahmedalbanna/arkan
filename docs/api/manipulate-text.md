@@ -4,7 +4,7 @@ This document describes the API endpoint for performing various text manipulatio
 
 **1. Purpose**
 
--   This is a versatile, general-purpose endpoint that uses an AI agent to modify a piece of text based on a specific command. It powers the "AI Actions" (Summarize, Expand, Rewrite, etc.) available in the `EditableSection` and `EditableField` components.
+-   This is a versatile, general-purpose endpoint that uses an AI agent to modify a piece of text based on a specific command. It powers the "AI Actions" (Summarize, Expand, Rewrite, etc.) available in the `Section` and `EditableField` components.
 
 **2. Key Concepts**
 

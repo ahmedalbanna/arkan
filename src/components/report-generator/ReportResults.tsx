@@ -3,7 +3,7 @@
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { EditableSection } from '../EditableSection';
+import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName, DiagramType } from '@/ai/schemas';
@@ -81,7 +81,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="p-4 border-t">
-                                     {content && <EditableSection sectionKey={key} title={t(title)} icon={Icon} content={content} onUpdate={onSectionUpdate} />}
+                                     {content && <Section sectionKey={key} title={t(title)} icon={Icon} content={content} onUpdate={onSectionUpdate} />}
                                 </AccordionContent>
                             </AccordionItem>
                           )

@@ -659,7 +659,7 @@
         "authError": "You must be logged in to generate a presentation."
       }
     },
-    "editableSection": {
+    "Section": {
       "aiSuggestion": "AI SUGGESTION",
       "reject": "Reject",
       "accept": "Accept",
