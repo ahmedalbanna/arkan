@@ -44,7 +44,7 @@ interface ChatState {
 }
 
 interface ChatActions {
-  initialize: (firebaseUser: FirebaseUser | null) => Promise<void>;
+  initialize: (firebaseUser: FirebaseUser | null) => void;
   addMessage: (chatId: string, message: ChatMessage) => void;
   setInput: (input: string) => void;
   createConversation: (conversation: ChatSession) => void;
@@ -68,25 +68,42 @@ export const useChatStore = create<ChatState & ChatActions>()(
   (set, get) => ({
     ...getInitialState(),
 
-    initialize: async (firebaseUser) => {
-      if (get().isInitialized || !firebaseUser) return;
-      try {
-        const token = await firebaseUser.getIdToken();
-        const response = await fetch('/api/conversations', {
-          headers: { 'Authorization': `Bearer ${token}` }
+    initialize: (firebaseUser) => {
+        if (get().isInitialized || !firebaseUser) return;
+        set({ isInitialized: true });
+    
+        const db = getDatabase(app);
+        const userConversationsRef = query(ref(db, `userConversations/${firebaseUser.uid}`));
+        
+        onValue(userConversationsRef, async (snapshot) => {
+            if (!snapshot.exists()) {
+                set({ chats: [], selectedChat: null });
+                return;
+            }
+            const conversationIds = Object.keys(snapshot.val());
+            const conversationPromises = conversationIds.map(id => 
+                new Promise<ChatSession | null>((resolve) => {
+                    const convoRef = ref(db, `conversations/${id}`);
+                    onValue(convoRef, (convoSnapshot) => {
+                        if (convoSnapshot.exists()) {
+                            resolve({ id, ...convoSnapshot.val() });
+                        } else {
+                            resolve(null);
+                        }
+                    }, { onlyOnce: true }); // Fetch details once per convo ID
+                })
+            );
+            
+            const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as ChatSession[];
+            conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
+
+            set(state => {
+                 // If there's a selected chat, find its updated version and keep it selected.
+                 const currentSelectedId = state.selectedChat?.id;
+                 const newSelectedChat = currentSelectedId ? conversations.find(c => c.id === currentSelectedId) : conversations[0];
+                 return { chats: conversations, selectedChat: newSelectedChat || null };
+            });
         });
-        if (response.ok) {
-          const serverChats: ChatSession[] = await response.json();
-           serverChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-          set({ chats: serverChats, isInitialized: true, selectedChat: serverChats[0] || null });
-        } else {
-          console.error('Failed to fetch initial chats');
-          set({ isInitialized: true });
-        }
-      } catch (error) {
-         console.error('Error initializing chat store:', error);
-         set({ isInitialized: true });
-      }
     },
 
     createConversation: (conversation) => {
