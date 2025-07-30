@@ -1,10 +1,9 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, MoreVertical, FileDown, PenSquare, Volume2, X } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, MoreVertical, FileDown, PenSquare, Volume2, X, Check, ThumbsDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -17,6 +16,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 
 
 interface EditableSectionProps {
@@ -136,11 +136,22 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
         }
         setIsEditorPopoverOpen(false);
     };
+
+    const handleAcceptSuggestion = () => {
+        if (aiSuggestion !== null) {
+            onUpdate(sectionKey, aiSuggestion);
+            setAiSuggestion(null);
+        }
+    };
+    
+    const handleRejectSuggestion = () => {
+        setAiSuggestion(null);
+    };
     
     const { words, chars } = calculateCounts(content);
 
     return (
-        <div className="group relative">
+        <div className="group relative space-y-4">
             {showAudioPlayer && audioSrc && (
                 <div className="flex items-center gap-2 my-2 p-2 rounded-md bg-muted">
                     <audio ref={audioRef} src={audioSrc} controls className="w-full h-8" />
@@ -154,6 +165,29 @@ export const EditableSection = ({ sectionKey, title, icon: Icon, content, onUpda
                     {content}
                 </ReactMarkdown>
             </div>
+
+            {aiSuggestion && (
+                 <Card className="mt-4 border-accent">
+                    <CardHeader>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                           <Wand2 className="h-5 w-5 text-accent" /> {t('builder.editableSection.aiSuggestion')}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
+                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                            {aiSuggestion}
+                        </ReactMarkdown>
+                    </CardContent>
+                    <CardFooter className="flex justify-end gap-2 pt-4">
+                        <Button variant="ghost" onClick={handleRejectSuggestion}>
+                            <ThumbsDown className="mr-2 h-4 w-4" /> {t('builder.editableSection.reject')}
+                        </Button>
+                        <Button onClick={handleAcceptSuggestion}>
+                            <Check className="mr-2 h-4 w-4" /> {t('builder.editableSection.accept')}
+                        </Button>
+                    </CardFooter>
+                </Card>
+            )}
             
              <div className="mt-4 flex items-center justify-between gap-4 text-xs text-muted-foreground">
                 <div className="flex gap-4">
