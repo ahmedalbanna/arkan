@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit } from 'lucide-react';
+import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileJson, FileText } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportProposalAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -18,6 +18,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
+import { saveAs } from 'file-saver';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -45,7 +46,7 @@ async function summarizeProjectApi(variables: { body: any; token: string }): Pro
 
 export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: ProposalActionsProps) => {
   const { t } = useLocalization();
-  const { proposal } = useBuilderStore();
+  const { proposal, getFullState, name: projectName } = useBuilderStore();
   const { sections } = useReportStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
@@ -98,6 +99,14 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
       exportProposalAsDocx(proposal, selectedDocxTemplate);
     }
   }
+  
+  const handleExportJson = () => {
+    if (!proposal) return;
+    const jsonString = JSON.stringify(getFullState());
+    const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
+    const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
+    saveAs(blob, `${projectName || 'arkan_project'}.arkan`);
+  }
 
   const handleSummarizeProject = async () => {
       if (!proposal || !firebaseUser) return;
@@ -126,10 +135,25 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
             ) : <p>Loading templates...</p> }
         </div>
         <div className='flex flex-col space-y-2'>
-            <Button onClick={handleExportDocx} disabled={isBusy || !proposal} className="w-full font-headline">
-              <Download className="mr-2 h-4 w-4" />
-              {t('builder.proposalGenerator.exportDocx')}
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button disabled={isBusy || !proposal} className="w-full font-headline">
+                        <Download className="mr-2 h-4 w-4" />
+                        Export
+                    </Button>
+                </DropdownMenuTrigger>
+                 <DropdownMenuContent className="w-56">
+                    <DropdownMenuItem onClick={handleExportDocx}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Download as DOCX</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportJson}>
+                        <FileJson className="mr-2 h-4 w-4" />
+                        <span>Download as .arkan File</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button onClick={handleSummarizeProject} variant="outline" className="w-full" disabled={isBusy || !proposal}>
                 {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
                 Summarize Project

@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff } from 'lucide-react';
+import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff, FileJson } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
@@ -220,8 +220,8 @@ export const SessionActions = () => {
                             disabled={!hasAnyContent(store)}
                              className="h-8 w-8 md:w-auto md:px-3"
                         >
-                            <FileDown className="h-4 w-4" />
-                             <span className="hidden md:inline ml-2">Download File</span>
+                            <FileJson className="h-4 w-4" />
+                             <span className="hidden md:inline ml-2">Download as .arkan</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">

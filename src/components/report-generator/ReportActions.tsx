@@ -3,7 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Languages, Loader2 } from 'lucide-react';
+import { FileText, Languages, Loader2, Download, FileJson } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { exportReportAsDocx } from '@/lib/docx-exporter';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -86,10 +86,20 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
             ) : <Loader2 className="h-5 w-5 animate-spin" /> }
         </div>
         <div className="flex flex-col space-y-2">
-            <Button onClick={handleExportReportDOCX} disabled={!hasContent || isTranslating} className="w-full font-headline">
-              <FileText className="mr-2 h-4 w-4" />
-              {t('builder.reportGenerator.exportReport')}
-            </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button disabled={!hasContent || isTranslating} className="w-full font-headline">
+                      <Download className="mr-2 h-4 w-4" />
+                      {t('builder.reportGenerator.exportReport')}
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleExportReportDOCX}>
+                        <FileText className="mr-2 h-4 w-4" />
+                        <span>Download as DOCX</span>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="secondary" className='w-full' disabled={isTranslating || !hasContent}>
