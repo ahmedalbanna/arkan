@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Accordion } from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EditableSection } from '../EditableSection';
 import { useLocalization } from '../../context/LocalizationContext';
