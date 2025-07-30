@@ -1,4 +1,6 @@
 
+'use client';
+
 import { AlignmentType } from 'docx';
 import type { IStylesOptions } from 'docx';
 

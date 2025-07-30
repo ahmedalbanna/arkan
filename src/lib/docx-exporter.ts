@@ -173,7 +173,7 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
 
 async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: IStylesOptions }>> {
     try {
-        const response = await fetch('/api/templates/docx');
+        const response = await fetch('/api/admin/templates/docx');
         if (!response.ok) {
             console.error('Failed to fetch DOCX templates from server, falling back to defaults.');
             return templates;
@@ -286,14 +286,15 @@ export async function exportReportAsDocx(
     diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
     templateKey: TemplateKey,
-    translatedTitles: { [key in SectionName]?: string; }
+    translatedTitles: { [key in SectionName]?: string; },
+    sectionsToInclude?: SectionName[]
 ) {
     const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
-    const orderedSections = Object.keys(sectionConfig) as SectionName[];
+    const orderedSections = sectionsToInclude || Object.keys(sectionConfig) as SectionName[];
     const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
     const reportBodyPromises = orderedSections.map(async (key) => {

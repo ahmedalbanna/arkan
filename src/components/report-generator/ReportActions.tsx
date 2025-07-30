@@ -14,7 +14,7 @@ import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
 import { sectionConfig } from '@/lib/report-config';
 import { SectionName } from '@/ai/schemas';
 
@@ -32,6 +32,14 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
   const { diagrams } = useDiagramStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+
+  const generatedSectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
+  const [selectedSectionsForExport, setSelectedSectionsForExport] = useState<SectionName[]>(generatedSectionKeys);
+
+  // Update selection when generated sections change
+  useEffect(() => {
+    setSelectedSectionsForExport(generatedSectionKeys);
+  }, [sections]);
 
   useEffect(() => {
     const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
@@ -59,7 +67,14 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
       return acc;
     }, {} as { [key in SectionName]?: string });
 
-    await exportReportAsDocx(sections, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles);
+    const sectionsToExport = selectedSectionsForExport.reduce((acc, key) => {
+        if (sections[key]) {
+            acc[key] = sections[key];
+        }
+        return acc;
+    }, {} as { [key in SectionName]?: string });
+
+    await exportReportAsDocx(sectionsToExport, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles, selectedSectionsForExport);
   };
 
 
@@ -93,11 +108,55 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                       {t('builder.reportGenerator.exportReport')}
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={handleExportReportDOCX}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>Download as DOCX</span>
-                    </DropdownMenuItem>
+                 <DropdownMenuContent className="w-64">
+                    <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                             <FileText className="mr-2 h-4 w-4" />
+                             <span>Download as DOCX</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent className="p-0">
+                            <div className="p-2">
+                                <DropdownMenuCheckboxItem
+                                    checked={selectedSectionsForExport.length === generatedSectionKeys.length}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        if (selectedSectionsForExport.length === generatedSectionKeys.length) {
+                                            setSelectedSectionsForExport([]);
+                                        } else {
+                                            setSelectedSectionsForExport(generatedSectionKeys);
+                                        }
+                                    }}
+                                >
+                                    Select All ({generatedSectionKeys.length})
+                                </DropdownMenuCheckboxItem>
+                                <DropdownMenuSeparator />
+                            </div>
+                           
+                            {generatedSectionKeys.map(key => (
+                                <DropdownMenuCheckboxItem
+                                    key={key}
+                                    checked={selectedSectionsForExport.includes(key)}
+                                    onSelect={(e) => {
+                                        e.preventDefault();
+                                        setSelectedSectionsForExport(prev => 
+                                            prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+                                        );
+                                    }}
+                                >
+                                    {t(sectionConfig[key]?.title) || key}
+                                </DropdownMenuCheckboxItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                                onClick={handleExportReportDOCX} 
+                                disabled={selectedSectionsForExport.length === 0}
+                                className="font-semibold"
+                            >
+                                <Download className="mr-2 h-4 w-4" />
+                                Export ({selectedSectionsForExport.length}) Section(s)
+                            </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
                 </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>

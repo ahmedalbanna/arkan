@@ -41,7 +41,7 @@ export interface DocxTemplate {
 
 // --- Proposal Templates ---
 export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
-    const response = await fetch('/api/templates/proposal');
+    const response = await fetch('/api/admin/templates/proposal');
     if (!response.ok) {
         throw new Error('Failed to fetch proposal templates');
     }
@@ -91,7 +91,7 @@ export async function deleteProposalTemplate(id: string, token: string): Promise
 
 // --- Report Templates ---
 export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]> {
-    const response = await fetch('/api/templates/report');
+    const response = await fetch('/api/admin/templates/report');
     if (!response.ok) {
         throw new Error('Failed to fetch report templates');
     }
@@ -142,14 +142,14 @@ export async function deleteReportTemplate(id: string, token: string): Promise<{
 
 // --- Presentation Templates ---
 export async function fetchPresentationTemplates(): Promise<PresentationGenerationTemplate[]> {
-    const response = await fetch('/api/templates/presentation');
+    const response = await fetch('/api/admin/templates/presentation');
     if (!response.ok) {
         throw new Error('Failed to fetch presentation templates');
     }
     return await response.json();
 }
 
-export async function createPresentationTemplate(data: Omit<PresentationGenerationTemplate, 'createdAt'>, token: string): Promise<PresentationGenerationTemplate> {
+export async function createPresentationTemplate(data: Omit<PresentationGenerationTemplate, 'createdAt'> & {id: string}, token: string): Promise<PresentationGenerationTemplate> {
      const response = await fetch('/api/admin/templates/presentation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -194,7 +194,7 @@ export async function deletePresentationTemplate(id: string, token: string): Pro
 // --- DOCX Templates ---
 
 export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>> {
-  const response = await fetch("/api/templates/docx");
+  const response = await fetch("/api/admin/templates/docx");
   if (!response.ok) {
     throw new Error("Failed to fetch DOCX templates");
   }
@@ -250,7 +250,7 @@ export async function deleteDocxTemplate(templateKey: string, token: string) {
 
 // --- PPTX Templates ---
 export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
-  const response = await fetch("/api/templates/pptx");
+  const response = await fetch("/api/admin/templates/pptx");
   if (!response.ok) {
     throw new Error("Failed to fetch PPTX templates");
   }
