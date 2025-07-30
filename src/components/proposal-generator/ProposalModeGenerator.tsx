@@ -17,6 +17,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { lazy, Suspense } from 'react';
 import { translateProposalApi } from '@/services/translation-service';
+import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -50,29 +51,11 @@ function ProposalSkeleton() {
     )
 }
 
-// The async function for the mutation
-async function generateProposal(variables: { body: any; token: string; }): Promise<AnyProjectProposal> {
-    const response = await fetch('/api/generate/proposal', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify(variables.body)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate proposal');
-    }
-    return await response.json();
-}
-
 export function ProposalModeGenerator() {
     const { toast } = useToast();
     const { t, locale } = useLocalization();
-    const { firebaseUser, refetchUser } = useAuth();
-    const queryClient = useQueryClient();
-
+    const { firebaseUser } = useAuth();
+    
     const {
         proposal,
         projectIdea,
@@ -82,24 +65,12 @@ export function ProposalModeGenerator() {
         customGuidelines,
     } = useBuilderStore();
 
-
-    const generationMutation = useMutation({
-        mutationFn: generateProposal,
-        onSuccess: (data) => {
-            setProposal(data);
-            refetchUser(); // Invalidate user query to update credits
-            toast({ title: t('builder.toasts.generationSuccess'), description: t('builder.toasts.generationSuccessDesc').replace('{item}', 'Proposal') });
-        },
-        onError: (error: Error) => {
-            toast({ title: t('builder.toasts.generationFailed'), description: error.message, variant: 'destructive' });
-        }
-    });
+    const generationMutation = useGenerateProposal();
 
     const translateMutation = useMutation({
         mutationFn: translateProposalApi,
         onSuccess: (data) => {
             setProposal(data);
-            refetchUser(); // Invalidate to update credits
             toast({
                 title: t('builder.proposalGenerator.toasts.translateAllSuccess'),
                 description: t('builder.proposalGenerator.toasts.translateAllSuccessDesc'),
@@ -116,18 +87,12 @@ export function ProposalModeGenerator() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: t('builder.toasts.authError'), variant: "destructive" });
-            return;
-        }
-
-        const token = await firebaseUser.getIdToken();
         const body = {
             projectIdea,
             templateId: selectedTemplateId,
             customGuidelines,
         }
-        generationMutation.mutate({ body, token });
+        generationMutation.mutate(body);
     };
 
     const handleTranslateProposal = async (targetLang: 'en' | 'ar') => {
