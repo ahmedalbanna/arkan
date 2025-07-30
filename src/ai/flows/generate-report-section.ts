@@ -56,7 +56,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
   
   // A single, dynamic prompt definition.
   const prompt = ai.definePrompt({
-    name: 'generateReportSectionPrompt',
+    name: `generate-${sectionToGenerate}-section-prompt`, // Unique name per section
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
     prompt: `${basePrompt}
