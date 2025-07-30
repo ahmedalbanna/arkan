@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -41,7 +42,6 @@ export interface ReportState {
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
   manualTableOfContents: string;
-  agents: AgentPrompt[]; // Add agents to the state
 }
 
 interface ReportActions {
@@ -63,7 +63,6 @@ interface ReportActions {
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
     setManualTableOfContents: (toc: string) => void;
-    setAgents: (agents: AgentPrompt[]) => void; // Action to set agents
 }
 
 const getDefaultGuidelineState = () => {
@@ -99,7 +98,6 @@ const initialState: ReportState = {
   selectedReportTemplateId: REPORT_GENERATION_TEMPLATES[0].id,
   selectedPresentationTemplateId: 'software-presentation',
   manualTableOfContents: '',
- agents: [], // Initialize agents in the state
 };
 
 
@@ -241,9 +239,5 @@ export const useReportStore = create<ReportState & ReportActions>()(
         set({ manualTableOfContents: toc });
         useBuilderStore.getState().setHasUnsavedChanges(true);
       },
-      setAgents: (agents: AgentPrompt[]) => {
-        set({ agents });
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      }
     })
 );

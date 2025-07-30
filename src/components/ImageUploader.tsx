@@ -40,7 +40,7 @@ export function ImageUploader({ type }: FileUploaderProps) {
 
         try {
             const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/image-to-text', {
+            const response = await fetch('/api/document-processing/image-to-text', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,
