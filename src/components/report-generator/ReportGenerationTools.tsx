@@ -16,7 +16,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
 import { Slider } from '../ui/slider';
@@ -34,6 +33,8 @@ import { Input } from '../ui/input';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
+import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { generateReport } from '@/services/report-service';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -48,19 +49,6 @@ const generateInstructionText = (controls: any): string => {
     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     return instructions.join('\n');
 };
-
-async function generateReportApi(variables: any): Promise<any> {
-    const response = await fetch('/api/generate/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${variables.token}` },
-        body: JSON.stringify(variables.body),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate report section');
-    }
-    return await response.json();
-}
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
@@ -98,8 +86,9 @@ function ToolsSkeleton() {
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser, userProfile } = useAuth();
+    const { firebaseUser, userProfile, refetchUser } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
+    const [isGeneratingFullReport, setIsGeneratingFullReport] = React.useState(false);
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
@@ -115,7 +104,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         setSection,
-        setAllSections,
         handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
@@ -123,33 +111,26 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
-    const handleGenerationResult = (data: any, variables: any) => {
-        if (variables.body.templateId) { // Full report was generated
-            setAllSections(data.sections);
-            toast({ title: `Full report generated successfully!` });
-        } else { // Single section
+    const reportGenerationMutation = useMutation({
+        mutationFn: async (variables: { body: any, token: string }) => generateReport(variables.body, variables.token),
+        onSuccess: (data, variables) => {
             const sectionKey = variables.body.sectionToGenerate as SectionNameType;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
             toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
+            refetchUser();
+        },
+        onError: (error: Error, variables) => {
+            const item = variables.body.sectionToGenerate;
+            toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
+        },
+        onSettled: () => {
+             // This runs for both success and error, perfect for clearing the active key.
+            setActiveMutationKey(null);
         }
-        setActiveMutationKey(null);
-    };
-
-    const handleGenerationError = (error: Error, variables: any) => {
-        const item = variables.body.templateId || variables.body.sectionToGenerate;
-        toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
-        setActiveMutationKey(null);
-    };
-
-    const reportGenerationMutation = useMutation({
-        mutationFn: generateReportApi,
-        onSuccess: handleGenerationResult,
-        onError: handleGenerationError
     });
 
-
-    const isAnythingGenerating = reportGenerationMutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.isPending || isGeneratingFullReport;
     const isDisabled = isAnythingGenerating || isTranslating;
 
     const onGenerateSection = async (section: SectionNameType) => {
@@ -159,16 +140,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         };
 
         const token = await firebaseUser.getIdToken();
-        const { getFullState } = useBuilderStore.getState();
-
-        const fullState = getFullState();
-
+        const fullState = useBuilderStore.getState().getFullState();
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-
-        const agent = agents?.find((a: { id: string; }) => a.id === sectionConfig[section as SectionNameType]?.agentId);
+        const agent = agents?.find(a => a.id === sectionConfig[section]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
@@ -192,35 +168,55 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
              toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
             return;
         }
-        const token = await firebaseUser.getIdToken();
-        const fullState = useBuilderStore.getState().getFullState();
 
-        const exampleFiles = fullState.externalContext?.filter(f => f.type === 'example');
-        const contextFiles = fullState.externalContext?.filter(f => f.type === 'context');
+        const template = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
+        if (!template) return;
+        
+        const sectionsToGenerate = template.agentIds
+            .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
+            .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
+        
+        if (sectionsToGenerate.length === 0) {
+            toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
+            return;
+        }
 
-        const body = {
-            proposal: fullState.proposal,
-            projectPlan: fullState.projectPlan,
-            templateId: selectedReportTemplateId,
-            existingSections: fullState.sections,
-            existingDiagrams: Object.fromEntries(Object.entries(fullState.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
-            exampleFiles,
-            contextFiles,
-        };
-        setActiveMutationKey(selectedReportTemplateId);
-        reportGenerationMutation.mutate({ body, token });
+        setIsGeneratingFullReport(true);
+        setActiveMutationKey('full-report'); // Indicate a full report generation is active
+
+        for (const sectionKey of sectionsToGenerate) {
+            // Check for credits before each generation in the loop
+            const currentUser = await firebaseUser.reload().then(() => auth.currentUser);
+            const profileResponse = await fetch(`/api/users/${currentUser!.uid}`, { headers: { 'Authorization': `Bearer ${await currentUser!.getIdToken()}` } });
+            const currentProfile = await profileResponse.json();
+
+            if (currentProfile.credits < 1) {
+                toast({ title: "Insufficient Credits", description: "Generation stopped due to lack of credits.", variant: "destructive" });
+                break; // Exit the loop
+            }
+
+            try {
+                await onGenerateSection(sectionKey);
+            } catch (error) {
+                console.error(`Error generating section ${sectionKey}:`, error);
+                // The onError in the mutation will handle the toast
+                break; // Stop on first error
+            }
+        }
+        setIsGeneratingFullReport(false);
+        setActiveMutationKey(null);
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
     const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
+    const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
+        const sectionKey = (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId);
+        return sectionKey && !sections[sectionKey];
+    }).length || 0;
 
-    const sectionsToGenerate = selectedTemplate?.agentIds
-        .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
-        .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]) || [];
-    const fullReportCreditCost = sectionsToGenerate.length;
+    const fullReportCreditCost = sectionsToGenerateCount;
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
-
 
     if (!agentsLoaded) {
         return <ToolsSkeleton />;
@@ -278,9 +274,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         <Button
                                             onClick={onGenerateFullReport}
                                             className="w-full mb-4 font-headline"
-                                            disabled={!canGenerateFullReport}
+                                            disabled={!canGenerateFullReport || isAnythingGenerating}
                                         >
-                                            {isAnythingGenerating && activeMutationKey === selectedReportTemplateId ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            {isGeneratingFullReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
                                             {fullReportCreditCost > 0 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
                                         </Button>
                                     </div>
@@ -308,8 +304,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 return (
                                     <AccordionItem value={key} key={key}>
                                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                            <div className="flex items-center gap-2">
-                                                <Icon className="h-4 w-4" /> {t(`${title}`)}
+                                             <div className="flex items-center gap-2">
+                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />} 
+                                                {t(`${title}`)}
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent className="space-y-4 p-4">
