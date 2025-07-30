@@ -13,7 +13,7 @@ import ProjectPlanViewer from './ProjectPlanViewer';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 async function generatePlanApi(variables: { proposal: any; token: string }): Promise<ProjectPlan> {
-  const response = await fetch('/api/generate-project-plan', {
+  const response = await fetch('/api/generate/project-plan', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
