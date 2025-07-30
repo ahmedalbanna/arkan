@@ -119,6 +119,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         setManualTableOfContents,
     } = useReportStore();
 
+    const { agents, isLoaded: agentsLoaded } = useAgents();
+
     const handleGenerationResult = (data: any, variables: any) => {
         if (variables.body.templateId) { // Full report was generated
             setAllSections(data.sections);
@@ -164,7 +166,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
 
-        const agent = fullState.agents?.find((a: { id: string; }) => a.id === sectionConfig[section as SectionNameType]?.agentId);
+        const agent = agents?.find((a: { id: string; }) => a.id === sectionConfig[section as SectionNameType]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
@@ -217,7 +219,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
-    const { agents, isLoaded: agentsLoaded } = useAgents();
 
     if (!agentsLoaded) {
         return <ToolsSkeleton />;

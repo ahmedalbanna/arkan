@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -135,7 +134,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
         academicSolver: useAcademicSolverStore.getState(),
-        agents: useReportStore.getState().guidelineState, // Add agents from report store
+        agents: useReportStore.getState().guidelineState, // This should be guidelineState, not the agent list
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>
