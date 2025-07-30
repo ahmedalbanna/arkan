@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -111,10 +110,12 @@ export const useReportStore = create<ReportState & ReportActions>()(
       ...initialState,
       newSession: () => set(initialState),
       loadState: (newState) => {
-        if (newState.sections) set({ sections: newState.sections });
-        if (newState.translatedSections) set({ translatedSections: newState.translatedSections });
-        if (newState.evaluation) set({ evaluation: newState.evaluation });
-        if (newState.externalContext) set({ externalContext: newState.externalContext });
+        set({
+            sections: newState.sections || {},
+            evaluation: newState.evaluation || null,
+            externalContext: newState.externalContext || [],
+            translatedSections: newState.translatedSections || {},
+        });
       },
       setSection: (key, content) => {
         set(state => ({ sections: { ...state.sections, [key]: content } }));

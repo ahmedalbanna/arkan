@@ -135,6 +135,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         projectPlan: useProjectPlanStore.getState().projectPlan,
         academicSolver: useAcademicSolverStore.getState(),
         agents: useReportStore.getState().guidelineState, // This should be guidelineState, not the agent list
+        evaluation: useReportStore.getState().evaluation,
+        translatedSections: useReportStore.getState().translatedSections,
       }),
       setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
       setProjectIdea: (idea) =>

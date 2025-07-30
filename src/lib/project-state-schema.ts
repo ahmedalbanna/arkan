@@ -12,6 +12,12 @@ export const ProjectStateSchema = z.object({
     projectIdea: z.string().optional(),
     proposal: z.lazy(() => ProjectProposalSchema).nullable(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
+    translatedSections: z.record(SectionNameSchema, z.string()).optional(),
+    evaluation: z.object({
+        evaluationScore: z.number(),
+        feedback: z.array(z.string()),
+        summary: z.string(),
+    }).nullable().optional(),
     diagrams: z.record(DiagramTypeSchema, z.object({
         plantUmlCode: z.string(),
         imageUrl: z.string(),
