@@ -10,6 +10,7 @@ import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
 import { generateDiagramTool } from '@/ai/tools/generateDiagram';
 import { addTaskToPhaseTool } from '@/ai/tools/addTaskToPhase';
 import { generateCodebaseTool } from '@/ai/tools/generateCodebase';
+import { generateProjectPlanTool } from '@/ai/tools/generateProjectPlan'; // Import the new tool
 
 const ChatInputSchema = z.object({
   message: z.string().describe("The user's message or command."),
@@ -35,6 +36,7 @@ Your task is to be as helpful as possible. Analyze the user's message and decide
 4.  Use the 'generateDiagram' tool if they ask to create a system diagram.
 5.  Use the 'addTaskToPhase' tool if they want to add a task or user story to the project plan.
 6.  Use the 'generateCodebase' tool if they ask to scaffold the entire project.
+7.  Use the 'generateProjectPlan' tool if they ask to create a project plan or break down the project into tasks.
 
 Base your actions on the user's intent.
 
@@ -55,6 +57,7 @@ ${stringifiedProjectState}
             generateDiagramTool,
             addTaskToPhaseTool,
             generateCodebaseTool,
+            generateProjectPlanTool, // Add the new tool here
         ]
     });
 

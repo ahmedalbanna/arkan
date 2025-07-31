@@ -34,3 +34,4 @@ import '@/ai/tools/updateProposalField';
 import '@/ai/tools/generateDiagram';
 import '@/ai/tools/addTaskToPhase';
 import '@/ai/tools/generateCodebase';
+import '@/ai/tools/generateProjectPlan';
