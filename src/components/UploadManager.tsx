@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
@@ -236,7 +236,6 @@ export function UploadManager() {
     const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
     const { firebaseUser, refetchUser } = useAuth();
     const [processingIndex, setProcessingIndex] = useState<number | null>(null);
-    const queryClient = useQueryClient();
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
@@ -329,8 +328,9 @@ export function UploadManager() {
                                                 </SelectContent>
                                             </Select>
                                             {item.content.startsWith('data:') && (
-                                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Process with AI" onClick={() => handleProcessFile(index)} disabled={processingIndex === index}>
-                                                    {processingIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                                <Button size="sm" variant="outline" className="h-7 ml-2" onClick={() => handleProcessFile(index)} disabled={processingIndex === index}>
+                                                    {processingIndex === index ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                                    Process
                                                 </Button>
                                             )}
                                             <ViewContextDialog item={item} />
