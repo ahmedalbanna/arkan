@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit, PlusCircle } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast, useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
@@ -147,6 +147,24 @@ function AnalystAgent() {
             toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
         }
     });
+    
+    const handleSaveAnalysis = () => {
+        if (!analysisResult || !prompt) return;
+
+        // Create a descriptive filename from the prompt
+        const fileName = prompt.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.json';
+
+        // Convert the data object to a formatted JSON string
+        const fileContent = JSON.stringify(analysisResult.data, null, 2);
+
+        // Add it to the context store
+        addExternalContext(fileName, fileContent, 'context');
+
+        toast({
+            title: "Analysis Saved",
+            description: `"${fileName}" has been added to your context files.`,
+        });
+    };
 
     const handleRunAnalysis = async () => {
         if (!prompt.trim()) {
@@ -197,6 +215,15 @@ function AnalystAgent() {
                                     name={false}
                                 />
                              </div>
+                        </div>
+                         <div className="mt-4">
+                            <Button
+                                variant="secondary"
+                                onClick={handleSaveAnalysis}
+                            >
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Save Result as Context File
+                            </Button>
                         </div>
                     </div>
                 )}
