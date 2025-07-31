@@ -1,8 +1,9 @@
+
 This code defines the service layer for all AI agent-related API interactions.
 
 **1. Purpose**
 
-- The `agent-service.ts` file is responsible for all raw `fetch` calls to the `/api/agents` backend endpoints. It handles the direct network communication for fetching agent lists, fetching a single agent's details, and sending update requests.
+- The `agent-service.ts` file is responsible for all raw `fetch` calls to the `/api/admin/agents` backend endpoints. It handles the direct network communication for fetching agent lists, fetching a single agent's details, and sending update requests.
 
 **2. Key Concepts**
 
@@ -12,9 +13,9 @@ This code defines the service layer for all AI agent-related API interactions.
 
 **3. Key Functions**
 
--   **`fetchAgents(token)`**: Performs a `GET` request to `/api/agents` to retrieve the full list of agent configurations.
--   **`fetchAgent(agentId, token)`**: Performs a `GET` request to `/api/agents/[id]` to get a single agent's data.
--   **`updateAgent(variables, token)`**: Performs a `PUT` request to `/api/agents/[id]` with a new payload to update an agent's configuration.
+-   **`fetchAgents(token)`**: Performs a `GET` request to `/api/admin/agents` to retrieve the full list of agent configurations.
+-   **`fetchAgent(agentId, token)`**: Performs a `GET` request to `/api/admin/agents/[id]` to get a single agent's data.
+-   **`updateAgent(variables, token)`**: Performs a `PUT` request to `/api/admin/agents/[id]` with a new payload to update an agent's configuration.
 
 **In summary:**
 

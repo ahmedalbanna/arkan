@@ -1,3 +1,4 @@
+
 This document outlines the API endpoint responsible for fetching statistics for the admin dashboard.
 
 **Endpoint**: `GET /api/admin/dashboard-stats`
@@ -15,7 +16,7 @@ This document outlines the API endpoint responsible for fetching statistics for 
 **3. Workflow**
 
 1.  An admin user navigates to the `/admin/dashboard` page.
-2.  The `Dashboard` component's `useQuery` hook, powered by `useDashboardStats`, calls this endpoint.
+2.  The `Dashboard` component's `useQuery` hook calls this endpoint by using the `fetchDashboardStats` function from `src/services/admin-service.ts`.
 3.  The route handler verifies the admin's token.
 4.  It executes multiple Firestore queries in parallel.
 5.  It formats the results into a `DashboardStats` object and returns it as JSON.
