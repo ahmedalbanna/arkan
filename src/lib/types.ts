@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 
