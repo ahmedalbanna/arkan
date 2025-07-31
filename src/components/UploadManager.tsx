@@ -3,11 +3,18 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
 import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
+import { ScrollArea } from './ui/scroll-area';
+import { Textarea } from './ui/textarea';
+import { useReportStore } from '@/hooks/useReportStore';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+import React, { useState } from 'react';
 
 const GoogleDriveIcon = () => (
     <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
@@ -39,32 +46,88 @@ const CloudStorageConnector = ({ provider, icon: Icon, onConnect }: { provider: 
     </Card>
 );
 
+function EditContextDialog({ item, onSave }: { item: { fileName: string, content: string }, onSave: (newContent: string) => void }) {
+    const [content, setContent] = useState(item.content);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSave = () => {
+        onSave(content);
+        setIsOpen(false);
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content"><Edit className="h-4 w-4" /></Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader><DialogTitle>Edit: {item.fileName}</DialogTitle></DialogHeader>
+                <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20} className="my-4" />
+                <div className="flex justify-end">
+                    <Button onClick={handleSave}>Save Changes</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export function UploadManager() {
+    const { externalContext, removeExternalContext, updateExternalContext } = useReportStore();
+
     return (
-        <Tabs defaultValue="file" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
-                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
-                <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
-                <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
-            </TabsList>
-            <TabsContent value="file" className="mt-4">
-                <FileUploader type="context" />
-            </TabsContent>
+        <div className="space-y-4">
+            <Tabs defaultValue="file" className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
+                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
+                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                    <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
+                    <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
+                </TabsList>
+                <TabsContent value="file" className="mt-4">
+                    <FileUploader type="context" />
+                </TabsContent>
                 <TabsContent value="text" className="mt-4">
-                <PasteTextUploader />
-            </TabsContent>
-            <TabsContent value="image" className="mt-4">
-                    <ImageUploader type={isContext ? 'context' : 'example'} />
-            </TabsContent>
-            <TabsContent value="drive" className="mt-4">
-                <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />
-            </TabsContent>
-            <TabsContent value="dropbox" className="mt-4">
+                    <PasteTextUploader />
+                </TabsContent>
+                <TabsContent value="image" className="mt-4">
+                    <ImageUploader type={'context'} />
+                </TabsContent>
+                <TabsContent value="drive" className="mt-4">
+                    <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />
+                </TabsContent>
+                <TabsContent value="dropbox" className="mt-4">
                     <CloudStorageConnector provider="Dropbox" icon={DropboxIcon} onConnect={() => alert('Connect to Dropbox clicked!')} />
-            </TabsContent>
-        </Tabs>
+                </TabsContent>
+            </Tabs>
+            
+            {externalContext && externalContext.length > 0 && (
+                <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-muted-foreground">MANAGED CONTEXT</h3>
+                    <Card>
+                        <CardContent className="p-2">
+                            <ul className="space-y-1 list-none p-0">
+                                {externalContext.map((item, index) => (
+                                    <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
+                                        <div className="flex items-center gap-2 truncate">
+                                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                            <span className="truncate font-medium text-sm">{item.fileName}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <Dialog>
+                                                <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
+                                                <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader><ScrollArea className="h-[60vh] rounded-md border p-4"><ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown></ScrollArea></DialogContent>
+                                            </Dialog>
+                                            <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+        </div>
     );
 }

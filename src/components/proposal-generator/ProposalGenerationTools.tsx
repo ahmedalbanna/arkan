@@ -20,6 +20,7 @@ import { Textarea } from '../ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalActions } from './ProposalActions';
 import { useAuth } from '@/context/AuthContext';
+import { UploadManager } from '../UploadManager';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -193,7 +194,10 @@ export const ProposalGenerationTools = ({
                                 </Button>
                             </div>
                         </div>
-
+                        <div className="pt-4 mt-4 border-t">
+                            <h3 className="text-sm font-semibold text-muted-foreground mb-2">Context Manager</h3>
+                            <UploadManager />
+                        </div>
                          <div className="pt-4">
                             <GenerateButton isGenerating={isGenerating} />
                         </div>
