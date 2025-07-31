@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Loader2, Sparkles, GanttChartSquare } from 'lucide-react';
+import { Loader2, Sparkles, GanttChartSquare, Lightbulb } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -35,6 +35,16 @@ export default function ProjectPlanGenerator() {
     }
   }, [proposal, projectIdea]);
 
+  const handleLoadExample = () => {
+    setDescription('Develop a comprehensive e-commerce platform for a boutique fashion brand. The platform should provide a seamless shopping experience, from browsing products to secure checkout. It needs to be visually appealing, align with the brand\'s high-end image, and be optimized for both desktop and mobile devices.');
+    setDeliverables(
+      '- A fully functional product catalog with categories and search functionality.\n' +
+      '- Secure user authentication and profile management.\n' +
+      '- Shopping cart and a multi-step checkout process with payment gateway integration.\n' +
+      '- An admin panel for managing products, orders, and customer data.'
+    );
+  };
+
 
   const handleGeneratePlan = async () => {
     if (!firebaseUser) {
@@ -59,7 +69,13 @@ export default function ProjectPlanGenerator() {
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
         <Card>
           <CardHeader>
-            <CardTitle>Project Planning</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Project Planning</CardTitle>
+              <Button variant="ghost" size="sm" onClick={handleLoadExample}>
+                <Lightbulb className="mr-2 h-4 w-4" />
+                Example
+              </Button>
+            </div>
             <CardDescription>Generate an actionable project plan from your project's description and key deliverables.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
