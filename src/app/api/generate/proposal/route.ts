@@ -3,6 +3,7 @@
 
 import { z } from 'zod';
 import { generateProposal } from '@/ai/flows/generate-proposal';
+import { selectProposalTemplate } from '@/ai/flows/select-proposal-template';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import type { ProposalTemplate } from '@/services/template-service';
@@ -26,7 +27,20 @@ export const POST = withAuth(async ({ request, user }) => {
 
     await deductCredit(user.id, 1);
 
-    const { projectIdea, templateId, customGuidelines } = validation.data;
+    let { projectIdea, templateId, customGuidelines } = validation.data;
+    
+    // If the user selects the "automatic" template, first call the AI to select the best template.
+    if (templateId === 'automatic-ai') {
+        const selectionResult = await selectProposalTemplate({ projectIdea });
+        templateId = selectionResult.templateId;
+        // Log this intermediate step
+        await logGeneration({
+            agentId: 'select-proposal-template',
+            userId: user.id,
+            input: { projectIdea },
+            output: { selectedTemplateId: templateId },
+        });
+    }
 
     const templateDoc = await adminDb.collection('templates').doc('proposal').collection('items').doc(templateId).get();
     if (!templateDoc.exists) {
@@ -51,7 +65,7 @@ export const POST = withAuth(async ({ request, user }) => {
     await logGeneration({
         agentId: 'generate-proposal-report', // Agent ID for logging
         userId: user.id,
-        input: { projectIdea, templateId, customGuidelines }, // Log the user-facing input
+        input: { projectIdea, templateId: validation.data.templateId, finalTemplateId: templateId, customGuidelines }, // Log the user-facing input
         output: result,
     });
     

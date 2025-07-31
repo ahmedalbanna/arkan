@@ -2,13 +2,11 @@
 'use client';
 
 import type { AnyProjectProposal } from '@/ai/schemas';
+import type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+
 
 interface GenerateProposalVariables {
-    body: {
-        projectIdea: string;
-        templateId: string;
-        customGuidelines: string[];
-    };
+    body: GenerateProposalBody;
     token: string;
 }
 

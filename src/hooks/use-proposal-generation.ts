@@ -11,7 +11,7 @@ import type { AnyProjectProposal } from '@/ai/schemas';
 import { generateProposalApi } from '@/services/proposal-service';
 import { useBuilderStore } from './useBuilderStore';
 
-interface GenerateProposalBody {
+export interface GenerateProposalBody {
     projectIdea: string;
     templateId: string;
     customGuidelines: string[];
