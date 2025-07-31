@@ -261,7 +261,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                           editor={editor}
                           theme={"light"}
                           sideMenu={false}
-                          formattingToolbar={false}
+                          formattingToolbar={true}
                           onChange={async () => {
                             const markdown = await editor.blocksToMarkdownLossy(editor.document);
                             onUpdate(sectionKey, markdown);
