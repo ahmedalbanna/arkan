@@ -10,7 +10,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const summarizeSchema = z.object({
   proposal: AnyProjectProposalSchema,
-  reportMarkdown: z.string(),
+  reportMarkdown: z.string().optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -23,7 +23,10 @@ export const POST = withAuth(async ({ request, user }) => {
 
     await deductCredit(user.id, 1);
 
-    const agentInput = validation.data;
+    const agentInput = {
+      proposal: validation.data.proposal,
+      reportMarkdown: validation.data.reportMarkdown || '',
+    };
     const result = await summarizeFullProject(agentInput);
 
     await logGeneration({

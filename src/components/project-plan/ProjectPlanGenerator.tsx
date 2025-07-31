@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Loader2, Sparkles, GanttChartSquare, Lightbulb } from 'lucide-react';
+import { Loader2, Sparkles, GanttChartSquare, Lightbulb, BrainCircuit } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -13,17 +13,37 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { useMutation } from '@tanstack/react-query';
+import type { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+
+async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {
+    const response = await fetch('/api/summarize-project', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ proposal: proposal, reportMarkdown: '' }), // Send empty report as we only need proposal
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get suggestion from AI');
+    }
+    return response.json();
+}
+
 
 export default function ProjectPlanGenerator() {
   const { toast } = useToast();
   const { firebaseUser } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
-  const { projectPlan, setProjectPlan } = useProjectPlanStore();
+  const { projectPlan } = useProjectPlanStore();
   
   const [description, setDescription] = useState('');
   const [deliverables, setDeliverables] = useState('');
   
-  const mutation = useGenerateProjectPlan();
+  const planGenerationMutation = useGenerateProjectPlan();
 
   useEffect(() => {
     // Pre-fill from proposal if available
@@ -35,15 +55,23 @@ export default function ProjectPlanGenerator() {
     }
   }, [proposal, projectIdea]);
 
-  const handleLoadExample = () => {
-    setDescription('Develop a comprehensive e-commerce platform for a boutique fashion brand. The platform should provide a seamless shopping experience, from browsing products to secure checkout. It needs to be visually appealing, align with the brand\'s high-end image, and be optimized for both desktop and mobile devices.');
-    setDeliverables(
-      '- A fully functional product catalog with categories and search functionality.\n' +
-      '- Secure user authentication and profile management.\n' +
-      '- Shopping cart and a multi-step checkout process with payment gateway integration.\n' +
-      '- An admin panel for managing products, orders, and customer data.'
-    );
-  };
+  const suggestionMutation = useMutation({
+      mutationFn: async () => {
+          const token = await getAuthenticatedToken(firebaseUser);
+          return summarizeProposalForPlanApi(proposal, token);
+      },
+      onSuccess: (data) => {
+          // A real implementation would parse the summary better,
+          // but for now we'll use a simple split.
+          const parts = data.summary.split("Key Deliverables:");
+          setDescription(parts[0]?.replace('Project Summary:', '').trim() || '');
+          setDeliverables(parts[1]?.trim() || '');
+          toast({ title: "Suggestion Applied", description: "The AI has filled in the details from your proposal." });
+      },
+      onError: (error: Error) => {
+          toast({ title: 'Suggestion Failed', description: error.message, variant: 'destructive' });
+      }
+  });
 
 
   const handleGeneratePlan = async () => {
@@ -59,10 +87,11 @@ export default function ProjectPlanGenerator() {
       });
       return;
     }
-    mutation.mutate({ projectDescription: description, keyDeliverables: deliverables });
+    planGenerationMutation.mutate({ projectDescription: description, keyDeliverables: deliverables });
   };
 
-  const canGenerate = (!!description.trim() && !!deliverables.trim()) && !mutation.isPending;
+  const isProcessing = planGenerationMutation.isPending || suggestionMutation.isPending;
+  const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -71,9 +100,9 @@ export default function ProjectPlanGenerator() {
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Project Planning</CardTitle>
-              <Button variant="ghost" size="sm" onClick={handleLoadExample}>
-                <Lightbulb className="mr-2 h-4 w-4" />
-                Example
+               <Button variant="ghost" size="sm" onClick={() => suggestionMutation.mutate()} disabled={!proposal || isProcessing}>
+                <BrainCircuit className="mr-2 h-4 w-4" />
+                AI Suggest
               </Button>
             </div>
             <CardDescription>Generate an actionable project plan from your project's description and key deliverables.</CardDescription>
@@ -87,7 +116,7 @@ export default function ProjectPlanGenerator() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={6}
-                    disabled={mutation.isPending}
+                    disabled={isProcessing}
                 />
             </div>
              <div className="space-y-2">
@@ -98,18 +127,18 @@ export default function ProjectPlanGenerator() {
                     value={deliverables}
                     onChange={(e) => setDeliverables(e.target.value)}
                     rows={4}
-                    disabled={mutation.isPending}
+                    disabled={isProcessing}
                 />
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
-              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {planGenerationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generate Plan
             </Button>
           </CardContent>
         </Card>
       </div>
       <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
-        {mutation.isPending && (
+        {planGenerationMutation.isPending && (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
               <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
@@ -117,10 +146,10 @@ export default function ProjectPlanGenerator() {
             </div>
           </Card>
         )}
-        {!mutation.isPending && projectPlan ? (
+        {!planGenerationMutation.isPending && projectPlan ? (
           <ProjectPlanViewer projectPlan={projectPlan} />
         ) : (
-          !mutation.isPending && (
+          !planGenerationMutation.isPending && (
             <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
                 <GanttChartSquare className="w-16 h-16 mx-auto mb-4" />

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -70,6 +71,29 @@ export type SummarizeFullProjectOutput = z.infer<typeof SummarizeFullProjectOutp
 export async function summarizeFullProject(input: SummarizeFullProjectInput): Promise<SummarizeFullProjectOutput> {
   const { proposal, reportMarkdown } = input;
   const stringifiedProposal = JSON.stringify(proposal, null, 2);
+
+  // If we only have a proposal, generate a summary suitable for the project planner.
+  if (!reportMarkdown && proposal) {
+      const planningSummaryPrompt = ai.definePrompt({
+          name: 'summarizeForPlanningPrompt',
+          input: { schema: z.any() },
+          output: { schema: SummarizeFullProjectOutputSchema },
+          prompt: `You are a project manager. The user has provided a project proposal and needs a summarized version to use for planning.
+
+**Your Task:**
+1.  **Project Summary**: Read the \`objective\` from the proposal and write a concise, one-paragraph summary. Start it with "Project Summary:".
+2.  **Key Deliverables**: Read the \`expected_outcome\` array from the proposal and list them as bullet points. Start this section on a new line with "Key Deliverables:".
+
+--- PROJECT PROPOSAL (JSON) ---
+\`\`\`json
+${stringifiedProposal}
+\`\`\`
+`,
+      });
+      const { output } = await planningSummaryPrompt(input);
+      return output!;
+  }
+
 
   const prompt = ai.definePrompt({
     name: 'summarizeFullProjectPrompt',
