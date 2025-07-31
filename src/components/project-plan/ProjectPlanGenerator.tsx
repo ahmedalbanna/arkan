@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Loader2, Sparkles, GanttChartSquare } from 'lucide-react';
@@ -10,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import ProjectPlanViewer from './ProjectPlanViewer';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
-
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 
 export default function ProjectPlanGenerator() {
   const { toast } = useToast();
@@ -18,27 +20,39 @@ export default function ProjectPlanGenerator() {
   const { proposal, projectIdea } = useBuilderStore();
   const { projectPlan } = useProjectPlanStore();
   
+  const [description, setDescription] = useState('');
+  const [deliverables, setDeliverables] = useState('');
+  
   const mutation = useGenerateProjectPlan();
+
+  useEffect(() => {
+    // Pre-fill from proposal if available
+    if (proposal) {
+        setDescription(proposal.objective || '');
+        setDeliverables(proposal.expected_outcome?.join('\n') || '');
+    } else if (projectIdea) {
+        setDescription(projectIdea);
+    }
+  }, [proposal, projectIdea]);
+
 
   const handleGeneratePlan = async () => {
     if (!firebaseUser) {
         toast({ title: "Authentication Required", variant: 'destructive' });
         return;
     }
-    // A plan can be generated from either a full proposal or a simple idea.
-    if (!proposal && !projectIdea) {
+    if (!description || !deliverables) {
       toast({
         title: 'Cannot Generate Plan',
-        description: 'A project proposal must be generated or an idea must be provided first.',
+        description: 'Please provide a project description and at least one deliverable.',
         variant: 'destructive',
       });
       return;
     }
-    // Prioritize the full proposal if it exists.
-    mutation.mutate({ proposal: proposal ?? undefined, projectIdea: proposal ? undefined : projectIdea });
+    mutation.mutate({ projectDescription: description, keyDeliverables: deliverables });
   };
 
-  const canGenerate = (!!proposal || !!projectIdea?.trim()) && !mutation.isPending;
+  const canGenerate = (!!description.trim() && !!deliverables.trim()) && !mutation.isPending;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -46,9 +60,31 @@ export default function ProjectPlanGenerator() {
         <Card>
           <CardHeader>
             <CardTitle>Project Planning</CardTitle>
-            <CardDescription>Generate an actionable project plan from your proposal or project idea.</CardDescription>
+            <CardDescription>Generate an actionable project plan from your project's description and key deliverables.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="plan-description">Project Description</Label>
+                <Textarea 
+                    id="plan-description"
+                    placeholder="Describe the main goals and purpose of the project."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    rows={6}
+                    disabled={mutation.isPending}
+                />
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="plan-deliverables">Key Deliverables / Features</Label>
+                <Textarea 
+                    id="plan-deliverables"
+                    placeholder="List the main features or outcomes, one per line."
+                    value={deliverables}
+                    onChange={(e) => setDeliverables(e.target.value)}
+                    rows={4}
+                    disabled={mutation.isPending}
+                />
+            </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
               Generate Plan
@@ -73,7 +109,7 @@ export default function ProjectPlanGenerator() {
               <div className="text-center text-muted-foreground p-8">
                 <GanttChartSquare className="w-16 h-16 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold">Project Plan Will Appear Here</h3>
-                <p>Click "Generate Plan" to break down your proposal or idea into actionable tasks.</p>
+                <p>Fill out the description and deliverables, then click "Generate Plan" to create an actionable project plan.</p>
               </div>
             </Card>
           )

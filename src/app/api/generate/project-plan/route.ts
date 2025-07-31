@@ -4,16 +4,13 @@
 import { z } from 'zod';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { ProjectProposalSchema } from '@/ai/schemas';
 import { generateProjectPlan } from '@/ai/flows/generate-project-plan';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const planSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
-  projectIdea: z.string().optional(),
-}).refine(data => data.proposal || data.projectIdea, {
-    message: "Either a project proposal or a project idea is required.",
-    path: ["proposal"], // You can associate the error with a path if you want
+  projectDescription: z.string().min(10, "Project description must be at least 10 characters long."),
+  keyDeliverables: z.string().min(10, "Please list at least one key deliverable."),
+  numPhases: z.coerce.number().int().optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -27,19 +24,13 @@ export const POST = withAuth(async ({ request, user }) => {
     // This is a more complex task, so we deduct 2 credits.
     await deductCredit(user.id, 2);
     
-    const agentInput = { 
-        proposal: validation.data.proposal,
-        projectIdea: validation.data.projectIdea,
-    };
+    const agentInput = validation.data;
     const result = await generateProjectPlan(agentInput);
 
     await logGeneration({
         agentId: `generate-project-plan`,
         userId: user.id,
-        input: { 
-            proposalTitle: validation.data.proposal?.title,
-            projectIdea: validation.data.projectIdea
-        }, // Log minimal input
+        input: agentInput,
         output: { phaseCount: result.phases.length }, // Log minimal output
     });
 
