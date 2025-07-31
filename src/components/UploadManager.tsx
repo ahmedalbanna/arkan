@@ -235,7 +235,8 @@ function AnalystAgent() {
 export function UploadManager() {
     const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
     const { firebaseUser, refetchUser } = useAuth();
-    const [processingIndex, setProcessingIndex] = useState<number | null>(null);
+    const [processingFileIndex, setProcessingFileIndex] = useState<number | null>(null);
+    const { toast } = useToast();
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
@@ -243,7 +244,7 @@ export function UploadManager() {
         const fileToProcess = externalContext[index];
         if (!fileToProcess || !fileToProcess.content.startsWith('data:') || !firebaseUser) return;
 
-        setProcessingIndex(index);
+        setProcessingFileIndex(index);
         
         try {
             const token = await firebaseUser.getIdToken();
@@ -266,7 +267,7 @@ export function UploadManager() {
         } catch (error: any) {
              toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
         } finally {
-            setProcessingIndex(null);
+            setProcessingFileIndex(null);
         }
     };
 
@@ -275,9 +276,9 @@ export function UploadManager() {
         <div className="space-y-4">
             <Tabs defaultValue="file" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
-                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                    <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4"/> Upload PDF</TabsTrigger>
+                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/> Paste Text</TabsTrigger>
+                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/> Upload Image</TabsTrigger>
                     <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
                     <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
                 </TabsList>
@@ -328,9 +329,9 @@ export function UploadManager() {
                                                 </SelectContent>
                                             </Select>
                                             {item.content.startsWith('data:') && (
-                                                <Button size="sm" variant="outline" className="h-7 ml-2" onClick={() => handleProcessFile(index)} disabled={processingIndex === index}>
-                                                    {processingIndex === index ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                                    Process
+                                                <Button size="sm" variant="outline" className="h-7 ml-2" onClick={() => handleProcessFile(index)} disabled={processingFileIndex === index}>
+                                                    {processingFileIndex === index ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                                                    Process with AI
                                                 </Button>
                                             )}
                                             <ViewContextDialog item={item} />
