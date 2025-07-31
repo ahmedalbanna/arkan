@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -110,7 +111,7 @@ export function ProposalModeGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 lg:h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+             <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <ProposalGenerationTools

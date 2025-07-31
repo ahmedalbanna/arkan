@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -41,7 +42,7 @@ export default function DiagramGenerator() {
         // Find which diagram this mutation was for to update the correct one
         const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === plantUmlCode);
         if(diagramKey) {
-            setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl });
+            setDiagram(diagramKey, { ...diagrams[diagramKey]!, plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
         }
     });
 
@@ -52,7 +53,7 @@ export default function DiagramGenerator() {
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
 
             {/* Center Column */}
             <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">

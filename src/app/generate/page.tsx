@@ -157,9 +157,9 @@ function GeneratePageContent() {
   }, [features, activeTab, enabledTabs]);
 
   return (
-    <div className="relative h-full">
+    <div className="relative flex-grow flex flex-col">
       <OnboardingGuide isOpen={showOnboarding} onOpenChange={setShowOnboarding} onComplete={handleOnboardingComplete} />
-      <div className="container h-full mx-auto max-w-screen-2xl px-4 py-8 flex flex-col">
+      <div className="container flex-grow flex flex-col mx-auto max-w-screen-2xl px-4 py-8">
         <div className="flex justify-between items-start mb-4 gap-4">
           <div className="flex-1 space-y-1">
              <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>

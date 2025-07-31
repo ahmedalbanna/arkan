@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -129,7 +130,7 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
 
 
 async function generateCodeApi(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
-    const response = await fetch('/api/generate-code', {
+    const response = await fetch('/api/generate/code', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -145,7 +146,7 @@ async function generateCodeApi(variables: { prompt: string; token: string }): Pr
 }
 
 async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {
-  const response = await fetch('/api/generate-codebase', {
+  const response = await fetch('/api/generate/codebase', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -332,7 +333,7 @@ function ComponentGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-250px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <Card>
@@ -483,7 +484,7 @@ function FullCodebaseGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-250px)]">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
         <Card>
           <CardHeader>
