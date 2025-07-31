@@ -13,6 +13,8 @@ import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Badge } from '../ui/badge';
+import { cn } from '../utils';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 const orderedDiagrams = DiagramTypeSchema.options;
@@ -99,7 +101,14 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                                 <Label htmlFor={`context-external-${itemKey}-${index}`} className="text-sm font-normal">
                                     <div className="flex items-center gap-2">
                                         <FileText className="h-4 w-4" />
-                                        {item.fileName}
+                                        <span className="truncate">{item.fileName}</span>
+                                        <Badge variant="secondary" className={cn("text-xs capitalize", {
+                                                    'bg-blue-100 text-blue-800 border-blue-200': item.type === 'context',
+                                                    'bg-green-100 text-green-800 border-green-200': item.type === 'example',
+                                                    'bg-yellow-100 text-yellow-800 border-yellow-200': item.type === 'question',
+                                                    'bg-purple-100 text-purple-800 border-purple-200': item.type === 'textbook',
+                                                    'bg-gray-100 text-gray-800 border-gray-200': item.type === 'guidelines',
+                                                })}>{item.type}</Badge>
                                     </div>
                                 </Label>
                             </div>
