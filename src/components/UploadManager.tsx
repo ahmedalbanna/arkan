@@ -42,39 +42,29 @@ const CloudStorageConnector = ({ provider, icon: Icon, onConnect }: { provider: 
 
 export function UploadManager() {
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Context Manager</CardTitle>
-                <CardDescription>
-                    Add context from various sources. Uploaded context will be available in the generation tools when you return to the builder.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue="file" className="w-full">
-                    <TabsList className="grid w-full grid-cols-5">
-                        <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
-                        <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
-                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
-                        <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
-                        <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="file" className="mt-4">
-                       <FileUploader type="context" />
-                    </TabsContent>
-                     <TabsContent value="text" className="mt-4">
-                        <PasteTextUploader />
-                    </TabsContent>
-                    <TabsContent value="image" className="mt-4">
-                         <ImageUploader type="context" />
-                    </TabsContent>
-                    <TabsContent value="drive" className="mt-4">
-                        <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />
-                    </TabsContent>
-                    <TabsContent value="dropbox" className="mt-4">
-                         <CloudStorageConnector provider="Dropbox" icon={DropboxIcon} onConnect={() => alert('Connect to Dropbox clicked!')} />
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
-        </Card>
+        <Tabs defaultValue="file" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+                <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4" /> Upload PDF</TabsTrigger>
+                <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Paste Text</TabsTrigger>
+                <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4" /> Upload Image</TabsTrigger>
+                <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
+                <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
+            </TabsList>
+            <TabsContent value="file" className="mt-4">
+                <FileUploader type="context" />
+            </TabsContent>
+                <TabsContent value="text" className="mt-4">
+                <PasteTextUploader />
+            </TabsContent>
+            <TabsContent value="image" className="mt-4">
+                    <ImageUploader type={isContext ? 'context' : 'example'} />
+            </TabsContent>
+            <TabsContent value="drive" className="mt-4">
+                <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />
+            </TabsContent>
+            <TabsContent value="dropbox" className="mt-4">
+                    <CloudStorageConnector provider="Dropbox" icon={DropboxIcon} onConnect={() => alert('Connect to Dropbox clicked!')} />
+            </TabsContent>
+        </Tabs>
     );
 }

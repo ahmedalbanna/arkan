@@ -217,6 +217,12 @@ export const SessionActions = () => {
                         </TooltipContent>
                     </Tooltip>
                     <DialogContent className="max-w-4xl">
+                         <DialogHeader>
+                            <DialogTitle>Context Manager</DialogTitle>
+                            <DialogDescription>
+                                Add context from various sources. This context will be available across all generation tools.
+                            </DialogDescription>
+                        </DialogHeader>
                         <UploadManager />
                     </DialogContent>
                 </Dialog>
