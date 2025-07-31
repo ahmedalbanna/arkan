@@ -22,6 +22,24 @@ Project Idea: {{{projectIdea}}}`;
 
 export const PROPOSAL_TEMPLATES: ProposalTemplate[] = [
     {
+        id: 'automatic-ai',
+        name: 'Automatic (AI-Generated)',
+        description: 'Let the AI analyze your idea and generate the most suitable proposal structure and content.',
+        prompt: `You are an expert project analyst. A user will provide a project idea. Your task is to analyze the idea and generate a complete, professional, and well-structured project proposal in JSON format.
+        
+Based on the user's idea, you must determine the most appropriate sections and details for the proposal. The structure should be logical and comprehensive.
+For all descriptive text, you MUST use well-formed markdown.
+Your entire response must be a valid JSON object.
+
+Project Idea: {{{projectIdea}}}`,
+        guidelines: [],
+        jsonStructure: {
+            "title": "AI will generate a fitting title",
+            "objective": "AI will generate a detailed objective",
+            "sections": "AI will determine the necessary sections (e.g., Scope, Budget, Timeline, Risks)"
+        }
+    },
+    {
         id: 'default-software',
         name: 'Default Software Proposal',
         description: 'A standard, comprehensive template for software development projects.',
