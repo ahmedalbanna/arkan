@@ -23,7 +23,7 @@ export type { TeamWithMembers } from '@/services/team-service';
 export type { Team, TeamMember, UserProfile, LoginCredentials } from '@/lib/db/queries';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
-export type { ExternalContext } from '@/hooks/useReportStore';
+export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
 export type { SignupCredentials } from '@/components/SignupForm';
 export type { ProjectState, SavedProject } from '@/services/project-service';

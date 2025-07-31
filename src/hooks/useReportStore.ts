@@ -23,10 +23,12 @@ export interface ControlState {
   wordCount: string;
 }
 
+export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+
 export interface ExternalContext {
     fileName: string;
     content: string;
-    type: 'context' | 'example';
+    type: ContextFileType;
 }
 
 export interface ReportState {
@@ -52,9 +54,10 @@ interface ReportActions {
     setTranslatedSection: (key: SectionName, content: string) => void;
     setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
-    addExternalContext: (fileName: string, content: string, type: 'context' | 'example') => void;
+    addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
     removeExternalContext: (index: number) => void;
     updateExternalContext: (index: number, newContent: string) => void;
+    updateExternalContextType: (index: number, type: ContextFileType) => void;
     handleControlChange: (section: SectionName, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
@@ -168,6 +171,16 @@ export const useReportStore = create<ReportState & ReportActions>()(
               return { externalContext: newContext };
           });
           useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      updateExternalContextType: (index: number, type: ContextFileType) => {
+        set((state) => {
+          const newContext = [...state.externalContext];
+          if (newContext[index]) {
+            newContext[index] = { ...newContext[index], type };
+          }
+          return { externalContext: newContext };
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleControlChange: (section, control, value) => {
         set(state => ({

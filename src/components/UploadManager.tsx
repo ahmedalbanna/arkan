@@ -15,6 +15,9 @@ import { useReportStore } from '@/hooks/useReportStore';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import React, { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { ContextFileType } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 const GoogleDriveIcon = () => (
     <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
@@ -72,7 +75,9 @@ function EditContextDialog({ item, onSave }: { item: { fileName: string, content
 }
 
 export function UploadManager() {
-    const { externalContext, removeExternalContext, updateExternalContext } = useReportStore();
+    const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
+
+    const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
         <div className="space-y-4">
@@ -114,6 +119,22 @@ export function UploadManager() {
                                             <span className="truncate font-medium text-sm">{item.fileName}</span>
                                         </div>
                                         <div className="flex items-center">
+                                            <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
+                                                <SelectTrigger className={cn("text-xs h-7 w-[120px]", {
+                                                    'bg-blue-100 text-blue-800 border-blue-200': item.type === 'context',
+                                                    'bg-green-100 text-green-800 border-green-200': item.type === 'example',
+                                                    'bg-yellow-100 text-yellow-800 border-yellow-200': item.type === 'question',
+                                                    'bg-purple-100 text-purple-800 border-purple-200': item.type === 'textbook',
+                                                    'bg-gray-100 text-gray-800 border-gray-200': item.type === 'guidelines',
+                                                })}>
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {fileTypes.map(type => (
+                                                        <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
                                             <Dialog>
                                                 <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
                                                 <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader><ScrollArea className="h-[60vh] rounded-md border p-4"><ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown></ScrollArea></DialogContent>
