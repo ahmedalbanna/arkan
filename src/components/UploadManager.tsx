@@ -1,9 +1,9 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2 } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
@@ -22,8 +22,13 @@ import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
-import { useQueryClient } from '@tanstack/react-query';
+import { analyzeContextApi } from '@/services/context-service';
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useTheme } from 'next-themes';
+import dynamic from 'next/dynamic';
+import { Separator } from './ui/separator';
 
+const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
 const GoogleDriveIcon = () => (
     <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
@@ -123,9 +128,86 @@ function dataURLtoFile(dataurl: string, filename: string): File {
     return new File([u8arr], filename, {type:mime});
 }
 
+function AnalystAgent() {
+    const { externalContext, addExternalContext } = useReportStore();
+    const { firebaseUser, refetchUser } = useAuth();
+    const { toast } = useToast();
+    const [prompt, setPrompt] = useState('');
+    const [analysisResult, setAnalysisResult] = useState<any>(null);
+    const { resolvedTheme } = useTheme();
+
+    const mutation = useMutation({
+        mutationFn: analyzeContextApi,
+        onSuccess: (data) => {
+            setAnalysisResult(data);
+            refetchUser(); // To update credits
+            toast({ title: 'Analysis Complete', description: 'The AI has analyzed the context and generated structured data.' });
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
+        }
+    });
+
+    const handleRunAnalysis = async () => {
+        if (!prompt.trim()) {
+            toast({ title: 'Prompt Required', description: 'Please enter a prompt for the analyst agent.', variant: 'destructive' });
+            return;
+        }
+        if (externalContext.length === 0) {
+            toast({ title: 'Context Required', description: 'Please upload at least one context file to analyze.', variant: 'destructive' });
+            return;
+        }
+        if (!firebaseUser) return;
+        const token = await firebaseUser.getIdToken();
+        mutation.mutate({ prompt, contextFiles: externalContext, token });
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> Analyst Agent</CardTitle>
+                <CardDescription>Ask a question or give an instruction based on the managed context files. The AI will generate a structured JSON response.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <Textarea 
+                    placeholder="e.g., 'List all project stakeholders and their main interests.'"
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    rows={4}
+                    disabled={mutation.isPending}
+                />
+                <Button onClick={handleRunAnalysis} disabled={mutation.isPending}>
+                    {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                    Run Analysis
+                </Button>
+                {analysisResult && (
+                    <div className="space-y-4 pt-4 border-t">
+                        <div className="space-y-2">
+                             <h4 className="font-semibold text-sm">Generated Schema (Zod)</h4>
+                             <pre className="p-2 border rounded-md bg-muted text-xs overflow-x-auto"><code>{analysisResult.schema}</code></pre>
+                        </div>
+                        <div className="space-y-2">
+                            <h4 className="font-semibold text-sm">Generated Data (JSON)</h4>
+                             <div className="p-2 border rounded-md bg-muted text-xs">
+                                <ReactJson 
+                                    src={analysisResult.data} 
+                                    theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                                    collapsed={false}
+                                    displayDataTypes={false}
+                                    name={false}
+                                />
+                             </div>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
 export function UploadManager() {
     const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
-    const { firebaseUser } = useAuth();
+    const { firebaseUser, refetchUser } = useAuth();
     const [processingIndex, setProcessingIndex] = useState<number | null>(null);
     const queryClient = useQueryClient();
 
@@ -153,7 +235,7 @@ export function UploadManager() {
             } else {
                 throw new Error("Unsupported file type for processing.");
             }
-            queryClient.invalidateQueries({ queryKey: ['user'] }); // To update credits
+            refetchUser(); // To update credits
             toast({ title: "File Processed", description: `Content from ${fileToProcess.fileName} has been extracted.` });
         } catch (error: any) {
              toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
@@ -235,6 +317,8 @@ export function UploadManager() {
                     </Card>
                 </div>
             )}
+            <Separator />
+            <AnalystAgent />
         </div>
     );
 }

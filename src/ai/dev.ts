@@ -26,6 +26,7 @@ import '@/ai/flows/academic-solver.ts';
 import '@/ai/flows/explain-diagram.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/project-chat.ts'; // Add new flow
+import '@/ai/flows/analyze-context.ts'; // Add new flow
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';
