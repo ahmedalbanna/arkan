@@ -23,6 +23,15 @@ const fileToDataUri = (file: File): Promise<string> => {
     });
 };
 
+const fileToText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => resolve(event.target?.result as string);
+        reader.onerror = reject;
+        reader.readAsText(file);
+    });
+}
+
 export function FileUploader({ type }: FileUploaderProps) {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
@@ -33,11 +42,6 @@ export function FileUploader({ type }: FileUploaderProps) {
         const file = acceptedFiles[0];
         if (!file) return;
 
-        if (file.type !== 'application/pdf') {
-            toast({ title: "Invalid File Type", description: "Only PDF files are supported at this time.", variant: "destructive" });
-            return;
-        }
-
         if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in to upload a file.", variant: "destructive" });
             return;
@@ -46,8 +50,15 @@ export function FileUploader({ type }: FileUploaderProps) {
         setIsLoading(true);
 
         try {
-            const dataUri = await fileToDataUri(file);
-            addExternalContext(file.name, dataUri, type);
+            let content: string;
+            // For non-PDF text files, read them as plain text. For PDFs (and others), use data URI for later processing.
+            if (file.type === 'text/plain' || file.type === 'text/markdown' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                content = await fileToText(file);
+            } else {
+                content = await fileToDataUri(file);
+            }
+            
+            addExternalContext(file.name, content, type);
             toast({ title: "File Added", description: `${file.name} has been successfully added as ${type}.` });
         } catch (err: any) {
             toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
@@ -60,7 +71,12 @@ export function FileUploader({ type }: FileUploaderProps) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
         multiple: false,
-        accept: { 'application/pdf': ['.pdf'] }
+        accept: { 
+            'application/pdf': ['.pdf'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+            'text/plain': ['.txt'],
+            'text/markdown': ['.md'],
+        }
     });
 
     return (
@@ -81,9 +97,9 @@ export function FileUploader({ type }: FileUploaderProps) {
                         <>
                             <UploadCloud className="h-10 w-10 text-muted-foreground" />
                             <p className="mt-2 text-sm font-semibold">
-                                {isDragActive ? 'Drop the file here...' : 'Drag & drop a PDF here, or click to select'}
+                                {isDragActive ? 'Drop the file here...' : 'Drag & drop a file here, or click to select'}
                             </p>
-                            <p className="text-xs text-muted-foreground">PDF only (Max 5MB)</p>
+                            <p className="text-xs text-muted-foreground">.pdf, .docx, .txt, .md (Max 5MB)</p>
                         </>
                     )}
                 </CardContent>

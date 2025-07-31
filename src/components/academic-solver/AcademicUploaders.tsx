@@ -23,6 +23,7 @@ export const AcademicUploaders = ({ title, isProcessing, isContext = false }: Ac
         <Card>
             <CardContent className="p-4 space-y-2">
                  <h3 className="font-semibold text-sm">{title}</h3>
+                 <p className="text-xs text-muted-foreground">You can upload PDFs, DOCX files, images, or paste text.</p>
                  <UploadManager />
             </CardContent>
         </Card>
