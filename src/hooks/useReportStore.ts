@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -11,6 +10,7 @@ import { sectionConfig } from '@/lib/report-config';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useBuilderStore } from './useBuilderStore';
+import type { ProjectState } from '@/lib/types';
 
 // Type definitions
 export interface GuidelineState {
@@ -49,7 +49,7 @@ export interface ReportState {
 
 interface ReportActions {
     newSession: () => void;
-    loadState: (state: Partial<Pick<ReportState, 'sections' | 'evaluation' | 'externalContext' | 'translatedSections'>>) => void;
+    loadState: (state: Partial<ProjectState>) => void;
     setSection: (key: SectionName, content: string) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
     setTranslatedSection: (key: SectionName, content: string) => void;
@@ -276,7 +276,6 @@ export const useReportStore = create<ReportState & ReportActions>()(
       {
         name: 'arkan-report-store',
         storage: createJSONStorage(() => localStorage),
-        // Exclude file data from being persisted to avoid storage issues.
         partialize: (state) =>
           Object.fromEntries(
             Object.entries(state).filter(([key]) => !['externalContext'].includes(key))

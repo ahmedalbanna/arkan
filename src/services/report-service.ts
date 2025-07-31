@@ -1,9 +1,12 @@
 
 'use client';
 
-import type { GenerateSectionInput, GenerateSectionOutput } from "@/ai/flows/generate-report-section";
-import type { ReportGenerationTemplate } from "./template-service";
-
+/**
+ * Calls the API to generate a report section.
+ * @param body The request body containing the generation context.
+ * @param token The user's authentication token.
+ * @returns A promise that resolves to the generated section data.
+ */
 export async function generateReport(body: any, token: string): Promise<any> {
     const response = await fetch('/api/generate/report', {
         method: 'POST',

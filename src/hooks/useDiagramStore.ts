@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useDiagramStore.md
 "use client";
 
@@ -6,6 +5,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { type DiagramType } from "@/ai/schemas";
 import { useBuilderStore } from "./useBuilderStore";
+import type { ProjectState } from "@/lib/types";
 
 export interface DiagramData {
   plantUmlCode: string;
@@ -19,7 +19,7 @@ export interface DiagramState {
 
 interface DiagramActions {
   newSession: () => void;
-  loadState: (state: Partial<DiagramState>) => void;
+  loadState: (state: Partial<ProjectState>) => void;
   setDiagram: (key: DiagramType, data: DiagramData) => void;
   setDiagramExplanation: (key: DiagramType, explanation: string) => void;
   handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
@@ -30,52 +30,58 @@ const initialState: DiagramState = {
 };
 
 export const useDiagramStore = create<DiagramState & DiagramActions>()(
-  (set, get) => ({
-    ...initialState,
-    newSession: () => set(initialState),
-    loadState: (newState) => {
-      if (newState.diagrams) {
-        set({ diagrams: newState.diagrams });
-      }
-    },
-    setDiagram: (key, data) => {
-      set((state) => ({
-        diagrams: {
-          ...state.diagrams,
-          [key]: data,
-        },
-      }));
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
-    setDiagramExplanation: (key, explanation) => {
-      set((state) => {
-        if (!state.diagrams[key]) return {};
-        return {
+  persist(
+    (set, get) => ({
+      ...initialState,
+      newSession: () => set(initialState),
+      loadState: (newState) => {
+        if (newState.diagrams) {
+          set({ diagrams: newState.diagrams });
+        }
+      },
+      setDiagram: (key, data) => {
+        set((state) => ({
           diagrams: {
             ...state.diagrams,
-            [key]: {
-              ...state.diagrams[key]!,
-              explanation,
-            },
+            [key]: data,
           },
-        };
-      });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
-    handleDiagramCodeUpdate: (key, code) => {
-      set((state) => {
-        if (!state.diagrams[key]) return {};
-        return {
-          diagrams: {
-            ...state.diagrams,
-            [key]: {
-              ...state.diagrams[key]!,
-              plantUmlCode: code,
+        }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      setDiagramExplanation: (key, explanation) => {
+        set((state) => {
+          if (!state.diagrams[key]) return {};
+          return {
+            diagrams: {
+              ...state.diagrams,
+              [key]: {
+                ...state.diagrams[key]!,
+                explanation,
+              },
             },
-          },
-        };
-      });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
-  })
+          };
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      handleDiagramCodeUpdate: (key, code) => {
+        set((state) => {
+          if (!state.diagrams[key]) return {};
+          return {
+            diagrams: {
+              ...state.diagrams,
+              [key]: {
+                ...state.diagrams[key]!,
+                plantUmlCode: code,
+              },
+            },
+          };
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+    }),
+    {
+      name: 'arkan-diagram-store',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
 );

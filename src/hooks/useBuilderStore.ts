@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -67,187 +66,130 @@ const initialState: BuilderState = {
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+  (set, get) => ({
+    ...initialState,
 
-      // --- GENERIC ACTIONS ---
-      newSession: () => {
-        set(initialState);
-        useReportStore.getState().newSession();
-        useDiagramStore.getState().newSession();
-        usePresentationStore.getState().newSession();
-        useCodeGeneratorStore.getState().newSession();
-        useProjectPlanStore.getState().newSession();
-        useCodebaseStore.getState().newSession();
-        useAcademicSolverStore.getState().newSession();
-        toast({
-          title: "New Session Started",
-          description: "All project content has been cleared.",
-        });
-      },
-      loadState: (newState) => {
-        let loadedProposal: AnyProjectProposal | null = null;
-        if (newState.proposal) {
-          // Attempt to parse the loaded proposal with the flexible schema
-          const parseResult = AnyProjectProposalSchema.safeParse(newState.proposal);
-          if (parseResult.success) {
-            loadedProposal = parseResult.data;
-          } else {
-            console.error("Failed to parse loaded proposal state:", parseResult.error);
-            // Optionally show a toast or handle the error appropriately
-            toast({ title: "Error loading proposal", description: "The loaded proposal data was invalid.", variant: "destructive" });
-          }
+    // --- GENERIC ACTIONS ---
+    newSession: () => {
+      set(initialState);
+      useReportStore.getState().newSession();
+      useDiagramStore.getState().newSession();
+      usePresentationStore.getState().newSession();
+      useCodeGeneratorStore.getState().newSession();
+      useProjectPlanStore.getState().newSession();
+      useCodebaseStore.getState().newSession();
+      useAcademicSolverStore.getState().newSession();
+      toast({
+        title: "New Session Started",
+        description: "All project content has been cleared.",
+      });
+    },
+    loadState: (newState) => {
+      let loadedProposal: AnyProjectProposal | null = null;
+      if (newState.proposal) {
+        // Attempt to parse the loaded proposal with the flexible schema
+        const parseResult = AnyProjectProposalSchema.safeParse(newState.proposal);
+        if (parseResult.success) {
+          loadedProposal = parseResult.data;
+        } else {
+          console.error("Failed to parse loaded proposal state:", parseResult.error);
+          // Optionally show a toast or handle the error appropriately
+          toast({ title: "Error loading proposal", description: "The loaded proposal data was invalid.", variant: "destructive" });
         }
+      }
 
-        set({
-          name: newState.name,
-          projectIdea: newState.projectIdea || "",
-          proposal: loadedProposal, // Assign the parsed and validated proposal
-          currentProjectId: newState.id || null, // Set the current project ID
-          hasUnsavedChanges: false, // Loading a project means it's saved
-        });
+      set({
+        name: newState.name,
+        projectIdea: newState.projectIdea || "",
+        proposal: loadedProposal, // Assign the parsed and validated proposal
+        currentProjectId: newState.id || null, // Set the current project ID
+        hasUnsavedChanges: false, // Loading a project means it's saved
+      });
 
-        useReportStore.getState().loadState({ ...newState });
-        useDiagramStore.getState().loadState({ ...newState });
-        usePresentationStore.getState().loadState({ ...newState });
-        useCodeGeneratorStore.getState().loadState({ codeGenerator: newState.codeGenerator });
-        useProjectPlanStore.getState().loadState({ projectPlan: newState.projectPlan });
-        useCodebaseStore.getState().loadState({ codebase: newState.codebase });
-        useAcademicSolverStore.getState().loadState({ academicSolver: newState.academicSolver });
+      // Orchestrate loading state into other stores
+      useReportStore.getState().loadState(newState);
+      useDiagramStore.getState().loadState(newState);
+      usePresentationStore.getState().loadState(newState);
+      useCodeGeneratorStore.getState().loadState(newState);
+      useProjectPlanStore.getState().loadState(newState);
+      useCodebaseStore.getState().loadState(newState);
+      useAcademicSolverStore.getState().loadState(newState);
 
-        toast({
-          title: "Project Loaded",
-          description: `Successfully loaded "${newState.name || newState.proposal?.title || "project"
-            }".`,
-        });
-      },
-      // This method gathers the necessary data from different stores to form a complete ProjectState object.
-      getFullState: () => ({
-        name: get().name!, // Assuming name will be set before saving/getting full state
-        projectIdea: get().projectIdea,
-        proposal: get().proposal,
-        sections: useReportStore.getState().sections,
-        diagrams: useDiagramStore.getState().diagrams,
-        presentation: usePresentationStore.getState().presentation,
-        codeGenerator: useCodeGeneratorStore.getState(),
-        codebase: useCodebaseStore.getState().codebase,
-        // Persisted state from report store does not include external context
-        // so we must get it directly from the running store instance
-        externalContext: useReportStore.getState().externalContext,
-        projectPlan: useProjectPlanStore.getState().projectPlan,
-        academicSolver: useAcademicSolverStore.getState(),
-        agents: useReportStore.getState().guidelineState, // This should be guidelineState, not the agent list
-        evaluation: useReportStore.getState().evaluation,
-        translatedSections: useReportStore.getState().translatedSections,
-      }),
-      setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
-      setProjectIdea: (idea) =>
-        set({ projectIdea: idea, hasUnsavedChanges: true }),
-      setCurrentProjectId: (id) => set({ currentProjectId: id }),
-      setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
-
-      // --- PROPOSAL ACTIONS ---
-      setProposal: (proposal) => {
-        set({
-          proposal: proposal,
-          name: proposal?.title || undefined, // Ensure name is string or undefined
-          // When a new proposal is generated, it's not a saved project yet.
-          currentProjectId: null,
-          hasUnsavedChanges: true,
-        });
-        // Clear downstream states when a new proposal is set
-        useReportStore.getState().newSession();
-        useDiagramStore.getState().newSession();
-        usePresentationStore.getState().newSession();
-        useProjectPlanStore.getState().newSession();
-        useCodebaseStore.getState().newSession();
-      },
-      handleProposalUpdate: (path, value) => {
-        const { proposal } = get();
-        if (!proposal) return;
-        const newProposal = JSON.parse(JSON.stringify(proposal));
-        let current = newProposal;
-        const keys = path.split(".");
-        for (let i = 0; i < keys.length - 1; i++) {
-          current = current[keys[i]];
-        }
-        current[keys[keys.length - 1]] = value;
-        set({ proposal: newProposal, hasUnsavedChanges: true });
-      },
-
-      // --- UI STATE ACTIONS ---
-      setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
-      addCustomGuideline: () => {
-        const { customGuidelines, customGuidelineInput } = get();
-        const newGuideline = customGuidelineInput.trim();
-        if (newGuideline) {
-          set({
-            customGuidelines: [...customGuidelines, newGuideline],
-            customGuidelineInput: "",
-            hasUnsavedChanges: true,
-          });
-        }
-      },
-      removeCustomGuideline: (index) =>
-        set((state) => ({
-          customGuidelines: state.customGuidelines.filter(
-            (_, i) => i !== index
-          ),
-          hasUnsavedChanges: true,
-        })),
-      setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
+      toast({
+        title: "Project Loaded",
+        description: `Successfully loaded "${newState.name || (newState.proposal as any)?.title || "project"
+          }".`,
+      });
+    },
+    // This method gathers the necessary data from different stores to form a complete ProjectState object.
+    getFullState: () => ({
+      name: get().name!,
+      projectIdea: get().projectIdea,
+      proposal: get().proposal,
+      sections: useReportStore.getState().sections,
+      diagrams: useDiagramStore.getState().diagrams,
+      presentation: usePresentationStore.getState().presentation,
+      codeGenerator: useCodeGeneratorStore.getState(),
+      codebase: useCodebaseStore.getState().codebase,
+      externalContext: useReportStore.getState().externalContext,
+      projectPlan: useProjectPlanStore.getState().projectPlan,
+      academicSolver: useAcademicSolverStore.getState(),
+      // Add other store states here if they need to be part of the project save state
     }),
-    {
-      name: "arkan-builder-state-v4", // Bump version to avoid conflicts
-      storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          state.setHasUnsavedChanges(false);
-        }
-      },
-      // Note: We are no longer persisting the report store from here.
-      // It has its own persistence now.
-      partialize: (state) => ({
-        name: state.name,
-        projectIdea: state.projectIdea,
-        proposal: state.proposal,
-        currentProjectId: state.currentProjectId,
-      }),
-      merge: (persistedState: any, currentState) => {
-        const merged: any = { ...currentState, ...persistedState };
+    setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
+    setProjectIdea: (idea) =>
+      set({ projectIdea: idea, hasUnsavedChanges: true }),
+    setCurrentProjectId: (id) => set({ currentProjectId: id }),
+    setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
 
-        // Ensure name is treated as string | undefined
-        if (typeof persistedState.name !== 'string' && persistedState.name !== undefined) {
-          merged.name = undefined; // Reset invalid name
-          console.warn("Invalid 'name' type found in persisted state. Resetting to undefined.");
-        }
+    // --- PROPOSAL ACTIONS ---
+    setProposal: (proposal) => {
+      set({
+        proposal: proposal,
+        name: proposal?.title || undefined,
+        currentProjectId: null,
+        hasUnsavedChanges: true,
+      });
+      // Clear downstream states when a new proposal is set
+      useReportStore.getState().newSession();
+      useDiagramStore.getState().newSession();
+      usePresentationStore.getState().newSession();
+      useProjectPlanStore.getState().newSession();
+      useCodebaseStore.getState().newSession();
+    },
+    handleProposalUpdate: (path, value) => {
+      const { proposal } = get();
+      if (!proposal) return;
+      const newProposal = JSON.parse(JSON.stringify(proposal));
+      let current = newProposal;
+      const keys = path.split(".");
+      for (let i = 0; i < keys.length - 1; i++) {
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+      set({ proposal: newProposal, hasUnsavedChanges: true });
+    },
 
-
-        // Attempt to parse the loaded proposal with the schema during merge
-        let loadedProposal: AnyProjectProposal | null = null;
-        if (persistedState.proposal) {
-          const parseResult = AnyProjectProposalSchema.safeParse(persistedState.proposal);
-          if (parseResult.success) {
-            loadedProposal = parseResult.data;
-          } else {
-            console.error("Failed to parse persisted proposal state during merge:", parseResult.error);
-            // Optionally show a toast or handle the error appropriately
-            toast({ title: "Error loading saved proposal", description: "The saved proposal data was invalid.", variant: "destructive" });
-          }
-        }
-        
-        // This part is no longer needed as each store hydrates itself.
-        // useReportStore.getState().loadState({ ...persistedState });
-        // useDiagramStore.getState().loadState({ ...persistedState });
-        // usePresentationStore.getState().loadState({ ...persistedState });
-        // useCodeGeneratorStore.getState().loadState({ codeGenerator: persistedState.codeGenerator });
-        // useProjectPlanStore.getState().loadState({ projectPlan: persistedState.projectPlan });
-        // useCodebaseStore.getState().loadState({ codebase: persistedState.codebase });
-        // useAcademicSolverStore.getState().loadState({ academicSolver: persistedState.academicSolver });
-
-        return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
-      },
-    }
-  )
+    // --- UI STATE ACTIONS ---
+    setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
+    addCustomGuideline: () => {
+      const { customGuidelines, customGuidelineInput } = get();
+      const newGuideline = customGuidelineInput.trim();
+      if (newGuideline) {
+        set({
+          customGuidelines: [...customGuidelines, newGuideline],
+          customGuidelineInput: "",
+          hasUnsavedChanges: true,
+        });
+      }
+    },
+    removeCustomGuideline: (index) =>
+      set((state) => ({
+        customGuidelines: state.customGuidelines.filter(
+          (_, i) => i !== index
+        ),
+        hasUnsavedChanges: true,
+      })),
+    setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
+  })
 );
