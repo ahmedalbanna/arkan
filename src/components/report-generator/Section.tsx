@@ -23,7 +23,7 @@ import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 
 // BlockNote Imports
-import { BlockNoteViewRaw, useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView, useCreateBlockNote } from "@blocknote/react";
 import { type PartialBlock } from '@blocknote/core';
 
 interface SectionProps {
@@ -139,7 +139,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     useEffect(() => {
         async function loadContent() {
             if (editor && content) {
-                const blocks = await editor.tryParseMarkdownToBlocks(content);
+                const blocks: PartialBlock[] = await editor.tryParseMarkdownToBlocks(content);
                 editor.replaceBlocks(editor.document, blocks);
             }
         }
@@ -257,12 +257,10 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                     <div className="prose dark:prose-invert max-w-none border rounded-md">
-                        <BlockNoteViewRaw
+                     <div className="border rounded-md">
+                        <BlockNoteView
                           editor={editor}
                           theme={"light"}
-                          sideMenu={false}
-                          formattingToolbar={false}
                           onChange={async () => {
                             const markdown = await editor.blocksToMarkdownLossy(editor.document);
                             onUpdate(sectionKey, markdown);
