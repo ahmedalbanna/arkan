@@ -409,15 +409,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <EvaluationTools />
                     </TabsContent>
                  </Tabs>
-                 <div className="pt-4 mt-4 border-t">
-                    <AcademicUploaders
-                        title="Uploaded Context & Examples"
-                        onContentAdded={addExternalContext}
-                        onContentRemoved={removeExternalContext}
-                        isProcessing={isDisabled}
-                        uploadedContent={externalContext}
-                    />
-                 </div>
             </CardContent>
         </Card>
     );

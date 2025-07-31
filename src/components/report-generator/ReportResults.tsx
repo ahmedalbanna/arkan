@@ -16,6 +16,7 @@ import { EvaluationResultViewer } from './EvaluationResultViewer';
 import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
