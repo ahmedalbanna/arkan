@@ -9,7 +9,11 @@ import { generateProjectPlan } from '@/ai/flows/generate-project-plan';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const planSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional(),
+  projectIdea: z.string().optional(),
+}).refine(data => data.proposal || data.projectIdea, {
+    message: "Either a project proposal or a project idea is required.",
+    path: ["proposal"], // You can associate the error with a path if you want
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -23,13 +27,19 @@ export const POST = withAuth(async ({ request, user }) => {
     // This is a more complex task, so we deduct 2 credits.
     await deductCredit(user.id, 2);
     
-    const agentInput = { proposal: validation.data.proposal };
+    const agentInput = { 
+        proposal: validation.data.proposal,
+        projectIdea: validation.data.projectIdea,
+    };
     const result = await generateProjectPlan(agentInput);
 
     await logGeneration({
         agentId: `generate-project-plan`,
         userId: user.id,
-        input: { proposalTitle: validation.data.proposal.title }, // Log minimal input
+        input: { 
+            proposalTitle: validation.data.proposal?.title,
+            projectIdea: validation.data.projectIdea
+        }, // Log minimal input
         output: { phaseCount: result.phases.length }, // Log minimal output
     });
 

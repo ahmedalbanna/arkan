@@ -1,26 +1,28 @@
+
 'use client';
 
 import type { ProjectPlan, ProjectProposal } from '@/ai/schemas';
 
 interface GeneratePlanVariables {
-  proposal: ProjectProposal;
+  proposal?: ProjectProposal;
+  projectIdea?: string;
   token: string;
 }
 
 /**
- * Calls the API to generate a project plan from a proposal.
- * @param variables - An object containing the project proposal and auth token.
+ * Calls the API to generate a project plan from a proposal or idea.
+ * @param variables - An object containing the project data and auth token.
  * @returns A promise that resolves to the generated ProjectPlan.
  */
 export async function generateProjectPlanApi(variables: GeneratePlanVariables): Promise<ProjectPlan> {
-  const { proposal, token } = variables;
+  const { token, ...body } = variables;
   const response = await fetch('/api/generate/project-plan', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ proposal }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

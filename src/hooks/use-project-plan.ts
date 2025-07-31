@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,7 +12,8 @@ import { generateProjectPlanApi } from '@/services/project-plan-service';
 import { useProjectPlanStore } from './useProjectPlanStore';
 
 interface GeneratePlanVariables {
-    proposal: ProjectProposal;
+    proposal?: ProjectProposal;
+    projectIdea?: string;
 }
 
 export function useGenerateProjectPlan() {
