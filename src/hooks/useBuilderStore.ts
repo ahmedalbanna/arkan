@@ -132,6 +132,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         presentation: usePresentationStore.getState().presentation,
         codeGenerator: useCodeGeneratorStore.getState(),
         codebase: useCodebaseStore.getState().codebase,
+        // Persisted state from report store does not include external context
+        // so we must get it directly from the running store instance
         externalContext: useReportStore.getState().externalContext,
         projectPlan: useProjectPlanStore.getState().projectPlan,
         academicSolver: useAcademicSolverStore.getState(),
@@ -204,12 +206,13 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           state.setHasUnsavedChanges(false);
         }
       },
+      // Note: We are no longer persisting the report store from here.
+      // It has its own persistence now.
       partialize: (state) => ({
         name: state.name,
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
-        // Downstream states are loaded in the merge function, not part of the main builder store partial
       }),
       merge: (persistedState: any, currentState) => {
         const merged: any = { ...currentState, ...persistedState };
@@ -233,14 +236,15 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
             toast({ title: "Error loading saved proposal", description: "The saved proposal data was invalid.", variant: "destructive" });
           }
         }
-
-        useReportStore.getState().loadState({ ...persistedState });
-        useDiagramStore.getState().loadState({ ...persistedState });
-        usePresentationStore.getState().loadState({ ...persistedState });
-        useCodeGeneratorStore.getState().loadState({ codeGenerator: persistedState.codeGenerator });
-        useProjectPlanStore.getState().loadState({ projectPlan: persistedState.projectPlan });
-        useCodebaseStore.getState().loadState({ codebase: persistedState.codebase });
-        useAcademicSolverStore.getState().loadState({ academicSolver: persistedState.academicSolver });
+        
+        // This part is no longer needed as each store hydrates itself.
+        // useReportStore.getState().loadState({ ...persistedState });
+        // useDiagramStore.getState().loadState({ ...persistedState });
+        // usePresentationStore.getState().loadState({ ...persistedState });
+        // useCodeGeneratorStore.getState().loadState({ codeGenerator: persistedState.codeGenerator });
+        // useProjectPlanStore.getState().loadState({ projectPlan: persistedState.projectPlan });
+        // useCodebaseStore.getState().loadState({ codebase: persistedState.codebase });
+        // useAcademicSolverStore.getState().loadState({ academicSolver: persistedState.academicSolver });
 
         return { ...merged, proposal: loadedProposal, hasUnsavedChanges: false };
       },
