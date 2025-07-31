@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -6,10 +7,10 @@ import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
-import { FileText, PanelLeft, Rows } from 'lucide-react';
+import { FileText, Trash2 } from 'lucide-react';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import { ContextViewer } from './ContextViewer';
 import { EvaluationResultViewer } from './EvaluationResultViewer';
@@ -17,6 +18,7 @@ import { Button } from '../ui/button';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -25,11 +27,21 @@ interface ReportResultsProps {
 }
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
-  const { sections, evaluation } = useReportStore();
+  const { sections, evaluation, removeSection } = useReportStore();
   const { t } = useLocalization();
   
   const generatedSections = orderedSections.filter(key => sections[key]);
   const [activeSection, setActiveSection] = useState<SectionName | undefined>(generatedSections[0]);
+
+  // Effect to update activeSection if it gets deleted
+  useEffect(() => {
+    if (activeSection && !generatedSections.includes(activeSection)) {
+      setActiveSection(generatedSections[0] || undefined);
+    } else if (!activeSection && generatedSections.length > 0) {
+      setActiveSection(generatedSections[0]);
+    }
+  }, [generatedSections, activeSection]);
+
 
   const hasContent = generatedSections.length > 0;
 
@@ -58,15 +70,35 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
              <ScrollArea className="h-[calc(75vh-60px)]">
                 <div className="space-y-1 pr-2">
                     {generatedSections.map(key => (
-                         <Button
-                            key={key}
-                            variant={activeSection === key ? 'secondary' : 'ghost'}
-                            onClick={() => setActiveSection(key)}
-                            className="w-full justify-start gap-2"
-                         >
-                            {React.createElement(sectionConfig[key].icon, { className: "h-4 w-4" })}
-                            <span className="truncate">{t(sectionConfig[key].title)}</span>
-                         </Button>
+                        <div key={key} className="group flex items-center">
+                            <Button
+                                variant={activeSection === key ? 'secondary' : 'ghost'}
+                                onClick={() => setActiveSection(key)}
+                                className="w-full justify-start gap-2 flex-grow"
+                            >
+                                {React.createElement(sectionConfig[key].icon, { className: "h-4 w-4" })}
+                                <span className="truncate">{t(sectionConfig[key].title)}</span>
+                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Trash2 className="h-4 w-4 text-destructive"/>
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            This will permanently delete the "{t(sectionConfig[key].title)}" section. This action cannot be undone.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => removeSection(key)}>Delete</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                         </div>
                     ))}
                 </div>
              </ScrollArea>

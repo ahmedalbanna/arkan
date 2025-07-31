@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -51,6 +52,7 @@ interface ReportActions {
     newSession: () => void;
     loadState: (state: Partial<ProjectState>) => void;
     setSection: (key: SectionName, content: string) => void;
+    removeSection: (key: SectionName) => void;
     setAllSections: (sections: { [key in SectionName]?: string }) => void;
     setTranslatedSection: (key: SectionName, content: string) => void;
     setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
@@ -127,6 +129,14 @@ export const useReportStore = create<ReportState & ReportActions>()(
         setSection: (key, content) => {
           set(state => ({ sections: { ...state.sections, [key]: content } }));
           useBuilderStore.getState().setHasUnsavedChanges(true);
+        },
+        removeSection: (key) => {
+            set(state => {
+                const newSections = { ...state.sections };
+                delete newSections[key];
+                return { sections: newSections };
+            });
+            useBuilderStore.getState().setHasUnsavedChanges(true);
         },
         setAllSections: (newSections) => {
           set(state => ({
