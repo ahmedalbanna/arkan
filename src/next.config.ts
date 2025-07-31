@@ -1,27 +1,24 @@
 
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   swcMinify: true, // Enable SWC minification for faster builds
-  // Add any custom configurations here
-  // For example:
-  // env: {
-  //   CUSTOM_VARIABLE: process.env.CUSTOM_VARIABLE,
-  // },
-  // images: {
-  //   domains: ['example.com'], // Allow images from this domain
-  // },
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: '/old-path',
-  //       destination: '/new-path',
-  //       permanent: true,
-  //     },
-  //   ];
-  // },
-  /* config options here */
+  
+  webpack: (config, { isServer }) => {
+    // Copy the pdf.js worker file to the static chunks directory
+    config.module.rules.push({
+      test: /pdf\.worker\.mjs$/,
+      type: "asset/resource",
+      generator: {
+        filename: "static/chunks/[name][ext]",
+      },
+    });
+
+    return config;
+  },
+
   experimental: {
     // prefetchInRender: true,
   },
@@ -53,14 +50,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/pdf.worker.js",
-        destination: "/_next/static/chunks/pdf.worker.js",
-      },
-    ]
-  }
 };
 
 export default nextConfig;

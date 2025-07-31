@@ -7,8 +7,11 @@ import { Button } from './ui/button';
 import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 
-// Set up the worker source for pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdfjs-dist/legacy/build/pdf.worker.mjs';
+// Set up the worker source for pdfjs. This path is configured in next.config.js's webpack config.
+// By importing it, webpack ensures the file is copied and returns the public path.
+import workerSrc from 'pdfjs-dist/legacy/build/pdf.worker.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+
 
 interface PdfPreviewProps {
     fileUri: string;
@@ -110,4 +113,3 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
         </div>
     );
 }
-
