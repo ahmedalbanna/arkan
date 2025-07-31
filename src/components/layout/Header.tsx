@@ -85,6 +85,7 @@ export function Header() {
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
+    { href: '/request', label: 'Submit Request', icon: PencilLine },
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
   ];

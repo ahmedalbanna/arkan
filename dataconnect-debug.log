@@ -1,4 +1,55 @@
-E0731 20:08:32.781929   18712 load.go:23] Could not load config from "F:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `F:\arkan\dataconnect.yaml`
-E0731 20:08:32.783463   18712 watch.go:76] watchAllDir unable to walk dir `F:\arkan\dataconnect`: on path "F:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile F:\arkan\dataconnect: The system cannot find the file specified.
-I0731 20:08:32.784465   18712 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:9399
-I0731 20:08:32.786107   18712 dev.go:95] Listening on address (HTTP + gRPC): [::1]:9399
+E0731 17:32:23.836712    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:32:23.840034    1704 watch.go:76] watchAllDir unable to walk dir `/home/user/studio/dataconnect`: on path "/home/user/studio/dataconnect" (DirEntry: <nil>): lstat /home/user/studio/dataconnect: no such file or directory
+I0731 17:32:23.893062    1704 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50002
+E0731 17:32:33.843318    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:32:43.847671    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:32:53.840774    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:03.849656    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:13.845724    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:23.840986    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:33.842560    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:43.850466    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:33:53.841394    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:03.846531    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:13.845669    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:23.841357    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:23.841420    1704 watch.go:76] watchAllDir unable to walk dir `/home/user/studio/dataconnect`: on path "/home/user/studio/dataconnect" (DirEntry: <nil>): lstat /home/user/studio/dataconnect: no such file or directory
+E0731 17:34:33.968341    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:43.857738    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:34:53.841372    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:03.850460    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:13.849524    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:23.841284    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:33.850942    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:43.850211    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:35:53.840476    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:03.845770    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:13.846206    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:23.840699    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:23.840784    1704 watch.go:76] watchAllDir unable to walk dir `/home/user/studio/dataconnect`: on path "/home/user/studio/dataconnect" (DirEntry: <nil>): lstat /home/user/studio/dataconnect: no such file or directory
+E0731 17:36:33.845743    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:43.841089    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:36:53.841757    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:03.845272    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:13.849704    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:23.841281    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:33.846397    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:43.846303    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:37:53.865107    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:03.849582    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:13.847879    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:23.840449    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:23.840534    1704 watch.go:76] watchAllDir unable to walk dir `/home/user/studio/dataconnect`: on path "/home/user/studio/dataconnect" (DirEntry: <nil>): lstat /home/user/studio/dataconnect: no such file or directory
+E0731 17:38:33.849344    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:43.850331    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:38:53.841459    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:03.845973    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:13.844939    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:23.841301    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:33.845737    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:43.845142    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:39:53.840455    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:40:03.860505    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:40:13.846647    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:40:23.840663    1704 load.go:23] Could not load config from "/home/user/studio/dataconnect": schema is required in dataconnect.yaml at `/home/user/studio/dataconnect.yaml`
+E0731 17:40:23.840734    1704 watch.go:76] watchAllDir unable to walk dir `/home/user/studio/dataconnect`: on path "/home/user/studio/dataconnect" (DirEntry: <nil>): lstat /home/user/studio/dataconnect: no such file or directory

@@ -16,7 +16,7 @@
   services.firebase.emulators = {
     detect = true;
     projectId = "docudec";
-    services = ["auth" "firestore" "storage" "functions"];
+    services = ["auth" "firestore" "storage" "functions" "database" "auth" "hosting"];
   };
   idx = {
     # Search for the extensions you want on https://open-vsx.org/ and use "publisher.id"
