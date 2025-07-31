@@ -14,7 +14,7 @@ import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/sche
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Badge } from '../ui/badge';
-import { cn } from '../utils';
+import { cn } from '@/lib/utils';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 const orderedDiagrams = DiagramTypeSchema.options;

@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, BookCheck, MessageSquare } from 'lucide-react';
+import { FileText, Laptop, Presentation, FilePlus2, GitGraph, GanttChartSquare, BookCheck, MessageSquare, FolderKanban } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -58,6 +58,10 @@ const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/Pro
   loading: () => <LoadingSkeleton />,
 });
 const AcademicSolver = dynamic(() => import('@/components/academic-solver/AcademicSolver'), {
+    ssr: false,
+    loading: () => <LoadingSkeleton />,
+});
+const FileManager = dynamic(() => import('@/components/FileManager'), {
     ssr: false,
     loading: () => <LoadingSkeleton />,
 });
@@ -137,6 +141,7 @@ function GeneratePageContent() {
   };
 
   const enabledTabs = [
+      { id: 'files', enabled: true }, // Files tab is always enabled
       { id: 'proposal', enabled: isFeatureEnabled('proposal') },
       { id: 'plan', enabled: isFeatureEnabled('plan') },
       { id: 'report', enabled: isFeatureEnabled('report') },
@@ -184,6 +189,9 @@ function GeneratePageContent() {
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
                     <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8">
+                        <TabsTrigger value="files" className="gap-2">
+                            <FolderKanban className="h-4 w-4" /> Files
+                        </TabsTrigger>
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
                                 <FilePlus2 className="h-4 w-4" /> {t('builder.tabs.proposal')}
@@ -222,6 +230,9 @@ function GeneratePageContent() {
                     </TabsList>
 
                     <div className="w-full flex-grow mt-4">
+                        <TabsContent value="files" className="h-full animate-fade-in">
+                            {activeTab === 'files' && <FileManager />}
+                        </TabsContent>
                         <TabsContent value="proposal" className="h-full animate-fade-in">
                             {activeTab === 'proposal' && <ProposalModeGenerator />}
                         </TabsContent>
