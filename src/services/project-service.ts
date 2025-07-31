@@ -1,6 +1,6 @@
 
 'use client';
-import type { AnyProjectProposal } from "@/ai/schemas";
+import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
 import { app } from '@/lib/firebase';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 
@@ -8,7 +8,7 @@ import { getFirestore, collection, query, where, onSnapshot, orderBy } from "fir
 // It is a combination of states from various Zustand stores.
 export interface ProjectState {
     agents: any;
-    projectPlan: any;
+    projectPlan: ProjectPlan | null;
     name?: string;
     projectIdea?: string;
     proposal: AnyProjectProposal | null;
