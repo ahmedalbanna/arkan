@@ -1,9 +1,7 @@
-
 'use client';
 
 import { UploadManager } from '../UploadManager';
 import { Card, CardContent } from '../ui/card';
-import type { ExternalContext } from '@/hooks/useReportStore';
 
 interface AcademicUploadersProps {
     title: string;

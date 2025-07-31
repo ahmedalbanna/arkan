@@ -1,12 +1,10 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit, PlusCircle } from 'lucide-react';
-import { FileUploader } from './FileUploader';
+import { UploadCloud, FileText, ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit, PlusCircle } from 'lucide-react';
 import { PasteTextUploader } from './PasteTextUploader';
-import { ImageUploader } from './ImageUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
@@ -14,12 +12,12 @@ import { Textarea } from './ui/textarea';
 import { useReportStore } from '@/hooks/useReportStore';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast, useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
@@ -28,6 +26,7 @@ import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import { Separator } from './ui/separator';
 import { PdfPreview } from './PdfPreview';
+import { useDropzone } from 'react-dropzone';
 
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
@@ -118,21 +117,6 @@ function EditContextDialog({ item, onSave }: { item: { fileName: string, content
             </DialogContent>
         </Dialog>
     )
-}
-
-function dataURLtoFile(dataurl: string, filename: string): File {
-    var arr = dataurl.split(','),
-        mimeMatch = arr[0].match(/:(.*?);/),
-        mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream',
-        bstr = atob(arr[1]), 
-        n = bstr.length, 
-        u8arr = new Uint8Array(n);
-        
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    
-    return new File([u8arr], filename, {type:mime});
 }
 
 function AnalystAgent() {
@@ -239,67 +223,111 @@ function AnalystAgent() {
     );
 }
 
-export function UploadManager() {
-    const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
-    const { firebaseUser, refetchUser } = useAuth();
-    const [processingFileIndex, setProcessingFileIndex] = useState<number | null>(null);
+function FileDropzone() {
     const { toast } = useToast();
+    const { firebaseUser, refetchUser } = useAuth();
+    const { addExternalContext } = useReportStore();
+    const [isLoading, setIsLoading] = useState(false);
 
-    const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
-
-    const handleProcessFile = async (index: number) => {
-        const fileToProcess = externalContext[index];
-        if (!fileToProcess || !fileToProcess.content.startsWith('data:') || !firebaseUser) return;
-
-        setProcessingFileIndex(index);
-        
-        try {
-            const token = await firebaseUser.getIdToken();
-            const file = dataURLtoFile(fileToProcess.content, fileToProcess.fileName);
-            const formData = new FormData();
-            formData.append('file', file);
-
-            let result;
-            if (file.type.startsWith('image/')) {
-                result = await processImageToText(formData, token);
-                updateExternalContext(index, result.text);
-            } else if (file.type === 'application/pdf') {
-                result = await processPdfToMarkdown(formData, token);
-                updateExternalContext(index, result.markdown);
-            } else {
-                throw new Error("Unsupported file type for processing.");
-            }
-            refetchUser(); // To update credits
-            toast({ title: "File Processed", description: `Content from ${fileToProcess.fileName} has been extracted.` });
-        } catch (error: any) {
-             toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
-        } finally {
-            setProcessingFileIndex(null);
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        if (!firebaseUser) {
+            toast({ title: "Authentication Error", description: "You must be logged in to upload files.", variant: "destructive" });
+            return;
         }
-    };
+        setIsLoading(true);
 
+        const token = await firebaseUser.getIdToken();
+
+        for (const file of acceptedFiles) {
+            try {
+                let content: string;
+                if (file.type.startsWith('image/')) {
+                    content = await processImageToText(new FormData().append('file', file) as any, token).then(res => res.text);
+                    addExternalContext(`${file.name}.txt`, content, 'context');
+                } else if (file.type === 'application/pdf') {
+                    content = await processPdfToMarkdown(new FormData().append('file', file) as any, token).then(res => res.markdown);
+                    addExternalContext(`${file.name}.md`, content, 'context');
+                } else { // Handle .txt, .md, .docx, etc. as plain text
+                    content = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => resolve(event.target?.result as string);
+                        reader.onerror = reject;
+                        reader.readAsText(file);
+                    });
+                    addExternalContext(file.name, content, 'context');
+                }
+                toast({ title: "File Processed", description: `Content from ${file.name} has been extracted and added.` });
+                refetchUser(); // Update credits
+            } catch (err: any) {
+                toast({ title: "Processing Failed", description: `Could not process ${file.name}: ${err.message}`, variant: "destructive" });
+            }
+        }
+        setIsLoading(false);
+    }, [firebaseUser, toast, addExternalContext, refetchUser]);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        multiple: true,
+        accept: {
+            'application/pdf': ['.pdf'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+            'text/plain': ['.txt'],
+            'text/markdown': ['.md'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/png': ['.png'],
+            'image/webp': ['.webp'],
+        }
+    });
 
     return (
+        <Card
+            {...getRootProps()}
+            className={`border-2 border-dashed ${isDragActive ? 'border-primary bg-accent' : 'border-border'
+                } hover:border-primary/80 transition-colors cursor-pointer`}
+        >
+            <CardContent className="flex flex-col items-center justify-center p-6 text-center">
+                <input {...getInputProps()} />
+                {isLoading ? (
+                    <>
+                        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                        <p className="mt-2 text-sm text-muted-foreground">Processing files...</p>
+                    </>
+                ) : (
+                    <>
+                        <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                        <p className="mt-2 text-sm font-semibold">
+                            {isDragActive ? 'Drop the files here...' : 'Drag & drop files here, or click to select'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT, MD, Images (Max 5MB)</p>
+                    </>
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+
+export function UploadManager() {
+    const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
+    const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
+    
+    return (
         <div className="space-y-4">
-            <Tabs defaultValue="file" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                    <TabsTrigger value="file"><UploadCloud className="mr-2 h-4 w-4"/> Upload PDF</TabsTrigger>
+            <Tabs defaultValue="upload" className="w-full">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="upload"><UploadCloud className="mr-2 h-4 w-4"/> Upload Files</TabsTrigger>
                     <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/> Paste Text</TabsTrigger>
-                    <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/> Upload Image</TabsTrigger>
                     <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
                     <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
                 </TabsList>
-                <TabsContent value="file" className="mt-4">
-                    <FileUploader type="context" />
+                <TabsContent value="upload" className="mt-4">
+                    <FileDropzone />
                 </TabsContent>
                 <TabsContent value="text" className="mt-4">
                     <PasteTextUploader />
                 </TabsContent>
-                <TabsContent value="image" className="mt-4">
-                    <ImageUploader type={'context'} />
-                </TabsContent>
                 <TabsContent value="drive" className="mt-4">
-                    <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => alert('Connect to Google Drive clicked!')} />
+                    <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => toast({title: "Coming Soon!", description:"Google Drive integration is not yet available."})} />
                 </TabsContent>
                 <TabsContent value="dropbox" className="mt-4">
                     <CloudStorageConnector provider="Dropbox" icon={DropboxIcon} onConnect={() => alert('Connect to Dropbox clicked!')} />
@@ -335,12 +363,6 @@ export function UploadManager() {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            {item.content.startsWith('data:') && (
-                                                <Button size="sm" variant="outline" className="h-7 ml-2" onClick={() => handleProcessFile(index)} disabled={processingFileIndex === index}>
-                                                    {processingFileIndex === index ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                                                    Process with AI
-                                                </Button>
-                                            )}
                                             <ViewContextDialog item={item} />
                                             <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
