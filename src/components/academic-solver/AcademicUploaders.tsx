@@ -1,23 +1,9 @@
 
 'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, Edit } from 'lucide-react';
+import { UploadManager } from '../UploadManager';
 import { Card, CardContent } from '../ui/card';
-import type { AcademicContextFile } from '@/lib/types';
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
-import { ScrollArea } from '../ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
-import { PlusCircle, File, Eye, X, Loader2 } from 'lucide-react';
-import { FileUploader } from '../FileUploader';
-import { PasteTextUploader } from '../PasteTextUploader';
-import { ImageUploader } from '../ImageUploader';
-import { Badge } from '../ui/badge';
-import { useReportStore } from '@/hooks/useReportStore';
-import { Textarea } from '../ui/textarea';
+import type { ExternalContext } from '@/hooks/useReportStore';
 
 interface AcademicUploadersProps {
     title: string;
@@ -28,70 +14,19 @@ interface AcademicUploadersProps {
     uploadedContent: { fileName: string; content: string; type?: 'context' | 'example' }[];
 }
 
-function EditContextDialog({ item, onSave }: { item: { fileName: string, content: string }, onSave: (newContent: string) => void }) {
-    const [content, setContent] = useState(item.content);
-    const [isOpen, setIsOpen] = useState(false);
-
-    const handleSave = () => {
-        onSave(content);
-        setIsOpen(false);
-    }
-
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content"><Edit className="h-4 w-4" /></Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-                <DialogHeader><DialogTitle>Edit: {item.fileName}</DialogTitle></DialogHeader>
-                <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20} className="my-4" />
-                <div className="flex justify-end">
-                    <Button onClick={handleSave}>Save Changes</Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
+// This component is now a wrapper around the main UploadManager to ensure UI consistency.
 export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: AcademicUploadersProps) => {
     
-    const { updateExternalContext } = useReportStore();
+    // NOTE: The props are passed for potential future customizations specific to the academic solver,
+    // but for now, we rely on the centralized UploadManager for the UI and logic.
+    // The state management is handled by the `useAcademicSolverStore`, which interacts
+    // with `useReportStore` under the hood for context management.
     
     return (
         <Card>
             <CardContent className="p-4 space-y-2">
                  <h3 className="font-semibold text-sm">{title}</h3>
-                 {uploadedContent.length > 0 && (
-                      <ul className="space-y-2 list-none p-0">
-                        {uploadedContent.map((item, index) => (
-                            <li key={index} className="flex items-center justify-between p-2 border rounded-md bg-muted/50 text-sm">
-                                <div className="flex items-center gap-2 truncate">
-                                    <File className="h-4 w-4 shrink-0" />
-                                    <span className="truncate">{item.fileName}</span>
-                                </div>
-                                <div className="flex items-center">
-                                    <Dialog>
-                                        <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
-                                        <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader><ScrollArea className="h-[60vh] rounded-md border p-4"><ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown></ScrollArea></DialogContent>
-                                    </Dialog>
-                                    <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onContentRemoved(index)}><X className="h-4 w-4 text-destructive" /></Button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                 )}
-                 <p className="text-xs text-muted-foreground mb-2">Provide documents for factual context. The AI will use this information to answer questions or ground its writing.</p>
-                <Tabs defaultValue="pdf" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="pdf"><UploadCloud className="mr-2 h-4 w-4"/>PDF</TabsTrigger>
-                        <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/>Text</TabsTrigger>
-                        <TabsTrigger value="image"><ImageIcon className="mr-2 h-4 w-4"/>Image</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="pdf" className="mt-2"><FileUploader type={isContext ? 'context' : 'example'} /></TabsContent>
-                    <TabsContent value="text" className="mt-2"><PasteTextUploader /></TabsContent>
-                    <TabsContent value="image" className="mt-2"><ImageUploader type={isContext ? 'context' : 'example'} /></TabsContent>
-                </Tabs>
+                 <UploadManager />
             </CardContent>
         </Card>
     )

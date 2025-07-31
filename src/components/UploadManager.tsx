@@ -7,7 +7,7 @@ import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from './ui/scroll-area';
 import { Textarea } from './ui/textarea';
