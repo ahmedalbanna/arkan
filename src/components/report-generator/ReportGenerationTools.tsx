@@ -17,18 +17,17 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useReportStore } from '@/hooks/useReportStore';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '../ui/select';
-import { Slider } from '../ui/slider';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { Slider } from '../ui/slider';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
@@ -36,6 +35,7 @@ import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { generateReport } from '@/services/report-service';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
+import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 
 const orderedSections = SectionNameSchema.options;
 
