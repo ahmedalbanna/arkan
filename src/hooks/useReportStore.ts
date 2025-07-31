@@ -27,7 +27,7 @@ export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 
 
 export interface ExternalContext {
     fileName: string;
-    content: string;
+    content: string; // Can be markdown text or a base64 data URI
     type: ContextFileType;
 }
 

@@ -14,6 +14,15 @@ interface FileUploaderProps {
     type: 'context' | 'example';
 }
 
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
+
 export function ImageUploader({ type }: FileUploaderProps) {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
@@ -35,29 +44,13 @@ export function ImageUploader({ type }: FileUploaderProps) {
         }
 
         setIsLoading(true);
-        const formData = new FormData();
-        formData.append('file', file);
-
+        
         try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/document-processing/image-to-text', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to process image.');
-            }
-            
-            const result = await response.json();
-            addExternalContext(file.name, result.text, type);
-
-            toast({ title: "Image Processed", description: `Text from ${file.name} has been successfully added as context.` });
-
+            const dataUri = await fileToDataUri(file);
+            addExternalContext(file.name, dataUri, type);
+            toast({ title: "Image Added", description: `Image ${file.name} has been successfully added as context.` });
         } catch (err: any) {
-            toast({ title: "Processing Failed", description: err.message, variant: "destructive" });
+            toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
         } finally {
             setIsLoading(false);
         }
@@ -82,7 +75,7 @@ export function ImageUploader({ type }: FileUploaderProps) {
                     {isLoading ? (
                         <>
                             <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                            <p className="mt-4 text-muted-foreground">Extracting text from image...</p>
+                            <p className="mt-4 text-muted-foreground">Adding image...</p>
                         </>
                     ) : (
                         <>

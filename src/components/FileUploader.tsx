@@ -14,6 +14,15 @@ interface FileUploaderProps {
     type: 'context' | 'example';
 }
 
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+};
+
 export function FileUploader({ type }: FileUploaderProps) {
     const { toast } = useToast();
     const { firebaseUser } = useAuth();
@@ -35,27 +44,11 @@ export function FileUploader({ type }: FileUploaderProps) {
         }
 
         setIsLoading(true);
-        const formData = new FormData();
-        formData.append('file', file);
 
         try {
-            const token = await firebaseUser.getIdToken();
-            const response = await fetch('/api/document-processing/pdf-to-markdown', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData,
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to process file.');
-            }
-
-            const result = await response.json();
-            addExternalContext(file.name, result.markdown, type);
-
-            toast({ title: "File Processed", description: `${file.name} has been successfully added as ${type}.` });
-
+            const dataUri = await fileToDataUri(file);
+            addExternalContext(file.name, dataUri, type);
+            toast({ title: "File Added", description: `${file.name} has been successfully added as ${type}.` });
         } catch (err: any) {
             toast({ title: "Upload Failed", description: err.message, variant: "destructive" });
         } finally {
@@ -82,7 +75,7 @@ export function FileUploader({ type }: FileUploaderProps) {
                     {isLoading ? (
                         <>
                             <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">Adding file...</p>
                         </>
                     ) : (
                         <>

@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 const GoogleDriveIcon = () => (
     <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
@@ -49,9 +50,35 @@ const CloudStorageConnector = ({ provider, icon: Icon, onConnect }: { provider: 
     </Card>
 );
 
+function ViewContextDialog({ item }: { item: { fileName: string, content: string }}) {
+    const isDataUri = item.content.startsWith('data:');
+    const isImage = isDataUri && item.content.startsWith('data:image');
+    
+    return (
+        <Dialog>
+            <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
+                <ScrollArea className="h-[60vh] rounded-md border p-4">
+                    {isImage ? (
+                        <Image src={item.content} alt={item.fileName} width={500} height={700} className="mx-auto" />
+                    ) : isDataUri ? (
+                        <p className="text-muted-foreground">PDF preview is not yet available. Please download the file to view.</p>
+                    ) : (
+                        <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
+                    )}
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
 function EditContextDialog({ item, onSave }: { item: { fileName: string, content: string }, onSave: (newContent: string) => void }) {
     const [content, setContent] = useState(item.content);
     const [isOpen, setIsOpen] = useState(false);
+    
+    // Disable editing for data URIs
+    const isEditable = !item.content.startsWith('data:');
 
     const handleSave = () => {
         onSave(content);
@@ -61,7 +88,9 @@ function EditContextDialog({ item, onSave }: { item: { fileName: string, content
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content"><Edit className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content" disabled={!isEditable}>
+                    <Edit className="h-4 w-4" />
+                </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl">
                 <DialogHeader><DialogTitle>Edit: {item.fileName}</DialogTitle></DialogHeader>
@@ -135,10 +164,7 @@ export function UploadManager() {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
-                                            <Dialog>
-                                                <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
-                                                <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader><ScrollArea className="h-[60vh] rounded-md border p-4"><ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown></ScrollArea></DialogContent>
-                                            </Dialog>
+                                            <ViewContextDialog item={item} />
                                             <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
                                         </div>
