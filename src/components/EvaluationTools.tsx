@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useEvaluateReport } from '@/hooks/use-evaluation';
-import { processPdfToMarkdown } from '@/services/document-processing-service';
+import { processFileApi } from '@/services/document-processing-service';
 
 export const EvaluationTools = () => {
     const { proposal } = useBuilderStore();
@@ -53,7 +53,7 @@ export const EvaluationTools = () => {
         
         try {
             const token = await firebaseUser.getIdToken();
-            const result = await processPdfToMarkdown(formData, token);
+            const result = await processFileApi(formData, token);
             const extractedCriteria = result.markdown
                 .split('\n')
                 .filter((line: string) => line.trim().startsWith('-') || /^\d+\./.test(line.trim()))
