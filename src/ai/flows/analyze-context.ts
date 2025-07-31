@@ -31,9 +31,17 @@ export type AnalyzeContextOutput = z.infer<typeof AnalyzeContextOutputSchema>;
 export async function analyzeContext(input: AnalyzeContextInput): Promise<AnalyzeContextOutput> {
   const { prompt, contextFiles } = input;
 
+  // Separate media from text files
+  const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
+  const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
+
   const analysisPrompt = ai.definePrompt({
     name: 'analyzeContextPrompt',
-    input: { schema: AnalyzeContextInputSchema },
+    input: { schema: z.object({
+        prompt: z.string(),
+        textFiles: z.any(),
+        mediaFiles: z.any(),
+    }) },
     output: { schema: AnalyzeContextOutputSchema },
     prompt: `You are an expert data analyst and schema designer. Your task is to analyze a user's prompt and a set of context files, then generate a structured JSON object with a corresponding Zod schema.
 
@@ -45,7 +53,7 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
     *   Provide this Zod schema as a single string in the \`schema\` field of your response.
 
 2.  **Extract and Structure the Data**:
-    *   Next, thoroughly analyze all the provided context files.
+    *   Next, thoroughly analyze all the provided context files (both text and media).
     *   Extract the relevant pieces of information that match the user's prompt.
     *   Populate a JSON object with this extracted data, ensuring it **strictly conforms** to the Zod schema you just designed.
     *   Place this JSON object in the \`data\` field of your response.
@@ -60,16 +68,16 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
 ---
 
 **CONTEXT FILES TO ANALYZE:**
-{{#each contextFiles}}
+{{#each textFiles}}
 --- File: {{this.fileName}} (Type: {{this.type}}) ---
-{{#if (contains this.content "data:")}}
-{{media url=this.content}}
-{{else}}
 {{{this.content}}}
-{{/if}}
 ---
 {{/each}}
-
+{{#each mediaFiles}}
+--- File: {{this.fileName}} (Type: {{this.type}}) ---
+{{media url=this.content}}
+---
+{{/each}}
 ---
 
 **CRITICAL INSTRUCTIONS:**
@@ -79,6 +87,6 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
 `,
   });
 
-  const { output } = await analysisPrompt({ prompt, contextFiles });
+  const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
   return output!;
 }

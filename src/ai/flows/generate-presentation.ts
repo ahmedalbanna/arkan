@@ -55,9 +55,13 @@ const generatePresentationFlow = ai.defineFlow(
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
 
+    // Separate media from text files for the prompt
+    const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+    const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
+
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
-      input: { schema: GeneratePresentationInputSchema },
+      input: { schema: z.any() }, // Using any() since we are manually constructing the payload
       output: { schema: GeneratePresentationOutputSchema },
       prompt: `${basePrompt}
 
@@ -69,15 +73,20 @@ const generatePresentationFlow = ai.defineFlow(
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContext}}
---- ADDITIONAL EXTERNAL CONTEXT ---
-{{#each externalContext}}
+{{#if textContext}}
+--- ADDITIONAL TEXTUAL CONTEXT ---
+{{#each textContext}}
 File: {{this.fileName}}
-{{#if (contains this.content "data:")}}
-{{media url=this.content}}
-{{else}}
 {{{this.content}}}
+---
+{{/each}}
 {{/if}}
+
+{{#if mediaContext}}
+--- ADDITIONAL MEDIA CONTEXT ---
+{{#each mediaContext}}
+File: {{this.fileName}}
+{{media url=this.content}}
 ---
 {{/each}}
 {{/if}}
@@ -108,7 +117,7 @@ ${stringifiedProposal}
 `,
     });
 
-    const { output } = await prompt(input);
+    const { output } = await prompt({ ...input, textContext, mediaContext });
     return output!;
   }
 );

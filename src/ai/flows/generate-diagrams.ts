@@ -44,11 +44,14 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
-
+    
+    // Separate media from text files for the prompt
+    const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+    const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
 
     const diagramPrompt = ai.definePrompt({
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
-        input: { schema: GenerateDiagramInputSchema },
+        input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
         prompt: `${basePrompt}
 {{#if guidelines}}
@@ -64,15 +67,20 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContext}}
---- ADDITIONAL EXTERNAL CONTEXT ---
-{{#each externalContext}}
+{{#if textContext}}
+--- ADDITIONAL TEXTUAL CONTEXT ---
+{{#each textContext}}
 File: {{this.fileName}}
-{{#if (contains this.content "data:")}}
-{{media url=this.content}}
-{{else}}
 {{{this.content}}}
+---
+{{/each}}
 {{/if}}
+
+{{#if mediaContext}}
+--- ADDITIONAL MEDIA CONTEXT ---
+{{#each mediaContext}}
+File: {{this.fileName}}
+{{media url=this.content}}
 ---
 {{/each}}
 {{/if}}
@@ -111,6 +119,6 @@ ${stringifiedPlan}
 `
     });
     
-    const { output } = await diagramPrompt(input);
+    const { output } = await diagramPrompt({ ...input, textContext, mediaContext });
     return output!;
 }

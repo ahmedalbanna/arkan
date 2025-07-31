@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
