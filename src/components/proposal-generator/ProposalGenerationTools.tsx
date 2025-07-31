@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, FileText, AlertCircle, Download, Languages } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, FileText, AlertCircle, Download, Languages, SlidersHorizontal, BookOpen, BrainCircuit } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,6 +17,8 @@ import { Skeleton } from '../ui/skeleton';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { UploadManager } from '../UploadManager';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -111,62 +113,75 @@ export const ProposalGenerationTools = ({
     }
 
     return (
-        <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
                 <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
                 <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-                <div>
-                    <Label htmlFor="project-idea">Main Subject or Idea</Label>
-                    <Textarea
-                        id="project-idea"
-                        name="projectIdea"
-                        placeholder="e.g., A training report on new data analysis techniques in the banking sector."
-                        rows={5}
-                        required
-                        value={projectIdea || ''}
-                        onChange={(e) => setProjectIdea(e.target.value)}
-                        disabled={isGenerating}
-                        className="mt-1"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
-                    <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
-                        <SelectTrigger id="proposal-template">
-                            <SelectValue placeholder="Select a template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {templates?.map(template => (
-                                <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+            <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
+                 <Accordion type="multiple" className="w-full space-y-4" defaultValue={['item-1']}>
+                    <AccordionItem value="item-1">
+                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="mr-2 h-4 w-4"/> Generation Settings</AccordionTrigger>
+                        <AccordionContent className="pt-4 space-y-4">
+                             <div>
+                                <Label htmlFor="project-idea">Main Subject or Idea</Label>
+                                <Textarea
+                                    id="project-idea"
+                                    name="projectIdea"
+                                    placeholder="e.g., A training report on new data analysis techniques in the banking sector."
+                                    rows={5}
+                                    required
+                                    value={projectIdea || ''}
+                                    onChange={(e) => setProjectIdea(e.target.value)}
+                                    disabled={isGenerating}
+                                    className="mt-1"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
+                                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                                    <SelectTrigger id="proposal-template">
+                                        <SelectValue placeholder="Select a template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {templates?.map(template => (
+                                            <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
 
-                <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
-                    {customGuidelines.map((custom, index) => (
-                        <div key={index} className="flex items-center gap-2 text-sm">
-                            <span>- {custom}</span>
-                            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)}>
-                                <Trash2 className="h-3 w-3 text-destructive" />
-                            </Button>
-                        </div>
-                    ))}
-                    <div className="flex gap-2">
-                        <Input
-                            placeholder={t('builder.proposalGenerator.customGuidelinePlaceholder')}
-                            value={customGuidelineInput}
-                            onChange={(e) => setCustomGuidelineInput(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
-                        />
-                        <Button type="button" variant="secondary" onClick={handleAddGuideline}>
-                            <Plus className="h-4 w-4" />
-                        </Button>
-                    </div>
-                </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>
+                                {customGuidelines.map((custom, index) => (
+                                    <div key={index} className="flex items-center gap-2 text-sm">
+                                        <span>- {custom}</span>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)}>
+                                            <Trash2 className="h-3 w-3 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder={t('builder.proposalGenerator.customGuidelinePlaceholder')}
+                                        value={customGuidelineInput}
+                                        onChange={(e) => setCustomGuidelineInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
+                                    />
+                                    <Button type="button" variant="secondary" onClick={handleAddGuideline}>
+                                        <Plus className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                        </AccordionContent>
+                    </AccordionItem>
+                    <AccordionItem value="item-2">
+                         <AccordionTrigger className="font-semibold text-base"><BookOpen className="mr-2 h-4 w-4"/> Context Manager</AccordionTrigger>
+                        <AccordionContent className="pt-4">
+                            <UploadManager />
+                        </AccordionContent>
+                    </AccordionItem>
+                 </Accordion>
             </CardContent>
             <CardFooter>
                 <GenerateButton isGenerating={isGenerating} />

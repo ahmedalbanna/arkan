@@ -2,10 +2,9 @@
 
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Languages, FileText, FileJson } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Loader2, FileText } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -99,19 +98,17 @@ export function ProposalModeGenerator() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Left Column */}
-            <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
-                    <ProposalGenerationTools
-                    isDisabled={generationMutation.isPending || translateMutation.isPending}
-                    isGenerating={generationMutation.isPending}
+            <div className="lg:col-span-4 h-full">
+                <ProposalGenerationTools
+                isDisabled={generationMutation.isPending || translateMutation.isPending}
+                isGenerating={generationMutation.isPending}
                 />
             </div>
-
-            {/* Right Column */}
-                <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
+            
+            <div className="lg:col-span-8 overflow-y-auto pr-2">
                 {proposal ? (
-                    <Card>
-                        <Tabs defaultValue="view" className="w-full">
+                    <Card className="h-full flex flex-col">
+                        <Tabs defaultValue="view" className="w-full flex-grow flex flex-col">
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -128,9 +125,9 @@ export function ProposalModeGenerator() {
                                     </TabsList>
                                 </div>
                             </CardHeader>
-                            <CardContent>
-                                <TabsContent value="view">
-                                    <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                            <CardContent className="flex-grow overflow-hidden">
+                                <TabsContent value="view" className="h-full">
+                                    <div className="h-full overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                                         <Suspense fallback={<ProposalSkeleton/>}>
                                             <FormattedProposalView
                                                 proposal={proposal}
@@ -140,8 +137,8 @@ export function ProposalModeGenerator() {
                                         </Suspense>
                                     </div>
                                 </TabsContent>
-                                <TabsContent value="json">
-                                     <div className="lg:h-[calc(100vh-295px)] overflow-y-auto pr-4 text-left" dir="ltr">
+                                <TabsContent value="json" className="h-full">
+                                     <div className="h-full overflow-y-auto pr-4 text-left" dir="ltr">
                                         <Suspense fallback={<ProposalSkeleton/>}>
                                             <ProposalViewer
                                                 proposal={proposal}
@@ -151,14 +148,15 @@ export function ProposalModeGenerator() {
                                         </Suspense>
                                     </div>
                                 </TabsContent>
-                                 <div className="border-t pt-4 mt-4">
-                                    <ProposalActions 
-                                        isGenerating={generationMutation.isPending}
-                                        isTranslating={translateMutation.isPending}
-                                        onTranslate={handleTranslateProposal}
-                                    />
-                                </div>
+                                
                             </CardContent>
+                            <div className="border-t p-4 mt-auto">
+                                <ProposalActions 
+                                    isGenerating={generationMutation.isPending}
+                                    isTranslating={translateMutation.isPending}
+                                    onTranslate={handleTranslateProposal}
+                                />
+                            </div>
                         </Tabs>
                     </Card>
                 ) : generationMutation.isPending ? (
