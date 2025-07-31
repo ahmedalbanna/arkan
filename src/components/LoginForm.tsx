@@ -35,10 +35,9 @@ export default function LoginForm() {
     },
   });
   
-  const formLevelError = loginMutation.error?.message;
-
   useEffect(() => {
     if(loginMutation.isError && loginMutation.error) {
+        // Set a form-level error for specific, known auth failures
         if (loginMutation.error.message.includes("Invalid email or password")) {
             form.setError("root.serverError", {
                 type: "manual",
@@ -50,20 +49,22 @@ export default function LoginForm() {
 
 
   function onSubmit(values: LoginCredentials) {
+    // Clear previous server errors before submitting
     form.clearErrors("root.serverError");
     loginMutation.mutate(values);
   }
 
   const isPending = loginMutation.isPending || googleSignInMutation.isPending;
+  const formLevelError = form.formState.errors.root?.serverError;
 
   return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-             {form.formState.errors.root?.serverError && (
+             {formLevelError && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Login Error</AlertTitle>
-                    <AlertDescription>{form.formState.errors.root.serverError.message}</AlertDescription>
+                    <AlertDescription>{formLevelError.message}</AlertDescription>
                 </Alert>
             )}
             <FormField

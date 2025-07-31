@@ -78,11 +78,29 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
   }
   
   const status = error.status || defaultStatus;
-  const message = error.message || 'An unexpected server error occurred.';
+  
+  // Provide more specific default messages for common Firebase auth errors
+  let message = error.message || 'An unexpected server error occurred.';
+  if (error.code) {
+      switch (error.code) {
+          case 'auth/id-token-expired':
+              message = 'Your session has expired. Please log in again.';
+              break;
+          case 'auth/user-not-found':
+              message = 'User account not found.';
+              break;
+          case 'auth/invalid-credential':
+              message = 'The credentials provided are invalid.';
+              break;
+          // Add other common error codes as needed
+      }
+  }
+
   const errors = error.errors || undefined;
   
   return NextResponse.json({ message, errors }, { status });
 };
+
 
 /**
  * Standardized success response handler for API routes.

@@ -101,7 +101,8 @@ export async function loginWithEmail(credentials: {email: string, password: stri
     if (
       error.code === "auth/invalid-credential" ||
       error.code === "auth/user-not-found" ||
-      error.code === "auth/wrong-password"
+      error.code === "auth/wrong-password" ||
+      error.code === "auth/invalid-email"
     ) {
       throw new Error("Invalid email or password.");
     }
