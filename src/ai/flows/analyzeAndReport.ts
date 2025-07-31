@@ -1,7 +1,6 @@
 // src/ai/flows/analyzeAndReport.ts
-import { defineFlow} from '@genkit-ai/core';
-import  runInference  from '@genkit-ai/core';
-import use from '@genkit-ai/core';
+import { defineFlow} from 'genkit';
+import { run, use } from 'genkit/experimental/flow';
 import * as z from 'zod';
 import { gemini15Pro } from '@genkit-ai/googleai'; // Assuming you're using Vertex AI
 
@@ -15,19 +14,20 @@ export const analyzeAndReportFlow = defineFlow(
   },
   async (request: any) => {
     // Step 1: Analyze the user request
-    const analysisResult = await runInference({
-      model: gemini15Pro, // Your chosen AI model
-      prompt: `Analyze the following user request and identify the key topics and requirements: ${request}`,
+    const analysisResult = await run('initial-analysis', async () => {
+        return (await gemini15Pro.generate({
+            prompt: `Analyze the following user request and identify the key topics and requirements: ${request}`,
+        })).text();
     });
-
-    const analysisText = await analysisResult.text();
 
     // Step 2: Generate a report section based on the analysis
-    const reportSection = await use(reportSectionGeneratorTool).execute({
-      analysis: analysisText, // Pass the analysis result as input to the tool
-      originalRequest: request,
+    const reportSection = await run('generate-report', async () => {
+        return (await use(reportSectionGeneratorTool).invoke({
+            analysis: analysisResult, // Pass the analysis result as input to the tool
+            originalRequest: request,
+        })).text();
     });
 
-    return reportSection.text();
+    return reportSection;
   }
 );
