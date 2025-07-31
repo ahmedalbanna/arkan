@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, FileText } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { lazy, Suspense } from 'react';
 import { translateProposalApi } from '@/services/translation-service';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 const ProposalViewer = lazy(() => import('./ProposalViewer'));
@@ -97,79 +98,89 @@ export function ProposalModeGenerator() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            <div className="lg:col-span-4 h-full">
-                <ProposalGenerationTools
-                isDisabled={generationMutation.isPending || translateMutation.isPending}
-                isGenerating={generationMutation.isPending}
-                />
-            </div>
+         <ResizablePanelGroup 
+            direction="horizontal" 
+            className="h-full items-stretch"
+            dir={locale === 'ar' ? 'rtl' : 'ltr'}
+        >
+            <ResizablePanel defaultSize={33} minSize={25}>
+                <div className="h-full overflow-y-auto pr-2">
+                    <ProposalGenerationTools
+                    isDisabled={generationMutation.isPending || translateMutation.isPending}
+                    isGenerating={generationMutation.isPending}
+                    />
+                </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
             
-            <div className="lg:col-span-8 overflow-y-auto pr-2">
-                {proposal ? (
-                    <Card className="h-full flex flex-col">
-                        <Tabs defaultValue="view" className="w-full flex-grow flex flex-col">
-                            <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <CardTitle className="font-headline text-2xl text-primary">
-                                            {(proposal as any).title || "Generated Proposal"}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {(proposal as any).category || "Review the generated proposal"}
-                                        </CardDescription>
+            <ResizablePanel defaultSize={67} minSize={40}>
+                <div className="h-full overflow-y-auto pl-2">
+                    {proposal ? (
+                        <Card className="h-full flex flex-col">
+                            <Tabs defaultValue="view" className="w-full flex-grow flex flex-col">
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <CardTitle className="font-headline text-2xl text-primary">
+                                                {(proposal as any).title || "Generated Proposal"}
+                                            </CardTitle>
+                                            <CardDescription>
+                                                {(proposal as any).category || "Review the generated proposal"}
+                                            </CardDescription>
+                                        </div>
+                                        <TabsList>
+                                            <TabsTrigger value="view">View</TabsTrigger>
+                                            <TabsTrigger value="json">JSON</TabsTrigger>
+                                        </TabsList>
                                     </div>
-                                    <TabsList>
-                                        <TabsTrigger value="view">View</TabsTrigger>
-                                        <TabsTrigger value="json">JSON</TabsTrigger>
-                                    </TabsList>
+                                </CardHeader>
+                                <CardContent className="flex-grow overflow-hidden">
+                                    <TabsContent value="view" className="h-full">
+                                        <div className="h-full overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                            <Suspense fallback={<ProposalSkeleton/>}>
+                                                <FormattedProposalView
+                                                    proposal={proposal}
+                                                    onUpdate={handleProposalUpdate}
+                                                    readOnly={generationMutation.isPending || translateMutation.isPending}
+                                                />
+                                            </Suspense>
+                                        </div>
+                                    </TabsContent>
+                                    <TabsContent value="json" className="h-full">
+                                         <div className="h-full overflow-y-auto pr-4 text-left" dir="ltr">
+                                            <Suspense fallback={<ProposalSkeleton/>}>
+                                                <ProposalViewer
+                                                    proposal={proposal}
+                                                    onUpdate={handleProposalUpdate}
+                                                    readOnly={generationMutation.isPending || translateMutation.isPending}
+                                                />
+                                            </Suspense>
+                                        </div>
+                                    </TabsContent>
+                                    
+                                </CardContent>
+                                <div className="border-t p-4 mt-auto">
+                                    <ProposalActions 
+                                        isGenerating={generationMutation.isPending}
+                                        isTranslating={translateMutation.isPending}
+                                        onTranslate={handleTranslateProposal}
+                                    />
                                 </div>
-                            </CardHeader>
-                            <CardContent className="flex-grow overflow-hidden">
-                                <TabsContent value="view" className="h-full">
-                                    <div className="h-full overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                        <Suspense fallback={<ProposalSkeleton/>}>
-                                            <FormattedProposalView
-                                                proposal={proposal}
-                                                onUpdate={handleProposalUpdate}
-                                                readOnly={generationMutation.isPending || translateMutation.isPending}
-                                            />
-                                        </Suspense>
-                                    </div>
-                                </TabsContent>
-                                <TabsContent value="json" className="h-full">
-                                     <div className="h-full overflow-y-auto pr-4 text-left" dir="ltr">
-                                        <Suspense fallback={<ProposalSkeleton/>}>
-                                            <ProposalViewer
-                                                proposal={proposal}
-                                                onUpdate={handleProposalUpdate}
-                                                readOnly={generationMutation.isPending || translateMutation.isPending}
-                                            />
-                                        </Suspense>
-                                    </div>
-                                </TabsContent>
-                                
-                            </CardContent>
-                            <div className="border-t p-4 mt-auto">
-                                <ProposalActions 
-                                    isGenerating={generationMutation.isPending}
-                                    isTranslating={translateMutation.isPending}
-                                    onTranslate={handleTranslateProposal}
-                                />
+                            </Tabs>
+                        </Card>
+                    ) : generationMutation.isPending ? (
+                        <ProposalSkeleton />
+                    ) : (
+                        <Card className="flex items-center justify-center h-full min-h-[400px]">
+                            <div className="text-center text-muted-foreground p-8">
+                                <FileText className="w-16 h-16 mx-auto mb-4" />
+                                <p>{t('builder.proposalGenerator.emptyState')}</p>
                             </div>
-                        </Tabs>
-                    </Card>
-                ) : generationMutation.isPending ? (
-                    <ProposalSkeleton />
-                ) : (
-                    <Card className="flex items-center justify-center h-full min-h-[400px]">
-                        <div className="text-center text-muted-foreground p-8">
-                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                            <p>{t('builder.proposalGenerator.emptyState')}</p>
-                        </div>
-                    </Card>
-                )}
-            </div>
-        </div>
+                        </Card>
+                    )}
+                </div>
+            </ResizablePanel>
+        </ResizablePanelGroup>
     );
 }
