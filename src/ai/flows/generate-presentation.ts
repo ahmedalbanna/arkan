@@ -23,7 +23,10 @@ const GeneratePresentationInputSchema = z.object({
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
-  externalContextContent: z.string().optional(),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
   templateId: z.string(), // The ID of the template which contains the primary agent and other config
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
@@ -66,11 +69,19 @@ const generatePresentationFlow = ai.defineFlow(
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContextContent}}
+{{#if externalContext}}
 --- ADDITIONAL EXTERNAL CONTEXT ---
-{{{externalContextContent}}}
----
+{{#each externalContext}}
+File: {{this.fileName}}
+{{#if (contains this.content "data:")}}
+{{media url=this.content}}
+{{else}}
+{{{this.content}}}
 {{/if}}
+---
+{{/each}}
+{{/if}}
+
 {{#if sections}}
 --- REPORT SECTIONS ---
 {{#each sections}}

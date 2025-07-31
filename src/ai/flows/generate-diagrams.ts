@@ -18,7 +18,10 @@ const GenerateDiagramInputSchema = z.object({
   diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
-  externalContextContent: z.string().optional().describe("Content from an external document to use as additional context."),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional instructions for generation (e.g., tone, formality)."),
 });
@@ -61,11 +64,19 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 {{/if}}
 
 --- Context from Project ---
-{{#if externalContextContent}}
+{{#if externalContext}}
 --- ADDITIONAL EXTERNAL CONTEXT ---
-{{{externalContextContent}}}
----
+{{#each externalContext}}
+File: {{this.fileName}}
+{{#if (contains this.content "data:")}}
+{{media url=this.content}}
+{{else}}
+{{{this.content}}}
 {{/if}}
+---
+{{/each}}
+{{/if}}
+
 {{#if otherSections}}
 --- PREVIOUSLY GENERATED SECTIONS ---
 {{#each otherSections}}
@@ -74,6 +85,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 ---
 {{/each}}
 {{/if}}
+
 {{#if otherDiagrams}}
 --- PREVIOUSLY GENERATED DIAGRAMS (PlantUML) ---
 {{#each otherDiagrams}}

@@ -67,7 +67,9 @@ const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, G
 
     const guidelines: string[] = [];
     promptConfig.guidelines.forEach((g, index) => {
-        if (currentGuidelineState.checked[index]) guidelines.push(g.text);
+        if (currentGuidelineState.checked[index]) {
+            guidelines.push(g.text);
+        }
     });
     guidelines.push(...currentGuidelineState.custom);
     return guidelines;
@@ -165,13 +167,15 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         const selectedDiagrams = Object.entries(selection.diagrams)
             .filter(([, isSelected]) => isSelected)
             .reduce((acc, [key]) => ({ ...acc, [key]: diagrams[key as DiagramType]?.plantUmlCode }), {});
+            
+        const selectedExternalContext = externalContext?.filter((item, index) => selection.externalContext[index]);
 
         const body = {
             proposal: proposal,
             sections: selectedSections,
             diagrams: selectedDiagrams,
             guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
-            externalContextContent: selection.externalContext && externalContext ? externalContext.map(c => c.content).join('\n\n---\n\n') : undefined,
+            externalContext: selectedExternalContext,
             templateId: selectedPresentationTemplateId, // Pass the templateId
         };
         onGenerate(body);

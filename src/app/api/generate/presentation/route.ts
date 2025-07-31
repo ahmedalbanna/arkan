@@ -13,7 +13,7 @@ const ApiGeneratePresentationSchema = z.object({
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
-  externalContextContent: z.string().optional(),
+  externalContext: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']) })).optional(),
   templateId: z.string(),
 });
 

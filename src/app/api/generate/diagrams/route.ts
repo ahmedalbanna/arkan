@@ -17,7 +17,7 @@ const generateDiagramSchema = z.object({
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(), 
-  externalContextContent: z.string().optional(),
+  externalContext: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']) })).optional(),
   instructionText: z.string().optional(),
 });
 

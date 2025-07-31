@@ -83,15 +83,15 @@ export const DiagramGenerationTools = () => {
 
     const onGenerateDiagram = async (diagramType: DiagramType) => {
         const { getFullState } = useBuilderStore.getState();
-        const { guidelineState, contextSelection } = useReportStore.getState();
+        const { guidelineState, contextSelection, externalContext } = useReportStore.getState();
 
         const fullState = getFullState();
         const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         
-        const exampleFiles = fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'example');
-        const contextFiles = fullState.externalContext?.filter((c, i) => selectedContext.externalContext[i] && c.type === 'context');
-        
         const agent = agents.find(a => a.id === diagramConfig[diagramType as DiagramType]?.agentId);
+        
+        const selectedExternalContext = externalContext?.filter((c, i) => selectedContext.externalContext[i]);
+
 
         const body = {
             proposal: selectedContext.proposal ? fullState.proposal : undefined,
@@ -100,8 +100,7 @@ export const DiagramGenerationTools = () => {
             otherSections: Object.keys(selectedContext.sections).filter(k => selectedContext.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionName]}), {}),
             otherDiagrams: Object.keys(selectedContext.diagrams).filter(k => selectedContext.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[diagramType]),
-            exampleFiles,
-            contextFiles,
+            externalContext: selectedExternalContext,
         };
         setActiveMutationKey(diagramType);
         diagramMutation.mutate(body);
