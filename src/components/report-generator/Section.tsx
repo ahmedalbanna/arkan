@@ -22,6 +22,10 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 
+// BlockNote Imports
+import { BlockNoteViewRaw, useCreateBlockNote } from "@blocknote/react";
+import { type PartialBlock } from '@blocknote/core';
+
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
@@ -115,7 +119,6 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
 }
 
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
-    const contentRef = useRef<HTMLDivElement>(null);
     const audioRef = useRef<HTMLAudioElement>(null);
 
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
@@ -128,6 +131,20 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const queryClient = useQueryClient();
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
+
+     // Creates a new editor instance.
+    const editor = useCreateBlockNote();
+
+    // Converts the markdown from props to BlockNote's format and loads it.
+    useEffect(() => {
+        async function loadContent() {
+            if (editor && content) {
+                const blocks: PartialBlock[] = await editor.tryParseMarkdownToBlocks(content);
+                editor.replaceBlocks(editor.document, blocks);
+            }
+        }
+        loadContent();
+    }, [editor, content]);
 
 
     const manipulateMutation = useMutation({
@@ -190,11 +207,18 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         setIsEditorPopoverOpen(false);
     };
 
-    const handleExportPdf = () => {
-        if (contentRef.current) {
-            exportComponentAsPDF(contentRef.current, `${title}.pdf`);
-        }
-        setIsEditorPopoverOpen(false);
+    const handleExportPdf = async () => {
+       if (editor.domElement) {
+         // Temporarily hide the toolbar for a cleaner PDF
+         const toolbar = editor.domElement.querySelector('.bn-floating-toolbar');
+         if (toolbar) (toolbar as HTMLElement).style.display = 'none';
+
+         await exportComponentAsPDF(editor.domElement, `${title}.pdf`);
+
+         // Restore the toolbar
+         if (toolbar) (toolbar as HTMLElement).style.display = '';
+       }
+       setIsEditorPopoverOpen(false);
     };
 
     const handleAcceptSuggestion = () => {
@@ -233,10 +257,15 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                    <div ref={contentRef} className="prose dark:prose-invert max-w-none">
-                         <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-                            {content}
-                        </ReactMarkdown>
+                     <div className="prose dark:prose-invert max-w-none border rounded-md">
+                        <BlockNoteViewRaw
+                          editor={editor}
+                          theme={"light"}
+                          onChange={async () => {
+                            const markdown = await editor.blocksToMarkdownLossy(editor.document);
+                            onUpdate(sectionKey, markdown);
+                          }}
+                        />
                     </div>
 
                     {aiSuggestion && (

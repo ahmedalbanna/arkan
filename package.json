@@ -18,7 +18,7 @@
   "dependencies": {
     "@blocknote/core": "^0.14.5",
     "@blocknote/mantine": "^0.14.5",
-    "@blocknote/react": "^0.14.5",
+    "@blocknote/react": "^0.35.0",
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "@genkit-ai/firebase": "^1.15.5",
     "@genkit-ai/googleai": "^1.15.5",
