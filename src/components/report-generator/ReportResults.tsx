@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -7,12 +6,14 @@ import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName, DiagramType } from '@/ai/schemas';
-import { FileText, CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle } from 'lucide-react';
+import { FileText, CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2 } from 'lucide-react';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import DiagramViewer from '../diagram-generator/DiagramViewer';
 import { Progress } from '../ui/progress';
+import { Button } from '../ui/button';
+import { toast } from '@/hooks/use-toast';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -122,14 +123,27 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                             <div className="space-y-2 p-4 border rounded-lg">
                                 <h4 className="font-semibold">Summary & Feedback</h4>
                                 <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
-                                <ul className="space-y-2 text-sm list-none pl-0">
+                                <ul className="space-y-4 text-sm list-none pl-0">
                                     {evaluation.feedback.map((item, index) => {
                                       const StatusIcon = getFeedbackStatusInfo(item.status).icon;
                                       const statusColor = getFeedbackStatusInfo(item.status).color;
                                       return (
-                                        <li key={index} className="flex items-start gap-2">
-                                            <StatusIcon className={`h-4 w-4 mt-1 shrink-0 ${statusColor}`}/>
-                                            <span>{item.point}</span>
+                                        <li key={index} className="flex flex-col items-start gap-2 border-b pb-3 last:border-b-0">
+                                            <div className="flex items-start gap-2 w-full">
+                                                <StatusIcon className={`h-4 w-4 mt-1 shrink-0 ${statusColor}`}/>
+                                                <span className="flex-grow">{item.point}</span>
+                                            </div>
+                                            {item.solution && (
+                                                <div className="pl-6 w-full">
+                                                    <div className="flex items-center gap-2 p-2 rounded-md bg-background border border-dashed">
+                                                        <p className="text-xs text-muted-foreground flex-grow italic">"{item.solution}"</p>
+                                                        <Button size="sm" variant="secondary" onClick={() => toast({title: "Coming Soon!", description: "This will automatically apply the suggested fix."})}>
+                                                            <Wand2 className="mr-2 h-4 w-4"/>
+                                                            Fix with AI
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </li>
                                       )
                                     })}

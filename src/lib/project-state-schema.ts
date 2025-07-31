@@ -17,6 +17,7 @@ export const ProjectStateSchema = z.object({
         feedback: z.array(z.object({
             point: z.string(),
             status: z.enum(["Acceptable", "Weak", "Not Present"]),
+            solution: z.string().optional(),
         })),
         summary: z.string(),
     }).nullable().optional(),

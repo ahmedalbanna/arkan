@@ -26,6 +26,7 @@ export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
 const FeedbackItemSchema = z.object({
   point: z.string().describe("A specific feedback point related to one of the acceptance criteria."),
   status: z.enum(["Acceptable", "Weak", "Not Present"]).describe("The status of the report regarding this feedback point."),
+  solution: z.string().optional().describe("A suggested prompt for an AI agent to fix the issue if status is 'Weak' or 'Not Present'. This prompt should be a clear, actionable command."),
 });
 
 const EvaluateReportOutputSchema = z.object({
@@ -67,6 +68,7 @@ Your evaluation must be objective and thorough.
         - **"Acceptable"**: If the criterion is fully met.
         - **"Weak"**: If the criterion is partially met or needs improvement.
         - **"Not Present"**: If the criterion is not addressed in the report.
+    - **Propose a Solution**: If the status is 'Weak' or 'Not Present', provide a short, actionable prompt in the 'solution' field that a user could give to another AI agent to fix the issue (e.g., "Rewrite the introduction to be more concise" or "Add a section explaining the project's budget"). If the status is 'Acceptable', leave the solution field empty.
 4.  **Calculate Score**: Assign a numerical score from 0 to 100 based on the percentage of criteria met and the overall quality of the documentation. A report that perfectly meets all criteria should receive a score close to 100.
 5.  **Summarize**: Write a brief summary of your findings.
 
