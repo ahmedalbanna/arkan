@@ -27,6 +27,9 @@ const generateSectionSchema = z.object({
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
   tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
+}).refine(data => data.proposal || data.projectPlan || (data.exampleFiles && data.exampleFiles.length > 0) || (data.contextFiles && data.contextFiles.length > 0), {
+    message: "A proposal, project plan, or external context is required to generate a report section.",
+    path: ["proposal"], // Associate error with a path for clarity
 });
 
 
@@ -42,11 +45,6 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, 1);
     const agentInput = validation.data;
     
-    // A proposal, plan, or external context is required to generate a section.
-    if (!agentInput.proposal && !agentInput.projectPlan && (!agentInput.exampleFiles || agentInput.exampleFiles.length === 0) && (!agentInput.contextFiles || agentInput.contextFiles.length === 0)) {
-        return handleApiError({ message: "A proposal, project plan, or external context is required to report section." }, 400);
-    }
-
     const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
     if (!agentInfo) {

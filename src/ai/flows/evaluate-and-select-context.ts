@@ -86,7 +86,7 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
 **Your Analysis Process:**
 
 1.  **Review All Available Context:**
-    *   Thoroughly examine the \`proposal\` and \`projectPlan\`.
+    *   Thoroughly examine the \`proposal\` (if provided) and \`projectPlan\` (if provided).
     *   Read through all \`existingSections\` and \`existingDiagrams\`.
     *   **Crucially, differentiate between external files marked as 'example' and 'context'.**
     *   **Style and Tone**: Use files marked as \`example\` as the primary reference for writing style, tone, and structure.

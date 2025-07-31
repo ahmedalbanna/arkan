@@ -197,6 +197,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             }
 
             try {
+                // We await each section generation to ensure they happen sequentially
+                // and context from the previous can be used if needed in a more advanced setup.
                 await onGenerateSection(sectionKey);
             } catch (error) {
                 console.error(`Error generating section ${sectionKey}:`, error);

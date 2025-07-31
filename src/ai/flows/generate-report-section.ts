@@ -127,6 +127,8 @@ File: {{this.fileName}}
 \`\`\`json
 ${stringifiedProposal}
 \`\`\`
+{{else}}
+(No project proposal is being used for this generation. Rely on other provided context.)
 {{/if}}
 
 {{#if projectPlan}}
