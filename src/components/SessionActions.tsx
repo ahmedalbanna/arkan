@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff, FileJson } from 'lucide-react';
+import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff, FileJson, UploadCloud } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
@@ -27,10 +27,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { UploadManager } from './UploadManager';
 
 function SaveStatus() {
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
@@ -195,6 +197,31 @@ export const SessionActions = () => {
                     accept=".arkan"
                     className="hidden"
                 />
+
+                <Dialog>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <DialogTrigger asChild>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-8 w-8 md:w-auto md:px-3"
+                                >
+                                    <UploadCloud className="h-4 w-4" />
+                                    <span className="hidden md:inline ml-2">Upload Context</span>
+                                </Button>
+                            </DialogTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent className="md:hidden">
+                            <p>Upload Context</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <DialogContent className="max-w-4xl">
+                        <UploadManager />
+                    </DialogContent>
+                </Dialog>
+
+
                  <Tooltip>
                     <TooltipTrigger asChild>
                        <Button
