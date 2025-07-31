@@ -18,9 +18,14 @@ export type GenerateProjectPlanInput = z.infer<typeof GenerateProjectPlanInputSc
 
 export async function generateProjectPlan(input: GenerateProjectPlanInput): Promise<z.infer<typeof ProjectPlanSchema>> {
   
+  // Prepare the phase range string in TypeScript
+  const minPhases = input.numPhases || 4;
+  const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
+  const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
+
   const planPrompt = ai.definePrompt({
     name: 'generateProjectPlanPrompt',
-    input: { schema: GenerateProjectPlanInputSchema },
+    input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
     output: { schema: ProjectPlanSchema },
     prompt: `You are an expert project manager and scrum master. Your task is to take a project description and list of deliverables and break them down into a detailed, actionable project plan.
 
@@ -37,7 +42,7 @@ Based on the analysis, create a structured project plan consisting of logical ph
 
 **CRITICAL INSTRUCTIONS:**
 -   Your output must strictly adhere to the provided JSON schema for the project plan.
--   The number of phases and tasks should be reasonable for the project's scope. A project might have between {{numPhases | default(4)}} and {{numPhases | plus: 2 | default(6)}} phases.
+-   The number of phases and tasks should be reasonable for the project's scope. A project might have {{{phaseRangeText}}} phases.
 -   Ensure the tasks within each phase are logically grouped.
 
 --- PROJECT INPUT ---
@@ -52,6 +57,6 @@ Based on the analysis, create a structured project plan consisting of logical ph
 `,
   });
 
-  const { output } = await planPrompt(input);
+  const { output } = await planPrompt({ ...input, phaseRangeText });
   return output!;
 }
