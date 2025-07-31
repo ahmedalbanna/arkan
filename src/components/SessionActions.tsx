@@ -67,6 +67,7 @@ function SaveStatus() {
 }
 
 function hasAnyContent(state: ReturnType<typeof useBuilderStore.getState>): boolean {
+    if (state.projectIdea?.trim()) return true;
     if (state.proposal) return true;
     if (Object.values(useReportStore.getState().sections).some(s => !!s)) return true;
     if (Object.values(useDiagramStore.getState().diagrams).some(d => !!d)) return true;
