@@ -139,7 +139,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     useEffect(() => {
         async function loadContent() {
             if (editor && content) {
-                const blocks: PartialBlock[] = await editor.tryParseMarkdownToBlocks(content);
+                const blocks = await editor.tryParseMarkdownToBlocks(content);
                 editor.replaceBlocks(editor.document, blocks);
             }
         }
@@ -261,6 +261,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                         <BlockNoteViewRaw
                           editor={editor}
                           theme={"light"}
+                          sideMenu={false}
+                          formattingToolbar={false}
                           onChange={async () => {
                             const markdown = await editor.blocksToMarkdownLossy(editor.document);
                             onUpdate(sectionKey, markdown);
