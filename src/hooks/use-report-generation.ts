@@ -21,7 +21,6 @@ export function useReportGeneration() {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       setSection(sectionKey, content);
-      toast({ title: `Section "${sectionKey}" generated successfully!` });
     }
   };
 
