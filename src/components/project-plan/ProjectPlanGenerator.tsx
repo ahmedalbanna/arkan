@@ -18,7 +18,7 @@ export default function ProjectPlanGenerator() {
   const { toast } = useToast();
   const { firebaseUser } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
-  const { projectPlan } = useProjectPlanStore();
+  const { projectPlan, setProjectPlan } = useProjectPlanStore();
   
   const [description, setDescription] = useState('');
   const [deliverables, setDeliverables] = useState('');
