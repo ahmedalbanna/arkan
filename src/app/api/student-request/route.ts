@@ -1,6 +1,9 @@
 
+'use server';
+
 import { z } from 'zod';
 import { handleApiError, createApiResponse } from '@/lib/api-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 const requestSchema = z.object({
   requirements: z.string().min(20),
@@ -20,12 +23,15 @@ export async function POST(request: Request) {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
+    
+    const projectId = uuidv4();
 
     // In a real application, you would save this data to a database,
     // and upload the file to a storage service like Firebase Storage.
     // For now, we just log it to the server console.
     console.log('New Student Request Received:');
     console.log({ 
+        projectId,
         requirements: validation.data.requirements, 
         email: validation.data.email, 
         phone: validation.data.phone,
@@ -35,7 +41,7 @@ export async function POST(request: Request) {
     });
 
     // Return a success response to the client
-    return createApiResponse({ message: 'Request received successfully.' }, 200);
+    return createApiResponse({ message: 'Request received successfully.', projectId }, 200);
   } catch (error) {
     return handleApiError(error);
   }
