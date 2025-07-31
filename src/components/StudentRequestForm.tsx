@@ -13,21 +13,30 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Loader2, Send } from 'lucide-react';
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_FILE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+
 // Schema for form validation
 const formSchema = z.object({
   requirements: z.string().min(20, { message: 'Please provide at least 20 characters for your requirements.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   phone: z.string().min(10, { message: 'Please enter a valid phone number.' }),
+  file: z
+    .any()
+    .refine((file) => file?.length == 1 ? file[0].size <= MAX_FILE_SIZE : true, `Max file size is 5MB.`)
+    .refine(
+      (file) => file?.length == 1 ? ACCEPTED_FILE_TYPES.includes(file[0].type) : true,
+      "Only .jpg, .jpeg, .png, .webp, .pdf, and .docx formats are supported."
+    ).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 // API submission function
-async function submitRequest(data: FormValues) {
+async function submitRequest(data: FormData) {
     const response = await fetch('/api/student-request', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: data,
     });
     if (!response.ok) {
         const error = await response.json();
@@ -43,6 +52,7 @@ export default function StudentRequestForm() {
       requirements: '',
       email: '',
       phone: '',
+      file: undefined,
     },
   });
 
@@ -65,7 +75,14 @@ export default function StudentRequestForm() {
   });
 
   function onSubmit(values: FormValues) {
-    mutation.mutate(values);
+    const formData = new FormData();
+    formData.append('requirements', values.requirements);
+    formData.append('email', values.email);
+    formData.append('phone', values.phone);
+    if (values.file && values.file.length > 0) {
+      formData.append('file', values.file[0]);
+    }
+    mutation.mutate(formData);
   }
 
   return (
@@ -119,6 +136,23 @@ export default function StudentRequestForm() {
                 )}
               />
             </div>
+             <FormField
+                control={form.control}
+                name="file"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Upload File (Optional)</FormLabel>
+                    <FormControl>
+                        <Input 
+                            type="file" 
+                            onChange={(e) => field.onChange(e.target.files)}
+                            disabled={mutation.isPending}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={mutation.isPending}>
