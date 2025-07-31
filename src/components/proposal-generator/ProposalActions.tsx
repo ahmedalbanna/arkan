@@ -40,7 +40,7 @@ async function summarizeProjectApi(variables: { body: any; token: string }): Pro
         const error = await response.json();
         throw new Error(error.message || 'Failed to summarize project');
     }
-    return await response.json();
+    return response.json();
 }
 
 export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: ProposalActionsProps) => {
