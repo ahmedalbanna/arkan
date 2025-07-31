@@ -7,8 +7,8 @@ import { UploadCloud, FileText, ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand
 import { PasteTextUploader } from './PasteTextUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
-import { ScrollArea } from './ui/scroll-area';
-import { Textarea } from './ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { useReportStore } from '@/hooks/useReportStore';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
-import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
+import { processFileApi } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useTheme } from 'next-themes';
@@ -229,41 +229,42 @@ function FileDropzone() {
     const { addExternalContext } = useReportStore();
     const [isLoading, setIsLoading] = useState(false);
 
-    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const processAndAddFile = async (file: File) => {
         if (!firebaseUser) {
             toast({ title: "Authentication Error", description: "You must be logged in to upload files.", variant: "destructive" });
             return;
         }
-        setIsLoading(true);
 
-        const token = await firebaseUser.getIdToken();
-
-        for (const file of acceptedFiles) {
+        if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.docx')) {
+            // For text-based files, just read the content directly on the client.
+            const content = await file.text();
+            addExternalContext(file.name, content, 'context');
+            toast({ title: "File Added", description: `${file.name} has been added to context.` });
+        } else {
+            // For non-text files (PDF, images), send to the backend for processing.
+            const token = await firebaseUser.getIdToken();
+            const formData = new FormData();
+            formData.append('file', file);
+            
             try {
-                let content: string;
-                if (file.type.startsWith('image/')) {
-                    content = await processImageToText(new FormData().append('file', file) as any, token).then(res => res.text);
-                    addExternalContext(`${file.name}.txt`, content, 'context');
-                } else if (file.type === 'application/pdf') {
-                    content = await processPdfToMarkdown(new FormData().append('file', file) as any, token).then(res => res.markdown);
-                    addExternalContext(`${file.name}.md`, content, 'context');
-                } else { // Handle .txt, .md, .docx, etc. as plain text
-                    content = await new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-                        reader.onload = (event) => resolve(event.target?.result as string);
-                        reader.onerror = reject;
-                        reader.readAsText(file);
-                    });
-                    addExternalContext(file.name, content, 'context');
-                }
+                const result = await processFileApi(formData, token);
+                addExternalContext(`${file.name}.txt`, result.markdown, 'context');
                 toast({ title: "File Processed", description: `Content from ${file.name} has been extracted and added.` });
                 refetchUser(); // Update credits
             } catch (err: any) {
-                toast({ title: "Processing Failed", description: `Could not process ${file.name}: ${err.message}`, variant: "destructive" });
+                 toast({ title: "Processing Failed", description: `Could not process ${file.name}: ${err.message}`, variant: "destructive" });
             }
         }
+    };
+    
+
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        setIsLoading(true);
+        for (const file of acceptedFiles) {
+           await processAndAddFile(file);
+        }
         setIsLoading(false);
-    }, [firebaseUser, toast, addExternalContext, refetchUser]);
+    }, [firebaseUser, addExternalContext, refetchUser, toast]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -327,10 +328,10 @@ export function UploadManager() {
                     <PasteTextUploader />
                 </TabsContent>
                 <TabsContent value="drive" className="mt-4">
-                    <CloudStorageConnector provider="Google Drive" icon={GoogleDriveIcon} onConnect={() => toast({title: "Coming Soon!", description:"Google Drive integration is not yet available."})} />
+                    <CloudStorageConnector provider="Google Drive" onConnect={() => toast({title: "Coming Soon!", description:"Google Drive integration is not yet available."})} />
                 </TabsContent>
                 <TabsContent value="dropbox" className="mt-4">
-                    <CloudStorageConnector provider="Dropbox" icon={DropboxIcon} onConnect={() => alert('Connect to Dropbox clicked!')} />
+                    <CloudStorageConnector provider="Dropbox" onConnect={() => alert('Connect to Dropbox clicked!')} />
                 </TabsContent>
             </Tabs>
             

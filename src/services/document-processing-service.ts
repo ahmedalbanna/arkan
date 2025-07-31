@@ -1,30 +1,22 @@
 
 'use client';
 
-export async function processPdfToMarkdown(formData: FormData, token: string): Promise<{ markdown: string }> {
-    const response = await fetch('/api/document-processing/pdf-to-markdown', { 
-        method: 'POST', 
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData 
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to process PDF.');
-    }
-    return await response.json();
-}
-
-export async function processImageToText(formData: FormData, token: string): Promise<{ text: string }> {
-    const response = await fetch('/api/document-processing/image-to-text', {
+/**
+ * Calls the API to process an uploaded file (PDF, Image, etc.) and extract its text content.
+ * @param formData The form data containing the file.
+ * @param token The user's authentication token.
+ * @returns A promise that resolves to the extracted markdown text.
+ */
+export async function processFileApi(formData: FormData, token: string): Promise<{ markdown: string }> {
+    const response = await fetch('/api/document-processing/process-file', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
+        body: formData
     });
 
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to process image.');
+        throw new Error(error.message || 'Failed to process file.');
     }
     return await response.json();
 }
