@@ -53,6 +53,7 @@ interface ReportActions {
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
     addExternalContext: (fileName: string, content: string, type: 'context' | 'example') => void;
     removeExternalContext: (index: number) => void;
+    updateExternalContext: (index: number, newContent: string) => void;
     handleControlChange: (section: SectionName, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
@@ -156,6 +157,16 @@ export const useReportStore = create<ReportState & ReportActions>()(
             externalContext: state.externalContext.filter((_, i) => i !== index),
         }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
+      },
+      updateExternalContext: (index, newContent) => {
+          set((state) => {
+              const newContext = [...state.externalContext];
+              if (newContext[index]) {
+                  newContext[index] = { ...newContext[index], content: newContent };
+              }
+              return { externalContext: newContext };
+          });
+          useBuilderStore.getState().setHasUnsavedChanges(true);
       },
       handleControlChange: (section, control, value) => {
         set(state => ({

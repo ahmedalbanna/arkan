@@ -2,10 +2,10 @@
 'use client';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, Edit } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
 import type { AcademicContextFile } from '@/lib/types';
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
@@ -17,6 +17,7 @@ import { PasteTextUploader } from '../PasteTextUploader';
 import { ImageUploader } from '../ImageUploader';
 import { Badge } from '../ui/badge';
 import { useReportStore } from '@/hooks/useReportStore';
+import { Textarea } from '../ui/textarea';
 
 interface AcademicUploadersProps {
     title: string;
@@ -27,8 +28,34 @@ interface AcademicUploadersProps {
     uploadedContent: { fileName: string; content: string; type?: 'context' | 'example' }[];
 }
 
+function EditContextDialog({ item, onSave }: { item: { fileName: string, content: string }, onSave: (newContent: string) => void }) {
+    const [content, setContent] = useState(item.content);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const handleSave = () => {
+        onSave(content);
+        setIsOpen(false);
+    }
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content"><Edit className="h-4 w-4" /></Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader><DialogTitle>Edit: {item.fileName}</DialogTitle></DialogHeader>
+                <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20} className="my-4" />
+                <div className="flex justify-end">
+                    <Button onClick={handleSave}>Save Changes</Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, isContext = false, uploadedContent }: AcademicUploadersProps) => {
+    
+    const { updateExternalContext } = useReportStore();
     
     return (
         <Card>
@@ -47,6 +74,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                                         <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
                                         <DialogContent className="max-w-3xl"><DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader><ScrollArea className="h-[60vh] rounded-md border p-4"><ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown></ScrollArea></DialogContent>
                                     </Dialog>
+                                    <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
                                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onContentRemoved(index)}><X className="h-4 w-4 text-destructive" /></Button>
                                 </div>
                             </li>
