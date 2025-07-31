@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X } from 'lucide-react';
+import { UploadCloud, FileText, Image as ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2 } from 'lucide-react';
 import { FileUploader } from './FileUploader';
 import { PasteTextUploader } from './PasteTextUploader';
 import { ImageUploader } from './ImageUploader';
@@ -19,6 +19,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
+import { processPdfToMarkdown, processImageToText } from '@/services/document-processing-service';
+import { useQueryClient } from '@tanstack/react-query';
+
 
 const GoogleDriveIcon = () => (
     <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
@@ -63,7 +68,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
                     {isImage ? (
                         <Image src={item.content} alt={item.fileName} width={500} height={700} className="mx-auto" />
                     ) : isDataUri ? (
-                        <p className="text-muted-foreground">PDF preview is not yet available. Please download the file to view.</p>
+                        <p className="text-muted-foreground">PDF preview is not yet available. Please process the file to view its content or download it.</p>
                     ) : (
                         <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
                     )}
@@ -103,10 +108,60 @@ function EditContextDialog({ item, onSave }: { item: { fileName: string, content
     )
 }
 
+function dataURLtoFile(dataurl: string, filename: string): File {
+    var arr = dataurl.split(','),
+        mimeMatch = arr[0].match(/:(.*?);/),
+        mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream',
+        bstr = atob(arr[1]), 
+        n = bstr.length, 
+        u8arr = new Uint8Array(n);
+        
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    
+    return new File([u8arr], filename, {type:mime});
+}
+
 export function UploadManager() {
     const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
+    const { firebaseUser } = useAuth();
+    const [processingIndex, setProcessingIndex] = useState<number | null>(null);
+    const queryClient = useQueryClient();
 
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
+
+    const handleProcessFile = async (index: number) => {
+        const fileToProcess = externalContext[index];
+        if (!fileToProcess || !fileToProcess.content.startsWith('data:') || !firebaseUser) return;
+
+        setProcessingIndex(index);
+        
+        try {
+            const token = await firebaseUser.getIdToken();
+            const file = dataURLtoFile(fileToProcess.content, fileToProcess.fileName);
+            const formData = new FormData();
+            formData.append('file', file);
+
+            let result;
+            if (file.type.startsWith('image/')) {
+                result = await processImageToText(formData, token);
+                updateExternalContext(index, result.text);
+            } else if (file.type === 'application/pdf') {
+                result = await processPdfToMarkdown(formData, token);
+                updateExternalContext(index, result.markdown);
+            } else {
+                throw new Error("Unsupported file type for processing.");
+            }
+            queryClient.invalidateQueries({ queryKey: ['user'] }); // To update credits
+            toast({ title: "File Processed", description: `Content from ${fileToProcess.fileName} has been extracted.` });
+        } catch (error: any) {
+             toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
+        } finally {
+            setProcessingIndex(null);
+        }
+    };
+
 
     return (
         <div className="space-y-4">
@@ -164,6 +219,11 @@ export function UploadManager() {
                                                     ))}
                                                 </SelectContent>
                                             </Select>
+                                            {item.content.startsWith('data:') && (
+                                                 <Button variant="ghost" size="icon" className="h-6 w-6" title="Process with AI" onClick={() => handleProcessFile(index)} disabled={processingIndex === index}>
+                                                    {processingIndex === index ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                                                </Button>
+                                            )}
                                             <ViewContextDialog item={item} />
                                             <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
