@@ -4,27 +4,7 @@ import type {NextConfig} from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
   swcMinify: true, // Enable SWC minification for faster builds
-  // Add any custom configurations here
-  // For example:
-  // env: {
-  //   CUSTOM_VARIABLE: process.env.CUSTOM_VARIABLE,
-  // },
-  // images: {
-  //   domains: ['example.com'], // Allow images from this domain
-  // },
-  // async redirects() {
-  //   return [
-  //     {
-  //       source: '/old-path',
-  //       destination: '/new-path',
-  //       permanent: true,
-  //     },
-  //   ];
-  // },
-  /* config options here */
-  experimental: {
-    // prefetchInRender: true,
-  },
+  
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -53,14 +33,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/pdfjs-dist/legacy/build/pdf.worker.mjs',
-        destination: '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',
+  webpack: (config, { isServer }) => {
+    // Correctly configure the pdf.js worker.
+    // This is a robust way to ensure the worker file is copied to the build output
+    // and is accessible via a public URL.
+    config.module.rules.push({
+      test: /pdf\.worker\.mjs$/,
+      type: "asset/resource",
+      generator: {
+        filename: "static/chunks/[name][ext]",
       },
-    ]
-  }
+    });
+
+    return config;
+  },
 };
 
 export default nextConfig;
