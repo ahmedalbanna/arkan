@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -12,7 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/use-user';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
@@ -205,19 +205,11 @@ export function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={`/profile/${firebaseUser.uid}`}>
-                      <UserCog className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <AreaChart className="mr-2 h-4 w-4" />
-                      My Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                   {userProfile?.role === 'admin' && (
+                  <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="mr-2 h-4 w-4" />Profile</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="mr-2 h-4 w-4" />My Dashboard</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="mr-2 h-4 w-4" />Manage Team</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="mr-2 h-4 w-4" />Payment History</Link></DropdownMenuItem>
+                  {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                         <Link href="/admin/dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -225,31 +217,26 @@ export function Header() {
                         </Link>
                     </DropdownMenuItem>
                    )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/payment-history">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Payment History
-                    </Link>
-                  </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                    <Link href="/team/manage">
-                      <Users className="mr-2 h-4 w-4" />
-                      Manage Team
-                    </Link>
-                  </DropdownMenuItem>
-                   <DropdownMenuItem asChild>
-                    <Link href="/handwriting">
-                      <PencilLine className="mr-2 h-4 w-4" />
-                      Handwriting
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/pdf-to-markdown">
-                      <FileText className="mr-2 h-4 w-4" />
-                      PDF to Markdown
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/generate">Go to Builder</Link></DropdownMenuItem>
+                   <DropdownMenuSub>
+                     <DropdownMenuSubTrigger>
+                       <MoreVertical className="mr-2 h-4 w-4" />
+                       <span>Utilities</span>
+                     </DropdownMenuSubTrigger>
+                     <DropdownMenuContent>
+                        <DropdownMenuItem asChild>
+                          <Link href="/handwriting">
+                            <PencilLine className="mr-2 h-4 w-4" />
+                            Handwriting
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/pdf-to-markdown">
+                            <FileText className="mr-2 h-4 w-4" />
+                            PDF to Markdown
+                          </Link>
+                        </DropdownMenuItem>
+                     </DropdownMenuContent>
+                   </DropdownMenuSub>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />

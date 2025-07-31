@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users, Palette, Workflow, Bell } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, ShieldCheck, Users, Workflow, Bell, Palette } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [
@@ -91,9 +91,10 @@ const features = [
       icon: Palette,
       description: 'Customize the visual appearance of your exported documents using a live template editor.',
       steps: [
-          "Click on the 'Design' link in the main header.",
-          "Use the controls in the left panel to change fonts, colors, and other styles.",
-          "The live preview on the right will instantly update to show your changes.",
+          "Navigate to the Admin Panel and select one of the Template managers (e.g., Export Templates).",
+          "Use the controls in the template cards to change fonts, colors, and other styles.",
+          "The live preview will instantly update to show your changes.",
+          "Click 'Save Template' to persist your new design for future exports."
       ],
   },
   {

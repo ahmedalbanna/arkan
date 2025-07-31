@@ -18,7 +18,8 @@ import {
   SlidersHorizontal,
   Workflow,
   Library,
-  MessageSquare, // Added MessageSquare
+  MessageSquare,
+  ChevronDown,
 } from 'lucide-react';
 import { ReactNode, useEffect, useState } from 'react';
 import { usePathname, notFound } from 'next/navigation';
@@ -47,6 +48,7 @@ import { useLogout } from '@/hooks/use-user';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const adminNavLinks = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
@@ -57,12 +59,16 @@ const adminNavLinks = [
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
     { href: '/automations/builder', labelKey: 'Automations', icon: Workflow },
+    { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
+];
+
+const templateLinks = [
     { href: '/admin/manage-generation-templates', labelKey: 'Generation Templates', icon: PencilRuler },
     { href: '/admin/manage-prompt-templates', labelKey: 'Prompt Templates', icon: Library },
     { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
     { href: '/admin/manage-pptx-templates', labelKey: 'header.pptxTemplates', icon: FileImage },
-    { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
+
 
 function AdminLayoutSkeleton() {
     return (
@@ -103,6 +109,13 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     const { userProfile, isLoading: isAuthLoading, firebaseUser } = useAuth();
     const logoutMutation = useLogout();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
+
+    useEffect(() => {
+        if (templateLinks.some(link => pathname.startsWith(link.href))) {
+            setIsTemplatesOpen(true);
+        }
+    }, [pathname]);
 
     useEffect(() => {
         if (!isAuthLoading && userProfile?.role !== 'admin') {
@@ -114,20 +127,38 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
         return <AdminLayoutSkeleton />;
     }
     
-    const renderNavLinks = (isMobile = false) => adminNavLinks.map(link => (
-        <Link
+    const renderNavLink = (link: { href: string; labelKey: string; icon: React.ElementType }, isMobile = false) => (
+         <Link
             key={link.href}
             href={link.href}
             onClick={() => isMobile && setIsSheetOpen(false)}
             className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary",
-                pathname === link.href && "bg-sidebar-accent text-sidebar-primary"
+                pathname.startsWith(link.href) && "bg-sidebar-accent text-sidebar-primary"
             )}
         >
             <link.icon className="h-4 w-4" />
             {t(link.labelKey)}
         </Link>
-    ));
+    );
+
+    const navContent = (isMobile = false) => (
+      <>
+        {adminNavLinks.map(link => renderNavLink(link, isMobile))}
+        <Collapsible open={isTemplatesOpen} onOpenChange={setIsTemplatesOpen}>
+            <CollapsibleTrigger className="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary [&[data-state=open]>svg]:rotate-180">
+                <div className="flex items-center gap-3">
+                    <Palette className="h-4 w-4" />
+                    <span>Templates</span>
+                </div>
+                <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pl-7 space-y-1 mt-1">
+                {templateLinks.map(link => renderNavLink(link, isMobile))}
+            </CollapsibleContent>
+        </Collapsible>
+      </>
+    );
 
     return (
         <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -141,7 +172,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                     </header>
                     <nav className="flex-1">
                         <div className="grid items-start px-2 text-sm font-medium lg:px-4">
-                           {renderNavLinks()}
+                           {navContent()}
                         </div>
                     </nav>
                 </div>
@@ -160,7 +191,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
                                      <Home className="h-6 w-6" />
                                     <span className="">{t('header.title')}</span>
                                 </Link>
-                               {renderNavLinks(true)}
+                               {navContent(true)}
                             </nav>
                         </SheetContent>
                     </Sheet>
