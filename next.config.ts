@@ -3,7 +3,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
-  swcMinify: true, // Enable SWC minification for faster builds
+
   
   typescript: {
     ignoreBuildErrors: true,
