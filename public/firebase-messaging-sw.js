@@ -5,13 +5,14 @@ importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-com
 
 // Initialize the Firebase app in the service worker by passing in the messagingSenderId.
 const firebaseConfig = {
-    apiKey: "REPLACE_WITH_YOUR_API_KEY",
-    authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-    projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-    storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-    messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-    appId: "REPLACE_WITH_YOUR_APP_ID",
-    measurementId: "REPLACE_WITH_YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyDFB2d0Cx2UtglBPMyuevtCiRUWROb_fmk",
+  authDomain: "docudec.firebaseapp.com",
+  databaseURL: "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "docudec",
+  storageBucket: "docudec.appspot.com",
+  messagingSenderId: "201859762958",
+  appId: "1:201859762958:web:602e322feffdcb11ed255f",
+  measurementId: "G-K42VXYX7NQ"
 };
 
 

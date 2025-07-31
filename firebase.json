@@ -1,29 +1,49 @@
 {
+  "database": {
+    "rules": "database.rules.json"
+  },
+
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 9030
+    },
+
+    "firestore": {
+      "port": 8030
+    },
+
+    "hosting": {
+      "port": 5000
+    },
+    "singleProjectMode": true,
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
-    "public": ".next", 
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
+    "public": ".next",
     "rewrites": [
-      { "source": "**",
-        "function": "nextjsApp" 
+      {
+        "function": "nextjsApp",
+        "source": "**"
       }
     ]
   },
-  "emulators": {
-    "dataconnect": {
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
-    },
-    "functions": { 
-      "port": 5001
-    },
-    "hosting": { 
-      "port": 5000
-    }
-  },
-  "dataconnect": {
-    "source": "dataconnect"
+  "storage": {
+    "rules": "storage.rules"
   }
 }

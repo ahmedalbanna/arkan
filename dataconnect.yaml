@@ -1,0 +1,7 @@
+# Settings to manage and configure a Firebase Data Connect backend.
+# https://firebase.google.com/docs/data-connect/configure
+
+dataConnect:
+  # The region where your Data Connect backend is hosted.
+  # See https://firebase.google.com/docs/data-connect/locations
+  region: us-central1

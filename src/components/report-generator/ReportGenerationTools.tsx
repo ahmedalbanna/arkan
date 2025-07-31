@@ -25,7 +25,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
-import { useLocalization } from '@/context/LocalizationContext';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
@@ -36,6 +35,7 @@ import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { generateReport } from '@/services/report-service';
 import { auth } from '@/lib/firebase';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -172,11 +172,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         const template = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
         if (!template) return;
-        
+
         const sectionsToGenerate = template.agentIds
             .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
             .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
-        
+
         if (sectionsToGenerate.length === 0) {
             toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
             return;
@@ -308,7 +308,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                     <AccordionItem value={key} key={key}>
                                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                              <div className="flex items-center gap-2">
-                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />} 
+                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
                                                 {t(`${title}`)}
                                             </div>
                                         </AccordionTrigger>

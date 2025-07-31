@@ -22,9 +22,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 
-// BlockNote Imports
-import { BlockNoteViewRaw, useCreateBlockNote } from "@blocknote/react";
-
 interface SectionProps {
     sectionKey: SectionName;
     title: string;
@@ -74,10 +71,10 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
             },
             onError: (error) => {
                 const isCreditError = error.message.toLowerCase().includes('credit');
-                toast({ 
-                    title: t('builder.Section.toasts.translateFailed'), 
+                toast({
+                    title: t('builder.Section.toasts.translateFailed'),
                     description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
-                    variant: 'destructive' 
+                    variant: 'destructive'
                 });
             }
         });
@@ -131,19 +128,19 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
 
-     // Creates a new editor instance.
-    const editor = useCreateBlockNote();
+    //  // Creates a new editor instance.
+    // const editor = useCreateBlockNote();
 
     // Converts the markdown from props to BlockNote's format and loads it.
-    useEffect(() => {
-        async function loadContent() {
-            if (editor && content) {
-                const blocks = await editor.tryParseMarkdownToBlocks(content);
-                editor.replaceBlocks(editor.document, blocks);
-            }
-        }
-        loadContent();
-    }, [editor, content]);
+    // useEffect(() => {
+    //     async function loadContent() {
+    //         if (editor && content) {
+    //             const blocks = await editor.tryParseMarkdownToBlocks(content);
+    //             editor.replaceBlocks(editor.document, blocks);
+    //         }
+    //     }
+    //     loadContent();
+    // }, [editor, content]);
 
 
     const manipulateMutation = useMutation({
@@ -155,10 +152,10 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         },
         onError: (error: Error) => {
             const isCreditError = error.message.toLowerCase().includes('credit');
-            toast({ 
+            toast({
                 title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
                 description: error.message,
-                variant: "destructive" 
+                variant: "destructive"
             });
         },
         onSettled: () => {
@@ -186,7 +183,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         const data = { textToManipulate: content, command };
         manipulateMutation.mutate({ data, token });
     };
-    
+
     const handleReadAloud = () => {
         if (audioSrc) {
             setShowAudioPlayer(true);
@@ -200,23 +197,23 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             },
         });
     };
-    
+
     const handleExportDocx = async () => {
         await exportSectionAsDocx(title, content, 'modern');
         setIsEditorPopoverOpen(false);
     };
 
     const handleExportPdf = async () => {
-       if (editor.domElement) {
-         // Temporarily hide the toolbar for a cleaner PDF
-         const toolbar = editor.domElement.querySelector('.bn-floating-toolbar');
-         if (toolbar) (toolbar as HTMLElement).style.display = 'none';
+    //    if (editor.domElement) {
+    //      // Temporarily hide the toolbar for a cleaner PDF
+    //      const toolbar = editor.domElement.querySelector('.bn-floating-toolbar');
+    //      if (toolbar) (toolbar as HTMLElement).style.display = 'none';
 
-         await exportComponentAsPDF(editor.domElement, `${title}.pdf`);
+    //      await exportComponentAsPDF(editor.domElement, `${title}.pdf`);
 
-         // Restore the toolbar
-         if (toolbar) (toolbar as HTMLElement).style.display = '';
-       }
+    //      // Restore the toolbar
+    //      if (toolbar) (toolbar as HTMLElement).style.display = '';
+    //    }
        setIsEditorPopoverOpen(false);
     };
 
@@ -226,11 +223,11 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             setAiSuggestion(null);
         }
     };
-    
+
     const handleRejectSuggestion = () => {
         setAiSuggestion(null);
     };
-    
+
     const { words, chars } = calculateCounts(content);
 
     return (
@@ -256,18 +253,19 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                     <div className="border rounded-md">
-                        <BlockNoteViewRaw
-                          editor={editor}
-                          theme={"light"}
-                          sideMenu={false}
-                          formattingToolbar={true}
-                          linkToolbar={true}
-                          onChange={async () => {
-                            const markdown = await editor.blocksToMarkdownLossy(editor.document);
-                            onUpdate(sectionKey, markdown);
-                          }}
-                        />
+                    <div className="border rounded-md p-4 prose dark:prose-invert max-w-none">
+                        {/* <BlockNoteViewRaw
+                            editor={editor}
+                            theme={"light"}
+                            sideMenu={false}
+                            formattingToolbar={true}
+                            linkToolbar={true}
+                            onChange={async () => {
+                                const markdown = await editor.blocksToMarkdownLossy(editor.document);
+                                onUpdate(sectionKey, markdown);
+                            }}
+                        /> */}
+                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
                     </div>
 
                     {aiSuggestion && (
@@ -292,7 +290,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </CardFooter>
                         </Card>
                     )}
-                    
+
                      <div className="flex items-center justify-end">
                         <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={isProcessingAi || !content}>
                             {ttsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4 mr-2" />}

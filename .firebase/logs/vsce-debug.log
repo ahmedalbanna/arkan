@@ -1,0 +1,280 @@
+[debug] [2025-07-31T16:53:30.917Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-07-31T16:53:41.032Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T16:53:41.035Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T16:53:41.035Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T16:53:41.041Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.041Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.042Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T16:53:41.044Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.046Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2025-07-31T16:53:41.083Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2025-07-31T16:53:41.362Z] [Firebase Plugin] Value of process.env.MONOSPACE_ENV: undefined
+[debug] [2025-07-31T16:53:41.363Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T16:53:41.366Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T16:53:41.367Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T16:53:41.368Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.368Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T16:53:41.373Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.373Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2025-07-31T16:53:41.410Z] [Firebase Plugin] Value of process.env.MONOSPACE_ENV: undefined
+[debug] [2025-07-31T16:53:41.423Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T16:53:41.425Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T16:53:41.426Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T16:53:41.426Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.427Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T16:53:41.429Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:53:41.430Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.8.0) on port 50001
+[debug] [2025-07-31T16:53:42.312Z] 'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 19:53:42.306857   24600 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 19:53:42.306857   24600 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:53:42.313Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-07-31T16:53:42.314Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-07-31T16:53:42.314Z] Starting Data Connect Emulator with command {"binary":"C:\\Users\\ahmed\\.cache\\firebase\\emulators\\dataconnect-emulator-2.8.0.exe","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=f:\\arkan\\dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"C:\\\\Users\\\\ahmed\\\\.cache\\\\firebase\\\\emulators\\\\dataconnect-emulator-2.8.0.exe\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=f:\\\\arkan\\\\dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to \u001b[1mdataconnect-debug.log\u001b[22m"}}
+[debug] [2025-07-31T16:53:42.365Z] E0731 19:53:42.364794   26044 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:53:42.364794   26044 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:53:42.367Z] E0731 19:53:42.367414   26044 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:53:42.367414   26044 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T16:53:42.383Z] I0731 19:53:42.383184   26044 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0731 19:53:42.383184   26044 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[error] [Firebase Plugin] error:  {"path":"f:\\arkan\\dataconnect\\dataconnect.yaml","error":{"name":"FirebaseError","children":[],"exit":1,"message":"Could not find \"dataconnect.yaml\" in \"f:\\arkan\\dataconnect\"","original":{"errno":-4058,"code":"ENOENT","syscall":"open","path":"f:\\arkan\\dataconnect\\dataconnect.yaml"},"status":500},"range":[{"line":0,"character":0},{"line":0,"character":0}]}
+[debug] [2025-07-31T16:53:42.821Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T16:53:42.821Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T16:53:42.955Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T16:53:42.955Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T16:53:43.017Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T16:53:43.017Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T16:53:52.367Z] E0731 19:53:52.367597   26044 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:53:52.367597   26044 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:54:02.367Z] E0731 19:54:02.367453   26044 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:54:02.367453   26044 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:54:12.368Z] E0731 19:54:12.368380   26044 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:54:12.368380   26044 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:54:22.368Z] E0731 19:54:22.368133   26044 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:54:22.368133   26044 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] !  Data Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2025-07-31T16:55:18.642Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-07-31T16:55:22.088Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T16:55:22.092Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T16:55:22.092Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T16:55:22.098Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:55:22.099Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:55:22.100Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T16:55:22.103Z] Checked if tokens are valid: true, expires at: 1753981877890
+[debug] [2025-07-31T16:55:22.105Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2025-07-31T16:55:22.123Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.8.0) on port 50001
+[debug] [2025-07-31T16:55:22.829Z] 'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 19:55:22.802430   13544 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 19:55:22.802430   13544 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:55:22.830Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-07-31T16:55:22.831Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-07-31T16:55:22.831Z] Starting Data Connect Emulator with command {"binary":"C:\\Users\\ahmed\\.cache\\firebase\\emulators\\dataconnect-emulator-2.8.0.exe","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=f:\\arkan\\dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"C:\\\\Users\\\\ahmed\\\\.cache\\\\firebase\\\\emulators\\\\dataconnect-emulator-2.8.0.exe\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=f:\\\\arkan\\\\dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to \u001b[1mdataconnect-debug.log\u001b[22m"}}
+[debug] [2025-07-31T16:55:22.934Z] E0731 19:55:22.933662   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:55:22.933662   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:55:22.936Z] E0731 19:55:22.936680   26312 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:55:22.936680   26312 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T16:55:22.954Z] I0731 19:55:22.953920   26312 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0731 19:55:22.953920   26312 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[error] [Firebase Plugin] error:  {"path":"f:\\arkan\\dataconnect\\dataconnect.yaml","error":{"name":"FirebaseError","children":[],"exit":1,"message":"Could not find \"dataconnect.yaml\" in \"f:\\arkan\\dataconnect\"","original":{"errno":-4058,"code":"ENOENT","syscall":"open","path":"f:\\arkan\\dataconnect\\dataconnect.yaml"},"status":500},"range":[{"line":0,"character":0},{"line":0,"character":0}]}
+[debug] [2025-07-31T16:55:23.499Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T16:55:23.500Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T16:55:32.938Z] E0731 19:55:32.938508   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:55:32.938508   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:55:42.938Z] E0731 19:55:42.937962   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:55:42.937962   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:55:52.940Z] E0731 19:55:52.940205   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:55:52.940205   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:02.938Z] E0731 19:56:02.938361   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:02.938361   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:12.938Z] E0731 19:56:12.938079   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:12.938079   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:22.937Z] E0731 19:56:22.937890   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:22.937890   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:32.938Z] E0731 19:56:32.938863   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:32.938863   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:42.938Z] E0731 19:56:42.938921   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:42.938921   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:56:52.944Z] E0731 19:56:52.944699   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:56:52.944699   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:02.939Z] E0731 19:57:02.939326   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:02.939326   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:12.938Z] E0731 19:57:12.938872   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:12.938872   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:22.939Z] E0731 19:57:22.939292   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:22.939292   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:22.939Z] E0731 19:57:22.939292   26312 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:22.939292   26312 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T16:57:32.986Z] E0731 19:57:32.986920   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:32.986920   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:42.938Z] E0731 19:57:42.938316   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:42.938316   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:57:52.938Z] E0731 19:57:52.938621   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:57:52.938621   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:02.954Z] E0731 19:58:02.954561   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:02.954561   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:12.954Z] E0731 19:58:12.954603   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:12.954603   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:22.939Z] E0731 19:58:22.938643   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:22.938643   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:32.938Z] E0731 19:58:32.937726   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:32.937726   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:42.938Z] E0731 19:58:42.938467   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:42.938467   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:58:52.938Z] E0731 19:58:52.938275   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:58:52.938275   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T16:59:02.938Z] E0731 19:59:02.938258   26312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 19:59:02.938258   26312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] !  Data Connect Emulator has exited upon receiving signal: SIGINT 
+[debug] [2025-07-31T17:00:10.243Z] [Firebase Plugin] Activating Firebase extension.
+[debug] [2025-07-31T17:00:18.364Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T17:00:18.366Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T17:00:18.367Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T17:00:18.371Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:18.371Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:18.372Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T17:00:18.377Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:18.379Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2025-07-31T17:00:18.404Z] [Firebase Plugin] VSCode notification server listening on port 40001
+[debug] [2025-07-31T17:00:25.389Z] [Firebase Plugin] Value of process.env.MONOSPACE_ENV: undefined
+[debug] [2025-07-31T17:00:25.390Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T17:00:25.392Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T17:00:25.392Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T17:00:25.393Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:25.394Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T17:00:25.395Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:25.396Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2025-07-31T17:00:25.478Z] [Firebase Plugin] Value of process.env.MONOSPACE_ENV: undefined
+[debug] [2025-07-31T17:00:25.478Z] [Firebase Plugin] requireAuthWrapper
+[debug] [2025-07-31T17:00:25.480Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-31T17:00:25.481Z] > authorizing via signed-in user (albanaawork@gmail.com)
+[debug] [2025-07-31T17:00:25.482Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:25.483Z] [Firebase Plugin] User found:  albanaawork@gmail.com
+[info] [Firebase Plugin] (Core:Project) New user detected, fetching projects
+[debug] [2025-07-31T17:00:25.486Z] Checked if tokens are valid: true, expires at: 1753984695671
+[debug] [2025-07-31T17:00:25.487Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[info] [Firebase Plugin] Starting Data Connect toolkit (version 2.8.0) on port 50001
+[debug] [2025-07-31T17:00:25.946Z] 'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 20:00:25.941755   10612 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"'fdc build' failed with error: Unable to build your Data Connect schema and connectors (exit code 1): E0731 20:00:25.941755   10612 cmd.go:43] Error loading data connect config: schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:00:25.947Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-07-31T17:00:25.947Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"dataconnect"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-07-31T17:00:25.948Z] Starting Data Connect Emulator with command {"binary":"C:\\Users\\ahmed\\.cache\\firebase\\emulators\\dataconnect-emulator-2.8.0.exe","args":["--logtostderr","-v=2","dev","--listen=localhost:50001","--config_dir=f:\\arkan\\dataconnect","--enable_output_schema_extensions=true","--enable_output_generated_sdk=true"],"optionalArgs":["listen","config_dir","enable_output_schema_extensions","enable_output_generated_sdk"],"joinArgs":true,"shell":false,"port":9399} {"metadata":{"emulator":{"name":"dataconnect"},"message":"Starting Data Connect Emulator with command {\"binary\":\"C:\\\\Users\\\\ahmed\\\\.cache\\\\firebase\\\\emulators\\\\dataconnect-emulator-2.8.0.exe\",\"args\":[\"--logtostderr\",\"-v=2\",\"dev\",\"--listen=localhost:50001\",\"--config_dir=f:\\\\arkan\\\\dataconnect\",\"--enable_output_schema_extensions=true\",\"--enable_output_generated_sdk=true\"],\"optionalArgs\":[\"listen\",\"config_dir\",\"enable_output_schema_extensions\",\"enable_output_generated_sdk\"],\"joinArgs\":true,\"shell\":false,\"port\":9399}"}}
+[info] i  dataconnect: Data Connect Emulator logging to dataconnect-debug.log {"metadata":{"emulator":{"name":"dataconnect"},"message":"Data Connect Emulator logging to \u001b[1mdataconnect-debug.log\u001b[22m"}}
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9005
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:00:25.994Z] E0731 20:00:25.994201   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:00:25.994201   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:00:25.995Z] E0731 20:00:25.995309   21312 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:00:25.995309   21312 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T17:00:26.009Z] I0731 20:00:26.009704   21312 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0731 20:00:26.009704   21312 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:50001\n"}}
+[error] [Firebase Plugin] error:  {"path":"f:\\arkan\\dataconnect\\dataconnect.yaml","error":{"name":"FirebaseError","children":[],"exit":1,"message":"Could not find \"dataconnect.yaml\" in \"f:\\arkan\\dataconnect\"","original":{"errno":-4058,"code":"ENOENT","syscall":"open","path":"f:\\arkan\\dataconnect\\dataconnect.yaml"},"status":500},"range":[{"line":0,"character":0},{"line":0,"character":0}]}
+[debug] [2025-07-31T17:00:26.894Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T17:00:26.894Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T17:00:27.376Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T17:00:27.376Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T17:00:27.405Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2025-07-31T17:00:27.405Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[debug] [2025-07-31T17:00:36.016Z] E0731 20:00:36.016970   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:00:36.016970   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:00:45.591Z] >>> [apiv2][query] GET https://accounts.google.com/o/oauth2/revoke token=1%2F%2F09TU5HBNwXC_QCgYIARAAGAkSNwF-L9IrqgDQJhIj9EALt2ZY4pQXpbZ8OSQXTpzdSSEIOQ2rz--VV1OfOwU1TmMP0mGpIlTn4rc
+[debug] [2025-07-31T17:00:45.995Z] E0731 20:00:45.995894   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:00:45.995894   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:00:48.737Z] *** [apiv2] error from fetch(https://accounts.google.com/o/oauth2/revoke?token=1%2F%2F09TU5HBNwXC_QCgYIARAAGAkSNwF-L9IrqgDQJhIj9EALt2ZY4pQXpbZ8OSQXTpzdSSEIOQ2rz--VV1OfOwU1TmMP0mGpIlTn4rc, {"headers":{},"method":"GET"}): FetchError: request to https://accounts.google.com/o/oauth2/revoke?token=1%2F%2F09TU5HBNwXC_QCgYIARAAGAkSNwF-L9IrqgDQJhIj9EALt2ZY4pQXpbZ8OSQXTpzdSSEIOQ2rz--VV1OfOwU1TmMP0mGpIlTn4rc failed, reason: 
+[warn] !  Invalid refresh token for albanaawork@gmail.com, did not need to deauthorize 
+[info] +  Logged out from albanaawork@gmail.com 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9006
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:00:55.995Z] E0731 20:00:55.995530   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:00:55.995530   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9007
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:01:05.996Z] E0731 20:01:05.996297   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:05.996297   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:01:15.996Z] E0731 20:01:15.995752   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:15.995752   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:01:25.996Z] E0731 20:01:25.995856   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:25.995856   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:01:36.000Z] E0731 20:01:35.999909   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:35.999909   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:01:45.997Z] E0731 20:01:45.996664   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:45.996664   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9008
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:01:55.996Z] E0731 20:01:55.996422   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:01:55.996422   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9009
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:02:05.996Z] E0731 20:02:05.995841   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:05.995841   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:02:15.996Z] E0731 20:02:15.995996   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:15.995996   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:02:25.997Z] E0731 20:02:25.997132   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:25.997132   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:02:25.998Z] E0731 20:02:25.997132   21312 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:25.997132   21312 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T17:02:35.996Z] E0731 20:02:35.996144   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:35.996144   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:02:45.998Z] E0731 20:02:45.997306   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:45.997306   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:02:55.996Z] E0731 20:02:55.996186   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:02:55.996186   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:05.996Z] E0731 20:03:05.995891   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:05.995891   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:15.995Z] E0731 20:03:15.995614   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:15.995614   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:25.996Z] E0731 20:03:25.996277   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:25.996277   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:35.995Z] E0731 20:03:35.995712   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:35.995712   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:45.996Z] E0731 20:03:45.996031   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:45.996031   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:03:55.996Z] E0731 20:03:55.995707   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:03:55.995707   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:04:05.996Z] E0731 20:04:05.995716   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:05.995716   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:04:15.996Z] E0731 20:04:15.996389   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:15.996389   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:04:25.995Z] E0731 20:04:25.996143   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+E0731 20:04:25.996143   21312 watch.go:76] watchAllDir unable to walk dir `f:\arkan\dataconnect`: on path "f:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile f:\arkan\dataconnect: The system cannot find the file specified.
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:25.996143   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\nE0731 20:04:25.996143   21312 watch.go:76] watchAllDir unable to walk dir `f:\\arkan\\dataconnect`: on path \"f:\\\\arkan\\\\dataconnect\" (DirEntry: <nil>): CreateFile f:\\arkan\\dataconnect: The system cannot find the file specified.\n"}}
+[debug] [2025-07-31T17:04:35.996Z] E0731 20:04:35.996431   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:35.996431   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:04:45.996Z] E0731 20:04:45.996740   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:45.996740   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:04:55.995Z] E0731 20:04:55.995968   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:04:55.995968   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[debug] [2025-07-31T17:05:05.996Z] E0731 20:05:05.997095   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:05:05.997095   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=513672093&redirect_uri=http%3A%2F%2Flocalhost%3A9010
+[info] 
+[info] Waiting for authentication...
+[debug] [2025-07-31T17:05:15.996Z] E0731 20:05:15.996029   21312 load.go:23] Could not load config from "f:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `f:\arkan\dataconnect.yaml`
+ {"metadata":{"emulator":{"name":"dataconnect"},"message":"E0731 20:05:15.996029   21312 load.go:23] Could not load config from \"f:\\\\arkan\\\\dataconnect\": schema is required in dataconnect.yaml at `f:\\arkan\\dataconnect.yaml`\n"}}
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] !  Data Connect Emulator has exited upon receiving signal: SIGINT 

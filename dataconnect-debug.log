@@ -1,0 +1,4 @@
+E0731 20:08:32.781929   18712 load.go:23] Could not load config from "F:\\arkan\\dataconnect": schema is required in dataconnect.yaml at `F:\arkan\dataconnect.yaml`
+E0731 20:08:32.783463   18712 watch.go:76] watchAllDir unable to walk dir `F:\arkan\dataconnect`: on path "F:\\arkan\\dataconnect" (DirEntry: <nil>): CreateFile F:\arkan\dataconnect: The system cannot find the file specified.
+I0731 20:08:32.784465   18712 dev.go:95] Listening on address (HTTP + gRPC): 127.0.0.1:9399
+I0731 20:08:32.786107   18712 dev.go:95] Listening on address (HTTP + gRPC): [::1]:9399
