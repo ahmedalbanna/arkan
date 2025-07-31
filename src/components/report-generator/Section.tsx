@@ -260,6 +260,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                         <BlockNoteViewRaw
                           editor={editor}
                           theme={"light"}
+                          sideMenu={false}
+                          formattingToolbar={false}
                           onChange={async () => {
                             const markdown = await editor.blocksToMarkdownLossy(editor.document);
                             onUpdate(sectionKey, markdown);

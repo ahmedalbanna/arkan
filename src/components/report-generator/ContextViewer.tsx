@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -9,7 +8,6 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { diagramConfig, sectionConfig } from '@/lib/report-config';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
@@ -36,56 +34,56 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
         .filter(key => currentSelection.diagrams[key] && diagrams[key as DiagramType])
         .map(key => ({ key: key as DiagramType, content: diagrams[key as DiagramType]!.plantUmlCode }));
 
-    const selectedExternalContext = externalContext
+    const selectedExternalContext = (externalContext || [])
         .map((item, index) => ({ ...item, index }))
         .filter(item => currentSelection.externalContext[item.index]);
 
     const hasContext = currentSelection.proposal || currentSelection.projectPlan || selectedSections.length > 0 || selectedDiagrams.length > 0 || selectedExternalContext.length > 0;
 
     return (
-        <ScrollArea className="h-full">
-            <div className="p-4">
-                <h3 className="font-semibold mb-4">Context for: {t(sectionConfig[itemKey as SectionName]?.title || itemKey)}</h3>
+        <ScrollArea className="h-full max-h-[calc(75vh-100px)]">
+            <div className="p-1 pr-4">
+                <h3 className="font-semibold mb-4">Context used for: {t(sectionConfig[itemKey as SectionName]?.title || itemKey)}</h3>
                 
                 {!hasContext && <p className="text-sm text-muted-foreground">No context selected for this section.</p>}
 
                 <Accordion type="multiple" className="w-full space-y-2">
                     {currentSelection.proposal && proposal && (
-                        <AccordionItem value="proposal">
-                            <AccordionTrigger>Project Proposal</AccordionTrigger>
-                            <AccordionContent className="p-2 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                        <AccordionItem value="proposal" className="bg-muted/50 rounded-lg border">
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">Project Proposal</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <ReactMarkdown components={markdownComponents}>{proposal.objective}</ReactMarkdown>
                             </AccordionContent>
                         </AccordionItem>
                     )}
                     {currentSelection.projectPlan && projectPlan && (
-                         <AccordionItem value="plan">
-                            <AccordionTrigger>Project Plan</AccordionTrigger>
-                            <AccordionContent className="p-2 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                         <AccordionItem value="plan" className="bg-muted/50 rounded-lg border">
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">Project Plan</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 Project plan details would be summarized here.
                             </AccordionContent>
                         </AccordionItem>
                     )}
                     {selectedSections.map(({ key, content }) => (
-                         <AccordionItem value={`section-${key}`} key={`section-${key}`}>
-                            <AccordionTrigger>{t(sectionConfig[key].title)}</AccordionTrigger>
-                            <AccordionContent className="p-2 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                         <AccordionItem value={`section-${key}`} key={`section-${key}`} className="bg-muted/50 rounded-lg border">
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(sectionConfig[key].title)}</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
                             </AccordionContent>
                         </AccordionItem>
                     ))}
                      {selectedDiagrams.map(({ key, content }) => (
-                         <AccordionItem value={`diagram-${key}`} key={`diagram-${key}`}>
-                            <AccordionTrigger>{t(diagramConfig[key].title)}</AccordionTrigger>
-                            <AccordionContent className="p-2 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                         <AccordionItem value={`diagram-${key}`} key={`diagram-${key}`} className="bg-muted/50 rounded-lg border">
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(diagramConfig[key].title)}</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <pre><code>{content}</code></pre>
                             </AccordionContent>
                         </AccordionItem>
                     ))}
                      {selectedExternalContext.map((item) => (
-                         <AccordionItem value={`external-${item.index}`} key={`external-${item.index}`}>
-                            <AccordionTrigger>{item.fileName}</AccordionTrigger>
-                            <AccordionContent className="p-2 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                         <AccordionItem value={`external-${item.index}`} key={`external-${item.index}`} className="bg-muted/50 rounded-lg border">
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{item.fileName}</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <ReactMarkdown components={markdownComponents}>{item.content}</ReactMarkdown>
                             </AccordionContent>
                         </AccordionItem>
