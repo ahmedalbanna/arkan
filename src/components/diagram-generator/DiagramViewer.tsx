@@ -46,6 +46,8 @@ export default function DiagramViewer({
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
     
+    const explainMutation = useExplainDiagram();
+    
     const handleCopy = () => {
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
@@ -65,6 +67,32 @@ export default function DiagramViewer({
             toast({title: "Download Failed", variant: "destructive"});
         } finally {
             setIsDownloading(false);
+        }
+    };
+
+     const handleExplainClick = () => {
+        // Switch to the explanation view
+        setViewMode('explanation');
+
+        // Only generate if an explanation doesn't exist and one isn't already being generated
+        if (!diagramData.explanation && !explainMutation.isPending) {
+             const blob = fetch(diagramData.imageUrl).then(res => res.blob()).then(blob => {
+                 const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onloadend = async () => {
+                    const base64data = reader.result as string;
+                     explainMutation.mutate(base64data, {
+                        onSuccess: (data) => {
+                            onExplanationSave(data.explanation);
+                            toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
+                        },
+                        onError: (error) => {
+                            toast({ title: "Explanation Failed", description: error.message, variant: "destructive" });
+                            setViewMode('image'); // Go back to image view on error
+                        }
+                    });
+                }
+             });
         }
     };
     
@@ -94,12 +122,16 @@ export default function DiagramViewer({
                     {viewMode === 'explanation' && (
                         <ScrollArea className="h-full w-full">
                              <div className="prose dark:prose-invert max-w-none p-4">
-                                {diagramData.explanation ? (
-                                    <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
-                                ) : (
+                                {explainMutation.isPending ? (
                                     <div className="text-center p-8 text-muted-foreground">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                                         <p>The AI is analyzing the diagram...</p>
+                                   </div>
+                                ) : diagramData.explanation ? (
+                                    <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
+                                ) : (
+                                    <div className="text-center p-8 text-muted-foreground">
+                                        <p>Click the "Explain" button again to generate an explanation.</p>
                                    </div>
                                 )}
                             </div>
@@ -115,8 +147,9 @@ export default function DiagramViewer({
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
                         <PenSquare className="h-4 w-4 mr-2"/> Edit
                     </Button>
-                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('explanation')}>
-                        <FileText className="h-4 w-4 mr-2"/> Explain
+                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={explainMutation.isPending}>
+                        {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2"/>}
+                        Explain
                     </Button>
                 </div>
                  <div className="flex items-center gap-1">
