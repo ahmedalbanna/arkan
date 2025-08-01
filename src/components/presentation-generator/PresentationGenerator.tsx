@@ -1,25 +1,24 @@
 
+
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Presentation, AlertCircle, History } from 'lucide-react';
+import { Loader2, Presentation } from 'lucide-react';
 import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { lazy, Suspense } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
-import type { PresentationHistoryEntry, GeneratePresentationOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { Skeleton } from '../ui/skeleton';
-import { useReportStore } from '@/hooks/useReportStore';
-import { generatePresentationApi } from '@/services/presentation-service';
+import { useGeneratePresentation } from '@/hooks/use-presentation-generation';
+import { translatePresentationApi } from '@/services/translation-service';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast';
+import type { PresentationHistoryEntry } from '@/ai/schemas';
+
 
 function ViewerSkeleton() {
     return (
@@ -40,30 +39,29 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 export default function PresentationGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    const queryClient = useQueryClient();
-    const { proposal } = useBuilderStore();
-    const { externalContext } = useReportStore();
     const {
         presentation,
         activePresentationId,
-        addPresentationToHistory,
-        setActivePresentationId,
+        replacePresentationInHistory
     } = usePresentationStore();
 
-    const mutation = useMutation({
-        mutationFn: generatePresentationApi,
+    const generationMutation = useGeneratePresentation();
+
+    const translateMutation = useMutation({
+        mutationFn: translatePresentationApi,
         onSuccess: (data) => {
-            const newEntry: PresentationHistoryEntry = {
-                id: new Date().toISOString(),
-                name: `Presentation - ${new Date().toLocaleTimeString()}`,
-                slides: data.slides,
-            };
-            addPresentationToHistory(newEntry);
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            toast({ title: t('builder.presentationGenerator.toasts.success') });
+            replacePresentationInHistory(data);
+            toast({
+                title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
+                description: t('builder.presentationGenerator.toasts.translateAllSuccessDesc'),
+            });
         },
         onError: (error: Error) => {
-            toast({ title: t('builder.presentationGenerator.toasts.failed'), description: error.message, variant: 'destructive' });
+             toast({
+                title: t('builder.presentationGenerator.toasts.translateAllFailed'),
+                description: error.message || t('builder.presentationGenerator.toasts.translateAllFailedDesc'),
+                variant: 'destructive'
+            });
         }
     });
 
@@ -73,38 +71,49 @@ export default function PresentationGenerator() {
             return;
         }
         const token = await firebaseUser.getIdToken();
-        mutation.mutate({ body, token });
+        generationMutation.mutate({ body, token });
+    };
+
+    const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
+        const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
+        if (!activePresentation || !firebaseUser) return;
+    
+        toast({
+            title: t('builder.presentationGenerator.toasts.translateAllStarted'),
+            description: t('builder.presentationGenerator.toasts.translateAllStartedDesc'),
+        });
+    
+        const token = await firebaseUser.getIdToken();
+        translateMutation.mutate({ presentation: activePresentation, targetLang, token });
     };
 
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
-
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-            {/* Left Column */}
             <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <PresentationGenerationTools
-                    isDisabled={mutation.isPending}
-                    isGenerating={mutation.isPending}
+                    isDisabled={generationMutation.isPending || translateMutation.isPending}
+                    isGenerating={generationMutation.isPending}
                     onGenerate={onGenerate}
                 />
             </div>
 
-
-            {/* Right Column */}
             <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">
                 <Suspense fallback={<ViewerSkeleton />}>
                     {activePresentation ? (
                         <DynamicPresentationViewer
                             key={activePresentation.id}
                             activePresentation={activePresentation}
+                            onTranslateAll={handleTranslateAll}
+                            isTranslating={translateMutation.isPending}
                         />
                     ) : (
                         <Card className="flex items-center justify-center h-full min-h-[300px]">
                             <div className="text-center text-muted-foreground p-8">
                                 <Presentation className="w-16 h-16 mx-auto mb-4" />
                                 <p>{t('builder.presentationGenerator.viewerEmpty')}</p>
-                                {mutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
+                                {generationMutation.isPending && <Loader2 className="h-8 w-8 animate-spin mt-4 mx-auto" />}
                             </div>
                         </Card>
                     )}

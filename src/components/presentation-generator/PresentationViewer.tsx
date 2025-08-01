@@ -9,25 +9,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ChevronLeft, ChevronRight, FileDown, Languages, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { translatePresentationApi } from '@/services/translation-service';
+import { useExport } from '@/hooks/use-export';
+import { PptxTemplateKey } from '@/lib/types';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
+  onTranslateAll: (targetLang: 'en' | 'ar') => void;
+  isTranslating: boolean;
 }
 
-export default function PresentationViewer({ activePresentation }: PresentationViewerProps) {
+export default function PresentationViewer({ activePresentation, onTranslateAll, isTranslating }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { updatePresentationSlide, replacePresentationInHistory } = usePresentationStore();
   const { t, locale } = useLocalization();
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { exportPresentationPptx, isExporting } = useExport();
 
   // Add a guard clause to handle cases where activePresentation might be undefined.
   if (!activePresentation) {
@@ -50,25 +47,13 @@ export default function PresentationViewer({ activePresentation }: PresentationV
     // When a new presentation is passed, reset to the first slide.
     setCurrentSlide(0);
   }, [activePresentation.id]);
-
-  const translateMutation = useMutation({
-    mutationFn: translatePresentationApi,
-    onSuccess: (data) => {
-        replacePresentationInHistory(data);
-        queryClient.invalidateQueries({ queryKey: ['user'] });
-        toast({
-            title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
-            description: t('builder.presentationGenerator.toasts.translateAllSuccessDesc'),
-        });
-    },
-    onError: (error: Error) => {
-         toast({
-            title: t('builder.presentationGenerator.toasts.translateAllFailed'),
-            description: error.message || t('builder.presentationGenerator.toasts.translateAllFailedDesc'),
-            variant: 'destructive'
-        });
-    }
-  });
+  
+  const handleExport = () => {
+    // For simplicity, we'll hardcode the modern template for now.
+    // This could be made dynamic with a selector in the UI.
+    const templateKey: PptxTemplateKey = 'modern';
+    exportPresentationPptx(slides, templateKey);
+  };
 
   const handleNext = () => {
     setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
@@ -78,15 +63,9 @@ export default function PresentationViewer({ activePresentation }: PresentationV
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
-  const handleExport = () => {
-    exportPresentationAsPptx(slides, 'modern');
-  };
-
-  const handleTranslate = async () => {
-    if (!firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
+  const handleTranslate = () => {
     const targetLang = locale === 'en' ? 'Arabic' : 'English';
-    translateMutation.mutate({ presentation: activePresentation, targetLang, token });
+    onTranslateAll(targetLang);
   };
 
   const slide = slides?.[currentSlide];
@@ -102,18 +81,20 @@ export default function PresentationViewer({ activePresentation }: PresentationV
     );
   }
 
+  const isBusy = isTranslating || isExporting;
+
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
           <div className="flex items-center gap-2">
-            <Button variant="outline" type="button" size="sm" onClick={handleTranslate} disabled={translateMutation.isPending}>
-                {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+            <Button variant="outline" type="button" size="sm" onClick={handleTranslate} disabled={isBusy}>
+                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                 {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport} title={t('builder.presentationGenerator.exportTooltip')}>
-              <FileDown className="mr-2 h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={handleExport} disabled={isBusy} title={t('builder.presentationGenerator.exportTooltip')}>
+              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
               {t('builder.presentationGenerator.exportButton')}
             </Button>
           </div>
