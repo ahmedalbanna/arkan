@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -8,8 +7,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, FileText, AlertCircle, Download, Languages, SlidersHorizontal, BookOpen, BrainCircuit } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, BookOpen } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useProposalGenerationStore } from '@/hooks/useProposalGenerationStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProposalTemplates } from '@/hooks/use-templates';
@@ -27,13 +27,14 @@ interface GenerateButtonProps {
 function GenerateButton({ isGenerating }: GenerateButtonProps) {
     const { t } = useLocalization();
     const { projectIdea } = useBuilderStore();
+    const { selectedTemplateId, customGuidelines } = useProposalGenerationStore();
     const generationMutation = useGenerateProposal();
 
     const handleClick = () => {
         generationMutation.mutate({
-            projectIdea: useBuilderStore.getState().projectIdea,
-            templateId: useBuilderStore.getState().selectedTemplateId,
-            customGuidelines: useBuilderStore.getState().customGuidelines,
+            projectIdea,
+            templateId: selectedTemplateId,
+            customGuidelines,
         });
     }
 
@@ -63,11 +64,10 @@ export const ProposalGenerationTools = ({
     
     const { t } = useLocalization();
     const { userProfile } = useAuth();
-    const { data: templates, isLoading: templatesLoading, isError } = useProposalTemplates();
+    const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
 
+    const { projectIdea, setProjectIdea } = useBuilderStore();
     const {
-        projectIdea,
-        setProjectIdea,
         selectedTemplateId,
         setSelectedTemplateId,
         customGuidelines,
@@ -75,13 +75,12 @@ export const ProposalGenerationTools = ({
         removeCustomGuideline,
         customGuidelineInput,
         setCustomGuidelineInput,
-    } = useBuilderStore();
+    } = useProposalGenerationStore();
 
 
     const handleAddGuideline = () => {
         addCustomGuideline();
     }
-
 
     if (templatesLoading) {
         return (
@@ -98,20 +97,6 @@ export const ProposalGenerationTools = ({
         );
     }
     
-    if (isError) {
-         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Error</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center text-center text-destructive">
-                    <AlertCircle className="h-8 w-8 mb-2" />
-                    <p>Failed to load proposal templates.</p>
-                </CardContent>
-            </Card>
-        );
-    }
-
     return (
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>

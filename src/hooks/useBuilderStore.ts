@@ -3,7 +3,7 @@
 "use client";
 
 import { create } from "zustand";
-import { type AnyProjectProposal, AnyProjectProposalSchema } from "@/ai/schemas";
+import { type AnyProjectProposal } from "@/ai/schemas";
 import { toast } from "@/hooks/use-toast";
 import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";
@@ -13,8 +13,6 @@ import { useProjectPlanStore } from "./useProjectPlanStore";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useAcademicSolverStore } from './useAcademicSolverStore';
 import type { ProjectState } from "@/lib/types";
-import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
-import { z } from "zod";
 
 /**
  * Zustand store for managing the core state of the project builder.
@@ -28,10 +26,6 @@ export interface BuilderState {
   proposal: AnyProjectProposal | null;
   currentProjectId: string | null; // To track if we are editing a saved project
   hasUnsavedChanges: boolean; // To track if a save is needed
-  // UI States for proposal generation
-  selectedTemplateId: string;
-  customGuidelines: string[];
-  customGuidelineInput: string;
 }
 
 interface BuilderActions {
@@ -46,11 +40,6 @@ interface BuilderActions {
   // Proposal Actions
   setProposal: (proposal: AnyProjectProposal | null) => void;
   handleProposalUpdate: (path: string, value: any) => void;
-  // UI State Actions
-  setSelectedTemplateId: (id: string) => void;
-  addCustomGuideline: () => void;
-  removeCustomGuideline: (index: number) => void;
-  setCustomGuidelineInput: (value: string) => void;
 }
 
 const initialState: BuilderState = {
@@ -59,9 +48,6 @@ const initialState: BuilderState = {
   proposal: null,
   currentProjectId: null,
   hasUnsavedChanges: false,
-  selectedTemplateId: PROPOSAL_TEMPLATES[0].id,
-  customGuidelines: [],
-  customGuidelineInput: "",
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -84,23 +70,10 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       });
     },
     loadState: (newState) => {
-      let loadedProposal: AnyProjectProposal | null = null;
-      if (newState.proposal) {
-        // Attempt to parse the loaded proposal with the flexible schema
-        const parseResult = AnyProjectProposalSchema.safeParse(newState.proposal);
-        if (parseResult.success) {
-          loadedProposal = parseResult.data;
-        } else {
-          console.error("Failed to parse loaded proposal state:", parseResult.error);
-          // Optionally show a toast or handle the error appropriately
-          toast({ title: "Error loading proposal", description: "The loaded proposal data was invalid.", variant: "destructive" });
-        }
-      }
-
       set({
         name: newState.name,
         projectIdea: newState.projectIdea || "",
-        proposal: loadedProposal, // Assign the parsed and validated proposal
+        proposal: newState.proposal,
         currentProjectId: newState.id || null, // Set the current project ID
         hasUnsavedChanges: false, // Loading a project means it's saved
       });
@@ -133,7 +106,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       externalContext: useReportStore.getState().externalContext,
       projectPlan: useProjectPlanStore.getState().projectPlan,
       academicSolver: useAcademicSolverStore.getState(),
-      // Add other store states here if they need to be part of the project save state
+      translatedSections: useReportStore.getState().translatedSections,
+      evaluation: useReportStore.getState().evaluation,
     }),
     setProjectName: (name) => set({ name, hasUnsavedChanges: true }),
     setProjectIdea: (idea) =>
@@ -146,7 +120,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       set({
         proposal: proposal,
         name: proposal?.title || undefined,
-        currentProjectId: null,
+        // currentProjectId: null, Don't reset project ID on re-generation
         hasUnsavedChanges: true,
       });
       // Clear downstream states when a new proposal is set
@@ -168,27 +142,5 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       current[keys[keys.length - 1]] = value;
       set({ proposal: newProposal, hasUnsavedChanges: true });
     },
-
-    // --- UI STATE ACTIONS ---
-    setSelectedTemplateId: (id) => set({ selectedTemplateId: id }),
-    addCustomGuideline: () => {
-      const { customGuidelines, customGuidelineInput } = get();
-      const newGuideline = customGuidelineInput.trim();
-      if (newGuideline) {
-        set({
-          customGuidelines: [...customGuidelines, newGuideline],
-          customGuidelineInput: "",
-          hasUnsavedChanges: true,
-        });
-      }
-    },
-    removeCustomGuideline: (index) =>
-      set((state) => ({
-        customGuidelines: state.customGuidelines.filter(
-          (_, i) => i !== index
-        ),
-        hasUnsavedChanges: true,
-      })),
-    setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
   })
 );

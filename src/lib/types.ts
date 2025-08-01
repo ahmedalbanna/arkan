@@ -27,7 +27,8 @@ export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChat
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
 export type { SignupCredentials } from '@/components/SignupForm';
-export type { ProjectState, SavedProject } from '@/services/project-service';
+export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+
 
 export interface Notification {
   id: string;
@@ -73,4 +74,70 @@ export interface PptxTemplate {
     description: string;
     imageUrl: string;
     dataAiHint: string;
+}
+
+export interface ProjectState {
+    agents: any;
+    projectPlan: import("@/ai/schemas").ProjectPlan | null;
+    name?: string | undefined;
+    projectIdea?: string | undefined;
+    proposal: AnyProjectProposal | null;
+    sections?: {
+        introduction?: string | undefined;
+        literatureReview?: string | undefined;
+        systemAnalysis?: string | undefined;
+        designStrategy?: string | undefined;
+        systemDesign?: string | undefined;
+        systemProgramming?: string | undefined;
+        systemTesting?: string | undefined;
+        conclusion?: string | undefined;
+        abstract?: string | undefined;
+        acknowledgment?: string | undefined;
+        trainingProgram?: string | undefined;
+        technicalExperience?: string | undefined;
+        recommendations?: string | undefined;
+        references?: string | undefined;
+        appendices?: string | undefined;
+    } | undefined;
+    translatedSections?: {
+        introduction?: string | undefined;
+        literatureReview?: string | undefined;
+        systemAnalysis?: string | undefined;
+        designStrategy?: string | undefined;
+        systemDesign?: string | undefined;
+        systemProgramming?: string | undefined;
+        systemTesting?: string | undefined;
+        conclusion?: string | undefined;
+        abstract?: string | undefined;
+        acknowledgment?: string | undefined;
+        trainingProgram?: string | undefined;
+        technicalExperience?: string | undefined;
+        recommendations?: string | undefined;
+        references?: string | undefined;
+        appendices?: string | undefined;
+    } | undefined;
+    evaluation?: import("@/ai/flows/evaluate-report").EvaluateReportOutput | null | undefined;
+    diagrams?: {
+        "use-case"?: import("./useDiagramStore").DiagramData | undefined;
+        class?: import("./useDiagramStore").DiagramData | undefined;
+        sequence?: import("./useDiagramStore").DiagramData | undefined;
+        activity?: import("./useDiagramStore").DiagramData | undefined;
+        component?: import("./useDiagramStore").DiagramData | undefined;
+        archimate?: import("./useDiagramStore").DiagramData | undefined;
+        er?: import("./useDiagramStore").DiagramData | undefined;
+    } | undefined;
+    presentation?: {
+        history: PresentationHistoryEntry[];
+    } | undefined;
+    codeGenerator?: any;
+    academicSolver?: any;
+    codebase?: any;
+    externalContext?: any[] | undefined;
+    teamId?: string | null | undefined;
+}
+export interface SavedProject extends ProjectState {
+    id: string;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
 }

@@ -3,25 +3,12 @@
 import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
 import { app } from '@/lib/firebase';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
+import type { ProjectState as FullProjectState } from "@/lib/types";
 
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
-export interface ProjectState {
-    agents: any;
-    projectPlan: ProjectPlan | null;
-    name?: string;
-    projectIdea?: string;
-    proposal: AnyProjectProposal | null;
-    sections?: Record<string, string>;
-    diagrams?: Record<string, { plantUmlCode: string; imageUrl: string; }>;
-    presentation?: any; // Define a more specific type if needed
-    externalContext?: any[]; // Define a more specific type if needed
-    teamId?: string;
-    codeGenerator?: any;
-    academicSolver?: any;
-    codebase?: any;
+export type ProjectState = FullProjectState;
 
-}
 
 // Represents a project document saved in Firestore
 export interface SavedProject extends ProjectState {
