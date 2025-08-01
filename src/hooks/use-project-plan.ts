@@ -7,18 +7,17 @@ import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
-import type { ProjectPlan, ProjectProposal } from '@/ai/schemas';
+import type { ProjectPlan } from '@/ai/schemas';
 import { generateProjectPlanApi } from '@/services/project-plan-service';
 import { useProjectPlanStore } from './useProjectPlanStore';
 
 interface GeneratePlanVariables {
-    proposal?: ProjectProposal;
-    projectIdea?: string;
+    projectDescription: string;
+    keyDeliverables: string;
 }
 
 export function useGenerateProjectPlan() {
     const { firebaseUser, refetchUser } = useAuth();
-    const queryClient = useQueryClient();
     const { setProjectPlan } = useProjectPlanStore();
 
     return useMutation<ProjectPlan, Error, GeneratePlanVariables>({

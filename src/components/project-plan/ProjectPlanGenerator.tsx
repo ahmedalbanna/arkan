@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Loader2, Sparkles, GanttChartSquare, Lightbulb, BrainCircuit } from 'lucide-react';
+import { Loader2, Sparkles, GanttChartSquare, BrainCircuit } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -14,7 +14,6 @@ import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { useMutation } from '@tanstack/react-query';
-import type { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 
 async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {

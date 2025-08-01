@@ -77,8 +77,6 @@ export interface PptxTemplate {
 }
 
 export interface ProjectState {
-    agents: any;
-    projectPlan: import("@/ai/schemas").ProjectPlan | null;
     name?: string | undefined;
     projectIdea?: string | undefined;
     proposal: AnyProjectProposal | null;
@@ -134,6 +132,7 @@ export interface ProjectState {
     codebase?: any;
     externalContext?: any[] | undefined;
     teamId?: string | null | undefined;
+    projectPlan: import("@/ai/schemas").ProjectPlan | null;
 }
 export interface SavedProject extends ProjectState {
     id: string;
