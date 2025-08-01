@@ -3,7 +3,6 @@
 "use client";
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import { type AnyProjectProposal, AnyProjectProposalSchema } from "@/ai/schemas";
 import { toast } from "@/hooks/use-toast";
 import { useReportStore } from "./useReportStore";

@@ -114,182 +114,172 @@ const initialState: ReportState = {
 
 
 export const useReportStore = create<ReportState & ReportActions>()(
-    persist(
-      (set, get) => ({
-        ...initialState,
-        newSession: () => set(initialState),
-        loadState: (newState) => {
-          set({
-              sections: newState.sections || {},
-              evaluation: newState.evaluation || null,
-              externalContext: newState.externalContext || [],
-              translatedSections: newState.translatedSections || {},
-          });
-        },
-        setSection: (key, content) => {
-          set(state => ({ sections: { ...state.sections, [key]: content } }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        removeSection: (key) => {
-            set(state => {
-                const newSections = { ...state.sections };
-                delete newSections[key];
-                return { sections: newSections };
-            });
-            useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setAllSections: (newSections) => {
-          set(state => ({
-              sections: {
-                  ...state.sections,
-                  ...newSections
-              }
-          }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setTranslatedSection: (key, content) => {
-          set(state => ({ translatedSections: { ...state.translatedSections, [key]: content } }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setAllTranslatedSections: (newSections) => {
-          set(state => ({
-              translatedSections: {
-                  ...state.translatedSections,
-                  ...newSections
-              }
-          }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setEvaluation: (evaluation) => {
-          set({ evaluation });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        addExternalContext: (fileName, content, type) => {
-          set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type }] }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        removeExternalContext: (index) => {
-          set((state) => ({
-              externalContext: state.externalContext.filter((_, i) => i !== index),
-          }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        updateExternalContext: (index, newContent) => {
-            set((state) => {
-                const newContext = [...state.externalContext];
-                if (newContext[index]) {
-                    newContext[index] = { ...newContext[index], content: newContent };
-                }
-                return { externalContext: newContext };
-            });
-            useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        updateExternalContextType: (index: number, type: ContextFileType) => {
-          set((state) => {
+  (set, get) => ({
+    ...initialState,
+    newSession: () => set(initialState),
+    loadState: (newState) => {
+      set({
+          sections: newState.sections || {},
+          evaluation: newState.evaluation || null,
+          externalContext: newState.externalContext || [],
+          translatedSections: newState.translatedSections || {},
+      });
+    },
+    setSection: (key, content) => {
+      set(state => ({ sections: { ...state.sections, [key]: content } }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    removeSection: (key) => {
+        set(state => {
+            const newSections = { ...state.sections };
+            delete newSections[key];
+            return { sections: newSections };
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setAllSections: (newSections) => {
+      set(state => ({
+          sections: {
+              ...state.sections,
+              ...newSections
+          }
+      }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setTranslatedSection: (key, content) => {
+      set(state => ({ translatedSections: { ...state.translatedSections, [key]: content } }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setAllTranslatedSections: (newSections) => {
+      set(state => ({
+          translatedSections: {
+              ...state.translatedSections,
+              ...newSections
+          }
+      }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setEvaluation: (evaluation) => {
+      set({ evaluation });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    addExternalContext: (fileName, content, type) => {
+      set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type }] }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    removeExternalContext: (index) => {
+      set((state) => ({
+          externalContext: state.externalContext.filter((_, i) => i !== index),
+      }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    updateExternalContext: (index, newContent) => {
+        set((state) => {
             const newContext = [...state.externalContext];
             if (newContext[index]) {
-              newContext[index] = { ...newContext[index], type };
+                newContext[index] = { ...newContext[index], content: newContent };
             }
             return { externalContext: newContext };
-          });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        handleControlChange: (section, control, value) => {
-          set(state => ({
-              controlState: {
-                  ...state.controlState,
-                  [section]: { ...state.controlState[section], [control]: value }
-              }
-          }));
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        handleGuidelineToggle: (itemKey, index, checked) => {
-          set(state => {
-              const newGuidelineState = { ...state.guidelineState };
-              if (!newGuidelineState[itemKey]) {
-                  const agent = AGENTS.find(a => a.id.includes(itemKey));
-                  const prompt = agent?.prompt as AgentPrompt;
-                  newGuidelineState[itemKey] = {
-                      checked: prompt?.guidelines?.map(g => g.isDefault) || [],
-                      custom: [],
-                  };
-              }
-              newGuidelineState[itemKey].checked[index] = checked;
-              return { guidelineState: newGuidelineState };
-          });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setCustomGuidelineInputForItem: (itemKey, value) => {
-          set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } }));
-        },
-        handleAddCustomGuidelineForItem: (itemKey) => {
-            const { guidelineState, customGuidelineInput } = get();
-            const newGuideline = customGuidelineInput[itemKey]?.trim();
-            if (newGuideline) {
-                const newGuidelines = { ...guidelineState };
-                if (!newGuidelines[itemKey]) {
-                  newGuidelines[itemKey] = { checked: [], custom: [] };
-                }
-                newGuidelines[itemKey].custom.push(newGuideline);
-                set({
-                    guidelineState: newGuidelines,
-                    customGuidelineInput: { ...customGuidelineInput, [itemKey]: '' }
-                });
-                useBuilderStore.getState().setHasUnsavedChanges(true);
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    updateExternalContextType: (index: number, type: ContextFileType) => {
+      set((state) => {
+        const newContext = [...state.externalContext];
+        if (newContext[index]) {
+          newContext[index] = { ...newContext[index], type };
+        }
+        return { externalContext: newContext };
+      });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    handleControlChange: (section, control, value) => {
+      set(state => ({
+          controlState: {
+              ...state.controlState,
+              [section]: { ...state.controlState[section], [control]: value }
+          }
+      }));
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    handleGuidelineToggle: (itemKey, index, checked) => {
+      set(state => {
+          const newGuidelineState = { ...state.guidelineState };
+          if (!newGuidelineState[itemKey]) {
+              const agent = AGENTS.find(a => a.id.includes(itemKey));
+              const prompt = agent?.prompt as AgentPrompt;
+              newGuidelineState[itemKey] = {
+                  checked: prompt?.guidelines?.map(g => g.isDefault) || [],
+                  custom: [],
+              };
+          }
+          newGuidelineState[itemKey].checked[index] = checked;
+          return { guidelineState: newGuidelineState };
+      });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setCustomGuidelineInputForItem: (itemKey, value) => {
+      set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } }));
+    },
+    handleAddCustomGuidelineForItem: (itemKey) => {
+        const { guidelineState, customGuidelineInput } = get();
+        const newGuideline = customGuidelineInput[itemKey]?.trim();
+        if (newGuideline) {
+            const newGuidelines = { ...guidelineState };
+            if (!newGuidelines[itemKey]) {
+              newGuidelines[itemKey] = { checked: [], custom: [] };
             }
-        },
-        handleRemoveCustomGuidelineForItem: (itemKey, index) => {
-            set(state => {
-                const newGuidelines = { ...state.guidelineState };
-                if (newGuidelines[itemKey]) {
-                    newGuidelines[itemKey].custom.splice(index, 1);
-                }
-                return { guidelineState: newGuidelines };
+            newGuidelines[itemKey].custom.push(newGuideline);
+            set({
+                guidelineState: newGuidelines,
+                customGuidelineInput: { ...customGuidelineInput, [itemKey]: '' }
             });
             useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
-          set(state => {
-              const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
-              if (!newSelection[itemKey]) {
-                  newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-              }
-              if (type === 'proposal' || type === 'projectPlan') {
-                   newSelection[itemKey][type] = isSelected;
-              } else if (type === 'externalContext') {
-                  if (typeof contextKey === 'number') {
-                      if (!Array.isArray(newSelection[itemKey].externalContext)) {
-                          newSelection[itemKey].externalContext = [];
-                      }
-                      newSelection[itemKey].externalContext[contextKey] = isSelected;
+        }
+    },
+    handleRemoveCustomGuidelineForItem: (itemKey, index) => {
+        set(state => {
+            const newGuidelines = { ...state.guidelineState };
+            if (newGuidelines[itemKey]) {
+                newGuidelines[itemKey].custom.splice(index, 1);
+            }
+            return { guidelineState: newGuidelines };
+        });
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
+      set(state => {
+          const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
+          if (!newSelection[itemKey]) {
+              newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+          }
+          if (type === 'proposal' || type === 'projectPlan') {
+               newSelection[itemKey][type] = isSelected;
+          } else if (type === 'externalContext') {
+              if (typeof contextKey === 'number') {
+                  if (!Array.isArray(newSelection[itemKey].externalContext)) {
+                      newSelection[itemKey].externalContext = [];
                   }
-              } else if (contextKey) {
-                  newSelection[itemKey][type][contextKey as string] = isSelected;
+                  newSelection[itemKey].externalContext[contextKey] = isSelected;
               }
-              return { contextSelection: newSelection };
-          });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setSelectedReportTemplateId: (id: string) => {
-          set({ selectedReportTemplateId: id });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setSelectedPresentationTemplateId: (id: string) => {
-          set({ selectedPresentationTemplateId: id });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-        setManualTableOfContents: (toc: string) => {
-          set({ manualTableOfContents: toc });
-          useBuilderStore.getState().setHasUnsavedChanges(true);
-        },
-      }),
-      {
-        name: 'arkan-report-store',
-        storage: createJSONStorage(() => localStorage),
-        partialize: (state) =>
-          Object.fromEntries(
-            Object.entries(state).filter(([key]) => !['externalContext'].includes(key))
-          ),
-      }
-    )
+          } else if (contextKey) {
+              newSelection[itemKey][type][contextKey as string] = isSelected;
+          }
+          return { contextSelection: newSelection };
+      });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setSelectedReportTemplateId: (id: string) => {
+      set({ selectedReportTemplateId: id });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setSelectedPresentationTemplateId: (id: string) => {
+      set({ selectedPresentationTemplateId: id });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    setManualTableOfContents: (toc: string) => {
+      set({ manualTableOfContents: toc });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+  })
 );
