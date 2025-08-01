@@ -1,29 +1,131 @@
+
 'use client';
 
-import { UploadManager } from '../UploadManager';
-import { Card, CardContent } from '../ui/card';
+import { useState, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UploadCloud, FileText, X } from 'lucide-react';
+import { useDropzone } from 'react-dropzone';
+import { useToast } from '@/hooks/use-toast';
+import { Textarea } from '../ui/textarea';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Label } from '../ui/label';
+import { processFileApi } from '@/services/document-processing-service';
+import { useAuth } from '@/context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
+import { ScrollArea } from '../ui/scroll-area';
+import type { ExternalContext } from '@/hooks/useReportStore';
 
 interface AcademicUploadersProps {
     title: string;
+    onContentAdded: (fileName: string, content: string) => void;
+    onContentRemoved: (index: number) => void;
     isProcessing: boolean;
-    isContext?: boolean;
+    uploadedContent: ExternalContext[];
+    isContext?: boolean; // Flag to differentiate between question and context documents
 }
 
-// This component is now a wrapper around the main UploadManager to ensure UI consistency.
-export const AcademicUploaders = ({ title, isProcessing, isContext = false }: AcademicUploadersProps) => {
-    
-    // NOTE: The props are passed for potential future customizations specific to the academic solver,
-    // but for now, we rely on the centralized UploadManager for the UI and logic.
-    // The state management is handled by the `useAcademicSolverStore`, which interacts
-    // with `useReportStore` under the hood for context management.
-    
+export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isProcessing, uploadedContent, isContext = false }: AcademicUploadersProps) => {
+    const { toast } = useToast();
+    const { firebaseUser, refetchUser } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const onDrop = useCallback(async (acceptedFiles: File[]) => {
+        setIsLoading(true);
+        for (const file of acceptedFiles) {
+            if (!firebaseUser) {
+                toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
+                continue;
+            }
+            try {
+                const token = await firebaseUser.getIdToken();
+                const formData = new FormData();
+                formData.append('file', file);
+                const result = await processFileApi(formData, token);
+                onContentAdded(file.name, result.markdown);
+                toast({ title: "File Processed", description: `Content from ${file.name} extracted.` });
+                refetchUser();
+            } catch (error: any) {
+                toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
+            }
+        }
+        setIsLoading(false);
+    }, [firebaseUser, onContentAdded, refetchUser, toast]);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop,
+        multiple: true,
+        accept: {
+            'application/pdf': ['.pdf'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/png': ['.png'],
+            'image/webp': ['.webp'],
+        }
+    });
+
+    const [pastedText, setPastedText] = useState('');
+    const [pastedTitle, setPastedTitle] = useState('');
+
+    const handleAddPastedText = () => {
+        if (!pastedTitle.trim() || !pastedText.trim()) {
+            toast({ title: "Missing Information", description: "Please provide a title and content.", variant: 'destructive' });
+            return;
+        }
+        onContentAdded(`${pastedTitle}.md`, pastedText);
+        setPastedText('');
+        setPastedTitle('');
+    };
+
     return (
-        <Card>
-            <CardContent className="p-4 space-y-2">
-                 <h3 className="font-semibold text-sm">{title}</h3>
-                 <p className="text-xs text-muted-foreground">You can upload PDFs, DOCX files, images, or paste text.</p>
-                 <UploadManager />
+        <Card className="bg-muted/50">
+            <CardHeader className="p-4">
+                <CardTitle className="text-base">{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 pt-0">
+                <Tabs defaultValue="upload">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload">Upload File</TabsTrigger>
+                        <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="upload" className="mt-4">
+                        <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                            <input {...getInputProps()} />
+                            <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
+                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop, or click to select files</p>
+                            <p className="text-xs text-muted-foreground">PDF, JPG, PNG supported</p>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="paste" className="mt-4 space-y-2">
+                        <Label htmlFor="paste-title">Title</Label>
+                        <Input id="paste-title" placeholder="e.g., Chapter 1 Notes" value={pastedTitle} onChange={e => setPastedTitle(e.target.value)} />
+                        <Label htmlFor="paste-content">Content</Label>
+                        <Textarea id="paste-content" placeholder="Paste your text or markdown here..." value={pastedText} onChange={e => setPastedText(e.target.value)} rows={5} />
+                        <Button onClick={handleAddPastedText} size="sm">Add Text</Button>
+                    </TabsContent>
+                </Tabs>
+                
+                {(isLoading || isProcessing) && <div className="flex justify-center mt-2"><Loader2 className="h-5 w-5 animate-spin" /></div>}
+                
+                {uploadedContent.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                        <h4 className="text-sm font-semibold">Uploaded Content:</h4>
+                        <ScrollArea className="h-24 w-full rounded-md border p-2">
+                            <div className="space-y-1">
+                                {uploadedContent.map((item, index) => (
+                                    <div key={index} className="flex items-center justify-between text-sm p-1 rounded-md bg-background">
+                                        <span className="truncate">{item.fileName}</span>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onContentRemoved(index)}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </ScrollArea>
+                    </div>
+                )}
             </CardContent>
         </Card>
-    )
-}
+    );
+};

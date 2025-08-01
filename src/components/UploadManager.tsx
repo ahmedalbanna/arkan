@@ -61,7 +61,7 @@ const CloudStorageConnector = ({ provider, icon: Icon, onConnect }: { provider: 
     </Card>
 );
 
-function ViewContextDialog({ item }: { item: { fileName: string, content: string }}) {
+function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ContextFileType }}) {
     const isDataUri = item.content.startsWith('data:');
     const isImage = isDataUri && item.content.startsWith('data:image');
     const isPdf = isDataUri && item.content.startsWith('data:application/pdf');
@@ -235,25 +235,16 @@ function FileDropzone() {
             return;
         }
 
-        if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.docx')) {
-            // For text-based files, just read the content directly on the client.
-            const content = await file.text();
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+            const content = reader.result as string;
+            // The type is initially 'context' and can be changed by the user.
             addExternalContext(file.name, content, 'context');
             toast({ title: "File Added", description: `${file.name} has been added to context.` });
-        } else {
-            // For non-text files (PDF, images), send to the backend for processing.
-            const token = await firebaseUser.getIdToken();
-            const formData = new FormData();
-            formData.append('file', file);
-            
-            try {
-                const result = await processFileApi(formData, token);
-                addExternalContext(`${file.name}.txt`, result.markdown, 'context');
-                toast({ title: "File Processed", description: `Content from ${file.name} has been extracted and added.` });
-                refetchUser(); // Update credits
-            } catch (err: any) {
-                 toast({ title: "Processing Failed", description: `Could not process ${file.name}: ${err.message}`, variant: "destructive" });
-            }
+        };
+        reader.onerror = () => {
+            toast({ title: "File Read Error", description: "Could not read the selected file.", variant: "destructive" });
         }
     };
     
@@ -264,7 +255,7 @@ function FileDropzone() {
            await processAndAddFile(file);
         }
         setIsLoading(false);
-    }, [firebaseUser, addExternalContext, refetchUser, toast]);
+    }, [firebaseUser, addExternalContext, toast]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -291,7 +282,7 @@ function FileDropzone() {
                 {isLoading ? (
                     <>
                         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                        <p className="mt-2 text-sm text-muted-foreground">Processing files...</p>
+                        <p className="mt-2 text-sm text-muted-foreground">Adding files...</p>
                     </>
                 ) : (
                     <>

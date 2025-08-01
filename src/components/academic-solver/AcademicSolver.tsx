@@ -23,7 +23,7 @@ import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks/us
 export default function AcademicSolver() {
   const { t } = useLocalization();
   const { toast } = useToast();
-  const { firebaseUser, refetchUser } = useAuth();
+  const { firebaseUser, refetchUser, userProfile } = useAuth();
 
   const {
     stage,
@@ -45,6 +45,9 @@ export default function AcademicSolver() {
 
   const analyzeMutation = useAnalyzeAcademicDocument();
   const solveMutation = useSolveAcademicDocument();
+
+  const creditCostAnalyze = 1;
+  const creditCostSolve = analyzedDocument?.documentType === 'exam' ? 3 : 2;
 
   const handleAnalyze = async () => {
     if (questionDocuments.length === 0 || !documentType || !firebaseUser) {
@@ -102,6 +105,9 @@ export default function AcademicSolver() {
   }
 
   const isProcessing = analyzeMutation.isPending || solveMutation.isPending;
+  const canAnalyze = questionDocuments.length > 0 && !!documentType && !isProcessing && (userProfile?.credits ?? 0) >= creditCostAnalyze;
+  const canSolve = stage === 'readyToSolve' && !isProcessing && (userProfile?.credits ?? 0) >= creditCostSolve;
+
 
   const controlPanel = (
     <Card>
@@ -131,7 +137,7 @@ export default function AcademicSolver() {
 
              <AcademicUploaders
                 title="Questions Document"
-                onContentAdded={(fileName, content) => addQuestionDocument(fileName, content)}
+                onContentAdded={addQuestionDocument}
                 onContentRemoved={removeQuestionDocument}
                 isProcessing={isProcessing}
                 uploadedContent={questionDocuments}
@@ -140,20 +146,20 @@ export default function AcademicSolver() {
              
              <AcademicUploaders
                 title="Context/Syllabus Document (Optional)"
-                onContentAdded={(fileName, content) => addExternalContext(fileName, content)}
+                onContentAdded={addExternalContext}
                 onContentRemoved={removeExternalContext}
                 isProcessing={isProcessing}
                 uploadedContent={externalContext}
                 isContext
              />
 
-            <Button onClick={handleAnalyze} disabled={questionDocuments.length === 0 || !documentType || isProcessing} className="w-full">
+            <Button onClick={handleAnalyze} disabled={!canAnalyze} className="w-full">
                 {analyzeMutation.isPending ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                {t('builder.academicSolver.analyzeButton')}
+                {t('builder.academicSolver.analyzeButton')} ({creditCostAnalyze} Credit)
             </Button>
         </CardContent>
         <CardFooter>
@@ -197,9 +203,9 @@ export default function AcademicSolver() {
              </CardContent>
              <CardFooter>
                  {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
-                      <Button onClick={handleSolve} disabled={stage !== 'readyToSolve' || solveMutation.isPending} className="w-full">
+                      <Button onClick={handleSolve} disabled={!canSolve} className="w-full">
                           {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                          {t('builder.academicSolver.solveButton')}
+                          {t('builder.academicSolver.solveButton')} ({creditCostSolve} Credits)
                       </Button>
                   )}
              </CardFooter>

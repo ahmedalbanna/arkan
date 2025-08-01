@@ -3,6 +3,7 @@
 
 import { create } from "zustand";
 import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from "@/ai/flows/academic-solver.shared";
+import { useBuilderStore } from "./useBuilderStore";
 
 export type AcademicSolverStage =
   | "idle"
@@ -68,23 +69,27 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
     addQuestionDocument: (fileName, content) => {
         set((state) => ({ 
             questionDocuments: [...state.questionDocuments, { fileName, content }],
-            stage: "idle",
+            stage: "idle", // Reset stage when new questions are added
             analyzedDocument: null,
             solvedDocument: null,
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     removeQuestionDocument: (index) => {
          set((state) => ({
             questionDocuments: state.questionDocuments.filter((_, i) => i !== index),
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     addExternalContext: (fileName, content) => {
         set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     removeExternalContext: (index) => {
         set((state) => ({
             externalContext: state.externalContext.filter((_, i) => i !== index),
         }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     newSession: () => set(initialState),
     loadState: (newState) => {
