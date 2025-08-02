@@ -8,7 +8,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 // GET /api/agents/[id]
 export const GET = withAuth(async ({ params }) => {
     try {
-        const agentId = params.id;
+        const {id:agentId} = await params;
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
             return handleApiError({ message: 'Agent not found.' }, 404);
