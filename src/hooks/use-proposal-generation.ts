@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,7 @@ import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
-import type { AnyProjectProposal } from '@/ai/schemas';
+import type { AnyProjectProposal, ExternalContext } from '@/lib/types';
 import { generateProposalApi } from '@/services/proposal-service';
 import { useBuilderStore } from './useBuilderStore';
 
@@ -15,6 +16,7 @@ export interface GenerateProposalBody {
     projectIdea: string;
     templateId: string;
     customGuidelines: string[];
+    externalContext: ExternalContext[];
 }
 
 export function useGenerateProposal() {

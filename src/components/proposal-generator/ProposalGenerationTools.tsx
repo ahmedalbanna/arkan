@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -19,6 +20,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { UploadManager } from '../UploadManager';
+import { useReportStore } from '@/hooks/useReportStore';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -28,13 +30,17 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
     const { t } = useLocalization();
     const { projectIdea } = useBuilderStore();
     const { selectedTemplateId, customGuidelines } = useProposalGenerationStore();
+    const { externalContext } = useReportStore();
     const generationMutation = useGenerateProposal();
+    const { userProfile } = useAuth();
+    const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
     const handleClick = () => {
         generationMutation.mutate({
             projectIdea,
             templateId: selectedTemplateId,
             customGuidelines,
+            externalContext: externalContext,
         });
     }
 
@@ -42,12 +48,12 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
         <Button
             type="button"
             onClick={handleClick}
-            disabled={isGenerating || !projectIdea}
+            disabled={isGenerating || !projectIdea || !hasCredits}
             className="font-headline w-full"
-            title={t('builder.proposalGenerator.generateButton')}
+            title={!hasCredits ? t('builder.toasts.insufficientCredits') : t('builder.proposalGenerator.generateButton')}
         >
             {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {t('builder.proposalGenerator.generateButton')}
+            {`${t('builder.proposalGenerator.generateButton')} (1 Credit)`}
         </Button>
     );
 }
@@ -63,7 +69,6 @@ export const ProposalGenerationTools = ({
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
-    const { userProfile } = useAuth();
     const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
 
     const { projectIdea, setProjectIdea } = useBuilderStore();
@@ -158,12 +163,6 @@ export const ProposalGenerationTools = ({
                                     </Button>
                                 </div>
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="item-2">
-                         <AccordionTrigger className="font-semibold text-base"><BookOpen className="mr-2 h-4 w-4"/> Context Manager</AccordionTrigger>
-                        <AccordionContent className="pt-4">
-                            <UploadManager />
                         </AccordionContent>
                     </AccordionItem>
                  </Accordion>

@@ -14,31 +14,61 @@ import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 
 const GenerateProposalInputSchema = z.object({
   projectIdea: z.string().describe('A short description of the project idea.'),
-  prompt: z.string().describe('The prompt to use for generating the proposal.')
+  prompt: z.string().describe('The base prompt to use for generating the proposal.'),
+  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
 });
+
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
-export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
-  return generateProposalFlow(input);
-}
 
-const generateProposalFlow = ai.defineFlow(
-  {
-    name: 'generateProposalFlow',
-    inputSchema: GenerateProposalInputSchema,
-    outputSchema: ProjectProposalSchema, // Use the strict schema
-  },
-  async (input) => {
-    const generateProposalPrompt = ai.definePrompt({
-      name: 'generateProposalPrompt',
-      input: { schema: GenerateProposalInputSchema },
-      output: { schema: ProjectProposalSchema }, // Use the strict schema for output validation
-      prompt: input.prompt,
-    });
-    
-    // The main generation prompt now includes instructions for valid markdown,
-    // so we no longer need to make extra calls to a validation/fixer agent.
-    const { output } = await generateProposalPrompt(input);
-    return output!;
-  }
-);
+export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
+  const { projectIdea, prompt, guidelines, externalContext } = input;
+
+  const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+  const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
+  
+  const generateProposalPrompt = ai.definePrompt({
+    name: 'generateProposalPrompt',
+    input: { schema: z.any() }, // Use any since we construct it manually
+    output: { schema: ProjectProposalSchema },
+    prompt: `${prompt}
+
+{{#if guidelines}}
+--- Guidelines ---
+{{#each guidelines}}
+- {{{this}}}
+{{/each}}
+{{/if}}
+
+{{#if textContext}}
+--- IMPORTANT CONTEXT ---
+Use the following text as the primary source of truth and context for generating the proposal.
+{{#each textContext}}
+File: {{this.fileName}}
+{{{this.content}}}
+---
+{{/each}}
+{{/if}}
+
+{{#if mediaContext}}
+--- IMPORTANT MEDIA CONTEXT ---
+Analyze the following files as the primary source of truth and context.
+{{#each mediaContext}}
+File: {{this.fileName}}
+{{media url=this.content}}
+---
+{{/each}}
+{{/if}}
+
+--- Main Input: Project Idea ---
+{{{projectIdea}}}
+`,
+  });
+
+  const { output } = await generateProposalPrompt({ projectIdea, guidelines, textContext, mediaContext });
+  return output!;
+}

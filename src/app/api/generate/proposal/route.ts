@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -9,11 +10,18 @@ import { logGeneration } from '@/services/generation-service';
 import type { ProposalTemplate } from '@/services/template-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
+import type { ExternalContext } from '@/lib/types';
+
 
 const generateProposalSchema = z.object({
   projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
   templateId: z.string(),
   customGuidelines: z.array(z.string()).optional(),
+  externalContext: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+      type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
+  })).optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -27,7 +35,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     await deductCredit(user.id, 1);
 
-    let { projectIdea, templateId, customGuidelines } = validation.data;
+    let { projectIdea, templateId, customGuidelines, externalContext } = validation.data;
     
     // If the user selects the "automatic" template, first call the AI to select the best template.
     if (templateId === 'automatic-ai') {
@@ -50,14 +58,11 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const finalGuidelines = [...(template.guidelines || []), ...(customGuidelines || [])];
     
-    let finalPrompt = template.prompt;
-    if (finalGuidelines.length > 0) {
-        finalPrompt += '\n\nAdditionally, please adhere to the following guidelines:\n' + finalGuidelines.map(g => `- ${g}`).join('\n');
-    }
-
     const agentInput = {
       projectIdea,
-      prompt: finalPrompt,
+      prompt: template.prompt,
+      guidelines: finalGuidelines,
+      externalContext: externalContext,
     };
 
     let result = await generateProposal(agentInput);
@@ -65,8 +70,14 @@ export const POST = withAuth(async ({ request, user }) => {
     await logGeneration({
         agentId: 'generate-proposal', 
         userId: user.id,
-        input: { projectIdea, templateId: validation.data.templateId, finalTemplateId: templateId, customGuidelines }, // Log the user-facing input
-        output: result,
+        input: { 
+            projectIdea, 
+            templateId: validation.data.templateId, 
+            finalTemplateId: templateId, 
+            customGuidelines,
+            externalContextFileCount: externalContext?.length || 0,
+        },
+        output: { title: result.title, category: result.category },
     });
     
     return createApiResponse(result, 200);
