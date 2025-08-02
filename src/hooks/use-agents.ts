@@ -22,6 +22,7 @@ export interface UpdateAgentPayload {
     name?: string;
     prompt?: string | AgentPrompt;
     isEnabled?: boolean;
+    toolIds?: string[];
 }
 
 export interface UpdateAgentVariables {
@@ -29,7 +30,7 @@ export interface UpdateAgentVariables {
     payload: UpdateAgentPayload;
 }
 
-export type CreateAgentVariables = Omit<AgentData, 'isEnabled' | 'prompt'> & { prompt: string };
+export type CreateAgentVariables = Omit<AgentData, 'isEnabled'>;
 
 
 /**

@@ -82,10 +82,13 @@ export async function createAgent(data: CreateAgentVariables, token: string): Pr
     });
     if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to create agent');
+        // The error from the API might already contain structured validation errors
+        // Throwing it allows useMutation's onError to catch it.
+        throw error;
     }
     return response.json();
 }
+
 
 /**
  * Deletes an agent via the API.

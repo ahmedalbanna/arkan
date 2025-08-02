@@ -10,8 +10,9 @@ import { useCreateAgent } from '@/hooks/use-agents';
 import { toast } from '@/hooks/use-toast';
 import { AgentCategory } from '@/lib/agents';
 import { Loader2 } from 'lucide-react';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import type { AgentPrompt } from '@/lib/agents';
 
 const suggestionChips = [
     { label: 'Task Manager', icon: Check },
@@ -25,7 +26,7 @@ type GenerationStep = 'prompting' | 'generating' | 'reviewing';
 interface GeneratedAgentData {
     name: string;
     instructions: string;
-    commands: string;
+    guidelines: string;
 }
 
 export function GenerateAgentView() {
@@ -49,7 +50,7 @@ export function GenerateAgentView() {
             setGeneratedData({
                 name: generatedName,
                 instructions: generatedInstructions,
-                commands: "List key features.\nSummarize the main points.\nProvide a detailed explanation."
+                guidelines: "- Maintain a professional and helpful tone.\n- If you don't know the answer, say so clearly.\n- Provide sources for your information when possible."
             });
             setStep('reviewing');
         }, 2000);
@@ -59,12 +60,18 @@ export function GenerateAgentView() {
         if (!generatedData) return;
         
         const generatedId = generatedData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const guidelinesArray = generatedData.guidelines.split('\n').map(line => line.replace(/^- /, '').trim()).filter(line => line);
+
+        const agentPrompt: AgentPrompt = {
+            base: generatedData.instructions,
+            guidelines: guidelinesArray.map(g => ({ text: g, isDefault: true })),
+        };
 
         const agentData = {
             id: generatedId,
             name: generatedData.name,
             description: prompt, // Use original prompt as description
-            prompt: generatedData.instructions,
+            prompt: agentPrompt,
             category: AgentCategory.ContentGeneration,
             pageUrl: '/admin/chats'
         };
@@ -179,8 +186,8 @@ export function GenerateAgentView() {
                         <Textarea id="agent-instructions" value={generatedData?.instructions || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, instructions: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
                      <div>
-                        <Label htmlFor="agent-commands" className="text-xs uppercase text-muted-foreground">Commands</Label>
-                        <Textarea id="agent-commands" value={generatedData?.commands || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, commands: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
+                        <Label htmlFor="agent-guidelines" className="text-xs uppercase text-muted-foreground">Guidelines</Label>
+                        <Textarea id="agent-guidelines" value={generatedData?.guidelines || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, guidelines: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
                 </div>
                 <div className="flex justify-center gap-4">

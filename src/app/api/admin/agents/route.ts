@@ -41,13 +41,25 @@ export const GET = withAuth(async () => {
 }, { requireAdmin: true });
 
 
+const agentGuidelineSchema = z.object({
+  text: z.string().min(1),
+  isDefault: z.boolean(),
+});
+
+const agentPromptSchema = z.object({
+  base: z.string().min(1),
+  guidelines: z.array(agentGuidelineSchema).optional(),
+  jsonStructure: z.any().optional(),
+});
+
+
 const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
   category: z.nativeEnum(AgentCategory),
   pageUrl: z.string().min(1, "Page URL is required"),
-  prompt: z.string().min(10, "Prompt must be at least 10 characters"),
+  prompt: z.union([z.string().min(10), agentPromptSchema]),
 });
 
 
