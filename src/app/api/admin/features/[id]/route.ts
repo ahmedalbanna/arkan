@@ -31,7 +31,7 @@ export const PUT = withAuth(async ({ request, params }) => {
     await featureRef.update({ isEnabled: validation.data.isEnabled });
     const updatedDoc = await featureRef.get();
 
-    return createApiResponse(updatedDoc.data(), 200);
+    return createApiResponse({id: updatedDoc.id, ...updatedDoc.data()}, 200);
   } catch (error) {
     return handleApiError(error);
   }

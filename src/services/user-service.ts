@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { UserProfile } from '@/lib/types';
+import type { UserProfile, PricingPlan } from '@/lib/types';
 import { auth, app } from '@/lib/firebase';
 import {
   signInWithEmailAndPassword,
@@ -179,6 +179,26 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || "Failed to send password reset email.");
+  }
+  return response.json();
+}
+
+export async function purchaseCreditsApi(
+  plan: PricingPlan,
+  token: string
+): Promise<{ newBalance: number }> {
+  const response = await fetch("/api/purchase", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Purchase failed.");
   }
   return response.json();
 }

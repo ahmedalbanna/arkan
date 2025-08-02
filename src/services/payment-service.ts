@@ -20,23 +20,3 @@ export async function submitPaymentProof({ formData, token }: { formData: FormDa
     }
     return response.json();
 }
-
-export async function purchaseCreditsApi(
-  plan: PricingPlan,
-  token: string
-): Promise<{ newBalance: number }> {
-  const response = await fetch("/api/purchase", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ planId: plan.id, credits: plan.credits }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Purchase failed.");
-  }
-  return response.json();
-}

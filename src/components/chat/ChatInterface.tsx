@@ -31,6 +31,13 @@ export default function ChatInterface() {
     }
   }, [firebaseUser, isInitialized, initialize]);
 
+  // Effect to select the first chat once loaded, if none is selected
+  useEffect(() => {
+    if (!selectedChat && chats.length > 0) {
+      setSelectedChat(chats[0]);
+    }
+  }, [chats, selectedChat, setSelectedChat]);
+
 
   const handleSelectChat = (chat: ChatSession | AgentChatSession) => {
     setSelectedChat(chat);

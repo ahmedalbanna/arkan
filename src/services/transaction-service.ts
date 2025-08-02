@@ -70,7 +70,7 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
         throw new Error("Authentication token is required.");
     }
     const queryParams = new URLSearchParams({ startDate, endDate });
-    const response = await fetch(`/api/admin/transactions?${queryParams.toString()}`, {
+    const response = await fetch(`/api/admin/transactions/report?${queryParams.toString()}`, {
         headers: {
             'Authorization': `Bearer ${token}`
         }

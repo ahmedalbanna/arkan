@@ -27,6 +27,7 @@ import {
   serviceSignupUser,
   fetchUserProfileApi,
   sendPasswordResetEmailApi,
+  purchaseCreditsApi,
   type UserListResponse,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
@@ -107,11 +108,11 @@ export function useLogin() {
       }
     },
     onError: (error: Error) => {
-      // Specific UI error handling is now done within the LoginForm component
-      // We still keep a general toast for unexpected errors
+      // General toast for unexpected errors
       if (!error.message.includes("Invalid email or password")) {
         handleErrorUtility(error, "Login Error");
       }
+      // The component handles displaying the specific error message
     },
   });
 }
@@ -177,11 +178,9 @@ export function useSignup() {
     },
     onError: (error: any) => {
       console.error("Signup mutation error:", error);
-      // Error handling is now primarily managed in the SignupForm component
-      // to set form-specific errors. A toast is still useful for general errors.
-      if (error.error && !error.error._form) {
-        // Do nothing if it's a field-specific error
-      } else {
+      // Let the form handle field-specific errors.
+      // Show a toast only for general form-level errors.
+      if (error?.message) {
         handleErrorUtility(error, "Signup Failed");
       }
     },
@@ -211,20 +210,7 @@ export function useSendPasswordReset() {
 export function useForgotPassword() {
   return useMutation({
     mutationFn: async (email: string) => {
-      try {
-        await sendPasswordResetEmail(auth, email);
-        return { success: true };
-      } catch (error: any) {
-        if (
-          error.code === "auth/user-not-found" ||
-          error.code === "auth/invalid-email"
-        ) {
-          throw new Error("No user found with this email address.");
-        }
-        throw new Error(
-          error.message || "Failed to send password reset email."
-        );
-      }
+        return sendPasswordResetEmail(auth, email);
     },
     onSuccess: () => {
       toast({

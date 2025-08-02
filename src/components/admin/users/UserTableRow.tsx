@@ -72,17 +72,16 @@ export function UserTableRow({ user }: UserTableRowProps) {
             <TableCell>{user.credits}</TableCell>
             <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
             <TableCell className="text-right">
-                <Button asChild variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
-                    <MessageSquare className="h-4 w-4" />
-                    <span className="sr-only">Chat with user</span>
+               <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="sr-only">Chat with user</span>
                 </Button>
-                <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
-                    <Link href={`/admin/manage-users/${user.id}/edit`}>
-                        <Pencil className="h-4 w-4" />
-                    </Link>
-                </Button>
+              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
+                <Link href={`/admin/manage-users/${user.id}/edit`}>
+                   <Pencil className="h-4 w-4" />
+                </Link>
+              </Button>
             </TableCell>
         </TableRow>
     );
 }
-

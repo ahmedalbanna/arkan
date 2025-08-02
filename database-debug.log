@@ -1,9 +1,9 @@
-16:54:55.275 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-16:54:56.171 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
-16:55:21.729 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 639ms, init: 0ms
-16:55:22.220 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
-16:55:35.463 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+17:28:15.698 [NamespaceSystem-akka.actor.default-dispatcher-6] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+17:28:16.551 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
+17:29:16.569 [NamespaceSystem-akka.actor.default-dispatcher-6] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 926ms, init: 0ms
+17:29:17.230 [NamespaceSystem-blocking-namespace-operation-dispatcher-8] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
+17:31:29.941 [FirebaseWorkerPool-1-3] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
 namespace fake-server, but the emulator is configured for docudec-default-rtdb. To 
 opt-out of single project mode add/set the singleProjectMode: false property in 
 the firebase.json emulators config. 
-16:55:35.623 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - fake-server successfully activated FBKV (SurveyIdle(0)) wait: 54ms, init: 0ms
+17:31:30.086 [NamespaceSystem-akka.actor.default-dispatcher-7] INFO com.firebase.core.namespace.NamespaceActor - fake-server successfully activated FBKV (SurveyIdle(0)) wait: 80ms, init: 0ms

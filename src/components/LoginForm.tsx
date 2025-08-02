@@ -36,7 +36,7 @@ export default function LoginForm() {
   });
   
   useEffect(() => {
-    if(loginMutation.isError && loginMutation.error) {
+    if(loginMutation.error) {
         // Set a form-level error for specific, known auth failures
         if (loginMutation.error.message.includes("Invalid email or password")) {
             form.setError("root.serverError", {
@@ -45,7 +45,7 @@ export default function LoginForm() {
             });
         }
     }
-  }, [loginMutation.isError, loginMutation.error, form]);
+  }, [loginMutation.error, form]);
 
 
   function onSubmit(values: LoginCredentials) {
