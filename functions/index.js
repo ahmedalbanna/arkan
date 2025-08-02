@@ -1,11 +1,11 @@
-import * as functions from 'firebase-functions';
-import next from 'next';
+
+const functions = require('firebase-functions');
+const next = require('next');
 
 const dev = process.env.NODE_ENV !== 'production';
-const app = next({ dev, conf: { distDir: '.next' } }); // Configure distDir
+const app = next({ dev, conf: { distDir: '.next' } });
 const handle = app.getRequestHandler();
 
-export const nextjsApp = functions.https.onRequest(async (req, res) => {
-  await app.prepare();
-  handle(req, res);
+exports.nextjsApp = functions.https.onRequest((req, res) => {
+  return app.prepare().then(() => handle(req, res));
 });

@@ -1,8 +1,8 @@
+
 {
   "database": {
     "rules": "database.rules.json"
   },
-
   "emulators": {
     "auth": {
       "port": 9099
@@ -10,11 +10,9 @@
     "database": {
       "port": 9030
     },
-
     "firestore": {
       "port": 8030
     },
-
     "hosting": {
       "port": 5000
     },
@@ -30,16 +28,16 @@
     "rules": "firestore.rules"
   },
   "hosting": {
+    "public": ".next",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "public": ".next",
     "rewrites": [
       {
-        "function": "nextjsApp",
-        "source": "**"
+        "source": "**",
+        "function": "nextjsApp"
       }
     ]
   },
