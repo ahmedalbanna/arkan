@@ -1,3 +1,4 @@
+
 'use server';
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
@@ -8,6 +9,11 @@ import { deductCredit } from '@/services/credit-service';
 const generateSchema = z.object({
     prompt: z.string().min(10, "Prompt must be at least 10 characters long."),
     includeJsonOutput: z.boolean().optional(),
+    contextFiles: z.array(z.object({
+        name: z.string(),
+        type: z.string(),
+        content: z.string(), // data URI
+    })).optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -23,7 +29,8 @@ export const POST = withAuth(async ({ request, user }) => {
 
         const result = await generateAgentConfig({ 
             prompt: validation.data.prompt,
-            includeJsonOutput: validation.data.includeJsonOutput 
+            includeJsonOutput: validation.data.includeJsonOutput,
+            contextFiles: validation.data.contextFiles,
         });
 
         return createApiResponse(result, 200);

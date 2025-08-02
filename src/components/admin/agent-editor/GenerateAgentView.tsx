@@ -1,10 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, Send, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces } from 'lucide-react';
+import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCreateAgent } from '@/hooks/use-agents';
@@ -18,6 +18,8 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { generateAgentConfigApi } from '@/services/agent-service';
 import { Switch } from '@/components/ui/switch';
+import { useDropzone } from 'react-dropzone';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const suggestionChips = [
     { label: 'Task Manager', icon: Check },
@@ -35,21 +37,44 @@ interface GeneratedAgentData {
     jsonStructure?: any;
 }
 
+interface UploadedFile {
+    name: string;
+    type: string;
+    content: string; // data URI
+}
+
 export function GenerateAgentView() {
     const router = useRouter();
     const [step, setStep] = useState<GenerationStep>('prompting');
     const [prompt, setPrompt] = useState('');
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
+    const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const createAgentMutation = useCreateAgent();
     const { firebaseUser } = useAuth();
+    
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        acceptedFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUri = reader.result as string;
+                setContextFiles(prev => [...prev, { name: file.name, type: file.type, content: dataUri }]);
+            };
+            reader.readAsDataURL(file);
+        });
+    }, []);
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+    
+    const removeFile = (index: number) => {
+        setContextFiles(prev => prev.filter((_, i) => i !== index));
+    };
 
     const generateMutation = useMutation({
         mutationFn: async (currentPrompt: string) => {
             if (!firebaseUser) throw new Error("Authentication required.");
             const token = await firebaseUser.getIdToken();
-            // Pass the new boolean to the API
-            return generateAgentConfigApi(currentPrompt, includeJsonOutput, token);
+            return generateAgentConfigApi(currentPrompt, includeJsonOutput, contextFiles, token);
         },
         onSuccess: (data) => {
             setGeneratedData(data);
@@ -118,7 +143,7 @@ export function GenerateAgentView() {
     };
 
     const renderPromptingView = () => (
-        <div className="w-full max-w-3xl">
+        <div className="w-full max-w-4xl">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
                     Generate Your AI Agent <Bot className="h-10 w-10" />
@@ -137,16 +162,36 @@ export function GenerateAgentView() {
                     <SendHorizonal className="h-6 w-6" />
                 </Button>
                 <div className="absolute bottom-4 left-4 flex items-center gap-4">
-                     <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
-                        <BrainCircuit className="mr-2 h-4 w-4" />
-                        Add knowledge
-                    </Button>
+                    <div {...getRootProps()} className="cursor-pointer">
+                        <input {...getInputProps()} />
+                        <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
+                            <BrainCircuit className="mr-2 h-4 w-4" />
+                            Add knowledge
+                        </Button>
+                    </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="json-output" checked={includeJsonOutput} onCheckedChange={setIncludeJsonOutput} />
                         <Label htmlFor="json-output" className="text-white text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> JSON Output</Label>
                     </div>
                 </div>
             </div>
+            {contextFiles.length > 0 && (
+                <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
+                    <h4 className="text-sm font-semibold mb-2">Context Files ({contextFiles.length})</h4>
+                    <ScrollArea className="h-24">
+                        <div className="space-y-1">
+                            {contextFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between p-1 text-xs bg-white/10 rounded">
+                                    <span className="truncate">{file.name}</span>
+                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeFile(index)}>
+                                        <XCircle className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
+                    </ScrollArea>
+                </div>
+            )}
             <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {suggestionChips.map(({ label, icon: Icon }) => (
                     <Button
@@ -230,3 +275,4 @@ export function GenerateAgentView() {
         </div>
     );
 }
+

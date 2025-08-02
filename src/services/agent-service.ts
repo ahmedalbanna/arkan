@@ -117,11 +117,11 @@ export async function deleteAgent(agentId: string, token: string): Promise<{ mes
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the generated agent configuration.
  */
-export async function generateAgentConfigApi(prompt: string, includeJsonOutput: boolean, token: string): Promise<GenerateAgentConfigOutput> {
+export async function generateAgentConfigApi(prompt: string, includeJsonOutput: boolean, contextFiles: any[], token: string): Promise<GenerateAgentConfigOutput> {
     const response = await fetch('/api/admin/agents/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ prompt, includeJsonOutput }),
+        body: JSON.stringify({ prompt, includeJsonOutput, contextFiles }),
     });
      if (!response.ok) {
         const error = await response.json();
