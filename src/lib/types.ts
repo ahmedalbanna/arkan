@@ -2,6 +2,7 @@
 
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
+import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
 
 export type {
   ProjectProposal,
@@ -11,6 +12,7 @@ export type {
   ManipulateTextInput,
   ManipulateTextOutput,
   AnyProjectProposal,
+  GenerateAgentConfigOutput,
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';

@@ -13,6 +13,9 @@ import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { AgentPrompt } from '@/lib/agents';
+import { useMutation } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
+import { generateAgentConfigApi } from '@/services/agent-service';
 
 const suggestionChips = [
     { label: 'Task Manager', icon: Check },
@@ -35,6 +38,23 @@ export function GenerateAgentView() {
     const [prompt, setPrompt] = useState('');
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const createAgentMutation = useCreateAgent();
+    const { firebaseUser } = useAuth();
+
+    const generateMutation = useMutation({
+        mutationFn: async (currentPrompt: string) => {
+            if (!firebaseUser) throw new Error("Authentication required.");
+            const token = await firebaseUser.getIdToken();
+            return generateAgentConfigApi(currentPrompt, token);
+        },
+        onSuccess: (data) => {
+            setGeneratedData(data);
+            setStep('reviewing');
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Agent Generation Failed', description: error.message, variant: 'destructive' });
+            setStep('prompting');
+        }
+    });
 
     const handleGenerate = () => {
         if (!prompt.trim()) {
@@ -42,18 +62,7 @@ export function GenerateAgentView() {
             return;
         }
         setStep('generating');
-
-        // Simulate AI generation
-        setTimeout(() => {
-            const generatedName = prompt.split(' ').slice(0, 4).join(' ');
-            const generatedInstructions = `You are an expert ${generatedName}. Your primary goal is to ${prompt}. Follow user instructions carefully and provide accurate, helpful responses.`;
-            setGeneratedData({
-                name: generatedName,
-                instructions: generatedInstructions,
-                guidelines: "- Maintain a professional and helpful tone.\n- If you don't know the answer, say so clearly.\n- Provide sources for your information when possible."
-            });
-            setStep('reviewing');
-        }, 2000);
+        generateMutation.mutate(prompt);
     };
 
     const handleAccept = () => {
@@ -96,13 +105,7 @@ export function GenerateAgentView() {
     };
 
     const handleRegenerate = () => {
-        setStep('generating');
-        // Simulate regeneration
-        setTimeout(() => {
-            // In a real app, you'd call the AI again. Here we just slightly modify the data.
-            setGeneratedData(prev => prev ? { ...prev, instructions: prev.instructions + " (Regenerated)" } : null);
-            setStep('reviewing');
-        }, 1500);
+       handleGenerate();
     };
 
     const renderPromptingView = () => (
@@ -159,11 +162,11 @@ export function GenerateAgentView() {
         <div className="w-full max-w-3xl">
             <Button variant="ghost" onClick={() => setStep('prompting')} className="absolute top-8 left-8 text-white hover:bg-white/10">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Browse Templates
+                Back to Prompt
             </Button>
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    Generate Your AI Agent <Bot className="h-10 w-10" />
+                    Review Your AI Agent <Bot className="h-10 w-10" />
                 </h1>
             </div>
             <div className="space-y-6">
@@ -193,15 +196,11 @@ export function GenerateAgentView() {
                 <div className="flex justify-center gap-4">
                     <Button variant="secondary" onClick={handleAccept} disabled={createAgentMutation.isPending}>
                         {createAgentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4"/>}
-                        <span className="ml-2">Accept</span>
+                        <span className="ml-2">Accept & Save Agent</span>
                     </Button>
-                    <Button variant="outline" onClick={handleRegenerate}>
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Regenerate
-                    </Button>
-                    <Button variant="destructive" onClick={handleReject}>
-                        <ThumbsDown className="h-4 w-4 mr-2" />
-                        Reject
+                    <Button variant="outline" onClick={handleRegenerate} disabled={generateMutation.isPending}>
+                        {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <RotateCcw className="h-4 w-4" />}
+                        <span className="ml-2">Regenerate</span>
                     </Button>
                 </div>
             </div>
@@ -211,8 +210,8 @@ export function GenerateAgentView() {
     return (
         <div className="h-screen w-full flex flex-col items-center justify-center p-4 text-white ai-gradient-background">
             {step === 'prompting' && renderPromptingView()}
-            {step === 'generating' && renderGeneratingView()}
-            {step === 'reviewing' && renderReviewView()}
+            {(step === 'generating' || generateMutation.isPending) && renderGeneratingView()}
+            {step === 'reviewing' && !generateMutation.isPending && renderReviewView()}
         </div>
     );
 }

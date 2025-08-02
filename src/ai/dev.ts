@@ -29,6 +29,7 @@ import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/project-chat.ts'; // Add new flow
 import '@/ai/flows/analyze-context.ts'; // Add new flow
 import '@/ai/flows/analyzeAndReport.ts';
+import '@/ai/flows/generate-agent-config.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';

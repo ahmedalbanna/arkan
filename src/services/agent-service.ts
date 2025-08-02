@@ -1,6 +1,6 @@
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, Agent } from '@/lib/types';
+import type { UpdateAgentVariables, CreateAgentVariables, Agent, GenerateAgentConfigOutput } from '@/lib/types';
 
 /**
  * Fetches the full list of agents from the API.
@@ -105,6 +105,26 @@ export async function deleteAgent(agentId: string, token: string): Promise<{ mes
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to delete agent');
+    }
+    return response.json();
+}
+
+
+/**
+ * Calls the API to generate a configuration for a new agent.
+ * @param prompt The user's description of the agent to create.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to the generated agent configuration.
+ */
+export async function generateAgentConfigApi(prompt: string, token: string): Promise<GenerateAgentConfigOutput> {
+    const response = await fetch('/api/admin/agents/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ prompt }),
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate agent configuration');
     }
     return response.json();
 }
