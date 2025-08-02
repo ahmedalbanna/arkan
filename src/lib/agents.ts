@@ -34,6 +34,7 @@ export interface AgentData {
   pageUrl: string;
   isEnabled: boolean;
   prompt: AgentPrompt | string; // Can be simple string or complex object
+  toolIds?: string[];
 }
 
 export interface Agent extends AgentData {
@@ -593,7 +594,7 @@ You will be provided with the full project proposal in JSON format, and may also
     description: 'View the logs of all agent generations for administrative review.',
     category: AgentCategory.AdminTools,
     icon: History,
-    pageUrl: '/manage-generations',
+    pageUrl: '/admin/manage-generations',
     isEnabled: true, // Typically for admins only, controlled by UI
     prompt: ''
   },

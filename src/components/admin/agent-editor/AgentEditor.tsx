@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentPrompt, AgentTool } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
@@ -22,6 +21,7 @@ import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
 import Link from 'next/link';
+import { AVAILABLE_TOOLS } from '@/lib/tools';
 
 interface AgentEditorProps {
   agentId: string;
@@ -51,6 +51,7 @@ const agentEditorSchema = z.object({
   tone: z.string().optional(),
   language: z.string().optional(),
   model: z.string().optional(),
+  toolIds: z.array(z.string()).optional(),
 });
 
 export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
@@ -83,6 +84,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       defaultValues: {
           name: initialData.name,
           prompt: initialData.prompt,
+          toolIds: initialData.toolIds || [],
           introduction: '',
           placeholder: 'Ask me anything about TypeScript...',
           conversationStarters: [],
@@ -97,20 +99,22 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   useEffect(() => {
     const promptFromUrl = searchParams.get('prompt');
-    const newPromptValue = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
-
-    const currentPrompt = form.getValues('prompt');
     
-    let updatedPrompt;
-    if (typeof currentPrompt === 'object' && typeof newPromptValue === 'string') {
-        updatedPrompt = { ...currentPrompt, base: newPromptValue };
-    } else {
-        updatedPrompt = newPromptValue;
+    const getInitialPrompt = () => {
+        if(typeof initialData.prompt === 'string') {
+            return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
+        }
+        if(typeof initialData.prompt === 'object') {
+            const newBase = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt.base;
+            return { ...initialData.prompt, base: newBase };
+        }
+        return '';
     }
 
     form.reset({
       name: initialData.name,
-      prompt: updatedPrompt,
+      prompt: getInitialPrompt(),
+      toolIds: initialData.toolIds || [],
       introduction: '',
       placeholder: 'Ask me anything about TypeScript...',
       conversationStarters: [],
@@ -122,7 +126,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   const handleSubmit = (data: AgentEditorFormValues) => {
     // We only update name and prompt for now
-    updateAgentMutation.mutate({ agentId, payload: { name: data.name, prompt: data.prompt } });
+    updateAgentMutation.mutate({ agentId, payload: { name: data.name, prompt: data.prompt, toolIds: data.toolIds } });
   };
 
   const navItems = [

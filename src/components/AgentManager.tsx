@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,6 +21,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { AgentCategory } from '@/lib/agents';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
@@ -139,38 +140,49 @@ function CreateAgentDialog() {
 
 function AgentSkeleton() {
   return (
-    <Card role="listitem" className="p-4 flex items-center gap-4 animate-pulse">
-        <Skeleton className="h-6 w-6" />
-        <Skeleton className="h-8 w-8 rounded-full" />
-        <div className="flex-grow space-y-2">
-            <Skeleton className="h-5 w-48" />
-            <Skeleton className="h-4 w-full" />
-        </div>
-        <Skeleton className="h-9 w-24" />
-    </Card>
+    <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+    </div>
   );
 }
 
 
 function AgentCard({ agent }: { agent: Agent }) {
-  const { id, name, description } = agent;
+  const { id, name, description, isEnabled } = agent;
+  const updateAgentMutation = useUpdateAgent();
   
   const localAgentConfig = AGENTS.find(a => a.id === id);
   const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
+  
+  const handleToggle = (checked: boolean) => {
+    updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
+  }
+
 
   return (
     <Card className="p-4 flex items-center gap-4">
         <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-        <Icon className="w-8 h-8 text-primary" />
+        <Icon className="w-8 h-8 text-primary shrink-0" />
         <div className="flex-grow">
             <p className="font-semibold">{name}</p>
             <p className="text-sm text-muted-foreground">{description}</p>
         </div>
-        <Button asChild variant="outline">
-          <Link href={`/admin/manage-agents/${id}/edit`}>
-            Configure
-          </Link>
-        </Button>
+        <div className="flex items-center gap-4">
+             <Switch
+                checked={isEnabled}
+                onCheckedChange={handleToggle}
+                disabled={updateAgentMutation.isPending && updateAgentMutation.variables?.agentId === id}
+                aria-label={`Enable ${name}`}
+            />
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/admin/manage-agents/${id}/edit`}>
+                <Pencil className="mr-2 h-4 w-4"/>
+                Configure
+              </Link>
+            </Button>
+        </div>
     </Card>
   );
 }
@@ -178,13 +190,34 @@ function AgentCard({ agent }: { agent: Agent }) {
 export default function AgentManager() {
   const { agents, isLoaded, isError } = useAgents();
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const groupedAgents = useMemo(() => {
+    if (!agents) return {};
+
+    const filtered = agents.filter(agent => {
+        const lowercasedTerm = searchTerm.toLowerCase();
+        return agent.name.toLowerCase().includes(lowercasedTerm) ||
+               agent.description.toLowerCase().includes(lowercasedTerm) ||
+               agent.category.toLowerCase().includes(lowercasedTerm);
+    });
+
+    return filtered.reduce((acc, agent) => {
+      const category = agent.category || AgentCategory.ContentGeneration;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(agent);
+      return acc;
+    }, {} as Record<AgentCategory, Agent[]>);
+
+  }, [agents, searchTerm]);
+
+  const sortedCategories = Object.keys(groupedAgents).sort() as AgentCategory[];
+
 
   if (!isLoaded) {
     return (
       <div className="space-y-4">
-        <AgentSkeleton />
-        <AgentSkeleton />
-        <AgentSkeleton />
         <AgentSkeleton />
       </div>
     );
@@ -199,27 +232,13 @@ export default function AgentManager() {
     );
   }
 
-  // Filter for agents that generate content and match search term
-  const filteredAgents = agents.filter(agent => {
-    const isCompletionAgent = agent.category === AgentCategory.ReportGeneration ||
-                              agent.category === AgentCategory.ProposalGeneration ||
-                              agent.category === AgentCategory.DiagramGeneration;
-    if (!isCompletionAgent) return false;
-
-    const lowercasedTerm = searchTerm.toLowerCase();
-    return (
-        agent.name.toLowerCase().includes(lowercasedTerm) ||
-        agent.description.toLowerCase().includes(lowercasedTerm)
-    );
-  });
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
         <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
-                placeholder="Search agents..." 
+                placeholder="Search agents by name, description, or category..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -227,17 +246,22 @@ export default function AgentManager() {
         </div>
         <CreateAgentDialog />
       </div>
-      <div className="space-y-4">
-        {filteredAgents.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} />
-        ))}
-        {filteredAgents.length === 0 && (
-            <p className="text-center text-muted-foreground py-4">No agents found.</p>
-        )}
-      </div>
-       <div className="flex justify-center mt-8">
-        <Button size="lg">Run Agents</Button>
-      </div>
+       <Accordion type="multiple" className="w-full space-y-4" defaultValue={sortedCategories}>
+            {sortedCategories.map(category => (
+                <AccordionItem value={category} key={category} className="border rounded-lg bg-card">
+                    <AccordionTrigger className="font-headline text-lg p-4 hover:no-underline">
+                        <div className="flex items-center gap-2">
+                           {category} <Badge variant="secondary">{groupedAgents[category].length}</Badge>
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-0 space-y-2">
+                        {groupedAgents[category].map(agent => (
+                           <AgentCard key={agent.id} agent={agent} />
+                        ))}
+                    </AccordionContent>
+                </AccordionItem>
+            ))}
+       </Accordion>
     </div>
   );
 }
