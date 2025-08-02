@@ -7,6 +7,7 @@ import { deductCredit } from '@/services/credit-service';
 
 const generateSchema = z.object({
     prompt: z.string().min(10, "Prompt must be at least 10 characters long."),
+    includeJsonOutput: z.boolean().optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -20,7 +21,10 @@ export const POST = withAuth(async ({ request, user }) => {
         // Agent generation is a more complex task
         await deductCredit(user.id, 2);
 
-        const result = await generateAgentConfig({ prompt: validation.data.prompt });
+        const result = await generateAgentConfig({ 
+            prompt: validation.data.prompt,
+            includeJsonOutput: validation.data.includeJsonOutput 
+        });
 
         return createApiResponse(result, 200);
 

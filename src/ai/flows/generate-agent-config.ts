@@ -5,9 +5,10 @@ import { z } from 'zod';
 
 const GenerateAgentConfigInputSchema = z.object({
   prompt: z.string().describe("The user's description of the agent to create."),
+  includeJsonOutput: z.boolean().optional().describe("Whether to include a sample JSON output structure in the agent's prompt."),
 });
 
-export const GenerateAgentConfigOutputSchema = z.object({
+const GenerateAgentConfigOutputSchema = z.object({
   name: z.string().describe("A short, descriptive name for the new agent."),
   instructions: z.string().describe("The base prompt or primary instruction for the agent. This should be a clear, concise paragraph explaining the agent's purpose and core function."),
   guidelines: z.string().describe("A newline-separated list of 3-5 specific, actionable guidelines for the agent to follow. Each guideline should start with '- '.")
@@ -30,7 +31,13 @@ export async function generateAgentConfig(input: z.infer<typeof GenerateAgentCon
 
 1.  **Generate a Name:** Create a short, descriptive name for the agent (e.g., "Social Media Post Generator", "Technical Documentation Writer").
 2.  **Write Instructions:** Write a clear, concise paragraph that will serve as the agent's primary instruction or 'base prompt'. This should explain its core purpose, who it is, and what it does.
+    {{#if includeJsonOutput}}
+    **IMPORTANT**: The user wants this agent to produce structured JSON. Add a sentence to the end of the instructions like: "Your final output must be a valid JSON object that adheres to the defined schema."
+    {{/if}}
 3.  **Define Guidelines:** Create a list of 3-5 specific, actionable guidelines that will direct the agent's behavior, tone, and output format. Each guideline must be on a new line and start with '- '.
+    {{#if includeJsonOutput}}
+    Also, add a guideline like "- Ensure the JSON output is complete and does not contain any extra text or markdown formatting."
+    {{/if}}
 
 **Example Output:**
 

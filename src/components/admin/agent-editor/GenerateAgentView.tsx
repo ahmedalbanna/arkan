@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, Send, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, Send, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCreateAgent } from '@/hooks/use-agents';
@@ -16,6 +16,7 @@ import type { AgentPrompt } from '@/lib/agents';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { generateAgentConfigApi } from '@/services/agent-service';
+import { Switch } from '@/components/ui/switch';
 
 const suggestionChips = [
     { label: 'Task Manager', icon: Check },
@@ -36,6 +37,7 @@ export function GenerateAgentView() {
     const router = useRouter();
     const [step, setStep] = useState<GenerationStep>('prompting');
     const [prompt, setPrompt] = useState('');
+    const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const createAgentMutation = useCreateAgent();
     const { firebaseUser } = useAuth();
@@ -44,7 +46,8 @@ export function GenerateAgentView() {
         mutationFn: async (currentPrompt: string) => {
             if (!firebaseUser) throw new Error("Authentication required.");
             const token = await firebaseUser.getIdToken();
-            return generateAgentConfigApi(currentPrompt, token);
+            // Pass the new boolean to the API
+            return generateAgentConfigApi(currentPrompt, includeJsonOutput, token);
         },
         onSuccess: (data) => {
             setGeneratedData(data);
@@ -127,10 +130,16 @@ export function GenerateAgentView() {
                 <Button variant="ghost" size="icon" className="absolute bottom-4 right-4 h-12 w-12 text-white hover:bg-white/20 rounded-full" onClick={handleGenerate}>
                     <SendHorizonal className="h-6 w-6" />
                 </Button>
-                 <Button variant="outline" className="absolute bottom-4 left-4 bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
-                    <BrainCircuit className="mr-2 h-4 w-4" />
-                    Add knowledge
-                </Button>
+                <div className="absolute bottom-4 left-4 flex items-center gap-4">
+                     <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
+                        <BrainCircuit className="mr-2 h-4 w-4" />
+                        Add knowledge
+                    </Button>
+                    <div className="flex items-center space-x-2">
+                        <Switch id="json-output" checked={includeJsonOutput} onCheckedChange={setIncludeJsonOutput} />
+                        <Label htmlFor="json-output" className="text-white text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> JSON Output</Label>
+                    </div>
+                </div>
             </div>
             <div className="mt-6 flex flex-wrap justify-center gap-2">
                 {suggestionChips.map(({ label, icon: Icon }) => (
