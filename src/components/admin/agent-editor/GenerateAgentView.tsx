@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -79,13 +80,23 @@ export function GenerateAgentView() {
             guidelines: guidelinesArray.map(g => ({ text: g, isDefault: true })),
         };
 
+        if (includeJsonOutput) {
+            agentPrompt.jsonStructure = {
+                "key": "value",
+                "description": "Describe the expected output here.",
+                "items": [
+                    { "id": 1, "name": "Example Item" }
+                ]
+            }
+        }
+
         const agentData = {
             id: generatedId,
             name: generatedData.name,
             description: prompt, // Use original prompt as description
             prompt: agentPrompt,
-            category: AgentCategory.ContentGeneration,
-            pageUrl: '/admin/chats'
+            category: AgentCategory.ContentGeneration, // Default category
+            pageUrl: '/admin/chats' // Default URL
         };
 
         createAgentMutation.mutate(agentData, {

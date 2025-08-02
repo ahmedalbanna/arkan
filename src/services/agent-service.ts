@@ -1,6 +1,7 @@
+
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, Agent, GenerateAgentConfigOutput } from '@/lib/types';
+import type { UpdateAgentVariables, CreateAgentVariables, Agent, GenerateAgentConfigOutput, AgentPrompt } from '@/lib/types';
 
 /**
  * Fetches the full list of agents from the API.
