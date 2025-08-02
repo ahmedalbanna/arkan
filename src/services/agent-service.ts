@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { UpdateAgentVariables, CreateAgentVariables, Agent } from '@/lib/types';
