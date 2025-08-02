@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useFormContext, useFieldArray } from 'react-hook-form';
 import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
@@ -16,37 +17,34 @@ import {
   ImageIcon,
   Link as LinkIcon,
   Youtube,
-  Database,
-  Box,
   FileText,
   Loader2,
-  File as FileIcon
+  File as FileIcon,
+  Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { AgentEditorFormValues } from './AgentEditor';
+import type { AgentKnowledgeSource } from '@/lib/agents';
 
-interface KnowledgeSource {
-    type: 'File' | 'Text' | 'Web Page' | 'Project' | 'Media' | 'YouTube';
-    name: string;
-    status: 'Ready' | 'Training' | 'Failed';
-    content?: string;
-}
 
-const SourceIcon = ({ type }: { type: KnowledgeSource['type'] }) => {
+const SourceIcon = ({ type }: { type: AgentKnowledgeSource['type'] }) => {
     switch (type) {
-        case 'File': return <FileIcon className="h-4 w-4 text-muted-foreground" />;
-        case 'Text': return <FileText className="h-4 w-4 text-muted-foreground" />;
-        case 'Web Page': return <LinkIcon className="h-4 w-4 text-muted-foreground" />;
-        case 'Project': return <FolderKanban className="h-4 w-4 text-muted-foreground" />;
-        case 'Media': return <ImageIcon className="h-4 w-4 text-muted-foreground" />;
-        case 'YouTube': return <Youtube className="h-4 w-4 text-muted-foreground" />;
+        case 'file': return <FileIcon className="h-4 w-4 text-muted-foreground" />;
+        case 'text': return <FileText className="h-4 w-4 text-muted-foreground" />;
+        case 'web': return <LinkIcon className="h-4 w-4 text-muted-foreground" />;
         default: return <FileIcon className="h-4 w-4 text-muted-foreground" />;
     }
 }
 
 
 export default function KnowledgeTab() {
+  const { control } = useFormContext<AgentEditorFormValues>();
+  const { fields, append, remove } = useFieldArray({
+      control,
+      name: "knowledge",
+  });
+
   const [enableKnowledge, setEnableKnowledge] = useState(true);
-  const [sources, setSources] = useState<KnowledgeSource[]>([]);
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [textInput, setTextInput] = useState("");
@@ -55,18 +53,25 @@ export default function KnowledgeTab() {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
       setIsUploading(true);
-      // Simulate file processing
-      setTimeout(() => {
-        const newSources = acceptedFiles.map(file => ({
-            type: 'File' as const,
-            name: file.name,
-            status: 'Ready' as const,
-        }));
-        setSources(prev => [...prev, ...newSources]);
-        setIsUploading(false);
-        toast({ title: `${acceptedFiles.length} file(s) added successfully.`});
-      }, 1500);
-  }, [toast]);
+      
+      acceptedFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = () => {
+              const dataUri = reader.result as string;
+              const newSource: AgentKnowledgeSource = {
+                  name: file.name,
+                  type: 'file',
+                  content: dataUri
+              };
+              append(newSource);
+          };
+          reader.readAsDataURL(file);
+      });
+      
+      setIsUploading(false);
+      toast({ title: `${acceptedFiles.length} file(s) added successfully.`});
+  }, [append, toast]);
+  
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true, noKeyboard: true });
   
   const handleAddText = () => {
@@ -74,13 +79,12 @@ export default function KnowledgeTab() {
         toast({ title: 'Title and content are required.', variant: 'destructive'});
         return;
     }
-    const newSource: KnowledgeSource = {
-        type: 'Text',
+    const newSource: AgentKnowledgeSource = {
         name: textTitle,
+        type: 'text',
         content: textInput,
-        status: 'Ready'
     };
-    setSources(prev => [...prev, newSource]);
+    append(newSource);
     setTextInput("");
     setTextTitle("");
     toast({ title: 'Text source added.' });
@@ -136,25 +140,29 @@ export default function KnowledgeTab() {
       </div>
 
        <div className="space-y-2">
-        <h3 className="text-sm font-medium text-muted-foreground">SOURCES ({sources.length})</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">SOURCES ({fields.length})</h3>
         <div className="border rounded-lg">
             <Table>
                 <TableHeader>
                     <TableRow>
                         <TableHead>TITLE</TableHead>
-                        <TableHead>STATUS</TableHead>
                         <TableHead>TYPE</TableHead>
+                        <TableHead className="text-right">ACTIONS</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sources.length > 0 ? sources.map((source, index) => (
-                        <TableRow key={index}>
+                    {fields.length > 0 ? fields.map((source, index) => (
+                        <TableRow key={source.id}>
                             <TableCell className="font-medium flex items-center gap-2">
                                 <SourceIcon type={source.type} />
                                 {source.name}
                             </TableCell>
-                            <TableCell>{source.status}</TableCell>
-                            <TableCell>{source.type}</TableCell>
+                            <TableCell className="capitalize">{source.type}</TableCell>
+                            <TableCell className="text-right">
+                                <Button variant="ghost" size="icon" onClick={() => remove(index)}>
+                                    <Trash2 className="h-4 w-4 text-destructive"/>
+                                </Button>
+                            </TableCell>
                         </TableRow>
                     )) : (
                         <TableRow>

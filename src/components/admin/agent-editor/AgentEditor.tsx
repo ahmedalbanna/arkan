@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentTool } from '@/lib/agents';
+import type { Agent, AgentPrompt, AgentTool, AgentKnowledgeSource } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
@@ -27,6 +28,12 @@ interface AgentEditorProps {
   agentId: string;
   initialData: Agent;
 }
+
+const agentKnowledgeSourceSchema = z.object({
+    name: z.string(),
+    type: z.enum(['file', 'text', 'web']),
+    content: z.string(),
+});
 
 const agentGuidelineSchema = z.object({
   text: z.string().min(1, "Guideline text cannot be empty."),
@@ -52,6 +59,7 @@ const agentEditorSchema = z.object({
   language: z.string().optional(),
   model: z.string().optional(),
   toolIds: z.array(z.string()).optional(),
+  knowledge: z.array(agentKnowledgeSourceSchema).optional(),
 });
 
 export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
@@ -85,6 +93,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           name: initialData.name,
           prompt: initialData.prompt,
           toolIds: initialData.toolIds || [],
+          knowledge: initialData.knowledge || [],
           introduction: '',
           placeholder: 'Ask me anything about TypeScript...',
           conversationStarters: [],
@@ -115,6 +124,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       name: initialData.name,
       prompt: getInitialPrompt(),
       toolIds: initialData.toolIds || [],
+      knowledge: initialData.knowledge || [],
       introduction: '',
       placeholder: 'Ask me anything about TypeScript...',
       conversationStarters: [],

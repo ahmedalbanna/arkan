@@ -5,7 +5,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys } from "@/lib/query-keys";
-import type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
+import type { Agent, AgentData, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -30,7 +30,7 @@ export interface UpdateAgentVariables {
     payload: UpdateAgentPayload;
 }
 
-export type CreateAgentVariables = Omit<AgentData, 'isEnabled'>;
+export type CreateAgentVariables = Omit<AgentData, 'isEnabled'> & { knowledge?: AgentKnowledgeSource[] };
 
 
 /**
