@@ -1,34 +1,33 @@
 
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
-import { Button } from '../../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Button } from '../ui/button';
 import { Loader2, Save, PlusCircle, Trash2, Check, X, Search, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../ui/form';
-import { Input } from '../../ui/input';
-import { Textarea } from '../../ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { AGENTS, AgentCategory } from '@/lib/agents';
-import { Checkbox } from '../../ui/checkbox';
-import { Skeleton } from '../../ui/skeleton';
+import { Checkbox } from '../ui/checkbox';
+import { Skeleton } from '../ui/skeleton';
 import { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useAgents } from '@/hooks/use-agents';
-import { ScrollArea } from '../../ui/scroll-area';
+import { ScrollArea } from '../ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Label } from '../../ui/label';
+import { Label } from '../ui/label';
 
 const reportTemplateSchema = z.object({
   id: z.string(),
@@ -39,9 +38,7 @@ const reportTemplateSchema = z.object({
 
 type ReportFormValues = z.infer<typeof reportTemplateSchema>;
 
-const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).extend({
-    id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
-});
+const createReportTemplateSchema = reportTemplateSchema.omit({ id: true });
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
 
@@ -145,7 +142,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     );
 }
 
-function CreateTeamDialog() {
+function CreateTemplateDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState('');
@@ -173,33 +170,29 @@ function CreateTeamDialog() {
     };
     
     const handleCreate = () => {
+        const id = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        if (!id) {
+            toast({ title: 'Invalid Name', description: 'Template name must contain valid characters.', variant: 'destructive' });
+            return;
+        }
+
         const data = {
-            id: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+            id,
             name,
             description,
             agentIds: selectedAgentIds,
         };
 
-        const validation = createReportTemplateSchema.safeParse(data);
-        if (!validation.success) {
-            toast({
-                title: 'Validation Error',
-                description: validation.error.errors.map(e => e.message).join('\n'),
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        createMutation.mutate(validation.data, {
+        createMutation.mutate(data, {
             onSuccess: () => {
-                toast({ title: 'Success', description: 'New agent team created.' });
+                toast({ title: 'Success', description: 'New report template created.' });
                 setIsOpen(false);
                 setName('');
                 setDescription('');
                 setSelectedAgentIds([]);
             },
             onError: (error: any) => {
-                handleErrorUtility(error, "Failed to create team.");
+                handleErrorUtility(error, "Failed to create template.");
             }
         });
     }
@@ -214,22 +207,22 @@ function CreateTeamDialog() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{t('team.createTeamTitle')}</DialogTitle>
-                    <DialogDescription>Choose agents you want to include in this team for group interactions.</DialogDescription>
+                    <DialogTitle>Create New Report Template</DialogTitle>
+                    <DialogDescription>Choose agents you want to include in this template for group interactions.</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="team-name">NAME</Label>
-                        <Input id="team-name" placeholder="e.g., Generate Report" value={name} onChange={e => setName(e.target.value)} />
+                        <Label htmlFor="template-name">TEMPLATE NAME</Label>
+                        <Input id="template-name" placeholder="e.g., Technical Software Report" value={name} onChange={e => setName(e.target.value)} />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="team-description">DESCRIPTION</Label>
-                        <Textarea id="team-description" placeholder="A short description of what this team does." value={description} onChange={e => setDescription(e.target.value)} rows={2} />
+                        <Label htmlFor="template-description">DESCRIPTION</Label>
+                        <Textarea id="template-description" placeholder="A short description of what this template is for." value={description} onChange={e => setDescription(e.target.value)} rows={2} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>MANAGE TEAM ({selectedAgents.length})</Label>
+                            <Label>INCLUDED AGENTS ({selectedAgents.length})</Label>
                             <ScrollArea className="h-48 border rounded-md p-2">
                                {selectedAgents.map(agent => (
                                    <div key={agent.id} className="flex items-center justify-between p-1">
@@ -240,7 +233,7 @@ function CreateTeamDialog() {
                             </ScrollArea>
                         </div>
                          <div className="space-y-2">
-                            <Label>ADD TO TEAM</Label>
+                            <Label>AVAILABLE AGENTS</Label>
                             <ScrollArea className="h-48 border rounded-md p-2">
                                 <div className="p-1"><Input placeholder="Search agents..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
                                 {isLoaded && availableAgents.map(agent => (
@@ -256,9 +249,9 @@ function CreateTeamDialog() {
                 </div>
                 <DialogFooter>
                     <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
-                    <Button onClick={handleCreate} disabled={createMutation.isPending || !name || selectedAgentIds.length === 0}>
+                    <Button onClick={handleCreate} disabled={createMutation.isPending || !name || !description || selectedAgentIds.length === 0}>
                         {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create
+                        Create Template
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -308,7 +301,7 @@ export function ReportTemplateManager() {
                     Configure which report sections are included in the "Generate Full Report" option.
                     </CardDescription>
                 </div>
-                 <CreateTeamDialog />
+                 <CreateTemplateDialog />
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">

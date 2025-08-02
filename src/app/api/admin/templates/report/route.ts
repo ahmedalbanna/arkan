@@ -1,7 +1,8 @@
 // src/app/api/templates/report/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-generation-templates';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // This is a public endpoint
 export async function GET() {
@@ -25,3 +26,34 @@ export async function GET() {
         return handleApiError(error);
     }
 }
+
+const createReportTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  agentIds: z.array(z.string()).min(1, "At least one agent must be selected."),
+});
+
+export const POST = withAuth(async ({ request }) => {
+    try {
+        const body = await request.json();
+        const validation = createReportTemplateSchema.safeParse(body);
+        if(!validation.success) {
+            return handleApiError(validation.error);
+        }
+
+        const { id, ...templateData } = validation.data;
+        const docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
+
+        const doc = await docRef.get();
+        if(doc.exists) {
+            return handleApiError({ message: 'A template with this ID already exists.'}, 409);
+        }
+
+        await docRef.set({ ...templateData, createdAt: new Date().toISOString() });
+
+        return createApiResponse({ id, ...templateData }, 201);
+    } catch (error) {
+        return handleApiError(error);
+    }
+}, { requireAdmin: true });
