@@ -10,7 +10,7 @@ export default function AdminChatsPage() {
        <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-semibold flex items-center gap-2">
                 <Bot className="h-6 w-6" />
-                Agent Training Chat
+                Agent Training & Support Chat
             </h1>
         </div>
       <ChatInterface />
