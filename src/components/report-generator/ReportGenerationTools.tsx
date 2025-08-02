@@ -8,19 +8,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { sectionConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, BookOpen, PencilRuler } from 'lucide-react';
-import { type Agent, type AgentGuideline, type AgentPrompt, AgentCategory } from '@/lib/agents';
+import { Loader2, Sparkles, GitGraph } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { Textarea } from '../ui/textarea';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
@@ -35,7 +36,6 @@ import { generateReport } from '@/services/report-service';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
-import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -105,28 +105,12 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         setSection,
-        setAllSections,
         handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
     } = useReportStore();
 
-    const { agents: defaultAgents, isLoaded: agentsLoaded } = useAgents();
-    
-    // Combine default agents with project-specific agents from the plan
-    const allAgents = React.useMemo(() => {
-        const projectAgents = projectPlan?.phases.flatMap(phase => phase.tasks.map(task => ({
-            id: `generate-${task.title.toLowerCase().replace(/\s+/g, '-')}-section`,
-            name: task.title,
-            description: task.description,
-            category: AgentCategory.ReportGeneration,
-            pageUrl: '/generate',
-            icon: PencilRuler,
-            isEnabled: true,
-            prompt: { base: `Write a detailed section about "${task.title}". The section should cover the following points: ${task.acceptanceCriteria.join(', ')}`, guidelines: [] },
-        }))) || [];
-        return [...defaultAgents, ...projectAgents];
-    }, [defaultAgents, projectPlan]);
+    const { agents, isLoaded: agentsLoaded } = useAgents();
 
     const reportGenerationMutation = useMutation({
         mutationFn: async (variables: { body: any, token: string }) => generateReport(variables.body, variables.token),
@@ -134,7 +118,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             const sectionKey = variables.body.sectionToGenerate as SectionNameType;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
-            toast({ title: `Section "${sectionConfig[sectionKey]?.title || sectionKey}" generated successfully!` });
+            toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
             refetchUser();
         },
         onError: (error: Error, variables) => {
@@ -142,7 +126,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
         },
         onSettled: () => {
-             // This runs for both success and error, perfect for clearing the active key.
+            // This runs for both success and error, perfect for clearing the active key.
             setActiveMutationKey(null);
         }
     });
@@ -152,7 +136,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const onGenerateSection = async (section: SectionNameType) => {
         if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive"});
+            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive" });
             return;
         };
 
@@ -161,14 +145,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-        const agent = allAgents?.find(a => a.id === sectionConfig[section]?.agentId);
+        const agent = agents?.find(a => a.id === sectionConfig[section]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
             projectPlan: currentSelection.projectPlan ? fullState.projectPlan : undefined,
             sectionToGenerate: section,
-            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({...acc, [k]: fullState.sections?.[k as SectionNameType]}), {}),
-            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode}), {}),
+            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.sections?.[k as SectionNameType] }), {}),
+            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: generateInstructionText(controlState[section]),
             exampleFiles,
@@ -182,7 +166,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const onGenerateFullReport = async () => {
         if (!firebaseUser) {
-             toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive"});
+            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
             return;
         }
 
@@ -227,27 +211,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
-    
-    const availableSections = React.useMemo(() => {
-        const templateAgentIds = new Set(selectedTemplate?.agentIds || []);
-        const defaultTemplateAgents = orderedSections.filter(key => templateAgentIds.has(sectionConfig[key]?.agentId));
-        
-        const projectSpecificAgents = projectPlan?.phases.flatMap(phase => phase.tasks.map(task => ({
-            key: `custom-${task.title.toLowerCase().replace(/\s+/g, '-')}`,
-            name: task.title,
-            agentId: `generate-${task.title.toLowerCase().replace(/\s+/g, '-')}-section`,
-            icon: PencilRuler, // Default icon for project-specific agents
-        }))) || [];
-
-        return [...defaultTemplateAgents.map(key => ({
-            key: key,
-            name: t(sectionConfig[key].title),
-            agentId: sectionConfig[key].agentId,
-            icon: sectionConfig[key].icon
-        })), ...projectSpecificAgents];
-    }, [selectedTemplate, projectPlan, t]);
-
-    
+    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
     const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
         const sectionKey = (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId);
         return sectionKey && !sections[sectionKey];
@@ -268,7 +232,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                 <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-                 <Tabs defaultValue="generate" className="w-full">
+                <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="generate">Generate</TabsTrigger>
                         <TabsTrigger value="actions" disabled={!Object.values(sections).some(s => !!s)}>Actions</TabsTrigger>
@@ -326,7 +290,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                     </TooltipContent>
                                 )}
                                 {!(!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (
-                                     <TooltipContent>
+                                    <TooltipContent>
                                         <p>Please create a proposal or add external context first.</p>
                                     </TooltipContent>
                                 )}
@@ -334,8 +298,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         </TooltipProvider>
 
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {availableSections.map(({key, name, agentId, icon}) => {
-                                const Icon = icon || PencilRuler;
+                            {availableSections.map((key) => {
+                                const { title, icon: Icon, agentId } = sectionConfig[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key];
                                 const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));
@@ -343,9 +307,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 return (
                                     <AccordionItem value={key} key={key}>
                                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                             <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2">
                                                 {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-                                                {name}
+                                                {t(`${title}`)}
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent className="space-y-4 p-4">
@@ -364,7 +328,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     <div className="space-y-6">
                                                         <div className="space-y-3">
                                                             <Label htmlFor={`formality-${key}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType]?.formality || 50]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
+                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType].formality]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
                                                             <div className="flex justify-between text-xs text-muted-foreground">
                                                                 <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
                                                                 <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
@@ -373,7 +337,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`tone-${key}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType]?.tone || 'professional'} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
+                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType].tone} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
                                                                 <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                                 <SelectContent>
                                                                     <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
@@ -385,11 +349,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
-                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType]?.wordCount || ''} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
+                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType].wordCount} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
                                                         </div>
                                                     </div>
                                                 </TabsContent>
-                                                 <TabsContent value="structure" className="pt-4">
+                                                <TabsContent value="structure" className="pt-4">
                                                     <div className="space-y-2">
                                                         <Label htmlFor="toc-input">Table of Contents</Label>
                                                         <Textarea
@@ -407,18 +371,18 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                 </TabsContent>
                                             </Tabs>
                                             <div className="pt-2">
-                                               <TooltipProvider>
+                                                <TooltipProvider>
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <div className="w-full">
                                                                 <Button
                                                                     type="button"
                                                                     onClick={() => onGenerateSection(key as SectionNameType)}
-                                                                    disabled={isAnythingGenerating || !allAgents.find(a=> a.id === agentId)?.isEnabled || !hasSelectedContext || !hasCreditsForSingleSection}
+                                                                    disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
                                                                     className="font-headline w-full"
                                                                 >
                                                                     {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                                                    {`${t('builder.reportGenerator.generateButton')} ${name}`}
+                                                                    {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
                                                                 </Button>
                                                             </div>
                                                         </TooltipTrigger>
@@ -428,7 +392,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                             </TooltipContent>
                                                         ) : !hasSelectedContext ? (
                                                             <TooltipContent>
-                                                                 <p>Please select a context (like the proposal) to generate this section.</p>
+                                                                <p>Please select a context (like the proposal) to generate this section.</p>
                                                             </TooltipContent>
                                                         ) : null}
                                                     </Tooltip>
@@ -441,12 +405,12 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         </Accordion>
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
-                         <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
+                        <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
                     </TabsContent>
                     <TabsContent value="evaluate" className="pt-6">
                         <EvaluationTools />
                     </TabsContent>
-                 </Tabs>
+                </Tabs>
             </CardContent>
         </Card>
     );
