@@ -16,6 +16,7 @@ const GenerateAgentConfigInputSchema = z.object({
 
 const GenerateAgentConfigOutputSchema = z.object({
   name: z.string().describe("A short, descriptive name for the new agent."),
+  description: z.string().describe("A concise, one-sentence description of the agent's purpose."),
   instructions: z.string().describe("The base prompt or primary instruction for the agent. This should be a clear, concise paragraph explaining the agent's purpose and core function."),
   guidelines: z.string().describe("A newline-separated list of 3-5 specific, actionable guidelines for the agent to follow. Each guideline should start with '- '."),
   jsonStructure: z.any().optional().describe("If the user requested JSON output, provide a sample JSON object structure that the agent should return. It should be a simple but relevant example based on the user's prompt and any provided context. Otherwise, this field should be omitted."),
@@ -48,17 +49,18 @@ The following files have been provided to give you more context about the desire
 
 **Your Task:**
 
-1.  **Analyze Context**: If context files are provided, analyze their content to understand the specific domain, terminology, and requirements. This should heavily influence the name, instructions, and guidelines.
+1.  **Analyze Context**: If context files are provided, analyze their content to understand the specific domain, terminology, and requirements. This should heavily influence all generated fields.
 2.  **Generate a Name:** Create a short, descriptive name for the agent (e.g., "Social Media Post Generator", "Technical Documentation Writer").
-3.  **Write Instructions:** Write a clear, concise paragraph that will serve as the agent's primary instruction or 'base prompt'. This should explain its core purpose, who it is, and what it does.
+3.  **Generate a Description:** Write a single, concise sentence that describes the agent's main function.
+4.  **Write Instructions:** Write a clear, concise paragraph that will serve as the agent's primary instruction or 'base prompt'. This should explain its core purpose, who it is, and what it does.
     {{#if includeJsonOutput}}
     **IMPORTANT**: The user wants this agent to produce structured JSON. Add a sentence to the end of the instructions like: "Your final output must be a valid JSON object that adheres to the defined schema."
     {{/if}}
-4.  **Define Guidelines:** Create a list of 3-5 specific, actionable guidelines that will direct the agent's behavior, tone, and output format. Each guideline must be on a new line and start with '- '.
+5.  **Define Guidelines:** Create a list of 3-5 specific, actionable guidelines that will direct the agent's behavior, tone, and output format. Each guideline must be on a new line and start with '- '.
     {{#if includeJsonOutput}}
     Also, add a guideline like "- Ensure the JSON output is complete and does not contain any extra text or markdown formatting."
     {{/if}}
-5.  **Define JSON Structure (If Requested):**
+6.  **Define JSON Structure (If Requested):**
     {{#if includeJsonOutput}}
     The user has requested that the agent return JSON. Based on the user's prompt and any provided context, create a simple but relevant example JSON object and place it in the \`jsonStructure\` field. This gives the user a starting point to define their schema.
     {{else}}

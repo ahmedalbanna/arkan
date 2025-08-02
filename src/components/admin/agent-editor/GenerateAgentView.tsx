@@ -4,7 +4,7 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle } from 'lucide-react';
+import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle, ChevronDown, CheckCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCreateAgent } from '@/hooks/use-agents';
@@ -20,6 +20,7 @@ import { generateAgentConfigApi } from '@/services/agent-service';
 import { Switch } from '@/components/ui/switch';
 import { useDropzone } from 'react-dropzone';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const suggestionChips = [
     { label: 'Task Manager', icon: Check },
@@ -32,6 +33,7 @@ type GenerationStep = 'prompting' | 'generating' | 'reviewing';
 
 interface GeneratedAgentData {
     name: string;
+    description: string;
     instructions: string;
     guidelines: string;
     jsonStructure?: any;
@@ -50,6 +52,7 @@ export function GenerateAgentView() {
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
     const [contextFiles, setContextFiles] = useState<UploadedFile[]>([]);
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
+    const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
     const createAgentMutation = useCreateAgent();
     const { firebaseUser } = useAuth();
     
@@ -113,10 +116,10 @@ export function GenerateAgentView() {
         const agentData = {
             id: generatedId,
             name: generatedData.name,
-            description: prompt, // Use original prompt as description
+            description: generatedData.description,
             prompt: agentPrompt,
-            category: AgentCategory.ContentGeneration, // Default category
-            pageUrl: '/admin/chats' // Default URL
+            category: selectedCategory,
+            pageUrl: '/admin/chats' // Default URL for custom agents
         };
 
         createAgentMutation.mutate(agentData, {
@@ -240,9 +243,24 @@ export function GenerateAgentView() {
                     </Button>
                 </div>
                 <div className="space-y-4">
-                    <div>
-                        <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">Name</Label>
-                        <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="bg-white/5 border-white/20 h-12" />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">Name</Label>
+                            <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="bg-white/5 border-white/20 h-12" />
+                        </div>
+                        <div>
+                            <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">Category</Label>
+                             <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
+                                <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    {Object.values(AgentCategory).map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                     <div>
+                        <Label htmlFor="agent-description" className="text-xs uppercase text-muted-foreground">Description</Label>
+                        <Textarea id="agent-description" value={generatedData?.description || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, description: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[70px]" />
                     </div>
                     <div>
                         <Label htmlFor="agent-instructions" className="text-xs uppercase text-muted-foreground">Instructions</Label>
@@ -275,4 +293,3 @@ export function GenerateAgentView() {
         </div>
     );
 }
-
