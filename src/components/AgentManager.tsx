@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAgents, useUpdateAgent, useCreateAgent } from '@/hooks/use-agents';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search } from 'lucide-react';
+import { ExternalLink, Pencil, Loader2, AlertCircle, PlusCircle, GripVertical, Search, Bot } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useState, useMemo } from 'react';
@@ -244,7 +245,15 @@ export default function AgentManager() {
                 className="pl-10"
             />
         </div>
-        <CreateAgentDialog />
+        <div className="flex items-center gap-2">
+            <Button asChild size="sm">
+                <Link href="/admin/manage-agents/new">
+                    <Bot className="mr-2 h-4 w-4" />
+                    Create New Agent with AI
+                </Link>
+            </Button>
+            <CreateAgentDialog />
+        </div>
       </div>
        <Accordion type="multiple" className="w-full space-y-4" defaultValue={sortedCategories}>
             {sortedCategories.map(category => (
