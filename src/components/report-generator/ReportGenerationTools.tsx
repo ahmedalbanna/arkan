@@ -403,6 +403,15 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 );
                             })}
                         </Accordion>
+                         <div className="pt-4 mt-4 border-t">
+                             <AcademicUploaders
+                                title="Add Context / Examples"
+                                onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
+                                onContentRemoved={removeExternalContext}
+                                isProcessing={isDisabled}
+                                uploadedContent={useReportStore.getState().externalContext}
+                            />
+                        </div>
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
                         <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
