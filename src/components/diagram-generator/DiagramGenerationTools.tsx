@@ -48,7 +48,7 @@ export const DiagramGenerationTools = () => {
         const translatedTitle = t(diagramConfig[diagramKey].title);
         
         setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
-        toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle }) });
+        toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
         setActiveMutationKey(null);
 
         // Now, automatically trigger the explanation
@@ -184,7 +184,7 @@ export const DiagramGenerationTools = () => {
                 <div className="pt-4 mt-4 border-t">
                      <AcademicUploaders
                         title="Add Context / Examples"
-                        onContentAdded={addExternalContext}
+                        onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
                         onContentRemoved={removeExternalContext}
                         isProcessing={isDisabled}
                         uploadedContent={useReportStore.getState().externalContext}

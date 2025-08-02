@@ -1,8 +1,8 @@
 
-
-import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal } from '@/ai/schemas';
+import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
+import type { LoginCredentials } from '@/lib/db/queries';
 
 export type {
   ProjectProposal,
@@ -12,12 +12,13 @@ export type {
   ManipulateTextInput,
   ManipulateTextOutput,
   AnyProjectProposal,
+  ProjectPlan,
   GenerateAgentConfigOutput,
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
-export type { Agent, AgentData } from '@/lib/agents';
+export type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/flows/generate-codebase';
@@ -118,13 +119,13 @@ export interface ProjectState {
     } | undefined;
     evaluation?: import("@/ai/flows/evaluate-report").EvaluateReportOutput | null | undefined;
     diagrams?: {
-        "use-case"?: import("./useDiagramStore").DiagramData | undefined;
-        class?: import("./useDiagramStore").DiagramData | undefined;
-        sequence?: import("./useDiagramStore").DiagramData | undefined;
-        activity?: import("./useDiagramStore").DiagramData | undefined;
-        component?: import("./useDiagramStore").DiagramData | undefined;
-        archimate?: import("./useDiagramStore").DiagramData | undefined;
-        er?: import("./useDiagramStore").DiagramData | undefined;
+        "use-case"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        class?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        sequence?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        activity?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        component?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        archimate?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        er?: import("@/hooks/useDiagramStore").DiagramData | undefined;
     } | undefined;
     presentation?: {
         history: PresentationHistoryEntry[];

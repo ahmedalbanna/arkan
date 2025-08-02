@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Eye, LayoutGrid, Bot, Wrench, GitBranch, Hourglass, Repeat, Search, Globe, FileCode, Youtube, Send,
-  Check, File, ImageIcon, FileText
+  Check, File, ImageIcon, FileText, Sparkles, FolderKanban, Filter
 } from 'lucide-react';
 
 const TaskadeLogo = () => (

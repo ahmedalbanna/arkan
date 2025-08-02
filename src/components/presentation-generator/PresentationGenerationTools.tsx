@@ -14,32 +14,28 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionNameSchema, DiagramTypeSchema, type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Plus, Trash2, UploadCloud, FileText, X, Eye, BookCheck, GitGraph, Presentation, FileDown, History } from 'lucide-react';
+import { SectionNameSchema, type SectionName, type DiagramType } from '@/ai/schemas';
+import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Presentation, History, FileText } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import type { GuidelineState } from '@/hooks/useReportStore';
-import { PptxTemplateKey, templates as pptxStyles } from '@/lib/pptx-styles';
-import { exportPresentationAsPptx } from '@/lib/pptx-exporter';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { usePresentationTemplates, useUpdatePresentationTemplate } from '@/hooks/use-templates';
+import { usePresentationTemplates } from '@/hooks/use-templates';
 import { formatDistanceToNow } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { FileUploader } from '../FileUploader';
-import { PasteTextUploader } from '../PasteTextUploader';
-import { ImageUploader } from '../ImageUploader';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { GuidelineEditor } from '../generate/GuidelineEditor';
+import { ContextSelector } from '../generate/ContextSelector';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
@@ -54,7 +50,7 @@ interface PresentationGenerationToolsProps {
 const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
 
 // Helper to get selected guidelines for a specific item
-const getSelectedGuidelines = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
+const getSelectedGuidelinesForItem = (itemKey: string, guidelineState: Record<string, GuidelineState>, agents: Agent[]): string[] => {
     const agent = agents.find(a => a.id === 'generate-presentation');
     const currentGuidelineState = guidelineState[itemKey];
 
@@ -124,6 +120,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const {
         externalContext,
+        addExternalContext,
+        removeExternalContext,
         guidelineState,
         customGuidelineInput,
         contextSelection,
@@ -136,6 +134,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         handleRemoveCustomGuidelineForItem,
      } = useReportStore(state => ({
         externalContext: state.externalContext,
+        addExternalContext: state.addExternalContext,
+        removeExternalContext: state.removeExternalContext,
         guidelineState: state.guidelineState,
         customGuidelineInput: state.customGuidelineInput,
         contextSelection: state.contextSelection,
@@ -158,7 +158,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const hasContent = Object.keys(sections).length > 0 || Object.keys(diagrams || {}).length > 0;
 
     const handleGenerateClick = () => {
-        const selection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
+        const selection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
         const selectedSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
@@ -174,7 +174,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             proposal: proposal,
             sections: selectedSections,
             diagrams: selectedDiagrams,
-            guidelines: getSelectedGuidelines('presentation', guidelineState, agents),
+            guidelines: getSelectedGuidelinesForItem('presentation', guidelineState, agents),
             externalContext: selectedExternalContext,
             templateId: selectedPresentationTemplateId, // Pass the templateId
         };
@@ -188,7 +188,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const promptConfig = agent.prompt as AgentPrompt;
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState.presentation;
-    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false };
+    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false, proposal: true, projectPlan: true };
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
@@ -236,140 +236,17 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                         </TabsList>
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
-                                            {userProfile?.role === 'admin' && (
-                                                <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                                                    <div className="p-3 rounded-md border bg-muted text-xs">
-                                                        <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {hasGuidelines && (
-                                                <div className="space-y-2">
-                                                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.guidelines')}</Label>
-                                                    <div className="space-y-2 p-3 rounded-md border">
-                                                        {promptConfig.guidelines!.map((guideline, index) => (
-                                                            <div key={index} className="flex items-start gap-2">
-                                                                <Checkbox
-                                                                    id={`guideline-presentation-${index}`}
-                                                                    checked={currentGuidelineState?.checked[index] ?? false}
-                                                                    onCheckedChange={(checked) => handleGuidelineToggle(index, !!checked)}
-                                                                />
-                                                                <Label htmlFor={`guideline-presentation-${index}`} className="font-normal text-sm flex-1">
-                                                                    <ReactMarkdown components={markdownComponents}>{guideline.text}</ReactMarkdown>
-                                                                </Label>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            <div className="space-y-2">
-                                                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.customGuidelines')}</Label>
-                                                {currentGuidelineState?.custom.map((custom, index) => (
-                                                    <div key={index} className="flex items-center gap-2 text-sm">
-                                                        <span>- {custom}</span>
-                                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => handleRemoveCustomGuidelineForItem(index)}>
-                                                            <Trash2 className="h-3 w-3 text-destructive" />
-                                                        </Button>
-                                                    </div>
-                                                ))}
-                                                <div className="flex gap-2">
-                                                    <Input
-                                                        placeholder={t('builder.reportGenerator.addGuidelinePlaceholder')}
-                                                        value={customGuidelineInput['presentation'] || ''}
-                                                        onChange={(e) => setCustomGuidelineInputForItem(e.target.value)}
-                                                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomGuidelineForItem())}
-                                                    />
-                                                    <Button type="button" variant="secondary" onClick={() => handleAddCustomGuidelineForItem()}>
-                                                        <Plus className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
+                                            <GuidelineEditor itemKey="presentation" agentId="generate-presentation" isAdmin={userProfile?.role === 'admin'} />
                                         </TabsContent>
 
                                         <TabsContent value="context" className="pt-4">
-                                            <div className="space-y-2">
-                                                <Label className="font-semibold">{t('builder.reportGenerator.tool_tab_context')}</Label>
-                                                {!hasContent && !externalContext ? (
-                                                    <p className="text-xs text-muted-foreground p-3 rounded-md border text-center">
-                                                        {t('builder.reportGenerator.no_other_sections')}
-                                                    </p>
-                                                ) : (
-                                                    <ScrollArea className="h-48 border rounded-md p-2">
-                                                      <div className="space-y-4 pr-4">
-                                                          <div className="space-y-2">
-                                                              <Label className="font-semibold">{t('builder.reportGenerator.context_sections')}</Label>
-                                                              {orderedSections.filter(sKey => sections[sKey]).map(contextKey => (
-                                                                  <div key={`ctx-s-pres-${contextKey}`} className="flex items-center space-x-2">
-                                                                      <Checkbox
-                                                                          id={`context-section-pres-${contextKey}`}
-                                                                          checked={!!currentSelection.sections[contextKey]}
-                                                                          onCheckedChange={(checked) => toggleContextSelection('presentation', 'sections', contextKey, !!checked)}
-                                                                      />
-                                                                      <Label htmlFor={`context-section-pres-${contextKey}`} className="text-sm font-normal">
-                                                                          <div className="flex items-center gap-2">
-                                                                              <BookCheck className="h-4 w-4" />
-                                                                              {t(sectionConfig[contextKey].title)}
-                                                                          </div>
-                                                                      </Label>
-                                                                  </div>
-                                                              ))}
-                                                              {Object.keys(sections).length === 0 && (
-                                                                <p className="text-xs text-muted-foreground">{t('builder.reportGenerator.no_other_sections')}</p>
-                                                              )}
-                                                          </div>
-                                                          {Object.keys(diagrams || {}).length > 0 && (
-                                                            <div className="space-y-2 pt-2 border-t">
-                                                                <Label className="font-semibold">{t('builder.reportGenerator.context_diagrams')}</Label>
-                                                                {orderedDiagrams.filter(dKey => diagrams?.[dKey]).map(contextKey => (
-                                                                    <div key={`ctx-d-pres-${contextKey}`} className="flex items-center space-x-2">
-                                                                        <Checkbox
-                                                                            id={`context-diagram-pres-${contextKey}`}
-                                                                            checked={!!currentSelection.diagrams[contextKey]}
-                                                                            onCheckedChange={(checked) => toggleContextSelection('presentation', 'diagrams', contextKey, !!checked)}
-                                                                        />
-                                                                        <Label htmlFor={`context-diagram-pres-${contextKey}`} className="text-sm font-normal">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <GitGraph className="h-4 w-4" />
-                                                                                {t(diagramConfig[contextKey].title)}
-                                                                            </div>
-                                                                        </Label>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                          )}
-                                                          {externalContext.length > 0 && (
-                                                            <div className="space-y-2 pt-2 border-t">
-                                                                <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>
-                                                                {externalContext.map((item, index) => (
-                                                                    <div key={index} className="flex items-center space-x-2">
-                                                                        <Checkbox
-                                                                            id={`context-external-${'presentation'}-${index}`}
-                                                                            checked={!!currentSelection.externalContext?.[index]}
-                                                                            onCheckedChange={(checked) => toggleContextSelection('presentation', 'externalContext', index, !!checked)}
-                                                                        />
-                                                                        <Label htmlFor={`context-external-${'presentation'}-${index}`} className="text-sm font-normal">
-                                                                            <div className="flex items-center gap-2">
-                                                                                <FileText className="h-4 w-4" />
-                                                                                {item.fileName}
-                                                                            </div>
-                                                                        </Label>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                          )}
-                                                      </div>
-                                                    </ScrollArea>
-                                                )}
-                                            </div>
+                                            <ContextSelector itemKey="presentation" />
                                         </TabsContent>
                                     </Tabs>
                                 </AccordionContent>
                             </AccordionItem>
                         </Accordion>
-                         <div className="pt-4">
+                        <div className="pt-4">
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>

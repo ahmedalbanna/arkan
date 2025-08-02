@@ -4,6 +4,7 @@ import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { AGENTS } from '@/lib/agents';
 import { sectionConfig } from '@/lib/report-config';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { SectionName } from '@/ai/schemas';
 
 // Mock useBuilderStore
 jest.mock('@/hooks/useBuilderStore', () => ({
@@ -28,7 +29,7 @@ describe('useReportStore', () => {
         const initialState = {
             sections: {},
             evaluation: null,
-            externalContext: null,
+            externalContext: [],
             guidelineState: expect.any(Object),
             controlState: expect.any(Object),
             customGuidelineInput: {},
@@ -41,7 +42,7 @@ describe('useReportStore', () => {
 
     it('should set a section', () => {
         const { result } = renderHook(() => useReportStore());
-        const sectionKey = Object.keys(sectionConfig)[0];
+        const sectionKey = Object.keys(sectionConfig)[0] as SectionName;
         const content = 'Test content';
 
         act(() => {
@@ -60,7 +61,7 @@ describe('useReportStore', () => {
         };
 
         act(() => {
-            result.current.setAllSections(newSections);
+            result.current.setAllSections(newSections as any);
         });
 
         expect(result.current.sections).toEqual(expect.objectContaining(newSections));
@@ -69,7 +70,7 @@ describe('useReportStore', () => {
 
     it('should set the evaluation', () => {
         const { result } = renderHook(() => useReportStore());
-        const evaluation = { overallScore: 0.8, feedback: 'Good job!' };
+        const evaluation = { evaluationScore: 80, feedback: [], summary: 'Good job!' };
 
         act(() => {
             result.current.setEvaluation(evaluation);
@@ -85,28 +86,28 @@ describe('useReportStore', () => {
         const content = 'External context content';
 
         act(() => {
-            result.current.setExternalContext(fileName, content);
+            result.current.addExternalContext(fileName, content, 'context');
         });
 
-        expect(result.current.externalContext).toEqual({ fileName, content });
+        expect(result.current.externalContext[0]).toEqual({ fileName, content, type: 'context' });
         expect(useBuilderStore.getState().setHasUnsavedChanges).toHaveBeenCalledWith(true);
     });
 
     it('should remove the external context', () => {
         const { result } = renderHook(() => useReportStore());
         act(() => {
-            result.current.setExternalContext('test.txt', 'External context content');
-            result.current.removeExternalContext();
+            result.current.addExternalContext('test.txt', 'External context content', 'context');
+            result.current.removeExternalContext(0);
         });
 
-        expect(result.current.externalContext).toBeNull();
+        expect(result.current.externalContext).toEqual([]);
         expect(useBuilderStore.getState().setHasUnsavedChanges).toHaveBeenCalledWith(true);
     });
 
     describe('Control State', () => {
         it('should handle control change', () => {
             const { result } = renderHook(() => useReportStore());
-            const sectionKey = Object.keys(sectionConfig)[0];
+            const sectionKey = Object.keys(sectionConfig)[0] as SectionName;
             const control = 'formality';
             const value = 75;
 
@@ -229,13 +230,13 @@ describe('useReportStore', () => {
     it('should load state', () => {
         const { result } = renderHook(() => useReportStore());
         const newState = {
-            sections: { section1: 'loaded content' },
-            evaluation: { overallScore: 0.9, feedback: 'Excellent!' },
-            externalContext: { fileName: 'loaded.txt', content: 'Loaded content' }
+            sections: { introduction: 'loaded content' },
+            evaluation: { evaluationScore: 90, feedback: [], summary: 'Excellent!' },
+            externalContext: [{ fileName: 'loaded.txt', content: 'Loaded content', type: 'context' as const }]
         };
 
         act(() => {
-            result.current.loadState(newState);
+            result.current.loadState(newState as any);
         });
 
         expect(result.current.sections).toEqual(expect.objectContaining(newState.sections));

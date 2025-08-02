@@ -1,41 +1,40 @@
+
 'use server';
 
 import { z } from 'zod';
-import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
-import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { NextRequest } from 'next/server';
+import { translateText } from '@/ai/flows/translate-text';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-// GET /api/teams - Fetches all teams for the authenticated user and their teams
-export async function GET(request: NextRequest) {
-    try {
-        const { user } = await authenticateRequest(request);
-        const teams = await getUserTeams(user.id);
-        return createApiResponse(teams, 200);
-    } catch (error) {
-        return handleApiError(error);
-    }
-}
-
-
-// POST /api/teams - Creates a new project
-const createTeamSchema = z.object({
-  name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
+const translateSchema = z.object({
+  text: z.string().min(1),
+  targetLang: z.string().min(2),
 });
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const { user } = await authenticateRequest(request);
     const body = await request.json();
-    const validation = createTeamSchema.safeParse(body);
+    const validation = translateSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
 
-    const { name } = validation.data;
-    const newTeam = await createTeamForUser(user.id, name);
-    
-    return createApiResponse(newTeam, 201);
+    await deductCredit(user.id, 1);
+
+    const agentInput = validation.data;
+    const result = await translateText(agentInput);
+
+    await logGeneration({
+        agentId: 'translate-text',
+        userId: user.id,
+        input: agentInput,
+        output: result,
+    });
+
+    const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');
+    return createApiResponse({ translatedText: cleanedTranslatedText }, 200);
   } catch (error) {
     return handleApiError(error);
   }
-}
+});

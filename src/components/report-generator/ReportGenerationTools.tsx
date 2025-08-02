@@ -8,20 +8,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GitGraph } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import { sectionConfig } from '@/lib/report-config';
+import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, PencilRuler } from '@/ai/schemas';
+import { Loader2, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { Textarea } from '../ui/textarea';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
@@ -105,12 +103,27 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         setSection,
+        setAllSections,
         handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
     } = useReportStore();
 
-    const { agents, isLoaded: agentsLoaded } = useAgents();
+    const { agents: defaultAgents, isLoaded: agentsLoaded } = useAgents();
+    
+    // Combine default agents with project-specific agents from the plan
+    const allAgents = React.useMemo(() => {
+        const projectAgents = projectPlan?.phases.flatMap(phase => phase.tasks.map(task => ({
+            id: `generate-${task.title.toLowerCase().replace(/\s+/g, '-')}-section`,
+            name: task.title,
+            description: task.description,
+            category: 'Report Generation',
+            pageUrl: '/generate',
+            isEnabled: true,
+            prompt: { base: `Write a detailed section about "${task.title}". The section should cover the following points: ${task.acceptanceCriteria.join(', ')}`, guidelines: [] },
+        }))) || [];
+        return [...defaultAgents, ...projectAgents];
+    }, [defaultAgents, projectPlan]);
 
     const reportGenerationMutation = useMutation({
         mutationFn: async (variables: { body: any, token: string }) => generateReport(variables.body, variables.token),
@@ -118,7 +131,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             const sectionKey = variables.body.sectionToGenerate as SectionNameType;
             const content = Object.values(data)[0] as string;
             setSection(sectionKey, content);
-            toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
+            toast({ title: `Section "${sectionConfig[sectionKey]?.title || sectionKey}" generated successfully!` });
             refetchUser();
         },
         onError: (error: Error, variables) => {
@@ -145,7 +158,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-        const agent = agents?.find(a => a.id === sectionConfig[section]?.agentId);
+        const agent = allAgents?.find(a => a.id === sectionConfig[section]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
@@ -211,7 +224,27 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
-    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
+    
+    const availableSections = React.useMemo(() => {
+        const templateAgentIds = new Set(selectedTemplate?.agentIds || []);
+        const defaultTemplateAgents = orderedSections.filter(key => templateAgentIds.has(sectionConfig[key]?.agentId));
+        
+        const projectSpecificAgents = projectPlan?.phases.flatMap(phase => phase.tasks.map(task => ({
+            key: `custom-${task.title.toLowerCase().replace(/\s+/g, '-')}`,
+            name: task.title,
+            agentId: `generate-${task.title.toLowerCase().replace(/\s+/g, '-')}-section`,
+            icon: PencilRuler, // Default icon for project-specific agents
+        }))) || [];
+
+        return [...defaultTemplateAgents.map(key => ({
+            key: key,
+            name: t(sectionConfig[key].title),
+            agentId: sectionConfig[key].agentId,
+            icon: sectionConfig[key].icon
+        })), ...projectSpecificAgents];
+    }, [selectedTemplate, projectPlan, t]);
+
+    
     const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
         const sectionKey = (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId);
         return sectionKey && !sections[sectionKey];
@@ -298,8 +331,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         </TooltipProvider>
 
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {availableSections.map((key) => {
-                                const { title, icon: Icon, agentId } = sectionConfig[key];
+                            {availableSections.map(({key, name, agentId, icon}) => {
+                                const Icon = icon || PencilRuler;
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key];
                                 const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));
@@ -309,7 +342,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                              <div className="flex items-center gap-2">
                                                 {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
-                                                {t(`${title}`)}
+                                                {name}
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent className="space-y-4 p-4">
@@ -328,7 +361,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                     <div className="space-y-6">
                                                         <div className="space-y-3">
                                                             <Label htmlFor={`formality-${key}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType].formality]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
+                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType]?.formality || 50]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
                                                             <div className="flex justify-between text-xs text-muted-foreground">
                                                                 <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
                                                                 <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
@@ -337,7 +370,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`tone-${key}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType].tone} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
+                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType]?.tone || 'professional'} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
                                                                 <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
                                                                 <SelectContent>
                                                                     <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
@@ -349,7 +382,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                         <div className="space-y-2">
                                                             <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
-                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType].wordCount} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
+                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType]?.wordCount || ''} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
                                                         </div>
                                                     </div>
                                                 </TabsContent>
@@ -378,11 +411,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                                 <Button
                                                                     type="button"
                                                                     onClick={() => onGenerateSection(key as SectionNameType)}
-                                                                    disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
+                                                                    disabled={isAnythingGenerating || !allAgents.find(a=> a.id === agentId)?.isEnabled || !hasSelectedContext || !hasCreditsForSingleSection}
                                                                     className="font-headline w-full"
                                                                 >
                                                                     {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                                                    {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
+                                                                    {`${t('builder.reportGenerator.generateButton')} ${name}`}
                                                                 </Button>
                                                             </div>
                                                         </TooltipTrigger>

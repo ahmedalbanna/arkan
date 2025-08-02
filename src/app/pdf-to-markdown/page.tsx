@@ -4,7 +4,7 @@
 import { useLocalization } from "@/context/LocalizationContext";
 import { FileText } from "lucide-react";
 import dynamic from 'next/dynamic';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const ConverterSkeleton = () => (

@@ -30,7 +30,7 @@ describe('FeatureManager', () => {
     const skeletons = screen.getAllByRole('listitem');
     expect(skeletons.length).toBeGreaterThan(0);
      skeletons.forEach(skeleton => {
-        expect(skeleton.classList.contains('animate-pulse')).toBe(true);
+        expect(skeleton).toHaveClass('animate-pulse');
     });
   });
 
