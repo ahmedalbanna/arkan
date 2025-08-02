@@ -1,19 +1,19 @@
 
+
 'use client';
 
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle, ChevronDown, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle, ChevronDown, CheckCircle, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCreateAgent } from '@/hooks/use-agents';
 import { toast } from '@/hooks/use-toast';
-import { AgentCategory } from '@/lib/agents';
+import { AgentCategory, type AgentPrompt } from '@/lib/agents';
 import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { AgentPrompt } from '@/lib/agents';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { generateAgentConfigApi } from '@/services/agent-service';
@@ -113,13 +113,20 @@ export function GenerateAgentView() {
             agentPrompt.jsonStructure = generatedData.jsonStructure;
         }
 
+        const knowledgeSources = contextFiles.map(file => ({
+            name: file.name,
+            type: 'file' as const, // For now, all are treated as files
+            content: file.content
+        }));
+
         const agentData = {
             id: generatedId,
             name: generatedData.name,
             description: generatedData.description,
-            prompt: agentPrompt,
             category: selectedCategory,
-            pageUrl: '/admin/chats' // Default URL for custom agents
+            pageUrl: '/admin/chats', // Default URL for custom agents
+            prompt: agentPrompt,
+            knowledge: knowledgeSources,
         };
 
         createAgentMutation.mutate(agentData, {
@@ -237,10 +244,13 @@ export function GenerateAgentView() {
                     <p>{prompt}</p>
                 </div>
                  <div className="flex justify-center">
-                     <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add knowledge
-                    </Button>
+                     <div {...getRootProps()} className="cursor-pointer">
+                        <input {...getInputProps()} />
+                        <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add knowledge
+                        </Button>
+                    </div>
                 </div>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">

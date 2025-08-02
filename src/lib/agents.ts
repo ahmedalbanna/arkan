@@ -8,6 +8,12 @@ export interface AgentGuideline {
   isDefault: boolean;
 }
 
+export interface AgentKnowledgeSource {
+    name: string;
+    type: 'file' | 'text' | 'web';
+    content: string; // content, data URI, or URL
+}
+
 export interface AgentPrompt {
   base: string;
   guidelines?: AgentGuideline[];
@@ -35,6 +41,7 @@ export interface AgentData {
   isEnabled: boolean;
   prompt: AgentPrompt | string; // Can be simple string or complex object
   toolIds?: string[];
+  knowledge?: AgentKnowledgeSource[];
 }
 
 export interface Agent extends AgentData {
@@ -106,6 +113,8 @@ User Prompt: {{{prompt}}}
 The proposal should be well-structured, realistic, and detailed. Fill out all the fields in the required output format with plausible information. Make sure the start and end dates in the timeline are logical based on today's date. Also, provide a list of 3 to 5 relevant tags for the project based on its content.
 
 IMPORTANT: For all fields that contain descriptive text (like 'objective', 'methodology', 'evaluation', 'interest', 'description', and 'mitigation'), you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
+
+Your entire response must be a valid JSON object that adheres to the structure provided below.
 
 Project Idea: {{{projectIdea}}}`,
         guidelines: []
