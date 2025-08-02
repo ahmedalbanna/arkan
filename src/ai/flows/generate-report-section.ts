@@ -59,8 +59,8 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     name: `generate-${sectionToGenerate}-section-prompt`, // Unique name per section
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
-    prompt: `${basePrompt}
-
+ system: basePrompt,
+    prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '${sectionToGenerate}'.
 
 {{#if tableOfContents}}
