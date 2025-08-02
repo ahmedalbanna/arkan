@@ -16,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../../ui/input';
 import { Textarea } from '../../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AGENTS } from '@/lib/agents';
+import { AGENTS, AgentCategory } from '@/lib/agents';
 import { Checkbox } from '../../ui/checkbox';
 import { Skeleton } from '../../ui/skeleton';
 import { useState } from 'react';
@@ -41,7 +41,7 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
 
-const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
+const reportAgents = AGENTS.filter(a => a.category === AgentCategory.ReportGeneration);
 
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
