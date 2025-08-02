@@ -61,9 +61,7 @@ const solvePrompt = ai.definePrompt({
   name: 'solveAcademicDocumentPrompt',
   input: { schema: SolveDocumentInputSchema },
   output: { schema: SolvedDocumentSchema },
-  prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}** with a deep knowledge of **{{{analyzedDocument.title}}}**.
-
-    Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'. **You must provide your response in {{{analyzedDocument.language}}}**.
+  prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}**. Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'. **You must provide your response in {{{analyzedDocument.language}}}**.
 
     {{#if contextMarkdown}}
     --- IMPORTANT CONTEXT ---
