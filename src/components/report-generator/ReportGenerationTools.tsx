@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { sectionConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, BookOpen, PencilRuler } from 'lucide-react';
+import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -34,6 +35,7 @@ import { generateReport } from '@/services/report-service';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
+import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -119,6 +121,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             description: task.description,
             category: 'Report Generation',
             pageUrl: '/generate',
+            icon: PencilRuler,
             isEnabled: true,
             prompt: { base: `Write a detailed section about "${task.title}". The section should cover the following points: ${task.acceptanceCriteria.join(', ')}`, guidelines: [] },
         }))) || [];
