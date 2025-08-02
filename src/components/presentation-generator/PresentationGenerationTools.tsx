@@ -4,17 +4,13 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
-import { SectionNameSchema, type SectionName, type DiagramType } from '@/ai/schemas';
+import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, BookCheck, GitGraph, Presentation, History, FileText } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import ReactMarkdown from 'react-markdown';
@@ -38,7 +34,7 @@ import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 
 
-const orderedSections = Object.keys(sectionConfig) as SectionName[];
+const orderedSections = Object.keys(sectionConfig) as SectionNameType[];
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
 
 interface PresentationGenerationToolsProps {
@@ -123,29 +119,17 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         addExternalContext,
         removeExternalContext,
         guidelineState,
-        customGuidelineInput,
         contextSelection,
         selectedPresentationTemplateId,
         setSelectedPresentationTemplateId,
-        toggleContextSelection,
-        handleGuidelineToggle,
-        setCustomGuidelineInputForItem,
-        handleAddCustomGuidelineForItem,
-        handleRemoveCustomGuidelineForItem,
      } = useReportStore(state => ({
         externalContext: state.externalContext,
         addExternalContext: state.addExternalContext,
         removeExternalContext: state.removeExternalContext,
         guidelineState: state.guidelineState,
-        customGuidelineInput: state.customGuidelineInput,
         contextSelection: state.contextSelection,
         selectedPresentationTemplateId: state.selectedPresentationTemplateId,
         setSelectedPresentationTemplateId: state.setSelectedPresentationTemplateId,
-        toggleContextSelection: state.toggleContextSelection,
-        handleGuidelineToggle: (index: number, checked: boolean) => state.handleGuidelineToggle('presentation', index, checked),
-        setCustomGuidelineInputForItem: (value: string) => state.setCustomGuidelineInputForItem('presentation', value),
-        handleAddCustomGuidelineForItem: () => state.handleAddCustomGuidelineForItem('presentation'),
-        handleRemoveCustomGuidelineForItem: (index: number) => state.handleRemoveCustomGuidelineForItem('presentation', index),
      }));
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -162,7 +146,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
         const selectedSections = Object.entries(selection.sections)
             .filter(([, isSelected]) => isSelected)
-            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionName] }), {});
+            .reduce((acc, [key]) => ({ ...acc, [key]: sections[key as SectionNameType] }), {});
 
         const selectedDiagrams = Object.entries(selection.diagrams)
             .filter(([, isSelected]) => isSelected)
@@ -184,11 +168,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     if (!agentsLoaded || presentationTemplatesLoading || !agent) {
         return <ToolsSkeleton />;
     }
-
-    const promptConfig = agent.prompt as AgentPrompt;
-    const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
-    const currentGuidelineState = guidelineState.presentation;
-    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: false, proposal: true, projectPlan: true };
 
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>

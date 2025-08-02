@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { PresentationSlide, PresentationHistoryEntry } from '@/ai/schemas';
+import type { PresentationHistoryEntry } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, FileDown, Languages, Loader2 } from 'lucide-react';
@@ -64,7 +64,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
   };
 
   const handleTranslate = () => {
-    const targetLang = locale === 'en' ? 'Arabic' : 'English';
+    const targetLang = locale === 'en' ? 'ar' : 'en';
     onTranslateAll(targetLang);
   };
 
