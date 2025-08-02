@@ -2,7 +2,6 @@
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
-import type { LoginCredentials } from '@/lib/db/queries';
 
 export type {
   ProjectProposal,
@@ -13,7 +12,6 @@ export type {
   ManipulateTextOutput,
   AnyProjectProposal,
   ProjectPlan,
-  GenerateAgentConfigOutput,
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';
@@ -24,7 +22,7 @@ export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/flows/generate-codebase';
 export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
 export type { TeamWithMembers } from '@/services/team-service';
-export type { Team, TeamMember, UserProfile, LoginCredentials } from '@/lib/db/queries';
+export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
 export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';

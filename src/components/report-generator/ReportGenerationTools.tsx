@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { sectionConfig } from '@/lib/report-config';
-import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
+import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, AgentCategorySchema } from '@/ai/schemas';
 import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, BookOpen, PencilRuler } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
@@ -119,7 +119,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             id: `generate-${task.title.toLowerCase().replace(/\s+/g, '-')}-section`,
             name: task.title,
             description: task.description,
-            category: 'Report Generation',
+ category: AgentCategorySchema.enum.ReportGeneration,
             pageUrl: '/generate',
             icon: PencilRuler,
             isEnabled: true,
