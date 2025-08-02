@@ -32,6 +32,7 @@ interface GeneratedAgentData {
     name: string;
     instructions: string;
     guidelines: string;
+    jsonStructure?: any;
 }
 
 export function GenerateAgentView() {
@@ -80,14 +81,8 @@ export function GenerateAgentView() {
             guidelines: guidelinesArray.map(g => ({ text: g, isDefault: true })),
         };
 
-        if (includeJsonOutput) {
-            agentPrompt.jsonStructure = {
-                "key": "value",
-                "description": "Describe the expected output here.",
-                "items": [
-                    { "id": 1, "name": "Example Item" }
-                ]
-            }
+        if (generatedData.jsonStructure) {
+            agentPrompt.jsonStructure = generatedData.jsonStructure;
         }
 
         const agentData = {

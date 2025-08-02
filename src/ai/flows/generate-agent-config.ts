@@ -12,6 +12,7 @@ const GenerateAgentConfigOutputSchema = z.object({
   name: z.string().describe("A short, descriptive name for the new agent."),
   instructions: z.string().describe("The base prompt or primary instruction for the agent. This should be a clear, concise paragraph explaining the agent's purpose and core function."),
   guidelines: z.string().describe("A newline-separated list of 3-5 specific, actionable guidelines for the agent to follow. Each guideline should start with '- '.")
+  jsonStructure: z.any().optional().describe("If the user requested JSON output, provide a sample JSON object structure that the agent should return. It should be a simple but relevant example based on the user's prompt. Otherwise, this field should be omitted."),
 });
 export type GenerateAgentConfigOutput = z.infer<typeof GenerateAgentConfigOutputSchema>;
 
@@ -38,15 +39,38 @@ export async function generateAgentConfig(input: z.infer<typeof GenerateAgentCon
     {{#if includeJsonOutput}}
     Also, add a guideline like "- Ensure the JSON output is complete and does not contain any extra text or markdown formatting."
     {{/if}}
+4.  **Define JSON Structure (If Requested):**
+    {{#if includeJsonOutput}}
+    The user has requested that the agent return JSON. Based on the user's prompt, create a simple but relevant example JSON object and place it in the \`jsonStructure\` field. This gives the user a starting point to define their schema. For example, for a "Recipe Generator", the structure might be \`{ "recipeName": "...", "ingredients": [], "instructions": [] }\`.
+    {{else}}
+    The user has not requested JSON output. Omit the \`jsonStructure\` field from your response.
+    {{/if}}
 
-**Example Output:**
+**Example Output (with JSON requested):**
 
-For a user request like "An agent that writes tweets about new tech products", your output should look like this:
+For a user request like "An agent that generates recipes", your output should look like this:
 
 {
-  "name": "Tech Product Tweet Crafter",
-  "instructions": "You are a witty and engaging social media copywriter specializing in technology. Your goal is to create exciting and concise tweets to announce new tech products, generating buzz and driving engagement.",
-  "guidelines": "- Keep tweets under 280 characters.\\n- Include relevant hashtags like #TechLaunch or #Innovation.\\n- Maintain a slightly informal and enthusiastic tone.\\n- Always include a call-to-action, like asking a question or linking to a product page."
+  "name": "Recipe Generator",
+  "instructions": "You are a master chef. Your task is to generate a recipe based on user input. Your final output must be a valid JSON object that adheres to the defined schema.",
+  "guidelines": "- Keep recipes clear and easy to follow.\\n- Include preparation and cooking times.\\n- Provide serving size suggestions.",
+  "jsonStructure": {
+    "recipeName": "Spaghetti Carbonara",
+    "prepTime": "10 minutes",
+    "cookTime": "15 minutes",
+    "servings": 4,
+    "ingredients": [
+        { "item": "Spaghetti", "quantity": "400g" },
+        { "item": "Pancetta", "quantity": "150g" },
+        { "item": "Eggs", "quantity": "2" }
+    ],
+    "instructions": [
+        "Boil the spaghetti.",
+        "Fry the pancetta.",
+        "Mix eggs and cheese.",
+        "Combine everything."
+    ]
+  }
 }
 `,
   });
