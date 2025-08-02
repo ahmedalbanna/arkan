@@ -9,7 +9,7 @@ const updatePptxTemplateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { key } = params;
+        const key = params.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }
@@ -40,7 +40,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { key } = params;
+        const key = params.key;
         if (!key) {
             return handleApiError({ message: 'Template key is required.' }, 400);
         }

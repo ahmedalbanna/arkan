@@ -2,12 +2,10 @@
 'use server';
 
 import { getUserProfile } from '@/lib/db/queries';
-import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-export const POST = async (request: Request, { params }: { params: { id: string } }) => {
+export const POST = withAuth(async ({ params }) => {
     try {
-        await authenticateRequest(request, { requireAdmin: true });
-        
         const { id: userId } = params;
         if (!userId) {
             return handleApiError({ message: 'User ID is required.' }, 400);
@@ -19,7 +17,6 @@ export const POST = async (request: Request, { params }: { params: { id: string 
         }
         
         // This is a placeholder for sending a reset email.
-        // Firebase Admin SDK does not directly send reset emails.
         // A real implementation would use a service like SendGrid and a generated link:
         // const link = await adminAuth.generatePasswordResetLink(user.email);
         // await sendCustomEmail(user.email, link);
@@ -31,4 +28,4 @@ export const POST = async (request: Request, { params }: { params: { id: string 
     } catch (error: any) {
         return handleApiError(error);
     }
-};
+}, { requireAdmin: true });

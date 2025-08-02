@@ -1,3 +1,4 @@
+
 // src/app/api/templates/proposal/[id]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
@@ -14,7 +15,7 @@ const updateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { id } = params;
+        const id = params.id;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }
@@ -46,7 +47,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        const id = params.id;
         if (!id) {
             return handleApiError({ message: 'Template ID is required.' }, 400);
         }

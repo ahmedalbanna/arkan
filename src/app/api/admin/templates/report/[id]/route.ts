@@ -13,7 +13,7 @@ const updateSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
-        const { id } = params;
+        const id = params.id;
         const templateRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
         const body = await request.json();
         const validation = updateSchema.safeParse(body);
@@ -34,7 +34,7 @@ export const PUT = withAuth(async ({ request, params }) => {
 
 export const DELETE = withAuth(async ({ params }) => {
     try {
-        const { id } = params;
+        const id = params.id;
 
         if (REPORT_GENERATION_TEMPLATES.some(t => t.id === id)) {
             return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);

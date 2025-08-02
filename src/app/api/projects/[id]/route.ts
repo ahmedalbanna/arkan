@@ -21,7 +21,7 @@ const verifyProjectOwner = async (requesterId: string, projectId: string) => {
 // GET a single project
 export const GET = withAuth(async ({ params, user }) => {
     try {
-        const {id:projectId} = await params;
+        const projectId = params.id;
         const project = await verifyProjectOwner(user.id, projectId);
         return createApiResponse({ id: projectId, ...project }, 200);
     } catch (error) {
@@ -32,7 +32,7 @@ export const GET = withAuth(async ({ params, user }) => {
 // PUT (update) a project
 export const PUT = withAuth(async ({ request, params, user }) => {
     try {
-        const { id: projectId } = await params;
+        const projectId = params.id;
         await verifyProjectOwner(user.id, projectId);
 
         const body = await request.json();
@@ -58,7 +58,7 @@ export const PUT = withAuth(async ({ request, params, user }) => {
 // DELETE a project
 export const DELETE = withAuth(async ({ params, user }) => {
     try {
-        const { id: projectId } = await params;
+        const projectId = params.id;
         await verifyProjectOwner(user.id, projectId);
         await adminDb.collection("projects").doc(projectId).delete();
         revalidatePath('/projects');

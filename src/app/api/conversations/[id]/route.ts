@@ -6,7 +6,7 @@ import { adminRealtimeDb } from '@/lib/firebase/server-init';
 
 export const DELETE = withAuth(async ({ user, params }) => {
     try {
-        const { id: conversationId } = params;
+        const conversationId = params.id;
         if (!conversationId) {
             return handleApiError({ message: 'Conversation ID is required.' }, 400);
         }

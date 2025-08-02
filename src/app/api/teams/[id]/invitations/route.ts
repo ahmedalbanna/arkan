@@ -1,3 +1,4 @@
+
 // src/app/api/teams/[id]/invitations/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';

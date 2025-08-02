@@ -3,19 +3,18 @@
 
 import { z } from 'zod';
 import { getUserTeams, createTeamForUser } from '@/lib/db/queries';
-import { authenticateRequest, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { NextRequest } from 'next/server';
 
 // GET /api/teams - Fetches all teams for the authenticated user and their teams
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async ({ user }) => {
     try {
-        const { user } = await authenticateRequest(request);
         const teams = await getUserTeams(user.id);
         return createApiResponse(teams, 200);
     } catch (error) {
         return handleApiError(error);
     }
-}
+});
 
 
 // POST /api/teams - Creates a new project
@@ -23,9 +22,8 @@ const createTeamSchema = z.object({
   name: z.string().min(3, "Team name must be at least 3 characters").max(50, "Team name cannot exceed 50 characters"),
 });
 
-export async function POST(request: NextRequest) {
+export const POST = withAuth(async ({ request, user }) => {
   try {
-    const { user } = await authenticateRequest(request);
     const body = await request.json();
     const validation = createTeamSchema.safeParse(body);
     if (!validation.success) {
@@ -39,4 +37,4 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     return handleApiError(error);
   }
-}
+});

@@ -9,7 +9,7 @@ const updateFeatureSchema = z.object({
 
 export const PUT = withAuth(async ({ request, params }) => {
   try {
-    const { id } = params;
+    const id = params.id;
     if (!id) {
       return handleApiError({ message: 'Feature ID is required.' }, 400);
     }

@@ -1,3 +1,4 @@
+
 // src/app/api/agents/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
@@ -8,7 +9,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 // GET /api/agents/[id]
 export const GET = withAuth(async ({ params }) => {
     try {
-        const {id:agentId} = await params;
+        const agentId = params.id;
         const agentDoc = await adminDb.collection("agents").doc(agentId).get();
         if (!agentDoc.exists) {
             return handleApiError({ message: 'Agent not found.' }, 404);
