@@ -63,7 +63,7 @@ export const POST = withAuth(async ({ request, user }) => {
     let result = await generateProposal(agentInput);
 
     await logGeneration({
-        agentId: 'generate-proposal-report', // Agent ID for logging
+        agentId: 'generate-proposal', 
         userId: user.id,
         input: { projectIdea, templateId: validation.data.templateId, finalTemplateId: templateId, customGuidelines }, // Log the user-facing input
         output: result,

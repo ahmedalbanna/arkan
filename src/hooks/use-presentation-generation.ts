@@ -8,6 +8,7 @@ import { generatePresentationApi } from '@/services/presentation-service';
 import type { GeneratePresentationOutput, PresentationHistoryEntry } from '@/ai/schemas';
 import { usePresentationStore } from './usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
+import { userKeys } from '@/lib/query-keys';
 
 interface GeneratePresentationVariables {
     body: any;
@@ -17,7 +18,7 @@ interface GeneratePresentationVariables {
 export function useGeneratePresentation() {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
-    const { firebaseUser, refetchUser } = useAuth();
+    const { firebaseUser } = useAuth();
     const { addPresentationToHistory } = usePresentationStore();
 
     return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
@@ -29,7 +30,9 @@ export function useGeneratePresentation() {
                 slides: data.slides,
             };
             addPresentationToHistory(newEntry);
-            refetchUser(); // To update credits
+            if (firebaseUser) {
+                queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+            }
             toast({ title: t('builder.presentationGenerator.toasts.success') });
         },
         onError: (error: Error) => {

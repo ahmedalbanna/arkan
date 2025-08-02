@@ -1,17 +1,19 @@
 
 'use client';
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateReport } from '@/services/report-service';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
 import { useReportStore } from './useReportStore';
+import { userKeys } from '@/lib/query-keys';
 
 export function useReportGeneration() {
   const { firebaseUser } = useAuth();
   const { setSection, setAllSections } = useReportStore();
+  const queryClient = useQueryClient();
 
   const handleSuccess = (data: any, variables: any) => {
     if (variables.body.templateId) { // Full report
@@ -21,6 +23,9 @@ export function useReportGeneration() {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       setSection(sectionKey, content);
+    }
+    if(firebaseUser) {
+        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
     }
   };
 

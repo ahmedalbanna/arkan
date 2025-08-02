@@ -18,7 +18,7 @@ export interface GenerateProposalBody {
 }
 
 export function useGenerateProposal() {
-    const { firebaseUser, refetchUser } = useAuth();
+    const { firebaseUser } = useAuth();
     const { setProposal } = useBuilderStore();
     const queryClient = useQueryClient();
 
@@ -29,7 +29,9 @@ export function useGenerateProposal() {
         },
         onSuccess: (data) => {
             setProposal(data);
-            refetchUser(); // To update credits
+            if (firebaseUser) {
+              queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
+            }
             toast({
                 title: "Proposal Generated",
                 description: "Your project proposal has been successfully created.",
