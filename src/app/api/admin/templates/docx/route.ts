@@ -2,7 +2,8 @@
 // src/app/api/templates/docx/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type TemplateKey } from '@/lib/docx-styles';
-import { createApiResponse, handleApiError } from '@/lib/api-utils';
+import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
+import { z } from 'zod';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
@@ -33,3 +34,45 @@ export async function GET() {
         return handleApiError(error);
     }
 }
+
+
+const createDocxTemplateSchema = z.object({
+  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+});
+
+export const POST = withAuth(async ({ request }) => {
+    try {
+        const body = await request.json();
+        const validation = createDocxTemplateSchema.safeParse(body);
+        if(!validation.success) {
+            return handleApiError(validation.error);
+        }
+
+        const { id, name, description } = validation.data;
+        const docRef = adminDb.collection('templates').doc('docx').collection('styles').doc(id);
+
+        const doc = await docRef.get();
+        if(doc.exists) {
+            return handleApiError({ message: 'A template with this ID already exists.'}, 409);
+        }
+
+        // Create a new template based on the 'modern' default
+        const newTemplate = {
+            id,
+            name,
+            description,
+            styles: defaultTemplates.modern.styles,
+            imageUrl: 'https://placehold.co/400x565.png',
+            dataAiHint: 'document modern',
+            createdAt: new Date().toISOString()
+        };
+
+        await docRef.set(newTemplate);
+
+        return createApiResponse(newTemplate, 201);
+    } catch (error) {
+        return handleApiError(error);
+    }
+}, { requireAdmin: true });

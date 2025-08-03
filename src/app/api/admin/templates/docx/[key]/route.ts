@@ -37,3 +37,32 @@ export const PUT = withAuth(async ({ request, params }) => {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
+
+
+export const DELETE = withAuth(async ({ params }) => {
+    try {
+        const key = params.key;
+        if (!key) {
+            return handleApiError({ message: 'Template key is required.' }, 400);
+        }
+
+        // Prevent deletion of default templates
+        if (['modern', 'classic', 'academic'].includes(key)) {
+            return handleApiError({ message: 'Default templates cannot be deleted.' }, 403);
+        }
+
+        const templateRef = adminDb.collection('templates').doc('docx').collection('styles').doc(key);
+        const templateDoc = await templateRef.get();
+
+        if (!templateDoc.exists) {
+            return handleApiError({ message: 'DOCX template not found.' }, 404);
+        }
+        
+        await templateRef.delete();
+        
+        return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
+
+    } catch (error) {
+        return handleApiError(error);
+    }
+}, { requireAdmin: true });

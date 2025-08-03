@@ -199,6 +199,19 @@ export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>
   return await response.json();
 }
 
+export async function createDocxTemplate(data: {id: string, name: string, description: string}, token: string): Promise<DocxTemplate> {
+    const response = await fetch('/api/admin/templates/docx', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return await response.json();
+}
+
 export async function updateDocxTemplate(
   variables: {key: string, styles: any},
   token: string
@@ -217,6 +230,19 @@ export async function updateDocxTemplate(
   }
   return response.json();
 }
+
+export async function deleteDocxTemplate(templateKey: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/admin/templates/docx/${templateKey}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete DOCX template');
+    }
+    return await response.json();
+}
+
 
 
 // --- PPTX Templates ---
