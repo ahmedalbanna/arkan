@@ -10,23 +10,17 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import {
   ProjectProposalSchema,
-  DiagramTypeSchema,
-  SectionNameSchema,
   PresentationSlideSchema,
 } from '@/ai/schemas';
-import { getAgent } from '@/lib/db/queries';
-import type { AgentPrompt } from '@/lib/agents';
 
 
 const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
+  proposal: ProjectProposalSchema.optional().describe("An optional project proposal for high-level context."),
   guidelines: z.array(z.string()).optional(),
-  externalContext: z.array(z.object({
+  sourceDocuments: z.array(z.object({
       fileName: z.string(),
       content: z.string(),
-  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
+  })).min(1, "At least one source document is required.").describe("An array of source documents (text or data URIs) to be synthesized into a presentation."),
   templateId: z.string(), // The ID of the template which contains the primary agent and other config
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
@@ -48,68 +42,61 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
-    const agent = await getAgent('generate-presentation');
-    if (!agent) throw new Error("Presentation agent configuration not found.");
-    const agentPrompt = agent.prompt as AgentPrompt;
-    const basePrompt = agentPrompt.base;
-
+    
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
 
     // Separate media from text files for the prompt
-    const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
-    const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
+    const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
+    const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
 
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
       input: { schema: z.any() }, // Using any() since we are manually constructing the payload
       output: { schema: GeneratePresentationOutputSchema },
-      prompt: `${basePrompt}
+      prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
 
+**Your Process:**
+1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data.
+2.  **Structure the Narrative:** Create a logical flow for the presentation. Start with an introduction, develop the main points across several slides, and end with a conclusion.
+3.  **Draft Slides:** For each slide:
+    *   Write a clear, concise title.
+    *   Summarize the key information into 2-5 bullet points.
+    *   Write detailed speaker notes that elaborate on each bullet point, providing context and deeper explanations.
+
+**CRITICAL INSTRUCTIONS:**
+-   Your primary source of information is the 'Source Documents' provided below.
+-   If a 'Project Proposal' is also provided, use it for high-level context (like the overall objective) but base the slide content on the detailed source documents.
+-   Adhere to all provided guidelines.
+
+--- GUIDELINES ---
 {{#if guidelines}}
---- Guidelines ---
 {{#each guidelines}}
 - {{{this}}}
 {{/each}}
+{{else}}
+- The total number of slides should be between 7 and 12.
+- Each slide must have a clear title.
+- Slide content should be a list of 2-5 concise bullet points.
+- Speaker notes must be detailed, providing elaboration for each bullet point.
+- Maintain a professional and engaging tone throughout.
 {{/if}}
 
---- Context from Project ---
-{{#if textContext}}
---- ADDITIONAL TEXTUAL CONTEXT ---
+--- SOURCE DOCUMENTS ---
 {{#each textContext}}
-File: {{this.fileName}}
+--- Document: {{this.fileName}} ---
 {{{this.content}}}
 ---
 {{/each}}
-{{/if}}
 
-{{#if mediaContext}}
---- ADDITIONAL MEDIA CONTEXT ---
 {{#each mediaContext}}
-File: {{this.fileName}}
+--- Document (Media): {{this.fileName}} ---
 {{media url=this.content}}
 ---
 {{/each}}
-{{/if}}
 
-{{#if sections}}
---- REPORT SECTIONS ---
-{{#each sections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
-{{#if diagrams}}
---- DIAGRAMS (PlantUML) ---
-{{#each diagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
----
-{{/each}}
-{{/if}}
 
 {{#if proposal}}
---- Main Input: Project Proposal ---
+--- High-Level Context: Project Proposal ---
 \`\`\`json
 ${stringifiedProposal}
 \`\`\`

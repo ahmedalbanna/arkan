@@ -3,17 +3,18 @@
 
 import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { ProjectProposalSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const ApiGeneratePresentationSchema = z.object({
   proposal: ProjectProposalSchema.optional(),
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   guidelines: z.array(z.string()).optional(),
-  externalContext: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']) })).optional(),
+  sourceDocuments: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+  })).min(1, "At least one source document is required."),
   templateId: z.string(),
 });
 
@@ -34,8 +35,14 @@ export const POST = withAuth(async ({ request, user }) => {
     await logGeneration({
         agentId: 'generate-presentation',
         userId: user.id,
-        input: agentInput,
-        output: result,
+        input: {
+            guidelineCount: agentInput.guidelines?.length || 0,
+            sourceDocumentCount: agentInput.sourceDocuments.length,
+            templateId: agentInput.templateId
+        },
+        output: {
+            slideCount: result.slides.length
+        },
     });
 
     return createApiResponse(result, 200);
