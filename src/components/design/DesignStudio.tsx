@@ -40,7 +40,7 @@ export function DesignStudio() {
                             </SelectTrigger>
                             <SelectContent>
                                 {Object.values(templates).map((template) => (
-                                    <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                    <SelectItem key={`${template.id}-${template.name}`} value={template.id}>{template.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
