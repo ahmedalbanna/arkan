@@ -12,7 +12,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/use-user';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '../ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
@@ -234,6 +234,12 @@ export function Header() {
                           <Link href="/pdf-to-markdown">
                             <FileText className="mr-2 h-4 w-4" />
                             PDF to Markdown
+                          </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                          <Link href="/markdown-display">
+                            <FileText className="mr-2 h-4 w-4" />
+                            Markdown Display
                           </Link>
                         </DropdownMenuItem>
                      </DropdownMenuContent>
