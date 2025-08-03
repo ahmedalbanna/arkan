@@ -29,7 +29,11 @@ const GenerateSectionInputSchema = z.object({
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
   tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
+}).refine(data => data.proposal || data.projectPlan || (data.exampleFiles && data.exampleFiles.length > 0) || (data.contextFiles && data.contextFiles.length > 0), {
+    message: "A proposal, project plan, or external context is required to generate a report section.",
+    path: ["proposal"], // Associate error with a path for clarity
 });
+
 export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
 
 // The output is now a static structure, which is more reliable for the AI model.
@@ -59,7 +63,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     name: `generate-${sectionToGenerate}-section-prompt`, // Unique name per section
     input: { schema: GenerateSectionInputSchema },
     output: { schema: GenerateSectionOutputSchema },
- system: basePrompt,
+    system: basePrompt,
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '${sectionToGenerate}'.
 

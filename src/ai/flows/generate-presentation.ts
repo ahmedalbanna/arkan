@@ -15,7 +15,7 @@ import {
 
 
 const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional().describe("An optional project proposal for high-level context."),
+  proposal: ProjectProposalSchema.nullable().optional().describe("An optional project proposal for high-level context."),
   guidelines: z.array(z.string()).optional(),
   sourceDocuments: z.array(z.object({
       fileName: z.string(),

@@ -8,20 +8,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { sectionConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GitGraph } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { Textarea } from '../ui/textarea';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
 import { Label } from '../ui/label';
@@ -32,7 +30,7 @@ import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { generateReport } from '@/services/report-service';
+import { useReportGeneration } from '@/hooks/use-report-generation';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
@@ -87,7 +85,7 @@ function ToolsSkeleton() {
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser, userProfile, refetchUser } = useAuth();
+    const { firebaseUser, userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const [isGeneratingFullReport, setIsGeneratingFullReport] = React.useState(false);
 
@@ -104,43 +102,18 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         contextSelection,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
-        setSection,
-        handleControlChange,
         manualTableOfContents,
         setManualTableOfContents,
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
-    const reportGenerationMutation = useMutation({
-        mutationFn: async (variables: { body: any, token: string }) => generateReport(variables.body, variables.token),
-        onSuccess: (data, variables) => {
-            const sectionKey = variables.body.sectionToGenerate as SectionNameType;
-            const content = Object.values(data)[0] as string;
-            setSection(sectionKey, content);
-            toast({ title: `Section "${t(sectionConfig[sectionKey].title)}" generated successfully!` });
-            refetchUser();
-        },
-        onError: (error: Error, variables) => {
-            const item = variables.body.sectionToGenerate;
-            toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
-        },
-        onSettled: () => {
-            // This runs for both success and error, perfect for clearing the active key.
-            setActiveMutationKey(null);
-        }
-    });
+    const reportGenerationMutation = useReportGeneration();
 
     const isAnythingGenerating = reportGenerationMutation.isPending || isGeneratingFullReport;
     const isDisabled = isAnythingGenerating || isTranslating;
 
     const onGenerateSection = async (section: SectionNameType) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: "You must be logged in.", variant: "destructive" });
-            return;
-        };
-
-        const token = await firebaseUser.getIdToken();
         const fullState = useBuilderStore.getState().getFullState();
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
@@ -161,7 +134,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         };
 
         setActiveMutationKey(section);
-        reportGenerationMutation.mutate({ body, token });
+        reportGenerationMutation.mutate({ body });
     };
 
     const onGenerateFullReport = async () => {
@@ -183,27 +156,23 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         }
 
         setIsGeneratingFullReport(true);
-        setActiveMutationKey('full-report'); // Indicate a full report generation is active
+        setActiveMutationKey('full-report');
 
         for (const sectionKey of sectionsToGenerate) {
-            // Check for credits before each generation in the loop
             const currentUser = await firebaseUser.reload().then(() => auth.currentUser);
             const profileResponse = await fetch(`/api/users/${currentUser!.uid}`, { headers: { 'Authorization': `Bearer ${await currentUser!.getIdToken()}` } });
             const currentProfile = await profileResponse.json();
 
             if (currentProfile.credits < 1) {
                 toast({ title: "Insufficient Credits", description: "Generation stopped due to lack of credits.", variant: "destructive" });
-                break; // Exit the loop
+                break;
             }
 
             try {
-                // We await each section generation to ensure they happen sequentially
-                // and context from the previous can be used if needed in a more advanced setup.
                 await onGenerateSection(sectionKey);
             } catch (error) {
                 console.error(`Error generating section ${sectionKey}:`, error);
-                // The onError in the mutation will handle the toast
-                break; // Stop on first error
+                break;
             }
         }
         setIsGeneratingFullReport(false);
@@ -269,11 +238,22 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 ))}
                             </div>
                         </div>
+                        
+                         <div className="pt-4 mt-4 border-t">
+                             <AcademicUploaders
+                                title="Add Context / Examples"
+                                onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
+                                onContentRemoved={removeExternalContext}
+                                isProcessing={isDisabled}
+                                uploadedContent={useReportStore.getState().externalContext}
+                            />
+                        </div>
+
 
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <div className="w-full">
+                                    <div className="w-full pt-4 mt-4 border-t">
                                         <Button
                                             onClick={onGenerateFullReport}
                                             className="w-full mb-4 font-headline"
@@ -403,15 +383,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 );
                             })}
                         </Accordion>
-                         <div className="pt-4 mt-4 border-t">
-                             <AcademicUploaders
-                                title="Add Context / Examples"
-                                onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
-                                onContentRemoved={removeExternalContext}
-                                isProcessing={isDisabled}
-                                uploadedContent={useReportStore.getState().externalContext}
-                            />
-                        </div>
+                       
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
                         <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />

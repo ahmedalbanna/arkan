@@ -4,7 +4,6 @@
 'use client';
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { type SectionName, type DiagramType } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { sectionConfig } from '@/lib/report-config';

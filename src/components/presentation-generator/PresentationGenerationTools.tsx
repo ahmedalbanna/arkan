@@ -21,6 +21,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
+import { Skeleton } from '../ui/skeleton';
+import { ScrollArea } from '../ui/scroll-area';
+import { getSelectedGuidelines } from '@/lib/guideline-utils';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;

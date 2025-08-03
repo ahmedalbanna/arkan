@@ -11,35 +11,24 @@ import { useReportStore } from './useReportStore';
 import { userKeys } from '@/lib/query-keys';
 
 export function useReportGeneration() {
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, refetchUser } = useAuth();
   const { setSection, setAllSections } = useReportStore();
-  const queryClient = useQueryClient();
-
-  const handleSuccess = (data: any, variables: any) => {
-    if (variables.body.templateId) { // Full report
-      setAllSections(data.sections);
-      toast({ title: "Full report generated successfully!" });
-    } else { // Single section
+  
+  return useMutation({
+    mutationFn: async (variables: { body: any }) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return generateReport(variables.body, token);
+    },
+    onSuccess: (data, variables) => {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       setSection(sectionKey, content);
-    }
-    if(firebaseUser) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-    }
-  };
-
-  const handleError = (error: Error, variables: any) => {
-    const item = variables.body.templateId || variables.body.sectionToGenerate;
-    toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
-  };
-
-  return useMutation({
-    mutationFn: async (body: any) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return generateReport(body, token);
+      
+      refetchUser(); // To update credits
     },
-    onSuccess: handleSuccess,
-    onError: handleError,
+    onError: (error: Error, variables) => {
+      const item = variables.body.sectionToGenerate;
+      toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
+    },
   });
 }

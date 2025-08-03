@@ -22,8 +22,8 @@ const generateSectionSchema = z.object({
   otherDiagrams: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']) })).optional().describe("An array of example documents to be used for style, tone, and structure."),
-  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']) })).optional().describe("An array of context documents to be used for factual information."),
+  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
+  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
   tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),

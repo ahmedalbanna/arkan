@@ -9,7 +9,7 @@ import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const ApiGeneratePresentationSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
+  proposal: ProjectProposalSchema.nullable().optional(),
   guidelines: z.array(z.string()).optional(),
   sourceDocuments: z.array(z.object({
       fileName: z.string(),
