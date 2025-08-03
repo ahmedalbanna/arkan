@@ -1,9 +1,9 @@
-21:55:49.576 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-21:55:51.037 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
-21:56:02.456 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - fake-server successfully activated FBKV (SurveyIdle(0)) wait: 4451ms, init: 0ms
-21:57:07.341 [FirebaseWorkerPool-1-4] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
+23:26:05.688 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+23:26:08.825 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
+23:26:19.551 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - fake-server successfully activated FBKV (SurveyIdle(0)) wait: 3088ms, init: 0ms
+23:27:42.023 [FirebaseWorkerPool-1-1] WARN com.firebase.core.persistence.backend.dummy.EmulatorMetadataPersistence - Multiple projectIds are not recommended in single project mode. Requested 
 namespace docudec-default-rtdb, but the emulator is configured for fake-server. To 
 opt-out of single project mode add/set the singleProjectMode: false property in 
 the firebase.json emulators config. 
-21:57:07.445 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 32ms, init: 0ms
-21:57:07.921 [NamespaceSystem-blocking-namespace-operation-dispatcher-8] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
+23:27:42.073 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 21ms, init: 0ms
+23:27:42.351 [NamespaceSystem-blocking-namespace-operation-dispatcher-10] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active

@@ -1,3 +1,4 @@
+
 // src/app/api/templates/docx/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type TemplateKey } from '@/lib/docx-styles';

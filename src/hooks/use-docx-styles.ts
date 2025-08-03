@@ -8,36 +8,43 @@ import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
-  fetchDocxTemplates,
+  fetchDocxTemplates as fetchDocxTemplatesApi,
   updateDocxTemplate,
-  createDocxTemplate,
-  deleteDocxTemplate,
-  type DocxTemplate,
 } from "@/services/template-service";
+import type { DocxTemplate } from '@/services/template-service';
+import { useDesignStore } from '@/components/design/useDesignStore';
 import type { IStylesOptions } from 'docx';
+import { templates as defaultTemplates } from '@/lib/docx-styles';
 
 export const docxTemplateKeys = {
   all: ["docx-templates"] as const,
   lists: () => [...docxTemplateKeys.all, "list"] as const,
-  detail: (id: string) => [...docxTemplateKeys.all, "detail", id] as const,
 };
-
 
 export function useDocxStyles() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
+    
+    const {
+        activeTemplateKey,
+        setActiveTemplateKey,
+        localChanges,
+        updateStyle: updateLocalStyle,
+        resetLocalChanges,
+    } = useDesignStore();
 
-    const { data: templates, isLoading, isError } = useQuery<Record<string, DocxTemplate>>({
+
+    const { data: templates, isLoading } = useQuery<Record<string, DocxTemplate>>({
         queryKey: docxTemplateKeys.lists(),
-        queryFn: fetchDocxTemplates, // This is a public endpoint now, no token needed
+        queryFn: fetchDocxTemplatesApi,
         staleTime: 1000 * 60 * 5, // 5 minutes
+        initialData: defaultTemplates,
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
     });
 
-    const updateMutation = useMutation({
+    const mutation = useMutation({
         mutationFn: async (variables: { key: string, styles: IStylesOptions }) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return updateDocxTemplate(variables, token);
@@ -45,92 +52,40 @@ export function useDocxStyles() {
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
             toast({ title: "Template Saved", description: `Template "${variables.key}" has been updated.` });
-            setLocalChanges(prev => {
-                const newChanges = { ...prev };
-                delete newChanges[variables.key];
-                return newChanges;
-            });
+            resetLocalChanges(variables.key);
         },
         onError: (error) => {
             handleErrorUtility(error, "Failed to save template");
         }
     });
 
-    const updateStyle = (templateKey: string, path: string, value: any) => {
-        setLocalChanges(prev => {
-            const newStyles = JSON.parse(JSON.stringify(prev[templateKey] || templates?.[templateKey]?.styles || {}));
-            
-            let current = newStyles;
-            const keys = path.split('.');
-            for (let i = 0; i < keys.length - 1; i++) {
-                if (!current[keys[i]]) current[keys[i]] = {};
-                current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = value;
+    const activeStyles = React.useMemo(() => {
+        if (!templates || !activeTemplateKey) return null;
+        return localChanges[activeTemplateKey] || templates[activeTemplateKey]?.styles;
+    }, [templates, localChanges, activeTemplateKey]);
 
-            return { ...prev, [templateKey]: newStyles };
-        });
+
+    const updateStyle = (path: string, value: any) => {
+        if (activeTemplateKey) {
+            updateLocalStyle(activeTemplateKey, path, value);
+        }
     };
     
     const saveChanges = (key: string) => {
-        if (localChanges[key]) {
-            updateMutation.mutate({ key, styles: localChanges[key] });
+        const changesToSave = localChanges[key];
+        if (changesToSave) {
+            mutation.mutate({ key, styles: changesToSave });
         }
     };
-    
-    const combinedTemplates = React.useMemo(() => {
-        if (!templates) return {};
-        const combined = { ...templates };
-        for (const key in localChanges) {
-            if (combined[key]) {
-                combined[key] = { ...combined[key], styles: localChanges[key] };
-            }
-        }
-        return combined;
-    }, [templates, localChanges]);
-
 
     return { 
-        templates: combinedTemplates, 
-        isLoaded: !isLoading, 
-        isSaving: updateMutation.isPending,
+        templates,
+        isLoaded: !isLoading,
+        activeTemplateKey,
+        setActiveTemplateKey,
+        activeStyles,
         updateStyle,
-        saveChanges
+        saveChanges,
+        isSaving: mutation.isPending,
     };
-}
-
-export function useCreateDocxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (data: {id: string, name: string, description: string}) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return createDocxTemplate(data, token);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-        },
-        onError: (error: any) => {
-            // Re-throw for form handling
-            throw error;
-        }
-    });
-}
-
-export function useDeleteDocxTemplate() {
-    const queryClient = useQueryClient();
-    const { firebaseUser } = useAuth();
-    return useMutation({
-        mutationFn: async (templateKey: string) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return deleteDocxTemplate(templateKey, token);
-        },
-        onSuccess: (data, templateKey) => {
-            queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-            toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
-        },
-        onError: (error: Error) => {
-            handleErrorUtility(error, "Failed to delete template");
-        }
-    });
 }
