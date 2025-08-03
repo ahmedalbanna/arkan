@@ -34,6 +34,7 @@ import { useReportGeneration } from '@/hooks/use-report-generation';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
+import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
 

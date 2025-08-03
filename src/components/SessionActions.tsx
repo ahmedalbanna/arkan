@@ -33,6 +33,11 @@ import { Label } from './ui/label';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { UploadManager } from './UploadManager';
+import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { useCodebaseStore } from '@/hooks/useCodebaseStore';
+import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
 
 function SaveStatus() {
     const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
@@ -66,12 +71,16 @@ function SaveStatus() {
     )
 }
 
-function hasAnyContent(state: ReturnType<typeof useBuilderStore.getState>): boolean {
-    if (state.projectIdea?.trim()) return true;
-    if (state.proposal) return true;
+function hasAnyContent(): boolean {
+    if (useBuilderStore.getState().projectIdea?.trim()) return true;
+    if (useBuilderStore.getState().proposal) return true;
     if (Object.values(useReportStore.getState().sections).some(s => !!s)) return true;
     if (Object.values(useDiagramStore.getState().diagrams).some(d => !!d)) return true;
-    // Add other store checks if necessary
+    if (usePresentationStore.getState().presentation?.history && usePresentationStore.getState().presentation!.history.length > 0) return true;
+    if (useCodeGeneratorStore.getState().html) return true;
+    if (useProjectPlanStore.getState().projectPlan) return true;
+    if (useCodebaseStore.getState().codebase) return true;
+    if (useAcademicSolverStore.getState().analyzedDocument) return true;
     return false;
 }
 
@@ -120,7 +129,7 @@ export const SessionActions = () => {
     };
     
     const handleSaveProjectFile = () => {
-        if (!hasAnyContent(store)) return;
+        if (!hasAnyContent()) return;
         const jsonString = JSON.stringify(store.getFullState());
         // Encode to Base64 with Unicode support
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
@@ -129,7 +138,7 @@ export const SessionActions = () => {
     }
 
     const performSave = (name?: string) => {
-        if (!hasAnyContent(store)) {
+        if (!hasAnyContent()) {
             toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
             return;
         }
@@ -145,14 +154,15 @@ export const SessionActions = () => {
         }
     }
 
-
     const handleSave = () => {
         // If we are editing a saved project, or if the project has a name, save directly.
-        if (store.currentProjectId || store.name || store.proposal?.title) {
+        if (store.currentProjectId || store.name) {
             performSave();
-        } else {
-            // If it's a new project without a name, prompt for one.
+        } else if (hasAnyContent()) {
+            // If it's a new project without a name but has content, prompt for one.
             setIsSavePromptOpen(true);
+        } else {
+            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
         }
     }
     
@@ -167,7 +177,7 @@ export const SessionActions = () => {
     };
 
     const handleSaveAs = () => {
-        if (!hasAnyContent(store)) {
+        if (!hasAnyContent()) {
             toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
             return;
         }
@@ -251,7 +261,7 @@ export const SessionActions = () => {
                             variant="outline"
                             size="icon"
                             onClick={handleSaveProjectFile}
-                            disabled={!hasAnyContent(store)}
+                            disabled={!hasAnyContent()}
                              className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <FileJson className="h-4 w-4" />
@@ -303,7 +313,7 @@ export const SessionActions = () => {
                          <Button
                             variant="outline"
                             size="icon"
-                            disabled={!hasAnyContent(store) || isSaving}
+                            disabled={!hasAnyContent()}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <DiscAlbum className="h-4 w-4" />
