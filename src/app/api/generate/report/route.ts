@@ -13,7 +13,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 // This API now only handles SINGLE section generation.
 // The "full report" generation is orchestrated on the client-side.
 const generateSectionSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
+  proposal: ProjectProposalSchema.optional().nullable(),
   projectPlan: ProjectPlanSchema.optional().nullable(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.object({}).passthrough().refine(obj => {

@@ -15,7 +15,7 @@ import type { AgentPrompt } from '@/lib/agents';
 // This input schema is generic and can handle any section generation.
 // The `sectionToGenerate` field tells the flow which agent's prompt to use.
 const GenerateSectionInputSchema = z.object({
-  proposal: AnyProjectProposalSchema.optional(),
+  proposal: AnyProjectProposalSchema.optional().nullable(),
   projectPlan: ProjectPlanSchema.optional().nullable(),
   sectionToGenerate: SectionNameSchema,
   otherSections: z.object({}).passthrough().refine(obj => {
