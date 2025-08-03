@@ -7,6 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Input } from '@/components/ui/input';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { Switch } from '../ui/switch';
+import { TemplateKey } from '@/lib/types';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
@@ -23,7 +24,9 @@ export function StyleEditor({ heading, styleKey }: StyleEditorProps) {
     const styles = activeStyles.default[styleKey].run;
 
     const handleStyleChange = (path: string, value: any) => {
-        updateStyle(`${styleKey}.run.${path}`, value);
+        if (activeTemplateKey) {
+            updateStyle(`${styleKey}.run.${path}`, value);
+        }
     }
     
     return (

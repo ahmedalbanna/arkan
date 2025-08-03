@@ -10,6 +10,7 @@ import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { Loader2, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
+import { TemplateKey } from '@/lib/types';
 
 export function DesignStudio() {
     const { templates, activeTemplateKey, setActiveTemplateKey, saveChanges, isSaving } = useDocxStyles();
@@ -34,7 +35,7 @@ export function DesignStudio() {
                  <div className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="template-selector">Active Template</Label>
-                        <Select value={activeTemplateKey} onValueChange={setActiveTemplateKey}>
+                        <Select value={activeTemplateKey} onValueChange={(v) => setActiveTemplateKey(v as TemplateKey)}>
                             <SelectTrigger id="template-selector">
                                 <SelectValue placeholder="Select a template..." />
                             </SelectTrigger>

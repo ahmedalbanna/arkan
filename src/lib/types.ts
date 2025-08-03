@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
@@ -76,6 +77,8 @@ export interface PptxTemplate {
     imageUrl: string;
     dataAiHint: string;
 }
+
+export type TemplateKey = 'modern' | 'classic' | 'academic';
 
 export interface ProjectState {
     name?: string | undefined;
