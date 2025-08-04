@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -43,8 +44,6 @@ const generatePresentationFlow = ai.defineFlow(
   },
   async (input) => {
     
-    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
-
     // Separate media from text files for the prompt
     const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
@@ -56,7 +55,7 @@ const generatePresentationFlow = ai.defineFlow(
       prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
 
 **Your Process:**
-1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data.
+1.  **Synthesize Content:** Read through all the provided source documents to understand the key topics, arguments, and data. The documents are varied and may include project proposals, report sections, diagrams (as PlantUML code), or other text.
 2.  **Structure the Narrative:** Create a logical flow for the presentation. Start with an introduction, develop the main points across several slides, and end with a conclusion.
 3.  **Draft Slides:** For each slide:
     *   Write a clear, concise title.
@@ -64,8 +63,7 @@ const generatePresentationFlow = ai.defineFlow(
     *   Write detailed speaker notes that elaborate on each bullet point, providing context and deeper explanations.
 
 **CRITICAL INSTRUCTIONS:**
--   Your primary source of information is the 'Source Documents' provided below.
--   If a 'Project Proposal' is also provided, use it for high-level context (like the overall objective) but base the slide content on the detailed source documents.
+-   Your primary source of information is the 'Source Documents' provided below. Synthesize information from ALL of them to create a coherent narrative.
 -   Adhere to all provided guidelines.
 
 --- GUIDELINES ---
@@ -93,14 +91,6 @@ const generatePresentationFlow = ai.defineFlow(
 {{media url=this.content}}
 ---
 {{/each}}
-
-
-{{#if proposal}}
---- High-Level Context: Project Proposal ---
-\`\`\`json
-${stringifiedProposal}
-\`\`\`
-{{/if}}
 `,
     });
 

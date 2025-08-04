@@ -9,11 +9,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Loader2, Sparkles, Presentation, History } from 'lucide-react';
+import { Loader2, Sparkles, Presentation, History, FileText } from 'lucide-react';
 import type { Agent, AgentPrompt } from '@/lib/agents';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useReportStore } from '@/hooks/useReportStore';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { usePresentationTemplates } from '@/hooks/use-templates';
 import { formatDistanceToNow } from 'date-fns';
@@ -24,6 +25,9 @@ import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
+import { ContextSelector } from '../generate/ContextSelector';
+import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import type { SectionName, DiagramType } from '@/ai/schemas';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -66,16 +70,13 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         addExternalContext,
         removeExternalContext,
         guidelineState,
+        contextSelection,
         selectedPresentationTemplateId,
         setSelectedPresentationTemplateId,
-     } = useReportStore(state => ({
-        externalContext: state.externalContext,
-        addExternalContext: state.addExternalContext,
-        removeExternalContext: state.removeExternalContext,
-        guidelineState: state.guidelineState,
-        selectedPresentationTemplateId: state.selectedPresentationTemplateId,
-        setSelectedPresentationTemplateId: state.setSelectedPresentationTemplateId,
-     }));
+     } = useReportStore();
+     
+    const { sections } = useReportStore();
+    const { diagrams } = useDiagramStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
@@ -84,12 +85,55 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
 
     const presentations = presentation?.history || [];
-    const hasContent = externalContext.length > 0;
+    
+    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+    const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
 
     const handleGenerateClick = () => {
+        const selectedContext = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+
+        const sourceDocuments = [];
+
+        // 1. Add Proposal
+        if (selectedContext.proposal && proposal) {
+            sourceDocuments.push({
+                fileName: "Project Proposal",
+                content: JSON.stringify(proposal, null, 2)
+            });
+        }
+
+        // 2. Add Report Sections
+        for (const key in selectedContext.sections) {
+            if (selectedContext.sections[key] && sections[key as SectionName]) {
+                const sectionKey = key as SectionName;
+                sourceDocuments.push({
+                    fileName: t(sectionConfig[sectionKey].title),
+                    content: sections[sectionKey]!
+                });
+            }
+        }
+        
+        // 3. Add Diagrams
+         for (const key in selectedContext.diagrams) {
+            if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
+                const diagramKey = key as DiagramType;
+                sourceDocuments.push({
+                    fileName: `Diagram: ${t(diagramConfig[diagramKey].title)}`,
+                    content: diagrams[diagramKey]!.plantUmlCode
+                });
+            }
+        }
+
+        // 4. Add External Context Files
+        externalContext.forEach((file, index) => {
+            if (selectedContext.externalContext[index]) {
+                sourceDocuments.push(file);
+            }
+        });
+
         const body = {
             proposal: proposal, // Still pass proposal for high-level context
-            sourceDocuments: externalContext,
+            sourceDocuments: sourceDocuments,
             guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
             templateId: selectedPresentationTemplateId,
         };
@@ -104,7 +148,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
                 <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
-                <CardDescription>Upload or paste text to generate a presentation.</CardDescription>
+                <CardDescription>Upload or select context to generate a presentation.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="generate" className="w-full">
@@ -113,16 +157,28 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">History</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-                        <AcademicUploaders
-                            title="Source Documents"
-                            onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
-                            onContentRemoved={removeExternalContext}
-                            isProcessing={isDisabled}
-                            uploadedContent={externalContext}
-                            isContext
-                        />
-
-                        <Accordion type="single" collapsible defaultValue="settings" className="w-full space-y-1">
+                        
+                         <Accordion type="multiple" className="w-full space-y-1" defaultValue={['context']}>
+                             <AccordionItem value="context">
+                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="h-4 w-4" /> Context & Source Documents
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="space-y-4 p-4">
+                                     <ContextSelector itemKey="presentation" />
+                                     <div className="pt-4 mt-4 border-t">
+                                        <AcademicUploaders
+                                            title="Upload Files"
+                                            onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
+                                            onContentRemoved={removeExternalContext}
+                                            isProcessing={isDisabled}
+                                            uploadedContent={externalContext}
+                                            isContext
+                                        />
+                                    </div>
+                                </AccordionContent>
+                            </AccordionItem>
                             <AccordionItem value="settings">
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                     <div className="flex items-center gap-2">
@@ -156,7 +212,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                         </TooltipContent>
                                     ) : !hasContent ? (
                                         <TooltipContent>
-                                            <p>Please upload or paste content to generate a presentation.</p>
+                                            <p>Please select or upload content to generate a presentation.</p>
                                         </TooltipContent>
                                     ): null}
                                 </Tooltip>
