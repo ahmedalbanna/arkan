@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -13,7 +14,7 @@ import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
 import { useProjectPlanStore } from "./useProjectPlanStore";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useAcademicSolverStore } from './useAcademicSolverStore';
-import type { ProjectState, FullReportModeConfig } from "@/lib/types";
+import type { ProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
 
 /**
  * Zustand store for managing the core state of the project builder.
@@ -28,6 +29,7 @@ export interface BuilderState {
   currentProjectId: string | null; // To track if we are editing a saved project
   hasUnsavedChanges: boolean; // To track if a save is needed
   reportConfig?: FullReportModeConfig | null; // Add reportConfig to the state
+  generatedProposalState?: SavedProposalState | null;
 }
 
 interface BuilderActions {
@@ -39,6 +41,7 @@ interface BuilderActions {
   setCurrentProjectId: (id: string | null) => void;
   setHasUnsavedChanges: (status: boolean) => void;
   setReportConfig: (config: FullReportModeConfig | null) => void; // Add setter for reportConfig
+  setGeneratedProposalState: (state: SavedProposalState | null) => void;
   getFullState: () => ProjectState;
   // Proposal Actions
   setProposal: (proposal: AnyProjectProposal | null) => void;
@@ -52,6 +55,7 @@ const initialState: BuilderState = {
   currentProjectId: null,
   hasUnsavedChanges: false,
   reportConfig: null,
+  generatedProposalState: null,
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -83,6 +87,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           proposal: newState.proposal,
           currentProjectId: newState.id || null, // Set the current project ID
           reportConfig: newState.reportConfig, // Load the report config
+          generatedProposalState: newState.generatedProposalState,
           hasUnsavedChanges: false, // Loading a project means it's saved
         });
 
@@ -107,6 +112,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         projectIdea: get().projectIdea,
         proposal: get().proposal,
         reportConfig: get().reportConfig, // Include reportConfig in the full state
+        generatedProposalState: get().generatedProposalState,
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
@@ -124,6 +130,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setCurrentProjectId: (id) => set({ currentProjectId: id }),
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
       setReportConfig: (config) => set({ reportConfig: config, hasUnsavedChanges: true }),
+      setGeneratedProposalState: (state) => set({ generatedProposalState: state, hasUnsavedChanges: true }),
 
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
@@ -161,6 +168,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
         reportConfig: state.reportConfig,
+        generatedProposalState: state.generatedProposalState,
         // Include substore states for persistence
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,

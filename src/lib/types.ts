@@ -80,6 +80,7 @@ export interface PptxTemplate {
 
 export type TemplateKey = 'modern' | 'classic' | 'academic';
 
+
 // --- Full Report Mode Configuration Interfaces ---
 
 export interface FullReportModeConfig {
@@ -136,12 +137,78 @@ export interface PostProcessingStep {
     template?: string;
 }
 
+// --- Proposal Mode Configuration Interfaces ---
+
+export interface LinkedAsset {
+    type: string; // e.g., "diagram", "report-section", "image"
+    assetId: string; // The ID of the linked asset
+    description?: string; // Optional description of the asset
+}
+export interface GeneratedProposalSection {
+    sectionName: string;
+    generatedContent: string;
+    generationDetails?: { // Optional details about how this section was generated
+       agentId?: string;
+       promptUsed?: {
+          base?: string;
+          guidelines?: { text: string; isDefault: boolean; }[];
+       };
+       contextsUsed?: any[]; // Summary or list of contexts
+       outputControl?: {
+           format?: string;
+           maxLength?: number;
+       };
+    };
+    order?: number; // Optional display order
+    wordCount?: number; // Optional word count
+    linkedAssets?: LinkedAsset[]; // Optional references to other assets
+}
+
+export interface PostProcessingStepResult {
+   type: string; // e.g., "evaluation", "compilation"
+   status: string; // Status of this specific step (e.g., "completed", "failed")
+   result?: any; // The outcome of the step (e.g., evaluation score, compilation URL)
+   errorMessage?: string | null; // Error if the step failed
+   timestamp?: string; // When this step completed
+}
+
+export interface ProposalVersionHistory {
+    version: string;
+    timestamp: string;
+    notes?: string;
+    changes?: string[]; // Brief description of what changed in this version
+}
+
+export interface SavedProposalState {
+   proposalTitle?: string;
+   language?: string;
+   status?: string;
+   errorMessage?: string | null;
+   generationMetadata?: {
+       timestamp?: string;
+       templateUsed?: string;
+       modelVersion?: string;
+       totalCostCredits?: number;
+       durationSeconds?: number;
+   };
+   authorId?: string; // Link to the user who initiated generation
+   targetAudience?: string; // Intended audience
+   desiredTone?: string; // Intended tone
+   sections?: GeneratedProposalSection[]; // Array of generated sections
+   postProcessing?: PostProcessingStepResult[]; // Results of post-processing steps
+   versionHistory?: ProposalVersionHistory[]; // History of generation versions
+   createdAt?: string;
+   updatedAt?: string;
+}
+
 // --- Main Project State ---
 
 export interface ProjectState {
     name?: string | undefined;
     projectIdea?: string | undefined;
     proposal: AnyProjectProposal | null;
+    reportConfig?: FullReportModeConfig | null;
+    generatedProposalState?: SavedProposalState | null; // Added field
     sections?: {
         introduction?: string | undefined;
         literatureReview?: string | undefined;
@@ -195,7 +262,6 @@ export interface ProjectState {
     externalContext?: any[] | undefined;
     teamId?: string | null | undefined;
     projectPlan: import("@/ai/schemas").ProjectPlan | null;
-    reportConfig?: FullReportModeConfig | null;
 }
 export interface SavedProject extends ProjectState {
     id: string;
