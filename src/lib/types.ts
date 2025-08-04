@@ -261,7 +261,7 @@ export interface ProjectState {
     codebase?: any;
     externalContext?: any[] | undefined;
     teamId?: string | null | undefined;
-    projectPlan: import("@/ai/schemas").ProjectPlan | null;
+    projectPlan: ProjectPlan | null;
 }
 export interface SavedProject extends ProjectState {
     id: string;
