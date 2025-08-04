@@ -44,7 +44,7 @@ export const DiagramGenerationTools = () => {
     } = useReportStore();
         
     const diagramMutation = useGenerateDiagram((data, variables) => {
-        const diagramKey = variables.body.diagramToGenerate as DiagramType;
+        const diagramKey = variables.diagramToGenerate as DiagramType;
         const translatedTitle = t(diagramConfig[diagramKey].title);
         
         setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
@@ -60,7 +60,7 @@ export const DiagramGenerationTools = () => {
                     const base64data = reader.result as string;
                     explainMutation.mutate(base64data, {
                         onSuccess: (explanationData) => {
-                            setDiagramExplanation(diagramKey, explanationData.explanation);
+                            onDiagramExplanationSave(diagramKey, explanationData.explanation);
                             toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
                         },
                         onError: (error) => {
@@ -75,6 +75,10 @@ export const DiagramGenerationTools = () => {
              console.error("Failed to prepare image for explanation:", error);
         }
     });
+
+    const onDiagramExplanationSave = (diagramKey: DiagramType, explanation: string) => {
+        setDiagramExplanation(diagramKey, explanation);
+    }
     
     
     const isAnythingGenerating = diagramMutation.isPending;
@@ -103,7 +107,7 @@ export const DiagramGenerationTools = () => {
             externalContext: selectedExternalContext,
         };
         setActiveMutationKey(diagramType);
-        diagramMutation.mutate({body});
+        diagramMutation.mutate(body);
     };
 
     if (!agentsLoaded) {

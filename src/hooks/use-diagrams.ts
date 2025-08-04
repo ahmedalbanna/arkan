@@ -18,7 +18,7 @@ import {
 /**
  * Custom mutation hook to generate a new diagram using an AI flow.
  */
-export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOutput & { imageUrl: string }, variables: { body: any; token: string }) => void) {
+export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOutput & { imageUrl: string }, variables: any) => void) {
   const { firebaseUser } = useAuth();
   const queryClient = useQueryClient();
 
@@ -32,7 +32,7 @@ export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOut
         queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
       }
       if(onSuccessCallback) {
-        onSuccessCallback(data, { body: variables, token: ''});
+        onSuccessCallback(data, variables);
       }
     },
     onError: (error: Error, variables) => {
