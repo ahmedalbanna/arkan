@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ScrollArea } from '../ui/scroll-area';
 import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
+import { Textarea } from '../ui/textarea';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -116,7 +117,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
 
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
     const audioRef = useRef<HTMLAudioElement>(null);
-
+    const [localContent, setLocalContent] = useState(content);
     const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
     const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
@@ -128,19 +129,10 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
 
-    //  // Creates a new editor instance.
-    // const editor = useCreateBlockNote();
 
-    // Converts the markdown from props to BlockNote's format and loads it.
-    // useEffect(() => {
-    //     async function loadContent() {
-    //         if (editor && content) {
-    //             const blocks = await editor.tryParseMarkdownToBlocks(content);
-    //             editor.replaceBlocks(editor.document, blocks);
-    //         }
-    //     }
-    //     loadContent();
-    // }, [editor, content]);
+    useEffect(() => {
+        setLocalContent(content);
+    }, [content])
 
 
     const manipulateMutation = useMutation({
@@ -204,16 +196,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     };
 
     const handleExportPdf = async () => {
-    //    if (editor.domElement) {
-    //      // Temporarily hide the toolbar for a cleaner PDF
-    //      const toolbar = editor.domElement.querySelector('.bn-floating-toolbar');
-    //      if (toolbar) (toolbar as HTMLElement).style.display = 'none';
-
-    //      await exportComponentAsPDF(editor.domElement, `${title}.pdf`);
-
-    //      // Restore the toolbar
-    //      if (toolbar) (toolbar as HTMLElement).style.display = '';
-    //    }
        setIsEditorPopoverOpen(false);
     };
 
@@ -235,6 +217,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             <div className="flex justify-between items-center mb-2">
                 <TabsList>
                     <TabsTrigger value="view">View</TabsTrigger>
+                    <TabsTrigger value="edit">Edit</TabsTrigger>
                     <TabsTrigger value="translate">Translate</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center text-xs text-muted-foreground">
@@ -253,20 +236,11 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                    <div className="border rounded-md p-4 prose dark:prose-invert max-w-none">
-                        {/* <BlockNoteViewRaw
-                            editor={editor}
-                            theme={"light"}
-                            sideMenu={false}
-                            formattingToolbar={true}
-                            linkToolbar={true}
-                            onChange={async () => {
-                                const markdown = await editor.blocksToMarkdownLossy(editor.document);
-                                onUpdate(sectionKey, markdown);
-                            }}
-                        /> */}
-                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-                    </div>
+                    <ScrollArea className="h-[50vh] rounded-md border p-4">
+                        <div className="prose dark:prose-invert max-w-none">
+                            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                        </div>
+                    </ScrollArea>
 
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
@@ -345,6 +319,14 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                         </Popover>
                     </div>
                 </div>
+            </TabsContent>
+            <TabsContent value="edit">
+                <Textarea
+                    value={localContent}
+                    onChange={(e) => setLocalContent(e.target.value)}
+                    onBlur={() => onUpdate(sectionKey, localContent)}
+                    className="h-[50vh] min-h-[300px]"
+                />
             </TabsContent>
             <TabsContent value="translate">
                 <TranslationView sectionKey={sectionKey} originalContent={content} />

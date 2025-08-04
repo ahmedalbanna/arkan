@@ -4,13 +4,13 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
-import { FileDown, Loader2, Wand2, Check, ThumbsDown } from 'lucide-react';
+import { FileDown, Loader2, Wand2, Check, ThumbsDown, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Label } from './ui/label';
 import { useMutation } from '@tanstack/react-query';
