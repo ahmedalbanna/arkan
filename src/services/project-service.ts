@@ -1,4 +1,5 @@
 
+
 'use client';
 import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
 import { app } from '@/lib/firebase';
