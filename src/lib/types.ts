@@ -80,6 +80,64 @@ export interface PptxTemplate {
 
 export type TemplateKey = 'modern' | 'classic' | 'academic';
 
+// --- Full Report Mode Configuration Interfaces ---
+
+export interface FullReportModeConfig {
+  mode: "Full Report Mode";
+  reportTitle?: string;
+  language?: string;
+  version?: string;
+  author?: {
+    name?: string;
+    id?: string;
+  };
+  metadata?: {
+    creationDate?: string;
+    lastModifiedDate?: string;
+    tags?: string[];
+  };
+  styling?: {
+    template?: string;
+    colors?: {
+      primary?: string;
+      background?: string;
+      accent?: string;
+    };
+    fonts?: {
+       headline?: string;
+       body?: string;
+       code?: string;
+    };
+  };
+  sections: ReportSectionConfig[];
+  postProcessing?: PostProcessingStep[];
+}
+
+export interface ReportSectionConfig {
+  sectionName: string;
+  agentId: string;
+  prompt: {
+    base: string;
+    guidelines: { text: string; isDefault: boolean; }[];
+  };
+  contexts: any[];
+  controlOutput?: {
+     format?: string;
+     maxLength?: number;
+  };
+  dependencies?: string[];
+}
+
+export interface PostProcessingStep {
+    type: string;
+    agentId?: string;
+    criteria?: string[];
+    format?: string;
+    template?: string;
+}
+
+// --- Main Project State ---
+
 export interface ProjectState {
     name?: string | undefined;
     projectIdea?: string | undefined;
@@ -137,6 +195,7 @@ export interface ProjectState {
     externalContext?: any[] | undefined;
     teamId?: string | null | undefined;
     projectPlan: import("@/ai/schemas").ProjectPlan | null;
+    reportConfig?: FullReportModeConfig | null;
 }
 export interface SavedProject extends ProjectState {
     id: string;

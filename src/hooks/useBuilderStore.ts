@@ -13,7 +13,7 @@ import { useCodeGeneratorStore } from "./useCodeGeneratorStore";
 import { useProjectPlanStore } from "./useProjectPlanStore";
 import { useCodebaseStore } from "./useCodebaseStore";
 import { useAcademicSolverStore } from './useAcademicSolverStore';
-import type { ProjectState } from "@/lib/types";
+import type { ProjectState, FullReportModeConfig } from "@/lib/types";
 
 /**
  * Zustand store for managing the core state of the project builder.
@@ -27,6 +27,7 @@ export interface BuilderState {
   proposal: AnyProjectProposal | null;
   currentProjectId: string | null; // To track if we are editing a saved project
   hasUnsavedChanges: boolean; // To track if a save is needed
+  reportConfig?: FullReportModeConfig | null; // Add reportConfig to the state
 }
 
 interface BuilderActions {
@@ -37,6 +38,7 @@ interface BuilderActions {
   setProjectIdea: (idea: string) => void;
   setCurrentProjectId: (id: string | null) => void;
   setHasUnsavedChanges: (status: boolean) => void;
+  setReportConfig: (config: FullReportModeConfig | null) => void; // Add setter for reportConfig
   getFullState: () => ProjectState;
   // Proposal Actions
   setProposal: (proposal: AnyProjectProposal | null) => void;
@@ -49,6 +51,7 @@ const initialState: BuilderState = {
   proposal: null,
   currentProjectId: null,
   hasUnsavedChanges: false,
+  reportConfig: null,
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>()(
@@ -79,6 +82,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
           projectIdea: newState.projectIdea || "",
           proposal: newState.proposal,
           currentProjectId: newState.id || null, // Set the current project ID
+          reportConfig: newState.reportConfig, // Load the report config
           hasUnsavedChanges: false, // Loading a project means it's saved
         });
 
@@ -102,6 +106,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         name: get().name!,
         projectIdea: get().projectIdea,
         proposal: get().proposal,
+        reportConfig: get().reportConfig, // Include reportConfig in the full state
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,
         presentation: usePresentationStore.getState().presentation,
@@ -118,6 +123,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         set({ projectIdea: idea, hasUnsavedChanges: true }),
       setCurrentProjectId: (id) => set({ currentProjectId: id }),
       setHasUnsavedChanges: (status) => set({ hasUnsavedChanges: status }),
+      setReportConfig: (config) => set({ reportConfig: config, hasUnsavedChanges: true }),
 
       // --- PROPOSAL ACTIONS ---
       setProposal: (proposal) => {
@@ -154,6 +160,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         projectIdea: state.projectIdea,
         proposal: state.proposal,
         currentProjectId: state.currentProjectId,
+        reportConfig: state.reportConfig,
         // Include substore states for persistence
         sections: useReportStore.getState().sections,
         diagrams: useDiagramStore.getState().diagrams,

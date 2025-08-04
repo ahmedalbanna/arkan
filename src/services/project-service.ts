@@ -3,7 +3,7 @@
 import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
 import { app } from '@/lib/firebase';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
-import type { ProjectState as FullProjectState } from "@/lib/types";
+import type { ProjectState as FullProjectState, FullReportModeConfig } from "@/lib/types";
 
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
@@ -18,6 +18,7 @@ export interface SavedProject extends ProjectState {
     createdAt: string;
     updatedAt: string;
     proposal: AnyProjectProposal | null;
+    reportConfig?: FullReportModeConfig | null; // Added field
 }
 
 // Fetch all projects for the current user
