@@ -185,6 +185,25 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: ISty
     }
 }
 
+export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, templateKey: TemplateKey = 'modern') {
+    const { saveAs } = await import('file-saver');
+    
+    const allTemplates = await getStylesFromServer();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const docxContent = await createDocxParagraphs(markdownContent);
+
+    const doc = new Document({
+        styles,
+        numbering,
+        sections: [{
+            children: docxContent
+        }]
+    });
+    
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${fileName}.docx`);
+}
+
 
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
     const { saveAs } = await import('file-saver');

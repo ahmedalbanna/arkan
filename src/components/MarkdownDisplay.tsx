@@ -1,13 +1,17 @@
+
 'use client';
 
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { markdownComponents } from '@/lib/markdown-components';
+import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
+import { FileDown, Loader2 } from 'lucide-react';
 
 export function MarkdownDisplay() {
   const [markdown, setMarkdown] = useState(`# Sample Markdown
@@ -30,6 +34,14 @@ function helloWorld() {
 }
 \`\`\`
 `);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    await exportMarkdownAsDocx(markdown, "markdown-export");
+    setIsExporting(false);
+  };
+
 
   return (
     <ResizablePanelGroup direction="horizontal" className="min-h-[70vh] rounded-lg border">
@@ -46,6 +58,16 @@ function helloWorld() {
               className="h-full resize-none"
             />
           </CardContent>
+           <CardFooter>
+            <Button onClick={handleExport} disabled={isExporting || !markdown}>
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <FileDown className="mr-2 h-4 w-4" />
+              )}
+              Export as DOCX
+            </Button>
+          </CardFooter>
         </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
