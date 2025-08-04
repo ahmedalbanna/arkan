@@ -14,7 +14,7 @@ import {
   deletePptxTemplate,
   type PptxTemplate,
 } from "@/services/template-service";
-import type { PptxStyleOptions, PptxTemplateKey } from '@/lib/types';
+import { PptxStyleOptions } from '@/lib/types';
 
 
 export const pptxTemplateKeys = {

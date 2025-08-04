@@ -4,30 +4,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
+import { AGENTS, AgentCategory } from '@/lib/agents';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Button } from '../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, Check, X, Search, Plus } from 'lucide-react';
-import { useForm } from 'react-hook-form';
+import { useForm, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AGENTS, AgentCategory } from '@/lib/agents';
-import { Checkbox } from '../ui/checkbox';
-import { Skeleton } from '../ui/skeleton';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAgents } from '@/hooks/use-agents';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Label } from '../ui/label';
+import { Label } from '@/components/ui/label';
+import React from 'react';
+
 
 const reportTemplateSchema = z.object({
   id: z.string(),
@@ -56,21 +58,21 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-                 <FormField control={form.control} name="name" render={({ field }) => (
+                 <FormField control={form.control} name="name" render={({ field }: { field: ControllerRenderProps<ReportFormValues, "name"> }) => (
                     <FormItem>
                         <FormLabel>Template Name</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="description" render={({ field }) => (
+                 <FormField control={form.control} name="description" render={({ field }: { field: ControllerRenderProps<ReportFormValues, "description"> }) => (
                     <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField
+                 <FormField // Outer FormField for the group
                     control={form.control}
                     name="agentIds"
                     render={() => (
@@ -84,7 +86,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                                         key={agent.id}
                                         control={form.control}
                                         name="agentIds"
-                                        render={({ field }) => {
+                                    render={({ field }: { field: ControllerRenderProps<ReportFormValues, "agentIds"> }) => {
                                             return (
                                                 <FormItem
                                                     key={agent.id}
@@ -93,7 +95,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                                                     <FormControl>
                                                         <Checkbox
                                                             checked={field.value?.includes(agent.id)}
-                                                            onCheckedChange={(checked) => {
+                                                            onCheckedChange={(checked: boolean) => {
                                                                 return checked
                                                                     ? field.onChange([...field.value, agent.id])
                                                                     : field.onChange(field.value?.filter((value) => value !== agent.id));
@@ -213,7 +215,7 @@ function CreateTemplateDialog() {
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="template-name">TEMPLATE NAME</Label>
-                        <Input id="template-name" placeholder="e.g., Technical Software Report" value={name} onChange={e => setName(e.target.value)} />
+                        <Input id="template-name" placeholder="e.g., Technical Software Report" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="template-description">DESCRIPTION</Label>
@@ -228,7 +230,7 @@ function CreateTemplateDialog() {
                                    <div key={agent.id} className="flex items-center justify-between p-1">
                                        <span>{agent.name}</span>
                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><X className="h-4 w-4"/></Button>
-                                   </div>
+                                    </div>
                                ))}
                             </ScrollArea>
                         </div>
@@ -236,7 +238,7 @@ function CreateTemplateDialog() {
                             <Label>AVAILABLE AGENTS</Label>
                             <ScrollArea className="h-48 border rounded-md p-2">
                                 <div className="p-1"><Input placeholder="Search agents..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
-                                {isLoaded && availableAgents.map(agent => (
+                                {isLoaded && availableAgents.map((agent: any) => ( // Explicitly type agent
                                      <div key={agent.id} className="flex items-center justify-between p-1">
                                        <span>{agent.name}</span>
                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><Plus className="h-4 w-4"/></Button>

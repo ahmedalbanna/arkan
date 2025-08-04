@@ -20,6 +20,7 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { useExport } from '@/hooks/use-export';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
+import { ProposalTemplate } from '@/services/template-service';
 
 interface ProposalActionsProps {
     isGenerating: boolean;
@@ -95,8 +96,8 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
 
   const handleExportDocx = () => {
     if (proposal) {
-      exportProposalDocx(proposal, selectedDocxTemplate);
-    }
+ exportProposalDocx(proposal as any, selectedDocxTemplate);
+ }
   }
   
   const handleExportJson = () => {

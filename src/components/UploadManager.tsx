@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
 import { analyzeContextApi } from '@/services/context-service';
@@ -319,10 +319,10 @@ export function UploadManager() {
                     <PasteTextUploader />
                 </TabsContent>
                 <TabsContent value="drive" className="mt-4">
-                    <CloudStorageConnector provider="Google Drive" onConnect={() => toast({title: "Coming Soon!", description:"Google Drive integration is not yet available."})} />
+                    <CloudStorageConnector provider="Google Drive" onConnect={() => toast({ title: "Coming Soon!", description: "Google Drive integration is not yet available." })} icon={'symbol'} />
                 </TabsContent>
                 <TabsContent value="dropbox" className="mt-4">
-                    <CloudStorageConnector provider="Dropbox" onConnect={() => alert('Connect to Dropbox clicked!')} />
+                    <CloudStorageConnector provider="Dropbox" onConnect={() => alert('Connect to Dropbox clicked!')} icon={'symbol'} />
                 </TabsContent>
             </Tabs>
             

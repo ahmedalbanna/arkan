@@ -105,6 +105,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         setSelectedReportTemplateId,
         manualTableOfContents,
         setManualTableOfContents,
+        handleControlChange,
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();

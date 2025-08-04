@@ -2,13 +2,13 @@
 'use client';
 
 import { useFeatures, useUpdateFeature } from '@/hooks/use-features';
-import type { Feature } from '@/hooks/use-features';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Feature } from '@/lib/features';
 
 function FeatureSkeleton() {
   return (

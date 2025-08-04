@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useLogin, useGoogleSignIn } from '@/hooks/use-user';
-import type { LoginCredentials } from '@/lib/types';
+import type { LoginCredentials } from "@/lib/authUtils";
 import { Separator } from './ui/separator';
 
 const formSchema = z.object({

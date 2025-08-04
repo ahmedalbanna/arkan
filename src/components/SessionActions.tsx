@@ -144,7 +144,7 @@ export const SessionActions = () => {
         }
 
         const projectData = store.getFullState();
-        const finalName = name || store.name || store.proposal?.title || 'Untitled Project';
+ const finalName = String(name || store.name || store.proposal?.title || '' || 'Untitled Project');
         const saveData = { ...projectData, name: finalName };
         
         if (store.currentProjectId) {
@@ -184,7 +184,7 @@ export const SessionActions = () => {
         const projectData = store.getFullState();
         // Create a new project with a new name, but don't change the current project context
         const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
-        const saveData = { ...projectData, name: finalSaveAsName };
+        const saveData = { ...projectData, name: String(finalSaveAsName) };
         saveProjectMutation.mutate(saveData, {
             // Overwrite onSuccess to not change the current project context
             onSuccess: (newProject) => {

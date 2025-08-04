@@ -19,8 +19,8 @@ import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, Me
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfile as fetchUserProfileApi, fetchUsers, type UserListResponse } from '@/services/user-service';
-import { Badge } from '@/components/ui/badge';
+import { fetchUserProfileApi as fetchUserProfileApi, fetchUsers, type UserListResponse } from '@/services/user-service';
+import { Badge } from '@/components/ui/badge'; // Corrected import alias
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 import { CreateUserDialog } from './CreateUserDialog';

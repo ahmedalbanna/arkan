@@ -13,7 +13,7 @@ import {
   createDocxTemplate,
   deleteDocxTemplate,
 } from "@/services/template-service";
-import type { DocxTemplate } from '@/services/template-service';
+import type { DocxTemplate, DocxTemplatesRecord } from '@/services/template-service';
 import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
 import { TemplateKey } from '@/lib/types';
@@ -31,11 +31,11 @@ export function useDocxStyles() {
     const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
 
-    const { data: templates, isLoading } = useQuery<Record<string, DocxTemplate>>({
+    const { data: templates, isLoading } = useQuery<DocxTemplatesRecord>({
         queryKey: docxTemplateKeys.lists(),
         queryFn: fetchDocxTemplatesApi,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        initialData: defaultTemplates,
+        initialData: defaultTemplates as Record<string, DocxTemplate>,
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
@@ -66,7 +66,7 @@ export function useDocxStyles() {
     }, [templates, localChanges, activeTemplateKey]);
 
 
-    const updateStyle = (path: string, value: any) => {
+    const updateStyle = (path: string, value: any, value: string | number | boolean) => {
         if (activeTemplateKey) {
             setLocalChanges(prev => {
                 const newStyles = JSON.parse(JSON.stringify(prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {}));

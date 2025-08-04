@@ -73,7 +73,10 @@ export default function ProjectChat() {
         setIsRunning(true);
 
         try {
-            const flow = await runFlow(projectChat, { message: input, projectState });
+            const flow = await runFlow({
+                input: input,
+                url: ''
+            });
 
             let finalContent = '';
             for await (const chunk of flow.stream()) {

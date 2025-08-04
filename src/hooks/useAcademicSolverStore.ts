@@ -16,6 +16,7 @@ export type AcademicSolverStage =
 export interface ExternalContext {
     fileName: string;
     content: string;
+    type: 'context' | 'example'; // Added to match the expected type in ReportGenerationTools
 }
 
 export interface AcademicSolverState {
@@ -68,8 +69,7 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
       }),
     addQuestionDocument: (fileName, content) => {
         set((state) => ({ 
-            questionDocuments: [...state.questionDocuments, { fileName, content }],
-            stage: "idle", // Reset stage when new questions are added
+            questionDocuments: [...state.questionDocuments, { fileName, content, type: 'example' }],
             analyzedDocument: null,
             solvedDocument: null,
         }));
@@ -82,7 +82,7 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     addExternalContext: (fileName, content) => {
-        set((state) => ({ externalContext: [...state.externalContext, { fileName, content }] }));
+        set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type: 'context' }] }));
         useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     removeExternalContext: (index) => {

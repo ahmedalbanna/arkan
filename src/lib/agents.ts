@@ -20,7 +20,7 @@ export interface AgentPrompt {
   jsonStructure?: any;
 }
 
-export enum AgentCategory {
+ export enum AgentCategory {
   ContentGeneration = 'Content Generation',
   ProposalGeneration = 'Proposal Generation',
   ReportGeneration = 'Report Generation',

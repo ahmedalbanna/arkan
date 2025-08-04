@@ -1,5 +1,11 @@
 import type { User as FirebaseUser } from 'firebase/auth';
 
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
 /**
  * Checks if a Firebase user is authenticated and returns their ID token.
  * Throws a consistent error if the user is not authenticated.

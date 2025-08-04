@@ -4,6 +4,7 @@ import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntr
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
 
+
 export type {
   ProjectProposal,
   DiagramType,

@@ -37,7 +37,11 @@ export function StyleEditor({ heading, styleKey }: StyleEditorProps) {
                     <div className="space-y-2">
                         <Label>Font Family</Label>
                         <Select
-                            value={styles?.font?.name || ''}
+                            value={
+                                typeof styles?.font === 'string' ?
+                                styles.font :
+                                (styles?.font as any)?.name || '' // Use any as a temporary workaround if type is complex
+                            }
                             onValueChange={(value) => handleStyleChange('font.name', value)}
                         >
                             <SelectTrigger><SelectValue /></SelectTrigger>

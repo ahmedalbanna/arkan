@@ -15,7 +15,7 @@ export const generateCodebaseTool = ai.defineTool(
     inputSchema: z.object({}), // No specific input needed from the LLM
     outputSchema: z.any(),
   },
-  async (input, {getFlowState}) => {
+  async (input, options: any) => {
     // The `generateCodebase` flow requires the proposal.
     // We assume the calling flow will have access to the full project state
     // and will pass the proposal when it calls this tool's underlying flow.
@@ -24,7 +24,7 @@ export const generateCodebaseTool = ai.defineTool(
     const state = getFlowState() as { proposal?: any };
     if (!state.proposal) {
         throw new Error("A project proposal is required to generate the codebase.");
-    }
+    } else if (options.getFlowState) { // Check if getFlowState exists before calling
     return generateCodebase({ proposal: state.proposal });
   }
 );

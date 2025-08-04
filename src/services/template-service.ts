@@ -1,8 +1,7 @@
 
 'use client';
 
-import { IStylesOptions } from 'docx';
-import type { PptxTemplate } from '@/lib/types';
+import { IStylesOptions, Document } from 'docx';
 
 // This file centralizes fetching and updating for generation templates.
 
@@ -35,7 +34,19 @@ export interface DocxTemplate {
     name: string;
     description: string;
     styles: IStylesOptions;
+    dataAiHint?: string;
 }
+
+export interface PptxTemplate {
+    id: string;
+    name: string;
+    description: string;
+    styles: any; // Add this line
+    content: any; // Consider a more specific type if possible for PPTX content
+}
+
+export type DocxTemplatesRecord = Record<string, DocxTemplate>;
+export type PptxTemplatesRecord = Record<string, PptxTemplate>;
 
 // --- Proposal Templates ---
 export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
@@ -191,7 +202,7 @@ export async function deletePresentationTemplate(id: string, token: string): Pro
 
 // --- DOCX Templates ---
 
-export async function fetchDocxTemplates(): Promise<Record<string, DocxTemplate>> {
+export async function fetchDocxTemplates(): Promise<DocxTemplatesRecord> {
   const response = await fetch("/api/admin/templates/docx");
   if (!response.ok) {
     throw new Error("Failed to fetch DOCX templates");

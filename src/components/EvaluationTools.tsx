@@ -81,12 +81,30 @@ export const EvaluationTools = () => {
         }
 
         const body = {
-            proposal: proposal!,
+            proposal: {
+                evaluation: proposal?.evaluation as string || '',
+                title: proposal?.title as string || '',
+                category: proposal?.category as string || '',
+                objective: proposal?.objective as string || '',
+                methodology: proposal?.methodology as string || '',
+                expected_outcome: Array.isArray(proposal?.expected_outcome) ? proposal.expected_outcome : [],
+                timeline: {
+                    phases: Array.isArray(proposal?.timeline?.phases) ? proposal.timeline.phases : [],
+                    startDate: proposal?.timeline?.startDate || '',
+                    endDate: proposal?.timeline?.endDate || '', // Keep this property
+                } as any, // Cast timeline to any if its type is uncertain
+                budget: {
+                    totalAmount: proposal?.budget?.totalAmount || 0,
+                    currency: proposal?.budget?.currency || '',
+                    breakdown: Array.isArray(proposal?.budget?.breakdown) ? proposal.budget.breakdown : [],
+                },
+                risks: Array.isArray(proposal?.risks) ? proposal.risks : [],
+ },
             reportSections: sections,
             diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
             acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
         };
-        mutation.mutate(body);
+        mutation.mutate({...body, proposal: body.proposal as any});
     }
   
   return (

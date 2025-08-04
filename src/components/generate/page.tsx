@@ -13,7 +13,6 @@ import OnboardingGuide from '@/components/OnboardingGuide';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFeatures } from '@/hooks/use-features';
-import type { Feature } from '@/hooks/use-features';
 import { cn } from '@/lib/utils';
 
 

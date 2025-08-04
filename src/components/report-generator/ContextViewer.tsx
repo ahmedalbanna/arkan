@@ -53,7 +53,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
                         <AccordionItem value="proposal" className="bg-muted/50 rounded-lg border">
                             <AccordionTrigger className="px-4 py-2 text-sm font-medium">Project Proposal</AccordionTrigger>
                             <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
-                                <ReactMarkdown components={markdownComponents}>{proposal.objective}</ReactMarkdown>
+                                <ReactMarkdown components={markdownComponents}>{String(proposal.objective)}</ReactMarkdown>
                             </AccordionContent>
                         </AccordionItem>
                     )}

@@ -5,6 +5,7 @@ import { AlignmentType } from 'docx';
 import type { IStylesOptions } from 'docx';
 
 export interface Template {
+    id: string;
     name: string;
     description: string;
     styles: IStylesOptions;
@@ -132,6 +133,7 @@ const academicStyles: IStylesOptions = {
 export const templates: Record<TemplateKey, Template> = {
     modern: {
         name: 'templates.modern.name',
+ id: 'modern',
         styles: modernStyles,
         description: 'templates.modern.description',
         imageUrl: '',
@@ -139,6 +141,7 @@ export const templates: Record<TemplateKey, Template> = {
     },
     classic: {
         name: 'templates.classic.name',
+ id: 'classic',
         styles: classicStyles,
         description: 'templates.classic.description',
         imageUrl: '',
@@ -146,11 +149,12 @@ export const templates: Record<TemplateKey, Template> = {
     },
     academic: {
         name: 'templates.academic.name',
+ id: 'academic',
         styles: academicStyles,
         description: 'templates.academic.description',
         imageUrl: '',
         dataAiHint: 'academic paper',
-    },
+ },
 };
 
 export type TemplateKey = 'modern' | 'classic' | 'academic';

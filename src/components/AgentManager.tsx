@@ -2,6 +2,7 @@
 'use client';
 
 import { useAgents, useUpdateAgent, useCreateAgent } from '@/hooks/use-agents';
+import {AgentCategory} from '@/lib/agents';
 import { AGENTS, type Agent, type AgentData } from '@/lib/agents';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -21,7 +22,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { AgentCategory } from '@/lib/agents';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 const createAgentSchema = z.object({
@@ -200,16 +200,16 @@ export default function AgentManager() {
         return agent.name.toLowerCase().includes(lowercasedTerm) ||
                agent.description.toLowerCase().includes(lowercasedTerm) ||
                agent.category.toLowerCase().includes(lowercasedTerm);
-    });
+    }).filter((agent): agent is Agent => agent !== undefined && agent !== null); // Ensure agents are not undefined or null after filtering
 
-    return filtered.reduce((acc, agent) => {
-      const category = agent.category || AgentCategory.ContentGeneration;
-      if (!acc[category]) {
-        acc[category] = [];
+    return filtered.reduce((acc: Record<AgentCategory, Agent[]>, agent: Agent) => {
+ const category = agent.category || AgentCategory.ContentGeneration;
+ if (!acc[category]) {
+ acc[category] = [];
       }
-      acc[category].push(agent);
-      return acc;
-    }, {} as Record<AgentCategory, Agent[]>);
+      acc[category].push(agent as Agent);
+ return acc;
+    }, Object.values(AgentCategory).reduce((acc, category) => ({ ...acc, [category]: [] }), {} as Record<AgentCategory, Agent[]>));
 
   }, [agents, searchTerm]);
 

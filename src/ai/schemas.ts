@@ -139,5 +139,6 @@ export type ProjectPhase = z.infer<typeof ProjectPhaseSchema>;
 
 export const ProjectPlanSchema = z.object({
   phases: z.array(ProjectPhaseSchema).describe('The full list of project phases, each containing a list of tasks.'),
+  tableOfContents: z.array(z.string()).optional().describe('An optional table of contents for the project plan.'),
 });
 export type ProjectPlan = z.infer<typeof ProjectPlanSchema>;

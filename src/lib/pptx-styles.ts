@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { PptxTemplate } from '@/lib/types';
+import type { PptxTemplate, PptxTemplateKey } from '@/lib/types';
 export type { PptxTemplateKey } from '@/lib/types';
 
 const modern: PptxTemplate['styles'] = {

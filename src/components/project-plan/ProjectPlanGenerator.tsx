@@ -13,6 +13,7 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
+import { useReportStore } from '@/hooks/useReportStore';
 import { useMutation } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 
@@ -38,8 +39,8 @@ export default function ProjectPlanGenerator() {
   const { firebaseUser } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
   const { projectPlan } = useProjectPlanStore();
-  
   const [description, setDescription] = useState('');
+  const [tableOfContents, setTableOfContents] = useState('');
   const [deliverables, setDeliverables] = useState('');
   
   const planGenerationMutation = useGenerateProjectPlan();
@@ -47,12 +48,18 @@ export default function ProjectPlanGenerator() {
   useEffect(() => {
     // Pre-fill from proposal if available
     if (proposal) {
-        setDescription(proposal.objective || '');
-        setDeliverables(proposal.expected_outcome?.join('\n') || '');
+        setDescription(String(proposal.objective) || '');
+        setDeliverables(Array.isArray(proposal.expected_outcome) ? proposal.expected_outcome.join('\n') : String(proposal.expected_outcome) || '');
     } else if (projectIdea) {
         setDescription(projectIdea);
     }
-  }, [proposal, projectIdea]);
+ }, [proposal, projectIdea]);
+
+ useEffect(() => {
+    if (projectPlan?.tableOfContents) {
+      setTableOfContents((projectPlan.tableOfContents as string[]).join('\n'));
+    }
+  }, [projectPlan?.tableOfContents]);
 
   const suggestionMutation = useMutation({
       mutationFn: async () => {

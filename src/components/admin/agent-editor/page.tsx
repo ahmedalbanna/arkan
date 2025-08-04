@@ -3,6 +3,7 @@
 
 import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
+import { AgentCategory } from '@/lib/agents';
 import { AlertCircle, Bot } from 'lucide-react';
 import React from 'react';
 
@@ -12,7 +13,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
   // In a real app, you would fetch the agent data based on params.id
   // For this example, we'll assume a structure but it won't have real data
   // until we implement the data fetching hook.
-  const agent = { id: params.id, name: "Loading Agent...", description: "...", prompt: "", isEnabled: true, category: 'Content Generation', pageUrl: '/'};
+  const agent = { id: params.id, name: "Loading Agent...", description: "...", prompt: "", isEnabled: true, category: AgentCategory.ContentGeneration, pageUrl: '/', icon: Bot };
 
   if (!agent) {
     return (

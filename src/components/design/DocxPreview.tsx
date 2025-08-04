@@ -22,8 +22,12 @@ export function DocxPreview() {
   const h3Styles = activeStyles.default?.heading3?.run || {};
 
   const inlineDocStyles = {
-    fontFamily: docStyles.font?.name || 'Calibri',
-    fontSize: `${(docStyles.size || 22) / 2}pt`,
+    fontFamily: 
+ typeof docStyles.font === 'string' 
+ ? docStyles.font 
+ : (docStyles.font as any)?.name ?? 'Calibri',
+ 
+    fontSize: `${Number(docStyles.size ?? 22) / 2}pt`,
     color: `#${docStyles.color || '333333'}`,
     lineHeight: 1.5,
   };

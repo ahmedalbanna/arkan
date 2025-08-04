@@ -45,7 +45,7 @@ function NewChatDialog() {
     } = useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
-            const token = await firebaseUser!.getIdToken();
+            const token = await firebaseUser!.getIdToken(); 
             return fetchUsers(50, pageParam, token); // Fetch more users for the command list
         },
         initialPageParam: undefined,

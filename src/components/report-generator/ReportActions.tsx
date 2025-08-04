@@ -57,10 +57,10 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
   const hasContent = Object.values(sections).some(s => !!s) || Object.values(diagrams || {}).some(d => !!d);
 
   const handleExportReportDOCX = async () => {
-    if (!hasContent) return;
+    if (!hasContent) return; // TODO: Add check for minimum content to export (e.g. at least one section or diagram)
     let proposalTitle = 'Project Report';
     if (proposal && proposal.title) {
-        proposalTitle = proposal.title;
+    proposalTitle = String(proposal.title);
     }
 
     const translatedTitles = Object.keys(sectionConfig).reduce((acc, key) => {
