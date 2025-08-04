@@ -54,6 +54,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
         prompt: `${basePrompt}
+
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}

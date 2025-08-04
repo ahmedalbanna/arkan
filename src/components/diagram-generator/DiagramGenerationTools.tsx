@@ -103,7 +103,7 @@ export const DiagramGenerationTools = () => {
             externalContext: selectedExternalContext,
         };
         setActiveMutationKey(diagramType);
-        diagramMutation.mutate(body);
+        diagramMutation.mutate({body});
     };
 
     if (!agentsLoaded) {
