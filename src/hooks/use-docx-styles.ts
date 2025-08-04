@@ -66,7 +66,7 @@ export function useDocxStyles() {
     }, [templates, localChanges, activeTemplateKey]);
 
 
-    const updateStyle = (path: string, value: any, value: string | number | boolean) => {
+    const updateStyle = (path: string, value: string | number | boolean) => {
         if (activeTemplateKey) {
             setLocalChanges(prev => {
                 const newStyles = JSON.parse(JSON.stringify(prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {}));
