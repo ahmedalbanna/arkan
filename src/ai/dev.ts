@@ -30,6 +30,7 @@ import '@/ai/flows/project-chat.ts'; // Add new flow
 import '@/ai/flows/analyze-context.ts'; // Add new flow
 import '@/ai/flows/analyzeAndReport.ts';
 import '@/ai/flows/generate-agent-config.ts';
+import '@/ai/flows/improve-report-markdown.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';

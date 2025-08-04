@@ -9,10 +9,10 @@ export default function MarkdownDisplayPage() {
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
           <FileText className="w-10 h-10" />
-          Markdown Previewer
+          Markdown Editor & Formatter
         </h1>
         <p className="text-lg text-muted-foreground mt-2">
-          Paste your Markdown content to see a live, styled preview.
+          Paste your Markdown content to see a live preview, or use the AI Assistant to format and improve it.
         </p>
       </div>
       <MarkdownDisplay />
