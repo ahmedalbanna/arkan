@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { PresentationSlide } from "@/ai/schemas";
@@ -54,17 +55,17 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
     // 1. Master for Title Slide (Cover)
     pptx.defineSlideMaster({
         title: "TITLE_SLIDE",
-        background: styles.background,
+        background: { color: styles.background.color },
         objects: [
             {
                 placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 2.0, w: '90%', h: 1.5 },
+                    options: { name: "title", type: "title", x: 0.5, y: 2.0, w: '90%', h: 1.5, ...styles.title },
                     text: "Presentation Title"
                 }
             },
             {
                 placeholder: {
-                    options: { name: "subtitle", type: "body", x: 0.5, y: 3.5, w: '90%', h: 1.0 },
+                    options: { name: "subtitle", type: "body", x: 0.5, y: 3.5, w: '90%', h: 1.0, ...styles.body },
                     text: "Subtitle or Author"
                 }
             },
@@ -74,80 +75,71 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
     // 2. Master for Content Slides
     pptx.defineSlideMaster({
         title: "CONTENT_SLIDE",
-        background: styles.background,
+        background: { color: styles.background.color },
         objects: [
             {
                 placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 0.25, w: '90%', h: 1 },
+                    options: { name: "title", type: "title", x: 0.5, y: 0.25, w: '90%', h: 1, ...styles.title },
                     text: "Slide Title",
                 },
             },
             {
                 placeholder: {
-                    options: { name: "body", type: "body", x: 0.5, y: 1.5, w: '90%', h: 5 },
+                    options: { name: "body", type: "body", x: 0.5, y: 1.5, w: '90%', h: 5, ...styles.body },
                     text: "Slide Content",
                 },
             },
-            {
-                text: {
-                    text: "Arkan AI",
-                    options: { x: 0.5, y: '95%', w: '90%', h: 0.25, align: 'center', color: styles.body.color, fontSize: 10 },
-                }
-            }
         ],
+    });
+    
+    // 3. Master for Section Header
+    pptx.defineSlideMaster({
+        title: "SECTION_HEADER",
+        background: { color: styles.title.color }, // Use title color for accent
+        objects: [
+             {
+                placeholder: {
+                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1.5, ...styles.title, color: styles.background.color, align: 'center' },
+                    text: "Section Header"
+                }
+            },
+        ]
+    });
+    
+     // 4. Master for Title Only
+    pptx.defineSlideMaster({
+        title: "TITLE_ONLY",
+        background: { color: styles.background.color },
+        objects: [
+             {
+                placeholder: {
+                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1.5, ...styles.title, align: 'center' },
+                    text: "Slide Title"
+                }
+            },
+        ]
     });
 
 
     // --- Slide Creation Loop ---
 
     slides.forEach((slideData, index) => {
-        if (index === 0) {
-            // Use Title Slide layout for the first slide
-            const slide = pptx.addSlide({ masterName: "TITLE_SLIDE" });
-            slide.addText(stripMarkdown(slideData.title), {
-                placeholder: "title",
-                ...styles.title,
-                fontSize: 44, // Larger font for cover
-                align: 'center'
-            });
-            // Use the first content bullet as a subtitle if it exists
-            const subtitleText = slideData.content[0] ? stripMarkdown(slideData.content[0]) : (pptx.author || '');
-             slide.addText(subtitleText, {
-                placeholder: "subtitle",
-                ...styles.body,
-                fontSize: 24,
-                align: 'center'
-            });
-        } else {
-            // Use Content Slide layout for all other slides
-            const slide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
-            slide.addText(stripMarkdown(slideData.title), {
-                placeholder: "title",
-                ...styles.title
-            });
-
-            // Process content into bullet points
-            const contentBullets = slideData.content.flatMap(item => 
-                stripMarkdown(item).split('. ').filter(sentence => sentence.trim() !== '')
-            ).map(sentence => ({
-                text: sentence,
-                options: {
-                    ...styles.body,
-                    bullet: styles.bullet.type === 'bullet' ? true : { type: 'number' },
-                },
-            }));
-
-             slide.addText(contentBullets, {
-                placeholder: "body",
-                ...styles.body,
-                lineSpacing: 36,
-            });
-        }
+        const masterName = `MASTER_${slideData.layout?.toUpperCase() || 'CONTENT_SLIDE'}`;
+        const slide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
         
-        // Add speaker notes to every slide
-        const slide = pptx.getSlide(index + 1); // getSlide is 1-based
-        if (slide) {
-             slide.addNotes(stripMarkdown(slideData.speakerNotes));
+        slide.addText(stripMarkdown(slideData.title), { placeholder: 'title' });
+        
+        const contentBullets = slideData.content.map(item => ({
+            text: stripMarkdown(item),
+            options: { bullet: true, ...styles.body }
+        }));
+        
+        if(contentBullets.length > 0) {
+            slide.addText(contentBullets, { placeholder: 'body' });
+        }
+
+        if (slideData.speakerNotes) {
+            slide.addNotes(stripMarkdown(slideData.speakerNotes));
         }
     });
 
