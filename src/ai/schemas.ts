@@ -112,10 +112,14 @@ export type PresentationHistoryEntry = z.infer<typeof PresentationHistoryEntrySc
 
 
 export const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
-  sections: z.record(SectionNameSchema, z.string()).optional(),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  prompt: z.string(),
+  proposal: ProjectProposalSchema.nullable().optional(),
+  projectPlan: z.any().nullable().optional(),
+  guidelines: z.array(z.string()).optional(),
+  sourceDocuments: z.array(z.object({
+      fileName: z.string(),
+      content: z.string(),
+  })).min(1),
+  templateId: z.string(),
   tone: z.string().optional(),
   complexity: z.string().optional(),
 });

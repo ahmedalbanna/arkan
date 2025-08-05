@@ -1,18 +1,21 @@
 
+
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { useLocalization } from '@/context/LocalizationContext';
+import { diagramConfig } from '@/lib/report-config';
+import { type SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, Presentation, History, FileText } from 'lucide-react';
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
@@ -26,9 +29,10 @@ import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { sectionConfig } from '@/lib/report-config';
 import { PresentationActions } from '@/components/presentation-generator/PresentationActions';
-import type { SectionName, DiagramType } from '@/ai/schemas';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { Label } from '../ui/label';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -82,16 +86,18 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
 
-    const agent = agents.find(a => a.id === 'generate-presentation');
-    const selectedTemplate = presentationTemplates?.find(t => t.id === selectedPresentationTemplateId);
+    const [tone, setTone] = useState('');
+    const [complexity, setComplexity] = useState('');
 
+    const agent = agents.find(a => a.id === 'generate-presentation');
+    
     const presentations = presentation?.history || [];
     
-    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+    const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
     const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
 
     const handleGenerateClick = () => {
-        const selectedContext = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true };
+        const selectedContext = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
         const sourceDocuments = [];
 
@@ -134,9 +140,12 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
         const body = {
             proposal: proposal, // Still pass proposal for high-level context
+            projectPlan: useProjectPlanStore.getState().projectPlan,
             sourceDocuments: sourceDocuments,
             guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
             templateId: selectedPresentationTemplateId,
+            tone: tone,
+            complexity: complexity,
         };
         onGenerate(body);
     }
@@ -187,6 +196,30 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">
+                                     <div className="grid grid-cols-2 gap-4">
+                                         <div className="space-y-2">
+                                             <Label htmlFor="tone-select">Tone</Label>
+                                             <Select value={tone} onValueChange={setTone}>
+                                                 <SelectTrigger id="tone-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                 <SelectContent>
+                                                     <SelectItem value="professional">Professional</SelectItem>
+                                                     <SelectItem value="casual">Casual</SelectItem>
+                                                     <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                                                 </SelectContent>
+                                             </Select>
+                                         </div>
+                                         <div className="space-y-2">
+                                             <Label htmlFor="complexity-select">Complexity</Label>
+                                             <Select value={complexity} onValueChange={setComplexity}>
+                                                 <SelectTrigger id="complexity-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                 <SelectContent>
+                                                     <SelectItem value="summary">High-level Summary</SelectItem>
+                                                     <SelectItem value="detailed">Detailed</SelectItem>
+                                                     <SelectItem value="technical">For Technical Audience</SelectItem>
+                                                 </SelectContent>
+                                             </Select>
+                                         </div>
+                                     </div>
                                      <GuidelineEditor itemKey="presentation" agentId="generate-presentation" isAdmin={userProfile?.role === 'admin'} />
                                 </AccordionContent>
                             </AccordionItem>
