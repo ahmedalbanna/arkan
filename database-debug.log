@@ -1,4 +1,4 @@
-06:41:23.404 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
-06:41:24.876 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
-06:42:00.106 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 735ms, init: 0ms
-06:42:00.452 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
+09:10:32.518 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+09:10:33.260 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
+09:10:53.961 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 340ms, init: 0ms
+09:10:54.252 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
