@@ -143,10 +143,12 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
                 options: { bullet: true, ...styles.body }
             }));
             
-            // If the master slide has a 'body' placeholder, use it. Otherwise, add the text box at a default position.
-            const bodyPlaceholder = pptx.getSlideMaster(masterName)?.bkgd?.objects?.find((obj: any) => obj.placeholder?.options?.name === 'body');
-            
-            if (bodyPlaceholder) {
+            // Check if the selected master slide has a 'body' placeholder
+            const master = (pptx as any).getSlideMaster(masterName); // Use internal method, may not be officially supported but works
+            const hasBodyPlaceholder = master?.objects?.some((obj: any) => obj.placeholder?.options?.name === 'body');
+
+
+            if (hasBodyPlaceholder) {
                 slide.addText(contentBullets, { placeholder: 'body' });
             } else {
                  // Fallback position for layouts without a body placeholder (e.g., Title Only)
