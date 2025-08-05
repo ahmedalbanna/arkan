@@ -48,7 +48,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     await deductCredit(user.id, creditCost);
 
-    const generatedSections: { [key in SectionNameSchema]?: string } = {};
+ const generatedSections: { [key in z.infer<typeof SectionNameSchema>]?: string } = {};
 
     for (const config of generationPlan) {
       const sectionKey = config.section;

@@ -43,29 +43,14 @@ const GenerateSectionOutputSchema = z.object({
 });
 export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;
 
-export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
-  const { sectionToGenerate } = input;
-  const agentId = `generate-${sectionToGenerate}-section`;
-  
-  const agent = await getAgent(agentId);
-  if (!agent) {
-    throw new Error(`Agent configuration not found for '${agentId}'.`);
-  }
-  
-  const agentPrompt = agent.prompt as AgentPrompt;
-  const basePrompt = agentPrompt.base;
-
-  const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
-  const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
-  
-  // A single, dynamic prompt definition.
-  const prompt = ai.definePrompt({
-    name: `generate-${sectionToGenerate}-section-prompt`, // Unique name per section
-    input: { schema: GenerateSectionInputSchema },
+// Define the prompt outside the flow to prevent re-registration
+const reportSectionPrompt = ai.definePrompt({
+    name: 'generateReportSectionPrompt', // Static name
+    input: { schema: z.any() }, // Input is manually constructed
     output: { schema: GenerateSectionOutputSchema },
-    system: basePrompt,
+    system: '{{systemPrompt}}', // System prompt will be passed in
     prompt: `
-CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '${sectionToGenerate}'.
+CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'.
 
 {{#if tableOfContents}}
 --- SECTION REPORT STRUCTURE (TABLE OF CONTENTS) ---
@@ -129,7 +114,7 @@ File: {{this.fileName}}
 {{#if proposal}}
 --- Main Input: Project Proposal ---
 \`\`\`json
-${stringifiedProposal}
+{{{stringifiedProposal}}}
 \`\`\`
 {{else}}
 (No project proposal is being used for this generation. Rely on other provided context.)
@@ -138,12 +123,34 @@ ${stringifiedProposal}
 {{#if projectPlan}}
 --- Main Input: Project Plan ---
 \`\`\`json
-${stringifiedPlan}
+{{{stringifiedPlan}}}
 \`\`\`
 {{/if}}
 `,
   });
 
-  const { output } = await prompt(input);
+
+export async function generateReportSection(input: GenerateSectionInput): Promise<GenerateSectionOutput> {
+  const { sectionToGenerate } = input;
+  const agentId = `generate-${sectionToGenerate}-section`;
+  
+  const agent = await getAgent(agentId);
+  if (!agent) {
+    throw new Error(`Agent configuration not found for '${agentId}'.`);
+  }
+  
+  const agentPrompt = agent.prompt as AgentPrompt;
+  const systemPrompt = agentPrompt.base;
+
+  const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
+  const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
+  
+  const { output } = await reportSectionPrompt({ 
+    ...input, 
+    systemPrompt, 
+    stringifiedProposal,
+    stringifiedPlan
+  });
+  
   return output!;
 }

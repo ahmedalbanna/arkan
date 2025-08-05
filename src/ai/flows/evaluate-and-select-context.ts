@@ -14,7 +14,7 @@ import { AGENTS, type AgentPrompt } from '@/lib/agents';
 
 // Define the input schema for the context evaluation flow
 const EvaluateContextInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional().describe("The original project proposal."),
+  proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
   projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   existingSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);

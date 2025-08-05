@@ -9,7 +9,7 @@ import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const evaluateContextSchema = z.object({
-    proposal: ProjectProposalSchema.optional(),
+    proposal: ProjectProposalSchema.optional().nullable(),
     projectPlan: ProjectPlanSchema.optional().nullable(),
     existingSections: z.record(SectionNameSchema, z.string()).optional(),
     existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
