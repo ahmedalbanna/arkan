@@ -124,18 +124,28 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
     // --- Slide Creation Loop ---
 
     slides.forEach((slideData, index) => {
-        const masterName = `MASTER_${slideData.layout?.toUpperCase() || 'CONTENT_SLIDE'}`;
-        const slide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
+        const layoutMap = {
+            'title_and_content': 'CONTENT_SLIDE',
+            'section_header': 'SECTION_HEADER',
+            'title_only': 'TITLE_ONLY',
+            // Add other layouts here and map to a PptxGenJS master
+        };
+        const masterName = layoutMap[slideData.layout || 'title_and_content'] || 'CONTENT_SLIDE';
+
+        const slide = pptx.addSlide({ masterName });
         
         slide.addText(stripMarkdown(slideData.title), { placeholder: 'title' });
         
-        const contentBullets = slideData.content.map(item => ({
-            text: stripMarkdown(item),
-            options: { bullet: true, ...styles.body }
-        }));
-        
-        if(contentBullets.length > 0) {
-            slide.addText(contentBullets, { placeholder: 'body' });
+        // Only add body content if the layout supports it
+        if (masterName === 'CONTENT_SLIDE') {
+            const contentBullets = slideData.content.map(item => ({
+                text: stripMarkdown(item),
+                options: { bullet: true, ...styles.body }
+            }));
+            
+            if(contentBullets.length > 0) {
+                slide.addText(contentBullets, { placeholder: 'body' });
+            }
         }
 
         if (slideData.speakerNotes) {
