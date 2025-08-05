@@ -2,7 +2,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReport } from '@/services/report-service';
+import { generateReportSectionApi, evaluateReportContextApi, generateFullReportApi } from '@/services/report-service';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
@@ -10,14 +10,14 @@ import { SectionName } from '@/ai/schemas';
 import { useReportStore } from './useReportStore';
 import { userKeys } from '@/lib/query-keys';
 
-export function useReportGeneration() {
+export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
-  const { setSection, setAllSections } = useReportStore();
+  const { setSection } = useReportStore();
   
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return generateReport(variables.body, token);
+      return generateReportSectionApi(variables.body, token);
     },
     onSuccess: (data, variables) => {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
@@ -31,4 +31,39 @@ export function useReportGeneration() {
       toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
     },
   });
+}
+
+export function useEvaluateReportContext() {
+    const { firebaseUser, refetchUser } = useAuth();
+    return useMutation({
+        mutationFn: async (body: any) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return evaluateReportContextApi(body, token);
+        },
+        onSuccess: () => {
+             refetchUser();
+        },
+        onError: (error: Error) => {
+             toast({ title: "Failed to create generation plan", description: error.message, variant: "destructive" });
+        }
+    });
+}
+
+export function useGenerateFullReport() {
+    const { firebaseUser, refetchUser } = useAuth();
+    const { setAllSections } = useReportStore();
+    return useMutation({
+        mutationFn: async (body: any) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return generateFullReportApi(body, token);
+        },
+        onSuccess: (data) => {
+             setAllSections(data);
+             refetchUser();
+             toast({ title: "Full Report Generated", description: "All selected sections have been created." });
+        },
+        onError: (error: Error) => {
+             toast({ title: "Full Report Generation Failed", description: error.message, variant: "destructive" });
+        }
+    });
 }

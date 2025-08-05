@@ -30,7 +30,7 @@ import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { useReportGeneration } from '@/hooks/use-report-generation';
+import { useGenerateReportSection, useEvaluateReportContext, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
@@ -61,9 +61,10 @@ function ToolsSkeleton() {
             <Card>
                 <CardHeader>
                     <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-24 w-full" />
                     <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
@@ -86,9 +87,8 @@ function ToolsSkeleton() {
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { firebaseUser, userProfile } = useAuth();
+    const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
-    const [isGeneratingFullReport, setIsGeneratingFullReport] = React.useState(false);
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
@@ -110,9 +110,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
-    const reportGenerationMutation = useReportGeneration();
+    const reportGenerationMutation = useGenerateReportSection();
+    const evaluateContextMutation = useEvaluateReportContext();
+    const fullReportMutation = useGenerateFullReport();
 
-    const isAnythingGenerating = reportGenerationMutation.isPending || isGeneratingFullReport;
+    const isAnythingGenerating = reportGenerationMutation.isPending || evaluateContextMutation.isPending || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating;
 
     const onGenerateSection = async (section: SectionNameType) => {
@@ -140,14 +142,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     };
 
     const onGenerateFullReport = async () => {
-        if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
-            return;
-        }
-
         const template = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
         if (!template) return;
-
+        
         const sectionsToGenerate = template.agentIds
             .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
             .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
@@ -157,28 +154,28 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             return;
         }
 
-        setIsGeneratingFullReport(true);
         setActiveMutationKey('full-report');
 
-        for (const sectionKey of sectionsToGenerate) {
-            const currentUser = await firebaseUser.reload().then(() => auth.currentUser);
-            const profileResponse = await fetch(`/api/users/${currentUser!.uid}`, { headers: { 'Authorization': `Bearer ${await currentUser!.getIdToken()}` } });
-            const currentProfile = await profileResponse.json();
+        const contextForEval = {
+            proposal: proposal,
+            projectPlan: projectPlan,
+            existingSections: sections,
+            existingDiagrams: useBuilderStore.getState().diagrams,
+            sectionsToGenerate: sectionsToGenerate,
+            externalContext: externalContext,
+        };
 
-            if (currentProfile.credits < 1) {
-                toast({ title: "Insufficient Credits", description: "Generation stopped due to lack of credits.", variant: "destructive" });
-                break;
+        evaluateContextMutation.mutate(contextForEval, {
+            onSuccess: (plan) => {
+                fullReportMutation.mutate({
+                    ...contextForEval,
+                    generationPlan: plan.configs,
+                });
+            },
+            onSettled: () => {
+                 setActiveMutationKey(null);
             }
-
-            try {
-                await onGenerateSection(sectionKey);
-            } catch (error) {
-                console.error(`Error generating section ${sectionKey}:`, error);
-                break;
-            }
-        }
-        setIsGeneratingFullReport(false);
-        setActiveMutationKey(null);
+        });
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
@@ -188,8 +185,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         return sectionKey && !sections[sectionKey];
     }).length || 0;
 
-    const fullReportCreditCost = sectionsToGenerateCount;
-    const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 0 && !isAnythingGenerating;
+    const fullReportCreditCost = sectionsToGenerateCount + 1; // +1 for the context evaluation step
+    const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 1 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
     if (!agentsLoaded) {
@@ -261,8 +258,8 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                             className="w-full mb-4 font-headline"
                                             disabled={!canGenerateFullReport || isAnythingGenerating}
                                         >
-                                            {isGeneratingFullReport ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                                            {fullReportCreditCost > 0 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
+                                            {activeMutationKey === 'full-report' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                            {fullReportCreditCost > 1 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
                                         </Button>
                                     </div>
                                 </TooltipTrigger>
