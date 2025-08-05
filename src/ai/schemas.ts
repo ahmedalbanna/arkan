@@ -116,6 +116,8 @@ export const GeneratePresentationInputSchema = z.object({
   sections: z.record(SectionNameSchema, z.string()).optional(),
   diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
   prompt: z.string(),
+  tone: z.string().optional(),
+  complexity: z.string().optional(),
 });
 export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
 

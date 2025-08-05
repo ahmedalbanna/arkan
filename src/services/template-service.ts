@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { IStylesOptions, Document } from 'docx';
@@ -41,8 +42,9 @@ export interface PptxTemplate {
     id: string;
     name: string;
     description: string;
-    styles: any; // Add this line
-    content: any; // Consider a more specific type if possible for PPTX content
+    styles: any;
+    imageUrl: string;
+    dataAiHint: string;
 }
 
 export type DocxTemplatesRecord = Record<string, DocxTemplate>;
