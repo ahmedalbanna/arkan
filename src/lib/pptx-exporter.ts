@@ -18,7 +18,7 @@ async function getStylesFromServer(): Promise<Record<PptxTemplateKey, any>> {
         return templates;
     }
     try {
-        const response = await fetch('/api/templates/pptx');
+        const response = await fetch('/api/admin/templates/pptx');
         if (!response.ok) {
             console.error('Failed to fetch PPTX templates from server, falling back to defaults.');
             return templates;
@@ -111,14 +111,13 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
                 align: 'center'
             });
             // Use the first content bullet as a subtitle if it exists
-            if (slideData.content && slideData.content.length > 0) {
-                 slide.addText(stripMarkdown(slideData.content[0]), {
-                    placeholder: "subtitle",
-                    ...styles.body,
-                    fontSize: 24,
-                    align: 'center'
-                });
-            }
+            const subtitleText = slideData.content[0] ? stripMarkdown(slideData.content[0]) : (pptx.author || '');
+             slide.addText(subtitleText, {
+                placeholder: "subtitle",
+                ...styles.body,
+                fontSize: 24,
+                align: 'center'
+            });
         } else {
             // Use Content Slide layout for all other slides
             const slide = pptx.addSlide({ masterName: "CONTENT_SLIDE" });
@@ -127,14 +126,17 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
                 ...styles.title
             });
 
-            // Add bullet points individually for better layout control
-            const contentBullets = slideData.content.map(item => ({
-                text: stripMarkdown(item),
+            // Process content into bullet points
+            const contentBullets = slideData.content.flatMap(item => 
+                stripMarkdown(item).split('. ').filter(sentence => sentence.trim() !== '')
+            ).map(sentence => ({
+                text: sentence,
                 options: {
                     ...styles.body,
-                    bullet: styles.bullet.type === 'bullet' ? true : {type: 'number'},
+                    bullet: styles.bullet.type === 'bullet' ? true : { type: 'number' },
                 },
             }));
+
              slide.addText(contentBullets, {
                 placeholder: "body",
                 ...styles.body,

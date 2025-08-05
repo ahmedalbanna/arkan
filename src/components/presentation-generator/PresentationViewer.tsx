@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import type { PresentationHistoryEntry } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, FileDown, Languages, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileDown, Languages, Loader2, Presentation } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,6 +14,12 @@ import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useExport } from '@/hooks/use-export';
 import { PptxTemplateKey } from '@/lib/types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
@@ -48,10 +54,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
     setCurrentSlide(0);
   }, [activePresentation.id]);
   
-  const handleExport = () => {
-    // For simplicity, we'll hardcode the modern template for now.
-    // This could be made dynamic with a selector in the UI.
-    const templateKey: PptxTemplateKey = 'modern';
+  const handleExport = (templateKey: PptxTemplateKey) => {
     exportPresentationPptx(slides, templateKey);
   };
 
@@ -93,10 +96,19 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
                 {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
                 {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleExport} disabled={isBusy} title={t('builder.presentationGenerator.exportTooltip')}>
-              {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-              {t('builder.presentationGenerator.exportButton')}
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isBusy} title={t('builder.presentationGenerator.exportTooltip')}>
+                   {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+                   {t('builder.presentationGenerator.exportButton')}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleExport('modern')}>Modern</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('dark')}>Dark</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleExport('professional')}>Professional</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
         <CardDescription>

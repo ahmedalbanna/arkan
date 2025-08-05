@@ -27,6 +27,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
 import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { PresentationActions } from '@/components/presentation-generator/PresentationActions';
 import type { SectionName, DiagramType } from '@/ai/schemas';
 
 interface PresentationGenerationToolsProps {

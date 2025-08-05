@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
-import { PptxTemplateKey } from '@/lib/pptx-styles';
+import { PptxTemplateKey } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { useExport } from '@/hooks/use-export';
@@ -30,7 +30,7 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
 
   useEffect(() => {
     const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
-    if (savedPptxTemplate && pptxTemplates[savedPptxTemplate]) {
+    if (savedPptxTemplate && pptxTemplates && pptxTemplates[savedPptxTemplate]) {
       setSelectedPptxTemplate(savedPptxTemplate);
     }
   }, [pptxTemplates]);
@@ -57,7 +57,7 @@ export const PresentationActions = ({ isGenerating }: PresentationActionsProps) 
         <div className="space-y-2">
             <Label htmlFor="pptx-template-select">{t('builder.presentationGenerator.exportStyleLabel')}</Label>
             {pptxLoaded ? (
-              <Select value={selectedPptxTemplate} onValueChange={handlePptxTemplateChange} disabled={isBusy}>
+              <Select value={selectedPptxTemplate} onValueChange={(value) => handlePptxTemplateChange(value as PptxTemplateKey)} disabled={isBusy}>
                   <SelectTrigger id="pptx-template-select">
                       <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
                   </SelectTrigger>
