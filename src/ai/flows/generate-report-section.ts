@@ -50,7 +50,7 @@ const reportSectionPrompt = ai.definePrompt({
     output: { schema: GenerateSectionOutputSchema },
     system: '{{systemPrompt}}', // System prompt will be passed in
     prompt: `
-CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'.
+CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
 
 {{#if tableOfContents}}
 --- SECTION REPORT STRUCTURE (TABLE OF CONTENTS) ---
