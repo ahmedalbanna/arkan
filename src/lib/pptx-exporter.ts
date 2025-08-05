@@ -136,17 +136,24 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         
         slide.addText(stripMarkdown(slideData.title), { placeholder: 'title' });
         
-        // Only add body content if the layout supports it
-        if (masterName === 'CONTENT_SLIDE') {
+        // Always add body content if it exists, formatting it as bullet points.
+        if (slideData.content && slideData.content.length > 0) {
             const contentBullets = slideData.content.map(item => ({
                 text: stripMarkdown(item),
                 options: { bullet: true, ...styles.body }
             }));
             
-            if(contentBullets.length > 0) {
+            // If the master slide has a 'body' placeholder, use it. Otherwise, add the text box at a default position.
+            const bodyPlaceholder = pptx.getSlideMaster(masterName)?.bkgd?.objects?.find((obj: any) => obj.placeholder?.options?.name === 'body');
+            
+            if (bodyPlaceholder) {
                 slide.addText(contentBullets, { placeholder: 'body' });
+            } else {
+                 // Fallback position for layouts without a body placeholder (e.g., Title Only)
+                slide.addText(contentBullets, { x: 0.5, y: 1.5, w: '90%', h: 5, ...styles.body });
             }
         }
+
 
         if (slideData.speakerNotes) {
             slide.addNotes(stripMarkdown(slideData.speakerNotes));
