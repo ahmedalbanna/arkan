@@ -1,21 +1,25 @@
 
+
 'use server';
 
 import { z } from 'zod';
 import { generatePresentation } from '@/ai/flows/generate-presentation';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const ApiGeneratePresentationSchema = z.object({
   proposal: ProjectProposalSchema.nullable().optional(),
+  projectPlan: ProjectPlanSchema.nullable().optional(),
   guidelines: z.array(z.string()).optional(),
   sourceDocuments: z.array(z.object({
       fileName: z.string(),
       content: z.string(),
   })).min(1, "At least one source document is required."),
   templateId: z.string(),
+  tone: z.string().optional(),
+  complexity: z.string().optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
