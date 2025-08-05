@@ -144,9 +144,8 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
             }));
             
             // Check if the selected master slide has a 'body' placeholder
-            const master = (pptx as any).getSlideMaster(masterName); // Use internal method, may not be officially supported but works
+            const master = (pptx.masters as any)[masterName]; // Use internal property to get master
             const hasBodyPlaceholder = master?.objects?.some((obj: any) => obj.placeholder?.options?.name === 'body');
-
 
             if (hasBodyPlaceholder) {
                 slide.addText(contentBullets, { placeholder: 'body' });
