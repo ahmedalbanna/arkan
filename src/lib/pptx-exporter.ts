@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { PresentationSlide } from "@/ai/schemas";
@@ -14,21 +13,19 @@ function stripMarkdown(text: string): string {
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Links
 }
 
-async function getStylesFromServer(): Promise<Record<PptxTemplateKey, any>> {
+function getStylesFromStorage() {
     if (typeof window === 'undefined') {
         return templates;
     }
-    try {
-        const response = await fetch('/api/admin/templates/pptx');
-        if (!response.ok) {
-            console.error('Failed to fetch PPTX templates from server, falling back to defaults.');
+    const stored = localStorage.getItem('arkan-pptx-styles');
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
             return templates;
         }
-        return await response.json();
-    } catch (error) {
-        console.error('Error fetching PPTX templates, falling back to defaults:', error);
-        return templates;
     }
+    return templates;
 }
 
 export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
@@ -38,7 +35,7 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         console.error("No slides provided for PPTX export.");
         return;
     }
-    const allTemplates = await getStylesFromServer();
+    const allTemplates = getStylesFromStorage();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
     let pptx = new pptxgen();
@@ -50,108 +47,47 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
     pptx.subject = "Project Presentation";
     pptx.title = slides[0]?.title || "Presentation";
 
-    // --- Master Slide Definitions ---
-
-    // 1. Master for Title Slide (Cover)
+    // Define a master slide for consistent layout
     pptx.defineSlideMaster({
-        title: "TITLE_SLIDE",
-        background: { color: styles.background.color },
-        objects: [
-            {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 2.0, w: '90%', h: 1.5, ...styles.title },
-                    text: "Presentation Title"
-                }
-            },
-            {
-                placeholder: {
-                    options: { name: "subtitle", type: "body", x: 0.5, y: 3.5, w: '90%', h: 1.0, ...styles.body },
-                    text: "Subtitle or Author"
-                }
-            },
-        ],
-    });
-
-    // 2. Master for Content Slides
-    pptx.defineSlideMaster({
-        title: "CONTENT_SLIDE",
-        background: { color: styles.background.color },
-        objects: [
-            {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 0.25, w: '90%', h: 1, ...styles.title },
-                    text: "Slide Title",
-                },
-            },
-            {
-                placeholder: {
-                    options: { name: "body", type: "body", x: 0.5, y: 1.5, w: '90%', h: 5, ...styles.body },
-                    text: "Slide Content",
-                },
-            },
-        ],
-    });
-    
-    // 3. Master for Section Header
-    pptx.defineSlideMaster({
-        title: "SECTION_HEADER",
-        background: { color: styles.title.color }, // Use title color for accent
-        objects: [
-             {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1.5, ...styles.title, color: styles.background.color, align: 'center' },
-                    text: "Section Header"
-                }
-            },
-        ]
-    });
-    
-     // 4. Master for Title Only
-    pptx.defineSlideMaster({
-        title: "TITLE_ONLY",
-        background: { color: styles.background.color },
-        objects: [
-             {
-                placeholder: {
-                    options: { name: "title", type: "title", x: 0.5, y: 2.5, w: '90%', h: 1.5, ...styles.title, align: 'center' },
-                    text: "Slide Title"
-                }
-            },
-        ]
-    });
-
-
-    // --- Slide Creation Loop ---
-
-    slides.forEach((slideData, index) => {
-        const layoutMap = {
-            'title_and_content': 'CONTENT_SLIDE',
-            'section_header': 'SECTION_HEADER',
-            'title_only': 'TITLE_ONLY',
-            // Add other layouts here and map to a PptxGenJS master
-        };
-        const masterName = layoutMap[slideData.layout || 'title_and_content'] || 'CONTENT_SLIDE';
-
-        const slide = pptx.addSlide({ masterName });
+        title: "MASTER_SLIDE",
         
-        slide.addText(stripMarkdown(slideData.title), { placeholder: 'title' });
         
-        if (slideData.content && slideData.content.length > 0) {
-            const contentBullets = slideData.content.map(item => ({
-                text: stripMarkdown(item),
-                options: { bullet: true, ...styles.body }
-            }));
-            
-            // This will add the text to the 'body' placeholder if it exists,
-            // or create a new text box at the same location if it doesn't.
-            slide.addText(contentBullets, { placeholder: 'body' });
-        }
-
-
-        if (slideData.speakerNotes) {
-            slide.addNotes(stripMarkdown(slideData.speakerNotes));
-        }
     });
+
+    for (const slideData of slides) {
+        const slide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+
+        // Add Slide Title
+        slide.addText(stripMarkdown(slideData.title), {
+            x: 0.5,
+            y: 0.25,
+            w: "90%",
+            h: 1,
+            ...styles.title
+        });
+
+        // Add Main Content (Bullet Points)
+        const contentBullets = slideData.content.map(item => ({
+            text: stripMarkdown(item),
+            options: {
+                ...styles.body,
+                bullet: styles.bullet.type === 'bullet' ? true : undefined,
+                numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined,
+            },
+        }));
+
+        slide.addText(contentBullets, {
+            x: 0.5,
+            y: 1.5,
+            w: "90%",
+            h: 4,
+            ...styles.body,
+            lineSpacing: 36,
+        });
+
+        // Add Speaker Notes
+        slide.addNotes(stripMarkdown(slideData.speakerNotes));
+    }
 
     pptx.writeFile({ fileName: `presentation.pptx` }).catch(err => {
         console.error("Error writing PPTX file:", err);
