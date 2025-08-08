@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -240,6 +240,12 @@ export function Header() {
                           <Link href="/markdown-display">
                             <FileText className="mr-2 h-4 w-4" />
                             Markdown Display
+                          </Link>
+                        </DropdownMenuItem>
+                         <DropdownMenuItem asChild>
+                          <Link href="/writing-tools">
+                            <PenSquare className="mr-2 h-4 w-4" />
+                            Writing Tools
                           </Link>
                         </DropdownMenuItem>
                      </DropdownMenuContent>

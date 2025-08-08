@@ -31,6 +31,14 @@ import '@/ai/flows/analyze-context.ts'; // Add new flow
 import '@/ai/flows/analyzeAndReport.ts';
 import '@/ai/flows/generate-agent-config.ts';
 import '@/ai/flows/improve-report-markdown.ts';
+import '@/ai/flows/generate-quiz.ts';
+import '@/ai/flows/paraphrase-text.ts';
+import '@/ai/flows/summarize-text.ts';
+import '@/ai/flows/humanize-text.ts';
+import '@/ai/flows/detect-ai-content.ts';
+import '@/ai/flows/generate-citation.ts';
+import '@/ai/flows/fact-checker.ts';
+import '@/ai/flows/plagiarism-checker.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';

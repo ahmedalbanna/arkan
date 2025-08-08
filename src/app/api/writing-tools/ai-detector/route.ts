@@ -1,0 +1,38 @@
+
+'use server';
+
+import { z } from 'zod';
+import { detectAiContent } from '@/ai/flows/detect-ai-content';
+import { deductCredit } from '@/services/credit-service';
+import { logGeneration } from '@/services/generation-service';
+import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+
+const detectorSchema = z.object({
+  text: z.string().min(50, 'Text must be at least 50 characters for analysis.'),
+});
+
+export const POST = withAuth(async ({ request, user }) => {
+  try {
+    const body = await request.json();
+    const validation = detectorSchema.safeParse(body);
+    if (!validation.success) {
+      return handleApiError(validation.error);
+    }
+
+    await deductCredit(user.id, 1);
+    
+    const agentInput = validation.data;
+    const result = await detectAiContent(agentInput);
+
+    await logGeneration({
+        agentId: 'detect-ai-content',
+        userId: user.id,
+        input: { textLength: agentInput.text.length },
+        output: result,
+    });
+
+    return createApiResponse(result, 200);
+  } catch (error) {
+    return handleApiError(error);
+  }
+});

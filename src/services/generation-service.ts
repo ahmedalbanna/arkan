@@ -2,6 +2,7 @@
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
+import { ManipulateTextInput } from '@/lib/types';
 
 interface GenerationLog {
     agentId: string;
@@ -65,4 +66,20 @@ export async function generateCodebaseApi(variables: { proposal: any; token: str
         throw new Error(error.message || 'Failed to generate codebase');
     }
     return await response.json();
+}
+
+export async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<{ rewrittenText: string }> {
+    const response = await fetch('/api/manipulate-text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify(variables.data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to manipulate text');
+    }
+    return response.json();
 }

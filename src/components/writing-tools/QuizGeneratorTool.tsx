@@ -1,0 +1,142 @@
+
+'use client';
+
+import { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useGenerateQuiz } from '@/hooks/use-writing-tools';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Loader2, Sparkles, FileText, Check, X } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from '@/hooks/use-toast';
+import { Slider } from '../ui/slider';
+import { Badge } from '../ui/badge';
+
+const quizGeneratorSchema = z.object({
+  text: z.string().min(50, 'Please enter at least 50 characters to generate a meaningful quiz.'),
+  numQuestions: z.number().int().min(1).max(10),
+});
+
+type QuizFormValues = z.infer<typeof quizGeneratorSchema>;
+
+export function QuizGeneratorTool() {
+  const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const quizMutation = useGenerateQuiz();
+
+  const form = useForm<QuizFormValues>({
+    resolver: zodResolver(quizGeneratorSchema),
+    defaultValues: { text: '', numQuestions: 5 },
+  });
+
+  const onSubmit = (data: QuizFormValues) => {
+    setGeneratedQuiz([]);
+    setShowAnswers(false);
+    quizMutation.mutate(data, {
+      onSuccess: (result) => {
+        setGeneratedQuiz(result.questions);
+        toast({ title: 'Quiz generated successfully!' });
+      },
+      onError: (error) => {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      },
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Quiz Generator</CardTitle>
+        <CardDescription>Enter text and the AI will create a multiple-choice quiz based on the content.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="text-to-quiz">Source Text</Label>
+            <Textarea
+              id="text-to-quiz"
+              {...form.register('text')}
+              rows={10}
+              placeholder="Paste the article, notes, or any text you want to create a quiz from..."
+              className="resize-none"
+            />
+            {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
+          </div>
+
+          <Controller
+            name="numQuestions"
+            control={form.control}
+            render={({ field }) => (
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <Label>Number of Questions</Label>
+                        <Badge variant="outline">{field.value}</Badge>
+                    </div>
+                    <Slider
+                        value={[field.value]}
+                        onValueChange={(value) => field.onChange(value[0])}
+                        min={1}
+                        max={10}
+                        step={1}
+                    />
+                </div>
+            )}
+           />
+
+          <Button type="submit" disabled={quizMutation.isPending} className="w-full">
+            {quizMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Generate Quiz
+          </Button>
+        </form>
+
+        {(quizMutation.isPending || generatedQuiz.length > 0) && (
+          <div className="space-y-4 pt-6 border-t">
+            <div className="flex justify-between items-center">
+                 <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
+                    <FileText className="h-5 w-5"/>
+                    Generated Quiz
+                </h3>
+                {generatedQuiz.length > 0 && (
+                    <Button variant="outline" size="sm" onClick={() => setShowAnswers(prev => !prev)}>
+                        {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                    </Button>
+                )}
+            </div>
+            
+            <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
+              {quizMutation.isPending ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="space-y-6">
+                    {generatedQuiz.map((q, index) => (
+                        <div key={index} className="space-y-3">
+                            <p className="font-semibold">{index + 1}. {q.question}</p>
+                            <ul className="space-y-2 pl-4">
+                                {q.options.map((option: string, i: number) => (
+                                    <li key={i} className="flex items-center gap-2 text-sm">
+                                        {showAnswers && (
+                                            q.answer === option 
+                                                ? <Check className="h-4 w-4 text-green-500" />
+                                                : <X className="h-4 w-4 text-destructive" />
+                                        )}
+                                        <span className={showAnswers && q.answer === option ? 'font-bold' : ''}>{option}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
