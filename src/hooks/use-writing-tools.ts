@@ -11,9 +11,11 @@ import {
     humanizeTextApi,
     detectAiContentApi,
     grammarCheckApi,
-    generateCitationApi, // Import new service
+    generateCitationApi,
     factCheckApi,
- plagiarismCheckApi,
+    plagiarismCheckApi,
+    aiResearcherApi,
+    topicExplainerApi,
 } from '@/services/writing-tools-service';
 import type { 
     ParaphraseTextOutput, ParaphraseTextVariables, 
@@ -31,6 +33,10 @@ import type {
     GenerateCitationOutput,
     FactCheckOutput,
     PlagiarismCheckOutput,
+    AIResearcherVariables,
+    AIResearcherOutput,
+    TopicExplainerVariables,
+    TopicExplainerOutput,
 } from '@/services/writing-tools-service';
 
 /**
@@ -157,6 +163,32 @@ export function usePlagiarismCheck() {
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return plagiarismCheckApi({ ...variables, token });
+        },
+    });
+}
+
+/**
+ * Custom mutation hook for the AI Researcher tool.
+ */
+export function useAiResearcher() {
+    const { firebaseUser } = useAuth();
+    return useMutation<AIResearcherOutput, Error, AIResearcherVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return aiResearcherApi({ ...variables, token });
+        },
+    });
+}
+
+/**
+ * Custom mutation hook for the Topic Explainer tool.
+ */
+export function useTopicExplainer() {
+    const { firebaseUser } = useAuth();
+    return useMutation<TopicExplainerOutput, Error, TopicExplainerVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return topicExplainerApi({ ...variables, token });
         },
     });
 }

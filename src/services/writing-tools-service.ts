@@ -5,6 +5,9 @@ import type { ParaphraseMode } from "@/ai/flows/paraphrase-text";
 import type { SummarizeLength } from "@/ai/flows/summarize-text";
 import type { CitationStyle } from "@/ai/flows/generate-citation";
 import { ReactNode, SetStateAction } from "react";
+import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
+import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
+
 
 // Base types
 export interface ParaphraseTextVariables {
@@ -38,6 +41,12 @@ export interface FactCheckVariables {
 export interface PlagiarismCheckVariables {
     text: string;
 }
+export interface AIResearcherVariables {
+    topic: string;
+}
+export interface TopicExplainerVariables {
+    topic: string;
+}
 
 
 // API Variable Types (include token)
@@ -66,6 +75,12 @@ export interface FactCheckApiVariables extends FactCheckVariables {
     token: string;
 }
 export interface PlagiarismCheckApiVariables extends PlagiarismCheckVariables {
+    token: string;
+}
+export interface AIResearcherApiVariables extends AIResearcherVariables {
+    token: string;
+}
+export interface TopicExplainerApiVariables extends TopicExplainerVariables {
     token: string;
 }
 
@@ -329,5 +344,33 @@ export async function plagiarismCheckApi(variables: PlagiarismCheckApiVariables)
         throw new Error(error.message || 'Failed to check for plagiarism.');
     }
 
+    return response.json();
+}
+
+/**
+ * Calls the API for the AI Researcher tool.
+ */
+export async function aiResearcherApi(variables: AIResearcherApiVariables): Promise<AIResearcherOutput> {
+    const { token, ...body } = variables;
+    const response = await fetch('/api/writing-tools/ai-researcher', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error((await response.json()).message || 'AI Researcher failed.');
+    return response.json();
+}
+
+/**
+ * Calls the API for the Topic Explainer tool.
+ */
+export async function topicExplainerApi(variables: TopicExplainerApiVariables): Promise<TopicExplainerOutput> {
+    const { token, ...body } = variables;
+    const response = await fetch('/api/writing-tools/topic-explainer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error((await response.json()).message || 'Topic Explainer failed.');
     return response.json();
 }

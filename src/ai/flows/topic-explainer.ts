@@ -1,0 +1,44 @@
+
+'use server';
+
+/**
+ * @fileOverview An AI agent for breaking down complex topics.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
+
+const TopicExplainerInputSchema = z.object({
+  topic: z.string().describe('The complex topic to be explained.'),
+});
+export type TopicExplainerInput = z.infer<typeof TopicExplainerInputSchema>;
+
+const TopicExplainerOutputSchema = z.object({
+  explanation: z.string().describe('A simple, easy-to-understand explanation of the topic, formatted in Markdown.'),
+});
+export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
+
+export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
+  const prompt = ai.definePrompt({
+    name: 'topicExplainerPrompt',
+    input: { schema: TopicExplainerInputSchema },
+    output: { schema: TopicExplainerOutputSchema },
+    prompt: `You are an expert educator who excels at breaking down complex topics into simple, easy-to-understand explanations. Your task is to explain the following topic for a beginner.
+
+**Guidelines:**
+- Use analogies and simple language.
+- Avoid jargon where possible, or explain it clearly if necessary.
+- Structure the explanation logically with headings and bullet points for clarity.
+- Keep the tone engaging and approachable.
+- The output should be formatted in Markdown.
+
+**Topic to Explain:**
+---
+{{{topic}}}
+---
+`,
+  });
+
+  const { output } = await prompt(input);
+  return output!;
+}
