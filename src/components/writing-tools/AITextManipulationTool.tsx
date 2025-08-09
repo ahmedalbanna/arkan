@@ -15,7 +15,30 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { useHumanizeText } from '@/hooks/use-writing-tools'; // Changed hook
+import { useMutation } from '@tanstack/react-query';
+import { getAuthenticatedToken } from '@/lib/authUtils';
+import type { ManipulateTextInput, ManipulateTextOutput } from '@/lib/types';
+
+
+// This is a generic component. For specific tools, consider creating a dedicated component
+// that uses this as a base or has a more tailored UI.
+
+async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
+    const response = await fetch('/api/manipulate-text', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify(variables.data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to manipulate text');
+    }
+    return response.json();
+}
+
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -50,20 +73,22 @@ export function AITextManipulationTool({
     defaultValues: { text: '' },
   });
 
-  const mutation = useHumanizeText();
+  const mutation = useMutation({
+    mutationFn: manipulateTextApi,
+    onSuccess: (result) => {
+      setProcessedText(result.rewrittenText);
+      refetchUser();
+      toast({ title: 'Processing successful!' });
+    },
+    onError: (error) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
+  });
 
   const onSubmit = async (data: FormValues) => {
     setOriginalText(data.text);
-    mutation.mutate({ text: data.text }, {
-      onSuccess: (result) => {
-        setProcessedText(result.humanizedText);
-        refetchUser();
-        toast({ title: 'Processing successful!' });
-      },
-      onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      },
-    });
+    const token = await getAuthenticatedToken(firebaseUser);
+    mutation.mutate({ data: { textToManipulate: data.text, command: aiCommand }, token });
   };
 
   const handleCopy = () => {

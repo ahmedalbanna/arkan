@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AITextManipulationTool } from '@/components/writing-tools/AITextManipulationTool';
+import { HumanizerTool } from '@/components/writing-tools/HumanizerTool';
 import { UserCheck } from 'lucide-react';
 
 export default function HumanizerPage() {
@@ -16,14 +16,7 @@ export default function HumanizerPage() {
           Make AI-generated text sound more natural and less robotic.
         </p>
       </div>
-      <AITextManipulationTool
-        toolTitle="AI Humanizer"
-        toolDescription="Paste your AI-generated text below, and the tool will rewrite it to have a more human-like tone and style."
-        buttonText="Humanize Text"
-        aiCommand="Rewrite the following text to sound more natural, fluent, and human-like. Avoid robotic phrasing and complex sentence structures."
-        originalTextTitle="Original AI Text"
-        processedTextTitle="Humanized Text"
-      />
+      <HumanizerTool />
     </div>
   );
 }
