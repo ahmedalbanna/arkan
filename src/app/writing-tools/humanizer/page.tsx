@@ -1,4 +1,3 @@
-
 'use client';
 
 import { HumanizerTool } from '@/components/writing-tools/HumanizerTool';
