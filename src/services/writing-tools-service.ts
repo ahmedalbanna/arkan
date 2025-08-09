@@ -8,6 +8,7 @@ import { ReactNode, SetStateAction } from "react";
 import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
 import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
 import type { GrammarCheckOutput } from '@/ai/flows/grammar-checker';
+import type { GenerateQuizOutput } from '@/ai/flows/generate-quiz';
 
 
 // Base types
@@ -94,10 +95,8 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export interface GenerateQuizOutput {
-    questions: SetStateAction<any[]>;
-    quiz: string;
-}
+export type { GenerateQuizOutput };
+
 export interface HumanizeTextOutput {
     humanizedText: string;
 }
