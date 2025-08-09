@@ -8,7 +8,9 @@ import { z } from 'zod';
 
 const webhookPayloadSchema = z.object({
   jobId: z.string(),
-  resultText: z.any(),
+  status: z.enum(['completed', 'failed']).optional().default('completed'),
+  resultText: z.any().optional(),
+  error: z.string().optional(),
   apiToken: z.string(), // The secure token we generated
 });
 
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
     if (!validation.success) {
       return handleApiError({ message: 'Invalid payload', errors: validation.error.flatten() }, 400);
     }
-    const { jobId, resultText, apiToken } = validation.data;
+    const { jobId, status, resultText, error, apiToken } = validation.data;
 
     // 1. Retrieve the job from the store
     const job = await getJob(jobId);
@@ -34,8 +36,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Update the job with the result
-    await updateJob(jobId, 'completed', resultText);
-    console.log(`Job ${jobId} completed and result stored.`);
+    if (status === 'failed') {
+        await updateJob(jobId, 'failed', error || 'Taskade workflow failed without an error message.');
+        console.log(`Job ${jobId} failed.`);
+    } else {
+        await updateJob(jobId, 'completed', resultText);
+        console.log(`Job ${jobId} completed and result stored.`);
+    }
 
     // 4. Respond to Taskade to acknowledge receipt
     return createApiResponse({ message: 'Result received' }, 200);

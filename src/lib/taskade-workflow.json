@@ -1,3 +1,4 @@
+
 {
   "name": "Arkan English to Arabic Translation Workflow",
   "description": "An asynchronous workflow to translate text from English to Arabic using an external service like Taskade.",
@@ -34,16 +35,25 @@
           "type": "string",
           "description": "The unique ID for the job, provided by the initial trigger."
         },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "failed"],
+          "description": "The final status of the job."
+        },
         "resultText": {
           "type": "string",
-          "description": "The final translated Arabic text."
+          "description": "The final translated Arabic text. Only present if status is 'completed'."
+        },
+        "error": {
+          "type": "string",
+          "description": "An error message if the job failed. Only present if status is 'failed'."
         },
         "apiToken": {
           "type": "string",
           "description": "The secret token to authenticate the callback to our service."
         }
       },
-      "required": ["jobId", "resultText", "apiToken"]
+      "required": ["jobId", "status", "apiToken"]
     }
   }
 }
