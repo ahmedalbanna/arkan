@@ -2,7 +2,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReportSectionApi, evaluateReportContextApi, generateFullReportApi } from '@/services/report-service';
+import { generateReportSectionApi, generateFullReportApi } from '@/services/report-service';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
@@ -31,22 +31,6 @@ export function useGenerateReportSection() {
       toast({ title: `Failed to generate "${item}"`, description: error.message, variant: "destructive" });
     },
   });
-}
-
-export function useEvaluateReportContext() {
-    const { firebaseUser, refetchUser } = useAuth();
-    return useMutation({
-        mutationFn: async (body: any) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return evaluateReportContextApi(body, token);
-        },
-        onSuccess: () => {
-             refetchUser();
-        },
-        onError: (error: Error) => {
-             toast({ title: "Failed to create generation plan", description: error.message, variant: "destructive" });
-        }
-    });
 }
 
 export function useGenerateFullReport() {
