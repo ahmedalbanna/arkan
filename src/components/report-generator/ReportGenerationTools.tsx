@@ -30,7 +30,7 @@ import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { useGenerateReportSection, useEvaluateReportContext, useGenerateFullReport } from '@/hooks/use-report-generation';
+import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { auth } from '@/lib/firebase';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
@@ -111,10 +111,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const { agents, isLoaded: agentsLoaded } = useAgents();
 
     const reportGenerationMutation = useGenerateReportSection();
-    const evaluateContextMutation = useEvaluateReportContext();
     const fullReportMutation = useGenerateFullReport();
 
-    const isAnythingGenerating = reportGenerationMutation.isPending || evaluateContextMutation.isPending || fullReportMutation.isPending;
+    const isAnythingGenerating = reportGenerationMutation.isPending  || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating;
 
     const onGenerateSection = async (section: SectionNameType) => {
@@ -165,17 +164,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             externalContext: externalContext,
         };
 
-        evaluateContextMutation.mutate(contextForEval, {
-            onSuccess: (plan) => {
-                fullReportMutation.mutate({
-                    ...contextForEval,
-                    generationPlan: plan.configs,
-                });
-            },
-            onSettled: () => {
-                 setActiveMutationKey(null);
-            }
-        });
+        
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);

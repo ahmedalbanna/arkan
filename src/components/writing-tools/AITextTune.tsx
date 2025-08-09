@@ -16,6 +16,9 @@ import { toast } from '@/hooks/use-toast';
 import { useRewriteText, useSummarizeTextWithRatio } from '@/hooks/use-writing-tools';
 import { Slider } from '../ui/slider';
 import { Badge } from '../ui/badge';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+import { Separator } from '../ui/separator';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -31,6 +34,7 @@ const styles = [
 ];
 
 export function AITextTune() {
+  const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [compressionRatio, setCompressionRatio] = useState(50);
@@ -49,12 +53,16 @@ export function AITextTune() {
       toast({ title: 'Style required', description: 'Please select a style to rewrite the text.', variant: 'destructive' });
       return;
     }
+    setOriginalText(data.text);
+    setProcessedText('');
     rewriteMutation.mutate({ text: data.text, style: data.style }, {
       onSuccess: (result) => setProcessedText(result.rewrittenText),
     });
   };
 
   const onSubmitSummarize = (data: FormValues) => {
+    setOriginalText(data.text);
+    setProcessedText('');
     summarizeMutation.mutate({ text: data.text, ratio: compressionRatio }, {
         onSuccess: (result) => setProcessedText(result.summarizedText)
     });
@@ -70,99 +78,119 @@ export function AITextTune() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-4">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Controls</CardTitle>
-                    <CardDescription>Select a tool and adjust its settings.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-4 w-4"/> Rewrite Text</h3>
-                        <div className="space-y-2">
-                            <Label htmlFor="style-select">Style</Label>
-                            <Controller
-                            name="style"
-                            control={form.control}
-                            render={({ field }) => (
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
-                                <SelectTrigger id="style-select">
-                                    <SelectValue placeholder="Select a style..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="None">None</SelectItem>
-                                    {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                </SelectContent>
-                                </Select>
-                            )}
-                            />
-                        </div>
-                        <Button type="submit" disabled={isProcessing} className="w-full">
-                            {rewriteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                            Rewrite
-                        </Button>
-                    </form>
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="p-6">
+          <form className="space-y-4">
+             <div className="space-y-2">
+                <Label htmlFor="input-text" className="text-lg font-semibold">Your Text</Label>
+                <Textarea
+                    id="input-text"
+                    {...form.register('text')}
+                    rows={8}
+                    placeholder="Enter your text here..."
+                    className="mt-2"
+                    disabled={isProcessing}
+                />
+                {form.formState.errors.text && <p className="text-sm text-destructive mt-1">{form.formState.errors.text.message}</p>}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+            <CardTitle>AI Tools</CardTitle>
+            <CardDescription>Use the tools below to refine your text.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="space-y-4">
+                <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5"/> Rewrite Text</h3>
+                <div className="space-y-2">
+                    <Label htmlFor="style-select">Style</Label>
+                    <Controller
+                    name="style"
+                    control={form.control}
+                    render={({ field }) => (
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
+                        <SelectTrigger id="style-select">
+                            <SelectValue placeholder="Select a style..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="None">None</SelectItem>
+                            {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                        </Select>
+                    )}
+                    />
+                </div>
+                <Button type="submit" disabled={isProcessing} className="w-full">
+                    {rewriteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Rewrite
+                </Button>
+            </form>
 
-                     <div className="border-t pt-6 mt-6 space-y-4">
-                        <h3 className="font-semibold flex items-center gap-2"><BookOpenText className="h-4 w-4"/> Summarize Text</h3>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <Label>Compression Ratio</Label>
-                                <Badge variant="outline">{compressionRatio}%</Badge>
-                            </div>
-                            <Slider
-                                value={[compressionRatio]}
-                                onValueChange={(val) => setCompressionRatio(val[0])}
-                                min={10} max={90} step={5}
-                                disabled={isProcessing}
-                            />
-                        </div>
-                        <Button onClick={form.handleSubmit(onSubmitSummarize)} disabled={isProcessing} className="w-full">
-                            {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                            Summarize
-                        </Button>
+            <form onSubmit={form.handleSubmit(onSubmitSummarize)} className="space-y-4">
+                <h3 className="font-semibold flex items-center gap-2"><BookOpenText className="h-5 w-5"/> Summarize Text</h3>
+                <div className="space-y-2">
+                    <div className="flex justify-between">
+                        <Label>Compression Ratio</Label>
+                        <Badge variant="outline">{compressionRatio}%</Badge>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
-        <div className="lg:col-span-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <Label htmlFor="input-text">Original Text</Label>
-                    <Textarea
-                        id="input-text"
-                        {...form.register('text')}
-                        rows={20}
-                        placeholder="Enter your text here..."
-                        className="mt-2"
+                    <Slider
+                        value={[compressionRatio]}
+                        onValueChange={(val) => setCompressionRatio(val[0])}
+                        min={10} max={90} step={5}
                         disabled={isProcessing}
                     />
-                     {form.formState.errors.text && <p className="text-sm text-destructive mt-1">{form.formState.errors.text.message}</p>}
                 </div>
-                <div>
-                    <div className="flex justify-between items-center">
-                        <Label htmlFor="output-text">Processed Text</Label>
-                         <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!processedText}>
-                            {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                        </Button>
-                    </div>
-                    <Card className="mt-2 h-[430px]">
-                        <ScrollArea className="h-full">
-                             <CardContent className="p-4 prose dark:prose-invert max-w-none">
-                                {isProcessing ? (
-                                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                                        <Loader2 className="h-8 w-8 animate-spin" />
-                                    </div>
-                                ) : (
-                                    <p className="text-sm">{processedText || 'Your processed text will appear here...'}</p>
-                                )}
-                            </CardContent>
+                <Button type="submit" disabled={isProcessing} className="w-full">
+                    {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                    Summarize
+                </Button>
+            </form>
+        </CardContent>
+      </Card>
+
+      {(isProcessing || processedText || originalText) && (
+          <Card>
+            <CardHeader>
+                <CardTitle>Comparison</CardTitle>
+                <CardDescription>View your original text and the AI-processed version side-by-side.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label htmlFor="input-text">Original Text</Label>
+                         <ScrollArea className="h-72 rounded-md border p-4 bg-background">
+                            <div className="prose dark:prose-invert max-w-none text-sm">
+                                <ReactMarkdown components={markdownComponents}>{originalText || "Your original text will appear here once you process it."}</ReactMarkdown>
+                            </div>
                         </ScrollArea>
-                    </Card>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                            <Label htmlFor="output-text">Processed Text</Label>
+                            <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!processedText}>
+                                {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                            </Button>
+                        </div>
+                        <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
+                            {isProcessing ? (
+                                <div className="flex items-center justify-center h-full">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                            ) : (
+                                <div className="prose dark:prose-invert max-w-none text-sm">
+                                    <ReactMarkdown components={markdownComponents}>{processedText || "Your processed text will appear here..."}</ReactMarkdown>
+                                </div>
+                            )}
+                        </ScrollArea>
+                    </div>
                 </div>
-            </div>
-        </div>
+            </CardContent>
+          </Card>
+      )}
     </div>
   );
 }
