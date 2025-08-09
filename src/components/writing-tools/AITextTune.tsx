@@ -21,6 +21,8 @@ import { markdownComponents } from '@/lib/markdown-components';
 import { Separator } from '../ui/separator';
 import { cn } from '@/lib/utils';
 import type { RewriteTextOutput } from '@/ai/flows/text-stylist';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -75,6 +77,7 @@ export function AITextTune() {
     setOriginalText(data.text);
     setProcessedText('');
     setDiff(null);
+    setActiveView('side-by-side'); // Reset to default view on new generation
     rewriteMutation.mutate({ text: data.text, style: data.style }, {
       onSuccess: (result) => {
           setProcessedText(result.rewrittenText);
@@ -87,6 +90,7 @@ export function AITextTune() {
     setOriginalText(data.text);
     setProcessedText('');
     setDiff(null);
+    setActiveView('side-by-side');
     summarizeMutation.mutate({ text: data.text, ratio: compressionRatio }, {
         onSuccess: (result) => setProcessedText(result.summarizedText)
     });
@@ -186,10 +190,12 @@ export function AITextTune() {
                     </div>
                      <div className="flex items-center gap-2">
                         {diff && (
-                             <div className="flex items-center gap-2 border p-1 rounded-md">
-                                <Button size="sm" variant={activeView === 'side-by-side' ? 'secondary' : 'ghost'} onClick={() => setActiveView('side-by-side')}>Side-by-side</Button>
-                                <Button size="sm" variant={activeView === 'diff' ? 'secondary' : 'ghost'} onClick={() => setActiveView('diff')}>Diff</Button>
-                            </div>
+                             <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
+                                <TabsList>
+                                    <TabsTrigger value="side-by-side">Side-by-side</TabsTrigger>
+                                    <TabsTrigger value="diff">Diff</TabsTrigger>
+                                </TabsList>
+                             </Tabs>
                         )}
                         <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!processedText}>
                             {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
