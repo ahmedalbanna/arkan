@@ -4,19 +4,12 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { 
-    paraphraseTextApi, 
-    summarizeTextApi, 
-    generateQuizApi, 
-    humanizeTextApi,
-    detectAiContentApi,
-    grammarCheckApi,
-    generateCitationApi,
-    factCheckApi,
-    plagiarismCheckApi,
-    aiResearcherApi,
-    topicExplainerApi,
-} from '@/services/writing-tools-service';
+import { paraphraseTextApi, summarizeTextApi, generateQuizApi, humanizeTextApi, grammarCheckApi, generateCitationApi } from '@/services/writing-tools-service';
+import { detectAiContentApi } from '@/services/ai-detector-service';
+import { factCheckApi } from '@/services/fact-checker-service';
+import { plagiarismCheckApi } from '@/services/plagiarism-checker-service';
+import { aiResearcherApi } from '@/services/ai-researcher-service';
+import { topicExplainerApi } from '@/services/topic-explainer-service';
 import type { 
     ParaphraseTextOutput, ParaphraseTextVariables, 
     SummarizeTextOutput, SummarizeTextVariables,

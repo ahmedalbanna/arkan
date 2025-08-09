@@ -9,6 +9,10 @@ import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
 import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
 import type { GrammarCheckOutput } from '@/ai/flows/grammar-checker';
 import type { GenerateQuizOutput } from '@/ai/flows/generate-quiz';
+import type { DetectAIOutput } from '@/ai/flows/detect-ai-content';
+import type { FactCheckOutput } from '@/ai/flows/fact-checker';
+import type { HumanizeTextOutput } from '@/ai/flows/humanize-text';
+import type { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
 
 
 // Base types
@@ -64,25 +68,10 @@ export interface GenerateQuizApiVariables extends GenerateQuizVariables {
 export interface HumanizeTextApiVariables extends HumanizeTextVariables {
     token: string;
 }
-export interface DetectAIApiVariables extends DetectAIVariables {
-    token: string;
-}
 export interface GrammarCheckApiVariables extends GrammarCheckVariables {
     token: string;
 }
 export interface GenerateCitationApiVariables extends GenerateCitationVariables {
-    token: string;
-}
-export interface FactCheckApiVariables extends FactCheckVariables {
-    token: string;
-}
-export interface PlagiarismCheckApiVariables extends PlagiarismCheckVariables {
-    token: string;
-}
-export interface AIResearcherApiVariables extends AIResearcherVariables {
-    token: string;
-}
-export interface TopicExplainerApiVariables extends TopicExplainerVariables {
     token: string;
 }
 
@@ -95,35 +84,7 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export type { GenerateQuizOutput };
-
-export interface HumanizeTextOutput {
-    humanizedText: string;
-}
-export interface DetectAIOutput {
-    analysis: ReactNode;
-    score: number;
-    isAI: boolean;
-}
-export interface GenerateCitationOutput {
-    citation: string;
-}
-export interface FactCheckOutput {
-    claims: {
-        statement: string;
-        status: 'Verified' | 'Inconclusive' | 'False';
-        explanation: string;
-        source: string;
-    }[];
-    originalityScore: number;
-}
-export interface PlagiarismCheckOutput {
-    matches: {
-        similarity: number;
-        source: string;
-    }[];
-    originalityScore: number;
-}
+export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput };
 
 
 /**
@@ -224,31 +185,6 @@ export async function humanizeTextApi(variables: HumanizeTextApiVariables): Prom
 }
 
 /**
- * Calls the API to detect AI content in text.
- * @param variables - An object containing the text and auth token.
- * @returns A promise that resolves to the detection result.
- */
-export async function detectAiContentApi(variables: DetectAIApiVariables): Promise<DetectAIOutput> {
-    const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/ai-detector', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to detect AI content.');
-    }
-
-    return response.json();
-}
-
-
-/**
  * Calls the API to check and correct grammar in text.
  * @param variables - An object containing the text and auth token.
  * @returns A promise that resolves to the corrected text output.
@@ -294,81 +230,4 @@ export async function generateCitationApi(variables: GenerateCitationApiVariable
   }
 
   return response.json();
-}
-
-/**
- * Calls the API to fact-check text.
- * @param variables - An object containing the text and auth token.
- * @returns A promise that resolves to the fact-check result.
- */
-export async function factCheckApi(variables: FactCheckApiVariables): Promise<FactCheckOutput> {
-    const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/fact-checker', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fact-check text.');
-    }
-
-    return response.json();
-}
-
-
-/**
- * Calls the API to check for plagiarism.
- * @param variables - An object containing the text and auth token.
- * @returns A promise that resolves to the plagiarism check result.
- */
-export async function plagiarismCheckApi(variables: PlagiarismCheckApiVariables): Promise<PlagiarismCheckOutput> {
-    const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/plagiarism-checker', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to check for plagiarism.');
-    }
-
-    return response.json();
-}
-
-/**
- * Calls the API for the AI Researcher tool.
- */
-export async function aiResearcherApi(variables: AIResearcherApiVariables): Promise<AIResearcherOutput> {
-    const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/ai-researcher', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-    });
-    if (!response.ok) throw new Error((await response.json()).message || 'AI Researcher failed.');
-    return response.json();
-}
-
-/**
- * Calls the API for the Topic Explainer tool.
- */
-export async function topicExplainerApi(variables: TopicExplainerApiVariables): Promise<TopicExplainerOutput> {
-    const { token, ...body } = variables;
-    const response = await fetch('/api/writing-tools/topic-explainer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(body),
-    });
-    if (!response.ok) throw new Error((await response.json()).message || 'Topic Explainer failed.');
-    return response.json();
 }
