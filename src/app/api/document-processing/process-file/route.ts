@@ -12,6 +12,8 @@ const SUPPORTED_MIME_TYPES = [
     'image/jpeg',
     'image/png',
     'image/webp',
+    'text/plain',
+    'text/markdown',
 ];
 
 export const POST = withAuth(async ({ request, user }) => {
@@ -36,18 +38,23 @@ export const POST = withAuth(async ({ request, user }) => {
 
         let result: { markdown: string } | { text: string };
         let agentId: string;
+        let markdownContent: string;
 
-        // Route to the correct AI flow based on file type
         if (file.type === 'application/pdf') {
             agentId = 'pdf-to-markdown';
             result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
-        } else {
+            markdownContent = 'markdown' in result ? result.markdown : '';
+        } else if (file.type.startsWith('image/')) {
             agentId = 'image-to-text';
             result = await imageToText({ imageDataUri: dataUri });
+            markdownContent = 'text' in result ? result.text : '';
+        } else {
+            // For plain text or markdown, we just decode it.
+            agentId = 'text-file-to-markdown';
+            markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
+            result = { markdown: markdownContent };
         }
         
-        const markdownContent = 'markdown' in result ? result.markdown : result.text;
-
         await logGeneration({
             agentId,
             userId: user.id,
