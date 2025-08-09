@@ -1,59 +1,20 @@
 
 {
-  "name": "Arkan English to Arabic Translation Workflow",
-  "description": "An asynchronous workflow to translate text from English to Arabic using an external service like Taskade.",
-  "trigger": {
-    "type": "webhook",
-    "url": "https://[YOUR_APP_URL]/api/generate/start",
-    "method": "POST",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "inputContent": {
-          "type": "string",
-          "description": "The English text to be translated."
+    "webhookUrl": "https://www.taskade.com/webhooks/flow/01K1XJVYKXE6BPSE706F4W8KTF",
+    "authToken": "Bearer tskdp_pJ56NamHnj8yn8Y3dNTTXMwrrB7ksoGWbC",
+    "schemas": {
+        "input": {
+            "jobId": "string",
+            "inputContent": "string",
+            "callbackUrl": "string",
+            "apiToken": "string"
+        },
+        "output": {
+            "jobId": "string",
+            "status": "string ('completed' or 'failed')",
+            "result": "any",
+            "error": "string (optional)",
+            "apiToken": "string"
         }
-      },
-      "required": ["inputContent"]
     }
-  },
-  "actions": [
-    {
-      "type": "aiAgent",
-      "name": "Taskade Translate Agent",
-      "description": "Receives English text and uses AI to translate it to Arabic."
-    }
-  ],
-  "output": {
-    "type": "webhook",
-    "callbackUrl": "https://[YOUR_APP_URL]/api/webhooks/taskade-result",
-    "method": "POST",
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "jobId": {
-          "type": "string",
-          "description": "The unique ID for the job, provided by the initial trigger."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["completed", "failed"],
-          "description": "The final status of the job."
-        },
-        "resultText": {
-          "type": "string",
-          "description": "The final translated Arabic text. Only present if status is 'completed'."
-        },
-        "error": {
-          "type": "string",
-          "description": "An error message if the job failed. Only present if status is 'failed'."
-        },
-        "apiToken": {
-          "type": "string",
-          "description": "The secret token to authenticate the callback to our service."
-        }
-      },
-      "required": ["jobId", "status", "apiToken"]
-    }
-  }
 }

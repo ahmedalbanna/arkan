@@ -8,6 +8,7 @@ import {
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 
 const tools = [
+  { name: 'Text Stylist & Summarizer', icon: PenSquare, href: '/writing-tools/text-stylist' },
   { name: 'Plagiarism Checker', icon: CopyCheck, href: '/writing-tools/plagiarism-checker' },
   { name: 'AI Humanizer', icon: UserCheck, href: '/writing-tools/humanizer' },
   { name: 'AI Detector', icon: Fingerprint, href: '/writing-tools/ai-detector' },

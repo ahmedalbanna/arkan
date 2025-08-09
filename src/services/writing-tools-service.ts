@@ -13,6 +13,7 @@ import type { DetectAIOutput } from '@/ai/flows/detect-ai-content';
 import type { FactCheckOutput } from '@/ai/flows/fact-checker';
 import type { HumanizeTextOutput } from '@/ai/flows/humanize-text';
 import type { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import type { RewriteTextOutput, SummarizeTextWithRatioOutput } from '@/ai/flows/text-stylist';
 
 
 // Base types
@@ -53,6 +54,15 @@ export interface AIResearcherVariables {
 export interface TopicExplainerVariables {
     topic: string;
 }
+export interface RewriteTextVariables {
+    text: string;
+    style: string;
+}
+export interface SummarizeTextWithRatioVariables {
+    text: string;
+    ratio: number;
+}
+
 
 
 // API Variable Types (include token)
@@ -74,6 +84,12 @@ export interface GrammarCheckApiVariables extends GrammarCheckVariables {
 export interface GenerateCitationApiVariables extends GenerateCitationVariables {
     token: string;
 }
+export interface RewriteTextApiVariables extends RewriteTextVariables {
+    token: string;
+}
+export interface SummarizeTextWithRatioApiVariables extends SummarizeTextWithRatioVariables {
+    token: string;
+}
 
 
 // Output Types
@@ -84,7 +100,7 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput };
+export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput, RewriteTextOutput, SummarizeTextWithRatioOutput };
 
 
 /**
@@ -230,4 +246,26 @@ export async function generateCitationApi(variables: GenerateCitationApiVariable
   }
 
   return response.json();
+}
+
+export async function rewriteTextApi(variables: RewriteTextApiVariables): Promise<RewriteTextOutput> {
+    const { token, ...body } = variables;
+    const response = await fetch('/api/writing-tools/rewrite-text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error((await response.json()).message || 'Rewrite failed.');
+    return response.json();
+}
+
+export async function summarizeTextWithRatioApi(variables: SummarizeTextWithRatioApiVariables): Promise<SummarizeTextWithRatioOutput> {
+    const { token, ...body } = variables;
+    const response = await fetch('/api/writing-tools/summarize-with-ratio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+    });
+    if (!response.ok) throw new Error((await response.json()).message || 'Summarization failed.');
+    return response.json();
 }

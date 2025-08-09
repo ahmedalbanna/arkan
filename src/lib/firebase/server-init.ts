@@ -1,5 +1,21 @@
 // src/lib/firebase/server-init.ts
 import admin from 'firebase-admin';
+import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
+
+const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
+const firebaseConfig = {
+  credential: cert(serviceAccount),
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "YOUR_DEFAULT_DATABASE_URL", // Use the environment variable or a default
+
+  // You might have other config options here
+};
+
+let adminApp;
+if (!getApps().length) {
+  adminApp = initializeApp(firebaseConfig);
+} else {
+  adminApp = getApp();
+}
 
 // This function initializes the Firebase Admin SDK if it hasn't been already.
 function initializeFirebaseAdmin() {
@@ -12,7 +28,7 @@ function initializeFirebaseAdmin() {
   }
 }
 
-// Ensure the SDK is initialized when this module is loaded.
+// // Ensure the SDK is initialized when this module is loaded.
 initializeFirebaseAdmin();
 
 // Export the admin db and rtdb instances directly.

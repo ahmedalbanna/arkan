@@ -4,7 +4,16 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { paraphraseTextApi, summarizeTextApi, generateQuizApi, humanizeTextApi, grammarCheckApi, generateCitationApi } from '@/services/writing-tools-service';
+import { 
+    paraphraseTextApi, 
+    summarizeTextApi, 
+    generateQuizApi, 
+    humanizeTextApi, 
+    grammarCheckApi, 
+    generateCitationApi,
+    rewriteTextApi,
+    summarizeTextWithRatioApi
+} from '@/services/writing-tools-service';
 import { detectAiContentApi } from '@/services/ai-detector-service';
 import { factCheckApi } from '@/services/fact-checker-service';
 import { plagiarismCheckApi } from '@/services/plagiarism-checker-service';
@@ -30,6 +39,10 @@ import type {
     AIResearcherOutput,
     TopicExplainerVariables,
     TopicExplainerOutput,
+    RewriteTextVariables,
+    RewriteTextOutput,
+    SummarizeTextWithRatioVariables,
+    SummarizeTextWithRatioOutput,
 } from '@/services/writing-tools-service';
 
 /**
@@ -183,5 +196,25 @@ export function useTopicExplainer() {
             const token = await getAuthenticatedToken(firebaseUser);
             return topicExplainerApi({ ...variables, token });
         },
+    });
+}
+
+export function useRewriteText() {
+    const { firebaseUser } = useAuth();
+    return useMutation<RewriteTextOutput, Error, RewriteTextVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return rewriteTextApi({ ...variables, token });
+        }
+    });
+}
+
+export function useSummarizeTextWithRatio() {
+    const { firebaseUser } = useAuth();
+    return useMutation<SummarizeTextWithRatioOutput, Error, SummarizeTextWithRatioVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return summarizeTextWithRatioApi({ ...variables, token });
+        }
     });
 }

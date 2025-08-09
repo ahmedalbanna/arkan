@@ -5,14 +5,19 @@ interface StartGenerationResponse {
   jobId: string;
 }
 
-export async function startGenerationApi(inputContent: string | object, token: string): Promise<StartGenerationResponse> {
+interface StartGenerationPayload {
+    featureId: string;
+    inputContent: string | object;
+}
+
+export async function startGenerationApi(payload: StartGenerationPayload, token: string): Promise<StartGenerationResponse> {
   const response = await fetch('/api/generate/start', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
     },
-    body: JSON.stringify({ inputContent }),
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
