@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,11 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
+import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { useDropzone } from 'react-dropzone';
+import { useAuth } from '@/context/AuthContext';
+import { processFileApi } from '@/services/document-processing-service';
 
 const summarizerSchema = z.object({
   text: z.string().min(20, 'Please enter at least 20 characters to summarize.'),
@@ -28,10 +32,48 @@ export function SummarizerTool() {
   const [summarizedText, setSummarizedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const summarizeMutation = useSummarizeText();
+  const { firebaseUser, refetchUser } = useAuth();
+  const [isUploading, setIsUploading] = useState(false);
 
   const form = useForm<SummarizerFormValues>({
     resolver: zodResolver(summarizerSchema),
     defaultValues: { text: '', length: 'medium' },
+  });
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
+    if (!firebaseUser) {
+        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
+        return;
+    }
+
+    setIsUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const token = await firebaseUser.getIdToken();
+        const result = await processFileApi(formData, token);
+        form.setValue('text', result.markdown, { shouldValidate: true });
+        toast({ title: "File Processed", description: `Text extracted from ${file.name}.` });
+        refetchUser();
+    } catch (error: any) {
+        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
+    } finally {
+        setIsUploading(false);
+    }
+  }, [firebaseUser, form, refetchUser, toast]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'text/plain': ['.txt'],
+      'text/markdown': ['.md'],
+    },
   });
 
   const onSubmit = (data: SummarizerFormValues) => {
@@ -63,17 +105,34 @@ export function SummarizerTool() {
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="text-to-summarize">Your Text</Label>
-            <Textarea
-              id="text-to-summarize"
-              {...form.register('text')}
-              rows={10}
-              placeholder="Paste your long article, report, or any text here..."
-              className="resize-none"
-            />
+          
+           <Tabs defaultValue="paste">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                </TabsList>
+                <TabsContent value="paste" className="pt-4">
+                     <Textarea
+                        {...form.register('text')}
+                        rows={10}
+                        placeholder="Paste your long article, report, or any text here..."
+                        className="resize-none"
+                        />
+                </TabsContent>
+                <TabsContent value="upload" className="pt-4">
+                     <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
+                        <input {...getInputProps()} />
+                        <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
+                        {isUploading ? (
+                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                        ) : (
+                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
+                        )}
+                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                    </div>
+                </TabsContent>
+            </Tabs>
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="summarize-length">Summary Length</Label>
@@ -95,8 +154,8 @@ export function SummarizerTool() {
             />
           </div>
 
-          <Button type="submit" disabled={summarizeMutation.isPending} className="w-full">
-            {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+          <Button type="submit" disabled={summarizeMutation.isPending || isUploading} className="w-full">
+            {summarizeMutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
             Summarize Text
           </Button>
         </form>
