@@ -3,7 +3,7 @@
 
 import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
-  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb
+  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 
@@ -19,6 +19,7 @@ const tools = [
   { name: 'Citation Generator', icon: Quote, href: '/writing-tools/citation-generator' },
   { name: 'AI Researcher', icon: Search, href: '/writing-tools/ai-researcher' },
   { name: 'Topic Explainer', icon: Lightbulb, href: '/writing-tools/topic-explainer' },
+  { name: 'Text to Handwriting', icon: PencilLine, href: '/handwriting' },
 ];
 
 export default function WritingToolsPage() {
