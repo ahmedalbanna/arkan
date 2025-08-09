@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { manipulateText } from '@/ai/flows/manipulate-text';
+import { grammarCheck } from '@/ai/flows/grammar-checker';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
@@ -22,17 +22,19 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, 1);
 
     const agentInput = {
-        textToManipulate: validation.data.text,
-        command: 'Correct any grammar and spelling mistakes in this text. Preserve the original markdown formatting.'
+        text: validation.data.text,
     };
     
-    const result = await manipulateText(agentInput);
+    const result = await grammarCheck(agentInput);
 
     await logGeneration({
         agentId: 'grammar-checker',
         userId: user.id,
         input: { textLength: validation.data.text.length },
-        output: { rewrittenLength: result.rewrittenText.length },
+        output: { 
+            correctedLength: result.correctedText.length,
+            correctionsCount: result.corrections.length,
+        },
     });
 
     return createApiResponse(result, 200);

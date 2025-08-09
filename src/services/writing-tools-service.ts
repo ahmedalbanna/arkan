@@ -7,6 +7,7 @@ import type { CitationStyle } from "@/ai/flows/generate-citation";
 import { ReactNode, SetStateAction } from "react";
 import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
 import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
+import type { GrammarCheckOutput } from '@/ai/flows/grammar-checker';
 
 
 // Base types
@@ -92,9 +93,7 @@ export interface ParaphraseTextOutput {
 export interface SummarizeTextOutput {
   summary: string;
 }
-export interface GrammarCheckOutput {
-    rewrittenText: string;
-}
+
 export interface GenerateQuizOutput {
     questions: SetStateAction<any[]>;
     quiz: string;
