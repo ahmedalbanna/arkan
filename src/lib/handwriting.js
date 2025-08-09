@@ -1,3 +1,4 @@
+
 'use client';
 // Adapted from https://github.com/saurabhdaware/text-to-handwriting
 
@@ -137,7 +138,7 @@ class Handwriting {
 
     draw_letter(letter) {
         this.ctx.save();
-        this.ctx.font = `${this.options.font.weight} ${this.options.font.size}px ${this.options.font.family}`;
+        this.ctx.font = `${\'\'\'${this.options.font.weight}\'\'\'} ${\'\'\'${this.options.font.size}\'\'\'}px ${\'\'\'${this.options.font.family}\'\'\'}`;
         this.ctx.fillStyle = this.options.font.color;
 
         let curve = this.rand(0, 1) === 0 ? this.rand(0, 5) : -this.rand(0, 5);

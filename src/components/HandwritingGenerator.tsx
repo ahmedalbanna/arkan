@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, RefreshCw } from 'lucide-react';
 import { Handwriting } from '@/lib/handwriting.js';
+
 const HANDWRITING_FONTS = [
   { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
   { name: 'Caveat', value: "'Caveat', cursive" },
@@ -18,6 +19,7 @@ const HANDWRITING_FONTS = [
   { name: 'Rabiohead', value: "'rabiohead', cursive" },
   { name: "Saurabh's Hand", value: "'Saurabh-Hand', cursive" },
 ];
+
 export default function HandwritingGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [text, setText] = useState('This is a sample text to get you started.');
