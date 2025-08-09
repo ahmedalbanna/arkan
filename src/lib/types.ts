@@ -1,5 +1,6 @@
 
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
@@ -31,6 +32,8 @@ export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
 export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
+export type { DiffPart } from '@/lib/diff';
 
 
 export interface Notification {

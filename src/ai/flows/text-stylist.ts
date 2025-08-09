@@ -16,14 +16,9 @@ const RewriteTextInputSchema = z.object({
 });
 export type RewriteTextInput = z.infer<typeof RewriteTextInputSchema>;
 
-const DiffSchema = z.object({
-    type: z.enum(['added', 'removed', 'unchanged']),
-    value: z.string()
-});
 
 const RewriteTextOutputSchema = z.object({
   rewrittenText: z.string().describe('The text rewritten in the specified style.'),
-  diff: z.array(DiffSchema).describe('An array of changes showing the difference between the original and rewritten text.')
 });
 export type RewriteTextOutput = z.infer<typeof RewriteTextOutputSchema>;
 
@@ -33,10 +28,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
     input: { schema: RewriteTextInputSchema },
     output: { schema: RewriteTextOutputSchema },
     prompt: `You are an expert editor. Your task is to rewrite the following text in a '{{{style}}}' style, preserving the core meaning and markdown formatting.
-
-**Your Process:**
-1.  **Rewrite Text**: Rewrite the text to match the requested style.
-2.  **Generate Diff**: Analyze the differences between the original and rewritten text. Produce a 'diff' array detailing every change. Each object in the array should have a 'type' ('added', 'removed', or 'unchanged') and the corresponding 'value' (the text segment).
+Return only the rewritten text.
 
 **Original Text:**
 ---

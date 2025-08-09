@@ -20,8 +20,9 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { Separator } from '../ui/separator';
 import { cn } from '@/lib/utils';
-import type { RewriteTextOutput } from '@/ai/flows/text-stylist';
+import type { RewriteTextOutput, DiffPart } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { computeDiff } from '@/lib/diff';
 
 
 const formSchema = z.object({
@@ -37,7 +38,7 @@ const styles = [
   "Technical", "Academic", "Journalistic", "Poetic", "Satirical", "Humorous"
 ];
 
-const DiffView = ({ diff }: { diff: RewriteTextOutput['diff'] }) => {
+const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     return (
         <p>
             {diff.map((part, index) => (
@@ -55,7 +56,7 @@ const DiffView = ({ diff }: { diff: RewriteTextOutput['diff'] }) => {
 export function AITextTune() {
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState('');
-  const [diff, setDiff] = useState<RewriteTextOutput['diff'] | null>(null);
+  const [diff, setDiff] = useState<DiffPart[] | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
@@ -77,11 +78,11 @@ export function AITextTune() {
     setOriginalText(data.text);
     setProcessedText('');
     setDiff(null);
-    setActiveView('side-by-side'); // Reset to default view on new generation
+    setActiveView('side-by-side');
     rewriteMutation.mutate({ text: data.text, style: data.style }, {
       onSuccess: (result) => {
           setProcessedText(result.rewrittenText);
-          setDiff(result.diff);
+          setDiff(computeDiff(data.text, result.rewrittenText));
       },
     });
   };
