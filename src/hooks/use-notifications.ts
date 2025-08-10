@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import type { Notification } from '@/lib/types';
 import { getDatabase, ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
-import { app } from "@/lib/firebase";
+import { app } from "@/lib/firebaseConfig";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';

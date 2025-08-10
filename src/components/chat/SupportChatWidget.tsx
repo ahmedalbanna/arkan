@@ -11,7 +11,7 @@ import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 import type { ChatMessage, ChatSession } from '@/hooks/useChatStore';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
 import { toast } from '@/hooks/use-toast';

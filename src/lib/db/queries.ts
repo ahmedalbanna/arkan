@@ -129,6 +129,11 @@ export async function deleteUser(userId: string) {
     await adminDb.collection('users').doc(userId).delete();
 }
 
+export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
+ const adminAuth = await getAdminAuth();
+ await adminAuth.updateUser(userId, { password: newPassword });
+}
+
 
 // === Credit Queries ===
 

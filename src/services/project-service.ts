@@ -2,7 +2,7 @@
 
 'use client';
 import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import type { ProjectState as FullProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
 

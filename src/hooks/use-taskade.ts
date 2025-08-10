@@ -7,7 +7,7 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import { startGenerationApi } from '@/services/taskade-service';
 import { toast } from './use-toast';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 
 type JobStatus = 'idle' | 'pending' | 'completed' | 'failed';
 

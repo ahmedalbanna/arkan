@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import admin from 'firebase-admin';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { CustomFirebaseError } from '@/lib/firebase/error';
 
 const sendNotificationSchema = z.object({
   userId: z.string().min(1, 'User ID is required.'),
@@ -48,7 +49,7 @@ export const POST = withAuth(async ({ request }) => {
 
   } catch (error) {
     console.error('Error sending push notification:', error);
-    if (error instanceof admin.FirebaseError) {
+    if (error instanceof CustomFirebaseError) { // Type assertion can be done here
         if (error.code === 'messaging/registration-token-not-registered') {
              return handleApiError({ message: 'Device token is no longer valid. The user may have uninstalled the app or revoked permissions.' }, 410);
         }

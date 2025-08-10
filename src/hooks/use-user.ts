@@ -10,7 +10,7 @@ import type { PricingPlan } from '@/components/PricingCard';
 import type { SignupCredentials } from "@/components/SignupForm";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/firebaseConfig";
 import {
   sendPasswordResetEmail,
   RecaptchaVerifier,
@@ -44,7 +44,9 @@ export function useUsers() {
     return useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
-            const token = await getAuthenticatedToken(firebaseUser);
+            const token = await getAuthenticatedToken(firebaseUser); 
+            // Ensure pageParam is treated as string | undefined
+            if (typeof pageParam !== 'string') return fetchUsersApi(USERS_PER_PAGE, undefined, token);
             return fetchUsersApi(USERS_PER_PAGE, pageParam, token);
         },
         initialPageParam: undefined,

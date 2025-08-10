@@ -14,7 +14,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks/useChatStore';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 
 interface ConversationViewProps {
   chat: ChatSession | AgentChatSession | null;

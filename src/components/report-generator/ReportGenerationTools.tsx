@@ -31,7 +31,7 @@ import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebaseConfig';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
@@ -155,14 +155,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         setActiveMutationKey('full-report');
 
-        const contextForEval = {
-            proposal: proposal,
-            projectPlan: projectPlan,
-            existingSections: sections,
-            existingDiagrams: useBuilderStore.getState().diagrams,
-            sectionsToGenerate: sectionsToGenerate,
-            externalContext: externalContext,
-        };
+        
 
         
     };

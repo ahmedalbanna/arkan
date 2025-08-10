@@ -193,7 +193,17 @@ export default function AgentManager() {
   const [searchTerm, setSearchTerm] = useState('');
   
   const groupedAgents = useMemo(() => {
-    if (!agents) return {};
+    const groupedAgents: Record<AgentCategory, Agent[]> = {
+        [AgentCategory.ContentGeneration]: [],
+        [AgentCategory.ProposalGeneration]: [],
+        [AgentCategory.ReportGeneration]: [],
+        [AgentCategory.DiagramGeneration]: [],
+        [AgentCategory.PresentationGeneration]: [],
+        [AgentCategory.CodeGeneration]: [],
+        [AgentCategory.Marketing]: [],
+        [AgentCategory.Legal]: [],
+        [AgentCategory.AdminTools]: []
+    };
 
     const filtered = agents.filter(agent => {
         const lowercasedTerm = searchTerm.toLowerCase();
@@ -202,7 +212,7 @@ export default function AgentManager() {
                agent.category.toLowerCase().includes(lowercasedTerm);
     }).filter((agent): agent is Agent => agent !== undefined && agent !== null); // Ensure agents are not undefined or null after filtering
 
-    return filtered.reduce((acc: Record<AgentCategory, Agent[]>, agent: Agent) => {
+    return filtered.reduce((acc, agent: Agent) => {
  const category = agent.category || AgentCategory.ContentGeneration;
  if (!acc[category]) {
  acc[category] = [];

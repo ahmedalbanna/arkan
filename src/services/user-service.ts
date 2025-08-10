@@ -2,7 +2,7 @@
 'use client';
 
 import type { UserProfile, PricingPlan } from '@/lib/types';
-import { auth, app } from '@/lib/firebase';
+import { auth, app } from '@/lib/firebaseConfig';
 import {
   signInWithEmailAndPassword,
   signOut,

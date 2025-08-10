@@ -3,7 +3,6 @@
 
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
 
 
 export type {
@@ -34,6 +33,14 @@ export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
 export type { DiffPart } from '@/lib/diff';
+export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
+
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
 
 
 export interface Notification {

@@ -135,7 +135,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setProposal: (proposal) => {
         set({
           proposal: proposal,
-          name: proposal?.title || undefined,
+          name: (proposal?.title || 'new Project') as string,
           hasUnsavedChanges: true,
         });
         // Clear downstream states when a new proposal is set

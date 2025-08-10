@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, query, orderByChild, limitToLast, update } from 'firebase/database';
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
 import { Agent } from '@/lib/agents';

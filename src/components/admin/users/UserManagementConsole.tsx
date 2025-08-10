@@ -1,10 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { UserProfile } from '@/lib/types';
-import Link from 'next/link';
-import { format } from 'date-fns';
 import {
   Table,
   TableBody,
@@ -14,63 +12,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Pencil, ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
-import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
-import { fetchUserProfileApi as fetchUserProfileApi, fetchUsers, type UserListResponse } from '@/services/user-service';
-import { Badge } from '@/components/ui/badge'; // Corrected import alias
+import { fetchUsers, type UserListResponse } from '@/services/user-service';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
-import { CreateUserDialog } from './CreateUserDialog';
-import { useChatStore } from '@/hooks/useChatStore';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
-import { createConversationApi } from '@/services/chat-service';
-
+import { CreateUserDialog } from './users/CreateUserDialog';
+import { UserTable } from './users/UserTable';
+import { UserTableSkeleton } from './users/UserTableSkeleton';
 
 const USERS_PER_PAGE = 10;
 
-function UserTableSkeleton() {
-    const { t } = useLocalization();
-    return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
-                    <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
-                    <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
-                    <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
-                    <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
-                    <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-16" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-8 w-8 inline-block" /></TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    );
-}
-
 export default function UserManagementConsole() {
   const { t } = useLocalization();
-  const queryClient = useQueryClient();
-  const { firebaseUser, userProfile: adminProfile, isLoading: authIsLoading } = useAuth();
-  const router = useRouter();
-  const { toast } = useToast();
-  const { createConversation, openChat } = useChatStore();
-
-
+  const { firebaseUser, isLoading: authIsLoading } = useAuth();
+  
   const { 
     data, 
     error, 
@@ -87,45 +45,11 @@ export default function UserManagementConsole() {
           return fetchUsers(USERS_PER_PAGE, pageParam, token);
       },
       initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) => {
-          if (!lastPage.hasNextPage) return undefined;
-          return lastPage.lastVisibleId;
-      },
+      getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
       enabled: !!firebaseUser
   });
 
   const allUsers = data?.pages.flatMap(page => page.users) ?? [];
-
-
-  // Prefetch user profile on hover for a smoother navigation experience
-  const prefetchUser = async (userId: string) => {
-    if (!firebaseUser) return;
-    const token = await firebaseUser.getIdToken();
-    await queryClient.prefetchQuery({
-        queryKey: userKeys.profile(userId),
-        queryFn: () => fetchUserProfileApi(userId, token),
-        staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
-    });
-  }
-
-  const handleStartChat = async (targetUser: UserProfile) => {
-    if (!firebaseUser || !adminProfile) return;
-    try {
-        const token = await firebaseUser.getIdToken();
-        const conversation = await createConversationApi({
-            participantIds: [firebaseUser.uid, targetUser.id],
-            participantNames: {
-                [firebaseUser.uid]: adminProfile.name || 'Admin',
-                [targetUser.id]: targetUser.name
-            },
-            title: `Chat with ${targetUser.name}`
-        }, token);
-        createConversation(conversation);
-        router.push('/admin/chats');
-    } catch (error: any) {
-        toast({ title: 'Error', description: `Failed to start chat: ${error.message}`, variant: 'destructive' });
-    }
-  }
 
   const isLoading = status === 'pending' || authIsLoading;
   const isError = status === 'error';
@@ -151,53 +75,20 @@ export default function UserManagementConsole() {
             </div>
         ) : (
             <>
-                <div className="border rounded-lg">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t('manageUsers.tableHeadName')}</TableHead>
-                          <TableHead>{t('manageUsers.tableHeadEmail')}</TableHead>
-                          <TableHead>{t('manageUsers.tableHeadRole')}</TableHead>
-                          <TableHead>{t('manageUsers.tableHeadCredits')}</TableHead>
-                          <TableHead>{t('manageUsers.tableHeadJoined')}</TableHead>
-                          <TableHead className="text-right">{t('manageUsers.tableHeadActions')}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {allUsers?.map((user) => (
-                          <TableRow key={user.id}>
-                            <TableCell className="font-medium">{user.name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>
-                              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                                {t(`roles.${user.role}`)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{user.credits}</TableCell>
-                            <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
-                            <TableCell className="text-right">
-                               <Button asChild variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
-                                  <MessageSquare className="h-4 w-4" />
-                                  <span className="sr-only">Chat with user</span>
-                                </Button>
-                              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
-                                <Link href={`/admin/manage-users/${user.id}/edit`}>
-                                   <Pencil className="h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                </div>
+                <UserTable users={allUsers} />
                 <div className="flex items-center justify-center pt-8">
                     <Button
                         onClick={() => fetchNextPage()}
                         disabled={!hasNextPage || isFetchingNextPage}
                     >
-                        {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                        {isFetchingNextPage ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <span>Loading more...</span>
+                            </>
+                        ) : (
+                            <span>Load More</span>
+                        )}
                     </Button>
                 </div>
             </>

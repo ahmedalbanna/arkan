@@ -89,7 +89,7 @@ export const EvaluationTools = () => {
                 methodology: proposal?.methodology as string || '',
                 expected_outcome: Array.isArray(proposal?.expected_outcome) ? proposal.expected_outcome : [],
                 timeline: {
-                    phases: Array.isArray(proposal?.timeline?.phases) ? proposal.timeline.phases : [],
+                    phases: Array.isArray(proposal?.timeline?.phases ) ? proposal.timeline.phases : [],
                     startDate: proposal?.timeline?.startDate || '',
                     endDate: proposal?.timeline?.endDate || '', // Keep this property
                 } as any, // Cast timeline to any if its type is uncertain

@@ -3,7 +3,7 @@
 
 import type { ParaphraseMode } from "@/ai/flows/paraphrase-text";
 import type { SummarizeLength } from "@/ai/flows/summarize-text";
-import type { CitationStyle } from "@/ai/flows/generate-citation";
+import type { CitationStyle, GenerateCitationOutput } from "@/ai/flows/generate-citation";
 import { ReactNode, SetStateAction } from "react";
 import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
 import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';

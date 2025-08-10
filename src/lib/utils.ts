@@ -4,3 +4,13 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+// generate random password
+export function generateRandomPassword(length: number): string {
+  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+  let password = ""
+  for (let i = 0; i < length; i++) {
+    password += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return password
+}

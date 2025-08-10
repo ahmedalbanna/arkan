@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useAuth } from '@/context/AuthContext';
-import { app } from '@/lib/firebase';
+import { app } from '@/lib/firebaseConfig';
 import { useToast } from '@/hooks/use-toast';
 import { saveDeviceToken } from '@/services/user-service';
 
