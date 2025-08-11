@@ -2,13 +2,7 @@
 'use client';
 
 import EditorLayout from '@/components/editor/EditorLayout';
-import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation'; // Assuming useSearchParams is still needed here
-
-// Dynamically import RichTextEditor with ssr: false
-const RichTextEditor = dynamic(() => import('@/components/editor/RichTextEditor'), {
-  ssr: false,
-});
+import { useSearchParams } from 'next/navigation';
 
 export default function EditorPageWrapper() {
   const searchParams = useSearchParams();
