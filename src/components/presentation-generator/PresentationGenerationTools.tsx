@@ -11,7 +11,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig } from '@/lib/report-config';
 import { type SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, Presentation, History, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Presentation, History, FileText, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -30,9 +30,9 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
 import { sectionConfig } from '@/lib/report-config';
-import { PresentationActions } from '@/components/presentation-generator/PresentationActions';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -168,62 +168,84 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
                         
-                         <Accordion type="multiple" className="w-full space-y-1" defaultValue={['context']}>
-                             <AccordionItem value="context">
-                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4" /> Context & Source Documents
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4">
-                                     <ContextSelector itemKey="presentation" />
-                                     <div className="pt-4 mt-4 border-t">
-                                        <AcademicUploaders
-                                            title="Upload Files"
+                        <div>
+                            <h4 className="text-sm font-semibold mb-2">Source Documents</h4>
+                             <Accordion type="multiple" className="w-full space-y-1">
+                                <AccordionItem value="context-selector">
+                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                        Select Existing Context
+                                    </AccordionTrigger>
+                                    <AccordionContent className="p-4 border">
+                                         <ContextSelector itemKey="presentation" />
+                                    </AccordionContent>
+                                </AccordionItem>
+                                 <AccordionItem value="file-uploader">
+                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                        Upload New Context
+                                    </AccordionTrigger>
+                                     <AccordionContent className="p-4 border">
+                                         <AcademicUploaders
+                                            title=""
                                             onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
                                             onContentRemoved={removeExternalContext}
                                             isProcessing={isDisabled}
                                             uploadedContent={externalContext}
                                             isContext
                                         />
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="settings">
-                                <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                    <div className="flex items-center gap-2">
-                                        <Presentation className="h-4 w-4" /> {t('builder.presentationGenerator.editDetails')}
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent className="space-y-4 p-4">
-                                     <div className="grid grid-cols-2 gap-4">
-                                         <div className="space-y-2">
-                                             <Label htmlFor="tone-select">Tone</Label>
-                                             <Select value={tone} onValueChange={setTone}>
-                                                 <SelectTrigger id="tone-select"><SelectValue placeholder="Default" /></SelectTrigger>
-                                                 <SelectContent>
-                                                     <SelectItem value="professional">Professional</SelectItem>
-                                                     <SelectItem value="casual">Casual</SelectItem>
-                                                     <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
-                                                 </SelectContent>
-                                             </Select>
-                                         </div>
-                                         <div className="space-y-2">
-                                             <Label htmlFor="complexity-select">Complexity</Label>
-                                             <Select value={complexity} onValueChange={setComplexity}>
-                                                 <SelectTrigger id="complexity-select"><SelectValue placeholder="Default" /></SelectTrigger>
-                                                 <SelectContent>
-                                                     <SelectItem value="summary">High-level Summary</SelectItem>
-                                                     <SelectItem value="detailed">Detailed</SelectItem>
-                                                     <SelectItem value="technical">For Technical Audience</SelectItem>
-                                                 </SelectContent>
-                                             </Select>
-                                         </div>
-                                     </div>
-                                     <GuidelineEditor itemKey="presentation" agentId="generate-presentation" isAdmin={userProfile?.role === 'admin'} />
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
+                                    </AccordionContent>
+                                </AccordionItem>
+                             </Accordion>
+                        </div>
+                        
+                        <Separator />
+
+                        <div>
+                            <h4 className="text-sm font-semibold mb-2">Generation Settings</h4>
+                            <Accordion type="multiple" className="w-full space-y-1">
+                                 <AccordionItem value="settings">
+                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                        <div className="flex items-center gap-2">
+                                            <Settings className="h-4 w-4" /> Advanced Settings
+                                        </div>
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-4 p-4 border">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label htmlFor="tone-select">Tone</Label>
+                                                <Select value={tone} onValueChange={setTone}>
+                                                    <SelectTrigger id="tone-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="professional">Professional</SelectItem>
+                                                        <SelectItem value="casual">Casual</SelectItem>
+                                                        <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="complexity-select">Complexity</Label>
+                                                <Select value={complexity} onValueChange={setComplexity}>
+                                                    <SelectTrigger id="complexity-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="summary">High-level Summary</SelectItem>
+                                                        <SelectItem value="detailed">Detailed</SelectItem>
+                                                        <SelectItem value="technical">For Technical Audience</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="guidelines">
+                                    <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
+                                        Prompt & Guidelines
+                                    </AccordionTrigger>
+                                    <AccordionContent className="space-y-4 p-4 border">
+                                        <GuidelineEditor itemKey="presentation" agentId="generate-presentation" isAdmin={userProfile?.role === 'admin'} />
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
+                       
                         <div className="pt-2">
                             <TooltipProvider>
                                 <Tooltip>

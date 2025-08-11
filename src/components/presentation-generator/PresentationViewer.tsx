@@ -20,6 +20,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PresentationActions } from './PresentationActions';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
@@ -30,10 +31,10 @@ interface PresentationViewerProps {
 export default function PresentationViewer({ activePresentation, onTranslateAll, isTranslating }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t, locale } = useLocalization();
-  const { exportPresentationPptx, isExporting } = useExport();
+  
 
   // Add a guard clause to handle cases where activePresentation might be undefined.
-  if (!activePresentation) {
+  if (!activePresentation || !activePresentation.slides || activePresentation.slides.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -54,9 +55,6 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
     setCurrentSlide(0);
   }, [activePresentation.id]);
   
-  const handleExport = (templateKey: PptxTemplateKey) => {
-    exportPresentationPptx(slides, templateKey);
-  };
 
   const handleNext = () => {
     setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
@@ -84,32 +82,12 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
     );
   }
 
-  const isBusy = isTranslating || isExporting;
-
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
         <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" type="button" size="sm" onClick={handleTranslate} disabled={isBusy}>
-                {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-                {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={isBusy} title={t('builder.presentationGenerator.exportTooltip')}>
-                   {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-                   {t('builder.presentationGenerator.exportButton')}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleExport('modern')}>Modern</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('dark')}>Dark</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleExport('professional')}>Professional</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+            <PresentationActions isGenerating={isTranslating} />
         </div>
         <CardDescription>
           {t('builder.presentationGenerator.slideLabel').replace('{current}', (currentSlide + 1).toString()).replace('{total}', slides.length.toString())}

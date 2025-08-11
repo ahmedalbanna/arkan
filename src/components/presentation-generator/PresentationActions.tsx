@@ -3,77 +3,44 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Presentation } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { useState, useEffect } from 'react';
-import { usePptxStyles } from '@/hooks/use-pptx-styles';
-import { PptxTemplateKey } from '@/lib/types';
+import { Loader2, Languages } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { useExport } from '@/hooks/use-export';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface PresentationActionsProps {
   isGenerating: boolean;
+  onTranslateAll: (targetLang: 'en' | 'ar') => void;
+  isTranslating: boolean;
 }
 
-const PPTX_TEMPLATE_KEY = 'arkan-pptx-template';
-
-export const PresentationActions = ({ isGenerating }: PresentationActionsProps) => {
-  const { t } = useLocalization();
-  const { templates: pptxTemplates, isLoaded: pptxLoaded } = usePptxStyles();
-  const [selectedPptxTemplate, setSelectedPptxTemplate] = useState<PptxTemplateKey>('modern');
-  const { exportPresentationPptx, isExporting } = useExport();
-
+export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslating }: PresentationActionsProps) => {
+  const { t, locale } = useLocalization();
   const { presentation, activePresentationId } = usePresentationStore();
   const slides = presentation?.history.find(p => p.id === activePresentationId)?.slides;
 
-  useEffect(() => {
-    const savedPptxTemplate = localStorage.getItem(PPTX_TEMPLATE_KEY) as PptxTemplateKey | null;
-    if (savedPptxTemplate && pptxTemplates && pptxTemplates[savedPptxTemplate]) {
-      setSelectedPptxTemplate(savedPptxTemplate);
-    }
-  }, [pptxTemplates]);
+  const isBusy = isGenerating || isTranslating;
 
-  const handlePptxTemplateChange = (key: PptxTemplateKey) => {
-    setSelectedPptxTemplate(key);
-    localStorage.setItem(PPTX_TEMPLATE_KEY, key);
-  }
-
-  const handleExportPresentation = () => {
-    if (!slides) return;
-    exportPresentationPptx(slides, selectedPptxTemplate);
-  }
-
-  const isBusy = isGenerating || isExporting;
+  const handleTranslate = () => {
+    const targetLang = locale === 'en' ? 'ar' : 'en';
+    onTranslateAll(targetLang);
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline">{t('builder.presentationGenerator.actionsTitle')}</CardTitle>
-        <CardDescription>{t('builder.presentationGenerator.actionsDesc')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="pptx-template-select">{t('builder.presentationGenerator.exportStyleLabel')}</Label>
-            {pptxLoaded ? (
-              <Select value={selectedPptxTemplate} onValueChange={(value) => handlePptxTemplateChange(value as PptxTemplateKey)} disabled={isBusy}>
-                  <SelectTrigger id="pptx-template-select">
-                      <SelectValue placeholder={t('builder.presentationGenerator.exportStylePlaceholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {Object.entries(pptxTemplates).map(([key, template]) => (
-                          <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-            ) : <Loader2 className="h-5 w-5 animate-spin" /> }
-        </div>
-        <Button onClick={handleExportPresentation} disabled={isBusy || !slides || slides.length === 0} className="w-full font-headline">
-          {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Presentation className="mr-2 h-4 w-4" />}
-          {t('builder.presentationGenerator.exportButton')}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleTranslate}
+        disabled={isBusy || !slides || slides.length === 0}
+      >
+        {isTranslating ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+        ) : (
+          <Languages className="mr-2 h-4 w-4" />
+        )}
+        {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
+      </Button>
+    </div>
   );
 };

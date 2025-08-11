@@ -4,7 +4,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, Presentation } from 'lucide-react';
-import PresentationViewer from './PresentationViewer';
 import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { lazy, Suspense } from 'react';
@@ -90,7 +89,7 @@ export default function PresentationGenerator() {
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-[calc(100vh-200px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full">
             <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
                 <PresentationGenerationTools
                     isDisabled={generationMutation.isPending || translateMutation.isPending}
