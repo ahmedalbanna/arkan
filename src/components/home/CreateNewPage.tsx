@@ -6,6 +6,7 @@ import {
   Search,
   LayoutGrid,
   File as FileIcon,
+  ChevronDown,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { WLogo, PLogo, SLogo, PDFLogo } from './NavItem';
