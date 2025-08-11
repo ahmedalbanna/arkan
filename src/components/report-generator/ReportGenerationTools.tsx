@@ -32,6 +32,7 @@ import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
+import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
 
