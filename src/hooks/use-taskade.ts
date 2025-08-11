@@ -7,6 +7,10 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import { startGenerationApi } from '@/services/taskade-service';
 import { toast } from './use-toast';
 import { getDatabase, ref, onValue, off } from 'firebase/database';
+import {
+  StartGenerationPayload,
+  TaskadeJobStatus,
+} from "@/@types/taskade";
 import { app } from '@/lib/firebaseConfig';
 
 type JobStatus = 'idle' | 'pending' | 'completed' | 'failed';
@@ -18,12 +22,14 @@ export function useTaskadeGeneration() {
   const [error, setError] = useState<string | null>(null);
   const { firebaseUser } = useAuth();
 
-  const startGeneration = useCallback(async (inputContent: string | object) => {
+  const startGeneration = useCallback(async (inputContent: StartGenerationPayload) => {
     setStatus('pending');
     setResult(null);
     setError(null);
     setJobId(null);
     try {
+      // Add explicit type assertion if inputContent could potentially be 'string' based on
+      // the function signature, although your usage implies it's always an object here.
       const token = await getAuthenticatedToken(firebaseUser);
       const data = await startGenerationApi(inputContent, token);
       setJobId(data.jobId);

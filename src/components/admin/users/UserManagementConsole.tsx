@@ -12,16 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { fetchUsers, type UserListResponse } from '@/services/user-service';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
-import { CreateUserDialog } from './users/CreateUserDialog';
-import { UserTable } from './users/UserTable';
-import { UserTableSkeleton } from './users/UserTableSkeleton';
+import { CreateUserDialog } from '@/components/admin/users/CreateUserDialog';
+import { UserTable } from '@/components/admin/users/UserTable';
+import { UserTableSkeleton } from '@/components/admin/users/UserTableSkeleton';
 
 const USERS_PER_PAGE = 10;
 

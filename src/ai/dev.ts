@@ -49,3 +49,10 @@ import '@/ai/tools/generateDiagram';
 import '@/ai/tools/addTaskToPhase';
 import '@/ai/tools/generateCodebase';
 import '@/ai/tools/generateProjectPlan';
+
+// Add new tools
+
+import '@/ai/flows/summarize-document.ts';
+import '@/ai/flows/ai-proofread-document.ts';
+import '@/ai/flows/generate-text.ts';
+import '@/ai/flows/generate-presentation-outline.ts';

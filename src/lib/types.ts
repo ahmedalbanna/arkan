@@ -1,6 +1,3 @@
-
-
-
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 
@@ -36,13 +33,6 @@ export type { DiffPart } from '@/lib/diff';
 export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
 
 
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-
-
 export interface Notification {
   id: string;
   title: string;
@@ -69,6 +59,10 @@ export interface UpdateFeatureVariables {
     payload: UpdateFeaturePayload;
 }
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
 // --- PPTX Template Types ---
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
@@ -280,3 +274,10 @@ export interface SavedProject extends ProjectState {
     createdAt: string;
     updatedAt: string;
 }
+
+export interface StartGenerationPayload {
+  featureId: string;
+  inputContent: string | object;
+}
+
+export type TaskadeJobStatus = 'idle' | 'pending' | 'completed' | 'failed';
