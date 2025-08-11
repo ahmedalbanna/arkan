@@ -30,11 +30,8 @@ import { Slider } from '../ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
-import { auth } from '@/lib/firebaseConfig';
-import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -96,8 +93,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const {
         sections,
         externalContext,
-        addExternalContext,
-        removeExternalContext,
         controlState,
         guidelineState,
         contextSelection,
@@ -155,9 +150,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
         setActiveMutationKey('full-report');
 
-        
-
-        
     };
 
     const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
@@ -189,37 +181,19 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                         <TabsTrigger value="evaluate" disabled={!Object.values(sections).some(s => !!s)}>Evaluate</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6">
-                        <div className="space-y-4 mb-4">
+                        <div className="space-y-2 mb-4">
                             <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {REPORT_GENERATION_TEMPLATES.map((template) => (
-                                    <Card
-                                        key={template.id}
-                                        onClick={() => setSelectedReportTemplateId(template.id)}
-                                        className={cn(
-                                            "cursor-pointer hover:border-primary transition-all",
-                                            selectedReportTemplateId === template.id && "border-primary ring-2 ring-primary/50"
-                                        )}
-                                    >
-                                        <CardHeader className="p-4">
-                                            <Image
-                                                src={`https://placehold.co/300x200.png`}
-                                                data-ai-hint="document template"
-                                                alt={template.name}
-                                                width={300}
-                                                height={200}
-                                                className="w-full h-auto rounded-md mb-2"
-                                            />
-                                            <CardTitle className="text-sm font-semibold">{template.name}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="p-4 pt-0">
-                                            <p className="text-xs text-muted-foreground">{template.description}</p>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
+                            <Select value={selectedReportTemplateId} onValueChange={(value) => setSelectedReportTemplateId(value)}>
+                                <SelectTrigger id="report-template-select">
+                                    <SelectValue placeholder="Select a report template" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {REPORT_GENERATION_TEMPLATES.map((template) => (
+                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
