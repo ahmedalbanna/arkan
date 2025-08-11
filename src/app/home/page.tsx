@@ -62,12 +62,18 @@ import {
   MessageCircle,
   MoreHorizontal,
   Trash2,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import Image from 'next/image';
 import EditorPage from '@/app/editor/page';
+import { useProjects } from '@/hooks/use-projects';
+import { formatDistanceToNow } from 'date-fns';
+import { SavedProject } from '@/lib/types';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
 
 
 function WLogo() {
@@ -108,6 +114,7 @@ type DocumentTab = {
   id: number;
   title: string;
   type: 'home' | 'word' | 'powerpoint' | 'excel' | 'pdf' | 'new';
+  projectId?: string;
 };
 
 
@@ -119,78 +126,6 @@ const initialTabs: DocumentTab[] = [
   { id: 5, title: 'Budget Report', type: 'excel' },
   { id: 6, title: 'Document2', type: 'word' },
 ];
-
-
-const recentFiles = [
-  {
-    icon: <WLogo />,
-    name: 'Co-op Final Report- Abdalbari Bandar Al-Osaimi - Report.wps',
-    isLocal: true,
-    location: 'My Desktop',
-    modified: 'Today 00:41',
-    size: '10.3 MB',
-    dateGroup: 'Today',
-    type: 'word'
-  },
-  {
-    icon: <WLogo />,
-    name: 'Co-op Final Report- Abdalbari Bandar Al-Osaimi - Report.docx',
-    isLocal: true,
-    location: 'Downloads',
-    modified: 'Yesterday 22:36',
-    size: '13.1 MB',
-    dateGroup: 'Yesterday',
-    type: 'word'
-  },
-  {
-    icon: <WLogo />,
-    name: 'WPS Docs Quick Start Guide.docx',
-    isLocal: true,
-    location: 'C:\\Users\\ahm...',
-    modified: 'Yesterday 23:46',
-    size: '1.3 MB',
-    dateGroup: 'Yesterday',
-    type: 'word'
-  },
-  {
-    icon: <PDFLogo />,
-    name: 'WPS PDF Quick Start Guide.pdf',
-    isLocal: true,
-    location: 'C:\\Users\\ahm...',
-    modified: 'Yesterday 23:46',
-    size: '1.8 MB',
-    dateGroup: 'Yesterday',
-    type: 'pdf'
-  },
-  {
-    icon: <SLogo />,
-    name: 'WPS Sheets Quick Start Guide.xlsx',
-    isLocal: true,
-    location: 'C:\\Users\\ahm...',
-    modified: 'Yesterday 23:46',
-    size: '1.5 MB',
-    dateGroup: 'Yesterday',
-    type: 'excel'
-  },
-  {
-    icon: <PLogo />,
-    name: 'WPS Slides Quick Start Guide.pptx',
-    isLocal: true,
-    location: 'C:\\Users\\ahm...',
-    modified: 'Yesterday 23:46',
-    size: '809 KB',
-    dateGroup: 'Yesterday',
-    type: 'powerpoint'
-  },
-];
-
-const fileGroups = recentFiles.reduce((acc, file) => {
-  const group = acc[file.dateGroup] || [];
-  group.push(file);
-  acc[file.dateGroup] = group;
-  return acc;
-}, {} as Record<string, typeof recentFiles>);
-
 
 function NavItem({ icon, label, isActive, onClick, isVertical = true }: { icon: React.ReactNode, label: string, isActive?: boolean, onClick?: () => void, isVertical?: boolean }) {
   return (
@@ -293,570 +228,131 @@ function ContentSidebar({ activeItem, setActiveItem }: { activeItem: string, set
     );
 }
 
-function StarredPageContent() {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">Starred</h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <Eye className="w-5 h-5 text-slate-500" />
-          <Settings className="w-5 h-5 text-slate-500" />
-          <Info className="w-5 h-5 text-slate-500" />
-        </div>
-      </div>
+function RecentProjectsContent({ onProjectClick }: { onProjectClick: (project: SavedProject) => void }) {
+    const { data: projects, isLoading, isError, error } = useProjects();
+    const loadState = useBuilderStore(state => state.loadState);
+    const router = useRouter();
 
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <Checkbox id="all-types" />
-          <label htmlFor="all-types" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            All Types
-          </label>
-          <ChevronDown className="h-4 w-4" />
-        </div>
-        <div className="flex items-center gap-4 text-sm text-slate-500">
-            <span>Last Modified</span>
-            <span>Size</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center justify-center text-center text-slate-500 py-20">
-        <div className="relative w-48 h-36">
-            <div className="absolute inset-0 bg-slate-100 rounded-lg"></div>
-            <div className="absolute inset-x-4 -bottom-4 bg-white rounded-lg shadow-md p-4 flex flex-col items-center">
-                 <div className="p-3 bg-white rounded-full shadow-lg -mt-10 mb-2">
-                    <Star className="w-8 h-8 text-yellow-500 fill-current" />
-                 </div>
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <Loader2 className="w-8 h-8 animate-spin text-slate-500" />
             </div>
-             <div className="absolute top-4 left-4 w-3/4 h-2 bg-slate-200 rounded"></div>
-             <div className="absolute top-10 left-4 w-1/2 h-2 bg-slate-200 rounded"></div>
-             <div className="absolute top-16 left-4 w-2/3 h-2 bg-slate-200 rounded"></div>
-
-        </div>
-
-        <h2 className="text-xl font-semibold text-slate-800 mt-8">No Starred Documents</h2>
-        <p className="mt-2">Star important documents for easy access</p>
-      </div>
-    </>
-  );
-}
-
-function SharePageContent() {
-  const [activeTab, setActiveTab] = useState('Shared folders');
-
-  return (
-    <div className="flex flex-col h-full">
-      <header className="flex-shrink-0 border-b border-slate-200">
-        <div className="flex items-center justify-between h-16 px-6">
-          <div className="flex items-center gap-4">
-            <div className="flex gap-1 border border-slate-200 rounded-md p-0.5">
-              <Button onClick={() => setActiveTab('Shared folders')} variant={activeTab === 'Shared folders' ? 'secondary' : 'ghost'} size="sm" className="px-3">Shared folders</Button>
-              <Button onClick={() => setActiveTab('Shared with me')} variant={activeTab === 'Shared with me' ? 'secondary' : 'ghost'} size="sm" className="px-3">Shared with me</Button>
-              <Button onClick={() => setActiveTab('Shared by me')} variant={activeTab === 'Shared by me' ? 'secondary' : 'ghost'} size="sm" className="px-3">Shared by me</Button>
+        );
+    }
+    
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center h-full text-red-500">
+                <AlertCircle className="w-8 h-8 mr-2" />
+                <p>Error loading projects: {error.message}</p>
             </div>
-            <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-          </div>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon"><Plus className="w-5 h-5 text-slate-500" /></Button>
-            <Button variant="ghost" size="icon"><Eye className="w-5 h-5 text-slate-500" /></Button>
-            <Button variant="ghost" size="icon"><Settings className="w-5 h-5 text-slate-500" /></Button>
-            <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-          </div>
-        </div>
-        <div className="px-6 pb-2">
-            <div className="flex items-center gap-2">
-                <Checkbox id="share-all-types" />
+        )
+    }
+
+    if (!projects || projects.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center text-center text-slate-500 py-20">
+                <Folder className="w-24 h-24 text-slate-300 mb-4"/>
+                <h2 className="text-xl font-semibold text-slate-800">No Recent Projects</h2>
+                <p className="mt-2">Your recently edited projects will appear here.</p>
+            </div>
+        )
+    }
+    
+    // Group projects by date
+    const groupedProjects = projects.reduce((acc, project) => {
+        const date = new Date(project.updatedAt);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        let groupName = formatDistanceToNow(date, { addSuffix: true });
+        if (date.toDateString() === today.toDateString()) {
+            groupName = 'Today';
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            groupName = 'Yesterday';
+        } else {
+            groupName = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
+        }
+
+        if (!acc[groupName]) {
+            acc[groupName] = [];
+        }
+        acc[groupName].push(project);
+        return acc;
+    }, {} as Record<string, SavedProject[]>);
+
+    const groupOrder = ['Today', 'Yesterday', ...Object.keys(groupedProjects).filter(g => g !== 'Today' && g !== 'Yesterday').sort((a,b) => new Date(b).getTime() - new Date(a).getTime())];
+
+
+    return (
+        <>
+             <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-semibold">Recent</h1>
+                <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                <Eye className="w-5 h-5 text-slate-500" />
+                <Settings className="w-5 h-5 text-slate-500" />
+                <Info className="w-5 h-5 text-slate-500" />
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-6">
+                <Checkbox id="all-types" />
                 <label
-                    htmlFor="share-all-types"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                htmlFor="all-types"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                    All Types
+                All Types
                 </label>
                 <ChevronDown className="h-4 w-4" />
             </div>
-        </div>
-      </header>
-      <main className="flex-grow flex flex-col items-center justify-center text-center text-slate-500 p-6">
-        <div className="relative w-72 h-48 bg-slate-100 rounded-lg p-4">
-            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-64 bg-white rounded-lg shadow-lg p-4 space-y-3">
-                <div className="flex justify-between items-center">
-                    <p className="font-semibold text-slate-800">Share & Collaborate</p>
-                    <Button size="sm" variant="outline">Share <ChevronDown className="w-4 h-4 ml-2"/></Button>
-                </div>
-                <Button className="w-full bg-blue-500 hover:bg-blue-600">Copy Link</Button>
-                <div className="flex justify-around items-center pt-2">
-                    <Mail className="w-6 h-6 text-slate-400"/>
-                    <svg className="w-6 h-6 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M326.21 213.39l-22-44.34-44.62-22.11L215.3 125l-22.25 44.5-44.5 22.25-22.25 44.5 22.25 44.5 44.5 22.25 22.25 44.5 22.25-44.5 44.5-22.25 22.25-44.5zM393.82 85l-13.62 27.25-27.25 13.62-13.62 27.25 13.62 27.25 27.25 13.62 13.62 27.25 13.62-27.25 27.25-13.62 13.62-27.25-13.62-27.25-27.25-13.62zM393.82 341l-13.62 27.25-27.25 13.62-13.62 27.25 13.62 27.25 27.25 13.62 13.62 27.25 13.62-27.25 27.25-13.62 13.62-27.25-13.62-27.25-27.25-13.62z"/></svg>
-                    <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                        <MessageCircle className="w-4 h-4 text-white"/>
-                    </div>
-                    <MoreHorizontal className="w-6 h-6 text-slate-400"/>
-                </div>
+
+            <div className="space-y-8">
+                {groupOrder.map(group => (
+                    groupedProjects[group] && (
+                        <div key={group}>
+                            <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
+                             <Table>
+                                <TableHeader>
+                                <TableRow className="hover:bg-transparent border-b-slate-200">
+                                    <TableHead className="w-[50%]">Name</TableHead>
+                                    <TableHead>Owner</TableHead>
+                                    <TableHead>Last Modified</TableHead>
+                                    <TableHead className="text-right">Size</TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {groupedProjects[group].map((project) => (
+                                    <TableRow key={project.id} className="cursor-pointer hover:bg-slate-50 border-b-slate-200" onClick={() => onProjectClick(project)}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                            <WLogo />
+                                            <span className="font-medium text-slate-800 truncate">{project.name || 'Untitled Project'}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-slate-500">{project.userId.substring(0,8)}...</TableCell>
+                                        <TableCell className="text-slate-500">{formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}</TableCell>
+                                        <TableCell className="text-right text-slate-500">--</TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    )
+                ))}
             </div>
-        </div>
-        <div className="mt-16">
-            <h2 className="text-xl font-semibold text-slate-800">No Documents</h2>
-            <p className="mt-2">Click "Share" in the upper right corner of the document to share it with others</p>
-        </div>
-      </main>
-      <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center text-slate-400">
-        <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
-        <p className="text-sm text-slate-500 text-center">Select a file to view details</p>
-      </aside>
-    </div>
-  );
-}
-
-
-const receivedFiles = [
-  { icon: <PLogo />, name: 'Co-op Final Report- Abdalbari B...r Al-Osaimi - Presentation.pptx', modified: 'Yesterday 22:56', size: '140 KB' },
-  { icon: <PDFLogo />, name: 'Co-op Final Report- Al-Hanouf M... Al-Tuwairqi - Presentation.pdf', modified: 'Yesterday 18:43', size: '354 KB' },
-  { icon: <PLogo />, name: 'presentation (16).pptx', modified: 'Yesterday 18:29', size: '102 KB' },
-  { icon: <PDFLogo />, name: 'Taif University.pdf', modified: 'Yesterday 17:14', size: '442 KB' },
-  { icon: <PLogo />, name: 'Co-op Final Mazen - Presentation.pptx', modified: 'Yesterday 17:11', size: '500 KB' },
-  { icon: <PDFLogo />, name: 'Co-op Final Mazen - Presentation.pdf', modified: 'Yesterday 17:11', size: '1.1 MB' },
-  { icon: <WLogo />, name: 'YouTube_Video__Content_Extracted_2025-08-10.docx', modified: 'Yesterday 03:53', size: '1 KB' },
-  { icon: <PDFLogo />, name: 'Rahaf Althobaiti-repory.pdf', modified: 'Yesterday 01:40', size: '1.3 MB' },
-  { icon: <WLogo />, name: 'Rahaf Althobaiti-repory.docx', modified: 'Yesterday 01:40', size: '4.6 MB' },
-  { icon: <PDFLogo />, name: 'Co-op Final Mazen .pdf', modified: 'Yesterday 01:08', size: '14.9 MB' },
-  { icon: <PDFLogo />, name: 'Co-op Final Report-Razan Maid Alzahrani-Report.pdf', modified: 'Yesterday 01:07', size: '1.5 MB' },
-];
-
-function ReceivedPageContent() {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">Received</h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <Settings className="w-5 h-5 text-slate-500" />
-          <Info className="w-5 h-5 text-slate-500" />
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <label htmlFor="all-types" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            All Types
-          </label>
-          <ChevronDown className="h-4 w-4" />
-        </div>
-      </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow className="hover:bg-transparent border-b-slate-200">
-            <TableHead className="w-[60%]"></TableHead>
-            <TableHead>Last Modified</TableHead>
-            <TableHead className="text-right">Size</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {receivedFiles.map((file) => (
-            <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {file.icon}
-                  <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-slate-500">{file.modified}</TableCell>
-              <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </>
-  )
-}
-
-function WpsDrivePageContent() {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <span className="text-slate-500">Drive</span>
-            <ChevronRight className="w-5 h-5" />
-            <span>WPS Drive</span>
-          </h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">New</Button>
-            <Button variant="outline" size="sm">Import</Button>
-            <Button variant="ghost" size="icon"><Eye className="w-5 h-5 text-slate-500" /></Button>
-            <Button variant="ghost" size="icon"><Settings className="w-5 h-5 text-slate-500" /></Button>
-            <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <label htmlFor="all-types" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            All Types
-          </label>
-          <ChevronDown className="h-4 w-4" />
-        </div>
-         <div className="flex items-center gap-4 text-sm text-slate-500">
-            <span>Last Modified</span>
-            <ChevronDown className="h-4 w-4" />
-            <span>Size</span>
-             <ChevronDown className="h-4 w-4" />
-        </div>
-      </div>
-      
-      <Table>
-        <TableBody>
-            <TableRow className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-              <TableCell className="w-[80%]">
-                <div className="flex items-center gap-3">
-                  <Trash2 className="w-5 h-5 text-slate-500"/>
-                  <span className="font-medium text-slate-800">Recycle Bin</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-slate-500">Today 03:38</TableCell>
-              <TableCell className="text-right text-slate-500">--</TableCell>
-            </TableRow>
-        </TableBody>
-      </Table>
-    </>
-  )
-}
-
-const googleDriveFiles = [
-    { name: 'بيت البناء', modified: '2020-11-17 01:1...', size: '0 KB' },
-    { name: 'علوم حاسوب 4', modified: '2020-11-16 21:1...', size: '0 KB' },
-    { name: 'Code Optimization', modified: '2020-02-10 04:0...', size: '0 KB' },
-    { name: 'Yu', modified: '2019-01-21 03:5...', size: '0 KB' },
-    { name: 'GOOGLE PLAY', modified: '2018-12-11 18:1...', size: '0 KB' },
-    { name: 'ملاحظات كتب Play', modified: '2018-12-04 20:4...', size: '0 KB' },
-    { name: 'PhpMyadmin', modified: '2018-11-19 04:2...', size: '0 KB' },
-    { name: 'أبحاث', modified: '2018-11-19 03:5...', size: '0 KB' },
-    { name: 'علوم حاسوب', modified: '2018-09-13 21:5...', size: '0 KB' },
-    { name: 'fasterpost', modified: '2018-01-22 18:3...', size: '0 KB' },
-    { name: 'puffinbrowser', modified: '2017-07-02 00:4...', size: '0 KB' },
-];
-
-function GoogleDrivePageContent() {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <span className="text-slate-500">Drive</span>
-            <ChevronRight className="w-5 h-5" />
-            <span>Google Drive</span>
-          </h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-        </div>
-      </div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <label htmlFor="all-types" className="text-sm font-medium">AllType</label>
-          <ChevronDown className="h-4 w-4" />
-        </div>
-        <div className="flex items-center gap-4 text-sm text-slate-500">
-          <span>Last Modified</span>
-          <span>Size</span>
-        </div>
-      </div>
-      <Table>
-        <TableBody>
-          {googleDriveFiles.map((file) => (
-            <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-              <TableCell className="w-[60%]">
-                <div className="flex items-center gap-3">
-                  <Folder className="w-5 h-5 text-blue-500" />
-                  <span className="font-medium text-slate-800">{file.name}</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-slate-500">{file.modified}</TableCell>
-              <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </>
-  )
-}
-
-const dropboxFiles = [
-    { icon: <Folder className="w-5 h-5 text-blue-500" />, name: 'Apps', modified: '', size: '0 KB' },
-    { icon: <PDFLogo />, name: 'Get Started with Dropbox.pdf', modified: '2017-04-04 02:3...', size: '935 KB' },
-    { icon: <PicsArtLogo />, name: 'PicsArt_1480806978130.png', modified: '2017-04-04 03:4...', size: '102 KB' },
-    { icon: <PicsArtLogo />, name: 'PicsArt_1483564564257.png', modified: '2017-04-04 03:4...', size: '1 MB' },
-    { icon: <PicsArtLogo />, name: 'PicsArt_1487687275287.png', modified: '2017-04-04 03:4...', size: '528 KB' },
-    { icon: <TxtLogo />, name: 'tsr.txt', modified: '2017-09-14 18:2...', size: '1 KB' },
-];
-
-function DropboxPageContent() {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold flex items-center gap-2">
-            <span className="text-slate-500">Drive</span>
-            <ChevronRight className="w-5 h-5" />
-            <span>Dropbox</span>
-          </h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-        </div>
-      </div>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <label htmlFor="all-types" className="text-sm font-medium">AllType</label>
-          <ChevronDown className="h-4 w-4" />
-        </div>
-        <div className="flex items-center gap-4 text-sm text-slate-500">
-          <span>Last Modified</span>
-          <span>Size</span>
-        </div>
-      </div>
-      <Table>
-        <TableHeader>
-            <TableRow className="hover:bg-transparent border-b-slate-200">
-                <TableHead className="w-[60%]"></TableHead>
-                <TableHead>Last Modified</TableHead>
-                <TableHead className="text-right">Size</TableHead>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-          {dropboxFiles.map((file) => (
-            <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {file.icon}
-                  <span className="font-medium text-slate-800">{file.name}</span>
-                </div>
-              </TableCell>
-              <TableCell className="text-slate-500">{file.modified}</TableCell>
-              <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </>
-  )
-}
-
-const myComputerItems = [
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (A:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (B:)' },
-    { icon: <Laptop className="w-5 h-5 text-slate-500" />, name: 'Local Disk (C:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (D:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (E:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (F:)' },
-    { icon: <Cloud className="w-5 h-5 text-green-500" />, name: 'Local Disk (G:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (I:)' },
-    { icon: <HardDrive className="w-5 h-5 text-slate-500" />, name: 'Local Disk (R:)' },
-    { icon: <Folder className="w-5 h-5 text-blue-500" />, name: 'My Desktop' },
-    { icon: <FileText className="w-5 h-5 text-blue-500" />, name: 'My Documents' },
-];
-
-function MyComputerPageContent() {
-    return (
-        <>
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-semibold flex items-center gap-2">
-                        <span className="text-slate-500">Local</span>
-                        <ChevronRight className="w-5 h-5" />
-                        <span>My Computer</span>
-                    </h1>
-                    <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon"><Eye className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Settings className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-                </div>
-            </div>
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                    <label htmlFor="all-types" className="text-sm font-medium">All Types</label>
-                    <ChevronDown className="h-4 w-4" />
-                </div>
-            </div>
-            <Table>
-                <TableBody>
-                    {myComputerItems.map((item) => (
-                        <TableRow key={item.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                            <TableCell className="w-full">
-                                <div className="flex items-center gap-3">
-                                    {item.icon}
-                                    <span className="font-medium text-slate-800">{item.name}</span>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
         </>
     )
 }
 
-const myDesktopFiles = [
-  { icon: <SLogo />, name: 'عبدالحفيظ.xlsx', modified: '2025-05-27', size: '14 KB' },
-  { icon: <TxtLogo />, name: 'عبدالله.txt', modified: '2025-02-08', size: '4 KB' },
-  { icon: <WLogo />, name: 'عنوان المستند.docx', modified: '2025-02-06', size: '4.3 MB' },
-  { icon: <WLogo />, name: 'خلاف اصل العرب.docx', modified: '2025-02-09', size: '16.2 MB' },
-  { icon: <WLogo />, name: 'كتاب أصل العرب.docx', modified: '2025-01-26', size: '117 KB' },
-  { icon: <WLogo />, name: 'كتاب اصل العرب ميزان القوة وتايرها العالمي المؤلف محمد البناء.docx', modified: '2025-02-06', size: '4.3 MB' },
-  { icon: <PDFLogo />, name: 'كتاب اصل العرب ميزان القوة وتايرها العالمي المؤلف محمد البناء.pdf', modified: '2025-02-06', size: '2.8 MB' },
-  { icon: <WLogo />, name: 'منصة ذكيه لمساعده المستخدمين في تحضير وصفات -نهائي.docx', modified: '2025-04-05', size: '264.8 MB' },
-  { icon: <PDFLogo />, name: 'منصة ذكيه لمساعده المستخدمين في تحضير وصفات -نهائي.pdf', modified: '2025-04-05', size: '5.3 MB' },
-  { icon: <WbkLogo />, name: 'نسخة احتياطية من منصة ذكيه لمساعده المستخدمين في تحضير وصفات -نهائي.wbk', modified: '2025-04-05', size: '264.8 MB' },
-  { icon: <TxtLogo />, name: 'txt.ي', modified: '2025-01-06', size: '1 KB' },
-];
-
-function MyDesktopPageContent() {
-    return (
-        <>
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-semibold flex items-center gap-2">
-                        <span className="text-slate-500">Local</span>
-                        <ChevronRight className="w-5 h-5" />
-                        <span>My Desktop</span>
-                    </h1>
-                    <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon"><Eye className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Settings className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-                </div>
-            </div>
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                    <label htmlFor="all-types" className="text-sm font-medium">All Types</label>
-                    <ChevronDown className="h-4 w-4" />
-                </div>
-                <div className="flex items-center gap-4 text-sm text-slate-500">
-                  <span>Last Modified</span>
-                  <span>Size</span>
-                </div>
-            </div>
-            <Table>
-                <TableBody>
-                    {myDesktopFiles.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                            <TableCell className="w-[60%]">
-                                <div className="flex items-center gap-3">
-                                    {file.icon}
-                                    <span className="font-medium text-slate-800">{file.name}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-slate-500">{file.modified}</TableCell>
-                            <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </>
-    )
-}
-
-const myDocumentsFiles = [
-    { name: 'Adobe', modified: '2025-06-25', size: '' },
-    { name: 'Balabolka', modified: '2025-03-17', size: '' },
-    { name: 'Custom Office Templates', modified: '2025-01-26', size: '' },
-    { name: 'Cybererps (ar-YE)_2', modified: '2025-02-16', size: '' },
-    { name: 'FeedbackHub', modified: '2025-06-24', size: '' },
-    { name: 'Google', modified: '2024-12-06', size: '' },
-    { name: 'IDM Computer Solutions', modified: '2025-05-24', size: '' },
-    { name: 'IISExpress', modified: '2025-02-20', size: '' },
-    { name: 'JSONBuddy', modified: '2024-12-28', size: '' },
-    { name: 'KingsoftData', modified: 'Yesterday 23:42', size: '' },
-    { name: 'Lunacy', modified: '2025-06-23', size: '' },
-];
-
-function MyDocumentsPageContent() {
-    return (
-        <>
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-semibold flex items-center gap-2">
-                        <span className="text-slate-500">Local</span>
-                        <ChevronRight className="w-5 h-5" />
-                        <span>My Documents</span>
-                    </h1>
-                    <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon"><Eye className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Settings className="w-5 h-5 text-slate-500" /></Button>
-                    <Button variant="ghost" size="icon"><Info className="w-5 h-5 text-slate-500" /></Button>
-                </div>
-            </div>
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                    <label htmlFor="all-types" className="text-sm font-medium">All Types</label>
-                    <ChevronDown className="h-4 w-4" />
-                </div>
-                 <div className="flex items-center gap-4 text-sm text-slate-500">
-                  <span>Last Modified</span>
-                  <span>Size</span>
-                </div>
-            </div>
-            <Table>
-                <TableBody>
-                    {myDocumentsFiles.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                            <TableCell className="w-[60%]">
-                                <div className="flex items-center gap-3">
-                                    <Folder className="w-5 h-5 text-blue-500" />
-                                    <span className="font-medium text-slate-800">{file.name}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-slate-500">{file.modified}</TableCell>
-                            <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </>
-    )
-}
-
-function HomePageContent({activeSidebarItem}: {activeSidebarItem: string}) {
-  if (activeSidebarItem === 'Starred') {
-    return <StarredPageContent />;
-  }
-  if (activeSidebarItem === 'Share') {
-    return <SharePageContent />;
-  }
-  if (activeSidebarItem === 'Received') {
-    return <ReceivedPageContent />;
-  }
-  if (activeSidebarItem === 'WPS Drive') {
-    return <WpsDrivePageContent />;
-  }
-  if (activeSidebarItem === 'Google Drive') {
-    return <GoogleDrivePageContent />;
-  }
-  if (activeSidebarItem === 'Dropbox') {
-    return <DropboxPageContent />;
-  }
-  if (activeSidebarItem === 'My Computer') {
-    return <MyComputerPageContent />;
-  }
-  if (activeSidebarItem === 'My Desktop') {
-    return <MyDesktopPageContent />;
-  }
-  if (activeSidebarItem === 'My Documents') {
-    return <MyDocumentsPageContent />;
+function HomePageContent({activeSidebarItem, onProjectClick}: {activeSidebarItem: string, onProjectClick: (project: SavedProject) => void}) {
+  
+  if (activeSidebarItem === 'Recent') {
+      return <RecentProjectsContent onProjectClick={onProjectClick} />;
   }
   
   return (
@@ -872,50 +368,12 @@ function HomePageContent({activeSidebarItem}: {activeSidebarItem: string}) {
           <Info className="w-5 h-5 text-slate-500" />
         </div>
       </div>
-
-      <div className="flex items-center gap-2 mb-6">
-        <Checkbox id="all-types" />
-        <label
-          htmlFor="all-types"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          All Types
-        </label>
-        <ChevronDown className="h-4 w-4" />
-      </div>
-
-      <div className="space-y-8">
-        {Object.entries(fileGroups).map(([group, files]) => (
-          <div key={group}>
-            <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent border-b-slate-200">
-                  <TableHead className="w-[50%]"></TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Last Modified</TableHead>
-                  <TableHead className="text-right">Size</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {files.map((file) => (
-                  <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {file.icon}
-                        <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                        {file.isLocal && <Badge variant="outline" className="font-normal text-slate-500 border-slate-300">Local</Badge>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-slate-500">{file.location}</TableCell>
-                    <TableCell className="text-slate-500">{file.modified}</TableCell>
-                    <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ))}
+      <div className="flex flex-col items-center justify-center text-center text-slate-500 py-20">
+         <div className="p-3 bg-white rounded-full shadow-lg mb-2">
+            <Folder className="w-16 h-16 text-slate-300" />
+         </div>
+        <h2 className="text-xl font-semibold text-slate-800 mt-8">Coming Soon</h2>
+        <p className="mt-2">This section is under construction.</p>
       </div>
     </>
   );
@@ -1164,7 +622,7 @@ function PdfPage() {
     )
 }
 
-function CreateNewPage({ addTab }: { addTab: (type: DocumentTab['type'], title?: string) => void }) {
+function CreateNewPage({ addTab }: { addTab: (type: DocumentTab['type'], title?: string, projectId?: string) => void }) {
     const [activeCategory, setActiveCategory] = useState('All');
     const [activeSubCategory, setActiveSubCategory] = useState('Recommended');
     const [activeView, setActiveView] = useState('templates'); // 'templates' or 'my-templates'
@@ -1425,15 +883,14 @@ function WpsAiPage() {
 }
 
 function DocsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: string) => void}) {
-  const docFiles = recentFiles.filter(file => file.type === 'word');
-  const docFileGroups = docFiles.reduce((acc, file) => {
-    if (!acc[file.dateGroup]) {
-      acc[file.dateGroup] = [];
-    }
-    acc[file.dateGroup].push(file);
-    return acc;
-  }, {} as Record<string, typeof docFiles>);
+  const { data: projects, isLoading, isError, error } = useProjects();
 
+  const handleOpenProject = (project: SavedProject) => {
+    addTab('word', project.name || 'Untitled Project', project.id);
+  }
+
+  const docFiles = projects?.filter(p => p.proposal?.category.includes('Document')) || [];
+  
   return (
     <div className="flex flex-1">
       <main className="flex-1 p-6 bg-white overflow-y-auto">
@@ -1463,39 +920,35 @@ function DocsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: 
             </div>
         </div>
         
-        <div className="space-y-8">
-            {Object.entries(docFileGroups).map(([group, files]) => (
-                <div key={group}>
-                <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
-                <Table>
-                    <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b-slate-200">
-                        <TableHead className="w-[50%]">File name</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Last Modified</TableHead>
-                        <TableHead className="text-right">Size</TableHead>
+        {isLoading && <Loader2 className="animate-spin" />}
+        {isError && <p>Error loading projects</p>}
+        {docFiles.length > 0 && (
+            <Table>
+                <TableHeader>
+                <TableRow className="hover:bg-transparent border-b-slate-200">
+                    <TableHead className="w-[50%]">File name</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Last Modified</TableHead>
+                    <TableHead className="text-right">Size</TableHead>
+                </TableRow>
+                </TableHeader>
+                <TableBody>
+                {docFiles.map((file) => (
+                    <TableRow key={file.id} className="cursor-pointer hover:bg-slate-50 border-b-slate-200" onClick={() => handleOpenProject(file)}>
+                    <TableCell>
+                        <div className="flex items-center gap-3">
+                        <WLogo />
+                        <span className="font-medium text-slate-800 truncate">{file.name}</span>
+                        </div>
+                    </TableCell>
+                    <TableCell className="text-slate-500">Cloud</TableCell>
+                    <TableCell className="text-slate-500">{formatDistanceToNow(new Date(file.updatedAt), { addSuffix: true })}</TableCell>
+                    <TableCell className="text-right text-slate-500">--</TableCell>
                     </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {files.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                        <TableCell>
-                            <div className="flex items-center gap-3">
-                            {file.icon}
-                            <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                            {file.isLocal && <Badge variant="outline" className="font-normal text-slate-500 border-slate-300">Local</Badge>}
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-slate-500">{file.location}</TableCell>
-                        <TableCell className="text-slate-500">{file.modified}</TableCell>
-                        <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </div>
-            ))}
-        </div>
+                ))}
+                </TableBody>
+            </Table>
+        )}
       </main>
       <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center">
         <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
@@ -1506,14 +959,6 @@ function DocsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: 
 }
 
 function SlidesPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: string) => void}) {
-  const slideFiles = recentFiles.filter(file => file.type === 'powerpoint' || file.type === 'pdf');
-  const slideFileGroups = slideFiles.reduce((acc, file) => {
-    if (!acc[file.dateGroup]) {
-      acc[file.dateGroup] = [];
-    }
-    acc[file.dateGroup].push(file);
-    return acc;
-  }, {} as Record<string, typeof slideFiles>);
 
   return (
     <div className="flex flex-1">
@@ -1529,51 +974,6 @@ function SlidesPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?
                 <Button variant="outline" size="sm"><Languages className="w-4 h-4 mr-2" />Parallel Translate</Button>
             </div>
         </div>
-
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Recent</h2>
-              <RefreshCw className="w-4 h-4 text-slate-500 cursor-pointer" />
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <Settings className="w-5 h-5 text-slate-500" />
-              <Info className="w-5 h-5 text-slate-500" />
-            </div>
-        </div>
-        
-        <div className="space-y-8">
-            {Object.entries(slideFileGroups).map(([group, files]) => (
-                <div key={group}>
-                <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
-                <Table>
-                    <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b-slate-200">
-                        <TableHead className="w-[50%]">File name</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Last Modified</TableHead>
-                        <TableHead className="text-right">Size</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {files.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                        <TableCell>
-                            <div className="flex items-center gap-3">
-                            {file.icon}
-                            <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                            {file.isLocal && <Badge variant="outline" className="font-normal text-slate-500 border-slate-300">Local</Badge>}
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-slate-500">{file.location}</TableCell>
-                        <TableCell className="text-slate-500">{file.modified}</TableCell>
-                        <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </div>
-            ))}
-        </div>
       </main>
       <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center">
         <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
@@ -1584,15 +984,6 @@ function SlidesPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?
 }
 
 function SheetsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: string) => void}) {
-  const sheetFiles = recentFiles.filter(file => file.type === 'excel');
-  const sheetFileGroups = sheetFiles.reduce((acc, file) => {
-    if (!acc[file.dateGroup]) {
-      acc[file.dateGroup] = [];
-    }
-    acc[file.dateGroup].push(file);
-    return acc;
-  }, {} as Record<string, typeof sheetFiles>);
-
   return (
     <div className="flex flex-1">
       <main className="flex-1 p-6 bg-white overflow-y-auto">
@@ -1602,51 +993,6 @@ function SheetsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?
                 <Button variant="outline" size="sm"><Folder className="w-4 h-4 mr-2" />Open</Button>
                 <Button variant="outline" size="sm"><LayoutGrid className="w-4 h-4 mr-2" />Create from Template</Button>
             </div>
-        </div>
-
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Recent</h2>
-              <RefreshCw className="w-4 h-4 text-slate-500 cursor-pointer" />
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <Settings className="w-5 h-5 text-slate-500" />
-              <Info className="w-5 h-5 text-slate-500" />
-            </div>
-        </div>
-        
-        <div className="space-y-8">
-            {Object.entries(sheetFileGroups).map(([group, files]) => (
-                <div key={group}>
-                <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
-                <Table>
-                    <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b-slate-200">
-                        <TableHead className="w-[50%]">File name</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Last Modified</TableHead>
-                        <TableHead className="text-right">Size</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {files.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                        <TableCell>
-                            <div className="flex items-center gap-3">
-                            {file.icon}
-                            <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                            {file.isLocal && <Badge variant="outline" className="font-normal text-slate-500 border-slate-300">Local</Badge>}
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-slate-500">{file.location}</TableCell>
-                        <TableCell className="text-slate-500">{file.modified}</TableCell>
-                        <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </div>
-            ))}
         </div>
       </main>
       <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center">
@@ -1658,15 +1004,6 @@ function SheetsPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?
 }
 
 function PdfPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: string) => void}) {
-  const pdfFiles = recentFiles.filter(file => file.type === 'pdf');
-  const pdfFileGroups = pdfFiles.reduce((acc, file) => {
-    if (!acc[file.dateGroup]) {
-      acc[file.dateGroup] = [];
-    }
-    acc[file.dateGroup].push(file);
-    return acc;
-  }, {} as Record<string, typeof pdfFiles>);
-
   return (
     <div className="flex flex-1">
       <main className="flex-1 p-6 bg-white overflow-y-auto">
@@ -1682,51 +1019,6 @@ function PdfPageContent({addTab}: {addTab: (type: DocumentTab['type'], title?: s
                 <Button variant="outline" size="sm">More <ChevronDown className="w-4 h-4 ml-2" /></Button>
             </div>
         </div>
-
-        <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Recent</h2>
-              <RefreshCw className="w-4 h-4 text-slate-500 cursor-pointer" />
-            </div>
-            <div className="flex items-center gap-4 text-sm">
-              <Settings className="w-5 h-5 text-slate-500" />
-              <Info className="w-5 h-5 text-slate-500" />
-            </div>
-        </div>
-        
-        <div className="space-y-8">
-            {Object.entries(pdfFileGroups).map(([group, files]) => (
-                <div key={group}>
-                <h3 className="text-sm font-medium text-slate-500 mb-2">{group}</h3>
-                <Table>
-                    <TableHeader>
-                    <TableRow className="hover:bg-transparent border-b-slate-200">
-                        <TableHead className="w-[50%]">File name</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>Last Modified</TableHead>
-                        <TableHead className="text-right">Size</TableHead>
-                    </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                    {files.map((file) => (
-                        <TableRow key={file.name} className="cursor-pointer hover:bg-slate-50 border-b-slate-200">
-                        <TableCell>
-                            <div className="flex items-center gap-3">
-                            {file.icon}
-                            <span className="font-medium text-slate-800 truncate">{file.name}</span>
-                            {file.isLocal && <Badge variant="outline" className="font-normal text-slate-500 border-slate-300">Local</Badge>}
-                            </div>
-                        </TableCell>
-                        <TableCell className="text-slate-500">{file.location}</TableCell>
-                        <TableCell className="text-slate-500">{file.modified}</TableCell>
-                        <TableCell className="text-right text-slate-500">{file.size}</TableCell>
-                        </TableRow>
-                    ))}
-                    </TableBody>
-                </Table>
-                </div>
-            ))}
-        </div>
       </main>
       <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center">
         <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
@@ -1741,7 +1033,7 @@ function DocumentTabs({ tabs, activeTab, setActiveTab, addTab, removeTab }: {
   tabs: DocumentTab[];
   activeTab: number;
   setActiveTab: (id: number) => void;
-  addTab: (type: DocumentTab['type'], title?: string) => void;
+  addTab: (type: DocumentTab['type'], title?: string, projectId?: string) => void;
   removeTab: (id: number) => void;
 }) {
   return (
@@ -1793,12 +1085,23 @@ export default function WPSOfficePage() {
   const [activeTab, setActiveTab] = useState<number>(1);
   const [nextId, setNextId] = useState(initialTabs.length + 1);
   const [activeSidebarItem, setActiveSidebarItem] = useState('Recent');
+  const loadState = useBuilderStore(state => state.loadState);
+  const newSession = useBuilderStore(state => state.newSession);
 
-  const addTab = (type: DocumentTab['type'], title?: string) => {
+  const addTab = (type: DocumentTab['type'], title?: string, projectId?: string) => {
     if (type === 'new') {
         const existingNewTab = tabs.find(tab => tab.type === 'new');
         if (existingNewTab) {
             setActiveTab(existingNewTab.id);
+            return;
+        }
+    }
+    
+    // If opening an existing project, check if it's already open
+    if(projectId) {
+        const existingTab = tabs.find(tab => tab.projectId === projectId);
+        if(existingTab) {
+            setActiveTab(existingTab.id);
             return;
         }
     }
@@ -1825,6 +1128,7 @@ export default function WPSOfficePage() {
       id: nextId,
       title: getNewTitle(),
       type: type,
+      projectId: projectId
     };
     setTabs([...tabs, newTab]);
     setActiveTab(newTab.id);
@@ -1871,6 +1175,12 @@ export default function WPSOfficePage() {
     }
   };
 
+  const handleOpenProjectInNewTab = (project: SavedProject) => {
+    newSession(); // Clear any existing state
+    loadState(project);
+    addTab('word', project.name || 'Untitled Project', project.id);
+  }
+
   const currentTab = tabs.find(t => t.id === activeTab);
   
   const renderMainContent = () => {
@@ -1891,7 +1201,7 @@ export default function WPSOfficePage() {
                 <div className="flex flex-1">
                     <ContentSidebar activeItem={activeSidebarItem} setActiveItem={setActiveSidebarItem} />
                     <main className="flex-1 p-6 bg-white overflow-y-auto">
-                        <HomePageContent activeSidebarItem={activeSidebarItem} />
+                        <HomePageContent activeSidebarItem={activeSidebarItem} onProjectClick={handleOpenProjectInNewTab} />
                     </main>
                      <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center text-slate-400">
                         <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
