@@ -44,7 +44,7 @@ export default function UserManagementConsole() {
           const token = await firebaseUser.getIdToken();
           return fetchUsers(USERS_PER_PAGE, pageParam, token);
       },
-      initialPageParam: undefined as string | undefined,
+      initialPageParam: undefined,
       getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
       enabled: !!firebaseUser
   });
