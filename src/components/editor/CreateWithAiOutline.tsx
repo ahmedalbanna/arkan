@@ -44,14 +44,16 @@ const OutlineItem = ({ item, level = 0 }: OutlineItemProps) => {
 export function CreateWithAiOutline({
   outline,
   onBack,
+  onClose,
 }: {
   outline: GeneratePresentationOutlineOutput;
   onBack: () => void;
+  onClose: () => void;
 }) {
     const [view, setView] = useState<'outline' | 'templates'>('outline');
     
     if (view === 'templates') {
-        return <CreateWithAiTemplates outline={outline} onBack={() => setView('outline')} />;
+        return <CreateWithAiTemplates outline={outline} onBack={() => setView('outline')} onClose={onClose} />;
     }
 
   return (

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { PresentationHistoryEntry } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +22,11 @@ export function PresentationViewer({ activePresentation }: PresentationViewerPro
         <div className="p-8 text-center text-muted-foreground">No slides to display.</div>
     );
   }
+  
+  useEffect(() => {
+    // When a new presentation is passed, reset to the first slide.
+    setCurrentSlide(0);
+  }, [activePresentation.id]);
 
   const slides = activePresentation.slides;
 
@@ -30,6 +35,14 @@ export function PresentationViewer({ activePresentation }: PresentationViewerPro
   if (!slide) {
     return <div className="p-8 text-center text-muted-foreground">Selected slide not found.</div>;
   }
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
+  };
+
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
+  };
 
   return (
     <div className="flex flex-col h-full bg-white p-8">
