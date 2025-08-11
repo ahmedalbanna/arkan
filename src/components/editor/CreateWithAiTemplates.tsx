@@ -20,9 +20,11 @@ const templates = [
 export function CreateWithAiTemplates({
   outline,
   onBack,
+  onClose,
 }: {
   outline: GeneratePresentationOutlineOutput;
   onBack: () => void;
+  onClose: () => void;
 }) {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,8 +53,7 @@ export function CreateWithAiTemplates({
             description: `Successfully generated "${newPresentation.name}".`,
             icon: <CheckCircle className="h-5 w-5 text-green-500" />
         });
-        // Here you would typically close the panel, but for the demo we keep it open
-        // to show the final state.
+        onClose(); // Close the panel after completion
     }, 2000);
   };
 
