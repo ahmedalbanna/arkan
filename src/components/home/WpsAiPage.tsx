@@ -15,7 +15,8 @@ import {
   CloudUpload,
   FileUp,
   PictureInPicture2,
-  Scan
+  Scan,
+  FileText
 } from 'lucide-react';
 
 const AiToolCard = ({ icon, title, description, tags, actionText, actionLink }: {
