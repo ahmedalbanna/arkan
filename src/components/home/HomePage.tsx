@@ -24,11 +24,6 @@ import { NavItem, WLogo, PLogo, SLogo, PDFLogo } from '@/components/home/NavItem
 
 const initialTabs: DocumentTab[] = [
   { id: 1, title: 'Home', type: 'home' },
-  { id: 2, title: 'WPS Docs Quick Start Guide.docx', type: 'word' },
-  { id: 3, title: 'Co-op Final Report - Abdalbari Ba...', type: 'word' },
-  { id: 4, title: 'Presentation1', type: 'powerpoint' },
-  { id: 5, title: 'Budget Report', type: 'excel' },
-  { id: 6, title: 'Document2', type: 'word' },
 ];
 
 
