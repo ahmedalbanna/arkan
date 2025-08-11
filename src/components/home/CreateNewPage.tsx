@@ -15,7 +15,7 @@ import { TemplateCard } from './TemplateCard';
 import { PdfPage } from './PdfPage';
 import { DocumentTab } from './DocumentTabs';
 
-const templates = {
+export const templates = {
   all: {
     top: [
       { title: 'Docs', imgSrc: 'https://placehold.co/128x160.png', dataAiHint: 'document blank', type: 'word' as const },
