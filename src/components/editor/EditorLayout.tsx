@@ -5,9 +5,9 @@ import { useState } from 'react';
 import EditorToolbar from './EditorToolbar';
 import dynamic from 'next/dynamic';
 
-    const RichTextEditor = dynamic(() => import('@/components/editor/RichTextEditor'), {
-      ssr: false,
-    });
+const RichTextEditor = dynamic(() => import('@/components/editor/RichTextEditor'), {
+    ssr: false,
+});
 import PresentationEditor from './PresentationEditor';
 import SheetsEditor from './SheetsEditor';
 import ParallelTranslatePanel from './ParallelTranslatePanel';
@@ -18,9 +18,9 @@ interface EditorLayoutProps {
 }
 
 const editorRecentFiles = [
-  { icon: 'word', name: 'Co-op Final Report - ... -Osaimi - Report.wps', location: 'Desktop/', modified: 'Today 0:41:45' },
-  { icon: 'word', name: 'Co-op Final Report - ... -Osaimi - Report.docx', location: 'Downloads/', modified: 'Yesterday 23:58:47' },
-  { icon: 'word', name: 'WPS Docs Quick Start Guide.docx', location: 'C:/Users/ahmed/AppData/Roaming/kingso...', modified: 'Yesterday 23:56:23' },
+    { icon: 'word', name: 'Co-op Final Report - ... -Osaimi - Report.wps', location: 'Desktop/', modified: 'Today 0:41:45' },
+    { icon: 'word', name: 'Co-op Final Report - ... -Osaimi - Report.docx', location: 'Downloads/', modified: 'Yesterday 23:58:47' },
+    { icon: 'word', name: 'WPS Docs Quick Start Guide.docx', location: 'C:/Users/ahmed/AppData/Roaming/kingso...', modified: 'Yesterday 23:56:23' },
 ];
 
 export default function EditorLayout({ fileType }: EditorLayoutProps) {
