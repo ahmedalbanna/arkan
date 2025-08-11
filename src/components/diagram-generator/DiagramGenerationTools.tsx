@@ -18,7 +18,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { useExplainDiagram, useGenerateDiagram } from '@/hooks/use-diagrams';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
@@ -185,15 +184,6 @@ export const DiagramGenerationTools = () => {
                         );
                     })}
                 </Accordion>
-                <div className="pt-4 mt-4 border-t">
-                     <AcademicUploaders
-                        title="Add Context / Examples"
-                        onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
-                        onContentRemoved={removeExternalContext}
-                        isProcessing={isDisabled}
-                        uploadedContent={useReportStore.getState().externalContext}
-                    />
-                </div>
             </CardContent>
         </Card>
     );

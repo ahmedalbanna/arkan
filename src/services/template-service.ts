@@ -109,7 +109,7 @@ export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]
     return await response.json();
 }
 
-export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'createdAt'>, token: string): Promise<ReportGenerationTemplate> {
+export async function createReportTemplate(data: Omit<ReportGenerationTemplate, 'createdAt'> & {id: string}, token: string): Promise<ReportGenerationTemplate> {
      const response = await fetch('/api/admin/templates/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

@@ -19,7 +19,6 @@ import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { UploadManager } from '../UploadManager';
 import { useReportStore } from '@/hooks/useReportStore';
 
 interface GenerateButtonProps {

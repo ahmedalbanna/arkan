@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -15,6 +16,7 @@ import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
@@ -32,8 +34,6 @@ import Image from 'next/image';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { auth } from '@/lib/firebaseConfig';
-import { useLocalization } from '@/context/LocalizationContext';
-import { AcademicUploaders } from '../academic-solver/AcademicUploaders';
 import { Textarea } from '../ui/textarea';
 
 const orderedSections = SectionNameSchema.options;
@@ -61,7 +61,7 @@ function ToolsSkeleton() {
             <Card>
                 <CardHeader>
                     <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <Skeleton className="h-24 w-full" />
@@ -219,17 +219,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                 ))}
                             </div>
                         </div>
-                        
-                         <div className="pt-4 mt-4 border-t">
-                             <AcademicUploaders
-                                title="Add Context / Examples"
-                                onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
-                                onContentRemoved={removeExternalContext}
-                                isProcessing={isDisabled}
-                                uploadedContent={useReportStore.getState().externalContext}
-                            />
-                        </div>
-
 
                         <TooltipProvider>
                             <Tooltip>
