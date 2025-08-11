@@ -3,7 +3,11 @@
 
 import { useState } from 'react';
 import EditorToolbar from './EditorToolbar';
-import RichTextEditor from './RichTextEditor';
+import dynamic from 'next/dynamic';
+
+    const RichTextEditor = dynamic(() => import('@/components/editor/RichTextEditor'), {
+      ssr: false,
+    });
 import PresentationEditor from './PresentationEditor';
 import SheetsEditor from './SheetsEditor';
 import ParallelTranslatePanel from './ParallelTranslatePanel';

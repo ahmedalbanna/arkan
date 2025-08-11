@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import fs from 'fs';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true, // Enable React strict mode for better development experience
@@ -33,20 +34,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  webpack: (config, { isServer }) => {
-    // Correctly configure the pdf.js worker.
-    // This is a robust way to ensure the worker file is copied to the build output
-    // and is accessible via a public URL.
-    config.module.rules.push({
-      test: /pdf\.worker\.mjs$/,
-      type: "asset/resource",
-      generator: {
-        filename: "static/chunks/[name][ext]",
+  async rewrites() {
+    return [
+      {
+        source: '/_next/static/chunks/pdf.worker.mjs',
+        destination: '/node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs',
       },
-    });
-
-    return config;
-  },
+    ]
+  }
 };
 
 export default nextConfig;
