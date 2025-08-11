@@ -64,7 +64,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
     const translatedContent = translatedSections[sectionKey];
 
     const handleTranslate = async () => {
-        const targetLang = locale === 'en' ? 'Arabic' : 'English';
+        const targetLang = locale === 'en' ? 'ar' : 'en';
         translateMutation.mutate({ text: originalContent, targetLang }, {
             onSuccess: (data) => {
                 setTranslatedSection(sectionKey, data.translatedText);
