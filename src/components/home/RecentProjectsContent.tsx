@@ -18,11 +18,11 @@ import {
   Settings,
   Info,
   ChevronDown,
-  Checkbox,
   Loader2,
   AlertCircle,
   Folder
 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { WLogo } from './NavItem';
 
 

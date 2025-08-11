@@ -1,20 +1,18 @@
 
 'use client';
 
-import { BlockNoteView, useBlockNote } from "@blocknote/core";
+import { BlockNoteViewRaw, useBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import { Sparkles } from 'lucide-react';
 import { AiAssistantMenu } from './AiAssistantMenu';
  
 export default function RichTextEditor({ onTranslateClick }: { onTranslateClick: () => void }) {
 
   const editor = useBlockNote({
-      onEditorContentChange: (editor) => {
-        // console.log(editor.topLevelBlocks);
-      }
-  });
+      
+  },[]);
  
   return (
     <div className="flex-grow p-4 md:p-8 lg:p-12 bg-slate-200">
@@ -30,7 +28,7 @@ export default function RichTextEditor({ onTranslateClick }: { onTranslateClick:
                     <AiAssistantMenu />
                 </PopoverContent>
             </Popover>
-            <BlockNoteView editor={editor} theme="light" />
+            <BlockNoteViewRaw editor={editor} theme="light" />
         </div>
     </div>
   );
