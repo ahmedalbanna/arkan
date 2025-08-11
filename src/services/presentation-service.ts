@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { GeneratePresentationOutput } from '@/ai/schemas';
+import type { GeneratePresentationOutput, GeneratePresentationOutlineInput, GeneratePresentationOutlineOutput } from '@/ai/schemas';
 
 /**
  * Calls the API to generate a presentation based on the provided context.
@@ -20,6 +20,25 @@ export async function generatePresentationApi(variables: { body: any, token: str
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to generate presentation');
+    }
+    return await response.json();
+}
+
+/**
+ * Calls the API to generate a presentation outline from a topic.
+ */
+export async function generatePresentationOutlineApi(variables: GeneratePresentationOutlineInput, token: string): Promise<GeneratePresentationOutlineOutput> {
+    const response = await fetch('/api/generate/presentation-outline', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(variables),
+    });
+     if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate presentation outline');
     }
     return await response.json();
 }
