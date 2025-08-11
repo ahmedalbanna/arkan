@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,7 +16,7 @@ const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
 
 
 interface EditorLayoutProps {
-  fileType: 'word' | 'powerpoint' | 'excel';
+  fileType: 'word' | 'powerpoint' | 'excel' | 'pdf';
 }
 
 const editorRecentFiles = [
