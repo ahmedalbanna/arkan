@@ -178,9 +178,7 @@ export default function RichTextEditor({ onTranslateClick }: { onTranslateClick:
                     <AiAssistantMenu />
                 </PopoverContent>
             </Popover>
-            <BlockNoteView
-            editor={editor}
-            />
+            
 
         </div>
     </div>
