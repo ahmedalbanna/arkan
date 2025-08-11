@@ -1,30 +1,14 @@
 
 'use client';
 
-import { useCreateBlockNote } from "@blocknote/react";
-
-import "@blocknote/core/fonts/inter.css";
-import "@blocknote/mantine/style.css";
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from "@/components/ui/button";
 import { Sparkles } from 'lucide-react';
 import { AiAssistantMenu } from './AiAssistantMenu';
 import dynamic from 'next/dynamic';
-
-const BlockNoteView = dynamic(() => import("@blocknote/mantine").then((mod) => mod.BlockNoteView), {
-    ssr: false,
-  });
+import React from 'react';
 
 export default function RichTextEditor({ onTranslateClick }: { onTranslateClick: () => void }) {
-
-    const editor:any = useCreateBlockNote({
-        initialContent: [
-          {
-            type: "paragraph",
-            content: "Start writing your document here...",
-          },
-        ],
-      });
  
   return (
     <div className="flex-grow p-4 md:p-8 lg:p-12 bg-slate-200">
@@ -40,7 +24,7 @@ export default function RichTextEditor({ onTranslateClick }: { onTranslateClick:
                     <AiAssistantMenu />
                 </PopoverContent>
             </Popover>
-             <BlockNoteView editor={editor} theme="light" />
+             <div>Editor content will go here.</div>
         </div>
     </div>
   );
