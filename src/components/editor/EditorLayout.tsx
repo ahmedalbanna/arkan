@@ -2,16 +2,18 @@
 'use client';
 
 import { useState } from 'react';
-import EditorToolbar from './EditorToolbar';
 import dynamic from 'next/dynamic';
-
-const RichTextEditor = dynamic(() => import('@/components/editor/RichTextEditor'), {
-    ssr: false,
-});
+import EditorToolbar from './EditorToolbar';
 import PresentationEditor from './PresentationEditor';
 import SheetsEditor from './SheetsEditor';
 import ParallelTranslatePanel from './ParallelTranslatePanel';
 import { EditorFileMenu } from './EditorFileMenu';
+
+// Dynamically import RichTextEditor to avoid SSR issues
+const RichTextEditor = dynamic(() => import('./RichTextEditor'), {
+    ssr: false,
+});
+
 
 interface EditorLayoutProps {
   fileType: 'word' | 'powerpoint' | 'excel';
