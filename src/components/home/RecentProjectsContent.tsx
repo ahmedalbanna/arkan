@@ -83,7 +83,7 @@ export function RecentProjectsContent({ onProjectClick }: { onProjectClick: (pro
 
 
     return (
-        <>
+        <main className="flex-1 p-6 bg-white overflow-y-auto">
              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-semibold">Recent</h1>
@@ -141,6 +141,6 @@ export function RecentProjectsContent({ onProjectClick }: { onProjectClick: (pro
                     )
                 ))}
             </div>
-        </>
+        </main>
     )
 }

@@ -4,60 +4,8 @@
 import React, { useState } from 'react';
 import {
   Home,
-  Star,
-  Share2,
-  Inbox,
-  HardDrive,
-  Cloud,
   PlusCircle,
-  Clock,
-  Laptop,
-  FileText,
-  RefreshCw,
-  Search,
-  Settings,
-  Info,
-  Eye,
-  ChevronDown,
-  File as FileIcon,
-  Folder,
-  Plus,
-  X,
-  Minus,
-  Copy,
-  LayoutGrid,
-  File,
-  FilePen,
-  Combine,
-  Split,
-  Shrink,
-  FileImage,
-  Image as ImageIcon,
-  BookText,
-  Sparkles,
-  Palette,
-  Languages,
-  FilePlus,
-  MessageSquare,
-  Wand2,
-  BookOpen,
-  CloudUpload,
-  FileUp,
-  PictureInPicture2,
-  Scan,
-  PenSquare,
-  Mail,
-  MessageCircle,
-  MoreHorizontal,
-  Trash2,
-  Loader2,
-  AlertCircle
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { useProjects } from '@/hooks/use-projects';
-import { formatDistanceToNow } from 'date-fns';
-import { SavedProject } from '@/lib/types';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useRouter } from 'next/navigation';
 
@@ -72,6 +20,7 @@ import { SlidesPageContent } from '@/components/home/SlidesPageContent';
 import { SheetsPageContent } from '@/components/home/SheetsPageContent';
 import { PdfPageContent } from '@/components/home/PdfPageContent';
 import type { DocumentTab } from '@/components/home/DocumentTabs';
+import { NavItem, WLogo, PLogo, SLogo, PDFLogo } from '@/components/home/NavItem';
 
 const initialTabs: DocumentTab[] = [
   { id: 1, title: 'Home', type: 'home' },
@@ -82,36 +31,19 @@ const initialTabs: DocumentTab[] = [
   { id: 6, title: 'Document2', type: 'word' },
 ];
 
-function HomePageContent({activeSidebarItem, onProjectClick}: {activeSidebarItem: string, onProjectClick: (project: SavedProject) => void}) {
-  
-  if (activeSidebarItem === 'Recent') {
-      return <RecentProjectsContent onProjectClick={onProjectClick} />;
-  }
-  
-  return (
-    <>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold">{activeSidebarItem}</h1>
-          <RefreshCw className="w-5 h-5 text-slate-500 cursor-pointer" />
-        </div>
-        <div className="flex items-center gap-4 text-sm">
-          <Eye className="w-5 h-5 text-slate-500" />
-          <Settings className="w-5 h-5 text-slate-500" />
-          <Info className="w-5 h-5 text-slate-500" />
-        </div>
-      </div>
-      <div className="flex flex-col items-center justify-center text-center text-slate-500 py-20">
-         <div className="p-3 bg-white rounded-full shadow-lg mb-2">
-            <Folder className="w-16 h-16 text-slate-300" />
-         </div>
-        <h2 className="text-xl font-semibold text-slate-800 mt-8">Coming Soon</h2>
-        <p className="mt-2">This section is under construction.</p>
-      </div>
-    </>
-  );
-}
 
+const navRailItems = [
+    { name: 'Home', icon: <Home className="w-5 h-5" />, label: 'Home' },
+    { name: 'New', icon: <PlusCircle className="w-5 h-5" />, label: 'New' },
+    { name: 'WPS AI', icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11.25 15.6667L8 12.4167L4.75 15.6667" /><path d="M8 12.4167V4.75" /><path d="M12.75 4.75H16.25" /><path d="M14.5 4.75V8.25" /><path d="M19.25 8.33333L16 11.5833L12.75 8.33333" /><path d="M16 11.5833V19.25" /></svg>, label: 'WPS AI' },
+];
+
+const appItems = [
+    { name: 'Docs', icon: <WLogo />, label: 'Docs' },
+    { name: 'Slides', icon: <PLogo />, label: 'Slides' },
+    { name: 'Sheets', icon: <SLogo />, label: 'Sheets' },
+    { name: 'PDF', icon: <PDFLogo />, label: 'PDF' }
+];
 
 export default function WPSOfficePage() {
   const [activeNavItem, setActiveNavItem] = useState('Home');
@@ -121,6 +53,8 @@ export default function WPSOfficePage() {
   const [activeSidebarItem, setActiveSidebarItem] = useState('Recent');
   const loadState = useBuilderStore(state => state.loadState);
   const newSession = useBuilderStore(state => state.newSession);
+  const router = useRouter();
+
 
   const addTab = (type: DocumentTab['type'], title?: string, projectId?: string) => {
     if (type === 'new') {
@@ -208,7 +142,7 @@ export default function WPSOfficePage() {
     }
   };
 
-  const handleOpenProjectInNewTab = (project: SavedProject) => {
+  const handleOpenProjectInNewTab = (project: any) => {
     newSession(); 
     loadState(project);
     addTab('word', project.name || 'Untitled Project', project.id);
@@ -232,13 +166,7 @@ export default function WPSOfficePage() {
             return (
                 <div className="flex flex-1">
                     <ContentSidebar activeItem={activeSidebarItem} setActiveItem={setActiveSidebarItem} />
-                    <main className="flex-1 p-6 bg-white overflow-y-auto">
-                        <HomePageContent activeSidebarItem={activeSidebarItem} onProjectClick={handleOpenProjectInNewTab} />
-                    </main>
-                     <aside className="w-64 bg-white border-l border-slate-200 p-6 flex flex-col items-center justify-center text-slate-400">
-                        <FileIcon className="w-24 h-24 text-slate-300 mb-4" />
-                        <p className="text-sm text-slate-500 text-center">Select a file to view details</p>
-                    </aside>
+                    <RecentProjectsContent onProjectClick={handleOpenProjectInNewTab} />
                 </div>
             )
         }
@@ -263,21 +191,28 @@ export default function WPSOfficePage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white text-slate-900">
-      <div className="relative bg-slate-100">
+    <div className="flex h-screen bg-slate-100 text-slate-900">
+       <div className="w-20 bg-slate-200 border-r border-slate-300 flex flex-col items-center py-4 space-y-4 z-10">
+          <div className="w-8 h-8 bg-[#2E68EB] rounded" />
+          <nav className="flex flex-col items-center space-y-1 flex-grow w-full">
+              {navRailItems.map(item => <NavItem key={item.label} icon={item.icon} label={item.label} isActive={activeNavItem === item.name} onClick={() => handleNavClick(item.name)} />)}
+              <div className="flex-grow" />
+              <div className="w-full px-2">
+                <hr className="border-slate-300 my-2" />
+              </div>
+              {appItems.map(item => <NavItem key={item.label} icon={item.icon} label={item.label} isActive={activeNavItem === item.name} onClick={() => handleNavClick(item.name)} />)}
+          </nav>
+      </div>
+
+      <div className="flex flex-col flex-1 overflow-hidden">
           <DocumentTabs
             tabs={tabs}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             addTab={addTab}
             removeTab={removeTab}
-            onNavClick={handleNavClick}
-            activeNavItem={activeNavItem}
           />
-      </div>
-
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 pl-20 bg-slate-100">
+        <div className="flex-1 overflow-auto">
              {renderMainContent()}
         </div>
       </div>
