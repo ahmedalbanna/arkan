@@ -112,7 +112,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     const [isTemplatesOpen, setIsTemplatesOpen] = useState(false);
 
     useEffect(() => {
-        if (templateLinks.some(link => pathname.startsWith(link.href)) || pathname.startsWith('/automations')) {
+        if (templateLinks.some(link => pathname.startsWith(link.href))) {
             setIsTemplatesOpen(true);
         }
     }, [pathname]);
