@@ -16,8 +16,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, BrainCircuit, Wand2, PlusCircle } from 'lucide-react';
+import { Loader2, BrainCircuit, Wand2, PlusCircle, Braces } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { jsonToMarkdown } from '@/ai/flows/json-to-markdown';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-components';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -31,17 +42,31 @@ export default function AnalystAgent() {
     const { externalContext, addExternalContext } = useReportStore();
     const { firebaseUser, refetchUser } = useAuth();
     const { resolvedTheme } = useTheme();
+    const [markdownResult, setMarkdownResult] = useState<string | null>(null);
 
     const form = useForm<AnalysisFormValues>({
         resolver: zodResolver(analysisSchema),
         defaultValues: { prompt: '' },
     });
 
-    const mutation = useMutation({
+    const markdownMutation = useMutation({
+        mutationFn: async (jsonData: any) => jsonToMarkdown({ jsonData }),
+        onSuccess: (data) => {
+            setMarkdownResult(data.markdown);
+        },
+        onError: (error: Error) => {
+            // If markdown conversion fails, we can just show the JSON.
+            toast({ title: 'Could not format as Markdown', description: 'Displaying raw JSON data instead.', variant: 'default' });
+        }
+    });
+
+    const analysisMutation = useMutation({
         mutationFn: analyzeContextApi,
-        onSuccess: () => {
+        onSuccess: (data) => {
             refetchUser(); // To update credits
             toast({ title: 'Analysis Complete', description: 'The AI has analyzed the context and generated structured data.' });
+            // After successful analysis, trigger markdown conversion
+            markdownMutation.mutate(data.data);
         },
         onError: (error: Error) => {
             toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
@@ -54,25 +79,28 @@ export default function AnalystAgent() {
             return;
         }
         if (!firebaseUser) return;
+        setMarkdownResult(null); // Clear previous markdown result
         const token = await firebaseUser.getIdToken();
-        mutation.mutate({ prompt: data.prompt, contextFiles: externalContext, token });
+        analysisMutation.mutate({ prompt: data.prompt, contextFiles: externalContext, token });
     };
 
     const handleSaveAnalysis = () => {
-        if (!mutation.data || !form.getValues('prompt')) return;
+        if (!analysisMutation.data || !form.getValues('prompt')) return;
 
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.json';
-        const fileContent = JSON.stringify(mutation.data.data, null, 2);
+        const fileContent = JSON.stringify(analysisMutation.data.data, null, 2);
 
         addExternalContext(fileName, fileContent, 'context');
         toast({ title: "Analysis Saved", description: `"${fileName}" has been added to your context files.` });
     };
 
+    const isProcessing = analysisMutation.isPending || markdownMutation.isPending;
+
     return (
         <Card className="h-full flex flex-col">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> Analyst Agent</CardTitle>
-                <CardDescription>Ask a question or give an instruction based on the managed context files. The AI will generate a structured JSON response.</CardDescription>
+                <CardDescription>Ask a question or give an instruction based on the managed context files. The AI will generate a structured response.</CardDescription>
             </CardHeader>
             <Form {...form}>
                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0">
@@ -88,36 +116,63 @@ export default function AnalystAgent() {
                                             placeholder="e.g., 'List all project stakeholders and their main interests.'"
                                             {...field}
                                             rows={4}
-                                            disabled={mutation.isPending}
+                                            disabled={isProcessing}
                                         />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={mutation.isPending}>
-                            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                        <Button type="submit" disabled={isProcessing}>
+                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
                             Run Analysis
                         </Button>
                         
-                        {mutation.data && (
-                            <div className="space-y-4 pt-4 border-t flex-grow flex flex-col min-h-0">
-                                <div className="space-y-2 flex-grow flex flex-col min-h-0">
-                                    <h4 className="font-semibold text-sm">Generated Data</h4>
-                                     <ScrollArea className="flex-grow border rounded-md bg-muted text-xs p-2">
-                                        <ReactJson 
-                                            src={mutation.data.data} 
-                                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
-                                            collapsed={false}
-                                            displayDataTypes={false}
-                                            name={false}
-                                        />
-                                     </ScrollArea>
+                        {(isProcessing || analysisMutation.data) && (
+                            <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-semibold text-sm">Generated Report</h4>
+                                    {analysisMutation.data && (
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Button variant="ghost" size="sm">
+                                                    <Braces className="mr-2 h-4 w-4"/> View JSON
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent className="max-w-3xl">
+                                                <DialogHeader>
+                                                    <DialogTitle>Raw JSON Output</DialogTitle>
+                                                </DialogHeader>
+                                                 <ScrollArea className="max-h-[70vh] border rounded-md bg-muted text-xs p-2">
+                                                    <ReactJson 
+                                                        src={analysisMutation.data.data} 
+                                                        theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                                                        collapsed={false}
+                                                        displayDataTypes={false}
+                                                        name={false}
+                                                    />
+                                                 </ScrollArea>
+                                            </DialogContent>
+                                        </Dialog>
+                                    )}
                                 </div>
+                                <ScrollArea className="flex-grow border rounded-md bg-muted/50 p-4">
+                                     <div className="prose dark:prose-invert max-w-none text-sm">
+                                        {isProcessing ? (
+                                             <div className="flex items-center justify-center h-full">
+                                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                             </div>
+                                        ) : markdownResult ? (
+                                            <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
+                                        ) : (
+                                            <p className="text-muted-foreground">The AI's analysis will appear here as a formatted report.</p>
+                                        )}
+                                    </div>
+                                </ScrollArea>
                             </div>
                         )}
                     </CardContent>
-                    {mutation.data && (
+                    {(analysisMutation.data && markdownResult) && (
                         <CardFooter>
                             <Button variant="secondary" onClick={handleSaveAnalysis}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -130,4 +185,3 @@ export default function AnalystAgent() {
         </Card>
     );
 }
-
