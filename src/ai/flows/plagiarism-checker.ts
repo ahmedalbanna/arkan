@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,7 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const MatchedSourceSchema = z.object({
-  source: z.string().describe("The most likely source URL or publication where the similar text was found."),
+  source: z.string().url().describe("The full, real URL of the source where the similar text was found."),
   similarity: z.number().min(0).max(100).describe("A percentage score (0-100) indicating how similar the provided text is to the found source."),
 });
 
@@ -30,13 +31,15 @@ export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<Plag
     name: 'plagiarismCheckPrompt',
     input: { schema: PlagiarismCheckInputSchema },
     output: { schema: PlagiarismCheckOutputSchema },
-    prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality.
+    prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
 
 **Your Process:**
-1.  **Analyze Content:** Carefully read the text and identify phrases, sentences, and ideas that seem non-original or are commonly found in other sources.
-2.  **Identify Potential Sources:** For each identified part, find the most likely original source (e.g., a famous quote's author, a common academic theory's origin, a specific website).
+1.  **Analyze Content:** Carefully read the text and identify phrases, sentences, and ideas that may not be original.
+2.  **Find Real Sources:** For each identified part, search the web to find the most likely original source. The source MUST be a real, accessible URL.
 3.  **Estimate Similarity:** Provide a similarity percentage for each potential match.
 4.  **Calculate Originality Score:** Based on your findings, provide an overall originality score from 0 to 100, where 100 means completely original and 0 means it's entirely copied.
+
+**CRITICAL INSTRUCTION:** The 'source' field for each match must be a full, valid, and real URL (e.g., https://www.example.com/article).
 
 **Text to Analyze:**
 ---
