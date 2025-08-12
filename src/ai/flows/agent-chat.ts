@@ -41,5 +41,6 @@ export async function agentChat(input: AgentChatInput): Promise<AgentChatOutput>
       prompt: finalPrompt,
   });
 
-  return { response: llmResponse.text };
+  return { response: llmResponse.text.replace(/---/g, '').trim() };
 }
+

@@ -50,6 +50,10 @@ Image:
     });
 
     const { output } = await extractTextPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error("Text extraction failed.");
+    }
+    output.text = output.text.replace(/---/g, '').trim();
+    return output;
   }
 );

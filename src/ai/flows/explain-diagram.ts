@@ -41,5 +41,9 @@ Diagram Image:
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+      throw new Error("Explanation generation failed.");
+  }
+  output.explanation = output.explanation.replace(/---/g, '').trim();
+  return output;
 }

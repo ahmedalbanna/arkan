@@ -44,5 +44,9 @@ Your tasks are to:
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+    throw new Error('Failed to improve markdown.');
+  }
+  output.improvedMarkdown = output.improvedMarkdown.replace(/---/g, '').trim();
+  return output;
 }

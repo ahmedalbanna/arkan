@@ -50,5 +50,9 @@ PDF Document:
       },
       async (input) => {
         const { output } = await generateMarkdownPrompt(input);
-        return output!;
+        if (!output) {
+          throw new Error('Failed to rewrite document to markdown.');
+        }
+        output.markdown = output.markdown.replace(/---/g, '').trim();
+        return output;
       });

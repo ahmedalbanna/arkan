@@ -51,6 +51,10 @@ Raw Text Input:
     });
     
     const { output } = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('Failed to rewrite text to markdown.');
+    }
+    output.markdown = output.markdown.replace(/---/g, '').trim();
+    return output;
   }
 );

@@ -46,7 +46,13 @@ const analysisPrompt = ai.definePrompt({
     }
   
   const { output } = await analysisPrompt(validation.data);
-  return output!;
+  if (!output) {
+      throw new Error('Analysis failed to produce an output.');
+  }
+  
+  // Clean up the generated content
+  output.structuredContent = output.structuredContent.replace(/---/g, '').trim();
+  return output;
 }
 
 
@@ -89,5 +95,16 @@ const solvePrompt = ai.definePrompt({
       throw new Error(`Invalid input for solveAcademicDocument: ${validation.error.message}`);
     }
   const { output } = await solvePrompt(validation.data);
-  return output!;
+  if (!output) {
+      throw new Error('Solving failed to produce an output.');
+  }
+
+  // Clean up each solution
+  output.solutions = output.solutions.map(pair => ({
+      ...pair,
+      solution: pair.solution.replace(/---/g, '').trim(),
+  }));
+
+  return output;
 }
+
