@@ -384,7 +384,7 @@
       "generationFailed": "Generation Failed",
       "generationSuccess": "Generation Successful",
       "generationSuccessDesc": "{item} has been successfully generated.",
-      "insufficientCredits": "Insufficient credits. Please purchase more."
+      "insufficientCredits": "Insufficient credits. Please purchase more credits to continue."
     },
     "proposalGenerator": {
       "title": "Describe Your Project Idea",
