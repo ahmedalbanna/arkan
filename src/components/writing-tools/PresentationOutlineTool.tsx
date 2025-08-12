@@ -1,0 +1,137 @@
+
+'use client';
+
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useGeneratePresentationOutline } from '@/hooks/use-presentation-generation';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Sparkles, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { ScrollArea } from '../ui/scroll-area';
+import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+
+const formSchema = z.object({
+  prompt: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline'][0], level?: number }) => {
+    const [isOpen, setIsOpen] = useState(true);
+    const hasChildren = item.children && item.children.length > 0;
+    
+    return (
+        <div style={{ paddingLeft: `${level * 1.5}rem`}}>
+            <div className="flex items-center gap-2 py-1">
+                {hasChildren ? (
+                    <button onClick={() => setIsOpen(!isOpen)} className="p-1 -ml-1">
+                        {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    </button>
+                ) : <div className="w-6 h-6"/>}
+                <h4 className="font-semibold">{item.title}</h4>
+            </div>
+            {isOpen && (
+                <div className="text-sm text-muted-foreground pl-8 border-l-2 ml-3">
+                    <p className="py-1">{item.content}</p>
+                    {hasChildren && item.children?.map((child, index) => <OutlineItem key={index} item={child} level={level + 1} />)}
+                </div>
+            )}
+        </div>
+    )
+}
+
+export function PresentationOutlineTool() {
+  const mutation = useGeneratePresentationOutline();
+  const [isCopied, setIsCopied] = useState(false);
+  const [generatedOutline, setGeneratedOutline] = useState<GeneratePresentationOutlineOutput | null>(null);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { prompt: '' },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    mutation.mutate(
+      { prompt: data.prompt },
+      {
+        onSuccess: (result) => {
+          setGeneratedOutline(result);
+          toast({ title: 'Outline generated successfully!' });
+        },
+        onError: (error) => {
+          toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        },
+      }
+    );
+  };
+
+  const handleCopy = () => {
+    if (!generatedOutline) return;
+    const textToCopy = `${generatedOutline.cover.title}\n\n` + generatedOutline.outline.map(item => `${item.title}\n${item.content}`).join('\n\n');
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setIsCopied(true);
+      toast({ title: 'Copied to clipboard!' });
+      setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Presentation Outline</CardTitle>
+        <CardDescription>Provide a topic, and the AI will generate a structured outline for your presentation.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="topic">Topic</Label>
+            <Input
+              id="topic"
+              {...form.register('prompt')}
+              placeholder="e.g., The Future of Artificial Intelligence"
+              disabled={mutation.isPending}
+            />
+            {form.formState.errors.prompt && <p className="text-sm text-destructive">{form.formState.errors.prompt.message}</p>}
+          </div>
+
+          <Button type="submit" disabled={mutation.isPending} className="w-full">
+            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            Generate Outline
+          </Button>
+        </form>
+
+        {(mutation.isPending || generatedOutline) && (
+          <div className="space-y-2 pt-6 border-t">
+            <div className="flex justify-between items-center">
+              <h3 className="font-semibold text-muted-foreground">Generated Outline</h3>
+              {generatedOutline && (
+                <Button variant="ghost" size="icon" onClick={handleCopy}>
+                  {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              )}
+            </div>
+            <ScrollArea className="h-[70vh] rounded-md border p-4 bg-muted/30">
+              {mutation.isPending ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : generatedOutline && (
+                <div className="space-y-4">
+                    <h3 className="text-lg font-bold">{generatedOutline.cover.title}</h3>
+                    <div className="space-y-2">
+                        {generatedOutline.outline.map((item, index) => <OutlineItem key={index} item={item} />)}
+                    </div>
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
