@@ -147,49 +147,50 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-auto min-h-16 items-center px-4 py-2 md:py-0 flex-wrap">
-        <div className="md:hidden">
-          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" aria-label={isClient ? t('header.openMenu') : 'Open Menu'}>
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm flex flex-col">
-                <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
-                <ScrollArea className="flex-grow mt-8">
-                  <nav className="flex flex-col gap-4 pr-6">
-                    {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
-                    {userProfile?.role === 'admin' && (
-                      <>
-                        <div className="my-4 border-t"></div>
-                        {adminLinks.map((link) => (
-                          <Button
-                            key={link.href}
-                            asChild
-                            variant="ghost"
-                            className="font-headline w-full justify-start text-lg py-6"
-                            onClick={handleLinkClick}
-                          >
-                            <Link href={link.href}>
-                              <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
-                              {link.label}
-                            </Link>
-                          </Button>
-                        ))}
-                      </>
-                    )}
-                  </nav>
-                </ScrollArea>
-              </SheetContent>
-          </Sheet>
+      <div className="flex h-16 items-center px-4">
+        <div className="flex items-center gap-2">
+            <div className="md:hidden">
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                <Button variant="outline" size="icon" aria-label={isClient ? t('header.openMenu') : 'Open Menu'}>
+                    <Menu className="h-6 w-6" />
+                </Button>
+                </SheetTrigger>
+                <SheetContent side={locale === 'ar' ? 'right' : 'left'} className="w-full max-w-sm flex flex-col">
+                    <SheetTitle className="sr-only">{isClient ? t('header.openMenu') : 'Open Menu'}</SheetTitle>
+                    <ScrollArea className="flex-grow mt-8">
+                    <nav className="flex flex-col gap-4 pr-6">
+                        {isClient ? renderNavLinks(navLinks, true) : <Skeleton className="h-10 w-full" />}
+                        {userProfile?.role === 'admin' && (
+                        <>
+                            <div className="my-4 border-t"></div>
+                            {adminLinks.map((link) => (
+                            <Button
+                                key={link.href}
+                                asChild
+                                variant="ghost"
+                                className="font-headline w-full justify-start text-lg py-6"
+                                onClick={handleLinkClick}
+                            >
+                                <Link href={link.href}>
+                                <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />
+                                {link.label}
+                                </Link>
+                            </Button>
+                            ))}
+                        </>
+                        )}
+                    </nav>
+                    </ScrollArea>
+                </SheetContent>
+            </Sheet>
+            </div>
+
+            <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
+                {isClient ? t('header.title') : <Skeleton className="h-6 w-20" />}
+            </Link>
         </div>
 
-        <div className="flex-1 flex justify-center md:justify-start">
-          <Link href="/" className="flex items-center gap-2 font-headline text-xl font-bold text-primary">
-            {isClient ? t('header.title') : <Skeleton className="h-6 w-20" />}
-          </Link>
-        </div>
         <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
           {isClient ? renderNavLinks(navLinks) : <Skeleton className="h-10 w-48" />}
            <DropdownMenu>
@@ -209,7 +210,7 @@ export function Header() {
             </DropdownMenu>
         </nav>
 
-        <div className="flex-1 flex justify-end items-center gap-2">
+        <div className="flex items-center gap-2">
           {showSkeleton ? (
             <div className="flex items-center gap-2">
               <Skeleton className="h-8 w-20" />
