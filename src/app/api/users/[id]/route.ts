@@ -51,9 +51,14 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             if (userId !== requester.id) {
                 return handleApiError({ message: "Forbidden" }, 403);
             }
-            // If not admin, only allow name and bio updates
+            // If not admin, only allow name, bio, and onboarding updates
             const { name, bio, hasCompletedOnboarding } = body;
-            const validation = updateUserSchema.safeParse({ name, bio, hasCompletedOnboarding });
+            const validation = z.object({
+                name: z.string().min(1, 'Name is required').optional(),
+                bio: z.string().optional(),
+                hasCompletedOnboarding: z.boolean().optional(),
+            }).safeParse({ name, bio, hasCompletedOnboarding });
+
              if (!validation.success) {
                 return handleApiError(validation.error);
             }
@@ -93,3 +98,4 @@ export const DELETE = withAuth(async ({ params }) => {
         return handleApiError(error);
     }
 }, { requireAdmin: true });
+
