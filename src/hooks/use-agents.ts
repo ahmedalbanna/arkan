@@ -5,18 +5,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
 import { agentKeys } from "@/lib/query-keys";
-import type { Agent, AgentData, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
+import { AGENTS as defaultAgents, type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/agents';
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
   fetchAgent,
-  fetchAgents,
   updateAgent as updateAgentApi,
   createAgent as createAgentApi,
   deleteAgent as deleteAgentApi,
 } from "@/services/agent-service";
+import { fetchAgents } from "@/services/admin-service";
+
 
 export interface UpdateAgentPayload {
     name?: string;
@@ -36,12 +37,14 @@ export type CreateAgentVariables = Omit<AgentData, 'isEnabled'> & { knowledge?: 
 /**
  * Custom hook to fetch the list of all AI agents.
  * Caches the data and provides loading and error states.
- * Requires admin authentication.
+ * For regular users, it returns the static default agents.
+ * For admin users, it fetches the latest configurations from the database.
  *
  * @returns An object containing the list of agents, loading status, and error status.
  */
 export function useAgents() {
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, userProfile } = useAuth();
+  const isAdmin = userProfile?.role === 'admin';
 
   const {
     data: agents,
@@ -50,19 +53,29 @@ export function useAgents() {
   } = useQuery<Agent[]>({
     queryKey: agentKeys.lists(),
     queryFn: async () => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return fetchAgents(token);
+      // Admins fetch from the API to get the latest editable data
+      if (isAdmin) {
+          const token = await getAuthenticatedToken(firebaseUser);
+          return fetchAgents(token);
+      }
+      // Regular users get the static default agent configurations
+      return Promise.resolve(defaultAgents);
     },
-    enabled: !!firebaseUser,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: !!firebaseUser, // Only run when the user is known
+    staleTime: isAdmin ? 1000 * 60 * 5 : Infinity, // Cache forever for regular users, 5 mins for admins
     meta: {
-      onError: (error: Error) =>
-        handleErrorUtility(error, "Failed to fetch agents"),
+      onError: (error: Error) => {
+        if(isAdmin) {
+            handleErrorUtility(error, "Failed to fetch agents");
+        }
+        // Don't show error for regular users, as they have a fallback.
+      }
     },
   });
 
-  return { agents: agents || [], isLoaded: !isLoading, isError };
+  return { agents: agents || defaultAgents, isLoaded: !isLoading, isError };
 }
+
 
 type UseAgentOptions = Omit<
   UseQueryOptions<Agent | null, Error>,

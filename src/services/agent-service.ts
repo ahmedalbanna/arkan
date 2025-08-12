@@ -1,24 +1,7 @@
 
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, Agent, GenerateAgentConfigOutput, AgentPrompt } from '@/lib/types';
-
-/**
- * Fetches the full list of agents from the API.
- * Requires admin authentication.
- * @param token The admin user's authentication token.
- * @returns A promise that resolves to an array of Agent objects.
- */
-export async function fetchAgents(token: string): Promise<Agent[]> {
-    const response = await fetch('/api/admin/agents', {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to fetch agents');
-    }
-    return response.json();
-}
+import type { UpdateAgentVariables, CreateAgentVariables, Agent } from '@/lib/types';
 
 /**
  * Fetches the configuration for a single agent by its ID.
@@ -117,7 +100,7 @@ export async function deleteAgent(agentId: string, token: string): Promise<{ mes
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the generated agent configuration.
  */
-export async function generateAgentConfigApi(prompt: string, includeJsonOutput: boolean, contextFiles: any[], token: string): Promise<GenerateAgentConfigOutput> {
+export async function generateAgentConfigApi(prompt: string, includeJsonOutput: boolean, contextFiles: any[], token: string): Promise<any> {
     const response = await fetch('/api/admin/agents/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },

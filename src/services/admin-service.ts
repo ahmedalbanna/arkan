@@ -2,6 +2,8 @@
 'use client';
 
 import { Activity } from "@/components/admin/dashboard/RecentActivity";
+import type { Agent } from "@/lib/agents";
+
 
 export interface DashboardStats {
     totalUsers: number;
@@ -22,4 +24,22 @@ export async function fetchDashboardStats(token: string): Promise<DashboardStats
         throw new Error(error.message || 'Failed to fetch dashboard stats');
     }
     return await response.json();
+}
+
+
+/**
+ * Fetches the full list of agents from the API.
+ * Requires admin authentication.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to an array of Agent objects.
+ */
+export async function fetchAgents(token: string): Promise<Agent[]> {
+    const response = await fetch('/api/admin/agents', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch agents');
+    }
+    return response.json();
 }
