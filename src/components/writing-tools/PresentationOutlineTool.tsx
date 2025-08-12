@@ -14,9 +14,11 @@ import { Loader2, Sparkles, Copy, Check, ChevronDown, ChevronRight } from 'lucid
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({
   prompt: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
+  documentation: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -57,7 +59,7 @@ export function PresentationOutlineTool() {
 
   const onSubmit = (data: FormValues) => {
     mutation.mutate(
-      { prompt: data.prompt },
+      { prompt: data.prompt, documentation: data.documentation },
       {
         onSuccess: (result) => {
           setGeneratedOutline(result);
@@ -97,6 +99,17 @@ export function PresentationOutlineTool() {
               disabled={mutation.isPending}
             />
             {form.formState.errors.prompt && <p className="text-sm text-destructive">{form.formState.errors.prompt.message}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="documentation">Documentation (Optional)</Label>
+            <Textarea
+              id="documentation"
+              {...form.register('documentation')}
+              rows={8}
+              placeholder="Paste any relevant context, articles, or notes here to guide the outline generation..."
+              disabled={mutation.isPending}
+            />
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">

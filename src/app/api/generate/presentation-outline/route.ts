@@ -9,6 +9,7 @@ import { logGeneration } from '@/services/generation-service';
 
 const schema = z.object({
   prompt: z.string().min(3, "Prompt must be at least 3 characters long."),
+  documentation: z.string().optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {

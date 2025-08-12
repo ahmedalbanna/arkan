@@ -14,6 +14,7 @@ import { z } from 'genkit';
 
 const GeneratePresentationOutlineInputSchema = z.object({
   prompt: z.string().describe('The topic or prompt for the presentation.'),
+  documentation: z.string().optional().describe('Optional documentation or context to base the outline on.'),
 });
 export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
 
@@ -41,9 +42,16 @@ const prompt = ai.definePrompt({
   name: 'generatePresentationOutlinePrompt',
   input: { schema: GeneratePresentationOutlineInputSchema },
   output: { schema: GeneratePresentationOutlineOutputSchema },
-  prompt: `You are an expert at creating presentation outlines. Based on the following prompt, generate a structured outline for a presentation. The outline should have a cover slide and a series of main points, each with potential sub-points including a title and content for each point.
+  prompt: `You are an expert at creating presentation outlines. Based on the following topic and any provided documentation, generate a structured outline for a presentation. The outline should have a cover slide and a series of main points, each with potential sub-points including a title and content for each point.
 
-Prompt: {{{prompt}}}
+Topic: {{{prompt}}}
+
+{{#if documentation}}
+--- DOCUMENTATION ---
+Use the following documentation as the primary source of information for the outline.
+{{{documentation}}}
+-------------------
+{{/if}}
 `,
 });
 
