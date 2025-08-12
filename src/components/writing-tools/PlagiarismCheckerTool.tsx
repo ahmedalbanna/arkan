@@ -9,12 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { usePlagiarismCheck } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
-import type { ClaimStatus, FactCheckOutput } from '@/ai/flows/fact-checker';
+import type { ClaimStatus } from '@/ai/flows/fact-checker';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
@@ -26,6 +26,7 @@ const plagiarismSchema = z.object({
 });
 
 type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
+
 
 export function PlagiarismCheckerTool() {
   const mutation = usePlagiarismCheck();
@@ -81,10 +82,15 @@ export function PlagiarismCheckerTool() {
     });
   };
   
-  const getScoreColor = (score: number) => {
-    if (score < 25) return 'text-destructive';
-    if (score < 75) return 'text-yellow-500';
-    return 'text-green-500';
+  const getStatusInfo = (status: ClaimStatus) => {
+    switch (status) {
+      case 'Verified':
+        return { icon: CheckCircle, color: 'text-green-500', badgeVariant: 'default' as const };
+      case 'Inconclusive':
+        return { icon: HelpCircle, color: 'text-yellow-500', badgeVariant: 'secondary' as const };
+      case 'False':
+        return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
+    }
   };
   
   const results = mutation.data;
