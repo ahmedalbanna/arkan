@@ -6,8 +6,9 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
-import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2 } from 'lucide-react';
+import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2, RefreshCw } from 'lucide-react';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
+import { useReportStore } from '@/hooks/useReportStore';
 
 interface EvaluationResultViewerProps {
     evaluation: EvaluateReportOutput;
@@ -40,9 +41,10 @@ const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Present") =>
 
 export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerProps) {
     const { t } = useLocalization();
+    const { setEvaluation } = useReportStore();
 
     return (
-        <div className="space-y-4 pt-4 border-t">
+        <div className="space-y-4">
             <div className="flex items-center gap-4 p-4 rounded-lg bg-muted">
                 <div className={getScoreColor(evaluation.evaluationScore)}>
                     {getScoreIcon(evaluation.evaluationScore)}
@@ -85,6 +87,12 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                       )
                     })}
                 </ul>
+            </div>
+            <div className="pt-4 flex justify-end">
+                <Button variant="outline" onClick={() => setEvaluation(null)}>
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Re-evaluate
+                </Button>
             </div>
         </div>
     );

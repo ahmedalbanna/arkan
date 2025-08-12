@@ -11,14 +11,14 @@ import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 
 const EvaluateReportInputSchema = z.object({
-  proposal: ProjectProposalSchema.describe("The original project proposal."),
+  proposal: ProjectProposalSchema.describe("The original project proposal.").optional().nullable(),
   reportSections: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
   }, "All keys must be a valid SectionName").describe("A map of all generated report sections."),
   diagrams: z.object({}).passthrough().refine(obj => {
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of all generated PlantUML diagrams."),
-  acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against."),
+  }, "All keys must be a valid DiagramType").optional().describe("A map of all generated PlantUML diagrams.").nullable(),
+  acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
 });
 
 export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;

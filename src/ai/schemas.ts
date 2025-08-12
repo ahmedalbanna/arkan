@@ -67,10 +67,10 @@ export const ProjectProposalSchema = z.object({
     name: z.string().describe("The name of the stakeholder or stakeholder group."),
     role: z.string().describe("The stakeholder's role in the project (e.g., 'Primary User', 'Sponsor')."),
     interest: z.string().describe("The stakeholder's interest or investment in the project."),
-  })).describe("A list of key stakeholders involved in the project."),
-  success_criteria: z.array(z.string()).describe("A list of measurable criteria that will define the project's success."),
+  })).describe("A list of key stakeholders involved in the project.").optional(),
+  success_criteria: z.array(z.string()).describe("A list of measurable criteria that will define the project's success.").optional(),
   evaluation: z.string().describe("A description of how the project's success will be measured and assessed."),
-  tags: z.array(z.string()).describe("A list of 3 to 5 relevant keywords or tags for the project (e.g., 'Productivity', 'eCommerce', 'AI')."),
+  tags: z.array(z.string()).describe("A list of 3 to 5 relevant keywords or tags for the project (e.g., 'Productivity', 'eCommerce', 'AI').").optional(),
   risks: z.array(z.object({
     description: z.string().describe("A description of a potential risk to the project."),
     mitigation: z.string().describe("The strategy to mitigate this potential risk."),

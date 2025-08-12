@@ -160,7 +160,9 @@ export const useReportStore = create<ReportState & ReportActions>()(
     },
     setEvaluation: (evaluation) => {
       set({ evaluation });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
+      if(evaluation) {
+        useBuilderStore.getState().setHasUnsavedChanges(true);
+      }
     },
     addExternalContext: (fileName, content, type) => {
       set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type }] }));

@@ -9,10 +9,10 @@ import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const evaluateReportSchema = z.object({
-  proposal: ProjectProposalSchema,
+  proposal: ProjectProposalSchema.optional().nullable(),
   reportSections: z.record(SectionNameSchema, z.string()),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  acceptanceCriteria: z.array(z.string()),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional().nullable(),
+  acceptanceCriteria: z.array(z.string()).optional().nullable(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {

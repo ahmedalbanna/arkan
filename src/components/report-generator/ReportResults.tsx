@@ -126,14 +126,11 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                         <ContextViewer itemKey={activeSection} />
                     </TabsContent>
                      <TabsContent value="evaluation" className="mt-4">
-                        <div className="space-y-4">
+                        {evaluation ? (
+                           <EvaluationResultViewer evaluation={evaluation} />
+                        ) : (
                            <EvaluationTools />
-                           {evaluation && (
-                               <div className="pt-4 border-t">
-                                   <EvaluationResultViewer evaluation={evaluation} />
-                               </div>
-                           )}
-                        </div>
+                        )}
                     </TabsContent>
                 </Tabs>
              ) : (
