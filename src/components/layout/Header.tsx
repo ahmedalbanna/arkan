@@ -116,23 +116,25 @@ export function Header() {
   };
 
   const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
-    links.filter(link => link.auth === 'any' || (link.auth === true && firebaseUser)).map((link) => (
-      <Button
-        key={link.href}
-        asChild
-        variant={pathname.startsWith(link.href) && link.href !== '/' || pathname === '/' && link.href === '/' ? 'secondary' : 'ghost'}
-        className={cn(
-          'font-headline',
-          isMobile && 'w-full justify-start text-lg py-6'
-        )}
-        onClick={isMobile ? handleLinkClick : undefined}
-      >
-        <Link href={link.href}>
-          {isMobile && <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />}
-          {link.label}
-        </Link>
-      </Button>
-    ));
+    links
+      .filter(link => link.auth === 'any' || (link.auth && firebaseUser))
+      .map((link) => (
+        <Button
+          key={link.href}
+          asChild
+          variant={pathname.startsWith(link.href) && link.href !== '/' || pathname === '/' && link.href === '/' ? 'secondary' : 'ghost'}
+          className={cn(
+            'font-headline',
+            isMobile && 'w-full justify-start text-lg py-6'
+          )}
+          onClick={isMobile ? handleLinkClick : undefined}
+        >
+          <Link href={link.href}>
+            {isMobile && <link.icon className="ml-4 rtl:ml-0 rtl:mr-4 h-5 w-5" />}
+            {link.label}
+          </Link>
+        </Button>
+      ));
     
   const handleLogout = async () => {
     await logoutMutation.mutate();
@@ -300,7 +302,7 @@ export function Header() {
           ) : (
             <Button asChild><Link href="/login">Login</Link></Button>
           )}
-          <ThemeToggle />
+          {isClient && <ThemeToggle />}
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
           </Button>
