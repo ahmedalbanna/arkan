@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,16 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const RewriteDocumentInputSchema = z.object({
-  pdfDataUri: z.string().describe("A PDF file encoded as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:application/pdf;base64,<encoded_data>'."),
-});
-export type RewriteDocumentInput = z.infer<typeof RewriteDocumentInputSchema>;
-
-const RewriteDocumentOutputSchema = z.object({
-  markdown: z.string().describe('The rewritten content, formatted as clean, well-structured markdown.'),
-});
-export type RewriteDocumentOutput = z.infer<typeof RewriteDocumentOutputSchema>;
+import { RewriteDocumentInputSchema, type RewriteDocumentInput, RewriteDocumentOutputSchema, type RewriteDocumentOutput } from '@/ai/schemas';
 
 // Define the prompt outside the flow definition
 const generateMarkdownPrompt = ai.definePrompt({

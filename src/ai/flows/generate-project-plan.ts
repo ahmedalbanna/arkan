@@ -7,14 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectPlanSchema } from '@/ai/schemas';
-
-const GenerateProjectPlanInputSchema = z.object({
-  projectDescription: z.string().describe("A description of the project idea, objectives, and goals."),
-  keyDeliverables: z.string().describe("A summary of the key features and deliverables for the project."),
-  numPhases: z.number().int().min(2).max(10).describe("The desired number of phases for the project plan.").optional(),
-});
-export type GenerateProjectPlanInput = z.infer<typeof GenerateProjectPlanInputSchema>;
+import { ProjectPlanSchema, GenerateProjectPlanInputSchema, type GenerateProjectPlanInput } from '@/ai/schemas';
 
 export async function generateProjectPlan(input: GenerateProjectPlanInput): Promise<z.infer<typeof ProjectPlanSchema>> {
   

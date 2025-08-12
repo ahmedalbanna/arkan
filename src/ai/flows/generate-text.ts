@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,20 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const GenerateTextInputSchema = z.object({
-  prompt: z
-    .string()
-    .describe('The prompt to generate text from.'),
-});
-export type GenerateTextInput = z.infer<typeof GenerateTextInputSchema>;
-
-const GenerateTextOutputSchema = z.object({
-  generatedText: z
-    .string()
-    .describe('The generated text.'),
-});
-export type GenerateTextOutput = z.infer<typeof GenerateTextOutputSchema>;
+import { GenerateTextInputSchema, type GenerateTextInput, GenerateTextOutputSchema, type GenerateTextOutput } from '@/ai/schemas';
 
 export async function generateText(input: GenerateTextInput): Promise<GenerateTextOutput> {
   return generateTextFlow(input);

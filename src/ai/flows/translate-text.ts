@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,19 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const TranslateTextInputSchema = z.object({
-  text: z.string().describe('The text to be translated.'),
-  targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
-});
-export type TranslateVariables = z.infer<typeof TranslateTextInputSchema>;
-export type TranslateTextInput = z.infer<typeof TranslateTextInputSchema>;
-
-const TranslateTextOutputSchema = z.object({
-  translatedText: z.string().describe('The resulting translated text, with original markdown formatting preserved.'),
-});
-export type TranslateTextOutput = z.infer<typeof TranslateTextOutputSchema>;
-
+import { TranslateTextInputSchema, type TranslateTextInput, TranslateTextOutputSchema, type TranslateTextOutput } from '@/ai/schemas';
 
 export async function translateText(
   input: TranslateTextInput

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,21 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-export const ParaphraseModeSchema = z.enum(['standard', 'fluent', 'formal', 'creative', 'simplify']);
-export type ParaphraseMode = z.infer<typeof ParaphraseModeSchema>;
-
-const ParaphraseInputSchema = z.object({
-  text: z.string().describe('The text to be paraphrased.'),
-  mode: ParaphraseModeSchema.describe('The desired style of the paraphrased text.'),
-});
-export type ParaphraseInput = z.infer<typeof ParaphraseInputSchema>;
-
-
-const ParaphraseOutputSchema = z.object({
-  paraphrasedText: z.string().describe('The rewritten text, with original markdown formatting preserved.'),
-});
-export type ParaphraseOutput = z.infer<typeof ParaphraseOutputSchema>;
+import { ParaphraseInputSchema, type ParaphraseInput, ParaphraseOutputSchema, type ParaphraseOutput, ParaphraseModeSchema, type ParaphraseMode } from '@/ai/schemas';
 
 const styleDescriptions: Record<ParaphraseMode, string> = {
     standard: "Provide a balanced rewrite that improves clarity while retaining the original meaning.",

@@ -10,30 +10,11 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import {
-  ProjectProposalSchema,
-  PresentationSlideSchema,
-  ProjectPlanSchema,
+  GeneratePresentationInputSchema,
+  type GeneratePresentationInput,
+  GeneratePresentationOutputSchema,
+  type GeneratePresentationOutput,
 } from '@/ai/schemas';
-
-
-const GeneratePresentationInputSchema = z.object({
-  proposal: ProjectProposalSchema.nullable().optional().describe("An optional project proposal for high-level context."),
-  projectPlan: ProjectPlanSchema.nullable().optional().describe("The project plan with phases and tasks."),
-  guidelines: z.array(z.string()).optional(),
-  sourceDocuments: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-  })).min(1, "At least one source document is required.").describe("An array of source documents (text or data URIs) to be synthesized into a presentation."),
-  templateId: z.string(), // The ID of the template which contains the primary agent and other config
-  tone: z.string().optional().describe("The desired tone for the presentation (e.g., 'Professional', 'Casual')."),
-  complexity: z.string().optional().describe("The desired complexity (e.g., 'High-level Summary', 'Detailed').")
-});
-export type GeneratePresentationInput = z.infer<typeof GeneratePresentationInputSchema>;
-
-const GeneratePresentationOutputSchema = z.object({
-  slides: z.array(PresentationSlideSchema),
-});
-export type GeneratePresentationOutput = z.infer<typeof GeneratePresentationOutputSchema>;
 
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {

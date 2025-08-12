@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -9,48 +10,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, ProjectPlanSchema } from '@/ai/schemas';
+import { type SectionName } from '@/ai/schemas';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
-
-// Define the input schema for the context evaluation flow
-const EvaluateContextInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
-  projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
-  existingSections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections."),
-  existingDiagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
-  sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-      type: z.enum(['context', 'example'])
-  })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
-});
-export type EvaluateContextInput = z.infer<typeof EvaluateContextInputSchema>;
-
-
-// Define the output schema for a single section's recommended settings
-const SectionGenerationConfigSchema = z.object({
-  section: SectionNameSchema.describe("The target section to generate."),
-  context: z.object({
-    sections: z.array(SectionNameSchema).optional().describe("The keys of existing sections that are most relevant as context."),
-    diagrams: z.array(DiagramTypeSchema).optional().describe("The keys of existing diagrams that are most relevant as context."),
-  }).describe("The recommended context to use for generating this section."),
-  guidelines: z.array(z.string()).describe("A list of the most relevant guidelines to follow. Can include existing guidelines or new ones."),
-  instructions: z.object({
-    tone: z.enum(['professional', 'academic', 'casual', 'persuasive', 'none']).describe("The recommended tone for the section."),
-    formality: z.enum(['informal', 'balanced', 'very formal']).describe("The recommended formality level."),
-  }).describe("Recommended instructions for tone and formality."),
-});
-
-// Define the final output schema for the entire flow
-const EvaluateContextOutputSchema = z.object({
-  configs: z.array(SectionGenerationConfigSchema).describe("An array of optimized configurations for each section to be generated."),
-});
-export type EvaluateContextOutput = z.infer<typeof EvaluateContextOutputSchema>;
+import { EvaluateContextInputSchema, type EvaluateContextInput, EvaluateContextOutputSchema, type EvaluateContextOutput } from '@/ai/schemas';
 
 
 // Helper function to get agent details (prompt, guidelines)

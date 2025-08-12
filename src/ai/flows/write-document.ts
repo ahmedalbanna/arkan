@@ -7,19 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const WriteDocumentInputSchema = z.object({
-  topic: z.string().describe('The topic or title of the document to be written.'),
-  documentType: z.string().describe('The type of document to generate (e.g., "Blog Post", "Formal Report", "Essay", "Technical Article").'),
-  knowledge: z.string().optional().describe('Any specific knowledge, context, or instructions for the document.'),
-  tableOfContents: z.array(z.string()).optional().describe("An optional list of headings to be used as the document's structure."),
-});
-export type WriteDocumentInput = z.infer<typeof WriteDocumentInputSchema>;
-
-const WriteDocumentOutputSchema = z.object({
-  documentContent: z.string().describe('The fully generated document content, formatted as markdown.'),
-});
-export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
+import { WriteDocumentInputSchema, type WriteDocumentInput, WriteDocumentOutputSchema, type WriteDocumentOutput } from '@/ai/schemas';
 
 
 export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,25 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const MatchedSourceSchema = z.object({
-  source: z.string().describe("The full, real URL of the source where the similar text was found. This must be a complete and valid URL (e.g., https://www.example.com/article)."),
-  title: z.string().describe("The title of the webpage or article found at the source URL."),
-  summary: z.string().describe("A brief summary of the content from the source that is similar to the user's text."),
-  similarity: z.number().min(0).max(100).describe("A percentage score (0-100) indicating how similar the provided text is to the found source."),
-});
-
-const PlagiarismCheckInputSchema = z.object({
-  text: z.string().describe('The text to be checked for plagiarism.'),
-});
-export type PlagiarismCheckInput = z.infer<typeof PlagiarismCheckInputSchema>;
-
-const PlagiarismCheckOutputSchema = z.object({
-  originalityScore: z.number().min(0).max(100).describe("An overall score from 0 to 100 representing how original the text is, where 100 is completely unique."),
-  matches: z.array(MatchedSourceSchema).describe("An array of potential sources that contain similar text."),
-});
-export type PlagiarismCheckOutput = z.infer<typeof PlagiarismCheckOutputSchema>;
-
+import { PlagiarismCheckInputSchema, type PlagiarismCheckInput, PlagiarismCheckOutputSchema, type PlagiarismCheckOutput } from '@/ai/schemas';
 
 export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<PlagiarismCheckOutput> {
   

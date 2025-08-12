@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,22 +8,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, CodebaseSchema, type Codebase, GenerateCodebaseInputSchema } from '@/ai/schemas';
 
-const GeneratedFileSchema = z.object({
-  path: z.string().describe('The full path of the file, including directories and the file name (e.g., "src/app/page.tsx").'),
-  content: z.string().describe('The complete source code or content for the file.'),
-});
-
-const CodebaseSchema = z.object({
-  files: z.array(GeneratedFileSchema).describe('An array of all the files that make up the codebase.'),
-});
-export type Codebase = z.infer<typeof CodebaseSchema>;
-
-
-const GenerateCodebaseInputSchema = z.object({
-  proposal: ProjectProposalSchema.describe('The project proposal to base the codebase on.'),
-});
 
 export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInputSchema>): Promise<Codebase> {
   const { proposal } = input;

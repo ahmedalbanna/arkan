@@ -7,23 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const CorrectionSchema = z.object({
-  original: z.string().describe("The original incorrect phrase or word."),
-  corrected: z.string().describe("The corrected version of the phrase or word."),
-  explanation: z.string().describe("A brief, clear explanation of why the correction was made."),
-});
-
-const GrammarCheckInputSchema = z.object({
-  text: z.string().describe('The text to be checked for grammar and spelling mistakes.'),
-});
-export type GrammarCheckInput = z.infer<typeof GrammarCheckInputSchema>;
-
-const GrammarCheckOutputSchema = z.object({
-  correctedText: z.string().describe("The full text with all corrections applied, preserving original markdown."),
-  corrections: z.array(CorrectionSchema).describe("A list of the specific corrections made."),
-});
-export type GrammarCheckOutput = z.infer<typeof GrammarCheckOutputSchema>;
+import { GrammarCheckInputSchema, type GrammarCheckInput, GrammarCheckOutputSchema, type GrammarCheckOutput } from '@/ai/schemas';
 
 
 export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarCheckOutput> {

@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,27 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const AiProofreadDocumentInputSchema = z.object({
-  documentText: z
-    .string()
-    .describe('The text content of the document to be proofread.'),
-  constraints: z
-    .string()
-    .optional()
-    .describe(
-      'Optional constraints to tailor the proofreading suggestions, such as specific style guidelines or target audience.'
-    ),
-});
-export type AiProofreadDocumentInput = z.infer<typeof AiProofreadDocumentInputSchema>;
-
-const AiProofreadDocumentOutputSchema = z.object({
-  proofreadDocument: z
-    .string()
-    .describe('The proofread document with suggested corrections.'),
-});
-export type AiProofreadDocumentOutput = z.infer<typeof AiProofreadDocumentOutputSchema>;
+import { AiProofreadDocumentInputSchema, type AiProofreadDocumentInput, AiProofreadDocumentOutputSchema, type AiProofreadDocumentOutput } from '@/ai/schemas';
 
 export async function aiProofreadDocument(input: AiProofreadDocumentInput): Promise<AiProofreadDocumentOutput> {
   return aiProofreadDocumentFlow(input);

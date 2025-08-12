@@ -7,17 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const ImproveMarkdownInputSchema = z.object({
-  markdownContent: z.string().describe('The full report content in Markdown format.'),
-  userPrompt: z.string().describe('Specific instructions from the user on how to improve the document.'),
-});
-export type ImproveMarkdownInput = z.infer<typeof ImproveMarkdownInputSchema>;
-
-const ImproveMarkdownOutputSchema = z.object({
-  improvedMarkdown: z.string().describe('The improved and reformatted Markdown content.'),
-});
-export type ImproveMarkdownOutput = z.infer<typeof ImproveMarkdownOutputSchema>;
+import { ImproveMarkdownInputSchema, type ImproveMarkdownInput, ImproveMarkdownOutputSchema, type ImproveMarkdownOutput } from '@/ai/schemas';
 
 export async function improveReportMarkdown(input: ImproveMarkdownInput): Promise<ImproveMarkdownOutput> {
   const prompt = ai.definePrompt({

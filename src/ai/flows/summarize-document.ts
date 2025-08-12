@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -10,20 +11,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-
-const SummarizeDocumentInputSchema = z.object({
-  documentDataUri: z
-    .string()
-    .describe(
-      'A document, as a data URI that must include a MIME type and use Base64 encoding. Expected format: \'data:<mimetype>;base64,<encoded_data>\'.' // Explicitly using backticks here, because VS Code interprets " as a special character within a string.
-    ),
-});
-export type SummarizeDocumentInput = z.infer<typeof SummarizeDocumentInputSchema>;
-
-const SummarizeDocumentOutputSchema = z.object({
-  summary: z.string().describe('A concise summary of the document.'),
-});
-export type SummarizeDocumentOutput = z.infer<typeof SummarizeDocumentOutputSchema>;
+import { SummarizeDocumentInputSchema, type SummarizeDocumentInput, SummarizeDocumentOutputSchema, type SummarizeDocumentOutput } from '@/ai/schemas';
 
 export async function summarizeDocument(input: SummarizeDocumentInput): Promise<SummarizeDocumentOutput> {
   return summarizeDocumentFlow(input);

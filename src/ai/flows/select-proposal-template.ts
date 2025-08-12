@@ -8,14 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
-
-const SelectProposalTemplateInputSchema = z.object({
-  projectIdea: z.string().describe('A short description of the project idea.'),
-});
-
-const SelectProposalTemplateOutputSchema = z.object({
-  templateId: z.enum(['default-software', 'agile-project', 'student-training-plan']).describe('The ID of the most appropriate proposal template.'),
-});
+import { SelectProposalTemplateInputSchema, SelectProposalTemplateOutputSchema } from '@/ai/schemas';
 
 export async function selectProposalTemplate(input: z.infer<typeof SelectProposalTemplateInputSchema>): Promise<z.infer<typeof SelectProposalTemplateOutputSchema>> {
   const availableTemplates = PROPOSAL_TEMPLATES.filter(t => t.id !== 'automatic-ai')

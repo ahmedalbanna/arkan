@@ -7,20 +7,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { GenerateCitationInputSchema, type GenerateCitationInput, GenerateCitationOutputSchema, type GenerateCitationOutput } from '@/ai/schemas';
 
-export const CitationStyleSchema = z.enum(['apa', 'mla', 'chicago', 'ieee']);
-export type CitationStyle = z.infer<typeof CitationStyleSchema>;
-
-const GenerateCitationInputSchema = z.object({
-  sourceText: z.string().describe('The source material to generate a citation for. This can be a URL, a block of text from an article, or a book title and author.'),
-  style: CitationStyleSchema.describe('The citation style to use (e.g., APA, MLA).'),
-});
-export type GenerateCitationInput = z.infer<typeof GenerateCitationInputSchema>;
-
-const GenerateCitationOutputSchema = z.object({
-  citation: z.string().describe('The formatted citation string.'),
-});
-export type GenerateCitationOutput = z.infer<typeof GenerateCitationOutputSchema>;
 
 export async function generateCitation(input: GenerateCitationInput): Promise<GenerateCitationOutput> {
   const { sourceText, style } = input;

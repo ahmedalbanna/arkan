@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -6,18 +7,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-const ExplainDiagramInputSchema = z.object({
-  imageDataUri: z.string().describe("An image of a diagram, encoded as a data URI that must include a MIME type and use Base64 encoding."),
-});
-export type ExplainDiagramInput = z.infer<typeof ExplainDiagramInputSchema>;
-
-const ExplainDiagramOutputSchema = z.object({
-  explanation: z.string().describe('A detailed explanation of the diagram, formatted as markdown.'),
-});
-export type ExplainDiagramOutput = z.infer<typeof ExplainDiagramOutputSchema>;
-
+import { ExplainDiagramInputSchema, type ExplainDiagramInput, ExplainDiagramOutputSchema, type ExplainDiagramOutput } from '@/ai/schemas';
 
 export async function explainDiagram(input: ExplainDiagramInput): Promise<ExplainDiagramOutput> {
   const prompt = ai.definePrompt({

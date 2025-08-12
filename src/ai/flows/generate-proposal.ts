@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -10,20 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
-
-const GenerateProposalInputSchema = z.object({
-  projectIdea: z.string().describe('A short description of the project idea.'),
-  prompt: z.string().describe('The base prompt to use for generating the proposal.'),
-  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-  })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
-});
-
-export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
-
+import { ProjectProposalSchema, type ProjectProposal, GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 
 export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
   const { projectIdea, prompt, guidelines, externalContext } = input;

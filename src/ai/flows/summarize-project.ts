@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -11,22 +12,17 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { AnyProjectProposalSchema, ProjectProposalSchema } from '../schemas';
-
-const SummarizeProjectInputSchema = z.object({
-  projectDescription: z
-    .string()
-    .describe('The detailed description of the project that needs to be summarized.'),
-  prompt: z.string().describe('The prompt to use for generating the summary.')
-});
-export type SummarizeProjectInput = z.infer<typeof SummarizeProjectInputSchema>;
-
-const SummarizeProjectOutputSchema = z.object({
-  summary: z.string().describe('A concise summary of the project.'),
-  technologies: z.array(z.string()).describe('A list of technologies, frameworks, and libraries identified in the project description.'),
-  progress: z.string().describe('Details on the summarization progress'),
-});
-export type SummarizeProjectOutput = z.infer<typeof SummarizeProjectOutputSchema>;
+import { 
+    AnyProjectProposalSchema, 
+    SummarizeProjectInputSchema, 
+    type SummarizeProjectInput, 
+    SummarizeProjectOutputSchema, 
+    type SummarizeProjectOutput,
+    SummarizeFullProjectInputSchema,
+    type SummarizeFullProjectInput,
+    SummarizeFullProjectOutputSchema,
+    type SummarizeFullProjectOutput
+} from '../schemas';
 
 export async function summarizeProject(input: SummarizeProjectInput): Promise<SummarizeProjectOutput> {
   return summarizeProjectFlow(input);
@@ -57,18 +53,6 @@ const summarizeProjectFlow = ai.defineFlow(
 
 
 // New flow for summarizing a full project
-const SummarizeFullProjectInputSchema = z.object({
-  proposal: AnyProjectProposalSchema.describe("The full JSON of the project proposal."),
-  reportMarkdown: z.string().describe("The concatenated markdown content of all generated report sections.")
-});
-export type SummarizeFullProjectInput = z.infer<typeof SummarizeFullProjectInputSchema>;
-
-const SummarizeFullProjectOutputSchema = z.object({
-  summary: z.string().describe('A concise executive summary of the entire project.'),
-});
-export type SummarizeFullProjectOutput = z.infer<typeof SummarizeFullProjectOutputSchema>;
-
-
 export async function summarizeFullProject(input: SummarizeFullProjectInput): Promise<SummarizeFullProjectOutput> {
   const { proposal, reportMarkdown } = input;
   const stringifiedProposal = JSON.stringify(proposal, null, 2);

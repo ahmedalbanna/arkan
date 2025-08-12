@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,21 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-export const SummarizeLengthSchema = z.enum(['short', 'medium', 'long']);
-export type SummarizeLength = z.infer<typeof SummarizeLengthSchema>;
-
-const SummarizeInputSchema = z.object({
-  text: z.string().describe('The text to be summarized.'),
-  length: SummarizeLengthSchema.describe('The desired length of the summary.'),
-});
-export type SummarizeInput = z.infer<typeof SummarizeInputSchema>;
-
-
-const SummarizeOutputSchema = z.object({
-  summary: z.string().describe('The generated summary of the original text.'),
-});
-export type SummarizeOutput = z.infer<typeof SummarizeOutputSchema>;
+import { SummarizeInputSchema, type SummarizeInput, SummarizeLength, SummarizeOutputSchema, type SummarizeOutput } from '@/ai/schemas';
 
 const lengthDescriptions: Record<SummarizeLength, string> = {
     short: "a single, concise paragraph.",

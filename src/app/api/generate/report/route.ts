@@ -1,39 +1,19 @@
 
+
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, type SectionName, DiagramType, ProjectPlanSchema } from '@/ai/schemas';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { sectionConfig } from '@/lib/report-config';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-
-// This API now only handles SINGLE section generation.
-// The "full report" generation is orchestrated on the client-side.
-const generateSectionSchema = z.object({
-  proposal: ProjectProposalSchema.optional().nullable(),
-  projectPlan: ProjectPlanSchema.optional().nullable(),
-  sectionToGenerate: SectionNameSchema,
-  otherSections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
-  otherDiagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
-  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
-  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
-  instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-  tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
-});
-
+import { GenerateSectionInputSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = generateSectionSchema.safeParse(body);
+    const validation = GenerateSectionInputSchema.safeParse(body);
 
     if (!validation.success) {
       return handleApiError(validation.error);

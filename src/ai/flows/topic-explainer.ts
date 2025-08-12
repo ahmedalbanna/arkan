@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,16 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const TopicExplainerInputSchema = z.object({
-  topic: z.string().describe('The complex topic to be explained.'),
-});
-export type TopicExplainerInput = z.infer<typeof TopicExplainerInputSchema>;
-
-const TopicExplainerOutputSchema = z.object({
-  explanation: z.string().describe('A simple, easy-to-understand explanation of the topic, formatted in Markdown.'),
-});
-export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
+import { TopicExplainerInputSchema, type TopicExplainerInput, TopicExplainerOutputSchema, type TopicExplainerOutput } from '@/ai/schemas';
 
 export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
   const prompt = ai.definePrompt({

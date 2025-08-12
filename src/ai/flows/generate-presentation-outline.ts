@@ -11,26 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-
-const GeneratePresentationOutlineInputSchema = z.object({
-  prompt: z.string().describe('The topic or prompt for the presentation.'),
-  documentation: z.string().optional().describe('Optional documentation or context to base the outline on.'),
-});
-export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
-
-const OutlineItemSchema = z.object({
-  title: z.string().describe('The title of the slide or section.'),
-  content: z.string().describe('A brief description of the content for this item.'),
-  children: z.array(z.lazy(() => OutlineItemSchema)).optional().describe('Sub-items for this outline entry.'),
-});
-
-const GeneratePresentationOutlineOutputSchema = z.object({
-  cover: z.object({
-    title: z.string(),
-  }),
-  outline: z.array(OutlineItemSchema),
-});
-export type GeneratePresentationOutlineOutput = z.infer<typeof GeneratePresentationOutlineOutputSchema>;
+import { GeneratePresentationOutlineInputSchema, type GeneratePresentationOutlineInput, GeneratePresentationOutlineOutputSchema, type GeneratePresentationOutlineOutput } from '@/ai/schemas';
 
 export async function generatePresentationOutline(
   input: GeneratePresentationOutlineInput

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,16 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const GenerateImageInputSchema = z.object({
-  prompt: z.string().describe("A text description of the image to be generated."),
-});
-export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
-
-const GenerateImageOutputSchema = z.object({
-  imageUrl: z.string().describe("The generated image as a Base64 data URI."),
-});
-export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
+import { GenerateImageInputSchema, type GenerateImageInput, GenerateImageOutputSchema, type GenerateImageOutput } from '@/ai/schemas';
 
 export async function generateImage(input: GenerateImageInput): Promise<GenerateImageOutput> {
   return generateImageFlow(input);

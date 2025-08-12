@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,13 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { PresentationHistoryEntrySchema, type PresentationHistoryEntry } from '@/ai/schemas';
-
-const TranslatePresentationInputSchema = z.object({
-  presentation: PresentationHistoryEntrySchema.describe('The presentation object to be translated.'),
-  targetLang: z.string().describe('The target language (e.g., "English", "Arabic").'),
-});
-export type TranslatePresentationInput = z.infer<typeof TranslatePresentationInputSchema>;
+import { PresentationHistoryEntrySchema, type PresentationHistoryEntry, TranslatePresentationInputSchema, type TranslatePresentationInput } from '@/ai/schemas';
 
 export async function translatePresentation(
   input: TranslatePresentationInput

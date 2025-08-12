@@ -1,4 +1,5 @@
 
+
 'use server';
 /**
  * @fileOverview AI agents for analyzing and solving academic documents (exams, homework).
@@ -8,17 +9,13 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import {
   AnalyzedDocumentSchema,
-  AnalyzedDocument,
+  type AnalyzedDocument,
   SolvedDocumentSchema,
-  SolvedDocument,
-  AcademicDocumentTypeSchema,
-} from './academic-solver.shared';
+  type SolvedDocument,
+  AnalyzeDocumentInputSchema,
+} from '@/ai/schemas';
 
 // 1. Analyze Document Flow
-const AnalyzeDocumentInputSchema = z.object({
-  documentType: AcademicDocumentTypeSchema,
-  markdownContent: z.string().min(10, 'Markdown content is too short.'),
-});
 
 // Define the analysis prompt outside the async function
 const analysisPrompt = ai.definePrompt({

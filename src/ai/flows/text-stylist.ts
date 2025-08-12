@@ -9,21 +9,18 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import type { DiffPart } from '@/lib/diff';
+import { 
+    RewriteTextInputSchema, 
+    type RewriteTextInput, 
+    RewriteTextOutputSchema, 
+    type RewriteTextOutput,
+    SummarizeTextWithRatioInputSchema,
+    type SummarizeTextWithRatioInput,
+    SummarizeTextWithRatioOutputSchema,
+    type SummarizeTextWithRatioOutput
+} from '@/ai/schemas';
 
 // --- Rewrite Text Flow ---
-
-const RewriteTextInputSchema = z.object({
-  text: z.string().describe('The text to be rewritten.'),
-  style: z.string().describe('The target style for the rewritten text (e.g., Formal, Creative, Simple).'),
-});
-export type RewriteTextInput = z.infer<typeof RewriteTextInputSchema>;
-
-
-const RewriteTextOutputSchema = z.object({
-  rewrittenText: z.string().describe('The text rewritten in the specified style.'),
-});
-export type RewriteTextOutput = z.infer<typeof RewriteTextOutputSchema>;
-
 
 const styleInstructions: Record<string, string> = {
     'Informal': 'Use a casual, conversational tone. Employ contractions (e.g., "don\'t", "it\'s") and simpler vocabulary. The goal is to make the text feel like a friendly chat.',
@@ -80,18 +77,6 @@ Return only the rewritten text.
 
 
 // --- Summarize Text with Ratio Flow ---
-
-const SummarizeTextWithRatioInputSchema = z.object({
-  text: z.string().describe('The text to be summarized.'),
-  ratio: z.number().min(10).max(90).describe('The desired compression ratio (10% - 90%). 10% is a very short summary, 90% is almost the original length.'),
-});
-export type SummarizeTextWithRatioInput = z.infer<typeof SummarizeTextWithRatioInputSchema>;
-
-const SummarizeTextWithRatioOutputSchema = z.object({
-  summarizedText: z.string().describe('The generated summary of the original text.'),
-});
-export type SummarizeTextWithRatioOutput = z.infer<typeof SummarizeTextWithRatioOutputSchema>;
-
 export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput): Promise<SummarizeTextWithRatioOutput> {
   const prompt = ai.definePrompt({
     name: 'summarizeTextWithRatioPrompt',

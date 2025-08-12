@@ -6,19 +6,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-const AIResearcherInputSchema = z.object({
-  topic: z.string().describe('The research topic.'),
-});
-export type AIResearcherInput = z.infer<typeof AIResearcherInputSchema>;
-
-const AIResearcherOutputSchema = z.object({
-  summary: z.string().describe('A comprehensive summary of the research topic.'),
-  keyPoints: z.array(z.string()).describe('A list of key points or facts about the topic.'),
-  sources: z.array(z.string()).describe('A list of URLs for the sources used.'),
-});
-export type AIResearcherOutput = z.infer<typeof AIResearcherOutputSchema>;
+import { AIResearcherInputSchema, type AIResearcherInput, AIResearcherOutputSchema, type AIResearcherOutput } from '@/ai/schemas';
 
 export async function aiResearcher(input: AIResearcherInput): Promise<AIResearcherOutput> {
   const prompt = ai.definePrompt({

@@ -9,24 +9,8 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import type { ExternalContext } from '@/hooks/useReportStore';
+import { AnalyzeContextInputSchema, type AnalyzeContextInput, AnalyzeContextOutputSchema, type AnalyzeContextOutput } from '@/ai/schemas';
 
-// Input schema for the context analysis flow
-const AnalyzeContextInputSchema = z.object({
-  prompt: z.string().describe("The user's question or instruction for what to extract or analyze from the context files."),
-  contextFiles: z.array(z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-  })).describe("An array of context files (text, images, PDFs as data URIs) to be analyzed."),
-});
-export type AnalyzeContextInput = z.infer<typeof AnalyzeContextInputSchema>;
-
-// Output schema for the context analysis flow
-const AnalyzeContextOutputSchema = z.object({
-  schema: z.string().describe("A Zod schema string that defines the structure of the output data. This schema should be dynamically generated based on the user's prompt."),
-  data: z.any().describe("The structured data, conforming to the generated schema, extracted and synthesized from the context files based on the user's prompt."),
-});
-export type AnalyzeContextOutput = z.infer<typeof AnalyzeContextOutputSchema>;
 
 export async function analyzeContext(input: AnalyzeContextInput): Promise<AnalyzeContextOutput> {
   const { prompt, contextFiles } = input;

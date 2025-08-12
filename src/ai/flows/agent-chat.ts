@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,19 +9,7 @@
 import { ai } from '@/ai/genkit';
 import { getAgent } from '@/lib/db/queries';
 import { AgentPrompt } from '@/lib/agents';
-import { z } from 'zod';
-
-const AgentChatInputSchema = z.object({
-  agentId: z.string().describe("The ID of the agent to chat with."),
-  message: z.string().describe("The user's message to the agent."),
-});
-export type AgentChatInput = z.infer<typeof AgentChatInputSchema>;
-
-const AgentChatOutputSchema = z.object({
-  response: z.string().describe("The agent's text response."),
-});
-export type AgentChatOutput = z.infer<typeof AgentChatOutputSchema>;
-
+import { AgentChatInputSchema, type AgentChatInput, AgentChatOutputSchema, type AgentChatOutput } from '@/ai/schemas';
 
 export async function agentChat(input: AgentChatInput): Promise<AgentChatOutput> {
   const agentConfig = await getAgent(input.agentId);

@@ -8,19 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const GenerateCodeInputSchema = z.object({
-  prompt: z.string().describe("A description of the UI component to be generated."),
-});
-export type GenerateCodeInput = z.infer<typeof GenerateCodeInputSchema>;
-
-const GenerateCodeOutputSchema = z.object({
-  html: z.string().describe("The complete HTML code for the component. It should not include <html>, <head>, or <body> tags, only the component's structure."),
-  css: z.string().describe("The complete CSS code to style the component. It should not include <style> tags."),
-  javascript: z.string().describe("The JavaScript code for any interactivity. It should not include <script> tags. Use vanilla JS that can be run in the browser.").optional(),
-});
-export type GenerateCodeOutput = z.infer<typeof GenerateCodeOutputSchema>;
-
+import { GenerateCodeInputSchema, type GenerateCodeInput, GenerateCodeOutputSchema, type GenerateCodeOutput } from '@/ai/schemas';
 
 export async function generateCode(input: GenerateCodeInput): Promise<GenerateCodeOutput> {
   return generateCodeFlow(input);

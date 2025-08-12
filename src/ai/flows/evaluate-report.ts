@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,39 +9,8 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
 import { detectAiContent } from './detect-ai-content';
-
-const EvaluateReportInputSchema = z.object({
-  proposal: ProjectProposalSchema.describe("The original project proposal.").optional().nullable(),
-  reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
-  diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
-  acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
-});
-
-export type EvaluateReportInput = z.infer<typeof EvaluateReportInputSchema>;
-
-const FeedbackItemSchema = z.object({
-  point: z.string().describe("A specific feedback point related to one of the acceptance criteria."),
-  status: z.enum(["Acceptable", "Weak", "Not Present"]).describe("The status of the report regarding this feedback point."),
-  sectionKey: SectionNameSchema.optional().describe("The specific section key (e.g., 'introduction', 'systemDesign') this feedback point applies to. This is crucial for applying automated fixes."),
-  solution: z.string().optional().describe("A suggested prompt for an AI agent to fix the issue if status is 'Weak' or 'Not Present'. This prompt should be a clear, actionable command."),
-});
-
-const AIContentAnalysisSchema = z.object({
-    sectionName: z.string(),
-    aiContentScore: z.number().min(0).max(100),
-    analysis: z.string(),
-});
-
-const EvaluateReportOutputSchema = z.object({
-  evaluationScore: z.number().min(0).max(100).describe("A numerical score from 0 to 100 representing the report's quality against the criteria."),
-  feedback: z.array(FeedbackItemSchema).describe("A list of specific feedback points, including praise for met criteria and suggestions for areas of improvement, each with a status."),
-  summary: z.string().describe("A concise summary of the overall evaluation."),
-  aiContentAnalysis: z.array(AIContentAnalysisSchema).optional().describe("An analysis of each section for AI-generated content probability."),
-});
-
-export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
+import { EvaluateReportInputSchema, type EvaluateReportInput, EvaluateReportOutputSchema, type EvaluateReportOutput } from '@/ai/schemas';
 
 export async function evaluateReport(input: EvaluateReportInput): Promise<EvaluateReportOutput> {
   return evaluateReportFlow(input);

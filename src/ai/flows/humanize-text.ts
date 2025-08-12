@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,16 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const HumanizeTextInputSchema = z.object({
-  text: z.string().describe('The AI-generated text to be humanized.'),
-});
-export type HumanizeTextInput = z.infer<typeof HumanizeTextInputSchema>;
-
-const HumanizeTextOutputSchema = z.object({
-  humanizedText: z.string().describe('The rewritten text, which sounds more natural and less robotic.'),
-});
-export type HumanizeTextOutput = z.infer<typeof HumanizeTextOutputSchema>;
+import { HumanizeTextInputSchema, type HumanizeTextInput, HumanizeTextOutputSchema, type HumanizeTextOutput } from '@/ai/schemas';
 
 export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTextOutput> {
   const prompt = ai.definePrompt({

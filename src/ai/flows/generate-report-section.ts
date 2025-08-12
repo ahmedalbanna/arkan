@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,37 +9,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { AnyProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/agents';
-
-// This input schema is generic and can handle any section generation.
-// The `sectionToGenerate` field tells the flow which agent's prompt to use.
-const GenerateSectionInputSchema = z.object({
-  proposal: AnyProjectProposalSchema.optional().nullable(),
-  projectPlan: ProjectPlanSchema.optional().nullable(),
-  sectionToGenerate: SectionNameSchema,
-  otherSections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").optional().describe("A map of previously generated text sections to provide context. The key is the section name and the value is the markdown content."),
-  otherDiagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams to provide context. The key is the diagram type and the value is the PlantUML code."),
-  exampleFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of example documents to be used for style, tone, and structure."),
-  contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
-  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
-  instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-  tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
-});
-
-export type GenerateSectionInput = z.infer<typeof GenerateSectionInputSchema>;
-
-// The output is now a static structure, which is more reliable for the AI model.
-const GenerateSectionOutputSchema = z.object({
-  sectionName: SectionNameSchema.describe("The name of the section that was generated. This must match the 'sectionToGenerate' from the input."),
-  content: z.string().describe("The generated markdown content for the specified section."),
-});
-export type GenerateSectionOutput = z.infer<typeof GenerateSectionOutputSchema>;
+import { GenerateSectionInputSchema, type GenerateSectionInput, GenerateSectionOutputSchema, type GenerateSectionOutput } from '@/ai/schemas';
 
 // Define the prompt outside the flow to prevent re-registration
 const reportSectionPrompt = ai.definePrompt({

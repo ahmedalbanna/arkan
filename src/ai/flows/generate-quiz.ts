@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -7,24 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const GenerateQuizInputSchema = z.object({
-  text: z.string().describe('The source text to generate the quiz from.'),
-  numQuestions: z.number().int().min(1).max(10).describe('The number of questions to generate.'),
-});
-export type GenerateQuizInput = z.infer<typeof GenerateQuizInputSchema>;
-
-const QuizQuestionSchema = z.object({
-  question: z.string().describe("The question text."),
-  options: z.array(z.string()).describe("An array of 4 possible answers (multiple choice)."),
-  answer: z.string().describe("The correct answer from the options."),
-});
-
-const GenerateQuizOutputSchema = z.object({
-  questions: z.array(QuizQuestionSchema).describe("An array of quiz questions."),
-});
-export type GenerateQuizOutput = z.infer<typeof GenerateQuizOutputSchema>;
-
+import { GenerateQuizInputSchema, type GenerateQuizInput, GenerateQuizOutputSchema, type GenerateQuizOutput } from '@/ai/schemas';
 
 export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
   const { text, numQuestions } = input;

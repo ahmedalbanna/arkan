@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -8,17 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-
-const RewriteToMarkdownInputSchema = z.object({
-  rawText: z.string().describe('The raw, unstructured text extracted from a document.'),
-});
-export type RewriteToMarkdownInput = z.infer<typeof RewriteToMarkdownInputSchema>;
-
-const RewriteToMarkdownOutputSchema = z.object({
-  markdown: z.string().describe('The rewritten content, formatted as clean, well-structured markdown.'),
-});
-export type RewriteToMarkdownOutput = z.infer<typeof RewriteToMarkdownOutputSchema>;
-
+import { RewriteToMarkdownInputSchema, type RewriteToMarkdownInput, RewriteToMarkdownOutputSchema, type RewriteToMarkdownOutput } from '@/ai/schemas';
 
 export async function rewriteToMarkdown(input: RewriteToMarkdownInput): Promise<RewriteToMarkdownOutput> {
   return rewriteToMarkdownFlow(input);
