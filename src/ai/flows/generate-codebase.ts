@@ -19,7 +19,7 @@ export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInp
     name: 'generateCodebasePrompt',
     input: { schema: GenerateCodebaseInputSchema },
     output: { schema: CodebaseSchema },
-    model: 'googleai/gemini-1.5-pro',
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert Next.js developer and software architect. Your task is to generate a complete boilerplate codebase for a new project based on the provided project proposal.
 
 **Analysis:**

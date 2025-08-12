@@ -27,7 +27,7 @@ const imageToTextFlow = ai.defineFlow(
       name: 'extractTextFromImagePrompt',
       input: { schema: ImageToTextInputSchema },
       output: { schema: ImageToTextOutputSchema },
-      model: 'googleai/gemini-1.5-pro',
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
 
 Follow these guidelines:

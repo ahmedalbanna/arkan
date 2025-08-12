@@ -27,7 +27,7 @@ export async function agentChat(input: AgentChatInput): Promise<AgentChatOutput>
   const finalPrompt = `${basePrompt}\n\n${guidelines}\n\n--- USER MESSAGE ---\n${input.message}`;
 
   const llmResponse = await ai.generate({
-      model: 'googleai/gemini-1.5-pro',
+      model: 'googleai/gemini-1.5-flash',
       prompt: finalPrompt,
       config: {
           temperature: 0.7, // Good for conversational, natural responses

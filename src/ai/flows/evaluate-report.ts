@@ -30,7 +30,7 @@ const evaluateReportFlow = ai.defineFlow(
       name: 'evaluateReportPrompt',
       input: { schema: EvaluateReportInputSchema },
       output: { schema: EvaluateReportOutputSchema },
-      model: 'googleai/gemini-1.5-pro',
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert quality assurance analyst and document reviewer. Your task is to evaluate a comprehensive project report based on a given set of acceptance criteria.
 
 You will be provided with the full project proposal, all generated report sections, and a list of acceptance criteria.

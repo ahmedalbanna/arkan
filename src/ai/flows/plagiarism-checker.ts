@@ -16,7 +16,7 @@ export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<Plag
     name: 'plagiarismCheckPrompt',
     input: { schema: PlagiarismCheckInputSchema },
     output: { schema: PlagiarismCheckOutputSchema },
-    model: 'googleai/gemini-1.5-pro',
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an advanced plagiarism detection engine. Your task is to analyze the following text for originality and find real web sources for any matching content.
 
 **Your Process:**

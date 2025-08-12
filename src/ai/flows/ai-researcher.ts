@@ -13,7 +13,7 @@ export async function aiResearcher(input: AIResearcherInput): Promise<AIResearch
     name: 'aiResearcherPrompt',
     input: { schema: AIResearcherInputSchema },
     output: { schema: AIResearcherOutputSchema },
-    model: 'googleai/gemini-1.5-pro',
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert research assistant. Your task is to conduct thorough research on the given topic and provide a structured report.
 
 **Your Process:**

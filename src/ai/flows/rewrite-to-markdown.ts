@@ -26,7 +26,7 @@ const rewriteToMarkdownFlow = ai.defineFlow(
       name: 'rewriteToMarkdownPrompt',
       input: { schema: RewriteToMarkdownInputSchema },
       output: { schema: RewriteToMarkdownOutputSchema },
-      model: 'googleai/gemini-1.5-pro',
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert document editor. Your task is to take a raw text input, which was extracted from a PDF, and rewrite it into clean, well-structured markdown.
 
 Follow these guidelines:

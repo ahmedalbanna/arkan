@@ -85,7 +85,7 @@ ${stringifiedProposal}
     name: 'summarizeFullProjectPrompt',
     input: { schema: SummarizeFullProjectInputSchema },
     output: { schema: SummarizeFullProjectOutputSchema },
-    model: 'googleai/gemini-1.5-pro',
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert project analyst. Your task is to create a high-level executive summary based on a full project proposal (JSON) and a generated report (Markdown).
 
 **Analysis Steps:**

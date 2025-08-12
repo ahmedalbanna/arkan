@@ -21,7 +21,7 @@ const prompt = ai.definePrompt({
   name: 'summarizeDocumentPrompt',
   input: {schema: SummarizeDocumentInputSchema},
   output: {schema: SummarizeDocumentOutputSchema},
-  model: 'googleai/gemini-1.5-pro',
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are an expert summarizer, able to distill the most important information from a document.
 
   Please provide a concise summary of the following document:

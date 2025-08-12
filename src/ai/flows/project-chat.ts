@@ -50,7 +50,7 @@ Current Project State:
 ${stringifiedProjectState}
 ---
 `,
-        model: 'googleai/gemini-1.5-pro',
+        model: 'googleai/gemini-1.5-flash',
         tools: [
             generateSectionTool,
             updateProposalFieldTool,
