@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck } from 'lucide-react';
 import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -23,7 +24,7 @@ import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import { useRewriteText } from '@/hooks/use-writing-tools';
+import { useRewriteText, useHumanizeText } from '@/hooks/use-writing-tools';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 
@@ -145,6 +146,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
     const rewriteMutation = useRewriteText();
+    const humanizeMutation = useHumanizeText();
 
     useEffect(() => {
         setLocalContent(content);
@@ -171,6 +173,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     
     const handleRewriteAction = (style: string) => {
         setAiSuggestion(null);
+        setDiff(null);
         rewriteMutation.mutate({ text: content, style }, {
             onSuccess: (data) => {
                 setAiSuggestion(data.rewrittenText);
@@ -181,7 +184,20 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         });
     }
 
-    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending || rewriteMutation.isPending;
+    const handleHumanizeAction = () => {
+        setAiSuggestion(null);
+        setDiff(null);
+        humanizeMutation.mutate({ text: content }, {
+            onSuccess: (data) => {
+                setAiSuggestion(data.humanizedText);
+                setDiff(computeDiff(content, data.humanizedText));
+                refetchUser();
+            },
+            onError: (error) => toast({ title: "Humanize Failed", description: error.message, variant: "destructive"})
+        });
+    }
+
+    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending || rewriteMutation.isPending || humanizeMutation.isPending;
 
     // Effect to play audio when src changes
     useEffect(() => {
@@ -305,6 +321,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                 <DropdownMenuItem onClick={() => handleAiAction('Summarize this text concisely.')}><BookText className="mr-2 h-4 w-4" />Summarize</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleAiAction('Expand on this topic, adding more detail.')}><Maximize className="mr-2 h-4 w-4" />Expand</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleAiAction('Correct any grammar and spelling mistakes.')}><SpellCheck className="mr-2 h-4 w-4" />Check Grammar</DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="mr-2 h-4 w-4" />Humanize</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />Rewrite</DropdownMenuSubTrigger>

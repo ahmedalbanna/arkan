@@ -2,16 +2,14 @@
 
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
-import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2, RefreshCw, UserCheck, Check, ThumbsDown, Loader2 } from 'lucide-react';
+import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2, RefreshCw } from 'lucide-react';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { useReportStore } from '@/hooks/useReportStore';
-import { useHumanizeText } from '@/hooks/use-writing-tools';
-import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 interface EvaluationResultViewerProps {
     evaluation: EvaluateReportOutput;
@@ -44,34 +42,7 @@ const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Present") =>
 
 export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerProps) {
     const { t } = useLocalization();
-    const { setEvaluation, setEvaluationSummary } = useReportStore();
-    const humanizeMutation = useHumanizeText();
-    const [humanizedSuggestion, setHumanizedSuggestion] = useState<string | null>(null);
-
-    const handleHumanize = () => {
-        setHumanizedSuggestion(null);
-        humanizeMutation.mutate({ text: evaluation.summary }, {
-            onSuccess: (data) => {
-                setHumanizedSuggestion(data.humanizedText);
-                toast({ title: "Suggestion Ready", description: "The AI has rewritten the summary." });
-            },
-            onError: (error) => {
-                toast({ title: "Humanizer Failed", description: error.message, variant: 'destructive' });
-            }
-        });
-    }
-
-    const handleAcceptSuggestion = () => {
-        if (humanizedSuggestion) {
-            setEvaluationSummary(humanizedSuggestion);
-            setHumanizedSuggestion(null);
-            toast({ title: "Summary Updated", description: "The evaluation summary has been updated." });
-        }
-    }
-
-    const handleRejectSuggestion = () => {
-        setHumanizedSuggestion(null);
-    }
+    const { setEvaluation } = useReportStore();
 
     return (
         <div className="space-y-4">
@@ -91,30 +62,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
             </div>
             <div className="space-y-2 p-4 border rounded-lg">
                 <h4 className="font-semibold">Summary & Feedback</h4>
-
-                {humanizedSuggestion ? (
-                     <Card className="mt-4 border-accent">
-                        <CardHeader>
-                            <CardTitle className="text-lg flex items-center gap-2">
-                            <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
-                            {humanizedSuggestion}
-                        </CardContent>
-                        <CardFooter className="flex justify-end gap-2 pt-4">
-                            <Button variant="ghost" onClick={handleRejectSuggestion}>
-                                <ThumbsDown className="mr-2 h-4 w-4" /> {t('builder.Section.reject')}
-                            </Button>
-                            <Button onClick={handleAcceptSuggestion}>
-                                <Check className="mr-2 h-4 w-4" /> {t('builder.Section.accept')}
-                            </Button>
-                        </CardFooter>
-                    </Card>
-                ) : (
-                    <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
-                )}
-
+                <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
                 <ul className="space-y-4 text-sm list-none pt-4 mt-4 border-t">
                     {evaluation.feedback.map((item, index) => {
                       const StatusIcon = getFeedbackStatusInfo(item.status).icon;
@@ -141,11 +89,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                     })}
                 </ul>
             </div>
-            <div className="pt-4 flex justify-between">
-                <Button variant="outline" onClick={handleHumanize} disabled={humanizeMutation.isPending}>
-                    {humanizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <UserCheck className="mr-2 h-4 w-4"/>}
-                    Humanize Summary
-                </Button>
+            <div className="pt-4 flex justify-end">
                 <Button variant="outline" onClick={() => setEvaluation(null)}>
                     <RefreshCw className="mr-2 h-4 w-4" />
                     Re-evaluate
