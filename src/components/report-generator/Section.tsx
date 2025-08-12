@@ -138,9 +138,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const [localContent, setLocalContent] = useState(content);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [diff, setDiff] = useState<DiffPart[] | null>(null);
-    const [showDiff, setShowDiff] = useState(false);
-    const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+    const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const { toast } = useToast();
     const { firebaseUser, refetchUser } = useAuth();
     const { t } = useLocalization();
@@ -266,18 +265,12 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
                             <CardHeader>
-                                <div className="flex justify-between items-center">
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                    <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
-                                    </CardTitle>
-                                    <Button variant="outline" size="sm" onClick={() => setShowDiff(!showDiff)}>
-                                        <GitCommitVertical className="mr-2 h-4 w-4" />
-                                        {showDiff ? "Hide Changes" : "Show Changes"}
-                                    </Button>
-                                </div>
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
-                               {showDiff && diff ? (
+                               {diff ? (
                                    <DiffView diff={diff} />
                                ) : (
                                    <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
