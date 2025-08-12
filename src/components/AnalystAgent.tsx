@@ -76,7 +76,7 @@ function jsonToMarkdown(json: any, level = 1): string {
 
 export default function AnalystAgent() {
     const { externalContext, addExternalContext } = useReportStore();
-    const { firebaseUser, refetchUser } = useAuth();
+    const { firebaseUser, refetchUser, userProfile } = useAuth();
     const { resolvedTheme } = useTheme();
     const [markdownResult, setMarkdownResult] = useState<string | null>(null);
 
@@ -119,7 +119,9 @@ export default function AnalystAgent() {
         toast({ title: "Analysis Saved", description: `"${fileName}" has been added to your context files.` });
     };
 
+    const creditCost = 2;
     const isProcessing = analysisMutation.isPending;
+    const canAnalyze = !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
 
     return (
         <Card className="h-full flex flex-col">
@@ -148,9 +150,9 @@ export default function AnalystAgent() {
                                 </FormItem>
                             )}
                         />
-                        <Button type="submit" disabled={isProcessing}>
+                        <Button type="submit" disabled={!canAnalyze}>
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                            Run Analysis
+                            Run Analysis ({creditCost} Credits)
                         </Button>
                         
                         {(isProcessing || markdownResult) && (
@@ -199,7 +201,7 @@ export default function AnalystAgent() {
                     </CardContent>
                     {markdownResult && !isProcessing && (
                         <CardFooter>
-                            <Button variant="secondary" onClick={handleSaveAnalysis}>
+                            <Button variant="secondary" onClick={handleSaveAnalysis} disabled={!markdownResult}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
                                 Save Result as Context File
                             </Button>
