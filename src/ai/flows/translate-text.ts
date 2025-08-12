@@ -60,6 +60,8 @@ const translateTextFlow = ai.defineFlow(
       return { translatedText: '' };
     }
 
-    return { translatedText: output.translatedText };
+    const cleanedTranslatedText = output.translatedText.replace(/---/g, '').trim();
+
+    return { translatedText: cleanedTranslatedText };
   }
 );
