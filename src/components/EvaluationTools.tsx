@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -108,44 +107,32 @@ export const EvaluationTools = () => {
     }
   
   return (
-    <form onSubmit={handleSubmit}>
-        <Card className={mutation.isPending ? 'opacity-50 pointer-events-none' : ''}>
-        <CardHeader>
-            <CardTitle className="font-headline">{t('builder.reportGenerator.evaluationTitle')}</CardTitle>
-            <CardDescription>{t('builder.reportGenerator.evaluationDesc')}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="space-y-2">
-                <Textarea
-                    name="acceptanceCriteria"
-                    placeholder={t('builder.reportGenerator.criteriaPlaceholder')}
-                    rows={6}
-                    value={criteria}
-                    onChange={(e) => setCriteria(e.target.value)}
-                    disabled={mutation.isPending}
-                />
-            </div>
-            <div className="space-y-2">
-                <div className="flex gap-2">
-                    <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isProcessingPdf} className="text-xs" />
-                    <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isProcessingPdf}>
-                        {isProcessingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4"/>}
-                        {t('builder.reportGenerator.processPdf')}
-                    </Button>
-                </div>
-            </div>
-        </CardContent>
-        <CardFooter>
-            <Button
-                type="submit"
-                disabled={mutation.isPending || !criteria}
-                className="w-full font-headline"
-            >
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-            {t('builder.reportGenerator.evaluateReport')}
+    <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+            <Textarea
+                name="acceptanceCriteria"
+                placeholder={t('builder.reportGenerator.criteriaPlaceholder')}
+                rows={6}
+                value={criteria}
+                onChange={(e) => setCriteria(e.target.value)}
+                disabled={mutation.isPending}
+            />
+        </div>
+        <div className="flex gap-2">
+            <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isProcessingPdf} className="text-xs" />
+            <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isProcessingPdf}>
+                {isProcessingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4"/>}
+                {t('builder.reportGenerator.processPdf')}
             </Button>
-        </CardFooter>
-        </Card>
+        </div>
+         <Button
+            type="submit"
+            disabled={mutation.isPending || !criteria}
+            className="w-full font-headline"
+        >
+        {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+        {t('builder.reportGenerator.evaluateReport')}
+        </Button>
     </form>
   );
 };

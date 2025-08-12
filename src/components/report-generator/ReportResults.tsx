@@ -19,6 +19,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { EvaluationTools } from '../EvaluationTools';
 
 const orderedSections = Object.keys(sectionConfig) as SectionName[];
 
@@ -110,7 +111,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="view">View & Edit</TabsTrigger>
                         <TabsTrigger value="context">Context</TabsTrigger>
-                        <TabsTrigger value="evaluation" disabled={!evaluation}>Evaluation</TabsTrigger>
+                        <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
                     </TabsList>
                     <TabsContent value="view" className="mt-4">
                         <Section
@@ -125,11 +126,14 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                         <ContextViewer itemKey={activeSection} />
                     </TabsContent>
                      <TabsContent value="evaluation" className="mt-4">
-                        {evaluation ? (
-                            <EvaluationResultViewer evaluation={evaluation} />
-                        ) : (
-                            <p className="text-center text-muted-foreground py-8">No evaluation has been performed yet.</p>
-                        )}
+                        <div className="space-y-4">
+                           <EvaluationTools />
+                           {evaluation && (
+                               <div className="pt-4 border-t">
+                                   <EvaluationResultViewer evaluation={evaluation} />
+                               </div>
+                           )}
+                        </div>
                     </TabsContent>
                 </Tabs>
              ) : (

@@ -32,6 +32,7 @@ import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { Textarea } from '../ui/textarea';
+import { Settings } from 'lucide-react';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -175,10 +176,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="generate" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="generate">Generate</TabsTrigger>
                         <TabsTrigger value="actions" disabled={!Object.values(sections).some(s => !!s)}>Actions</TabsTrigger>
-                        <TabsTrigger value="evaluate" disabled={!Object.values(sections).some(s => !!s)}>Evaluate</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6">
                         <div className="space-y-2 mb-4">
@@ -331,9 +331,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
                         <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
-                    </TabsContent>
-                    <TabsContent value="evaluate" className="pt-6">
-                        <EvaluationTools />
                     </TabsContent>
                 </Tabs>
             </CardContent>
