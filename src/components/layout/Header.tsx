@@ -23,6 +23,8 @@ import type { Notification, UserProfile } from '@/lib/types';
 import { useChatStore } from '@/hooks/useChatStore';
 import { toast } from '@/hooks/use-toast';
 import { initiateSupportChat } from '@/services/chat-service';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+
 
 function NotificationIcon({ icon }: { icon: Notification['icon']}) {
   switch (icon) {
@@ -141,6 +143,8 @@ export function Header() {
 
   const showSkeleton = !isClient || isLoadingAuth;
 
+  const hasNoCredits = userProfile && userProfile.credits === 0;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-auto min-h-16 items-center px-4 py-2 md:py-0 flex-wrap">
@@ -214,13 +218,31 @@ export function Header() {
             </div>
           ) : firebaseUser && userProfile ? (
             <>
-              
-              <Button variant="outline" asChild>
-                <Link href="/pricing" className="flex items-center gap-2 text-sm font-semibold text-primary">
-                  <Gem className="h-4 w-4" />
-                  <span>{userProfile.credits} {isClient && t('header.credits')}</span>
-                </Link>
-              </Button>
+               <TooltipProvider>
+                  <Tooltip open={hasNoCredits ? undefined : false}>
+                    <TooltipTrigger asChild>
+                       <Button
+                        variant="outline"
+                        asChild
+                        className={cn(
+                          'flex items-center gap-2 text-sm font-semibold text-primary',
+                          hasNoCredits && 'border-destructive text-destructive hover:bg-destructive/10 hover:text-destructive animate-pulse'
+                        )}
+                      >
+                        <Link href="/pricing">
+                          <Gem className="h-4 w-4" />
+                          <span>{userProfile.credits} {isClient && t('header.credits')}</span>
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    {hasNoCredits && (
+                      <TooltipContent>
+                        <p>You have run out of credits. Please purchase more.</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" aria-label="Toggle user menu">
