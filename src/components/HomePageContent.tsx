@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BrainCircuit, FileSpreadsheet, ShieldCheck } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileSpreadsheet, Presentation } from 'lucide-react';
 import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
@@ -26,7 +26,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
         description: t('home.feature2Desc'),
       },
       {
-        icon: ShieldCheck,
+        icon: Presentation,
         title: t('home.feature3Title'),
         description: t('home.feature3Desc'),
       },
@@ -67,7 +67,7 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline w-full sm:w-auto">
-                            <Link href={firebaseUser ? "/generate?tab=code" : "/login"}>{t('home.trySummarizer')}</Link>
+                            <Link href="/docs">{t('home.trySummarizer')}</Link>
                         </Button>
                     </div>
                 </div>

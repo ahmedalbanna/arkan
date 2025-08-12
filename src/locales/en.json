@@ -113,18 +113,18 @@
   "home": {
     "heroTitle": {
       "main": "Arkan",
-      "animated": "Your Platform for Professional Creativity"
+      "animated": "Your Platform for Professional Writing"
     },
-    "heroSubtitle": "Use powerful AI tools to generate documents, reports, code, and more.",
+    "heroSubtitle": "Use powerful AI tools to generate professional documents, presentations, and diagrams.",
     "exploreProjects": "Start Generating",
-    "trySummarizer": "Try Code Generator",
+    "trySummarizer": "Explore Features",
     "featuredProjects": "Featured Projects",
-    "feature1Title": "Document Generation",
+    "feature1Title": "Instant Documentation",
     "feature1Desc": "Generate professional proposals and full reports from a simple idea.",
-    "feature2Title": "Code Generation",
-    "feature2Desc": "Describe the component you want, and let the AI write the code for you.",
-    "feature3Title": "Powerful Management",
-    "feature3Desc": "Control users, AI agents, and export templates with ease."
+    "feature2Title": "Intelligent Analysis",
+    "feature2Desc": "Let AI analyze your context to provide summaries, insights, and structured data.",
+    "feature3Title": "Diagram & Presentation Generation",
+    "feature3Desc": "Visualize complex systems and create stunning presentations with AI assistance."
   },
   "login": {
     "pageTitle": "Welcome Back",
@@ -388,7 +388,7 @@
     },
     "proposalGenerator": {
       "title": "Describe Your Project Idea",
-      "placeholder": "A mobile app for tracking personal fitness goals, including workouts and nutrition.",
+      "placeholder": "A training report on new data analysis techniques in the banking sector.",
       "generatedTitle": "Generated Proposal",
       "generatedDescription": "Review and edit the generated details below.",
       "exportJson": ".json",
@@ -699,6 +699,10 @@
       "solveButton": "Solve Document",
       "solvingInProgress": "Solving in progress... The AI is working on the solution.",
       "solutionPlaceholder": "The solution will appear here after the document is solved.",
+      "historyTitle": "History",
+      "historyDescription": "Review your past solutions.",
+      "historyEmpty": "No solved documents yet.",
+      "clearHistoryTooltip": "Clear History",
       "toasts": {
         "invalidFile": "Invalid file type. Please upload a PDF.",
         "analysisError": "Please upload a file and select a document type.",
