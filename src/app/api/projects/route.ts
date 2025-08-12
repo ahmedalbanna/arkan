@@ -1,7 +1,8 @@
 
+
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { ProjectStateSchema } from '@/lib/project-state-schema';
+import { ProjectStateSchema } from '@/ai/schemas';
 import { revalidatePath } from 'next/cache';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 

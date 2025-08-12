@@ -1,10 +1,11 @@
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { type AnyProjectProposal } from "@/ai/schemas";
+import { type AnyProjectProposal, ProjectStateSchema } from "@/ai/schemas";
 import { toast } from "@/hooks/use-toast";
 import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";

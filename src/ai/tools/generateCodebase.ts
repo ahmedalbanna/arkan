@@ -1,10 +1,11 @@
 
+
 // 'use server';
 
 // import { ai } from '@/ai/genkit';
 // import { generateCodebase } from '@/ai/flows/generate-codebase';
 // import { z } from 'zod';
-// import { ProjectStateSchema } from '@/lib/project-state-schema';
+// import { ProjectStateSchema } from '@/ai/schemas';
 
 // // This tool allows the AI to trigger the full codebase generation process.
 // // It uses the proposal from the main project state as its context.

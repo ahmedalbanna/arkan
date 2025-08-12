@@ -1,10 +1,11 @@
 
+
 'use server';
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { runFlow, type FlowResponse } from '@genkit-ai/next/client';
-import { ProjectStateSchema } from '@/lib/project-state-schema';
+import { ProjectStateSchema } from '@/ai/schemas';
 import { generateSectionTool } from '@/ai/tools/generateReportSection';
 import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
 import { generateDiagramTool } from '@/ai/tools/generateDiagram';
