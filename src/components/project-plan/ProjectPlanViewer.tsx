@@ -9,13 +9,13 @@ import { CheckSquare, ListTodo } from 'lucide-react';
 function TaskCard({ task }: { task: ProjectTask }) {
   return (
     <Card className="bg-background/50">
-      <CardHeader>
+      <CardHeader className="p-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <ListTodo className="h-4 w-4 text-primary" />
           {task.title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="p-4 pt-0 space-y-4">
         <p className="text-sm text-muted-foreground">{task.description}</p>
         <div>
           <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
@@ -38,7 +38,6 @@ export default function ProjectPlanViewer({ projectPlan }: { projectPlan: Projec
     return null;
   }
 
-  // Open the first phase by default
   const defaultOpen = projectPlan.phases.length > 0 ? [projectPlan.phases[0].phaseName] : [];
 
   return (

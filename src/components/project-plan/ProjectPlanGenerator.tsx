@@ -40,7 +40,6 @@ export default function ProjectPlanGenerator() {
   const { proposal, projectIdea } = useBuilderStore();
   const { projectPlan } = useProjectPlanStore();
   const [description, setDescription] = useState('');
-  const [tableOfContents, setTableOfContents] = useState('');
   const [deliverables, setDeliverables] = useState('');
   
   const planGenerationMutation = useGenerateProjectPlan();
@@ -55,20 +54,12 @@ export default function ProjectPlanGenerator() {
     }
  }, [proposal, projectIdea]);
 
- useEffect(() => {
-    if (projectPlan?.tableOfContents) {
-      setTableOfContents((projectPlan.tableOfContents as string[]).join('\n'));
-    }
-  }, [projectPlan?.tableOfContents]);
-
   const suggestionMutation = useMutation({
       mutationFn: async () => {
           const token = await getAuthenticatedToken(firebaseUser);
           return summarizeProposalForPlanApi(proposal, token);
       },
       onSuccess: (data) => {
-          // A real implementation would parse the summary better,
-          // but for now we'll use a simple split.
           const parts = data.summary.split("Key Deliverables:");
           setDescription(parts[0]?.replace('Project Summary:', '').trim() || '');
           setDeliverables(parts[1]?.trim() || '');
