@@ -41,6 +41,9 @@ Based on your analysis, provide a probability score from 0 to 100 indicating how
 {{{text}}}
 ---
 `,
+    config: {
+        temperature: 0.2, // Low temp for more deterministic scoring
+    }
   });
 
   const { output } = await prompt(input);

@@ -68,6 +68,10 @@ File: {{this.fileName}}
 --- Main Input: Project Idea ---
 {{{projectIdea}}}
 `,
+    config: {
+        temperature: 0.8, // Higher temperature for more creative/detailed proposals
+        maxOutputTokens: 8192, // Allow for very detailed proposals
+    }
   });
 
   const { output } = await generateProposalPrompt({ projectIdea, guidelines, textContext, mediaContext });

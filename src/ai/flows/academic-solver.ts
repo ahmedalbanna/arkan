@@ -38,6 +38,9 @@ const analysisPrompt = ai.definePrompt({
     {{{markdownContent}}}
     ---
     `,
+    config: {
+        temperature: 0.3, // Low temperature for consistent structuring
+    }
   });
 
   export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocumentInputSchema>): Promise<AnalyzedDocument> {
@@ -89,6 +92,10 @@ const solvePrompt = ai.definePrompt({
     {{{analyzedDocument.structuredContent}}}
     ---
     `,
+    config: {
+        temperature: 0.4, // Slightly more creative for detailed explanations
+        maxOutputTokens: 4096,
+    }
   });
 
   export async function solveAcademicDocument(input: z.infer<typeof SolveDocumentInputSchema>): Promise<SolvedDocument> {

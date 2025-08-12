@@ -54,6 +54,9 @@ const translateTextFlow = ai.defineFlow(
 {{{text}}}
 ---
 `,
+      config: {
+          temperature: 0.2,
+      }
     });
 
     const { output } = await prompt({ text, targetLang });

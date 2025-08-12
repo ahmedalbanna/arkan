@@ -108,6 +108,10 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 ---
 {{/each}}
 `,
+      config: {
+          temperature: 0.7,
+          maxOutputTokens: 8192,
+      }
     });
 
     const { output } = await prompt({ ...input, textContext, mediaContext });

@@ -54,6 +54,9 @@ const translatePresentationFlow = ai.defineFlow(
 ${stringifiedPresentation}
 \`\`\`
 `,
+      config: {
+          temperature: 0.2,
+      }
     });
 
     const { output } = await prompt({ presentation, targetLang });

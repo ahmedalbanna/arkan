@@ -56,6 +56,10 @@ Based on the analysis, create a structured project plan consisting of logical ph
 
 ---
 `,
+    config: {
+        temperature: 0.6,
+        maxOutputTokens: 8192,
+    }
   });
 
   const { output } = await planPrompt({ ...input, phaseRangeText });

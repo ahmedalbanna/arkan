@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -43,6 +44,9 @@ export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarChe
 {{{text}}}
 ---
 `,
+    config: {
+        temperature: 0.1, // Very low temp for accuracy
+    }
   });
 
   const { output } = await prompt(input);

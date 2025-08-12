@@ -118,7 +118,11 @@ ${stringifiedProposal}
 ${stringifiedPlan}
 \`\`\`
 {{/if}}
-`
+`,
+    config: {
+        temperature: 0.2, // Low temp for precise PlantUML syntax
+        maxOutputTokens: 2048,
+    }
     });
     
     const { output } = await diagramPrompt({ ...input, textContext, mediaContext });

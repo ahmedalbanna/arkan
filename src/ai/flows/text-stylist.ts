@@ -65,6 +65,9 @@ Return only the rewritten text.
 {{{text}}}
 ---
 `,
+    config: {
+        temperature: 0.7,
+    }
   });
 
   const { output } = await prompt({ text: input.text, style: input.style });
@@ -103,6 +106,9 @@ The summary should be approximately {{{ratio}}}% of the original text's length.
 {{{text}}}
 ---
 `,
+    config: {
+        temperature: 0.5,
+    }
   });
 
   const { output } = await prompt(input);

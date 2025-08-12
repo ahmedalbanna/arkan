@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -40,6 +41,9 @@ Original Text:
 {{{textToManipulate}}}
 ---
 `,
+      config: {
+          temperature: 0.5,
+      }
     });
 
     const { output } = await prompt({ textToManipulate, command });

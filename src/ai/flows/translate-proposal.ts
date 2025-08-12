@@ -54,6 +54,9 @@ ${stringifiedProposal}
 
 Translated JSON Object:
 `,
+      config: {
+          temperature: 0.2,
+      }
     });
 
     const { output } = await prompt({ proposal, targetLang });

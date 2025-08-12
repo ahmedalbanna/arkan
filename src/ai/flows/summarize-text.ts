@@ -47,6 +47,9 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
 ---
 
 **Summary:**`,
+    config: {
+        temperature: 0.5,
+    }
   });
 
   const { output } = await prompt({ text, length });

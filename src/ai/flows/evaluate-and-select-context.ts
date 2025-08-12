@@ -163,6 +163,10 @@ ${JSON.stringify(input.projectPlan, null, 2)}
 ${agentDetailsContext}
 ---
 `,
+    config: {
+        temperature: 0.3,
+        maxOutputTokens: 8192,
+    }
   });
 
   const { output } = await prompt(input);
