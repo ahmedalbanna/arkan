@@ -29,7 +29,7 @@ export function useFeatures() {
   } = useQuery<Feature[]>({
     queryKey: featureKeys.lists(),
     queryFn: fetchFeaturesApi, // Does not require a token
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {
       onError: (error: Error) =>
         handleErrorUtility(error, "Failed to fetch features"),
