@@ -438,7 +438,7 @@ export const GenerateSectionInputSchema = z.object({
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
   tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
-}).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0), {
+}).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
     message: "A proposal, project plan, or external context is required to generate a report section.",
     path: ["proposal"], // You can associate the error with a specific path
 });
@@ -833,3 +833,32 @@ export const ExplainDiagramOutputSchema = z.object({
   explanation: z.string().describe('A detailed explanation of the diagram, formatted as markdown.'),
 });
 export type ExplainDiagramOutput = z.infer<typeof ExplainDiagramOutputSchema>;
+
+
+// API Schemas
+export const ApiAnalyzeSchema = z.object({
+  documentType: AcademicDocumentTypeSchema,
+  markdown: z.string().min(20, 'Markdown content is too short.'),
+});
+
+export const ApiSolveSchema = z.object({
+  analyzedDocument: AnalyzedDocumentSchema,
+  contextMarkdown: z.string().optional(),
+});
+
+export const ApiAgentGuidelineSchema = z.object({
+  text: z.string().min(1),
+  isDefault: z.boolean(),
+});
+
+export const ApiAgentPromptSchema = z.object({
+  base: z.string().min(1),
+  guidelines: z.array(ApiAgentGuidelineSchema).optional(),
+  jsonStructure: z.any().optional(),
+});
+
+export const ApiUpdateAgentSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  prompt: z.union([z.string().min(10), ApiAgentPromptSchema]).optional(),
+  isEnabled: z.boolean().optional(),
+});
