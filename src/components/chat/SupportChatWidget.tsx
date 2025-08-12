@@ -225,6 +225,9 @@ export default function SupportChatWidget() {
     
     const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
     
+    if (!firebaseUser) {
+        return null;
+    }
 
     return (
       <>
