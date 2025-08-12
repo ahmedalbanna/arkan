@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { toast } from './use-toast';
-import { exportProposalAsDocx as exportProposalUtil, exportReportAsDocx as exportReportUtil } from '@/lib/docx-exporter';
+import { exportProposalAsDocx as exportProposalUtil, exportProposalAsPdf as exportProposalPdfUtil, exportReportAsDocx as exportReportUtil } from '@/lib/docx-exporter';
 import { exportPresentationAsPptx as exportPptxUtil } from '@/lib/pptx-exporter';
 
 import type { SavedProject } from '@/lib/types';
@@ -15,13 +15,17 @@ import { PptxTemplateKey } from '@/lib/pptx-styles';
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportProposalDocx = async (proposal: ProjectProposal, templateKey: TemplateKey) => {
+    const exportProposal = async (format: 'docx' | 'pdf', proposal: ProjectProposal, templateKey: TemplateKey) => {
         setIsExporting(true);
         try {
-            await exportProposalUtil(proposal, templateKey);
+            if (format === 'docx') {
+                await exportProposalUtil(proposal, templateKey);
+            } else {
+                await exportProposalPdfUtil(proposal, templateKey);
+            }
         } catch (error) {
             console.error(error);
-            toast({ title: 'Export Failed', description: 'Could not generate the DOCX file.', variant: 'destructive' });
+            toast({ title: 'Export Failed', description: `Could not generate the ${format.toUpperCase()} file.`, variant: 'destructive' });
         } finally {
             setIsExporting(false);
         }
@@ -61,7 +65,7 @@ export function useExport() {
 
     return {
         isExporting,
-        exportProposalDocx,
+        exportProposal,
         exportReportDocx,
         exportPresentationPptx,
     };

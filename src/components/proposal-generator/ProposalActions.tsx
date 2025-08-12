@@ -1,9 +1,8 @@
 
-
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileJson, FileText } from 'lucide-react';
+import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileJson, FileText, FileDown, FileUp, File, FileCode } from 'lucide-react';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,18 +10,18 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
+import { summarizeFullProject } from '@/ai/flows/summarize-project';
 import { saveAs } from 'file-saver';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useExport } from '@/hooks/use-export';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { SummarizeFullProjectOutput } from '@/ai/schemas';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
-import { ProposalTemplate } from '@/services/template-service';
 
 interface ProposalActionsProps {
     isGenerating: boolean;
@@ -54,7 +53,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
   const [isCopied, setIsCopied] = useState(false);
   const { firebaseUser, refetchUser } = useAuth();
-  const { exportProposalDocx, isExporting } = useExport();
+  const { exportProposal, isExporting } = useExport();
 
   const summarizeMutation = useMutation({
     mutationFn: summarizeProjectApi,
@@ -96,18 +95,10 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
     localStorage.setItem(DOCX_TEMPLATE_KEY, key);
   }
 
-  const handleExportDocx = () => {
+  const handleExport = (format: 'docx' | 'pdf') => {
     if (proposal) {
-        exportProposalDocx(proposal as any, selectedDocxTemplate);
+        exportProposal(format, proposal as any, selectedDocxTemplate);
     }
-  }
-  
-  const handleExportJson = () => {
-    if (!proposal) return;
-    const jsonString = JSON.stringify(getFullState());
-    const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
-    const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, `${projectName || 'arkan_project'}.arkan`);
   }
 
   const handleSummarizeProject = async () => {
@@ -173,13 +164,13 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                                 ) : <p>Loading...</p> }
                              </div>
                              <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={handleExportDocx}>
+                            <DropdownMenuItem onClick={() => handleExport('docx')}>
                                 <FileText className="mr-2 h-4 w-4" />
                                 <span>Download as DOCX</span>
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={handleExportJson}>
-                                <FileJson className="mr-2 h-4 w-4" />
-                                <span>Download as .arkan File</span>
+                             <DropdownMenuItem onClick={() => handleExport('pdf')}>
+                                <FileCode className="mr-2 h-4 w-4" />
+                                <span>Download as PDF</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

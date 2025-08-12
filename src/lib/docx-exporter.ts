@@ -8,6 +8,7 @@ import type { Root, PhrasingContent, List } from 'mdast';
 import { sectionConfig, diagramConfig } from './report-config';
 import { templates, type TemplateKey } from './docx-styles';
 import { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun, Document, Packer, HeadingLevel, Header, Footer, PageNumber, TableOfContents } from 'docx';
+import { exportComponentAsPDF } from './pdf-exporter';
 
 export async function createDocxParagraphs(markdown: string) {
     const { unified } = await import('unified');
@@ -227,6 +228,92 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
     saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
 }
 
+function applyStylesToElement(element: HTMLElement, styles: any) {
+    if (styles?.font) {
+        element.style.fontFamily = typeof styles.font === 'string' ? styles.font : styles.font.name;
+    }
+    if (styles?.size) {
+        element.style.fontSize = `${Number(styles.size) / 2}pt`;
+    }
+    if (styles?.color) {
+        element.style.color = `#${styles.color}`;
+    }
+    if (styles?.bold) {
+        element.style.fontWeight = 'bold';
+    }
+    if (styles?.italics) {
+        element.style.fontStyle = 'italic';
+    }
+}
+
+
+export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey: TemplateKey) {
+    const { format } = await import('date-fns');
+    const { unified } = await import('unified');
+    const { default: remarkParse } = await import('remark-parse');
+    const { default: remarkGfm } = await import('remark-gfm');
+    const { default: remarkRehype } = await import('remark-rehype');
+    const { default: rehypeStringify } = await import('rehype-stringify');
+
+    const allTemplates = await getStylesFromServer();
+    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+
+    // Create a hidden element to render the proposal for PDF generation
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px'; // Position off-screen
+    container.style.width = '800px';
+    container.style.padding = '40px';
+    container.style.backgroundColor = 'white';
+
+    const markdownToHtml = async (md: string) => {
+        const file = await unified()
+            .use(remarkParse)
+            .use(remarkGfm)
+            .use(remarkRehype)
+            .use(rehypeStringify)
+            .process(md);
+        return String(file);
+    }
+    
+    let htmlContent = `<div id="pdf-content">`;
+    // Apply default document styles to the container
+    applyStylesToElement(container, styles.default?.document?.run);
+
+    // Title and Category
+    htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
+    htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
+
+    const sections = [
+        { title: "Objective", content: await markdownToHtml(proposal.objective) },
+        { title: "Methodology", content: await markdownToHtml(proposal.methodology) },
+        { title: "Expected Outcomes", content: `<ul>${(proposal.expected_outcome || []).map(o => `<li>${o}</li>`).join('')}</ul>` },
+        { title: "Success Criteria", content: `<ul>${(proposal.success_criteria || []).map(c => `<li>${c}</li>`).join('')}</ul>` },
+        { title: "Evaluation", content: await markdownToHtml(proposal.evaluation) },
+    ];
+    
+    for (const section of sections) {
+        htmlContent += `<h2>${section.title}</h2>${section.content}`;
+    }
+
+    htmlContent += `</div>`;
+    container.innerHTML = htmlContent;
+
+    // Apply specific styles to headings
+    const h1 = container.querySelector('h1');
+    if (h1) applyStylesToElement(h1, styles.default?.heading1?.run);
+    
+    container.querySelectorAll('h2').forEach(h2 => {
+        applyStylesToElement(h2, styles.default?.heading2?.run);
+    });
+
+    document.body.appendChild(container);
+    
+    await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
+    
+    document.body.removeChild(container);
+}
+
 
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
     const { saveAs } = await import('file-saver');
@@ -279,15 +366,15 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
                     new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
                     new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
-                    ...expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })),
+                    ...(Array.isArray(expected_outcome) ? expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })) : []),
                     new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
-                    ...success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })),
+                    ...(Array.isArray(success_criteria) ? success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })) : []),
                     new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
                     ...await createDocxParagraphs(evaluation),
                     new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                    ...(await Promise.all(stakeholders.flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
+                    ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
                     new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
-                    ...(await Promise.all(risks.flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
+                    ...(await Promise.all((risks || []).flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
                 ],
             }],
     });
