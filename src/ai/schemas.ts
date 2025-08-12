@@ -333,7 +333,13 @@ export const GeneratePresentationOutlineInputSchema = z.object({
 });
 export type GeneratePresentationOutlineInput = z.infer<typeof GeneratePresentationOutlineInputSchema>;
 
-export const OutlineItemSchema = z.object({
+type OutlineItem = {
+  title: string;
+  content: string;
+  children?: OutlineItem[];
+}
+
+export const OutlineItemSchema: z.ZodSchema<OutlineItem> = z.object({
   title: z.string().describe('The title of the slide or section.'),
   content: z.string().describe('A brief description of the content for this item.'),
   children: z.array(z.lazy(() => OutlineItemSchema)).optional().describe('Sub-items for this outline entry.'),
