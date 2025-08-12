@@ -177,8 +177,7 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
         projectPlan: useProjectPlanStore.getState().projectPlan,
         codebase: useCodebaseStore.getState().codebase,
         academicSolver: useAcademicSolverStore.getState(),
-        externalContext: useReportStore.getState().externalContext,
-        evaluation: useReportStore.getState().evaluation,
+        // evaluation: useReportStore.getState().evaluation,
       }),
       merge: (persistedState: any, currentState) => {
         const state = persistedState as ProjectState;
