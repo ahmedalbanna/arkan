@@ -1,4 +1,5 @@
 
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -56,6 +57,7 @@ interface ReportActions {
     setTranslatedSection: (key: SectionName, content: string) => void;
     setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
+    setEvaluationSummary: (summary: string) => void;
     addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
     removeExternalContext: (index: number) => void;
     updateExternalContext: (index: number, newContent: string) => void;
@@ -163,6 +165,12 @@ export const useReportStore = create<ReportState & ReportActions>()(
       if(evaluation) {
         useBuilderStore.getState().setHasUnsavedChanges(true);
       }
+    },
+    setEvaluationSummary: (summary) => {
+        set((state) => ({
+            evaluation: state.evaluation ? { ...state.evaluation, summary } : null
+        }));
+        useBuilderStore.getState().setHasUnsavedChanges(true);
     },
     addExternalContext: (fileName, content, type) => {
       set((state) => ({ externalContext: [...state.externalContext, { fileName, content, type }] }));
