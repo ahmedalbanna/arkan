@@ -41,6 +41,7 @@ import '@/ai/flows/fact-checker.ts';
 import '@/ai/flows/plagiarism-checker.ts';
 import '@/ai/flows/grammar-checker.ts';
 import '@/ai/flows/text-stylist.ts';
+import '@/ai/flows/write-document.ts';
     
 // Import tools so Genkit recognizes them in development
 import '@/ai/tools/generateReportSection';

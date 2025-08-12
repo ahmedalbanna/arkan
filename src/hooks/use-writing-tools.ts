@@ -12,7 +12,8 @@ import {
     grammarCheckApi, 
     generateCitationApi,
     rewriteTextApi,
-    summarizeTextWithRatioApi
+    summarizeTextWithRatioApi,
+    writeDocumentApi
 } from '@/services/writing-tools-service';
 import { detectAiContentApi } from '@/services/ai-detector-service';
 import { factCheckApi } from '@/services/fact-checker-service';
@@ -43,6 +44,8 @@ import type {
     RewriteTextOutput,
     SummarizeTextWithRatioVariables,
     SummarizeTextWithRatioOutput,
+    WriteDocumentVariables,
+    WriteDocumentOutput,
 } from '@/services/writing-tools-service';
 
 /**
@@ -215,6 +218,19 @@ export function useSummarizeTextWithRatio() {
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return summarizeTextWithRatioApi({ ...variables, token });
+        }
+    });
+}
+
+/**
+ * Custom mutation hook for writing a full document from a topic.
+ */
+export function useWriteDocument() {
+    const { firebaseUser } = useAuth();
+    return useMutation<WriteDocumentOutput, Error, WriteDocumentVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return writeDocumentApi({ ...variables, token });
         }
     });
 }

@@ -3,12 +3,13 @@
 
 import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
-  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine
+  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 
 const tools = [
   { name: 'Text Stylist & Summarizer', icon: PenSquare, href: '/writing-tools/text-stylist' },
+  { name: 'AI Document Writer', icon: FileEdit, href: '/writing-tools/document-writer' },
   { name: 'Plagiarism Checker', icon: CopyCheck, href: '/writing-tools/plagiarism-checker' },
   { name: 'AI Humanizer', icon: UserCheck, href: '/writing-tools/humanizer' },
   { name: 'AI Detector', icon: Fingerprint, href: '/writing-tools/ai-detector' },

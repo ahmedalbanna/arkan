@@ -14,6 +14,7 @@ import type { FactCheckOutput } from '@/ai/flows/fact-checker';
 import type { HumanizeTextOutput } from '@/ai/flows/humanize-text';
 import type { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
 import type { RewriteTextOutput, SummarizeTextWithRatioOutput } from '@/ai/flows/text-stylist';
+import type { WriteDocumentOutput } from '@/ai/flows/write-document';
 
 
 // Base types
@@ -62,6 +63,11 @@ export interface SummarizeTextWithRatioVariables {
     text: string;
     ratio: number;
 }
+export interface WriteDocumentVariables {
+    topic: string;
+    documentType: string;
+    instructions?: string;
+}
 
 
 
@@ -90,6 +96,10 @@ export interface RewriteTextApiVariables extends RewriteTextVariables {
 export interface SummarizeTextWithRatioApiVariables extends SummarizeTextWithRatioVariables {
     token: string;
 }
+export interface WriteDocumentApiVariables extends WriteDocumentVariables {
+    token: string;
+}
+
 
 
 // Output Types
@@ -100,7 +110,7 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput, RewriteTextOutput, SummarizeTextWithRatioOutput };
+export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput };
 
 
 /**
@@ -268,4 +278,20 @@ export async function summarizeTextWithRatioApi(variables: SummarizeTextWithRati
     });
     if (!response.ok) throw new Error((await response.json()).message || 'Summarization failed.');
     return response.json();
+}
+
+/**
+ * Calls the API to write a full document from a topic.
+ * @param variables - An object containing the document details and auth token.
+ * @returns A promise that resolves to the generated document content.
+ */
+export async function writeDocumentApi(variables: WriteDocumentApiVariables): Promise<WriteDocumentOutput> {
+  const { token, ...body } = variables;
+  const response = await fetch('/api/writing-tools/write-document', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error((await response.json()).message || 'Document generation failed.');
+  return response.json();
 }
