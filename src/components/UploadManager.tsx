@@ -1,65 +1,28 @@
 
 'use client';
 
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, ImageIcon, ExternalLink, Bot, Edit, Eye, X, Wand2, Loader2, BrainCircuit, PlusCircle } from 'lucide-react';
+import { UploadCloud, FileText, X, ImageIcon } from 'lucide-react';
 import { PasteTextUploader } from './PasteTextUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Textarea } from '@/components/ui/textarea';
 import { useReportStore } from '@/hooks/useReportStore';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import React, { useState, useCallback } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast, useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
-import { analyzeContextApi } from '@/services/context-service';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { useTheme } from 'next-themes';
-import dynamic from 'next/dynamic';
-import { Separator } from './ui/separator';
+import { useQueryClient } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { PdfPreview } from './PdfPreview';
 import { useDropzone } from 'react-dropzone';
-
-
-const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
-
-const GoogleDriveIcon = () => (
-    <svg className="h-4 w-4 mr-2" viewBox="0 0 48 48">
-        <path fill="#4CAF50" d="M32.2,27.9l-7.4,12.8l-7.4-12.8L24.8,4.1z"></path>
-        <path fill="#1E88E5" d="M9.8,28.9l-5.7,9.9c-0.6,1-0.2,2.3,0.8,2.8L9.2,44c1,0.6,2.3,0.2,2.8-0.8l5.7-9.9L9.8,28.9z"></path>
-        <path fill="#FFC107" d="M43.9,41.7c1-0.6,1.4-1.8,0.8-2.8l-5.7-9.9l-7.9,4.4l5.7,9.9C37.4,43.8,38.7,44.2,39.6,43.7L43.9,41.7z"></path>
-    </svg>
-)
-
-const DropboxIcon = () => (
-    <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 4.305L7.05 7.695 12 11.085l-4.95 3.39 4.95 3.39-4.95 3.39L2.1 17.865l4.95-3.39L2.1 11.085 12 4.305zm0 0L16.95 7.695 12 11.085l4.95 3.39-4.95 3.39 4.95 3.39L21.9 17.865l-4.95-3.39L21.9 11.085 12 4.305z"/>
-    </svg>
-)
-
-const CloudStorageConnector = ({ provider, icon: Icon, onConnect }: { provider: string, icon: React.ElementType, onConnect: () => void }) => (
-    <Card>
-        <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-            <Icon />
-            <p className="mt-4 font-semibold">Connect to {provider}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-                Import files directly from your {provider} account to use as context.
-            </p>
-            <Button className="mt-4" onClick={onConnect}>
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Connect to {provider}
-            </Button>
-        </CardContent>
-    </Card>
-);
 
 function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ContextFileType }}) {
     const isDataUri = item.content.startsWith('data:');
@@ -68,7 +31,11 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 
     return (
         <Dialog>
-            <DialogTrigger asChild><Button variant="ghost" size="icon" className="h-6 w-6" title="View Content"><Eye className="h-4 w-4" /></Button></DialogTrigger>
+            <DialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-6 w-6" title="View Content">
+                    <ImageIcon className="h-4 w-4" />
+                </Button>
+            </DialogTrigger>
             <DialogContent className="max-w-3xl h-[90vh]">
                 <DialogHeader><DialogTitle>{item.fileName}</DialogTitle></DialogHeader>
                 <div className="h-full overflow-y-auto">
@@ -87,140 +54,6 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
             </DialogContent>
         </Dialog>
     )
-}
-
-function EditContextDialog({ item, onSave }: { item: { fileName: string, content: string }, onSave: (newContent: string) => void }) {
-    const [content, setContent] = useState(item.content);
-    const [isOpen, setIsOpen] = useState(false);
-    
-    // Disable editing for data URIs
-    const isEditable = !item.content.startsWith('data:');
-
-    const handleSave = () => {
-        onSave(content);
-        setIsOpen(false);
-    }
-
-    return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-6 w-6" title="Edit Content" disabled={!isEditable}>
-                    <Edit className="h-4 w-4" />
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-3xl">
-                <DialogHeader><DialogTitle>Edit: {item.fileName}</DialogTitle></DialogHeader>
-                <Textarea value={content} onChange={(e) => setContent(e.target.value)} rows={20} className="my-4" />
-                <div className="flex justify-end">
-                    <Button onClick={handleSave}>Save Changes</Button>
-                </div>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-function AnalystAgent() {
-    const { externalContext, addExternalContext } = useReportStore();
-    const { firebaseUser, refetchUser } = useAuth();
-    const { toast } = useToast();
-    const [prompt, setPrompt] = useState('');
-    const [analysisResult, setAnalysisResult] = useState<any>(null);
-    const { resolvedTheme } = useTheme();
-
-    const mutation = useMutation({
-        mutationFn: analyzeContextApi,
-        onSuccess: (data) => {
-            setAnalysisResult(data);
-            refetchUser(); // To update credits
-            toast({ title: 'Analysis Complete', description: 'The AI has analyzed the context and generated structured data.' });
-        },
-        onError: (error: Error) => {
-            toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
-        }
-    });
-    
-    const handleSaveAnalysis = () => {
-        if (!analysisResult || !prompt) return;
-
-        // Create a descriptive filename from the prompt
-        const fileName = prompt.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.json';
-
-        // Convert the data object to a formatted JSON string
-        const fileContent = JSON.stringify(analysisResult.data, null, 2);
-
-        // Add it to the context store
-        addExternalContext(fileName, fileContent, 'context');
-
-        toast({
-            title: "Analysis Saved",
-            description: `"${fileName}" has been added to your context files.`,
-        });
-    };
-
-    const handleRunAnalysis = async () => {
-        if (!prompt.trim()) {
-            toast({ title: 'Prompt Required', description: 'Please enter a prompt for the analyst agent.', variant: 'destructive' });
-            return;
-        }
-        if (externalContext.length === 0) {
-            toast({ title: 'Context Required', description: 'Please upload at least one context file to analyze.', variant: 'destructive' });
-            return;
-        }
-        if (!firebaseUser) return;
-        const token = await firebaseUser.getIdToken();
-        mutation.mutate({ prompt, contextFiles: externalContext, token });
-    };
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> Analyst Agent</CardTitle>
-                <CardDescription>Ask a question or give an instruction based on the managed context files. The AI will generate a structured JSON response.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <Textarea 
-                    placeholder="e.g., 'List all project stakeholders and their main interests.'"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    rows={4}
-                    disabled={mutation.isPending}
-                />
-                <Button onClick={handleRunAnalysis} disabled={mutation.isPending}>
-                    {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                    Run Analysis
-                </Button>
-                {analysisResult && (
-                    <div className="space-y-4 pt-4 border-t">
-                        <div className="space-y-2">
-                             <h4 className="font-semibold text-sm">Generated Schema (Zod)</h4>
-                             <pre className="p-2 border rounded-md bg-muted text-xs overflow-x-auto"><code>{analysisResult.schema}</code></pre>
-                        </div>
-                        <div className="space-y-2">
-                            <h4 className="font-semibold text-sm">Generated Data (JSON)</h4>
-                             <div className="p-2 border rounded-md bg-muted text-xs">
-                                <ReactJson 
-                                    src={analysisResult.data} 
-                                    theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
-                                    collapsed={false}
-                                    displayDataTypes={false}
-                                    name={false}
-                                />
-                             </div>
-                        </div>
-                         <div className="mt-4">
-                            <Button
-                                variant="secondary"
-                                onClick={handleSaveAnalysis}
-                            >
-                                <PlusCircle className="mr-2 h-4 w-4" />
-                                Save Result as Context File
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </CardContent>
-        </Card>
-    );
 }
 
 function FileDropzone() {
@@ -298,19 +131,23 @@ function FileDropzone() {
     );
 }
 
-
 export function UploadManager() {
-    const { externalContext, removeExternalContext, updateExternalContext, updateExternalContextType } = useReportStore();
+    const { externalContext, removeExternalContext, updateExternalContextType } = useReportStore();
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
     
     return (
-        <div className="space-y-4">
+        <Card className="h-full flex flex-col">
+          <CardHeader>
+            <CardTitle>Context Files</CardTitle>
+            <CardDescription>
+              Upload and manage all contextual files for your project here. 
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-grow flex flex-col gap-4">
             <Tabs defaultValue="upload" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="upload"><UploadCloud className="mr-2 h-4 w-4"/> Upload Files</TabsTrigger>
-                    <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4"/> Paste Text</TabsTrigger>
-                    <TabsTrigger value="drive"><GoogleDriveIcon /> Google Drive</TabsTrigger>
-                    <TabsTrigger value="dropbox" disabled><DropboxIcon /> Dropbox</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="upload">Upload Files</TabsTrigger>
+                    <TabsTrigger value="text">Paste Text</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="mt-4">
                     <FileDropzone />
@@ -318,56 +155,46 @@ export function UploadManager() {
                 <TabsContent value="text" className="mt-4">
                     <PasteTextUploader />
                 </TabsContent>
-                <TabsContent value="drive" className="mt-4">
-                    <CloudStorageConnector provider="Google Drive" onConnect={() => toast({ title: "Coming Soon!", description: "Google Drive integration is not yet available." })} icon={'symbol'} />
-                </TabsContent>
-                <TabsContent value="dropbox" className="mt-4">
-                    <CloudStorageConnector provider="Dropbox" onConnect={() => alert('Connect to Dropbox clicked!')} icon={'symbol'} />
-                </TabsContent>
             </Tabs>
             
             {externalContext && externalContext.length > 0 && (
-                <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">MANAGED CONTEXT</h3>
-                    <Card>
-                        <CardContent className="p-2">
-                            <ul className="space-y-1 list-none p-0">
-                                {externalContext.map((item, index) => (
-                                    <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
-                                        <div className="flex items-center gap-2 truncate">
-                                            <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                            <span className="truncate font-medium text-sm">{item.fileName}</span>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
-                                                <SelectTrigger className={cn("text-xs h-7 w-[120px]", {
-                                                    'bg-blue-100 text-blue-800 border-blue-200': item.type === 'context',
-                                                    'bg-green-100 text-green-800 border-green-200': item.type === 'example',
-                                                    'bg-yellow-100 text-yellow-800 border-yellow-200': item.type === 'question',
-                                                    'bg-purple-100 text-purple-800 border-purple-200': item.type === 'textbook',
-                                                    'bg-gray-100 text-gray-800 border-gray-200': item.type === 'guidelines',
-                                                })}>
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {fileTypes.map(type => (
-                                                        <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <ViewContextDialog item={item} />
-                                            <EditContextDialog item={item} onSave={(newContent) => updateExternalContext(index, newContent)} />
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
+                <div className="space-y-2 flex-grow flex flex-col min-h-0">
+                    <h3 className="text-sm font-medium text-muted-foreground">UPLOADED CONTEXT</h3>
+                    <ScrollArea className="flex-grow border rounded-lg">
+                        <ul className="space-y-1 list-none p-2">
+                            {externalContext.map((item, index) => (
+                                <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
+                                    <div className="flex items-center gap-2 truncate">
+                                        <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        <span className="truncate font-medium text-sm">{item.fileName}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
+                                            <SelectTrigger className={cn("text-xs h-7 w-[110px]", {
+                                                'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-800': item.type === 'context',
+                                                'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200 border-green-200 dark:border-green-800': item.type === 'example',
+                                                'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-800': item.type === 'question',
+                                                'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200 border-purple-200 dark:border-purple-800': item.type === 'textbook',
+                                                'bg-gray-100 dark:bg-gray-700/50 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-600': item.type === 'guidelines',
+                                            })}>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {fileTypes.map(type => (
+                                                    <SelectItem key={type} value={type} className="capitalize">{type}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <ViewContextDialog item={item} />
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeExternalContext(index)}><X className="h-4 w-4 text-destructive" /></Button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </ScrollArea>
                 </div>
             )}
-            <Separator />
-            <AnalystAgent />
-        </div>
+        </CardContent>
+    </Card>
     );
 }
