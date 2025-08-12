@@ -49,5 +49,9 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
   });
 
   const { output } = await prompt({ text, length });
-  return output!;
+  if (!output) {
+      throw new Error("Failed to summarize text.");
+  }
+  output.summary = output.summary.replace(/---/g, '').trim();
+  return output;
 }

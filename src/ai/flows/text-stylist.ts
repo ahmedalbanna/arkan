@@ -67,7 +67,11 @@ Return only the rewritten text.
   });
 
   const { output } = await prompt({ text: input.text, style: input.style });
-  return output!;
+  if (!output) {
+      throw new Error("Failed to rewrite text.");
+  }
+  output.rewrittenText = output.rewrittenText.replace(/---/g, '').trim();
+  return output;
 }
 
 
@@ -100,5 +104,9 @@ The summary should be approximately {{{ratio}}}% of the original text's length.
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+      throw new Error("Failed to summarize text.");
+  }
+  output.summarizedText = output.summarizedText.replace(/---/g, '').trim();
+  return output;
 }

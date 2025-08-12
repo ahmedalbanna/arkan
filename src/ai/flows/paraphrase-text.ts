@@ -52,5 +52,9 @@ export async function paraphraseText(input: ParaphraseInput): Promise<Paraphrase
   });
 
   const { output } = await prompt({ text, mode });
-  return output!;
+  if (!output) {
+      throw new Error("Failed to paraphrase text.");
+  }
+  output.paraphrasedText = output.paraphrasedText.replace(/---/g, '').trim();
+  return output;
 }

@@ -40,5 +40,9 @@ export async function topicExplainer(input: TopicExplainerInput): Promise<TopicE
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+      throw new Error("Failed to explain topic.");
+  }
+  output.explanation = output.explanation.replace(/---/g, '').trim();
+  return output;
 }

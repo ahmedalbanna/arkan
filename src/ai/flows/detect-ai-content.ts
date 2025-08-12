@@ -43,5 +43,9 @@ Based on your analysis, provide a probability score from 0 to 100 indicating how
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+      throw new Error("AI content detection failed.");
+  }
+  output.analysis = output.analysis.replace(/---/g, '').trim();
+  return output;
 }

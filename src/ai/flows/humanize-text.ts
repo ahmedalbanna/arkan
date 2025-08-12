@@ -40,5 +40,9 @@ export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTe
   });
 
   const { output } = await prompt(input);
-  return output!;
+  if (!output) {
+      throw new Error("Failed to humanize text.");
+  }
+  output.humanizedText = output.humanizedText.replace(/---/g, '').trim();
+  return output;
 }
