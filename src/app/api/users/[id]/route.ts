@@ -31,7 +31,7 @@ export const GET = withAuth(async ({ params, user: requester, token }) => {
 });
 
 
-const updateUserSchema = z.object({
+const adminUpdateUserSchema = z.object({
   name: z.string().min(1, 'Name is required').optional(),
   email: z.string().email('Invalid email address').optional(),
   bio: z.string().optional(),
@@ -40,41 +40,38 @@ const updateUserSchema = z.object({
   hasCompletedOnboarding: z.boolean().optional(),
 });
 
+const userUpdateSchema = z.object({
+  name: z.string().min(1, 'Name is required').optional(),
+  bio: z.string().optional(),
+  hasCompletedOnboarding: z.boolean().optional(),
+});
+
+
 // PUT (update) a user profile
 export const PUT = withAuth(async ({ request, params, user: requester }) => {
     try {
         const { id: userId } = params;
         const body = await request.json();
+        let validation;
 
-        // An admin can update any field. A regular user can only update their own name/bio.
+        // An admin can update any field. A regular user can only update their own name/bio/onboarding.
         if (requester.role !== 'admin') {
             if (userId !== requester.id) {
-                return handleApiError({ message: "Forbidden" }, 403);
+                return handleApiError({ message: "Forbidden: Users can only update their own profile." }, 403);
             }
-            // If not admin, only allow name, bio, and onboarding updates
-            const { name, bio, hasCompletedOnboarding } = body;
-            const validation = z.object({
-                name: z.string().min(1, 'Name is required').optional(),
-                bio: z.string().optional(),
-                hasCompletedOnboarding: z.boolean().optional(),
-            }).safeParse({ name, bio, hasCompletedOnboarding });
-
-
-             if (!validation.success) {
-                return handleApiError(validation.error);
-            }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
+            // If not admin, use the more restrictive schema
+            validation = userUpdateSchema.safeParse(body);
         } else {
-             const validation = updateUserSchema.safeParse(body);
-             if (!validation.success) {
-                return handleApiError(validation.error);
-
-            }
-            const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
-            await adminDb.collection("users").doc(userId).update(updateData);
+            // Admins use the full schema
+            validation = adminUpdateUserSchema.safeParse(body);
+        }
+        
+        if (!validation.success) {
+            return handleApiError(validation.error);
         }
 
+        const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
+        await adminDb.collection("users").doc(userId).update(updateData);
 
         revalidatePath(`/profile/${userId}`);
         revalidatePath('/admin/manage-users');
