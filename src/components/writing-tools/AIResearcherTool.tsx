@@ -5,18 +5,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, ExternalLink, FileText } from 'lucide-react';
+import { Loader2, Sparkles, ExternalLink, FileText, Download, Copy, CheckCircle, PlusCircle, FileDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAiResearcher } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { AIResearcherOutput } from '@/ai/flows/ai-researcher';
+import type { AIResearcherOutput } from '@/ai/schemas';
 import Link from 'next/link';
+import { useReportStore } from '@/hooks/useReportStore';
+import { exportMarkdownAsDocx, exportComponentAsPDF } from '@/lib/docx-exporter';
+import { useRef } from 'react';
 
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
@@ -24,8 +27,26 @@ const researcherSchema = z.object({
 
 type ResearcherFormValues = z.infer<typeof researcherSchema>;
 
+// Helper function to format the research output as Markdown
+const formatResearchToMarkdown = (data: AIResearcherOutput): string => {
+  let markdown = `## Research Summary: ${data.summary}\n\n`;
+  markdown += `### Key Points\n`;
+  data.keyPoints.forEach(point => {
+    markdown += `- ${point}\n`;
+  });
+  markdown += `\n### Sources\n`;
+  data.sources.forEach(source => {
+    markdown += `- [${source}](${source})\n`;
+  });
+  return markdown;
+};
+
+
 export function AIResearcherTool() {
   const mutation = useAiResearcher();
+  const { addExternalContext } = useReportStore();
+  const reportRef = useRef<HTMLDivElement>(null);
+  const [isCopied, setIsCopied] = useState(false);
 
   const form = useForm<ResearcherFormValues>({
     resolver: zodResolver(researcherSchema),
@@ -41,6 +62,36 @@ export function AIResearcherTool() {
   };
   
   const results = mutation.data;
+  const markdownResult = results ? formatResearchToMarkdown(results) : '';
+
+  const handleCopyToClipboard = () => {
+    if (!markdownResult) return;
+    navigator.clipboard.writeText(markdownResult);
+    toast({ title: 'Copied to clipboard!' });
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  const handleExportDocx = () => {
+    if (!markdownResult) return;
+    exportMarkdownAsDocx(markdownResult, 'ai_research_report');
+  };
+  
+  const handleExportPdf = () => {
+      if(reportRef.current) {
+          exportComponentAsPDF(reportRef.current, 'ai_research_report.pdf');
+      }
+  }
+
+  const handleAddToContext = () => {
+    if (!markdownResult || !results) return;
+    const fileName = `${results.summary.slice(0, 30).replace(/\s+/g, '_')}_research.md`;
+    addExternalContext(fileName, markdownResult, 'context');
+    toast({
+        title: 'Added to Context',
+        description: `"${fileName}" has been added to your current project's context files.`,
+    });
+  }
 
   return (
     <Card>
@@ -77,41 +128,31 @@ export function AIResearcherTool() {
         )}
 
         {results && (
-          <div className="space-y-6 pt-6 border-t">
-            <h3 className="font-semibold text-lg flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Research Report
-            </h3>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Summary</h4>
-              <Card className="bg-muted/30">
-                <CardContent className="p-4 prose dark:prose-invert max-w-none text-sm">
-                    <ReactMarkdown components={markdownComponents}>{results.summary}</ReactMarkdown>
-                </CardContent>
-              </Card>
+          <div className="space-y-4 pt-6 border-t">
+            <div className="flex justify-between items-center">
+                 <h3 className="font-semibold text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    Research Report
+                </h3>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
+                        {isCopied ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+                        Copy
+                    </Button>
+                     <Button variant="outline" size="sm" onClick={handleAddToContext}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add to Project
+                    </Button>
+                </div>
             </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Key Points</h4>
-              <ul className="list-disc space-y-2 pl-5 text-sm">
-                {results.keyPoints.map((point: string, index: number) => (
-                  <li key={index}>{point}</li>
-                ))}
-              </ul>
-            </div>
-
-             <div className="space-y-2">
-              <h4 className="font-semibold">Sources</h4>
-              <ul className="space-y-1 text-sm">
-                {results.sources.map((source: string, index: number) => (
-                  <li key={index}>
-                    <Link href={source} target="_blank" className="text-primary hover:underline flex items-center gap-1">
-                      {source} <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+             <ScrollArea className="h-[60vh] rounded-md border" ref={reportRef}>
+                <div className="prose dark:prose-invert max-w-none p-6">
+                    <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
+                </div>
+            </ScrollArea>
+             <div className="flex justify-end gap-2">
+                <Button variant="secondary" onClick={handleExportDocx}><FileDown className="mr-2 h-4 w-4"/>Export as DOCX</Button>
+                <Button variant="secondary" onClick={handleExportPdf}><FileDown className="mr-2 h-4 w-4"/>Export as PDF</Button>
             </div>
           </div>
         )}
