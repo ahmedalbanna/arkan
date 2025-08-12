@@ -36,7 +36,7 @@ async function summarizeProposalForPlanApi(proposal: any, token: string): Promis
 
 export default function ProjectPlanGenerator() {
   const { toast } = useToast();
-  const { firebaseUser } = useAuth();
+  const { firebaseUser, userProfile } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
   const { projectPlan } = useProjectPlanStore();
   const [description, setDescription] = useState('');
@@ -87,8 +87,10 @@ export default function ProjectPlanGenerator() {
     planGenerationMutation.mutate({ projectDescription: description, keyDeliverables: deliverables });
   };
 
+  const creditCost = 2;
   const isProcessing = planGenerationMutation.isPending || suggestionMutation.isPending;
-  const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing;
+  const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
+
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
@@ -129,7 +131,7 @@ export default function ProjectPlanGenerator() {
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
               {planGenerationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generate Plan (2 Credits)
+              Generate Plan ({creditCost} Credits)
             </Button>
           </CardContent>
         </Card>
