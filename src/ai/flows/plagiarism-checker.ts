@@ -9,7 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
 const MatchedSourceSchema = z.object({
-  source: z.string().url().describe("The full, real URL of the source where the similar text was found."),
+  source: z.string().describe("The full, real URL of the source where the similar text was found. This must be a complete and valid URL (e.g., https://www.example.com/article)."),
   similarity: z.number().min(0).max(100).describe("A percentage score (0-100) indicating how similar the provided text is to the found source."),
 });
 
