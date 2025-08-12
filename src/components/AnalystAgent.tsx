@@ -111,12 +111,11 @@ export default function AnalystAgent() {
     };
 
     const handleSaveAnalysis = () => {
-        if (!analysisMutation.data || !form.getValues('prompt')) return;
+        if (!markdownResult || !form.getValues('prompt')) return;
 
-        const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.json';
-        const fileContent = JSON.stringify(analysisMutation.data.data, null, 2);
-
-        addExternalContext(fileName, fileContent, 'context');
+        const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
+        
+        addExternalContext(fileName, markdownResult, 'context');
         toast({ title: "Analysis Saved", description: `"${fileName}" has been added to your context files.` });
     };
 
@@ -154,7 +153,7 @@ export default function AnalystAgent() {
                             Run Analysis
                         </Button>
                         
-                        {(isProcessing || analysisMutation.data) && (
+                        {(isProcessing || markdownResult) && (
                             <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0">
                                 <div className="flex justify-between items-center">
                                     <h4 className="font-semibold text-sm">Generated Report</h4>
@@ -198,7 +197,7 @@ export default function AnalystAgent() {
                             </div>
                         )}
                     </CardContent>
-                    {(analysisMutation.data && markdownResult) && (
+                    {markdownResult && !isProcessing && (
                         <CardFooter>
                             <Button variant="secondary" onClick={handleSaveAnalysis}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
