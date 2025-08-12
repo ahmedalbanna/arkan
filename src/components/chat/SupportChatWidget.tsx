@@ -41,7 +41,7 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
                 </div>
             )}
             <div className={cn("p-3 rounded-lg max-w-lg", bubbleClasses)}>
-                <p className="text-sm">{content}</p>
+                <p className="text-sm whitespace-pre-wrap">{content}</p>
             </div>
              {isUser && (
                  <div className="h-8 w-8 rounded-full bg-secondary text-secondary-foreground flex items-center justify-center shrink-0">
@@ -241,7 +241,7 @@ export default function SupportChatWidget() {
         )}
         
         {isChatOpen && (
-            <Card className="fixed bottom-8 right-8 w-[400px] h-[600px] shadow-lg z-50 flex flex-col">
+            <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
                      <div className="flex items-center gap-1">
                         {view === 'new_chat_selection' && (
