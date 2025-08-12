@@ -1,3 +1,4 @@
+
 'use client';
 
 import { GrammarCheckerTool } from '@/components/writing-tools/GrammarCheckerTool';

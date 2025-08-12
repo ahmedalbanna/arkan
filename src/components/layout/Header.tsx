@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare, Workflow } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -85,12 +85,18 @@ export function Header() {
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon },
-    { href: '/request', label: 'Submit Request', icon: PencilLine },
     { href: '/projects', label: 'My Projects', icon: FolderOpen },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
-    { href: '/design', label: t('header.design'), icon: Brush },
+    { href: '/automations/builder', label: 'Automations', icon: Workflow },
   ];
   
+  const toolsLinks = [
+      { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
+      { href: '/handwriting', label: 'Text to Handwriting', icon: PencilLine },
+      { href: '/pdf-to-markdown', label: 'PDF to Markdown', icon: FileText },
+      { href: '/markdown-display', label: 'Markdown Editor', icon: PencilRuler },
+  ];
+
   const adminLinks = [
     { href: '/admin/dashboard', label: t('adminDashboard.pageTitle'), icon: LayoutDashboard },
     { href: '/admin/manage-users', label: t('header.manageUsers'), icon: Users },
@@ -179,6 +185,21 @@ export function Header() {
         </div>
         <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
           {isClient ? renderNavLinks(navLinks) : <Skeleton className="h-10 w-48" />}
+           <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                     <Button variant="ghost" className="font-headline">Tools</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                    {toolsLinks.map(link => (
+                        <DropdownMenuItem key={link.href} asChild>
+                            <Link href={link.href}>
+                                <link.icon className="mr-2 h-4 w-4" />
+                                {link.label}
+                            </Link>
+                        </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
         </nav>
 
         <div className="flex-1 flex justify-end items-center gap-2">
@@ -218,38 +239,6 @@ export function Header() {
                         </Link>
                     </DropdownMenuItem>
                    )}
-                   <DropdownMenuSub>
-                     <DropdownMenuSubTrigger>
-                       <MoreVertical className="mr-2 h-4 w-4" />
-                       <span>Utilities</span>
-                     </DropdownMenuSubTrigger>
-                     <DropdownMenuContent>
-                        <DropdownMenuItem asChild>
-                          <Link href="/handwriting">
-                            <PencilLine className="mr-2 h-4 w-4" />
-                            Handwriting
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/pdf-to-markdown">
-                            <FileText className="mr-2 h-4 w-4" />
-                            PDF to Markdown
-                          </Link>
-                        </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                          <Link href="/markdown-display">
-                            <FileText className="mr-2 h-4 w-4" />
-                            Markdown Display
-                          </Link>
-                        </DropdownMenuItem>
-                         <DropdownMenuItem asChild>
-                          <Link href="/writing-tools">
-                            <PenSquare className="mr-2 h-4 w-4" />
-                            Writing Tools
-                          </Link>
-                        </DropdownMenuItem>
-                     </DropdownMenuContent>
-                   </DropdownMenuSub>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />

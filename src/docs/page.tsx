@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, CheckCircle, ShieldCheck, Users } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, PencilLine, FileText, ShieldCheck, Users, Workflow, Bell, Palette } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [
@@ -63,28 +63,48 @@ const features = [
     ],
   },
   {
-    id: 'exam-solver',
-    title: 'docs.examSolver.title',
+    id: 'academic-solver',
+    title: 'docs.academicSolver.title',
     icon: FileQuestion,
-    description: 'docs.examSolver.description',
+    description: 'docs.academicSolver.description',
     steps: [
-        'docs.examSolver.step1',
-        'docs.examSolver.step2',
-        'docs.examSolver.step3',
+        'docs.academicSolver.step1',
+        'docs.academicSolver.step2',
+        'docs.academicSolver.step3',
     ],
   },
   {
-    id: 'homework-solver',
-    title: 'docs.homeworkSolver.title',
-    icon: BookCheck,
-    description: 'docs.homeworkSolver.description',
-    steps: [
-        'docs.homeworkSolver.step1',
-        'docs.homeworkSolver.step2',
-        'docs.homeworkSolver.step3',
-    ],
+      id: 'team-management',
+      title: 'Team Management',
+      icon: Users,
+      description: 'Collaborate with others by creating teams, inviting members, and sharing projects.',
+      steps: [
+          "Navigate to 'Manage Team' from your user profile dropdown.",
+          "Create a new team by giving it a name.",
+          "Invite members to your team using their email address.",
+          "Team projects will appear alongside your personal projects on the 'My Projects' page.",
+      ],
   },
-    {
+  {
+      id: 'design-studio',
+      title: 'Design Studio',
+      icon: Palette,
+      description: 'Customize the visual appearance of your exported documents using a live template editor.',
+      steps: [
+          "Navigate to the Admin Panel and select one of the Template managers (e.g., Export Templates).",
+          "Use the controls in the template cards to change fonts, colors, and other styles.",
+          "The live preview will instantly update to show your changes.",
+          "Click 'Save Template' to persist your new design for future exports."
+      ],
+  },
+  {
+    id: 'push-notifications',
+    title: 'Push Notifications',
+    icon: Bell,
+    description: 'Implement push notifications for task reminders, feedback requests, or marketing updates.',
+    steps: [],
+  },
+  {
     id: 'admin',
     title: 'docs.admin.title',
     icon: ShieldCheck,
@@ -103,7 +123,7 @@ export default function DocsPage() {
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="text-center mb-16">
+            <div className="text-center mb-16 animate-fade-in-up">
                 <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center gap-4">
                     <BrainCircuit className="w-10 h-10" />
                     {t('docs.pageTitle')}
@@ -113,16 +133,16 @@ export default function DocsPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-                <aside className="md:col-span-3">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+                <aside className="md:col-span-3 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <nav className="sticky top-24">
-                        <h2 className="text-lg font-semibold font-headline mb-4">{t('docs.navigationTitle')}</h2>
-                        <ul className="space-y-2">
+                        <h2 className="text-lg font-semibold font-headline mb-4 px-2">{t('docs.navigationTitle')}</h2>
+                        <ul className="space-y-1">
                             {features.map(feature => (
                                 <li key={feature.id}>
-                                    <a href={`#${feature.id}`} className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+                                    <a href={`#${feature.id}`} className="flex items-center gap-3 px-2 py-1.5 rounded-md text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
                                         <feature.icon className="h-4 w-4" />
-                                        {t(feature.title)}
+                                        <span>{t(feature.title)}</span>
                                     </a>
                                 </li>
                             ))}
@@ -131,8 +151,8 @@ export default function DocsPage() {
                 </aside>
 
                 <main className="md:col-span-9 space-y-12">
-                    {features.map(feature => (
-                        <Card id={feature.id} key={feature.id} className="scroll-mt-24">
+                    {features.map((feature, index) => (
+                        <Card id={feature.id} key={feature.id} className="scroll-mt-24 animate-fade-in-up transition-all hover:shadow-lg" style={{ animationDelay: `${0.3 + index * 0.1}s` }}>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-3 text-2xl font-headline">
                                     <feature.icon className="w-6 h-6 text-primary" />
@@ -142,10 +162,10 @@ export default function DocsPage() {
                             <CardContent>
                                 <p className="text-muted-foreground mb-6">{t(feature.description)}</p>
                                 <Accordion type="single" collapsible className="w-full">
-                                    <AccordionItem value="how-to-use">
-                                        <AccordionTrigger className="font-semibold">{t('docs.howToUse')}</AccordionTrigger>
+                                    <AccordionItem value="how-to-use" className="border-t">
+                                        <AccordionTrigger className="font-semibold text-left py-3 hover:no-underline">{t('docs.howToUse')}</AccordionTrigger>
                                         <AccordionContent>
-                                            <ol className="list-decimal list-inside space-y-2 mt-2">
+                                            <ol className="list-decimal list-inside space-y-2 mt-2 text-muted-foreground">
                                                 {feature.steps.map((step, index) => (
                                                     <li key={index}>{t(step)}</li>
                                                 ))}
