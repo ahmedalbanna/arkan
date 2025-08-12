@@ -2,7 +2,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Download, Trash2, Upload, Save, FileDown, DiscAlbum, CheckCircle, Cloud, CloudOff, FileJson, UploadCloud } from 'lucide-react';
+import { Download, Trash2, Save, FileJson, Upload, Cloud } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { saveAs } from 'file-saver';
@@ -25,51 +25,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { UploadManager } from './UploadManager';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useCodebaseStore } from '@/hooks/useCodebaseStore';
 import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
-
-function SaveStatus() {
-    const hasUnsavedChanges = useBuilderStore(state => state.hasUnsavedChanges);
-    const saveProjectMutation = useSaveProject();
-    const updateProjectMutation = useUpdateProject();
-    const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
-
-    if (isSaving) {
-        return (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Saving...</span>
-            </div>
-        );
-    }
-    
-    if (hasUnsavedChanges) {
-        return (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CloudOff className="h-4 w-4" />
-                <span>Unsaved changes</span>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex items-center gap-2 text-sm text-green-600">
-            <CheckCircle className="h-4 w-4" />
-            <span>All changes saved</span>
-        </div>
-    )
-}
+import { SaveStatus } from './generate/SaveStatus';
 
 function hasAnyContent(): boolean {
     if (useBuilderStore.getState().projectIdea?.trim()) return true;
@@ -128,13 +95,14 @@ export const SessionActions = () => {
         }
     };
     
-    const handleSaveProjectFile = () => {
+    const handleSaveProjectFile = (name?: string) => {
         if (!hasAnyContent()) return;
+        const finalName = name?.trim() || store.name || store.proposal?.title || 'arkan_project';
         const jsonString = JSON.stringify(store.getFullState());
         // Encode to Base64 with Unicode support
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
-        saveAs(blob, `${store.name || 'arkan_project'}.arkan`);
+        saveAs(blob, `${finalName}.arkan`);
     }
 
     const performSave = (name?: string) => {
@@ -144,7 +112,7 @@ export const SessionActions = () => {
         }
 
         const projectData = store.getFullState();
- const finalName = String(name || store.name || store.proposal?.title || '' || 'Untitled Project');
+        const finalName = String(name || store.name || store.proposal?.title || '' || 'Untitled Project');
         const saveData = { ...projectData, name: finalName };
         
         if (store.currentProjectId) {
@@ -176,17 +144,11 @@ export const SessionActions = () => {
         }
     };
 
-    const handleSaveAs = () => {
-        if (!hasAnyContent()) {
-            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
-            return;
-        }
+    const handleSaveAsCloud = () => {
         const projectData = store.getFullState();
-        // Create a new project with a new name, but don't change the current project context
         const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
         const saveData = { ...projectData, name: String(finalSaveAsName) };
         saveProjectMutation.mutate(saveData, {
-            // Overwrite onSuccess to not change the current project context
             onSuccess: (newProject) => {
                  toast({
                     title: 'Project Saved As New',
@@ -196,6 +158,13 @@ export const SessionActions = () => {
                 setSaveAsName('');
             }
         });
+    }
+
+    const handleDownloadAs = () => {
+         const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
+         handleSaveProjectFile(finalSaveAsName);
+         setIsSaveAsOpen(false);
+         setSaveAsName('');
     }
 
     return (
@@ -208,36 +177,6 @@ export const SessionActions = () => {
                     accept=".arkan"
                     className="hidden"
                 />
-
-                <Dialog>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-8 w-8 md:w-auto md:px-3"
-                                >
-                                    <UploadCloud className="h-4 w-4" />
-                                    <span className="hidden md:inline ml-2">Upload Context</span>
-                                </Button>
-                            </DialogTrigger>
-                        </TooltipTrigger>
-                        <TooltipContent className="md:hidden">
-                            <p>Upload Context</p>
-                        </TooltipContent>
-                    </Tooltip>
-                    <DialogContent className="max-w-4xl">
-                         <DialogHeader>
-                            <DialogTitle>Context Manager</DialogTitle>
-                            <DialogDescription>
-                                Add context from various sources. This context will be available across all generation tools.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <UploadManager />
-                    </DialogContent>
-                </Dialog>
-
 
                  <Tooltip>
                     <TooltipTrigger asChild>
@@ -253,23 +192,6 @@ export const SessionActions = () => {
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
                         <p>Load Project</p>
-                    </TooltipContent>
-                </Tooltip>
-                 <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={handleSaveProjectFile}
-                            disabled={!hasAnyContent()}
-                             className="h-8 w-8 md:w-auto md:px-3"
-                        >
-                            <FileJson className="h-4 w-4" />
-                             <span className="hidden md:inline ml-2">Download as .arkan</span>
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent className="md:hidden">
-                        <p>Download as .arkan file</p>
                     </TooltipContent>
                 </Tooltip>
                 
@@ -308,40 +230,44 @@ export const SessionActions = () => {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <AlertDialog open={isSaveAsOpen} onOpenChange={setIsSaveAsOpen}>
-                    <AlertDialogTrigger asChild>
+                <Dialog open={isSaveAsOpen} onOpenChange={setIsSaveAsOpen}>
+                    <DialogTrigger asChild>
                          <Button
                             variant="outline"
                             size="icon"
                             disabled={!hasAnyContent()}
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
-                            <DiscAlbum className="h-4 w-4" />
+                            <Save className="h-4 w-4" />
                             <span className="hidden md:inline ml-2">Save As...</span>
                         </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Save Project As</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Enter a new name for this project. This will create a new copy in your saved projects.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Save Project As</DialogTitle>
+                            <DialogDescription>
+                                Enter a new name and choose whether to save to the cloud or download a local file.
+                            </DialogDescription>
+                        </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-as-name" className="text-right">Name</Label>
                                 <Input id="save-as-name" defaultValue={store.name || (store.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleSaveAs} disabled={isSaving}>
+                        <DialogFooter>
+                            <Button type="button" variant="secondary" onClick={handleDownloadAs}>
+                                <FileJson className="mr-2 h-4 w-4" />
+                                Download as .arkan
+                            </Button>
+                            <Button onClick={handleSaveAsCloud} disabled={isSaving}>
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                                Save
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                                <Cloud className="mr-2 h-4 w-4" />
+                                Save to Cloud
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
 
                  <Tooltip>
