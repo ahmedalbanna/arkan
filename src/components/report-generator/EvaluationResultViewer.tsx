@@ -9,7 +9,10 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2, RefreshCw } from 'lucide-react';
 import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
 import { useReportStore } from '@/hooks/useReportStore';
-import { toast } from '@/hooks/use-toast';
+import { useGenerateReportSection } from '@/hooks/use-report-generation';
+import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { SectionName } from '@/ai/schemas';
 
 interface EvaluationResultViewerProps {
     evaluation: EvaluateReportOutput;
@@ -43,6 +46,30 @@ const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Present") =>
 export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerProps) {
     const { t } = useLocalization();
     const { setEvaluation } = useReportStore();
+    const generationMutation = useGenerateReportSection();
+    
+    const { proposal } = useBuilderStore();
+    const { projectPlan } = useProjectPlanStore();
+    const { sections } = useReportStore();
+
+
+    const handleFixWithAi = (sectionKey: SectionName, suggestion: string) => {
+        const sectionContent = sections[sectionKey];
+        if (!sectionContent) {
+            console.error(`Cannot fix: Section content for '${sectionKey}' not found.`);
+            return;
+        }
+        
+        const body = {
+            proposal,
+            projectPlan,
+            sectionToGenerate: sectionKey,
+            otherSections: sections,
+            guidelines: [suggestion], // Use the solution as a one-time guideline
+        };
+
+        generationMutation.mutate({ body });
+    };
 
     return (
         <div className="space-y-4">
@@ -73,11 +100,16 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                                 <StatusIcon className={`h-4 w-4 mt-1 shrink-0 ${statusColor}`}/>
                                 <span className="flex-grow">{item.point}</span>
                             </div>
-                            {item.solution && (
+                            {item.solution && item.sectionKey && (
                                 <div className="pl-6 w-full">
                                     <div className="flex items-center gap-2 p-2 rounded-md bg-background border border-dashed">
                                         <p className="text-xs text-muted-foreground flex-grow italic">"{item.solution}"</p>
-                                        <Button size="sm" variant="secondary" onClick={() => toast({title: "Coming Soon!", description: "This will automatically apply the suggested fix."})}>
+                                        <Button 
+                                            size="sm" 
+                                            variant="secondary" 
+                                            onClick={() => handleFixWithAi(item.sectionKey!, item.solution!)}
+                                            disabled={generationMutation.isPending && generationMutation.variables?.body.sectionToGenerate === item.sectionKey}
+                                        >
                                             <Wand2 className="mr-2 h-4 w-4"/>
                                             Fix with AI
                                         </Button>
