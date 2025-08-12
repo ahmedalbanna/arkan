@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -322,6 +321,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                 <DropdownMenuItem onClick={() => handleAiAction('Expand on this topic, adding more detail.')}><Maximize className="mr-2 h-4 w-4" />Expand</DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleAiAction('Correct any grammar and spelling mistakes.')}><SpellCheck className="mr-2 h-4 w-4" />Check Grammar</DropdownMenuItem>
                                 <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="mr-2 h-4 w-4" />Humanize</DropdownMenuItem>
+                                <DropdownMenuItem><GitCommitVertical className="mr-2 h-4 w-4" />Version History</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
                                     <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />Rewrite</DropdownMenuSubTrigger>
@@ -330,6 +330,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>Friendly</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>Simple</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Creative')}>Creative</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Professional')}>Professional</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Academic')}>Academic</DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
                             </DropdownMenuContent>
@@ -351,3 +353,5 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         </Tabs>
     );
 };
+
+    
