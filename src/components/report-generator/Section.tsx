@@ -26,6 +26,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useRewriteText, useHumanizeText } from '@/hooks/use-writing-tools';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -305,10 +306,21 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     )}
 
                      <div className="flex items-center justify-end">
-                        <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={isProcessingAi || !content}>
-                            {ttsMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Volume2 className="h-4 w-4 mr-2" />}
-                            Read Aloud
-                        </Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <span tabIndex={0}> {/* Wrapper for disabled button */}
+                                        <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={true}>
+                                            <Volume2 className="h-4 w-4 mr-2" />
+                                            Read Aloud
+                                        </Button>
+                                    </span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Coming Soon!</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
 
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -353,5 +365,3 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         </Tabs>
     );
 };
-
-    
