@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useProjects } from '@/hooks/use-projects'; // Changed from useQuery
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, FolderOpen, PlusCircle } from 'lucide-react';
+import { AlertCircle, FolderOpen, PlusCircle, RefreshCw } from 'lucide-react';
 import { ProjectCard } from '@/components/project/ProjectCard';
 import { Button } from '@/components/ui/button';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -105,12 +105,12 @@ function CreateProjectDialog() {
 export default function MyProjectsPage() {
     const { isLoading: authLoading } = useAuth();
     
-    const { data: projects, isLoading, isError, error } = useProjects();
+    const { projects, isLoading, isError, error, refetch, isRefetching } = useProjects();
 
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-12">
-            <div className="flex justify-between items-center mb-12">
+            <div className="flex justify-between items-center mb-12 flex-wrap gap-4">
                 <div className="text-center sm:text-left">
                     <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center gap-4 animate-fade-in-up"  style={{ animationDelay: '0.1s' }}>
                         <FolderOpen className="w-10 h-10" />
@@ -120,7 +120,13 @@ export default function MyProjectsPage() {
                         Load, manage, and continue working on your saved projects.
                     </p>
                 </div>
-                <CreateProjectDialog />
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => refetch()} disabled={isRefetching} className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                        <RefreshCw className={cn("mr-2 h-4 w-4", isRefetching && "animate-spin")} />
+                        Refresh
+                    </Button>
+                    <CreateProjectDialog />
+                </div>
             </div>
             
             {isLoading || authLoading ? (

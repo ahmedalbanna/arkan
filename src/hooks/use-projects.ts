@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/use-projects.md
 
 "use client";
@@ -33,7 +32,7 @@ type SaveProjectVariables = ProjectState & { name: string };
 export function useProjects() {
   const { firebaseUser } = useAuth();
   
-  return useQuery<SavedProject[]>({
+  const queryInfo = useQuery<SavedProject[]>({
     queryKey: projectKeys.lists(),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -47,6 +46,11 @@ export function useProjects() {
       },
     },
   });
+
+  return {
+    ...queryInfo,
+    projects: queryInfo.data,
+  }
 }
 
 export function useProject(projectId: string) {
