@@ -41,6 +41,7 @@ interface ChatState {
   input: string;
   isChatOpen: boolean; // To control the floating widget
   isInitialized: boolean;
+  unreadCounts: Record<string, number>;
 }
 
 interface ChatActions {
@@ -53,6 +54,7 @@ interface ChatActions {
   closeChat: () => void;
   toggleChat: () => void;
   removeChat: (chatId: string) => void;
+  resetUnreadCount: (chatId: string) => void;
 }
 
 const getInitialState = (): ChatState => ({
@@ -61,6 +63,7 @@ const getInitialState = (): ChatState => ({
   input: '',
   isChatOpen: false,
   isInitialized: false,
+  unreadCounts: {},
 });
 
 
@@ -124,6 +127,9 @@ export const useChatStore = create<ChatState & ChatActions>()(
     },
 
     setSelectedChat: (chat) => {
+      if (chat) {
+        get().resetUnreadCount(chat.id);
+      }
       set({ selectedChat: chat });
     },
     
@@ -138,6 +144,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
 
       // Also update the local state for immediate UI feedback
       set((state) => {
+        const isChatSelected = state.selectedChat?.id === chatId;
         const newChats = state.chats.map(chat => 
           chat.id === chatId 
             ? { ...chat, lastMessage: message.content, lastMessageTimestamp: new Date().toISOString() } 
@@ -145,15 +152,35 @@ export const useChatStore = create<ChatState & ChatActions>()(
         );
         // Sort to bring the updated chat to the top
         newChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-        return { chats: newChats };
+        return { 
+          chats: newChats,
+          unreadCounts: isChatSelected ? state.unreadCounts : {
+              ...state.unreadCounts,
+              [chatId]: (state.unreadCounts[chatId] || 0) + 1,
+          },
+        };
       });
     },
     
     setInput: (input) => set({ input }),
     
-    openChat: () => set({ isChatOpen: true }),
+    openChat: () => {
+      const { selectedChat, resetUnreadCount } = get();
+      if(selectedChat) {
+          resetUnreadCount(selectedChat.id);
+      }
+      set({ isChatOpen: true });
+    },
     closeChat: () => set({ isChatOpen: false }), 
-    toggleChat: () => set(state => ({ isChatOpen: !state.isChatOpen })),
+    toggleChat: () => {
+        set(state => {
+            const nextIsOpen = !state.isChatOpen;
+            if (nextIsOpen && state.selectedChat) {
+                get().resetUnreadCount(state.selectedChat.id);
+            }
+            return { isChatOpen: nextIsOpen };
+        });
+    },
 
     removeChat: (chatId) => {
         set(state => {
@@ -164,6 +191,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
                 selectedChat: newSelectedChat
             };
         });
+    },
+
+    resetUnreadCount: (chatId: string) => {
+        set(state => ({
+            unreadCounts: {
+                ...state.unreadCounts,
+                [chatId]: 0,
+            }
+        }));
     },
 
   })

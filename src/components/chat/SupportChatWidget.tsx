@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { UserProfile } from '@/lib/types';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
+import { Badge } from '../ui/badge';
 
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
@@ -112,6 +113,7 @@ export default function SupportChatWidget() {
       initialize, 
       isInitialized,
       addMessage,
+      unreadCounts,
     } = useChatStore();
     const { firebaseUser, userProfile } = useAuth();
     const [input, setInput] = useState('');
@@ -224,6 +226,7 @@ export default function SupportChatWidget() {
     };
     
     const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
+    const totalUnreadCount = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
     
     if (!firebaseUser) {
         return null;
@@ -237,11 +240,14 @@ export default function SupportChatWidget() {
                 className="fixed bottom-8 right-8 rounded-full h-16 w-16 shadow-lg z-50"
             >
                 <LifeBuoy className="h-8 w-8" />
+                 {totalUnreadCount > 0 && (
+                    <Badge variant="destructive" className="absolute -top-1 -right-1 h-6 w-6 justify-center p-0">{totalUnreadCount}</Badge>
+                )}
             </Button>
         )}
         
         {isChatOpen && (
-            <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-9rem)] sm:w-[400px] sm:h-[550px] shadow-lg z-50 flex flex-col">
+            <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-13rem)] sm:w-[400px] sm:h-[550px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
                      <div className="flex items-center gap-1">
                         {view === 'new_chat_selection' && (
