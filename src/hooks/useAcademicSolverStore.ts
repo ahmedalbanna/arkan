@@ -2,7 +2,7 @@
 'use client';
 
 import { create } from "zustand";
-import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from "@/ai/flows/academic-solver.shared";
+import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from "@/ai/schemas";
 import { useBuilderStore } from "./useBuilderStore";
 
 export type AcademicSolverStage =

@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/flows/academic-solver.shared';
+import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
 
 interface AnalyzeVariables {
   markdown: string;
