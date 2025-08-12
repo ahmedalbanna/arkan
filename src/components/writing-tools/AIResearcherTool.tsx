@@ -29,7 +29,7 @@ type ResearcherFormValues = z.infer<typeof researcherSchema>;
 
 // Helper function to format the research output as Markdown
 const formatResearchToMarkdown = (data: AIResearcherOutput): string => {
-  let markdown = `## Research Summary: ${data.summary}\n\n`;
+  let markdown = `## Research Summary\n\n${data.summary}\n\n`;
   markdown += `### Key Points\n`;
   data.keyPoints.forEach(point => {
     markdown += `- ${point}\n`;
@@ -120,7 +120,7 @@ export function AIResearcherTool() {
 
         {mutation.isPending && (
             <div className="pt-6 border-t">
-                <div className="flex justify-center items-center text-sm text-muted-foreground">
+                <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Researching... This may take a moment as the AI browses and synthesizes information.
                 </div>
