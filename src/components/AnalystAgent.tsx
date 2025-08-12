@@ -18,7 +18,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, BrainCircuit, Wand2, PlusCircle, Braces } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { jsonToMarkdown } from '@/ai/flows/json-to-markdown';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import {
@@ -38,6 +37,43 @@ const analysisSchema = z.object({
 
 type AnalysisFormValues = z.infer<typeof analysisSchema>;
 
+// Helper function to convert JSON to Markdown
+function jsonToMarkdown(json: any, level = 1): string {
+  if (json === null || json === undefined) return '';
+  if (typeof json !== 'object') return String(json);
+
+  let markdown = '';
+
+  if (Array.isArray(json)) {
+    json.forEach(item => {
+      if (typeof item === 'object' && item !== null && !Array.isArray(item)) {
+        // For objects inside an array, create a list item and then process the object
+        const objectContent = Object.entries(item).map(([key, value]) => `**${key.replace(/_/g, ' ')}:** ${value}`).join('; ');
+        markdown += `- ${objectContent}\n`;
+      } else {
+         markdown += `- ${jsonToMarkdown(item, level + 1)}\n`;
+      }
+    });
+  } else {
+    for (const key in json) {
+      if (Object.prototype.hasOwnProperty.call(json, key)) {
+        const value = json[key];
+        // Convert camelCase or snake_case to Title Case for headings
+        const title = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, str => str.toUpperCase());
+        
+        if (typeof value === 'object' && value !== null) {
+          markdown += `\n${'#'.repeat(level + 1)} ${title}\n\n`;
+          markdown += jsonToMarkdown(value, level + 1);
+        } else {
+          markdown += `**${title}:** ${String(value)}\n\n`;
+        }
+      }
+    }
+  }
+  return markdown;
+}
+
+
 export default function AnalystAgent() {
     const { externalContext, addExternalContext } = useReportStore();
     const { firebaseUser, refetchUser } = useAuth();
@@ -48,25 +84,15 @@ export default function AnalystAgent() {
         resolver: zodResolver(analysisSchema),
         defaultValues: { prompt: '' },
     });
-
-    const markdownMutation = useMutation({
-        mutationFn: async (jsonData: any) => jsonToMarkdown({ jsonData }),
-        onSuccess: (data) => {
-            setMarkdownResult(data.markdown);
-        },
-        onError: (error: Error) => {
-            // If markdown conversion fails, we can just show the JSON.
-            toast({ title: 'Could not format as Markdown', description: 'Displaying raw JSON data instead.', variant: 'default' });
-        }
-    });
-
+    
     const analysisMutation = useMutation({
         mutationFn: analyzeContextApi,
         onSuccess: (data) => {
             refetchUser(); // To update credits
             toast({ title: 'Analysis Complete', description: 'The AI has analyzed the context and generated structured data.' });
-            // After successful analysis, trigger markdown conversion
-            markdownMutation.mutate(data.data);
+            // After successful analysis, convert JSON to Markdown
+            const markdown = jsonToMarkdown(data.data);
+            setMarkdownResult(markdown);
         },
         onError: (error: Error) => {
             toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
@@ -94,7 +120,7 @@ export default function AnalystAgent() {
         toast({ title: "Analysis Saved", description: `"${fileName}" has been added to your context files.` });
     };
 
-    const isProcessing = analysisMutation.isPending || markdownMutation.isPending;
+    const isProcessing = analysisMutation.isPending;
 
     return (
         <Card className="h-full flex flex-col">
