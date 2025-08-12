@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
   documentType: z.string().min(1, 'Please select a document type.'),
-  instructions: z.string().optional(),
+  knowledge: z.string().optional(),
   tableOfContents: z.string().optional(),
 });
 
@@ -34,7 +34,7 @@ export function DocumentWriterTool() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { topic: '', documentType: 'essay', instructions: '', tableOfContents: '' },
+    defaultValues: { topic: '', documentType: 'essay', knowledge: '', tableOfContents: '' },
   });
 
   const onSubmit = (data: FormValues) => {
@@ -102,10 +102,10 @@ export function DocumentWriterTool() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="instructions">Specific Instructions (Optional)</Label>
+            <Label htmlFor="knowledge">Knowledge & Instructions (Optional)</Label>
             <Textarea
-              id="instructions"
-              {...form.register('instructions')}
+              id="knowledge"
+              {...form.register('knowledge')}
               rows={3}
               placeholder="e.g., Keep the tone formal and include a section on challenges."
               disabled={mutation.isPending}

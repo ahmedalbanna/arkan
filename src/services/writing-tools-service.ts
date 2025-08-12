@@ -66,7 +66,7 @@ export interface SummarizeTextWithRatioVariables {
 export interface WriteDocumentVariables {
     topic: string;
     documentType: string;
-    instructions?: string;
+    knowledge?: string;
     tableOfContents?: string[];
 }
 
