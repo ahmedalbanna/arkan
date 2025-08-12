@@ -1,9 +1,12 @@
 
 
+
 import { ProjectStateSchema } from '@/ai/schemas';
 import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { FieldValue } from 'firebase-admin/firestore';
+import { z } from 'zod';
 
 
 // Helper to verify user owns the project - integrated into withAuth now
@@ -68,3 +71,35 @@ export const DELETE = withAuth(async ({ params, user }) => {
         return handleApiError(error);
     }
 });
+
+
+// PATCH (partially update) a project, e.g., to add context
+const addContextSchema = z.object({
+  fileName: z.string(),
+  content: z.string(),
+  type: z.enum(['context', 'example']),
+});
+
+export const PATCH = withAuth(async ({ request, params, user }) => {
+    try {
+        const { id: projectId } = await params;
+        await verifyProjectOwner(user.id, projectId);
+
+        const body = await request.json();
+        const validation = addContextSchema.safeParse(body);
+         if (!validation.success) {
+            return handleApiError({ errors: validation.error.flatten().fieldErrors }, 400);
+        }
+
+        const projectRef = adminDb.collection("projects").doc(projectId);
+        await projectRef.update({
+            externalContext: FieldValue.arrayUnion(validation.data),
+            updatedAt: new Date().toISOString(),
+        });
+        
+        return createApiResponse({ message: 'Context added successfully' }, 200);
+
+    } catch (error) {
+        return handleApiError(error);
+    }
+})

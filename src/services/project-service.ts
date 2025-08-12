@@ -1,7 +1,8 @@
 
 
+
 'use client';
-import type { AnyProjectProposal, ProjectPlan } from "@/ai/schemas";
+import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
 import { app } from '@/lib/firebaseConfig';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import type { ProjectState as FullProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
@@ -91,6 +92,24 @@ export async function deleteProject(projectId: string, token: string): Promise<{
     });
     if (!response.ok) {
         throw new Error('Failed to delete project');
+    }
+    return await response.json();
+}
+
+// Add a context file to a project
+export async function addContextToProjectApi({ projectId, contextFile, token }: { projectId: string, contextFile: ExternalContext, token: string }): Promise<{ message: string }> {
+    if (!token) throw new Error("User not authenticated");
+    const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(contextFile),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add context to project');
     }
     return await response.json();
 }

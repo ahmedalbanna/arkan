@@ -20,6 +20,14 @@ import Link from 'next/link';
 import { useReportStore } from '@/hooks/useReportStore';
 import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '../ui/dialog';
+import { useProjects } from '@/hooks/use-projects';
+import { Skeleton } from '../ui/skeleton';
+import { AlertCircle } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { addContextToProjectApi } from '@/services/project-service';
+import { useAuth } from '@/context/AuthContext';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
@@ -29,8 +37,8 @@ type ResearcherFormValues = z.infer<typeof researcherSchema>;
 
 // Helper function to format the research output as Markdown
 const formatResearchToMarkdown = (data: AIResearcherOutput): string => {
-  let markdown = `## Research Summary\n\n${data.summary}\n\n`;
-  markdown += `### Key Points\n`;
+  let markdown = `# Research Summary: ${data.summary}\n\n`;
+  markdown += `## Key Points\n`;
   data.keyPoints.forEach(point => {
     markdown += `- ${point}\n`;
   });
@@ -41,12 +49,83 @@ const formatResearchToMarkdown = (data: AIResearcherOutput): string => {
   return markdown;
 };
 
+function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: { researchMarkdown: string; researchTitle: string; onOpenChange: (open: boolean) => void; }) {
+    const { projects, isLoading, isError } = useProjects();
+    const { firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
+
+    const mutation = useMutation({
+        mutationFn: addContextToProjectApi,
+        onSuccess: (data, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
+            toast({
+                title: "Context Added",
+                description: `Research on "${researchTitle}" has been added to the project.`
+            });
+            onOpenChange(false);
+        },
+        onError: (error) => {
+            toast({ title: "Failed to Add Context", description: error.message, variant: "destructive" });
+        }
+    });
+
+    const handleSelectProject = async (projectId: string) => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        const fileName = `${researchTitle.slice(0, 30).replace(/\s+/g, '_')}_research.md`;
+        mutation.mutate({ projectId, contextFile: { fileName, content: researchMarkdown, type: 'context' }, token });
+    };
+
+    return (
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Add Research to Project</DialogTitle>
+                <DialogDescription>Select a project to add this research report as a context file.</DialogDescription>
+            </DialogHeader>
+            <div className="max-h-96 overflow-y-auto">
+                {isLoading && (
+                    <div className="space-y-2 p-4">
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-12 w-full" />
+                    </div>
+                )}
+                {isError && (
+                    <div className="p-4 text-center text-destructive">
+                        <AlertCircle className="mx-auto h-8 w-8 mb-2" />
+                        <p>Could not load projects.</p>
+                    </div>
+                )}
+                <div className="space-y-2">
+                    {projects?.map(project => (
+                        <Button
+                            key={project.id}
+                            variant="outline"
+                            className="w-full justify-start"
+                            onClick={() => handleSelectProject(project.id)}
+                            disabled={mutation.isPending && mutation.variables?.projectId === project.id}
+                        >
+                            {mutation.isPending && mutation.variables?.projectId === project.id ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                                <FileText className="mr-2 h-4 w-4" />
+                            )}
+                            {project.name}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+             <DialogClose asChild>
+                <Button variant="ghost">Cancel</Button>
+            </DialogClose>
+        </DialogContent>
+    );
+}
 
 export function AIResearcherTool() {
   const mutation = useAiResearcher();
-  const { addExternalContext } = useReportStore();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false);
 
   const form = useForm<ResearcherFormValues>({
     resolver: zodResolver(researcherSchema),
@@ -83,15 +162,6 @@ export function AIResearcherTool() {
       }
   }
 
-  const handleAddToContext = () => {
-    if (!markdownResult || !results) return;
-    const fileName = `${results.summary.slice(0, 30).replace(/\s+/g, '_')}_research.md`;
-    addExternalContext(fileName, markdownResult, 'context');
-    toast({
-        title: 'Added to Context',
-        description: `"${fileName}" has been added to your current project's context files.`,
-    });
-  }
 
   return (
     <Card>
@@ -139,10 +209,19 @@ export function AIResearcherTool() {
                         {isCopied ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
                         Copy
                     </Button>
-                     <Button variant="outline" size="sm" onClick={handleAddToContext}>
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        Add to Project
-                    </Button>
+                    <Dialog open={isAddToProjectOpen} onOpenChange={setIsAddToProjectOpen}>
+                        <DialogTrigger asChild>
+                             <Button variant="outline" size="sm">
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Add to Project
+                            </Button>
+                        </DialogTrigger>
+                        <AddToProjectDialog 
+                            researchMarkdown={markdownResult}
+                            researchTitle={form.getValues('topic')}
+                            onOpenChange={setIsAddToProjectOpen}
+                        />
+                    </Dialog>
                 </div>
             </div>
              <ScrollArea className="h-[60vh] rounded-md border">
