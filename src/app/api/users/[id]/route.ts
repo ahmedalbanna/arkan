@@ -59,6 +59,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
                 hasCompletedOnboarding: z.boolean().optional(),
             }).safeParse({ name, bio, hasCompletedOnboarding });
 
+
              if (!validation.success) {
                 return handleApiError(validation.error);
             }
@@ -68,6 +69,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
              const validation = updateUserSchema.safeParse(body);
              if (!validation.success) {
                 return handleApiError(validation.error);
+
             }
             const updateData = { ...validation.data, updatedAt: new Date().toISOString() };
             await adminDb.collection("users").doc(userId).update(updateData);

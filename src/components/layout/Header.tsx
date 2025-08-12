@@ -84,10 +84,12 @@ export function Header() {
   };
 
   const navLinks = [
-    { href: '/', label: t('header.home'), icon: HomeIcon },
-    { href: '/projects', label: 'My Projects', icon: FolderOpen },
-    { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal },
-    { href: '/automations/builder', label: 'Automations', icon: Workflow },
+    { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
+    { href: '/projects', label: 'My Projects', icon: FolderOpen, auth: true },
+    { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal, auth: true },
+    { href: '/automations/builder', label: 'Automations', icon: Workflow, auth: true },
+    { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
+    { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck, auth: 'any'},
   ];
   
   const toolsLinks = [
@@ -114,7 +116,7 @@ export function Header() {
   };
 
   const renderNavLinks = (links: typeof navLinks, isMobile = false) =>
-    links.map((link) => (
+    links.filter(link => link.auth === 'any' || (link.auth === true && firebaseUser)).map((link) => (
       <Button
         key={link.href}
         asChild
@@ -298,11 +300,6 @@ export function Header() {
           ) : (
             <Button asChild><Link href="/login">Login</Link></Button>
           )}
-           <Button asChild variant="ghost" size="icon">
-                <Link href="/docs" aria-label={t('header.documentation')}>
-                    <BookOpenCheck className="h-5 w-5" />
-                </Link>
-            </Button>
           <ThemeToggle />
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />

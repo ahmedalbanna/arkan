@@ -7,10 +7,12 @@ import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 // The 'featuredProjects' prop is no longer used but kept to avoid breaking changes if the page is rendered from different places.
 export default function HomePageContent({ featuredProjects }: { featuredProjects: any[] }) {
     const { t, locale } = useLocalization();
+    const { firebaseUser } = useAuth();
 
     const features = [
       {
@@ -60,12 +62,12 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                       style={{ animationDelay: '2.7s' }}
                     >
                         <Button asChild size="lg" className="font-headline w-full sm:w-auto">
-                            <Link href="/generate">
+                            <Link href={firebaseUser ? "/generate" : "/login"}>
                                 {t('home.exploreProjects')} <ArrowRight className="ml-2 rtl:ml-0 rtl:mr-2" />
                             </Link>
                         </Button>
                         <Button asChild size="lg" variant="secondary" className="font-headline w-full sm:w-auto">
-                            <Link href="/generate?tab=code">{t('home.trySummarizer')}</Link>
+                            <Link href={firebaseUser ? "/generate?tab=code" : "/login"}>{t('home.trySummarizer')}</Link>
                         </Button>
                     </div>
                 </div>
