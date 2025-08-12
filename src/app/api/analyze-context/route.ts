@@ -24,12 +24,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This is a complex task, so we deduct 2 credits.
-    await deductCredit(user.id, 2);
     
     const agentInput = validation.data;
     const result = await analyzeContext(agentInput);
+    
+    // This is a complex task, so we deduct 2 credits.
+    await deductCredit(user.id, 2);
 
     await logGeneration({
         agentId: 'analyze-context',

@@ -18,11 +18,11 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
-    // Deduct credit for image generation
-    await deductCredit(user.id, 5);
-
+        
     const result = await generateImage(validation.data);
+
+    // Deduct credit for image generation after success
+    await deductCredit(user.id, 5);
 
     return createApiResponse(result, 200);
   } catch (error) {

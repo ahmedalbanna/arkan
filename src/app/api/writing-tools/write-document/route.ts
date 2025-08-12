@@ -21,12 +21,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This can be a credit-intensive task
-    await deductCredit(user.id, 3);
     
     const agentInput = validation.data;
     const result = await writeDocument(agentInput);
+
+    // This can be a credit-intensive task, deduct after success
+    await deductCredit(user.id, 3);
 
     await logGeneration({
         agentId: 'write-document',

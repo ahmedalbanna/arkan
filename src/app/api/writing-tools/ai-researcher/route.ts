@@ -18,12 +18,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This is a complex task involving search
-    await deductCredit(user.id, 2);
     
     const agentInput = validation.data;
     const result = await aiResearcher(agentInput);
+    
+    // This is a complex task involving search, deduct after success
+    await deductCredit(user.id, 2);
 
     await logGeneration({
         agentId: 'ai-researcher',

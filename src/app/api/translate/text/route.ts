@@ -6,24 +6,21 @@ import { translateText } from '@/ai/flows/translate-text';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-const translateSchema = z.object({
-  text: z.string().min(1),
-  targetLang: z.string().min(2),
-});
+import { ApiTranslateTextSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = translateSchema.safeParse(body);
+    const validation = ApiTranslateTextSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
-
+    
     const agentInput = validation.data;
     const result = await translateText(agentInput);
+
+    // Deduct credit only after successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: 'translate-text',

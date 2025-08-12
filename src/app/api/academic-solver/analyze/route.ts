@@ -5,29 +5,25 @@ import { z } from 'zod';
 import { deductCredit } from '@/services/credit-service';
 import { analyzeAcademicDocument } from '@/ai/flows/academic-solver';
 import { logGeneration } from '@/services/generation-service';
-import { AcademicDocumentTypeSchema } from '@/ai/flows/academic-solver.shared';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-const analyzeSchema = z.object({
-  documentType: AcademicDocumentTypeSchema,
-  markdown: z.string().min(20, 'Markdown content is too short.'),
-});
+import { ApiAnalyzeSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = analyzeSchema.safeParse(body);
+    const validation = ApiAnalyzeSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
     
     const agentInput = {
       documentType: validation.data.documentType,
       markdownContent: validation.data.markdown,
     };
     const result = await analyzeAcademicDocument(agentInput);
+
+    // Deduct credit only after a successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: `analyze-${validation.data.documentType}`,

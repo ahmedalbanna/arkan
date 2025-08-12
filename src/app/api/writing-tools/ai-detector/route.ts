@@ -18,11 +18,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
     
     const agentInput = validation.data;
     const result = await detectAiContent(agentInput);
+
+    // Deduct credit only after a successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: 'detect-ai-content',

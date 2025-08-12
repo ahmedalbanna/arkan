@@ -19,13 +19,14 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    await deductCredit(user.id, 1);
-
     const agentInput = {
         text: validation.data.text,
     };
     
     const result = await grammarCheck(agentInput);
+    
+    // Deduct credit only after a successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: 'grammar-checker',

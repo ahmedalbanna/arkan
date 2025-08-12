@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -17,12 +18,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This is a complex task
-    await deductCredit(user.id, 2);
     
     const agentInput = validation.data;
     const result = await plagiarismCheck(agentInput);
+    
+    // This is a complex task, deduct after success
+    await deductCredit(user.id, 2);
 
     await logGeneration({
         agentId: 'plagiarism-checker',

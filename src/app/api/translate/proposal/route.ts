@@ -4,27 +4,23 @@
 import { z } from 'zod';
 import { translateProposal } from '@/ai/flows/translate-proposal';
 import { deductCredit } from '@/services/credit-service';
-import { ProjectProposalSchema } from '@/ai/schemas';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-const translateProposalSchema = z.object({
-  proposal: ProjectProposalSchema,
-  targetLang: z.string().min(2),
-});
+import { ApiTranslateProposalSchema } from '@/ai/schemas';
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    const validation = translateProposalSchema.safeParse(body);
+    const validation = ApiTranslateProposalSchema.safeParse(body);
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 2);
-
+    
     const agentInput = validation.data;
     const result = await translateProposal(agentInput);
+    
+    // Deduct credit only after successful generation
+    await deductCredit(user.id, 2);
 
     await logGeneration({
         agentId: 'translate-proposal',

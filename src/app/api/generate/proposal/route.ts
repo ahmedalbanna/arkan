@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -32,9 +31,7 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
-
+    
     let { projectIdea, templateId, customGuidelines, externalContext } = validation.data;
     
     // If the user selects the "automatic" template, first call the AI to select the best template.
@@ -66,6 +63,9 @@ export const POST = withAuth(async ({ request, user }) => {
     };
 
     let result = await generateProposal(agentInput);
+
+    // Deduct credit only after a successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: 'generate-proposal', 

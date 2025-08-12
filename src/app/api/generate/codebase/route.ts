@@ -4,9 +4,9 @@
 import { z } from 'zod';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { ProjectProposalSchema } from '@/ai/schemas';
 import { generateCodebase } from '@/ai/flows/generate-codebase';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
 const codebaseSchema = z.object({
   proposal: ProjectProposalSchema,
@@ -19,12 +19,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This is a very complex task, so we deduct 5 credits.
-    await deductCredit(user.id, 5);
-
+    
     const agentInput = { proposal: validation.data.proposal };
     const result = await generateCodebase(agentInput);
+
+    // This is a very complex task, so we deduct 5 credits after success.
+    await deductCredit(user.id, 5);
 
     await logGeneration({
       agentId: 'generate-codebase',

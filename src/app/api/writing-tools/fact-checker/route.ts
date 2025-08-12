@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -17,12 +18,12 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    // This is a complex task, potentially requiring multiple steps in the future
-    await deductCredit(user.id, 2);
     
     const agentInput = validation.data;
     const result = await factCheckText(agentInput);
+
+    // This is a complex task, deduct after success
+    await deductCredit(user.id, 2);
 
     await logGeneration({
         agentId: 'fact-checker',

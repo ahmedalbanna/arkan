@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -18,10 +17,8 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
-    await deductCredit(user.id, 1);
+        
     const agentInput = validation.data;
-    
     const agentInfo = sectionConfig[agentInput.sectionToGenerate];
 
     if (!agentInfo) {
@@ -29,6 +26,9 @@ export const POST = withAuth(async ({ request, user }) => {
     }
     
     const result = await generateReportSection(agentInput);
+    
+    // Deduct credit only after a successful generation
+    await deductCredit(user.id, 1);
 
     const transformedOutput = { [result.sectionName]: result.content };
     

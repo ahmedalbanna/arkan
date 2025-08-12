@@ -18,10 +18,11 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-
-    await deductCredit(user.id, 1);
     
-    const result = await textToSpeech(validation.data.text);
+    const result = await textToSpeech({text: validation.data.text});
+
+    // Deduct credit only after successful generation
+    await deductCredit(user.id, 1);
 
     await logGeneration({
         agentId: 'text-to-speech',

@@ -23,15 +23,15 @@ export const POST = withAuth(async ({ request, user }) => {
         if(!validation.success) {
             return handleApiError(validation.error);
         }
-
-        // Agent generation is a more complex task
-        await deductCredit(user.id, 2);
-
+        
         const result = await generateAgentConfig({ 
             prompt: validation.data.prompt,
             includeJsonOutput: validation.data.includeJsonOutput,
             contextFiles: validation.data.contextFiles,
         });
+        
+        // Agent generation is a more complex task
+        await deductCredit(user.id, 2);
 
         return createApiResponse(result, 200);
 
