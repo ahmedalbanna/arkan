@@ -4,7 +4,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Loader2, FileText } from 'lucide-react';
-import { toast, useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -13,15 +13,13 @@ import { useMutation } from '@tanstack/react-query';
 import type { AnyProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { lazy, Suspense } from 'react';
 import { translateProposalApi } from '@/services/translation-service';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
+import { ScrollArea } from '../ui/scroll-area';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
-const ProposalViewer = lazy(() => import('./ProposalViewer'));
-
 
 function ProposalSkeleton() {
     return (
@@ -54,7 +52,6 @@ function ProposalSkeleton() {
 }
 
 export function ProposalModeGenerator() {
-    const { toast } = useToast();
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
     
@@ -118,56 +115,36 @@ export function ProposalModeGenerator() {
                 <div className="h-full overflow-y-auto pl-2">
                     {proposal ? (
                         <Card className="h-full flex flex-col">
-                            <Tabs defaultValue="view" className="w-full flex-grow flex flex-col">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <CardTitle className="font-headline text-2xl text-primary">
-                                                {(proposal as any).title || "Generated Proposal"}
-                                            </CardTitle>
-                                            <CardDescription>
-                                                {(proposal as any).category || "Review the generated proposal"}
-                                            </CardDescription>
-                                        </div>
-                                        <TabsList>
-                                            <TabsTrigger value="view">View</TabsTrigger>
-                                            <TabsTrigger value="json">JSON</TabsTrigger>
-                                        </TabsList>
+                            <CardHeader>
+                                <div className="flex justify-between items-start gap-4">
+                                    <div className="flex-1">
+                                        <CardTitle className="font-headline text-2xl text-primary">
+                                            {(proposal as any).title || "Generated Proposal"}
+                                        </CardTitle>
+                                        <CardDescription>
+                                            {(proposal as any).category || "Review the generated proposal"}
+                                        </CardDescription>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex-grow overflow-hidden">
-                                    <TabsContent value="view" className="h-full">
-                                        <div className="h-full overflow-y-auto pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                            <Suspense fallback={<ProposalSkeleton/>}>
-                                                <FormattedProposalView
-                                                    proposal={proposal}
-                                                    onUpdate={handleProposalUpdate}
-                                                    readOnly={generationMutation.isPending || translateMutation.isPending}
-                                                />
-                                            </Suspense>
-                                        </div>
-                                    </TabsContent>
-                                    <TabsContent value="json" className="h-full">
-                                         <div className="h-full overflow-y-auto pr-4 text-left" dir="ltr">
-                                            <Suspense fallback={<ProposalSkeleton/>}>
-                                                <ProposalViewer
-                                                    proposal={proposal}
-                                                    onUpdate={handleProposalUpdate}
-                                                    readOnly={generationMutation.isPending || translateMutation.isPending}
-                                                />
-                                            </Suspense>
-                                        </div>
-                                    </TabsContent>
-                                    
-                                </CardContent>
-                                <div className="border-t p-4 mt-auto">
-                                    <ProposalActions 
-                                        isGenerating={generationMutation.isPending}
-                                        isTranslating={translateMutation.isPending}
-                                        onTranslate={handleTranslateProposal}
-                                    />
+                                     <div className="flex-none">
+                                        <ProposalActions 
+                                            isGenerating={generationMutation.isPending}
+                                            isTranslating={translateMutation.isPending}
+                                            onTranslate={handleTranslateProposal}
+                                        />
+                                    </div>
                                 </div>
-                            </Tabs>
+                            </CardHeader>
+                             <CardContent className="flex-grow overflow-hidden">
+                                <ScrollArea className="h-full pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                                    <Suspense fallback={<ProposalSkeleton/>}>
+                                        <FormattedProposalView
+                                            proposal={proposal}
+                                            onUpdate={handleProposalUpdate}
+                                            readOnly={generationMutation.isPending || translateMutation.isPending}
+                                        />
+                                    </Suspense>
+                                </ScrollArea>
+                            </CardContent>
                         </Card>
                     ) : generationMutation.isPending ? (
                         <ProposalSkeleton />

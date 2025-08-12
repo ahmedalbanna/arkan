@@ -19,6 +19,7 @@ import { SummarizeFullProjectOutput } from '@/ai/flows/summarize-project';
 import { saveAs } from 'file-saver';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useExport } from '@/hooks/use-export';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 import { ProposalTemplate } from '@/services/template-service';
@@ -97,8 +98,8 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
 
   const handleExportDocx = () => {
     if (proposal) {
- exportProposalDocx(proposal as any, selectedDocxTemplate);
- }
+        exportProposalDocx(proposal as any, selectedDocxTemplate);
+    }
   }
   
   const handleExportJson = () => {
@@ -119,63 +120,73 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
   const isBusy = isGenerating || isTranslating || summarizeMutation.isPending || isExporting;
 
   return (
-    <div className="space-y-4">
-        <div className="space-y-2">
-            <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
-            {docxLoaded ? (
-              <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange} disabled={isBusy}>
-                  <SelectTrigger id="docx-template-select">
-                      <SelectValue placeholder="Select a template" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {docxTemplates && Object.entries(docxTemplates).map(([key, template]) => (
-                          <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-            ) : <p>Loading templates...</p> }
-        </div>
-        <div className='flex flex-col space-y-2'>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button disabled={isBusy || !proposal} className="w-full font-headline">
-                        {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                        Export
+    <div className="flex items-center gap-2">
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button onClick={handleSummarizeProject} variant="outline" size="icon" disabled={isBusy || !proposal}>
+                        {summarizeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
                     </Button>
-                </DropdownMenuTrigger>
-                 <DropdownMenuContent className="w-56">
-                    <DropdownMenuItem onClick={handleExportDocx}>
-                        <FileText className="mr-2 h-4 w-4" />
-                        <span>Download as DOCX</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportJson}>
-                        <FileJson className="mr-2 h-4 w-4" />
-                        <span>Download as .arkan File</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                </TooltipTrigger>
+                <TooltipContent><p>Summarize Project</p></TooltipContent>
+            </Tooltip>
+            
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" disabled={isBusy || !proposal}>
+                                <Languages className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem onClick={() => onTranslate('en')} disabled={isTranslating}>Translate to English</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => onTranslate('ar')} disabled={isTranslating}>Translate to Arabic</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </TooltipTrigger>
+                <TooltipContent><p>Translate Proposal</p></TooltipContent>
+            </Tooltip>
 
-            <Button onClick={handleSummarizeProject} variant="outline" className="w-full" disabled={isBusy || !proposal}>
-                {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <BrainCircuit className="mr-2 h-4 w-4" />}
-                Summarize Project
-            </Button>
-             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="secondary" className='w-full' disabled={isBusy || !proposal}>
-                        {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
-                        {t('builder.proposalGenerator.translateAllButton')}
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onTranslate('en')} disabled={isTranslating}>
-                        Translate to English
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => onTranslate('ar')} disabled={isTranslating}>
-                        Translate to Arabic
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="icon" disabled={isBusy || !proposal}>
+                                <Download className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-56">
+                             <div className="px-2 py-1.5 text-sm">
+                                <Label htmlFor="docx-template-select">{t('builder.reportGenerator.docxTemplate')}</Label>
+                                {docxLoaded ? (
+                                <Select value={selectedDocxTemplate} onValueChange={handleDocxTemplateChange} disabled={isBusy}>
+                                    <SelectTrigger id="docx-template-select" className="mt-1 h-8">
+                                        <SelectValue placeholder="Select a template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {docxTemplates && Object.entries(docxTemplates).map(([key, template]) => (
+                                            <SelectItem key={key} value={key}>{t((template as any).name)}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                ) : <p>Loading...</p> }
+                             </div>
+                             <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={handleExportDocx}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                <span>Download as DOCX</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportJson}>
+                                <FileJson className="mr-2 h-4 w-4" />
+                                <span>Download as .arkan File</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </TooltipTrigger>
+                <TooltipContent><p>Export Options</p></TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     </div>
   );
 };

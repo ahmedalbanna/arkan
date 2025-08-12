@@ -26,6 +26,10 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 
 export default function FormattedProposalView({ proposal }: FormattedProposalViewProps) {
     if (!proposal) return null;
+    
+    // Ensure outcomes and criteria are arrays before mapping
+    const expectedOutcomes = Array.isArray(proposal.expected_outcome) ? proposal.expected_outcome : [];
+    const successCriteria = Array.isArray(proposal.success_criteria) ? proposal.success_criteria : [];
 
     return (
         <div className="space-y-6">
@@ -44,8 +48,8 @@ export default function FormattedProposalView({ proposal }: FormattedProposalVie
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Section title="Expected Outcomes">
                     <ul className="list-disc pl-5 space-y-1">
-                        {proposal.expected_outcome?.map((item: string, index: number) => (
-                            <li key={index}> {/* Check if expected_outcome is an array before mapping */}
+                        {expectedOutcomes.map((item: string, index: number) => (
+                            <li key={index}>
                                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{item}</ReactMarkdown>
                             </li>
                         ))}
@@ -53,7 +57,7 @@ export default function FormattedProposalView({ proposal }: FormattedProposalVie
                 </Section>
                 <Section title="Success Criteria">
                     <ul className="list-disc pl-5 space-y-1">
-                        {proposal.success_criteria?.map((item: string, index: number) => (
+                        {successCriteria.map((item: string, index: number) => (
                             <li key={index}>
                                 <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{item}</ReactMarkdown>
                             </li>
