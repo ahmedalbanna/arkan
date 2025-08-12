@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -18,8 +18,8 @@ import { markdownComponents } from '@/lib/markdown-components';
 import type { AIResearcherOutput } from '@/ai/schemas';
 import Link from 'next/link';
 import { useReportStore } from '@/hooks/useReportStore';
-import { exportMarkdownAsDocx, exportComponentAsPDF } from '@/lib/docx-exporter';
-import { useRef } from 'react';
+import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
+import { exportComponentAsPDF } from '@/lib/pdf-exporter';
 
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
@@ -56,7 +56,7 @@ export function AIResearcherTool() {
   const onSubmit = async (data: ResearcherFormValues) => {
     mutation.mutate({ topic: data.topic }, {
         onError: (error) => {
-            toast({ title: "Research Failed", description: error.message, variant: 'destructive' });
+            toast({ title: "Research Failed", description: error.message, variant: "destructive" });
         }
     });
   };
@@ -145,8 +145,8 @@ export function AIResearcherTool() {
                     </Button>
                 </div>
             </div>
-             <ScrollArea className="h-[60vh] rounded-md border" ref={reportRef}>
-                <div className="prose dark:prose-invert max-w-none p-6">
+             <ScrollArea className="h-[60vh] rounded-md border">
+                <div className="prose dark:prose-invert max-w-none p-6" ref={reportRef}>
                     <ReactMarkdown components={markdownComponents}>{markdownResult}</ReactMarkdown>
                 </div>
             </ScrollArea>
