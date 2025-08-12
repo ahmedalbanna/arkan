@@ -82,17 +82,6 @@ export function PlagiarismCheckerTool() {
     });
   };
   
-  const getStatusInfo = (status: ClaimStatus) => {
-    switch (status) {
-      case 'Verified':
-        return { icon: CheckCircle, color: 'text-green-500', badgeVariant: 'default' as const };
-      case 'Inconclusive':
-        return { icon: HelpCircle, color: 'text-yellow-500', badgeVariant: 'secondary' as const };
-      case 'False':
-        return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
-    }
-  };
-  
   const results = mutation.data;
 
   return (
@@ -166,24 +155,28 @@ export function PlagiarismCheckerTool() {
               <p className="text-sm text-muted-foreground">
                 We found potential matches from the following sources. Review them to ensure proper citation.
               </p>
-              <div className="border rounded-lg">
-                {results.matches.length > 0 ? results.matches.map((result: PlagiarismCheckOutput['matches'][0], index: number) => (
-                  <div key={index} className="flex items-center justify-between p-3 border-b last:border-b-0">
-                    <div className="flex-grow truncate mr-4">
-                        <Link href={result.source} target="_blank" className="text-sm font-medium hover:underline flex items-center gap-1">
-                            {result.source} <ExternalLink className="inline h-3 w-3" />
-                        </Link>
-                    </div>
-                    <Badge variant={result.similarity > 75 ? 'destructive' : result.similarity > 50 ? 'secondary' : 'outline'}>
-                      {result.similarity}% Match
-                    </Badge>
-                  </div>
-                )) : (
-                  <div className="text-center text-muted-foreground p-4">
+               {results.matches.length > 0 ? (
+                <div className="space-y-4">
+                    {results.matches.map((match: PlagiarismCheckOutput['matches'][0], index: number) => (
+                        <div key={index} className="border p-4 rounded-lg space-y-2">
+                            <div className="flex justify-between items-start gap-4">
+                                <p className="font-semibold">{match.title}</p>
+                                <Badge variant={match.similarity > 75 ? 'destructive' : match.similarity > 50 ? 'secondary' : 'outline'}>
+                                  {match.similarity}% Match
+                                </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground italic">"{match.summary}"</p>
+                             <Link href={match.source} target="_blank" className="text-xs text-primary hover:underline flex items-center gap-1">
+                                {match.source} <ExternalLink className="inline h-3 w-3" />
+                            </Link>
+                        </div>
+                    ))}
+                </div>
+                ) : (
+                  <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
                     <p>No direct matches found. The content appears to be original.</p>
                   </div>
                 )}
-              </div>
             </div>
           </div>
         )}
