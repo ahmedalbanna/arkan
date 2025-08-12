@@ -26,7 +26,7 @@ export const projectChat = ai.defineFlow(
   async (input): Promise<any> => {
     const stringifiedProjectState = JSON.stringify(input.projectState, null, 2);
 
-    const { stream, response } = await ai.generateStream({
+    const llmResponse = await ai.generate({
         prompt: `You are an AI project assistant. The user has sent you a message about their project. The full context of their current project is provided as a JSON object.
 
 Your task is to be as helpful as possible. Analyze the user's message and decide if you should:
@@ -60,13 +60,13 @@ ${stringifiedProjectState}
             generateProjectPlanTool, // Add the new tool here
         ]
     });
-
-    for await (const chunk of stream) {
-      // In a real implementation, you'd stream chunks back to the client here.
-      // Since this is a server flow, we'll just log them.
-      console.log(chunk.text);
+    
+    // Clean up the response text before returning
+    const cleanedResponse = llmResponse.output();
+    if (typeof cleanedResponse === 'object' && cleanedResponse !== null && 'text' in cleanedResponse && typeof cleanedResponse.text === 'string') {
+        cleanedResponse.text = cleanedResponse.text.replace(/---/g, '').trim();
     }
     
-    return await response;
+    return cleanedResponse;
   }
 );
