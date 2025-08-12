@@ -129,7 +129,7 @@ export default function ProjectPlanGenerator() {
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
               {planGenerationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generate Plan
+              Generate Plan (2 Credits)
             </Button>
           </CardContent>
         </Card>
