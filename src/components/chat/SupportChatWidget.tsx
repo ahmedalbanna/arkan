@@ -241,7 +241,7 @@ export default function SupportChatWidget() {
         )}
         
         {isChatOpen && (
-            <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-lg z-50 flex flex-col">
+            <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-9rem)] sm:w-[400px] sm:h-[550px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">
                      <div className="flex items-center gap-1">
                         {view === 'new_chat_selection' && (
