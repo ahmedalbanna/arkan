@@ -58,7 +58,7 @@ const adminNavLinks = [
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
-    { href: '/automations/builder', labelKey: 'Automations', icon: Workflow },
+    { href: '/admin/automations/builder', labelKey: 'Automations', icon: Workflow },
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
 
