@@ -36,7 +36,6 @@ import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useCodebaseStore } from '@/hooks/useCodebaseStore';
 import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
-import { SaveStatus } from './generate/SaveStatus';
 
 function hasAnyContent(): boolean {
     if (useBuilderStore.getState().projectIdea?.trim()) return true;
@@ -195,8 +194,6 @@ export const SessionActions = () => {
                     </TooltipContent>
                 </Tooltip>
                 
-                <SaveStatus />
-
                  <Button
                     variant="default"
                     size="icon"
