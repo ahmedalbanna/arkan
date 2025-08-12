@@ -15,7 +15,6 @@ import QueryProvider from '@/components/QueryProvider';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAdminAuth } from '@/lib/firebase/admin';
-import { NextResponse } from 'next/server'; // Assuming you're using NextResponse
 import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
 
@@ -49,27 +48,33 @@ const fontCairo = Cairo({
 })
 
 // List of public paths that do not require authentication
-const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design'];
+const PUBLIC_PATHS = ['/login', '/signup', '/forgot-password', '/design', '/docs', '/request'];
+const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
 
 // This function runs on the server for every request
-async function checkAuth(pathname: string, sessionCookieValue: string | undefined) {
-  // If the path is public, do nothing
-  if (PUBLIC_PATHS.includes(pathname) || pathname === '/') {
-    return;
+async function handleAuthRedirects(pathname: string) {
+  const sessionCookie = cookies().get('__session')?.value;
+
+  let isAuthenticated = false;
+  if(sessionCookie) {
+    try {
+        const adminAuth = await getAdminAuth();
+        await adminAuth.verifySessionCookie(sessionCookie, true);
+        isAuthenticated = true;
+    } catch (error) {
+       // Ignore verification errors, treat as not authenticated
+       isAuthenticated = false;
+    }
   }
 
-  // If the path is protected, check for a valid session
-  if (!sessionCookieValue) {
-    redirect('/login'); // Redirect if no session cookie
+  // If user is authenticated and tries to access an auth page, redirect them
+  if (isAuthenticated && AUTH_PATHS.includes(pathname)) {
+    redirect('/generate');
   }
 
-  try {
-    const adminAuth = await getAdminAuth();
-    // Verify the cookie is valid
-    await adminAuth.verifySessionCookie(sessionCookieValue, true);
-  } catch (error) {
-    // If verification fails, redirect to login
-    console.warn('Session cookie verification failed, redirecting to login.');
+  // If user is not authenticated and tries to access a protected page, redirect them
+  const isPublic = PUBLIC_PATHS.includes(pathname) || pathname === '/';
+  if (!isAuthenticated && !isPublic) {
     redirect('/login');
   }
 }
@@ -81,16 +86,11 @@ export default async function RootLayout({
 }>) {
 
   // We need to get the current path to check if it's protected
-  const headersList = await headers();
+  const headersList = headers();
   const pathname = headersList.get('x-next-pathname') || '/';
 
-  // Get the session cookie value here, at the top level
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('__session')?.value;
-
-
-  // Run the server-side authentication check for protected routes
-  await checkAuth(pathname, sessionCookie);
+  // Run the server-side authentication check and redirects
+  await handleAuthRedirects(pathname);
 
   return (
     <html lang="en" dir="ltr" className={cn(fontBody.variable, fontHeadline.variable, fontAlmarai.variable, fontCairo.variable)} suppressHydrationWarning>
