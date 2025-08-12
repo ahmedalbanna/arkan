@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare, Workflow } from 'lucide-react';
+import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare, Workflow, Wrench } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -193,21 +193,6 @@ export function Header() {
 
         <nav className="hidden md:flex flex-wrap items-center justify-center gap-1 mx-auto">
           {isClient ? renderNavLinks(navLinks) : <Skeleton className="h-10 w-48" />}
-           <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                     <Button variant="ghost" className="font-headline">Tools</Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                    {toolsLinks.map(link => (
-                        <DropdownMenuItem key={link.href} asChild>
-                            <Link href={link.href}>
-                                <link.icon className="mr-2 h-4 w-4" />
-                                {link.label}
-                            </Link>
-                        </DropdownMenuItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -256,6 +241,22 @@ export function Header() {
                   <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="mr-2 h-4 w-4" />Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="mr-2 h-4 w-4" />My Dashboard</Link></DropdownMenuItem>
                   <DropdownMenuItem asChild><Link href="/team/manage"><Users className="mr-2 h-4 w-4" />Manage Team</Link></DropdownMenuItem>
+                   <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                            <Wrench className="mr-2 h-4 w-4" />
+                            <span>Tools</span>
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                             {toolsLinks.map(link => (
+                                <DropdownMenuItem key={link.href} asChild>
+                                    <Link href={link.href}>
+                                        <link.icon className="mr-2 h-4 w-4" />
+                                        {link.label}
+                                    </Link>
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuSubContent>
+                    </DropdownMenuSub>
                   <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="mr-2 h-4 w-4" />Payment History</Link></DropdownMenuItem>
                   {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
