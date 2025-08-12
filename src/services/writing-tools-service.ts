@@ -67,6 +67,7 @@ export interface WriteDocumentVariables {
     topic: string;
     documentType: string;
     instructions?: string;
+    tableOfContents?: string[];
 }
 
 

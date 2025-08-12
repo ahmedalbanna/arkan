@@ -22,6 +22,7 @@ const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
   documentType: z.string().min(1, 'Please select a document type.'),
   instructions: z.string().optional(),
+  tableOfContents: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -33,11 +34,15 @@ export function DocumentWriterTool() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { topic: '', documentType: 'essay', instructions: '' },
+    defaultValues: { topic: '', documentType: 'essay', instructions: '', tableOfContents: '' },
   });
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data, {
+    const submissionData = {
+        ...data,
+        tableOfContents: data.tableOfContents ? data.tableOfContents.split('\n').filter(line => line.trim() !== '') : undefined,
+    };
+    mutation.mutate(submissionData, {
       onSuccess: (result) => {
         setGeneratedContent(result.documentContent);
         toast({ title: 'Document generated successfully!' });
@@ -103,6 +108,16 @@ export function DocumentWriterTool() {
               {...form.register('instructions')}
               rows={3}
               placeholder="e.g., Keep the tone formal and include a section on challenges."
+              disabled={mutation.isPending}
+            />
+          </div>
+           <div className="space-y-2">
+            <Label htmlFor="toc">Table of Contents (Optional)</Label>
+            <Textarea
+              id="toc"
+              {...form.register('tableOfContents')}
+              rows={5}
+              placeholder="Enter one heading per line to define the document structure."
               disabled={mutation.isPending}
             />
           </div>

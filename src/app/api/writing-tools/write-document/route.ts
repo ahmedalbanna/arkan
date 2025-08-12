@@ -11,6 +11,7 @@ const writeDocumentSchema = z.object({
   topic: z.string().min(5, 'Topic must be at least 5 characters long.'),
   documentType: z.string().min(3, 'Document type is required.'),
   instructions: z.string().optional(),
+  tableOfContents: z.array(z.string()).optional(),
 });
 
 export const POST = withAuth(async ({ request, user }) => {
