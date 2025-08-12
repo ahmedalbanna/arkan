@@ -9,19 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, ShieldCheck, Sparkles, ExternalLink, UploadCloud } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { usePlagiarismCheck } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
-import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import type { ClaimStatus, FactCheckOutput } from '@/ai/flows/fact-checker';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
 
 const plagiarismSchema = z.object({
-  text: z.string().min(100, 'Please enter at least 100 characters for an effective check.'),
+  text: z.string().min(100, 'Please enter at least 100 characters for a plagiarism check.'),
 });
 
 type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
@@ -163,7 +164,7 @@ export function PlagiarismCheckerTool() {
                 {results.matches.length > 0 ? results.matches.map((result: PlagiarismCheckOutput['matches'][0], index: number) => (
                   <div key={index} className="flex items-center justify-between p-3 border-b last:border-b-0">
                     <div className="flex-grow truncate mr-4">
-                        <Link href={`https://${result.source}`} target="_blank" className="text-sm font-medium hover:underline flex items-center gap-1">
+                        <Link href={result.source} target="_blank" className="text-sm font-medium hover:underline flex items-center gap-1">
                             {result.source} <ExternalLink className="inline h-3 w-3" />
                         </Link>
                     </div>
@@ -183,4 +184,10 @@ export function PlagiarismCheckerTool() {
       </CardContent>
     </Card>
   );
+}
+
+function getScoreColor(score: number) {
+    if (score < 25) return 'text-destructive';
+    if (score < 80) return 'text-yellow-500';
+    return 'text-green-500';
 }
