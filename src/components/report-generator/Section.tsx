@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical } from 'lucide-react';
 import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -24,6 +24,8 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
 import { useRewriteText } from '@/hooks/use-writing-tools';
+import { computeDiff, DiffPart } from '@/lib/diff';
+import { cn } from '@/lib/utils';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -41,6 +43,20 @@ const calculateCounts = (text: string) => {
     return { words, chars };
 };
 
+const DiffView = ({ diff }: { diff: DiffPart[] }) => {
+    return (
+        <p className="whitespace-pre-wrap">
+            {diff.map((part, index) => (
+                <span key={index} className={cn({
+                    'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300': part.type === 'added',
+                    'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 line-through': part.type === 'removed',
+                })}>
+                    {part.value}
+                </span>
+            ))}
+        </p>
+    )
+}
 
 // API call function for text manipulation
 async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
@@ -121,6 +137,8 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const audioRef = useRef<HTMLAudioElement>(null);
     const [localContent, setLocalContent] = useState(content);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+    const [diff, setDiff] = useState<DiffPart[] | null>(null);
+    const [showDiff, setShowDiff] = useState(false);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [showAudioPlayer, setShowAudioPlayer] = useState(false);
     const { toast } = useToast();
@@ -138,6 +156,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         mutationFn: manipulateTextApi,
         onSuccess: (data) => {
             setAiSuggestion(data.rewrittenText);
+            setDiff(computeDiff(content, data.rewrittenText));
             refetchUser();
             toast({ title: "Suggestion Ready", description: "The AI has provided a suggestion." });
         },
@@ -156,6 +175,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         rewriteMutation.mutate({ text: content, style }, {
             onSuccess: (data) => {
                 setAiSuggestion(data.rewrittenText);
+                setDiff(computeDiff(content, data.rewrittenText));
                 refetchUser();
             },
             onError: (error) => toast({ title: "Rewrite Failed", description: error.message, variant: "destructive"})
@@ -178,6 +198,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             return;
         }
         setAiSuggestion(null);
+        setDiff(null);
         const token = await firebaseUser.getIdToken();
         const data = { textToManipulate: content, command };
         manipulateMutation.mutate({ data, token });
@@ -201,11 +222,13 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         if (aiSuggestion !== null) {
             onUpdate(sectionKey, aiSuggestion);
             setAiSuggestion(null);
+            setDiff(null);
         }
     };
 
     const handleRejectSuggestion = () => {
         setAiSuggestion(null);
+        setDiff(null);
     };
 
     const { words, chars } = calculateCounts(content);
@@ -243,14 +266,24 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
                             <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                   <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
-                                </CardTitle>
+                                <div className="flex justify-between items-center">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                    <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
+                                    </CardTitle>
+                                    <Button variant="outline" size="sm" onClick={() => setShowDiff(!showDiff)}>
+                                        <GitCommitVertical className="mr-2 h-4 w-4" />
+                                        {showDiff ? "Hide Changes" : "Show Changes"}
+                                    </Button>
+                                </div>
                             </CardHeader>
                             <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
-                                <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-                                    {aiSuggestion}
-                                </ReactMarkdown>
+                               {showDiff && diff ? (
+                                   <DiffView diff={diff} />
+                               ) : (
+                                   <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                                        {aiSuggestion}
+                                    </ReactMarkdown>
+                               )}
                             </CardContent>
                             <CardFooter className="flex justify-end gap-2 pt-4">
                                 <Button variant="ghost" onClick={handleRejectSuggestion}>
