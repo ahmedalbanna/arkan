@@ -27,6 +27,7 @@ export async function generateProjectPlan(input: GenerateProjectPlanInput): Prom
     name: 'generateProjectPlanPrompt',
     input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
     output: { schema: ProjectPlanSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert project manager and scrum master. Your task is to take a project description and list of deliverables and break them down into a detailed, actionable project plan.
 
 **Analyze the Input:**

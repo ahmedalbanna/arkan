@@ -26,6 +26,7 @@ export async function selectProposalTemplate(input: z.infer<typeof SelectProposa
     name: 'selectProposalTemplatePrompt',
     input: { schema: SelectProposalTemplateInputSchema },
     output: { schema: SelectProposalTemplateOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert project analyst. Your task is to analyze a user's project idea and select the most suitable proposal template from the provided list.
 
 **Available Templates:**

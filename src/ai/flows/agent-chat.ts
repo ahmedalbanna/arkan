@@ -38,9 +38,9 @@ export async function agentChat(input: AgentChatInput): Promise<AgentChatOutput>
   const finalPrompt = `${basePrompt}\n\n${guidelines}\n\n--- USER MESSAGE ---\n${input.message}`;
 
   const llmResponse = await ai.generate({
+      model: 'googleai/gemini-1.5-flash',
       prompt: finalPrompt,
   });
 
   return { response: llmResponse.text.replace(/---/g, '').trim() };
 }
-

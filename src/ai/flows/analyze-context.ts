@@ -43,6 +43,7 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
         mediaFiles: z.any(),
     }) },
     output: { schema: AnalyzeContextOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert data analyst and schema designer. Your task is to analyze a user's prompt and a set of context files, then generate a structured JSON object with a corresponding Zod schema.
 
 **Your Two-Step Process:**

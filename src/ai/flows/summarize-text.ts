@@ -36,6 +36,7 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
     name: 'summarizeTextPrompt',
     input: { schema: SummarizeInputSchema },
     output: { schema: SummarizeOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
 **Desired Length**: The summary should be ${lengthDescriptions[length]}

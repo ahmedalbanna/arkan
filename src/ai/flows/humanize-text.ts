@@ -23,6 +23,7 @@ export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTe
     name: 'humanizeTextPrompt',
     input: { schema: HumanizeTextInputSchema },
     output: { schema: HumanizeTextOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert editor specializing in making AI-generated text sound more natural and human-like. Your task is to rewrite the provided text, focusing on the following principles:
 
 - **Vary Sentence Structure:** Break up long, complex sentences. Introduce a mix of short, punchy sentences and longer, more flowing ones.

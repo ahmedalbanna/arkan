@@ -33,6 +33,7 @@ const promptTemplate = ai.definePrompt({
   name: 'generateTextPrompt',
   input: {schema: GenerateTextInputSchema},
   output: {schema: GenerateTextOutputSchema},
+  model: 'googleai/gemini-1.5-flash',
   prompt: `You are a writing assistant. Generate text based on the following prompt.
 
 Prompt: {{{prompt}}}

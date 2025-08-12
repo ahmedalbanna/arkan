@@ -25,6 +25,7 @@ export async function detectAiContent(input: DetectAIInput): Promise<DetectAIOut
     name: 'detectAiContentPrompt',
     input: { schema: DetectAIInputSchema },
     output: { schema: DetectAIOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert AI content detector. Your task is to analyze the following text for patterns typically found in AI-generated writing.
 
 Consider the following characteristics:

@@ -54,6 +54,7 @@ export async function rewriteText(input: RewriteTextInput): Promise<RewriteTextO
     name: 'rewriteTextPrompt',
     input: { schema: RewriteTextInputSchema },
     output: { schema: RewriteTextOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert editor. Your task is to rewrite the following text based on the provided style instruction, preserving the core meaning and markdown formatting.
 Return only the rewritten text.
 
@@ -93,6 +94,7 @@ export async function summarizeTextWithRatio(input: SummarizeTextWithRatioInput)
     name: 'summarizeTextWithRatioPrompt',
     input: { schema: SummarizeTextWithRatioInputSchema },
     output: { schema: SummarizeTextWithRatioOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary.
 The summary should be approximately {{{ratio}}}% of the original text's length.
 

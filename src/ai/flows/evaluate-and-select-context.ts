@@ -81,6 +81,7 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
     name: 'evaluateAndSelectContextPrompt',
     input: { schema: EvaluateContextInputSchema },
     output: { schema: EvaluateContextOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert project analyst and AI coordinator. Your task is to analyze a project's current state and create an optimal generation plan for a list of target sections.
 
 **Your Analysis Process:**

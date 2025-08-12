@@ -30,6 +30,7 @@ export async function generateAgentConfig(input: z.infer<typeof GenerateAgentCon
     name: 'generateAgentConfigPrompt',
     input: { schema: GenerateAgentConfigInputSchema },
     output: { schema: GenerateAgentConfigOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert AI Agent Engineer. Your task is to take a user's description of a desired AI agent, along with any provided context files, and generate a structured configuration for it.
 
 **User's Request:**

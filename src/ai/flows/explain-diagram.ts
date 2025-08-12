@@ -24,6 +24,7 @@ export async function explainDiagram(input: ExplainDiagramInput): Promise<Explai
     name: 'explainDiagramPrompt',
     input: { schema: ExplainDiagramInputSchema },
     output: { schema: ExplainDiagramOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert systems analyst. Your task is to provide a detailed explanation of the provided diagram.
 
 Follow these guidelines:

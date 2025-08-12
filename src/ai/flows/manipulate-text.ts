@@ -30,6 +30,7 @@ const manipulateTextFlow = ai.defineFlow(
       name: 'manipulateTextPrompt',
       input: { schema: ManipulateTextInputSchema },
       output: { schema: ManipulateTextOutputSchema },
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert editor. A user has provided a piece of text and a command for how to change it. Your task is to follow the command and return only the rewritten text.
 
 Command: {{{command}}}

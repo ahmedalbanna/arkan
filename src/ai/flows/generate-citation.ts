@@ -29,6 +29,7 @@ export async function generateCitation(input: GenerateCitationInput): Promise<Ge
     name: 'generateCitationPrompt',
     input: { schema: GenerateCitationInputSchema },
     output: { schema: GenerateCitationOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert academic librarian specializing in generating accurate citations. Your task is to analyze the provided source material and generate a single, correctly formatted citation in the specified style.
 
 **Citation Style:** {{{style}}}

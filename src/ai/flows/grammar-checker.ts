@@ -30,6 +30,7 @@ export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarChe
     name: 'grammarCheckPrompt',
     input: { schema: GrammarCheckInputSchema },
     output: { schema: GrammarCheckOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert English grammar and spelling checker. Your task is to analyze the following text, correct any errors, and provide a clear explanation for each correction.
 
 **Instructions:**

@@ -36,6 +36,7 @@ const translatePresentationFlow = ai.defineFlow(
       name: 'translatePresentationPrompt',
       input: { schema: TranslatePresentationInputSchema },
       output: { schema: PresentationHistoryEntrySchema },
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert translator. A user has provided a JSON object representing a presentation. Your task is to translate all user-facing text values within this object to the specified target language.
 
 **CRITICAL INSTRUCTIONS:**

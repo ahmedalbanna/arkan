@@ -56,6 +56,7 @@ const generatePresentationFlow = ai.defineFlow(
       name: 'generatePresentationPrompt',
       input: { schema: z.any() }, // Using any() since we are manually constructing the payload
       output: { schema: GeneratePresentationOutputSchema },
+      model: 'googleai/gemini-1.5-pro',
       prompt: `You are an expert presentation creator. Your task is to analyze the provided source documents and create a compelling presentation slide deck.
 
 **Your Process:**

@@ -9,15 +9,12 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema } from '@/ai/schemas';
+import { detectAiContent } from './detect-ai-content';
 
 const EvaluateReportInputSchema = z.object({
   proposal: ProjectProposalSchema.describe("The original project proposal.").optional().nullable(),
-  reportSections: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => SectionNameSchema.safeParse(key).success);
-  }, "All keys must be a valid SectionName").describe("A map of all generated report sections."),
-  diagrams: z.object({}).passthrough().refine(obj => {
-    return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
-  }, "All keys must be a valid DiagramType").optional().describe("A map of all generated PlantUML diagrams.").nullable(),
+  reportSections: z.record(SectionNameSchema, z.string()).describe("A map of all generated report sections."),
+  diagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of all generated PlantUML diagrams.").nullable(),
   acceptanceCriteria: z.array(z.string()).describe("A list of acceptance criteria to evaluate the report against.").nullable().optional(),
 });
 
@@ -30,10 +27,17 @@ const FeedbackItemSchema = z.object({
   solution: z.string().optional().describe("A suggested prompt for an AI agent to fix the issue if status is 'Weak' or 'Not Present'. This prompt should be a clear, actionable command."),
 });
 
+const AIContentAnalysisSchema = z.object({
+    sectionName: z.string(),
+    aiContentScore: z.number().min(0).max(100),
+    analysis: z.string(),
+});
+
 const EvaluateReportOutputSchema = z.object({
   evaluationScore: z.number().min(0).max(100).describe("A numerical score from 0 to 100 representing the report's quality against the criteria."),
   feedback: z.array(FeedbackItemSchema).describe("A list of specific feedback points, including praise for met criteria and suggestions for areas of improvement, each with a status."),
   summary: z.string().describe("A concise summary of the overall evaluation."),
+  aiContentAnalysis: z.array(AIContentAnalysisSchema).optional().describe("An analysis of each section for AI-generated content probability."),
 });
 
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
@@ -56,6 +60,7 @@ const evaluateReportFlow = ai.defineFlow(
       name: 'evaluateReportPrompt',
       input: { schema: EvaluateReportInputSchema },
       output: { schema: EvaluateReportOutputSchema },
+      model: 'googleai/gemini-1.5-pro',
       prompt: `You are an expert quality assurance analyst and document reviewer. Your task is to evaluate a comprehensive project report based on a given set of acceptance criteria.
 
 You will be provided with the full project proposal, all generated report sections, and a list of acceptance criteria.

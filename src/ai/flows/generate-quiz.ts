@@ -33,6 +33,7 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQu
     name: 'generateQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert educator and quiz creator. Your task is to generate a multiple-choice quiz based on the provided text.
 
 **Instructions:**

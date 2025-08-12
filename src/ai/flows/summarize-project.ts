@@ -43,6 +43,7 @@ const summarizeProjectFlow = ai.defineFlow(
       name: 'summarizeProjectPrompt',
       input: { schema: SummarizeProjectInputSchema },
       output: { schema: SummarizeProjectOutputSchema },
+      model: 'googleai/gemini-1.5-flash',
       prompt: input.prompt,
     });
 
@@ -78,6 +79,7 @@ export async function summarizeFullProject(input: SummarizeFullProjectInput): Pr
           name: 'summarizeForPlanningPrompt',
           input: { schema: z.any() },
           output: { schema: SummarizeFullProjectOutputSchema },
+          model: 'googleai/gemini-1.5-flash',
           prompt: `You are a project manager. The user has provided a project proposal and needs a summarized version to use for planning.
 
 **Your Task:**
@@ -99,6 +101,7 @@ ${stringifiedProposal}
     name: 'summarizeFullProjectPrompt',
     input: { schema: SummarizeFullProjectInputSchema },
     output: { schema: SummarizeFullProjectOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert project analyst. Your task is to create a high-level executive summary based on a full project proposal (JSON) and a generated report (Markdown).
 
 **Analysis Steps:**

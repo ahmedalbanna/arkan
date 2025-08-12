@@ -27,6 +27,7 @@ export async function writeDocument(input: WriteDocumentInput): Promise<WriteDoc
     name: 'writeDocumentPrompt',
     input: { schema: WriteDocumentInputSchema },
     output: { schema: WriteDocumentOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert writer and researcher. Your task is to generate a complete, well-structured, and comprehensive document based on the user's request.
 
 **Topic:** {{{topic}}}

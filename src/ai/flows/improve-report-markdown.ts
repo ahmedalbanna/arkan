@@ -24,6 +24,7 @@ export async function improveReportMarkdown(input: ImproveMarkdownInput): Promis
     name: 'improveReportMarkdownPrompt',
     input: { schema: ImproveMarkdownInputSchema },
     output: { schema: ImproveMarkdownOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     prompt: `You are an expert technical editor and document formatter. A user has provided a full report in Markdown format and a set of instructions for how to improve it.
 
 Your tasks are to:

@@ -25,6 +25,7 @@ const analysisPrompt = ai.definePrompt({
   name: 'analyzeAcademicDocumentPrompt',
   input: { schema: AnalyzeDocumentInputSchema },
   output: { schema: AnalyzedDocumentSchema },
+  model: 'googleai/gemini-1.5-pro',
   prompt: `You are an expert academic analyst. Your task is to analyze the following academic document content provided in Markdown. The document is a/an '{{{documentType}}}'.
 
     1.  Identify the main **subject** and a concise **title**.
@@ -67,6 +68,7 @@ const solvePrompt = ai.definePrompt({
   name: 'solveAcademicDocumentPrompt',
   input: { schema: SolveDocumentInputSchema },
   output: { schema: SolvedDocumentSchema },
+  model: 'googleai/gemini-1.5-pro',
   prompt: `You are an expert tutor specializing in **{{{analyzedDocument.subject}}}**. Your task is to provide a comprehensive and accurate solution to the following '{{{analyzedDocument.documentType}}}'. **You must provide your response in {{{analyzedDocument.language}}}**.
 
     {{#if contextMarkdown}}
@@ -107,4 +109,3 @@ const solvePrompt = ai.definePrompt({
 
   return output;
 }
-

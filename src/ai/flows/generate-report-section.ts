@@ -48,6 +48,7 @@ const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: z.any() }, // Input is manually constructed
     output: { schema: GenerateSectionOutputSchema },
+    model: 'googleai/gemini-1.5-pro',
     system: '{{systemPrompt}}', // System prompt will be passed in
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.

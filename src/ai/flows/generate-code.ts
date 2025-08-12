@@ -37,6 +37,7 @@ const generateCodeFlow = ai.defineFlow(
       name: 'generateCodePrompt',
       input: { schema: GenerateCodeInputSchema },
       output: { schema: GenerateCodeOutputSchema },
+      model: 'googleai/gemini-1.5-flash',
       prompt: `You are an expert frontend developer. Your task is to generate the HTML, CSS, and JavaScript for a UI component based on a user's prompt.
 
 Guidelines:

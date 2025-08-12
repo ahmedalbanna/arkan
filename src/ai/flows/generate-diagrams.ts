@@ -53,6 +53,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
+        model: 'googleai/gemini-1.5-flash',
         prompt: `${basePrompt}
 
 {{#if guidelines}}
