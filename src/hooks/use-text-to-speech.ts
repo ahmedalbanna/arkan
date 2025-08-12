@@ -36,8 +36,7 @@ async function textToSpeechApi(variables: { data: TTSInput, token: string }): Pr
  * @returns The result of the useMutation hook, including the `mutate` function to trigger TTS.
  */
 export function useTextToSpeech() {
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { firebaseUser, refetchUser } = useAuth();
 
   return useMutation<TTSOutput, Error, TTSInput>({
     mutationFn: async (data: TTSInput) => {
@@ -45,10 +44,7 @@ export function useTextToSpeech() {
       return textToSpeechApi({ data, token });
     },
     onSuccess: () => {
-      // Invalidate user query to update credits after successful generation
-      if (firebaseUser) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-      }
+      refetchUser();
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Speech Generation Failed");

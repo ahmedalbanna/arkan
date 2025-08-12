@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush } from 'lucide-react';
 import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-components';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -22,6 +22,8 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Textarea } from '../ui/textarea';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
+import { useRewriteText } from '@/hooks/use-writing-tools';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -118,17 +120,14 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [localContent, setLocalContent] = useState(content);
-    const [isAiPopoverOpen, setIsAiPopoverOpen] = useState(false);
-    const [isEditorPopoverOpen, setIsEditorPopoverOpen] = useState(false);
     const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
     const [showAudioPlayer, setShowAudioPlayer] = useState(false);
     const { toast } = useToast();
-    const { firebaseUser } = useAuth();
-    const queryClient = useQueryClient();
+    const { firebaseUser, refetchUser } = useAuth();
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
-
+    const rewriteMutation = useRewriteText();
 
     useEffect(() => {
         setLocalContent(content);
@@ -139,7 +138,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         mutationFn: manipulateTextApi,
         onSuccess: (data) => {
             setAiSuggestion(data.rewrittenText);
-            queryClient.invalidateQueries({ queryKey: ['user', firebaseUser?.uid] });
+            refetchUser();
             toast({ title: "Suggestion Ready", description: "The AI has provided a suggestion." });
         },
         onError: (error: Error) => {
@@ -150,12 +149,20 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 variant: "destructive"
             });
         },
-        onSettled: () => {
-            setIsAiPopoverOpen(false);
-        }
     });
+    
+    const handleRewriteAction = (style: string) => {
+        setAiSuggestion(null);
+        rewriteMutation.mutate({ text: content, style }, {
+            onSuccess: (data) => {
+                setAiSuggestion(data.rewrittenText);
+                refetchUser();
+            },
+            onError: (error) => toast({ title: "Rewrite Failed", description: error.message, variant: "destructive"})
+        });
+    }
 
-    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending;
+    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending || rewriteMutation.isPending;
 
     // Effect to play audio when src changes
     useEffect(() => {
@@ -188,15 +195,6 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 toast({ title: "Reading Aloud", description: "Audio generation successful."});
             },
         });
-    };
-
-    const handleExportDocx = async () => {
-        await exportSectionAsDocx(title, content, 'modern');
-        setIsEditorPopoverOpen(false);
-    };
-
-    const handleExportPdf = async () => {
-       setIsEditorPopoverOpen(false);
     };
 
     const handleAcceptSuggestion = () => {
@@ -271,52 +269,28 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             Read Aloud
                         </Button>
 
-                        <Popover open={isAiPopoverOpen} onOpenChange={setIsAiPopoverOpen}>
-                            <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" title={t('builder.Section.tooltips.aiActions')}>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm">
                                     <Wand2 className="h-4 w-4 mr-2" /> AI Actions
                                 </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-56 p-2">
-                                {isProcessingAi ? (
-                                    <div className="flex items-center justify-center p-4">
-                                        <Loader2 className="h-6 w-6 animate-spin" />
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-1">
-                                        <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Summarize this text concisely.')}>
-                                            <BookText className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.summarize')}
-                                        </Button>
-                                        <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Expand on this topic, adding more detail.')}>
-                                            <Maximize className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.expand')}
-                                        </Button>
-                                        <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Rewrite this to sound more professional.')}>
-                                            <PenLine className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.rewrite')}
-                                        </Button>
-                                        <Button variant="ghost" className="justify-start" onClick={() => handleAiAction('Correct any grammar and spelling mistakes in this text. Do not change the meaning or style.')}>
-                                            <SpellCheck className="mr-2 h-4 w-4" /> {t('builder.Section.aiActions.checkGrammar')}
-                                        </Button>
-                                    </div>
-                                )}
-                            </PopoverContent>
-                        </Popover>
-                        <Popover open={isEditorPopoverOpen} onOpenChange={setIsEditorPopoverOpen}>
-                            <PopoverTrigger asChild>
-                                <Button variant="ghost" size="sm" title={t('builder.Section.tooltips.editorOptions')}>
-                                    <PenSquare className="h-4 w-4 mr-2" /> Editor Tools
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-56 p-2">
-                                <div className="grid gap-1">
-                                    <Button variant="ghost" className="justify-start" onClick={handleExportDocx}>
-                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.Section.editorActions.downloadDocx')}
-                                    </Button>
-                                    <Button variant="ghost" className="justify-start" onClick={handleExportPdf}>
-                                        <FileDown className="mr-2 h-4 w-4" /> {t('builder.Section.editorActions.downloadPdf')}
-                                    </Button>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleAiAction('Summarize this text concisely.')}><BookText className="mr-2 h-4 w-4" />Summarize</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction('Expand on this topic, adding more detail.')}><Maximize className="mr-2 h-4 w-4" />Expand</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction('Correct any grammar and spelling mistakes.')}><SpellCheck className="mr-2 h-4 w-4" />Check Grammar</DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuSub>
+                                    <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />Rewrite</DropdownMenuSubTrigger>
+                                     <DropdownMenuSubContent>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>Formal</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>Friendly</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>Simple</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Creative')}>Creative</DropdownMenuItem>
+                                    </DropdownMenuSubContent>
+                                </DropdownMenuSub>
+                            </DropdownMenuContent>
+                         </DropdownMenu>
                     </div>
                 </div>
             </TabsContent>

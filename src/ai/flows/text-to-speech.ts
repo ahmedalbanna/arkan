@@ -59,12 +59,14 @@ function chunkText(text: string, chunkSize = 4500): string[] {
 export const textToSpeech = ai.defineFlow(
   {
     name: 'textToSpeechFlow',
-    inputSchema: z.string(),
+    inputSchema: z.object({
+        text: z.string()
+    }),
     outputSchema: z.object({
       audioDataUri: z.string().describe("The generated audio as a Base64 data URI."),
     }),
   },
-  async (text) => {
+  async ({ text }) => {
     const textChunks = chunkText(text);
     const audioBuffers: Buffer[] = [];
 
