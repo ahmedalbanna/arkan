@@ -42,7 +42,7 @@ export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOut
 }
 
 /**
- * Custom mutation hook to update an existing diagram from PlantUML code.
+ * Custom mutation hook to update an existing diagram from its PlantUML code.
  */
 export function useUpdateDiagram(onSuccessCallback?: (data: { plantUmlCode: string; imageUrl: string }, variables: string) => void) {
   const { firebaseUser } = useAuth();
