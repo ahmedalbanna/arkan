@@ -164,9 +164,9 @@ export function UploadManager() {
                         <ul className="space-y-1 list-none p-2">
                             {externalContext.map((item, index) => (
                                 <li key={index} className="flex items-center justify-between p-2 rounded-md hover:bg-muted">
-                                    <div className="flex items-center gap-2 truncate">
+                                    <div className="flex items-center gap-2 truncate ">
                                         <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                        <span className="truncate font-medium text-sm">{item.fileName}</span>
+                                        <span className="truncate font-medium text-sm" style={{ maxWidth: '200px' }}>{item.fileName}</span>
                                     </div>
                                     <div className="flex items-center">
                                         <Select value={item.type} onValueChange={(value: ContextFileType) => updateExternalContextType(index, value)}>
