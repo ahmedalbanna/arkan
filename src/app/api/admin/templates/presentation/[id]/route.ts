@@ -1,23 +1,19 @@
 
+
 // src/app/api/templates/presentation/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { UpdatePresentationTemplateSchema } from '@/ai/schemas/template-schemas';
 
-const updateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "Description is required").optional(),
-  primaryAgentId: z.string().optional(),
-  relevantReportSectionIds: z.array(z.string()).optional(),
-});
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
         const id = params.id;
         const templateRef = adminDb.collection('templates').doc('presentation').collection('items').doc(id);
         const body = await request.json();
-        const validation = updateSchema.safeParse(body);
+        const validation = UpdatePresentationTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);

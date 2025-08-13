@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-generation-templates';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { CreateReportTemplateSchema } from '@/ai/schemas/template-schemas';
 
 // This is a public endpoint
 export async function GET() {
@@ -27,17 +28,11 @@ export async function GET() {
     }
 }
 
-const createReportTemplateSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  agentIds: z.array(z.string()).min(1, "At least one agent must be selected."),
-});
 
 export const POST = withAuth(async ({ request }) => {
     try {
         const body = await request.json();
-        const validation = createReportTemplateSchema.safeParse(body);
+        const validation = CreateReportTemplateSchema.safeParse(body);
         if(!validation.success) {
             return handleApiError(validation.error);
         }

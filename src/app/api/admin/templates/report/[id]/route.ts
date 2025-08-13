@@ -1,22 +1,18 @@
 
+
 // src/app/api/templates/report/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-
-const updateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "Description is required").optional(),
-  agentIds: z.array(z.string()).min(1, "At least one agent ID is required.").optional(),
-});
+import { UpdateReportTemplateSchema } from '@/ai/schemas/template-schemas';
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
         const id = params.id;
         const templateRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
         const body = await request.json();
-        const validation = updateSchema.safeParse(body);
+        const validation = UpdateReportTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);

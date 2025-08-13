@@ -1,6 +1,8 @@
 
 
 import { z } from 'zod';
+import { DocxStyleOptionsSchema, PptxStyleOptionsSchema, AgentPromptSchema } from './schemas/template-schemas';
+
 
 // Generic Schemas
 export const DiagramTypeSchema = z.enum([
@@ -706,7 +708,7 @@ export const TopicExplainerInputSchema = z.object({
 export type TopicExplainerInput = z.infer<typeof TopicExplainerInputSchema>;
 
 export const TopicExplainerOutputSchema = z.object({
-  explanation: z.string().describe('A simple, easy-to-understand explanation of the topic, formatted in Markdown.'),
+  explanation: z.string().describe('A simple, easy-to-understand explanation of the topic, formatted as markdown.'),
 });
 export type TopicExplainerOutput = z.infer<typeof TopicExplainerOutputSchema>;
 
@@ -857,15 +859,9 @@ export const ApiAgentGuidelineSchema = z.object({
   isDefault: z.boolean(),
 });
 
-export const ApiAgentPromptSchema = z.object({
-  base: z.string().min(1),
-  guidelines: z.array(ApiAgentGuidelineSchema).optional(),
-  jsonStructure: z.any().optional(),
-});
-
 export const ApiUpdateAgentSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  prompt: z.union([z.string().min(10), ApiAgentPromptSchema]).optional(),
+  prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
   isEnabled: z.boolean().optional(),
 });
 
@@ -1041,4 +1037,17 @@ export const ProjectStateSchema = z.object({
         questionDocuments: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })),
         externalContext: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })),
     }).optional(),
+});
+
+export const ApiGeneratePresentationSchema = z.object({
+  proposal: z.lazy(() => ProjectProposalSchema).nullable().optional(),
+  projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
+  guidelines: z.array(z.string()).optional(),
+  sourceDocuments: z.array(z.object({
+    fileName: z.string(),
+    content: z.string(),
+  })).min(1, "At least one source document is required."),
+  templateId: z.string(),
+  tone: z.string().optional(),
+  complexity: z.string().optional(),
 });

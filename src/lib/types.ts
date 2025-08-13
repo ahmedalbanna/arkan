@@ -1,6 +1,9 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
+import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
+import { z } from 'zod';
 
 
 export type {
@@ -23,7 +26,6 @@ export type { Codebase } from '@/ai/flows/generate-codebase';
 export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
 export type { TeamWithMembers } from '@/services/team-service';
 export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
-export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
@@ -32,6 +34,14 @@ export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
 export type { DiffPart } from '@/lib/diff';
 export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
+
+// Re-exporting generated Template types from Zod schemas
+export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
+export type PptxTemplate = z.infer<typeof PptxTemplateSchema>;
+export type ProposalTemplate = z.infer<typeof ProposalTemplateSchema>;
+export type ReportGenerationTemplate = z.infer<typeof ReportGenerationTemplateSchema>;
+export type PresentationGenerationTemplate = z.infer<typeof PresentationGenerationTemplateSchema>;
+export type PptxStyleOptions = z.infer<typeof PptxTemplateSchema>['styles'];
 
 
 export interface Notification {
@@ -67,22 +77,6 @@ export interface LoginCredentials {
 
 // --- PPTX Template Types ---
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
-
-export interface PptxStyleOptions {
-    background: { color: string };
-    title: { fontFace: string; fontSize: number; bold: boolean; color: string; align: 'left' | 'center' | 'right' };
-    body: { fontFace: string; fontSize: number; color: string; align: 'left' | 'center' | 'right' };
-    bullet: { type: 'bullet' | 'number' };
-}
-
-export interface PptxTemplate {
-    id: string;
-    name: string;
-    styles: PptxStyleOptions;
-    description: string;
-    imageUrl: string;
-    dataAiHint: string;
-}
 
 export type TemplateKey = 'modern' | 'classic' | 'academic';
 

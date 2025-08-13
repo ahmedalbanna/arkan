@@ -1,17 +1,12 @@
 
+
 // src/app/api/templates/proposal/[id]/route.ts
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
-
-const updateSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  description: z.string().min(1, "Description is required").optional(),
-  prompt: z.string().min(10, "Prompt is required").optional(),
-  guidelines: z.array(z.string()).optional(),
-});
+import { UpdateProposalTemplateSchema } from '@/ai/schemas/template-schemas';
 
 export const PUT = withAuth(async ({ request, params }) => {
     try {
@@ -28,7 +23,7 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
         
         const body = await request.json();
-        const validation = updateSchema.safeParse(body);
+        const validation = UpdateProposalTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);

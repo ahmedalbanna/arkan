@@ -2,50 +2,9 @@
 
 'use client';
 
-import { IStylesOptions, Document } from 'docx';
+import type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/lib/types';
 
-// This file centralizes fetching and updating for generation templates.
-
-export interface ProposalTemplate {
-    id: string;
-    name: string;
-    description: string;
-    prompt: string;
-    guidelines?: string[];
-    jsonStructure?: any;
-}
-
-export interface ReportGenerationTemplate {
-    id: string;
-    name: string;
-    description: string;
-    agentIds: string[]; // List of agent IDs included in this report type
-}
-
-export interface PresentationGenerationTemplate {
-    id: string;
-    name: string;
-    description: string;
-    primaryAgentId: string; // Likely 'generate-presentation'
-    relevantReportSectionIds?: string[];
-}
-
-export interface DocxTemplate {
-    id: string;
-    name: string;
-    description: string;
-    styles: IStylesOptions;
-    dataAiHint?: string;
-}
-
-export interface PptxTemplate {
-    id: string;
-    name: string;
-    description: string;
-    styles: any;
-    imageUrl: string;
-    dataAiHint: string;
-}
+export type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate };
 
 export type DocxTemplatesRecord = Record<string, DocxTemplate>;
 export type PptxTemplatesRecord = Record<string, PptxTemplate>;
