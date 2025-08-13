@@ -1,9 +1,9 @@
-
 // src/app/api/templates/docx/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultTemplates, type TemplateKey } from '@/lib/docx-styles';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { z } from 'zod';
+import { createGenerativeTemplate } from '@/lib/db/queries';
 
 // This endpoint is public and does not require authentication
 // as all users need to be able to fetch the templates for exporting.
@@ -51,25 +51,17 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const { id, name, description } = validation.data;
-        const docRef = adminDb.collection('templates').doc('docx').collection('styles').doc(id);
-
-        const doc = await docRef.get();
-        if(doc.exists) {
-            return handleApiError({ message: 'A template with this ID already exists.'}, 409);
-        }
-
+        
         // Create a new template based on the 'modern' default
-        const newTemplate = {
-            id,
+        const newTemplateData = {
             name,
             description,
             styles: defaultTemplates.modern.styles,
             imageUrl: 'https://placehold.co/400x565.png',
             dataAiHint: 'document modern',
-            createdAt: new Date().toISOString()
         };
 
-        await docRef.set(newTemplate);
+        const newTemplate = await createGenerativeTemplate('docx', id, newTemplateData);
 
         return createApiResponse(newTemplate, 201);
     } catch (error) {

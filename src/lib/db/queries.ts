@@ -1,10 +1,12 @@
 
+
 'use server';
 import { getAdminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { Agent, AgentData } from '@/lib/agents';
 import { AGENTS as defaultAgents } from '@/lib/agents';
+import type { ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
 
 export type UserRole = 'user' | 'admin';
 
@@ -304,4 +306,29 @@ export async function getAgent(agentId: string): Promise<AgentData | null> {
         const defaultAgent = defaultAgents.find(a => a.id === agentId);
         return defaultAgent || null;
     }
+}
+
+
+// --- Template Queries ---
+export type TemplateType = 'proposal' | 'report' | 'presentation' | 'docx' | 'pptx';
+export type TemplateData = ProposalTemplate | ReportGenerationTemplate | PresentationGenerationTemplate | DocxTemplate | PptxTemplate;
+
+export async function createGenerativeTemplate(templateType: TemplateType, id: string, data: Omit<TemplateData, 'id' | 'createdAt'>): Promise<TemplateData> {
+    const collectionName = ['docx', 'pptx'].includes(templateType) ? 'styles' : 'items';
+    const docRef = adminDb.collection('templates').doc(templateType).collection(collectionName).doc(id);
+
+    const doc = await docRef.get();
+    if(doc.exists) {
+        throw { status: 409, message: 'A template with this ID already exists.' };
+    }
+    
+    const newTemplate = {
+        id,
+        ...data,
+        createdAt: new Date().toISOString(),
+    };
+
+    await docRef.set(newTemplate);
+
+    return newTemplate as TemplateData;
 }

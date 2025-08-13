@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/proposal-templates';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { CreateProposalTemplateSchema } from '@/ai/schemas/template-schemas';
+import { createGenerativeTemplate } from '@/lib/db/queries';
 
 // This endpoint is public for now, but could be restricted
 export async function GET() {
@@ -36,22 +37,11 @@ export const POST = withAuth(async ({ request }) => {
             return handleApiError(validation.error);
         }
 
-        const { id, ...agentData } = validation.data;
-        const docRef = adminDb.collection('templates').doc('proposal').collection('items').doc(id);
+        const { id, ...templateData } = validation.data;
+        
+        const newTemplate = await createGenerativeTemplate('proposal', id, templateData);
 
-        const doc = await docRef.get();
-        if(doc.exists) {
-            return handleApiError({ message: 'A template with this ID already exists.'}, 409);
-        }
-
-        const newTemplate = {
-            ...agentData,
-            createdAt: new Date().toISOString()
-        };
-
-        await docRef.set(newTemplate);
-
-        return createApiResponse({ id, ...newTemplate }, 201);
+        return createApiResponse(newTemplate, 201);
     } catch (error) {
         return handleApiError(error);
     }

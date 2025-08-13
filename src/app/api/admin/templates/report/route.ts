@@ -4,6 +4,7 @@ import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-ge
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { z } from 'zod';
 import { CreateReportTemplateSchema } from '@/ai/schemas/template-schemas';
+import { createGenerativeTemplate } from '@/lib/db/queries';
 
 // This is a public endpoint
 export async function GET() {
@@ -38,16 +39,10 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const { id, ...templateData } = validation.data;
-        const docRef = adminDb.collection('templates').doc('report').collection('items').doc(id);
+        
+        const newTemplate = await createGenerativeTemplate('report', id, templateData);
 
-        const doc = await docRef.get();
-        if(doc.exists) {
-            return handleApiError({ message: 'A template with this ID already exists.'}, 409);
-        }
-
-        await docRef.set({ ...templateData, createdAt: new Date().toISOString() });
-
-        return createApiResponse({ id, ...templateData }, 201);
+        return createApiResponse(newTemplate, 201);
     } catch (error) {
         return handleApiError(error);
     }
