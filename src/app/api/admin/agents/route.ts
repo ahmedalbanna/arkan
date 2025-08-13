@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS as defaultAgents, AgentCategory, type AgentKnowledgeSource } from '@/lib/agents';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { AgentPromptSchema } from '@/ai/schemas/template-schemas';
 
 // GET /api/agents
 export const GET = withAuth(async () => {
@@ -41,17 +42,6 @@ export const GET = withAuth(async () => {
 }, { requireAdmin: true });
 
 
-const agentGuidelineSchema = z.object({
-  text: z.string().min(1),
-  isDefault: z.boolean(),
-});
-
-const agentPromptSchema = z.object({
-  base: z.string().min(1),
-  guidelines: z.array(agentGuidelineSchema).optional(),
-  jsonStructure: z.any().optional(),
-});
-
 const agentKnowledgeSourceSchema = z.object({
     name: z.string(),
     type: z.enum(['file', 'text', 'web']),
@@ -65,7 +55,7 @@ const createAgentSchema = z.object({
   description: z.string().min(1, "Description is required"),
   category: z.nativeEnum(AgentCategory),
   pageUrl: z.string().min(1, "Page URL is required"),
-  prompt: z.union([z.string().min(10), agentPromptSchema]),
+  prompt: z.union([z.string().min(10), AgentPromptSchema]),
   knowledge: z.array(agentKnowledgeSourceSchema).optional(),
 });
 

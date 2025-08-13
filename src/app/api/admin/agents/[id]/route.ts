@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS } from '@/lib/agents';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { ApiUpdateAgentSchema } from '@/ai/schemas';
 
 
 // GET /api/agents/[id]
@@ -25,25 +26,7 @@ export const GET = withAuth(async ({ params }) => {
 }, { requireAdmin: true });
 
 
-const agentGuidelineSchema = z.object({
-  text: z.string().min(1),
-  isDefault: z.boolean(),
-});
-
-const agentPromptSchema = z.object({
-  base: z.string().min(1),
-  guidelines: z.array(agentGuidelineSchema).optional(),
-  jsonStructure: z.any().optional(),
-});
-
 // PUT /api/agents/[id]
-const updateAgentSchema = z.object({
-  name: z.string().min(1, "Name is required").optional(),
-  prompt: z.union([z.string().min(10), agentPromptSchema]).optional(),
-  isEnabled: z.boolean().optional(),
-});
-
-
 export const PUT = withAuth(async ({ request, params }) => {
     try {
         const agentId = params.id;
@@ -54,7 +37,7 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         const body = await request.json();
-        const validation = updateAgentSchema.safeParse(body);
+        const validation = ApiUpdateAgentSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }

@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { AgentPromptSchema } from '@/ai/schemas';
 
 // Base schema for common template fields
 const BaseTemplateSchema = z.object({
@@ -7,6 +6,17 @@ const BaseTemplateSchema = z.object({
   name: z.string(),
   description: z.string(),
 });
+
+// Agent Prompt schema
+export const AgentPromptSchema = z.object({
+    base: z.string().min(1, "Base prompt is required."),
+    guidelines: z.array(z.object({
+        text: z.string(),
+        isDefault: z.boolean(),
+    })).optional(),
+    jsonStructure: z.any().optional(),
+});
+
 
 // DOCX Styles
 export const DocxStyleOptionsSchema = z.object({}).passthrough(); // Use passthrough for complex, nested docx styles

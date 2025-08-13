@@ -854,11 +854,6 @@ export const ApiSolveSchema = z.object({
   contextMarkdown: z.string().optional(),
 });
 
-export const ApiAgentGuidelineSchema = z.object({
-  text: z.string().min(1),
-  isDefault: z.boolean(),
-});
-
 export const ApiUpdateAgentSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
