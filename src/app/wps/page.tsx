@@ -1,7 +1,7 @@
 
 'use client';
 
-import HomePage from '@/components/home/HomePage';
+import HomePage from '@/components/wps/HomePage';
 
 export default function WPSOfficePage() {
     return <HomePage />;

@@ -10,17 +10,17 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useRouter } from 'next/navigation';
 
 import EditorPage from '@/app/editor/page';
-import { DocumentTabs } from '@/components/home/DocumentTabs';
-import { ContentSidebar } from '@/components/home/ContentSidebar';
-import { RecentProjectsContent } from '@/components/home/RecentProjectsContent';
-import { CreateNewPage } from '@/components/home/CreateNewPage';
-import { WpsAiPage } from '@/components/home/WpsAiPage';
-import { DocsPageContent } from '@/components/home/DocsPageContent';
-import { SlidesPageContent } from '@/components/home/SlidesPageContent';
-import { SheetsPageContent } from '@/components/home/SheetsPageContent';
-import { PdfPageContent } from '@/components/home/PdfPageContent';
-import type { DocumentTab } from '@/components/home/DocumentTabs';
-import { NavItem, WLogo, PLogo, SLogo, PDFLogo } from '@/components/home/NavItem';
+import { DocumentTabs } from '@/components/wps/DocumentTabs';
+import { ContentSidebar } from '@/components/wps/ContentSidebar';
+import { RecentProjectsContent } from '@/components/wps/RecentProjectsContent';
+import { CreateNewPage } from '@/components/wps/CreateNewPage';
+import { WpsAiPage } from '@/components/wps/WpsAiPage';
+import { DocsPageContent } from '@/components/wps/DocsPageContent';
+import { SlidesPageContent } from '@/components/wps/SlidesPageContent';
+import { SheetsPageContent } from '@/components/wps/SheetsPageContent';
+import { PdfPageContent } from '@/components/wps/PdfPageContent';
+import type { DocumentTab } from '@/components/wps/DocumentTabs';
+import { NavItem, WLogo, PLogo, SLogo, PDFLogo } from '@/components/wps/NavItem';
 
 const initialTabs: DocumentTab[] = [
   { id: 1, title: 'Home', type: 'home' },
