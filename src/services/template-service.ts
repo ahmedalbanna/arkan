@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/lib/types';
@@ -10,8 +9,10 @@ export type DocxTemplatesRecord = Record<string, DocxTemplate>;
 export type PptxTemplatesRecord = Record<string, PptxTemplate>;
 
 // --- Proposal Templates ---
-export async function fetchProposalTemplates(): Promise<ProposalTemplate[]> {
-    const response = await fetch('/api/admin/templates/proposal');
+export async function fetchProposalTemplates(token: string): Promise<ProposalTemplate[]> {
+    const response = await fetch('/api/admin/templates/proposal', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch proposal templates');
     }
@@ -60,8 +61,10 @@ export async function deleteProposalTemplate(id: string, token: string): Promise
 }
 
 // --- Report Templates ---
-export async function fetchReportTemplates(): Promise<ReportGenerationTemplate[]> {
-    const response = await fetch('/api/admin/templates/report');
+export async function fetchReportTemplates(token: string): Promise<ReportGenerationTemplate[]> {
+    const response = await fetch('/api/admin/templates/report', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch report templates');
     }
@@ -111,8 +114,10 @@ export async function deleteReportTemplate(id: string, token: string): Promise<{
 }
 
 // --- Presentation Templates ---
-export async function fetchPresentationTemplates(): Promise<PresentationGenerationTemplate[]> {
-    const response = await fetch('/api/admin/templates/presentation');
+export async function fetchPresentationTemplates(token: string): Promise<PresentationGenerationTemplate[]> {
+    const response = await fetch('/api/admin/templates/presentation', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
     if (!response.ok) {
         throw new Error('Failed to fetch presentation templates');
     }

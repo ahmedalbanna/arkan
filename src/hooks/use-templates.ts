@@ -41,9 +41,14 @@ interface UpdateTemplateVariables<T> {
 }
 
 export function useProposalTemplates() {
+  const { firebaseUser } = useAuth();
   return useQuery<ProposalTemplate[]>({
     queryKey: templateKeys.proposals(),
-    queryFn: fetchProposalTemplates,
+    queryFn: async () => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchProposalTemplates(token);
+    },
+    enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     meta: {
       onError: (error: Error) => {
@@ -54,9 +59,14 @@ export function useProposalTemplates() {
 }
 
 export function useReportTemplates() {
+  const { firebaseUser } = useAuth();
   return useQuery<ReportGenerationTemplate[]>({
     queryKey: templateKeys.reports(),
-    queryFn: fetchReportTemplates,
+    queryFn: async () => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchReportTemplates(token);
+    },
+    enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5,
     meta: {
       onError: (error: Error) => {
@@ -67,9 +77,14 @@ export function useReportTemplates() {
 }
 
 export function usePresentationTemplates() {
+  const { firebaseUser } = useAuth();
   return useQuery<PresentationGenerationTemplate[]>({
     queryKey: templateKeys.presentations(),
-    queryFn: fetchPresentationTemplates,
+    queryFn: async () => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchPresentationTemplates(token);
+    },
+    enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5,
     meta: {
       onError: (error: Error) => {
