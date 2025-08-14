@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -34,6 +33,8 @@ import { useReportTemplates } from '@/hooks/use-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { Textarea } from '../ui/textarea';
 import { Settings } from 'lucide-react';
+import { evaluateContextApi } from '@/services/report-service';
+import { getAuthenticatedToken } from '@/lib/authUtils';
 
 const orderedSections = SectionNameSchema.options;
 
@@ -86,7 +87,7 @@ function ToolsSkeleton() {
 export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { userProfile } = useAuth();
+    const { userProfile, firebaseUser } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
 
     const { proposal } = useBuilderStore();
@@ -152,7 +153,35 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         }
 
         setActiveMutationKey('full-report');
+        
+        try {
+            const token = await getAuthenticatedToken(firebaseUser);
+            // 1. Evaluate context to get the plan
+            const evaluationBody = {
+                proposal,
+                projectPlan,
+                existingSections: sections,
+                existingDiagrams: useBuilderStore.getState().diagrams,
+                sectionsToGenerate,
+                externalContext,
+            };
+            const plan = await evaluateContextApi(evaluationBody, token);
 
+            // 2. Execute the full report generation with the plan
+            const fullReportBody = {
+                proposal,
+                projectPlan,
+                existingSections: sections,
+                existingDiagrams: useBuilderStore.getState().diagrams,
+                externalContext,
+                generationPlan: plan.configs,
+            };
+            fullReportMutation.mutate(fullReportBody);
+
+        } catch (error: any) {
+            toast({ title: "Error Planning Report", description: error.message, variant: 'destructive' });
+            setActiveMutationKey(null);
+        }
     };
 
     const selectedTemplate = reportTemplates?.find(t => t.id === selectedReportTemplateId);
