@@ -1,5 +1,10 @@
 #!/bin/bash
 #apt-get install graphviz & apt-get install doxygen
+# on firebase studio set packages as 
+#pkgs.vim # Example existing package
+#pkgs.doxygen # Add doxygen here
+#pkgs.graphviz # You'll also need graphviz for diagrams
+#chmod +x generate_doxygen_docs.sh & ./generate_doxygen_docs.sh
 # --- Configuration ---
 PROJECT_NAME="My Awesome Project" # Replace with your project name
 INPUT_DIR="src"                   # Replace with the main source directory
