@@ -16,7 +16,7 @@ export type AcademicSolverStage =
 export interface ExternalContext {
     fileName: string;
     content: string;
-    type: 'context' | 'example'; // Added to match the expected type in ReportGenerationTools
+    type: 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
 }
 
 export interface AcademicSolverState {
@@ -69,7 +69,7 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
       }),
     addQuestionDocument: (fileName, content) => {
         set((state) => ({ 
-            questionDocuments: [...state.questionDocuments, { fileName, content, type: 'example' }],
+            questionDocuments: [...state.questionDocuments, { fileName, content, type: 'question' }],
             analyzedDocument: null,
             solvedDocument: null,
         }));
