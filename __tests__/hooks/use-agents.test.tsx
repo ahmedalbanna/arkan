@@ -1,78 +1,92 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { useAgents } from '@/hooks/use-agents';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { type Agent, AgentCategory } from '@/lib/agents';
-import { Bot } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import fetchMock from 'jest-fetch-mock';
+import { useAgents, useAgent } from '@/hooks/use-agents';
+import { AGENTS } from '@/lib/agents';
+import * as authUtils from '@/lib/authUtils';
+import * as agentService from '@/services/agent-service';
 
+// Mock dependencies
+jest.mock('@/lib/authUtils');
+jest.mock('@/services/agent-service');
+const mockedGetAuthenticatedToken = authUtils.getAuthenticatedToken as jest.Mock;
+const mockedFetchAgents = agentService.fetchAgents as jest.Mock;
+const mockedFetchAgent = agentService.fetchAgent as jest.Mock;
 
-jest.mock('@/context/AuthContext');
-const mockedUseAuth = useAuth as jest.Mock;
-
-const mockAgents: Agent[] = [
-  { id: 'agent-1', name: 'Test Agent 1', description: 'Desc 1', category: AgentCategory.ProposalGeneration, pageUrl: '/test1', isEnabled: true, prompt: 'Prompt 1', icon: Bot },
-  { id: 'agent-2', name: 'Test Agent 2', description: 'Desc 2', category: AgentCategory.ReportGeneration, pageUrl: '/test2', isEnabled: false, prompt: 'Prompt 2', icon: Bot },
-];
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false, // Turn off retries for tests
+      retry: false, // Prevent retries in tests
     },
   },
 });
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient}>
-    {children}
-  </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
-describe('useAgents', () => {
-  beforeEach(() => {
-    // Reset mocks before each test
-    fetchMock.resetMocks();
-    mockedUseAuth.mockReturnValue({
-        firebaseUser: {
-            getIdToken: async () => 'test-token',
-        },
+describe('useAgents Hook', () => {
+    beforeEach(() => {
+        // Clear mocks before each test
+        jest.clearAllMocks();
+        queryClient.clear();
+        mockedGetAuthenticatedToken.mockResolvedValue('fake-token');
     });
-  });
 
-  it('should return a list of agents on successful fetch', async () => {
-    fetchMock.mockResponseOnce(JSON.stringify(mockAgents));
-    
-    const { result } = renderHook(() => useAgents(), { wrapper });
+    it('fetches agents from the API and returns them', async () => {
+        mockedFetchAgents.mockResolvedValue(AGENTS);
 
-    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+        const { result } = renderHook(() => useAgents(), { wrapper });
+        
+        await waitFor(() => expect(result.current.isLoaded).toBe(true));
+        
+        expect(result.current.agents).toEqual(AGENTS);
+        expect(result.current.isError).toBe(false);
+        expect(mockedFetchAgents).toHaveBeenCalledWith('fake-token');
+    });
     
-    expect(result.current.agents).toEqual(mockAgents);
-    expect(result.current.isError).toBe(false);
-  });
+    it('handles API errors gracefully', async () => {
+        mockedFetchAgents.mockRejectedValue(new Error('API is down'));
+        
+        const { result } = renderHook(() => useAgents(), { wrapper });
 
-  it('should return an error state when fetch fails', async () => {
-    fetchMock.mockRejectOnce(new Error('API Error'));
-    
-    const { result } = renderHook(() => useAgents(), { wrapper });
+        await waitFor(() => expect(result.current.isLoaded).toBe(true));
 
-    await waitFor(() => expect(result.current.isLoaded).toBe(true));
-    
-    expect(result.current.agents).toEqual([]);
-    expect(result.current.isError).toBe(true);
-  });
-  
-  it('should not fetch if user is not authenticated', async () => {
-    mockedUseAuth.mockReturnValue({ firebaseUser: null });
+        // It should return default agents as a fallback and mark as an error
+        expect(result.current.agents).toEqual(AGENTS);
+        expect(result.current.isError).toBe(true);
+    });
+});
 
-    const { result } = renderHook(() => useAgents(), { wrapper });
-    
-    // Give it a moment to run, but it shouldn't fetch
-    await new Promise(res => setTimeout(res, 50));
-    
-    expect(fetchMock).not.toHaveBeenCalled();
-    expect(result.current.isLoaded).toBe(true); // Should be considered loaded as it won't fetch
-    expect(result.current.agents).toEqual([]);
-  });
+describe('useAgent Hook', () => {
+    const testAgent = AGENTS[0];
+    const agentId = testAgent.id;
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        queryClient.clear();
+        mockedGetAuthenticatedToken.mockResolvedValue('fake-token');
+    });
+
+    it('fetches a single agent by ID', async () => {
+        mockedFetchAgent.mockResolvedValue(testAgent);
+
+        const { result } = renderHook(() => useAgent(agentId), { wrapper });
+
+        await waitFor(() => expect(result.current.isSuccess).toBe(true));
+        
+        expect(result.current.data).toEqual(testAgent);
+        expect(mockedFetchAgent).toHaveBeenCalledWith(agentId, 'fake-token');
+    });
+
+    it('returns an error state when fetching a single agent fails', async () => {
+        mockedFetchAgent.mockRejectedValue(new Error('Agent not found'));
+
+        const { result } = renderHook(() => useAgent(agentId), { wrapper });
+
+        await waitFor(() => expect(result.current.isError).toBe(true));
+
+        expect(result.current.data).toBeUndefined();
+    });
 });
