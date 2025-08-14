@@ -85,7 +85,7 @@ ${JSON.stringify(proposal, null, 2)}
 ${JSON.stringify(input.projectPlan, null, 2)}
 \`\`\`
 {{else}}
-(No project plan has been generated yet)
+(No project plan provided)
 {{/if}}
 
 **Existing Report Sections:**
