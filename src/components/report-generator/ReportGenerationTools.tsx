@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -29,7 +30,7 @@ import { Slider } from '../ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Skeleton } from '../ui/skeleton';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { useReportTemplates } from '@/hooks/use-templates';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
 import { Textarea } from '../ui/textarea';
 import { Settings } from 'lucide-react';
@@ -105,6 +106,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
+    const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
 
     const reportGenerationMutation = useGenerateReportSection();
     const fullReportMutation = useGenerateFullReport();
@@ -137,7 +139,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     };
 
     const onGenerateFullReport = async () => {
-        const template = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
+        const template = reportTemplates?.find(t => t.id === selectedReportTemplateId);
         if (!template) return;
         
         const sectionsToGenerate = template.agentIds
@@ -153,7 +155,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     };
 
-    const selectedTemplate = REPORT_GENERATION_TEMPLATES.find(t => t.id === selectedReportTemplateId);
+    const selectedTemplate = reportTemplates?.find(t => t.id === selectedReportTemplateId);
     const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
     const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
         const sectionKey = (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId);
@@ -164,7 +166,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 1 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
-    if (!agentsLoaded) {
+    if (!agentsLoaded || templatesLoading) {
         return <ToolsSkeleton />;
     }
 
@@ -188,7 +190,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                     <SelectValue placeholder="Select a report template" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {REPORT_GENERATION_TEMPLATES.map((template) => (
+                                    {reportTemplates?.map((template) => (
                                         <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
                                     ))}
                                 </SelectContent>

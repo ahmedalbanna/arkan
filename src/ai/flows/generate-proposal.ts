@@ -21,7 +21,7 @@ export async function generateProposal(input: GenerateProposalInput): Promise<Pr
     name: 'generateProposalPrompt',
     input: { schema: z.any() }, // Use any since we construct it manually
     output: { schema: ProjectProposalSchema },
-    model: 'googleai/gemini-1.5-flash',
+    model: 'googleai/gemini-2.0-flash',
     prompt: `${prompt}
 
 {{#if guidelines}}
