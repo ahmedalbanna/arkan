@@ -87,7 +87,9 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
       <CardHeader>
         <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
-            <PresentationActions isGenerating={isTranslating} />
+            <PresentationActions isGenerating={isTranslating} onTranslateAll={function (targetLang: 'en' | 'ar'): void {
+            throw new Error('Function not implemented.');
+          } } isTranslating={false} />
         </div>
         <CardDescription>
           {t('builder.presentationGenerator.slideLabel').replace('{current}', (currentSlide + 1).toString()).replace('{total}', slides.length.toString())}

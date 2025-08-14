@@ -1,6 +1,7 @@
+
 'use client';
 
-import type { EvaluateReportInput, EvaluateReportOutput } from "@/ai/flows/evaluate-report";
+import type { EvaluateReportInput, EvaluateReportOutput } from "@/ai/schemas";
 
 interface EvaluateReportApiVariables {
     body: EvaluateReportInput;

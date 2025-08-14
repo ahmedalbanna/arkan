@@ -16,6 +16,9 @@ import {
   Shield, Sigma, Sparkles, Split, SplitSquareHorizontal, SquareSigma, Star, Strikethrough, Subscript,
   Superscript, Table as TableIcon, Text, TextQuote, ThumbsDown, ThumbsUp, Trash2, Type,
   Type as TypeIcon, Underline, Undo, Unlink, View, Wand2, WrapText, X, XCircle, FunctionSquare, Braces,
+  AppWindow,
+  ChevronDown,
+  RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

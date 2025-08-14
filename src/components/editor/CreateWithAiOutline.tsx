@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChevronDown, ChevronRight, Check } from 'lucide-react';
-import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { CreateWithAiTemplates } from './CreateWithAiTemplates';
 

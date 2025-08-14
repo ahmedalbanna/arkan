@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ArrowLeft, Loader2, Sparkles, CheckCircle } from 'lucide-react';
-import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import Image from 'next/image';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
 import { toast } from '@/hooks/use-toast';

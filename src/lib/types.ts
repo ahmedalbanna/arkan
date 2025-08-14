@@ -22,18 +22,18 @@ export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } f
 export type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
-export type { Codebase } from '@/ai/flows/generate-codebase';
+export type { Codebase } from '@/ai/schemas';
 export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
 export type { TeamWithMembers } from '@/services/team-service';
 export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
-export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
+export type { TranslateVariables, TranslateTextOutput } from '@/ai/schemas';
 export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
-export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
+export type { RewriteTextOutput } from '@/ai/schemas';
 export type { DiffPart } from '@/lib/diff';
-export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
+export type { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 // Re-exporting generated Template types from Zod schemas
 export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
@@ -243,7 +243,7 @@ export interface ProjectState {
         references?: string | undefined;
         appendices?: string | undefined;
     } | undefined;
-    evaluation?: import("@/ai/flows/evaluate-report").EvaluateReportOutput | null | undefined;
+    evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
     diagrams?: {
         "use-case"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
         class?: import("@/hooks/useDiagramStore").DiagramData | undefined;

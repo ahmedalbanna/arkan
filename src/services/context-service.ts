@@ -2,7 +2,7 @@
 'use client';
 
 import type { ExternalContext } from '@/hooks/useReportStore';
-import type { AnalyzeContextOutput } from '@/ai/flows/analyze-context';
+import type { AnalyzeContextOutput } from '@/ai/schemas';
 
 interface AnalyzeContextVariables {
   prompt: string;

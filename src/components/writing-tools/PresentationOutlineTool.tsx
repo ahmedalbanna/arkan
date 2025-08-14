@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
-import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { Textarea } from '../ui/textarea';
 
 const formSchema = z.object({

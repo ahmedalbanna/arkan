@@ -5,8 +5,8 @@
 'use client';
 
 import { create } from 'zustand';
-import { type SectionName, type DiagramType } from '@/ai/schemas';
-import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
+import { type SectionName } from '@/ai/schemas';
+import type { EvaluateReportOutput } from '@/ai/schemas';
 import { sectionConfig } from '@/lib/report-config';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';

@@ -15,7 +15,6 @@ import { useTopicExplainer } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
 
 const explainerSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to explain.'),

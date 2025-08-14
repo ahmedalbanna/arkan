@@ -21,7 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useGeneratePresentationOutline } from '@/hooks/use-presentation-generation';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { GeneratePresentationOutlineOutput } from '@/ai/flows/generate-presentation-outline';
+import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { CreateWithAiOutline } from './CreateWithAiOutline';
 
 

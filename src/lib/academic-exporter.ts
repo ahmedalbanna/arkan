@@ -3,7 +3,7 @@
 
 import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
-import { AnalyzedDocument, SolvedDocument } from '@/ai/flows/academic-solver.shared';
+import { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
 import { templates, type TemplateKey } from './docx-styles';
 import { createDocxParagraphs } from './docx-exporter';
 

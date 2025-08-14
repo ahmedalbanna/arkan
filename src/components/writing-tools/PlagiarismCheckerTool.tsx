@@ -14,7 +14,7 @@ import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { usePlagiarismCheck } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
-import type { ClaimStatus } from '@/ai/flows/fact-checker';
+import type { ClaimStatus } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';

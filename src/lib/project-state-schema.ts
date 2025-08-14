@@ -2,7 +2,6 @@
 
 import { z } from 'zod';
 import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, PresentationSlideSchema, ProjectPlanSchema, AcademicDocumentTypeSchema, AnalyzedDocumentSchema, SolvedDocumentSchema } from '@/ai/schemas';
-import type { Codebase } from '@/ai/flows/generate-codebase';
 
 const ReportSectionConfigSchema = z.object({
   sectionName: z.string(),

@@ -2,7 +2,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { Codebase } from '@/ai/flows/generate-codebase';
+import type { Codebase } from '@/ai/schemas';
 import { ProjectState } from '@/lib/types';
 
 export interface CodebaseState {

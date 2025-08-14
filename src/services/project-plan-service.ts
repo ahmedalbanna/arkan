@@ -2,7 +2,7 @@
 'use client';
 
 import type { ProjectPlan } from '@/ai/schemas';
-import type { GenerateProjectPlanInput } from '@/ai/flows/generate-project-plan';
+import type { GenerateProjectPlanInput } from '@/ai/schemas';
 
 interface GeneratePlanVariables extends GenerateProjectPlanInput {
   token: string;

@@ -53,7 +53,7 @@ const AUTH_PATHS = ['/login', '/signup', '/forgot-password'];
 
 // This function runs on the server for every request
 async function handleAuthRedirects(pathname: string) {
-  const sessionCookie = cookies().get('__session')?.value;
+  const sessionCookie = (await cookies()).get('__session')?.value;
 
   let isAuthenticated = false;
   if(sessionCookie) {
@@ -87,7 +87,7 @@ export default async function RootLayout({
 
   // We need to get the current path to check if it's protected
   const headersList = headers();
-  const pathname = headersList.get('x-next-pathname') || '/';
+  const pathname = (await headersList).get('x-next-pathname') || '/';
 
   // Run the server-side authentication check and redirects
   await handleAuthRedirects(pathname);

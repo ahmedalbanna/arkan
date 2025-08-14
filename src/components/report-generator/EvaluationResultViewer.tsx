@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle, Wand2, RefreshCw } from 'lucide-react';
-import type { EvaluateReportOutput } from '@/ai/flows/evaluate-report';
+import type { EvaluateReportOutput } from '@/ai/schemas';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useGenerateReportSection } from '@/hooks/use-report-generation';
 import { useBuilderStore } from '@/hooks/useBuilderStore';

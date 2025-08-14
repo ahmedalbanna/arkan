@@ -17,10 +17,10 @@ import JSZip from 'jszip';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
-import type { GenerateCodeOutput } from '@/ai/flows/generate-code';
+import type { GenerateCodeOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
-import type { Codebase } from '@/ai/flows/generate-codebase';
+import type { Codebase } from '@/ai/schemas';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 

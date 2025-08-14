@@ -1,8 +1,8 @@
 
 'use client';
 
-import type { GenerateDiagramOutput } from '@/ai/flows/generate-diagrams';
-import type { ExplainDiagramOutput } from '@/ai/flows/explain-diagram';
+import type { GenerateDiagramOutput } from '@/ai/schemas';
+import type { ExplainDiagramOutput } from '@/ai/schemas';
 
 /**
  * Calls the API to generate a new diagram.

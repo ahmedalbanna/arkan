@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useCodebaseStore } from '@/hooks/useCodebaseStore';
-import type { Codebase } from '@/ai/flows/generate-codebase';
+import type { Codebase } from '@/ai/schemas';
 import FileTreeView from './FileTreeView';
 
 async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {

@@ -7,8 +7,8 @@ import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
-import type { GenerateDiagramOutput } from "@/ai/flows/generate-diagrams";
-import type { ExplainDiagramOutput } from "@/ai/flows/explain-diagram";
+import type { GenerateDiagramOutput } from "@/ai/schemas";
+import type { ExplainDiagramOutput } from "@/ai/schemas";
 import { 
     generateDiagramApi, 
     updateDiagramApi, 

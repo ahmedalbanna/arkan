@@ -10,7 +10,7 @@ import * as agentService from '@/services/agent-service';
 jest.mock('@/lib/authUtils');
 jest.mock('@/services/agent-service');
 const mockedGetAuthenticatedToken = authUtils.getAuthenticatedToken as jest.Mock;
-const mockedFetchAgents = agentService.fetchAgents as jest.Mock;
+const mockedFetchAgents = agentService.fetchAgent as jest.Mock;
 const mockedFetchAgent = agentService.fetchAgent as jest.Mock;
 
 

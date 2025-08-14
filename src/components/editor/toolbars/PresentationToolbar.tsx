@@ -6,7 +6,8 @@ import {
   AlignCenter, AlignJustify, AlignLeft, AlignRight, Bold, CaseSensitive, ChevronDown, Copy,
   Eraser, ImageIcon, Italic, LayoutGrid, List, ListOrdered, Paintbrush, Play, RefreshCw,
   Shapes, Split, Strikethrough, Text, Type, Underline, BookCopy, Box, Link2, Pen, Settings,
-  Wand2, Sparkles, FileText, FileEdit, Languages
+  Wand2, Sparkles, FileText, FileEdit, Languages,
+  ArrowDownUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';

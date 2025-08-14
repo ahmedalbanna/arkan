@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { EvaluateContextOutput } from "@/ai/flows/evaluate-and-select-context";
+import type { EvaluateContextOutput } from "@/ai/schemas";
 
 /**
  * Calls the API to generate a single report section.

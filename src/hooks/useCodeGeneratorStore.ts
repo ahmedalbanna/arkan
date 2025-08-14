@@ -4,8 +4,8 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { GenerateCodeOutput } from "@/ai/flows/generate-code";
-import type { Codebase } from '@/ai/flows/generate-codebase';
+import type { GenerateCodeOutput } from "@/ai/schemas";
+import type { Codebase } from '@/ai/schemas';
 
 export interface CodeGeneratorState {
   prompt: string;

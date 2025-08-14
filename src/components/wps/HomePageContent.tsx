@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, BrainCircuit, FileSpreadsheet, Presentation } from 'lucide-react';
 import Link from 'next/link';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 

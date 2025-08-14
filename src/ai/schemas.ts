@@ -763,6 +763,13 @@ export const WriteDocumentOutputSchema = z.object({
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
 // evaluate-and-select-context.ts
+export const ExternalContextSchema = z.object({
+    fileName: z.string(),
+    content: z.string(),
+    type: z.enum(['context', 'example'])
+});
+export type ExternalContext = z.infer<typeof ExternalContextSchema>;
+
 export const EvaluateContextInputSchema = z.object({
   proposal: ProjectProposalSchema.optional().nullable().describe("The original project proposal."),
   projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
@@ -773,11 +780,7 @@ export const EvaluateContextInputSchema = z.object({
     return Object.keys(obj).every(key => DiagramTypeSchema.safeParse(key).success);
   }, "All keys must be a valid DiagramType").optional().describe("A map of previously generated PlantUML diagrams."),
   sectionsToGenerate: z.array(SectionNameSchema).describe("A list of the target sections that need to be generated."),
-  externalContext: z.array(z.object({
-      fileName: z.string(),
-      content: z.string(),
-      type: z.enum(['context', 'example'])
-  })).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
+  externalContext: z.array(ExternalContextSchema).optional().describe("An array of external documents provided by the user, categorized as 'context' (for facts) or 'example' (for style)."),
 });
 export type EvaluateContextInput = z.infer<typeof EvaluateContextInputSchema>;
 

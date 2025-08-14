@@ -1,20 +1,8 @@
 
 'use client';
-
-import type { ParaphraseMode } from "@/ai/flows/paraphrase-text";
-import type { SummarizeLength } from "@/ai/flows/summarize-text";
-import type { CitationStyle, GenerateCitationOutput } from "@/ai/flows/generate-citation";
 import { ReactNode, SetStateAction } from "react";
-import type { AIResearcherOutput } from '@/ai/flows/ai-researcher';
-import type { TopicExplainerOutput } from '@/ai/flows/topic-explainer';
-import type { GrammarCheckOutput } from '@/ai/flows/grammar-checker';
-import type { GenerateQuizOutput } from '@/ai/flows/generate-quiz';
-import type { DetectAIOutput } from '@/ai/flows/detect-ai-content';
-import type { FactCheckOutput } from '@/ai/flows/fact-checker';
-import type { HumanizeTextOutput } from '@/ai/flows/humanize-text';
-import type { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
-import type { RewriteTextOutput, SummarizeTextWithRatioOutput } from '@/ai/flows/text-stylist';
-import type { WriteDocumentOutput } from '@/ai/flows/write-document';
+import type { ParaphraseMode } from "@/ai/schemas";
+import { SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput } from "@/ai/schemas";
 
 
 // Base types
@@ -111,7 +99,7 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export type { GenerateQuizOutput, HumanizeTextOutput, DetectAIOutput, GrammarCheckOutput, GenerateCitationOutput, FactCheckOutput, PlagiarismCheckOutput, AIResearcherOutput, TopicExplainerOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput };
+export type { ParaphraseMode, SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput };
 
 
 /**

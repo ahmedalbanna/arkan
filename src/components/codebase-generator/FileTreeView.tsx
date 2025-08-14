@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { File, Folder, Download, FolderOpen, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import type { Codebase } from '@/ai/flows/generate-codebase';
+import type { Codebase } from '@/ai/schemas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { ScrollArea } from '@/components/ui/scroll-area';
