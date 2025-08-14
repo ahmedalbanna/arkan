@@ -64,8 +64,8 @@ export async function evaluateContextApi(body: any, token: string): Promise<Eval
         body: JSON.stringify(body),
     });
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to evaluate context');
+        const errorData = await response.json().catch(() => ({ message: 'Failed to evaluate context and could not parse error response.'}));
+        throw new Error(errorData.message || 'Failed to evaluate context');
     }
     return await response.json();
 }
