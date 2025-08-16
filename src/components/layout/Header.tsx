@@ -238,13 +238,13 @@ export function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="mr-2 h-4 w-4" />Profile</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="mr-2 h-4 w-4" />My Dashboard</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="mr-2 h-4 w-4" />Manage Team</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="mr-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="mr-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="mr-2 h-4 w-4" />{t('header.manageTeam')}</Link></DropdownMenuItem>
                    <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
                             <Wrench className="mr-2 h-4 w-4" />
-                            <span>Tools</span>
+                            <span>{t('header.tools')}</span>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
                              {toolsLinks.map(link => (
@@ -257,19 +257,19 @@ export function Header() {
                             ))}
                         </DropdownMenuSubContent>
                     </DropdownMenuSub>
-                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="mr-2 h-4 w-4" />Payment History</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="mr-2 h-4 w-4" />{t('header.paymentHistory')}</Link></DropdownMenuItem>
                   {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                         <Link href="/admin/dashboard">
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Admin Panel
+                        {t('header.admin')}
                         </Link>
                     </DropdownMenuItem>
                    )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    Logout
+                    {t('header.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -285,11 +285,11 @@ export function Header() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-80">
                     <DropdownMenuLabel className="flex justify-between items-center">
-                      <span>Notifications</span>
+                      <span>{t('header.notifications')}</span>
                       {notifications && notifications.length > 0 && (
                         <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={clearAllMutation.isPending}>
                           <Trash2 className="mr-1 h-3 w-3" />
-                           Clear All
+                           {t('header.clearAll')}
                         </Button>
                       )}
                     </DropdownMenuLabel>
@@ -315,7 +315,7 @@ export function Header() {
                         ))
                       ) : (
                         <div className="p-4 text-center text-sm text-muted-foreground">
-                          You have no new notifications.
+                          {t('header.noNotifications')}
                         </div>
                       )}
                     </ScrollArea>
@@ -323,7 +323,7 @@ export function Header() {
                 </DropdownMenu>
             </>
           ) : (
-            <Button asChild><Link href="/login">Login</Link></Button>
+            <Button asChild><Link href="/login">{t('login.pageTitle')}</Link></Button>
           )}
           {isClient && <ThemeToggle />}
           <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">

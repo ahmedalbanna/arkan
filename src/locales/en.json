@@ -26,7 +26,14 @@
     "academicSolver": "Academic Solver",
     "adminSettings": "Settings",
     "documentation": "Documentation",
-    "pushNotifications": "Push Notifications"
+    "pushNotifications": "Push Notifications",
+    "myDashboard": "My Dashboard",
+    "manageTeam": "Manage Team",
+    "paymentHistory": "Payment History",
+    "tools": "Tools",
+    "notifications": "Notifications",
+    "clearAll": "Clear All",
+    "noNotifications": "You have no new notifications."
   },
   "agentGenerator": {
     "title": "Generate Your AI Agent",
@@ -556,7 +563,9 @@
       },
       "toasts": {
         "copied": "Copied to clipboard",
-        "cleared": "Content cleared"
+        "cleared": "Content cleared",
+        "translateSuccess": "Translation Complete!",
+        "translateFailed": "Translation Failed"
       }
     },
     "reportGenerator": {
