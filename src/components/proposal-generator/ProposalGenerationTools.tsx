@@ -137,7 +137,7 @@ export const ProposalGenerationTools = ({
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
-                                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+                                <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId} disabled={isGenerating}>
                                     <SelectTrigger id="proposal-template">
                                         <SelectValue placeholder="Select a template" />
                                     </SelectTrigger>
@@ -154,7 +154,7 @@ export const ProposalGenerationTools = ({
                                 {customGuidelines.map((custom, index) => (
                                     <div key={index} className="flex items-center gap-2 text-sm">
                                         <span>- {custom}</span>
-                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)}>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => removeCustomGuideline(index)} disabled={isGenerating}>
                                             <Trash2 className="h-3 w-3 text-destructive" />
                                         </Button>
                                     </div>
@@ -165,8 +165,9 @@ export const ProposalGenerationTools = ({
                                         value={customGuidelineInput}
                                         onChange={(e) => setCustomGuidelineInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
+                                        disabled={isGenerating}
                                     />
-                                    <Button type="button" variant="secondary" onClick={handleAddGuideline}>
+                                    <Button type="button" variant="secondary" onClick={handleAddGuideline} disabled={isGenerating}>
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </div>
