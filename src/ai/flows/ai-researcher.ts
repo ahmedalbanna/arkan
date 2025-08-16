@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -7,9 +6,9 @@
 
 import { ai } from '@/ai/genkit';
 import { AIResearcherInputSchema, type AIResearcherInput, AIResearcherOutputSchema, type AIResearcherOutput } from '@/ai/schemas';
+import { z } from 'zod';
 
-export async function aiResearcher(input: AIResearcherInput): Promise<AIResearcherOutput> {
-  const prompt = ai.definePrompt({
+const researcherPrompt = ai.definePrompt({
     name: 'aiResearcherPrompt',
     input: { schema: AIResearcherInputSchema },
     output: { schema: AIResearcherOutputSchema },
@@ -28,8 +27,24 @@ export async function aiResearcher(input: AIResearcherInput): Promise<AIResearch
 {{{topic}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  return output!;
+const aiResearcherFlow = ai.defineFlow({
+    name: 'aiResearcherFlow',
+    inputSchema: AIResearcherInputSchema,
+    outputSchema: AIResearcherOutputSchema,
+}, async (input) => {
+    const { output } = await researcherPrompt(input);
+    if (!output) {
+      throw new Error('AI Researcher failed to produce an output.');
+    }
+    return output;
+});
+
+export async function aiResearcher(input: AIResearcherInput): Promise<AIResearcherOutput> {
+  const validation = AIResearcherInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for aiResearcher: ${validation.error.message}`);
+  }
+  return aiResearcherFlow(validation.data);
 }

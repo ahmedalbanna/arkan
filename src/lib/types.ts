@@ -4,6 +4,7 @@ import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntr
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
 import { z } from 'zod';
+import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 
 
 export type {
@@ -19,7 +20,7 @@ export type {
 
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
-export type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
+export type { Agent, AgentData, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/schemas';
@@ -33,7 +34,12 @@ export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/schemas';
 export type { DiffPart } from '@/lib/diff';
+<<<<<<< Updated upstream
 export type { GenerateAgentConfigOutput } from '@/ai/schemas';
+=======
+export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
+export type { UploadedFile };
+>>>>>>> Stashed changes
 
 // Re-exporting generated Template types from Zod schemas
 export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;

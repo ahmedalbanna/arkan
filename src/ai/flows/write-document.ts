@@ -9,9 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { WriteDocumentInputSchema, type WriteDocumentInput, WriteDocumentOutputSchema, type WriteDocumentOutput } from '@/ai/schemas';
 
-
-export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {
-  const prompt = ai.definePrompt({
+const writeDocumentPrompt = ai.definePrompt({
     name: 'writeDocumentPrompt',
     input: { schema: WriteDocumentInputSchema },
     output: { schema: WriteDocumentOutputSchema },
@@ -46,10 +44,23 @@ You MUST structure your document according to the following headings. Ensure eac
 `,
   });
 
-  const { output } = await prompt(input);
-  if (!output) {
+const writeDocumentFlow = ai.defineFlow({
+    name: 'writeDocumentFlow',
+    inputSchema: WriteDocumentInputSchema,
+    outputSchema: WriteDocumentOutputSchema
+}, async (input) => {
+    const { output } = await writeDocumentPrompt(input);
+    if (!output) {
       throw new Error("Document generation failed.");
+    }
+    output.documentContent = output.documentContent.replace(/---/g, '').trim();
+    return output;
+});
+
+export async function writeDocument(input: WriteDocumentInput): Promise<WriteDocumentOutput> {
+  const validation = WriteDocumentInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for writeDocument: ${validation.error.message}`);
   }
-  output.documentContent = output.documentContent.replace(/---/g, '').trim();
-  return output;
+  return writeDocumentFlow(validation.data);
 }

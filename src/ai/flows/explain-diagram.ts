@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -9,8 +8,7 @@
 import { ai } from '@/ai/genkit';
 import { ExplainDiagramInputSchema, type ExplainDiagramInput, ExplainDiagramOutputSchema, type ExplainDiagramOutput } from '@/ai/schemas';
 
-export async function explainDiagram(input: ExplainDiagramInput): Promise<ExplainDiagramOutput> {
-  const prompt = ai.definePrompt({
+const explainDiagramPrompt = ai.definePrompt({
     name: 'explainDiagramPrompt',
     input: { schema: ExplainDiagramInputSchema },
     output: { schema: ExplainDiagramOutputSchema },
@@ -29,12 +27,25 @@ Diagram Image:
 {{media url=imageDataUri}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  if (!output) {
+const explainDiagramFlow = ai.defineFlow({
+    name: 'explainDiagramFlow',
+    inputSchema: ExplainDiagramInputSchema,
+    outputSchema: ExplainDiagramOutputSchema,
+}, async (input) => {
+    const { output } = await explainDiagramPrompt(input);
+    if (!output) {
       throw new Error("Explanation generation failed.");
+    }
+    output.explanation = output.explanation.replace(/---/g, '').trim();
+    return output;
+});
+
+export async function explainDiagram(input: ExplainDiagramInput): Promise<ExplainDiagramOutput> {
+  const validation = ExplainDiagramInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for explainDiagram: ${validation.error.message}`);
   }
-  output.explanation = output.explanation.replace(/---/g, '').trim();
-  return output;
+  return explainDiagramFlow(validation.data);
 }

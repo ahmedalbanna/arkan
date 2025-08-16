@@ -1,5 +1,3 @@
-
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -45,7 +43,6 @@ export interface ReportState {
   contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean[]; proposal: boolean; projectPlan: boolean }>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
-  manualTableOfContents: string;
 }
 
 interface ReportActions {
@@ -67,9 +64,9 @@ interface ReportActions {
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
     toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal' | 'projectPlan', contextKey: string | number | null, isSelected: boolean) => void;
+    initializeContextSelection: (itemKey: string, defaultContextIds: string[]) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
-    setManualTableOfContents: (toc: string) => void;
 }
 
 const getDefaultGuidelineState = () => {
@@ -109,9 +106,9 @@ const initialState: ReportState = {
   contextSelection: {},
   selectedReportTemplateId: REPORT_GENERATION_TEMPLATES[0].id,
   selectedPresentationTemplateId: 'software-presentation',
-  manualTableOfContents: '',
 };
 
+const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useReportStore = create<ReportState & ReportActions>()(
   (set, get) => ({
@@ -249,25 +246,47 @@ export const useReportStore = create<ReportState & ReportActions>()(
         });
         useBuilderStore.getState().setHasUnsavedChanges(true);
     },
+    initializeContextSelection: (itemKey, defaultContextIds) => {
+      set(state => {
+        const newSelection = {
+            ...emptySelection,
+            proposal: defaultContextIds.includes('proposal'),
+            projectPlan: defaultContextIds.includes('projectPlan'),
+            externalContext: Array(state.externalContext.length).fill(true),
+        };
+
+        defaultContextIds.forEach(id => {
+            const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === id) as SectionName | undefined;
+            if(sectionKey) {
+                newSelection.sections[sectionKey] = true;
+            }
+        });
+        
+        return {
+          contextSelection: {
+            ...state.contextSelection,
+            [itemKey]: newSelection,
+          },
+        };
+      });
+    },
     toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
       set(state => {
-          const newSelection = JSON.parse(JSON.stringify(state.contextSelection));
-          if (!newSelection[itemKey]) {
-              newSelection[itemKey] = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-          }
+          const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
+          
           if (type === 'proposal' || type === 'projectPlan') {
-               newSelection[itemKey][type] = isSelected;
+               newSelection[type] = isSelected;
           } else if (type === 'externalContext') {
               if (typeof contextKey === 'number') {
-                  if (!Array.isArray(newSelection[itemKey].externalContext)) {
-                      newSelection[itemKey].externalContext = [];
+                  if (!Array.isArray(newSelection.externalContext)) {
+                      newSelection.externalContext = [];
                   }
-                  newSelection[itemKey].externalContext[contextKey] = isSelected;
+                  newSelection.externalContext[contextKey] = isSelected;
               }
           } else if (contextKey) {
-              newSelection[itemKey][type][contextKey as string] = isSelected;
+              newSelection[type][contextKey as string] = isSelected;
           }
-          return { contextSelection: newSelection };
+          return { contextSelection: {...state.contextSelection, [itemKey]: newSelection} };
       });
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
@@ -277,10 +296,6 @@ export const useReportStore = create<ReportState & ReportActions>()(
     },
     setSelectedPresentationTemplateId: (id: string) => {
       set({ selectedPresentationTemplateId: id });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
-    setManualTableOfContents: (toc: string) => {
-      set({ manualTableOfContents: toc });
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
   })

@@ -11,11 +11,7 @@ import { z } from 'zod';
 import { ProjectProposalSchema, CodebaseSchema, type Codebase, GenerateCodebaseInputSchema } from '@/ai/schemas';
 
 
-export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInputSchema>): Promise<Codebase> {
-  const { proposal } = input;
-  const stringifiedProposal = JSON.stringify(proposal, null, 2);
-
-  const codebasePrompt = ai.definePrompt({
+const codebasePrompt = ai.definePrompt({
     name: 'generateCodebasePrompt',
     input: { schema: GenerateCodebaseInputSchema },
     output: { schema: CodebaseSchema },
@@ -48,12 +44,30 @@ export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInp
 
 --- PROJECT PROPOSAL ---
 \`\`\`json
-${stringifiedProposal}
+{{{jsonStringifiedProposal}}}
 \`\`\`
 ---
 `,
   });
 
-  const { output } = await codebasePrompt({ proposal });
-  return output!;
+const generateCodebaseFlow = ai.defineFlow({
+    name: 'generateCodebaseFlow',
+    inputSchema: GenerateCodebaseInputSchema,
+    outputSchema: CodebaseSchema,
+}, async (input) => {
+    const jsonStringifiedProposal = JSON.stringify(input.proposal, null, 2);
+    const { output } = await codebasePrompt({ ...input, jsonStringifiedProposal });
+    if (!output) {
+        throw new Error("Codebase generation failed.");
+    }
+    return output;
+});
+
+
+export async function generateCodebase(input: z.infer<typeof GenerateCodebaseInputSchema>): Promise<Codebase> {
+  const validation = GenerateCodebaseInputSchema.safeParse(input);
+  if(!validation.success) {
+      throw new Error(`Invalid input for generateCodebase: ${validation.error.message}`);
+  }
+  return generateCodebaseFlow(validation.data);
 }

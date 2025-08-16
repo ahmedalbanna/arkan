@@ -9,8 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { ImproveMarkdownInputSchema, type ImproveMarkdownInput, ImproveMarkdownOutputSchema, type ImproveMarkdownOutput } from '@/ai/schemas';
 
-export async function improveReportMarkdown(input: ImproveMarkdownInput): Promise<ImproveMarkdownOutput> {
-  const prompt = ai.definePrompt({
+const improveMarkdownPrompt = ai.definePrompt({
     name: 'improveReportMarkdownPrompt',
     input: { schema: ImproveMarkdownInputSchema },
     output: { schema: ImproveMarkdownOutputSchema },
@@ -32,12 +31,25 @@ Your tasks are to:
 {{{markdownContent}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  if (!output) {
-    throw new Error('Failed to improve markdown.');
+const improveReportMarkdownFlow = ai.defineFlow({
+    name: 'improveReportMarkdownFlow',
+    inputSchema: ImproveMarkdownInputSchema,
+    outputSchema: ImproveMarkdownOutputSchema
+}, async (input) => {
+    const { output } = await improveMarkdownPrompt(input);
+    if (!output) {
+      throw new Error('Failed to improve markdown.');
+    }
+    output.improvedMarkdown = output.improvedMarkdown.replace(/---/g, '').trim();
+    return output;
+});
+
+export async function improveReportMarkdown(input: ImproveMarkdownInput): Promise<ImproveMarkdownOutput> {
+  const validation = ImproveMarkdownInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for improveReportMarkdown: ${validation.error.message}`);
   }
-  output.improvedMarkdown = output.improvedMarkdown.replace(/---/g, '').trim();
-  return output;
+  return improveReportMarkdownFlow(validation.data);
 }

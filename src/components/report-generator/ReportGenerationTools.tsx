@@ -2,7 +2,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -160,9 +160,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         contextSelection,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
-        manualTableOfContents,
-        setManualTableOfContents,
-        handleControlChange,
+        initializeContextSelection,
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -173,6 +171,22 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
 
     const isAnythingGenerating = reportGenerationMutation.isPending  || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
+
+    // Initialize context selections based on agent defaults when agents are loaded
+    useEffect(() => {
+        if (agentsLoaded && agents.length > 0) {
+            agents.forEach(agent => {
+                const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionNameType].agentId === agent.id);
+                if (sectionKey) {
+                    const prompt = agent.prompt as AgentPrompt;
+                    const defaultContext = prompt.defaultContext || [];
+                    if (defaultContext.length > 0) {
+                        initializeContextSelection(sectionKey, defaultContext);
+                    }
+                }
+            });
+        }
+    }, [agentsLoaded, agents, initializeContextSelection]);
 
     const onGenerateSection = async (section: SectionNameType) => {
         const fullState = useBuilderStore.getState().getFullState();
@@ -191,7 +205,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
             instructionText: generateInstructionText(controlState[section]),
             exampleFiles,
             contextFiles,
-            tableOfContents: manualTableOfContents.split('\n').filter(line => line.trim() !== '')
         };
 
         setActiveMutationKey(section);
@@ -341,10 +354,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                         </AccordionTrigger>
                                         <AccordionContent className="space-y-4 p-4">
                                             <Tabs defaultValue="prompt" className="w-full">
-                                                <TabsList className="grid w-full grid-cols-4">
+                                                <TabsList className="grid w-full grid-cols-3">
                                                     <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
                                                     <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                                                    <TabsTrigger value="structure">Structure</TabsTrigger>
                                                     <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
                                                 </TabsList>
                                                 <TabsContent value="prompt" className="pt-4 space-y-4">
@@ -380,19 +392,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
                                                         </div>
                                                     </div>
                                                 </TabsContent>
-                                                <TabsContent value="structure" className="pt-4">
-                                                    <div className="space-y-2">
-                                                        <Label htmlFor="toc-input">Table of Contents</Label>
-                                                        <Textarea
-                                                            id="toc-input"
-                                                            placeholder="Enter each chapter title on a new line..."
-                                                            rows={8}
-                                                            value={manualTableOfContents}
-                                                            onChange={(e) => setManualTableOfContents(e.target.value)}
-                                                        />
-                                                        <p className="text-xs text-muted-foreground">Provide the full report structure to give the AI better context.</p>
-                                                    </div>
-                                                </TabsContent>
+                                                
                                                 <TabsContent value="context" className="pt-4">
                                                     <ContextSelector itemKey={key} />
                                                 </TabsContent>

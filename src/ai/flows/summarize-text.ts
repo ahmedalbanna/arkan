@@ -1,5 +1,3 @@
-
-
 'use server';
 
 /**
@@ -16,15 +14,19 @@ const lengthDescriptions: Record<SummarizeLength, string> = {
     long: "a detailed summary, covering all significant topics and arguments.",
 };
 
-export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
-  const { text, length } = input;
-
-  const prompt = ai.definePrompt({
-    name: 'summarizeTextPrompt',
-    input: { schema: SummarizeInputSchema },
-    output: { schema: SummarizeOutputSchema },
-    model: 'googleai/gemini-1.5-flash',
-    prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
+const summarizeTextFlow = ai.defineFlow({
+    name: 'summarizeTextFlow',
+    inputSchema: SummarizeInputSchema,
+    outputSchema: SummarizeOutputSchema
+}, async (input) => {
+    const { text, length } = input;
+    
+    const summarizePrompt = ai.definePrompt({
+        name: 'summarizeTextPrompt',
+        input: { schema: SummarizeInputSchema },
+        output: { schema: SummarizeOutputSchema },
+        model: 'googleai/gemini-1.5-flash',
+        prompt: `You are an expert summarizer. Your task is to read the provided text and generate a summary of the specified length.
 
 **Desired Length**: The summary should be ${lengthDescriptions[length]}
 
@@ -34,15 +36,24 @@ export async function summarizeText(input: SummarizeInput): Promise<SummarizeOut
 ---
 
 **Summary:**`,
-    config: {
-        temperature: 0.5,
-    }
-  });
+        config: {
+            temperature: 0.5,
+        }
+    });
 
-  const { output } = await prompt({ text, length });
-  if (!output) {
-      throw new Error("Failed to summarize text.");
+    const { output } = await summarizePrompt({ text, length });
+    if (!output) {
+        throw new Error("Failed to summarize text.");
+    }
+    output.summary = output.summary.replace(/---/g, '').trim();
+    return output;
+});
+
+
+export async function summarizeText(input: SummarizeInput): Promise<SummarizeOutput> {
+  const validation = SummarizeInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for summarizeText: ${validation.error.message}`);
   }
-  output.summary = output.summary.replace(/---/g, '').trim();
-  return output;
+  return summarizeTextFlow(validation.data);
 }

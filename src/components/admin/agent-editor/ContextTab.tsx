@@ -1,13 +1,18 @@
 
 'use client';
 
+import { useState, useMemo } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { CardTitle } from '@/components/ui/card';
 import { useAgents } from '@/hooks/use-agents';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { AGENTS } from '@/lib/agents';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Search } from 'lucide-react';
+import type { AgentEditorFormValues } from './AgentEditor';
+import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 
 function ContextSkeleton() {
     return (
@@ -30,32 +35,75 @@ function ContextSkeleton() {
 
 export default function ContextTab() {
   const { agents, isLoaded } = useAgents();
+  const { control } = useFormContext<AgentEditorFormValues>();
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredAgents = useMemo(() => {
+    if (!agents) return [];
+    return agents.filter(agent =>
+      agent.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [agents, searchTerm]);
 
   return (
     <div className="space-y-6">
       <CardTitle>Share Context</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Select other agents whose output should be available as context when running this agent. This allows you to chain agent actions together.
+        Select other agents whose output should be available as context by default when running this agent. This allows you to chain agent actions together.
       </p>
 
       <div className="space-y-4 rounded-lg border p-4">
-        <h3 className="font-semibold">Available Agents</h3>
+        <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+                placeholder="Search available agents..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-8"
+            />
+        </div>
+
+        <h3 className="font-semibold text-sm pt-2">Available Agents for Context</h3>
          {!isLoaded ? <ContextSkeleton /> : (
-            <div className="grid grid-cols-2 gap-4">
-                {agents.map(({ id, name }) => {
-                    const defaultAgent = AGENTS.find(a => a.id === id);
-                    const Icon = defaultAgent ? defaultAgent.icon : AlertCircle;
-                    return (
-                        <div key={id} className="flex items-center space-x-2">
-                            <Checkbox id={`agent-context-${id}`} />
-                            <Label htmlFor={`agent-context-${id}`} className="font-normal flex items-center gap-2">
-                               <Icon className="h-4 w-4" />
-                               {name}
-                            </Label>
+            <FormField
+                control={control}
+                name="prompt.defaultContext"
+                render={() => (
+                    <FormItem>
+                         <div className="grid grid-cols-2 gap-4">
+                            {filteredAgents.map((agent) => (
+                                <FormField
+                                    key={agent.id}
+                                    control={control}
+                                    name="prompt.defaultContext"
+                                    render={({ field }) => {
+                                        const Icon = AGENTS.find(a => a.id === agent.id)?.icon || AlertCircle;
+                                        return (
+                                            <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                                <FormControl>
+                                                    <Checkbox
+                                                        checked={field.value?.includes(agent.id)}
+                                                        onCheckedChange={(checked) => {
+                                                            const currentValue = field.value || [];
+                                                            return checked
+                                                                ? field.onChange([...currentValue, agent.id])
+                                                                : field.onChange(currentValue?.filter((value) => value !== agent.id));
+                                                        }}
+                                                    />
+                                                </FormControl>
+                                                <FormLabel className="font-normal flex items-center gap-2">
+                                                    <Icon className="h-4 w-4" />
+                                                    {agent.name}
+                                                </FormLabel>
+                                            </FormItem>
+                                        );
+                                    }}
+                                />
+                            ))}
                         </div>
-                    )
-                })}
-            </div>
+                    </FormItem>
+                )}
+            />
         )}
       </div>
     </div>

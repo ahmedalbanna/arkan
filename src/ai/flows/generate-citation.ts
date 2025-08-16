@@ -9,11 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { GenerateCitationInputSchema, type GenerateCitationInput, GenerateCitationOutputSchema, type GenerateCitationOutput } from '@/ai/schemas';
 
-
-export async function generateCitation(input: GenerateCitationInput): Promise<GenerateCitationOutput> {
-  const { sourceText, style } = input;
-
-  const prompt = ai.definePrompt({
+const generateCitationPrompt = ai.definePrompt({
     name: 'generateCitationPrompt',
     input: { schema: GenerateCitationInputSchema },
     output: { schema: GenerateCitationOutputSchema },
@@ -35,6 +31,22 @@ export async function generateCitation(input: GenerateCitationInput): Promise<Ge
 `,
   });
 
-  const { output } = await prompt({ sourceText, style });
-  return output!;
+const generateCitationFlow = ai.defineFlow({
+    name: 'generateCitationFlow',
+    inputSchema: GenerateCitationInputSchema,
+    outputSchema: GenerateCitationOutputSchema,
+}, async (input) => {
+    const { output } = await generateCitationPrompt(input);
+    if (!output) {
+      throw new Error("Citation generation failed.");
+    }
+    return output;
+});
+
+export async function generateCitation(input: GenerateCitationInput): Promise<GenerateCitationOutput> {
+  const validation = GenerateCitationInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for generateCitation: ${validation.error.message}`);
+  }
+  return generateCitationFlow(validation.data);
 }

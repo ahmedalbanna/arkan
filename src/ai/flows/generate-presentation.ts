@@ -15,6 +15,7 @@ import {
   GeneratePresentationOutputSchema,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
 
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
@@ -32,6 +33,9 @@ const generatePresentationFlow = ai.defineFlow(
     // Separate media from text files for the prompt
     const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
+    
+    const template = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === input.templateId);
+    const relevantSections = template?.relevantReportSectionIds || [];
 
     const prompt = ai.definePrompt({
       name: 'generatePresentationPrompt',
@@ -46,12 +50,21 @@ const generatePresentationFlow = ai.defineFlow(
 3.  **Draft Slides:** For each slide:
     *   Write a clear, concise title.
     *   Summarize the key information into 2-5 bullet points.
-    *   Write detailed speaker notes that elaborate on each bullet point, providing context and deeper explanations.
-    *   Suggest a suitable 'layout' for the slide ('title_and_content', 'section_header', 'title_only') based on its purpose. Use 'section_header' for slides that introduce a new major topic.
+    *   Suggest a suitable 'layout' for the slide ('title_and_content', 'section_header', 'title_only', 'image_with_caption') based on its purpose. Use 'section_header' for slides that introduce a new major topic. If the slide content discusses a diagram, use the 'image_with_caption' layout.
+    *   Write detailed speaker notes that elaborate on each bullet point, providing context and deeper explanations. **Crucially, include prompts for the presenter**, such as "Ask the audience if they have experience with..." or "Emphasize the cost savings here."
 
 **CRITICAL INSTRUCTIONS:**
 -   Your primary source of information is the 'Source Documents' and 'Project Plan' provided below. Synthesize information from ALL of them to create a coherent narrative.
 -   Adhere to all provided guidelines, including tone and complexity.
+
+{{#if relevantSections.length}}
+--- PRIORITIZATION ---
+This is a '{{template.name}}' presentation. You MUST prioritize and focus heavily on the content from the following source documents when creating the presentation. These sections are the most important for this presentation type:
+{{#each relevantSections}}
+-   {{this}}
+{{/each}}
+--------------------
+{{/if}}
 
 --- GUIDELINES ---
 {{#if guidelines}}
@@ -95,7 +108,7 @@ ${JSON.stringify(input.projectPlan, null, 2)}
       }
     });
 
-    const { output } = await prompt({ ...input, textContext, mediaContext });
+    const { output } = await prompt({ ...input, textContext, mediaContext, relevantSections, template });
     return output!;
   }
 );

@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -9,8 +8,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { DetectAIInputSchema, type DetectAIInput, DetectAIOutputSchema, type DetectAIOutput } from '@/ai/schemas';
 
-export async function detectAiContent(input: DetectAIInput): Promise<DetectAIOutput> {
-  const prompt = ai.definePrompt({
+const detectAiPrompt = ai.definePrompt({
     name: 'detectAiContentPrompt',
     input: { schema: DetectAIInputSchema },
     output: { schema: DetectAIOutputSchema },
@@ -35,10 +33,24 @@ Based on your analysis, provide a probability score from 0 to 100 indicating how
     }
   });
 
-  const { output } = await prompt(input);
-  if (!output) {
-      throw new Error("AI content detection failed.");
+const detectAiContentFlow = ai.defineFlow({
+    name: 'detectAiContentFlow',
+    inputSchema: DetectAIInputSchema,
+    outputSchema: DetectAIOutputSchema,
+}, async (input) => {
+    const { output } = await detectAiPrompt(input);
+    if (!output) {
+        throw new Error("AI content detection failed.");
+    }
+    output.analysis = output.analysis.replace(/---/g, '').trim();
+    return output;
+});
+
+
+export async function detectAiContent(input: DetectAIInput): Promise<DetectAIOutput> {
+  const validation = DetectAIInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for detectAiContent: ${validation.error.message}`);
   }
-  output.analysis = output.analysis.replace(/---/g, '').trim();
-  return output;
+  return detectAiContentFlow(validation.data);
 }

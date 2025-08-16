@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -10,11 +11,11 @@ import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import { summarizeFullProject } from '@/ai/flows/summarize-project';
+import { summarizeProjectApi } from '@/services/proposal-service';
 import { saveAs } from 'file-saver';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useExport } from '@/hooks/use-export';
@@ -27,22 +28,6 @@ interface ProposalActionsProps {
     isGenerating: boolean;
     isTranslating: boolean;
     onTranslate: (targetLang: 'en' | 'ar') => void;
-}
-
-async function summarizeProjectApi(variables: { body: any; token: string }): Promise<SummarizeFullProjectOutput> {
-    const response = await fetch('/api/summarize-project', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`
-        },
-        body: JSON.stringify(variables.body)
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to summarize project');
-    }
-    return response.json();
 }
 
 export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: ProposalActionsProps) => {

@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -12,26 +11,16 @@ import { z } from 'zod';
 import { detectAiContent } from './detect-ai-content';
 import { EvaluateReportInputSchema, type EvaluateReportInput, EvaluateReportOutputSchema, type EvaluateReportOutput } from '@/ai/schemas';
 
-export async function evaluateReport(input: EvaluateReportInput): Promise<EvaluateReportOutput> {
-  return evaluateReportFlow(input);
-}
-
-const evaluateReportFlow = ai.defineFlow(
+const evaluateReportPrompt = ai.definePrompt(
   {
-    name: 'evaluateReportFlow',
-    inputSchema: EvaluateReportInputSchema,
-    outputSchema: EvaluateReportOutputSchema,
+    name: 'evaluateReportPrompt',
+    input: { schema: EvaluateReportInputSchema },
+    output: { schema: EvaluateReportOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
   },
   async (input) => {
-
-    const stringifiedProposal = JSON.stringify(input.proposal, null, 2);
-
-    const prompt = ai.definePrompt({
-      name: 'evaluateReportPrompt',
-      input: { schema: EvaluateReportInputSchema },
-      output: { schema: EvaluateReportOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
-      prompt: `You are an expert quality assurance analyst and document reviewer. Your task is to evaluate a comprehensive project report based on a given set of acceptance criteria.
+    const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : 'No proposal provided.';
+    return `You are an expert quality assurance analyst and document reviewer. Your task is to evaluate a comprehensive project report based on a given set of acceptance criteria.
 
 You will be provided with the full project proposal, all generated report sections, and a list of acceptance criteria.
 
@@ -51,9 +40,7 @@ Your evaluation must be objective and thorough.
 
 ---
 **Acceptance Criteria to Evaluate Against:**
-{{#each acceptanceCriteria}}
-- {{{this}}}
-{{/each}}
+${input.acceptanceCriteria?.map(c => `- ${c}`).join('\n') || '(No explicit criteria provided. Evaluate based on general quality and completeness.)'}
 ---
 **Project Proposal (for context):**
 \`\`\`json
@@ -61,23 +48,31 @@ ${stringifiedProposal}
 \`\`\`
 ---
 **Report Sections:**
-{{#each reportSections}}
---- Section: {{@key}} ---
-{{{this}}}
----
-{{/each}}
+${Object.entries(input.reportSections).map(([key, value]) => `--- Section: ${key} ---\n${value}\n---`).join('\n')}
 ---
 **Diagrams (PlantUML Code):**
-{{#each diagrams}}
---- Diagram: {{@key}} ---
-{{{this}}}
+${Object.entries(input.diagrams || {}).map(([key, value]) => `--- Diagram: ${key} ---\n${value}\n---`).join('\n')}
 ---
-{{/each}}
----
-`,
-    });
-
-    const { output } = await prompt(input);
-    return output!;
+`;
   }
 );
+
+
+const evaluateReportFlow = ai.defineFlow(
+  {
+    name: 'evaluateReportFlow',
+    inputSchema: EvaluateReportInputSchema,
+    outputSchema: EvaluateReportOutputSchema,
+  },
+  async (input) => {
+    const { output } = await evaluateReportPrompt(input);
+    if (!output) {
+      throw new Error("Evaluation failed to produce an output.");
+    }
+    return output;
+  }
+);
+
+export async function evaluateReport(input: EvaluateReportInput): Promise<EvaluateReportOutput> {
+  return evaluateReportFlow(input);
+}

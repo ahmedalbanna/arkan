@@ -31,3 +31,24 @@ export async function generateProposalApi(variables: GenerateProposalVariables):
     }
     return await response.json();
 }
+
+/**
+ * Calls the API to summarize a project proposal or a full report.
+ * @param variables - An object containing the request body and token.
+ * @returns A promise that resolves to the summary.
+ */
+export async function summarizeProjectApi(variables: { body: any, token: string }): Promise<any> {
+    const response = await fetch('/api/summarize-project', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${variables.token}`
+        },
+        body: JSON.stringify(variables.body),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to summarize project');
+    }
+    return response.json();
+}

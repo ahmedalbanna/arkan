@@ -248,7 +248,6 @@ export type ProjectPhase = z.infer<typeof ProjectPhaseSchema>;
 
 export const ProjectPlanSchema = z.object({
   phases: z.array(ProjectPhaseSchema).describe('The full list of project phases, each containing a list of tasks.'),
-  tableOfContents: z.array(z.string()).optional().describe('An optional table of contents for the project plan.'),
 });
 export type ProjectPlan = z.infer<typeof ProjectPlanSchema>;
 
@@ -445,7 +444,6 @@ export const GenerateSectionInputSchema = z.object({
   contextFiles: z.array(z.object({ fileName: z.string(), content: z.string() })).optional().describe("An array of context documents to be used for factual information."),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   instructionText: z.string().optional().describe("Additional specific instructions for the generation, derived from user controls like tone and formality."),
-  tableOfContents: z.array(z.string()).optional().describe("The full table of contents for the report to give the agent context of the document structure."),
 }).refine(data => data.proposal || data.projectPlan || (data.contextFiles && data.contextFiles.length > 0) || (data.otherSections && Object.keys(data.otherSections).length > 0) || (data.otherDiagrams && Object.keys(data.otherDiagrams).length > 0) || (data.exampleFiles && data.exampleFiles.length > 0), {
     message: "A proposal, project plan, or external context is required to generate a report section.",
     path: ["proposal"], // You can associate the error with a specific path
@@ -1049,3 +1047,5 @@ export const ApiGeneratePresentationSchema = z.object({
   tone: z.string().optional(),
   complexity: z.string().optional(),
 });
+
+    

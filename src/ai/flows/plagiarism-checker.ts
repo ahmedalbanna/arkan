@@ -1,5 +1,3 @@
-
-
 'use server';
 
 /**
@@ -10,9 +8,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { PlagiarismCheckInputSchema, type PlagiarismCheckInput, PlagiarismCheckOutputSchema, type PlagiarismCheckOutput } from '@/ai/schemas';
 
-export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<PlagiarismCheckOutput> {
-  
-  const prompt = ai.definePrompt({
+const plagiarismCheckPrompt = ai.definePrompt({
     name: 'plagiarismCheckPrompt',
     input: { schema: PlagiarismCheckInputSchema },
     output: { schema: PlagiarismCheckOutputSchema },
@@ -33,8 +29,24 @@ export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<Plag
 {{{text}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  return output!;
+const plagiarismCheckFlow = ai.defineFlow({
+    name: 'plagiarismCheckFlow',
+    inputSchema: PlagiarismCheckInputSchema,
+    outputSchema: PlagiarismCheckOutputSchema,
+}, async (input) => {
+    const { output } = await plagiarismCheckPrompt(input);
+    if (!output) {
+      throw new Error('Plagiarism check failed to produce an output.');
+    }
+    return output;
+});
+
+export async function plagiarismCheck(input: PlagiarismCheckInput): Promise<PlagiarismCheckOutput> {
+  const validation = PlagiarismCheckInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for plagiarismCheck: ${validation.error.message}`);
+  }
+  return plagiarismCheckFlow(validation.data);
 }

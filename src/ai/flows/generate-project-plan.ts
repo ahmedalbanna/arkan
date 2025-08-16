@@ -1,4 +1,5 @@
 
+
 'use server';
 
 /**
@@ -9,14 +10,8 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { ProjectPlanSchema, GenerateProjectPlanInputSchema, type GenerateProjectPlanInput } from '@/ai/schemas';
 
-export async function generateProjectPlan(input: GenerateProjectPlanInput): Promise<z.infer<typeof ProjectPlanSchema>> {
-  
-  // Prepare the phase range string in TypeScript
-  const minPhases = input.numPhases || 4;
-  const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
-  const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
 
-  const planPrompt = ai.definePrompt({
+const planPrompt = ai.definePrompt({
     name: 'generateProjectPlanPrompt',
     input: { schema: GenerateProjectPlanInputSchema.extend({ phaseRangeText: z.string() }) },
     output: { schema: ProjectPlanSchema },
@@ -55,6 +50,28 @@ Based on the analysis, create a structured project plan consisting of logical ph
     }
   });
 
-  const { output } = await planPrompt({ ...input, phaseRangeText });
-  return output!;
+
+const generateProjectPlanFlow = ai.defineFlow({
+    name: 'generateProjectPlanFlow',
+    inputSchema: GenerateProjectPlanInputSchema,
+    outputSchema: ProjectPlanSchema,
+}, async (input) => {
+    const minPhases = input.numPhases || 4;
+    const maxPhases = input.numPhases ? input.numPhases + 2 : 6;
+    const phaseRangeText = `between ${minPhases} and ${maxPhases}`;
+    
+    const { output } = await planPrompt({ ...input, phaseRangeText });
+    if (!output) {
+        throw new Error("Project plan generation failed.");
+    }
+    return output;
+});
+
+
+export async function generateProjectPlan(input: GenerateProjectPlanInput): Promise<z.infer<typeof ProjectPlanSchema>> {
+  const validation = GenerateProjectPlanInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for generateProjectPlan: ${validation.error.message}`);
+  }
+  return generateProjectPlanFlow(validation.data);
 }

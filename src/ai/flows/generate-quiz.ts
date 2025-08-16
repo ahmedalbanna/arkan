@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -10,10 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { GenerateQuizInputSchema, type GenerateQuizInput, GenerateQuizOutputSchema, type GenerateQuizOutput } from '@/ai/schemas';
 
-export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
-  const { text, numQuestions } = input;
-
-  const prompt = ai.definePrompt({
+const generateQuizPrompt = ai.definePrompt({
     name: 'generateQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
@@ -34,6 +30,22 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQu
 `,
   });
 
-  const { output } = await prompt({ text, numQuestions });
-  return output!;
+const generateQuizFlow = ai.defineFlow({
+    name: 'generateQuizFlow',
+    inputSchema: GenerateQuizInputSchema,
+    outputSchema: GenerateQuizOutputSchema,
+}, async (input) => {
+    const { output } = await generateQuizPrompt(input);
+    if (!output) {
+      throw new Error("Quiz generation failed.");
+    }
+    return output;
+});
+
+export async function generateQuiz(input: GenerateQuizInput): Promise<GenerateQuizOutput> {
+  const validation = GenerateQuizInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for generateQuiz: ${validation.error.message}`);
+  }
+  return generateQuizFlow(validation.data);
 }

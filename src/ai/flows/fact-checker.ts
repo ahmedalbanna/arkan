@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -9,9 +8,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { FactCheckInputSchema, type FactCheckInput, FactCheckOutputSchema, type FactCheckOutput } from '@/ai/schemas';
 
-export async function factCheckText(input: FactCheckInput): Promise<FactCheckOutput> {
-  
-  const prompt = ai.definePrompt({
+const factCheckPrompt = ai.definePrompt({
     name: 'factCheckPrompt',
     input: { schema: FactCheckInputSchema },
     output: { schema: FactCheckOutputSchema },
@@ -30,8 +27,24 @@ export async function factCheckText(input: FactCheckInput): Promise<FactCheckOut
 {{{text}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  return output!;
+const factCheckFlow = ai.defineFlow({
+    name: 'factCheckFlow',
+    inputSchema: FactCheckInputSchema,
+    outputSchema: FactCheckOutputSchema,
+}, async (input) => {
+    const { output } = await factCheckPrompt(input);
+    if (!output) {
+      throw new Error("Fact-checking failed to produce an output.");
+    }
+    return output;
+});
+
+export async function factCheckText(input: FactCheckInput): Promise<FactCheckOutput> {
+  const validation = FactCheckInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for factCheckText: ${validation.error.message}`);
+  }
+  return factCheckFlow(validation.data);
 }

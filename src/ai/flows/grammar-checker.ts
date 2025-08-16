@@ -9,9 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { GrammarCheckInputSchema, type GrammarCheckInput, GrammarCheckOutputSchema, type GrammarCheckOutput } from '@/ai/schemas';
 
-
-export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarCheckOutput> {
-  const prompt = ai.definePrompt({
+const grammarCheckPrompt = ai.definePrompt({
     name: 'grammarCheckPrompt',
     input: { schema: GrammarCheckInputSchema },
     output: { schema: GrammarCheckOutputSchema },
@@ -33,6 +31,22 @@ export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarChe
     }
   });
 
-  const { output } = await prompt(input);
-  return output!;
+const grammarCheckFlow = ai.defineFlow({
+    name: 'grammarCheckFlow',
+    inputSchema: GrammarCheckInputSchema,
+    outputSchema: GrammarCheckOutputSchema,
+}, async (input) => {
+    const { output } = await grammarCheckPrompt(input);
+    if (!output) {
+        throw new Error("Grammar check failed.");
+    }
+    return output;
+});
+
+export async function grammarCheck(input: GrammarCheckInput): Promise<GrammarCheckOutput> {
+  const validation = GrammarCheckInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for grammarCheck: ${validation.error.message}`);
+  }
+  return grammarCheckFlow(validation.data);
 }

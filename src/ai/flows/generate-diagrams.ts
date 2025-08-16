@@ -32,9 +32,8 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
-        model: 'googleai/gemini-1.5-flash',
-        prompt: `${basePrompt}
-
+        system: basePrompt,
+        prompt: `
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}
@@ -104,6 +103,6 @@ ${stringifiedPlan}
     }
     });
     
-    const { output } = await diagramPrompt({ ...input, textContext, mediaContext });
+    const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-1.5-flash' });
     return output!;
 }

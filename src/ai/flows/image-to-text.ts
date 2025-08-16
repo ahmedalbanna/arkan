@@ -1,5 +1,3 @@
-
-
 'use server';
 
 /**
@@ -11,24 +9,12 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { ImageToTextInputSchema, type ImageToTextInput, ImageToTextOutputSchema, type ImageToTextOutput } from '@/ai/schemas';
 
-
-export async function imageToText(input: ImageToTextInput): Promise<ImageToTextOutput> {
-  return imageToTextFlow(input);
-}
-
-const imageToTextFlow = ai.defineFlow(
-  {
-    name: 'imageToTextFlow',
-    inputSchema: ImageToTextInputSchema,
-    outputSchema: ImageToTextOutputSchema,
-  },
-  async (input) => {
-    const extractTextPrompt = ai.definePrompt({
-      name: 'extractTextFromImagePrompt',
-      input: { schema: ImageToTextInputSchema },
-      output: { schema: ImageToTextOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
-      prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
+const extractTextPrompt = ai.definePrompt({
+    name: 'extractTextFromImagePrompt',
+    input: { schema: ImageToTextInputSchema },
+    output: { schema: ImageToTextOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: `You are an expert OCR (Optical Character Recognition) tool. Your task is to take the provided image and extract all text content from it.
 
 Follow these guidelines:
 1.  **Structure**: Analyze the image to understand the layout. Preserve the original structure as much as possible, including headings, lists, and paragraphs.
@@ -40,8 +26,15 @@ Image:
 {{media url=imageDataUri}}
 ---
 `,
-    });
+});
 
+const imageToTextFlow = ai.defineFlow(
+  {
+    name: 'imageToTextFlow',
+    inputSchema: ImageToTextInputSchema,
+    outputSchema: ImageToTextOutputSchema,
+  },
+  async (input) => {
     const { output } = await extractTextPrompt(input);
     if (!output) {
       throw new Error("Text extraction failed.");
@@ -50,3 +43,12 @@ Image:
     return output;
   }
 );
+
+
+export async function imageToText(input: ImageToTextInput): Promise<ImageToTextOutput> {
+  const validation = ImageToTextInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for imageToText: ${validation.error.message}`);
+  }
+  return imageToTextFlow(validation.data);
+}

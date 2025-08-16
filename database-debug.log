@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 03:40:28.138 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
 03:40:29.162 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
 03:41:24.565 [NamespaceSystem-akka.actor.default-dispatcher-4] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 686ms, init: 0ms
@@ -7,3 +8,9 @@ namespace fake-server, but the emulator is configured for docudec-default-rtdb. 
 opt-out of single project mode add/set the singleProjectMode: false property in 
 the firebase.json emulators config. 
 03:42:22.258 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - fake-server successfully activated FBKV (SurveyIdle(0)) wait: 33ms, init: 0ms
+=======
+14:23:35.668 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO akka.event.slf4j.Slf4jLogger - Slf4jLogger started
+14:23:36.777 [main] INFO com.firebase.server.forge.App$ - Listening at 127.0.0.1:9030
+14:24:16.941 [NamespaceSystem-akka.actor.default-dispatcher-5] INFO com.firebase.core.namespace.NamespaceActor - docudec-default-rtdb successfully activated FBKV (SurveyIdle(0)) wait: 613ms, init: 0ms
+14:24:17.284 [NamespaceSystem-blocking-namespace-operation-dispatcher-7] INFO com.firebase.core.namespace.StateManager - Namespace docudec-default-rtdb status Active to Active
+>>>>>>> Stashed changes
