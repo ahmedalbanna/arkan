@@ -1,7 +1,6 @@
-
 'use client';
 
-import GenerationTemplateManager from '@/components/admin/templates/GenerationTemplateManager';
+import GenerationTemplateManager from '@/components/admin/GenerationTemplateManager';
 import { SlidersHorizontal } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
