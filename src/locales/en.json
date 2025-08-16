@@ -186,6 +186,8 @@
     "tableHeadJoined": "Joined",
     "tableHeadActions": "Actions",
     "editUserSr": "Edit User",
+    "chatWithUserSr": "Chat with User",
+    "noUsersFound": "No users found.",
     "previousButton": "Previous",
     "pageLabel": "Page",
     "nextButton": "Next"
@@ -201,7 +203,9 @@
     "actions": "Actions",
     "filterAgentPlaceholder": "Filter by agent ID...",
     "filterUserPlaceholder": "Filter by user ID...",
-    "noResults": "No logs found matching the filter criteria."
+    "noResults": "No logs found matching your query.",
+    "loadMore": "Load More",
+    "loadingMore": "Loading more..."
   },
   "roles": {
     "user": "User",
@@ -265,7 +269,7 @@
     "fontSize": "Font Size (pt)",
     "fontColor": "Font Color",
     "bold": "Bold",
-    "c": "Heading {level}",
+    "headingLevel": "Heading {level}",
     "saveButton": "Save Template"
   },
   "templates": {
@@ -311,13 +315,24 @@
     "pageSubtitle": "Review and process pending payment submissions from users.",
     "errorLoading": "Failed to load payment requests",
     "noPending": "No pending payment requests.",
+    "noTransactionsFound": "No {status} transactions found.",
+    "historyTitle": "Transaction History",
+    "historyDescription": "View and manage all user transactions.",
+    "tabs": {
+        "pending": "Pending",
+        "verified": "Verified",
+        "rejected": "Rejected"
+    },
+    "loadingMore": "Loading more...",
+    "loadMore": "Load More",
     "userLabel": "User",
     "amountLabel": "Amount",
     "creditsLabel": "Credits",
     "viewProofButton": "View Proof",
     "notesPlaceholder": "Add verification notes (optional)...",
     "approveButton": "Approve",
-    "declineButton": "Decline"
+    "declineButton": "Decline",
+    "processedOn": "Processed on {date}"
   },
   "submitPayment": {
     "pageTitle": "Submit Proof of Payment",
@@ -401,7 +416,7 @@
       "editPromptLabel": "Edit Prompt Details",
       "basePromptLabel": "Base Prompt",
       "customGuidelinesLabel": "Custom Guidelines",
-      "customGuidelinePlaceholder": "Add a custom guideline...",
+      "addGuidelinePlaceholder": "Add a custom guideline...",
       "generateButton": "Generate Proposal",
       "toasts": {
         "translateAllStarted": "Bulk Translation Started",
@@ -473,7 +488,7 @@
       "translateAll": "Translate All Sections",
       "toolsTitle": "Generation Tools",
       "toolsDesc": "Configure and generate report sections.",
-      "reportTemplate": "Report Template",
+      "report_template": "Report Template",
       "generateFullReport": "Generate Full Report",
       "generateButton": "Generate",
       "externalContextTitle": "External Context",
@@ -635,7 +650,7 @@
       "historyEmpty": "No presentations generated yet.",
       "viewerEmpty": "Your generated presentation will appear here.",
       "toolsTitle": "Generation Tools",
-      "toolsDesc": "Configure and generate the presentation.",
+      "toolsDesc": "Upload or select context to generate a presentation.",
       "templateLabel": "Presentation Template",
       "editDetails": "Edit Generation Details",
       "generateButton": "Generate Presentation",
@@ -656,7 +671,13 @@
       "toasts": {
         "success": "Presentation Generated Successfully!",
         "failed": "Presentation Generation Failed",
-        "authError": "You must be logged in to generate a presentation."
+        "authError": "You must be logged in to generate a presentation.",
+        "translateAllStarted": "Bulk Translation Started",
+        "translateAllStartedDesc": "Translating all slides. This may take a moment...",
+        "translateAllSuccess": "Translation Complete",
+        "translateAllSuccessDesc": "The presentation has been successfully translated.",
+        "translateAllFailed": "Translation Failed",
+        "translateAllFailedDesc": "An error occurred while translating the presentation."
       }
     },
     "Section": {
@@ -681,8 +702,8 @@
         "downloadPdf": "Download PDF"
       },
       "toasts": {
-        "copiedMd": "Copied as Markdown",
-        "copiedText": "Copied as Plain Text",
+        "copied": "Copied to clipboard",
+        "cleared": "Content cleared",
         "translateSuccess": "Translation Complete!",
         "translateFailed": "Translation Failed"
       }

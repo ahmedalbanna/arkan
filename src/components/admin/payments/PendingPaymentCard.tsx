@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,7 +65,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                 </div>
                  {transaction.verifiedBy && transaction.verifiedAt && (
                     <p className="text-xs text-muted-foreground pt-2 border-t">
-                        Processed on {format(new Date(transaction.verifiedAt), 'd MMM yyyy')}
+                        {t('managePayments.processedOn').replace('{date}', format(new Date(transaction.verifiedAt), 'd MMM yyyy'))}
                     </p>
                 )}
             </CardContent>

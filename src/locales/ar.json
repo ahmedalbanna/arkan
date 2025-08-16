@@ -331,7 +331,8 @@
     "viewProofButton": "عرض الإثبات",
     "notesPlaceholder": "أضف ملاحظات التحقق (اختياري)...",
     "approveButton": "موافقة",
-    "declineButton": "رفض"
+    "declineButton": "رفض",
+    "processedOn": "تمت المعالجة في {date}"
   },
   "submitPayment": {
     "pageTitle": "إرسال إثبات الدفع",
@@ -526,6 +527,9 @@
       "tool_context_desc": "حدد أقسامًا أو رسومًا بيانية أخرى تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
       "tool_context_sections": "الأقسام",
       "tool_context_diagrams": "الرسوم البيانية",
+      "errorInsufficientCredits": "أرصدة غير كافية. يرجى شراء المزيد من الأرصدة للمتابعة.",
+      "ContextualSections": "الأقسام السياقية",
+      "ContextualDiagrams": "الرسوم البيانية السياقية",
       "noOtherSections": "لم يتم إنشاء أقسام أخرى بعد.",
       "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد",
       "externalContext": "سياق خارجي",
@@ -534,9 +538,7 @@
       "disabledTooltip": "هذا الوكيل معطل",
       "updateSection": "تحديث القسم",
       "Select_template": "حدد قالبًا",
-      "context_diagrams": "الرسوم البيانية السياقية",
-      "ContextualSections": "الأقسام السياقية",
-      "ContextualDiagrams": "الرسوم البيانية السياقية",
+      "report_template": "قالب التقرير",
       "sections": {
         "introduction": "المقدمة",
         "literatureReview": "مراجعة الأدبيات",
@@ -567,8 +569,7 @@
         "translateAllStarted": "بدأت الترجمة المجمعة",
         "translateAllStartedDesc": "ترجمة جميع الأقسام. قد يستغرق هذا بعض الوقت...",
         "translateAllSuccess": "اكتملت الترجمة",
-        "translateAllSuccessDesc": "تمت ترجمة جميع الأقسام بنجاح.",
-        "translateAllFailed": "فشلت الترجمة"
+        "translateAllSuccessDesc": "تمت ترجمة جميع الأقسام بنجاح."
       }
     },
     "diagramGenerator": {
