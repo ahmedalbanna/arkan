@@ -35,6 +35,24 @@
     "clearAll": "Clear All",
     "noNotifications": "You have no new notifications."
   },
+  "notifications": {
+    "newPayment": {
+      "title": "New Payment Request",
+      "description": "User {name} submitted a payment request for ${price}."
+    },
+    "paymentApproved": {
+      "title": "Payment Approved",
+      "description": "Your purchase of {credits} credits has been approved."
+    },
+    "paymentRejected": {
+      "title": "Payment Rejected",
+      "description": "Your recent purchase could not be verified. Please contact support."
+    },
+    "newUser": {
+      "title": "New User Signed Up",
+      "description": "A new user, {name}, has joined the platform."
+    }
+  },
   "agentGenerator": {
     "title": "Generate Your AI Agent",
     "placeholder": "Describe your AI Agent's specialty and task—more details, better customization!",
@@ -209,6 +227,8 @@
     "projectNamePlaceholder": "e.g., Q4 Marketing Campaign",
     "projectIdeaPlaceholder": "e.g., A mobile app for tracking personal fitness goals...",
     "startBuildingButton": "Start Building",
+    "saveAsButton": "Save As...",
+    "saveButton": "Save",
     "saveAsTitle": "Save Project As",
     "saveAsDescription": "Enter a new name and choose whether to save to the cloud or download a local file.",
     "nameLabel": "Name",
@@ -226,6 +246,7 @@
     "deleteDialogTitle": "Are you absolutely sure?",
     "deleteDialogDescription": "This action cannot be undone. This will permanently delete your \"{projectTitle}\" project.",
     "deleteButton": "Delete",
+    "cancelButton": "Cancel",
     "projectDeletedToastTitle": "Project Deleted",
     "projectDeletedToastDesc": "The project has been successfully deleted.",
     "deleteFailedToastTitle": "Delete Failed",
@@ -400,8 +421,9 @@
     "tone": "Tone",
     "language": "Language",
     "aiModel": "AI Model",
-    "complexPromptNote": "This is a complex prompt. Only the base prompt is editable here.",
-    "saveButton": "Save Changes",
+    "complexPromptNoteTitle": "Simple Prompt Mode",
+    "complexPromptNoteDesc": "This agent uses a simple string prompt. Advanced features like Guidelines and JSON Output require converting to a complex prompt structure.",
+    "saveButton": "Update",
     "automationTitle": "Automation",
     "automationDesc": "Use your AI agent as part of an automation flow to handle tasks, make decisions, and streamline workflows. Build custom workflows and tools to further empower your agents. Your AI agents can seamlessly integrate into automations, transforming how you manage work. Learn more.",
     "newAutomationBtn": "Add new automation",
@@ -427,7 +449,13 @@
     },
     "filterToolsPlaceholder": "Filter tools...",
     "newToolButton": "New tool",
-    "availableToolsTitle": "Available Tools"
+    "availableToolsTitle": "Available Tools",
+    "introductionPlaceholder": "Set your agent's introduction message here...",
+    "guidelinePlaceholder": "e.g., Always respond in a friendly and professional tone.",
+    "addGuideline": "Add Guideline",
+    "remove": "Remove",
+    "noJsonDefined": "No JSON structure defined for this agent's prompt.",
+    "createStructure": "Create Structure"
   },
   "manageTemplates": {
     "pageSubtitle": "Customize the look and feel of exported DOCX documents.",
@@ -705,6 +733,7 @@
       "noOtherSections": "No other sections generated yet.",
       "noOtherDiagrams": "No other diagrams generated yet",
       "externalContext": "External Context",
+      "ContextualSections": "Contextual Items",
       "GenerateFullReport": "Generate Full Report",
       "GenerateButton": "Generate",
       "disabledTooltip": "This agent is disabled",

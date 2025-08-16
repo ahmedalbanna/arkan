@@ -141,13 +141,13 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   };
 
   const navItems = [
-    { id: 'general', label: 'General', icon: Bot },
-    { id: 'guidelines', label: 'Guidelines', icon: ListChecks },
-    { id: 'output', label: 'Output', icon: PencilRuler },
-    { id: 'knowledge', label: 'Knowledge', icon: BookOpen },
-    { id: 'tools', label: 'Tools', icon: Wrench },
-    { id: 'context', label: 'Context', icon: LinkIcon },
-    { id: 'automation', label: 'Automation', icon: BotMessageSquare },
+    { id: 'general', label: t('agentEditor.generalTitle'), icon: Bot },
+    { id: 'guidelines', label: t('agentEditor.guidelinesTitle'), icon: ListChecks },
+    { id: 'output', label: t('agentEditor.outputTitle'), icon: PencilRuler },
+    { id: 'knowledge', label: t('agentEditor.knowledgeTitle'), icon: BookOpen },
+    { id: 'tools', label: t('agentEditor.toolsTitle'), icon: Wrench },
+    { id: 'context', label: t('agentEditor.contextTitle'), icon: LinkIcon },
+    { id: 'automation', label: t('agentEditor.automationTitle'), icon: BotMessageSquare },
   ];
 
   const renderContent = () => {
@@ -196,7 +196,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
             <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
             <Button type="submit" disabled={updateAgentMutation.isPending}>
               {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Update
+              {t('agentEditor.saveButton')}
             </Button>
           </CardFooter>
         </form>

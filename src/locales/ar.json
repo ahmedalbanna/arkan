@@ -35,6 +35,24 @@
     "clearAll": "مسح الكل",
     "noNotifications": "ليس لديك إشعارات جديدة."
   },
+  "notifications": {
+    "newPayment": {
+      "title": "طلب دفع جديد",
+      "description": "قدم المستخدم {name} طلب دفع بمبلغ ${price}."
+    },
+    "paymentApproved": {
+      "title": "تمت الموافقة على الدفع",
+      "description": "تمت الموافقة على شرائك لـ {credits} أرصدة."
+    },
+    "paymentRejected": {
+      "title": "تم رفض الدفع",
+      "description": "تعذر التحقق من عملية الشراء الأخيرة. يرجى الاتصال بالدعم."
+    },
+    "newUser": {
+      "title": "مستخدم جديد سجل",
+      "description": "انضم مستخدم جديد، {name}، إلى المنصة."
+    }
+  },
   "agentGenerator": {
     "title": "أنشئ وكيلك الذكي",
     "placeholder": "صف تخصص ومهام وكيلك الذكي - كلما زادت التفاصيل، كان التخصيص أفضل!",
@@ -209,6 +227,8 @@
     "projectNamePlaceholder": "على سبيل المثال، حملة تسويق الربع الرابع",
     "projectIdeaPlaceholder": "على سبيل المثال، تطبيق جوال لتتبع أهداف اللياقة البدنية الشخصية...",
     "startBuildingButton": "ابدأ البناء",
+    "saveAsButton": "حفظ باسم...",
+    "saveButton": "حفظ",
     "saveAsTitle": "حفظ المشروع باسم",
     "saveAsDescription": "أدخل اسمًا جديدًا واختر ما إذا كنت تريد الحفظ في السحابة أو تنزيل ملف محلي.",
     "nameLabel": "الاسم",
@@ -226,6 +246,7 @@
     "deleteDialogTitle": "هل أنت متأكد تمامًا؟",
     "deleteDialogDescription": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف مشروعك \"{projectTitle}\" بشكل دائم.",
     "deleteButton": "حذف",
+    "cancelButton": "إلغاء",
     "projectDeletedToastTitle": "تم حذف المشروع",
     "projectDeletedToastDesc": "تم حذف المشروع بنجاح.",
     "deleteFailedToastTitle": "فشل الحذف",
@@ -400,8 +421,9 @@
     "tone": "النبرة",
     "language": "اللغة",
     "aiModel": "نموذج الذكاء الاصطناعي",
-    "complexPromptNote": "هذه مطالبة معقدة. المطالبة الأساسية فقط قابلة للتحرير هنا.",
-    "saveButton": "حفظ التغييرات",
+    "complexPromptNoteTitle": "وضع المطالبة البسيط",
+    "complexPromptNoteDesc": "يستخدم هذا الوكيل مطالبة سلسلة بسيطة. تتطلب الميزات المتقدمة مثل الإرشادات وإخراج JSON التحويل إلى بنية مطالبة معقدة.",
+    "saveButton": "تحديث",
     "automationTitle": "الأتمتة",
     "automationDesc": "استخدم وكيل الذكاء الاصطناعي الخاص بك كجزء من تدفق الأتمتة للتعامل مع المهام واتخاذ القرارات وتبسيط سير العمل. أنشئ مهام سير عمل وأدوات مخصصة لتمكين وكلائك بشكل أكبر. يمكن لوكلاء الذكاء الاصطناعي الاندماج بسلاسة في عمليات الأتمتة، مما يغير طريقة إدارتك للعمل. تعلم المزيد.",
     "newAutomationBtn": "إضافة أتمتة جديدة",
@@ -427,7 +449,13 @@
     },
     "filterToolsPlaceholder": "تصفية الأدوات...",
     "newToolButton": "أداة جديدة",
-    "availableToolsTitle": "الأدوات المتاحة"
+    "availableToolsTitle": "الأدوات المتاحة",
+    "introductionPlaceholder": "حدد رسالة مقدمة وكيلك هنا...",
+    "guidelinePlaceholder": "على سبيل المثال، قم بالرد دائمًا بنبرة ودية ومهنية.",
+    "addGuideline": "إضافة إرشادات",
+    "remove": "إزالة",
+    "noJsonDefined": "لا يوجد بنية JSON محددة لمطالبة هذا الوكيل.",
+    "createStructure": "إنشاء بنية"
   },
   "manageTemplates": {
     "pageSubtitle": "تخصيص شكل وأسلوب مستندات DOCX المصدرة.",
@@ -705,6 +733,7 @@
       "noOtherSections": "لم يتم إنشاء أقسام أخرى بعد.",
       "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد",
       "externalContext": "سياق خارجي",
+      "ContextualSections": "العناصر السياقية",
       "GenerateFullReport": "إنشاء تقرير كامل",
       "GenerateButton": "إنشاء",
       "disabledTooltip": "هذا الوكيل معطل",

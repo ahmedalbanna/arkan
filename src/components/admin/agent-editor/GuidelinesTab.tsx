@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
@@ -22,8 +23,8 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
     return (
         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
             <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">{t('agentEditor.complexPromptNote')}</p>
-            <p>Guidelines can only be added to agents with a complex prompt (base + guidelines). This agent uses a simple string prompt.</p>
+            <p className="font-semibold">{t('agentEditor.complexPromptNoteTitle')}</p>
+            <p>{t('agentEditor.complexPromptNoteDesc')}</p>
         </div>
     )
   }
@@ -42,7 +43,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
               {...control.register(`prompt.guidelines.${index}.text`)}
               rows={2}
               className="flex-grow"
-              placeholder="e.g., Always respond in a friendly and professional tone."
+              placeholder={t('agentEditor.guidelinePlaceholder')}
             />
             <Button
               type="button"
@@ -63,7 +64,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
         className="w-full justify-start"
       >
         <Plus className="mr-2 h-4 w-4" />
-        Add Guideline
+        {t('agentEditor.addGuideline')}
       </Button>
     </div>
   );

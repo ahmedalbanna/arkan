@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -43,7 +44,7 @@ export default function ToolsTab() {
             onClick={() => setActiveFilter(filter)}
             className="rounded-full"
           >
-            {filter}
+            {t(`agentEditor.toolFilters.${filter.toLowerCase()}`)}
             {filter === 'All' && <Badge className="ml-2 bg-background text-foreground">{tools.length}</Badge>}
             {filter === 'Active' && <Badge className="ml-2 bg-background text-foreground">{activeCount}</Badge>}
           </Button>
@@ -53,13 +54,13 @@ export default function ToolsTab() {
       <div className="flex justify-between items-center">
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Filter tools..." className="pl-10" />
+          <Input placeholder={t('agentEditor.filterToolsPlaceholder')} className="pl-10" />
         </div>
-        <Button variant="outline"><Plus className="mr-2 h-4 w-4" /> New tool</Button>
+        <Button variant="outline"><Plus className="mr-2 h-4 w-4" />{t('agentEditor.newToolButton')}</Button>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Available Tools</h3>
+        <h3 className="text-lg font-semibold">{t('agentEditor.availableToolsTitle')}</h3>
         {tools.map((tool) => (
           <div key={tool.id} className="flex items-center justify-between rounded-lg border p-4">
             <div className="flex items-center gap-4">

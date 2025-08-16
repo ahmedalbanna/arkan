@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useFormContext } from 'react-hook-form';
@@ -34,8 +35,8 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
     return (
         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
             <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">{t('agentEditor.complexPromptNote')}</p>
-            <p>JSON output structures can only be defined for agents with a complex prompt.</p>
+            <p className="font-semibold">{t('agentEditor.complexPromptNoteTitle')}</p>
+            <p>{t('agentEditor.complexPromptNoteDesc')}</p>
         </div>
     )
   }
@@ -62,10 +63,10 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
           />
         ) : (
             <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center">
-                <p className="mb-4">No JSON structure defined for this agent's prompt.</p>
+                <p className="mb-4">{t('agentEditor.noJsonDefined')}</p>
                 <Button variant="outline" onClick={handleCreateStructure}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Create Structure
+                    {t('agentEditor.createStructure')}
                 </Button>
             </div>
         )}

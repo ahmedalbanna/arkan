@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
@@ -95,7 +96,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                     <span>{t('agentEditor.introduction')}</span>
                     <span className="text-xs text-muted-foreground">{introLength}/500</span>
                   </FormLabel>
-                  <FormControl><Textarea {...field} placeholder="Set your agent's introduction message here..." rows={3} /></FormControl>
+                  <FormControl><Textarea {...field} placeholder={t('agentEditor.introductionPlaceholder')} rows={3} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
