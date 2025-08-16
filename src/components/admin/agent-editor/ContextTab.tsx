@@ -13,6 +13,7 @@ import { AlertCircle, Search } from 'lucide-react';
 import type { AgentEditorFormValues } from './AgentEditor';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function ContextSkeleton() {
     return (
@@ -37,6 +38,7 @@ export default function ContextTab() {
   const { agents, isLoaded } = useAgents();
   const { control } = useFormContext<AgentEditorFormValues>();
   const [searchTerm, setSearchTerm] = useState('');
+  const { t } = useLocalization();
 
   const filteredAgents = useMemo(() => {
     if (!agents) return [];
@@ -47,23 +49,23 @@ export default function ContextTab() {
 
   return (
     <div className="space-y-6">
-      <CardTitle>Share Context</CardTitle>
+      <CardTitle>{t('agentEditor.contextTitle')}</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Select other agents whose output should be available as context by default when running this agent. This allows you to chain agent actions together.
+        {t('agentEditor.contextDesc')}
       </p>
 
       <div className="space-y-4 rounded-lg border p-4">
         <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
-                placeholder="Search available agents..."
+                placeholder={t('agentEditor.searchAgentsPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-8"
             />
         </div>
 
-        <h3 className="font-semibold text-sm pt-2">Available Agents for Context</h3>
+        <h3 className="font-semibold text-sm pt-2">{t('agentEditor.availableAgentsLabel')}</h3>
          {!isLoaded ? <ContextSkeleton /> : (
             <FormField
                 control={control}

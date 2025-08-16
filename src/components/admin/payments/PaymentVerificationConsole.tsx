@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TransactionData } from '@/lib/db/queries';
 import { FinancialReportExporter } from './FinancialReportExporter';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../ui/card';
 
 const TRANSACTIONS_PER_PAGE = 6;
 type TransactionStatus = 'pending' | 'verified' | 'rejected';
@@ -56,7 +56,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
     } = useInfiniteQuery({
         queryKey: transactionKeys.list(status),
         queryFn: ({ pageParam }) => getTransactions({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
-        initialPageParam: undefined as string | undefined,
+        initialPageParam: undefined,
         getNextPageParam: (lastPage) => {
             if (!lastPage.hasNextPage) return undefined;
             const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];
@@ -90,7 +90,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
     if (allTransactions.length === 0) {
         return (
             <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                <p>{t('managePayments.noTransactionsFound').replace('{status}', status)}</p>
+                <p>{t('managePayments.noTransactionsFound', {status: status})}</p>
             </div>
         )
     }

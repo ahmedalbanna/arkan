@@ -9,6 +9,7 @@ import { AlertCircle, PlusCircle } from 'lucide-react';
 import type { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
 import type { AgentPrompt } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -19,6 +20,7 @@ interface OutputTabProps {
 export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
   const { resolvedTheme } = useTheme();
   const { watch, setValue } = useFormContext<AgentEditorFormValues>();
+  const { t } = useLocalization();
 
   const promptValue = watch('prompt') as AgentPrompt;
   const jsonStructure = promptValue?.jsonStructure;
@@ -32,7 +34,7 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
     return (
         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
             <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">Not a Complex Prompt</p>
+            <p className="font-semibold">{t('agentEditor.complexPromptNote')}</p>
             <p>JSON output structures can only be defined for agents with a complex prompt.</p>
         </div>
     )
@@ -40,9 +42,9 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
 
   return (
     <div className="space-y-6">
-      <CardTitle>Output</CardTitle>
+      <CardTitle>{t('agentEditor.outputTitle')}</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Define the expected JSON structure for the agent's output. This ensures consistent, machine-readable responses from the AI.
+        {t('agentEditor.outputDesc')}
       </p>
 
       <div className="p-4 border rounded-md bg-background min-h-[200px]">

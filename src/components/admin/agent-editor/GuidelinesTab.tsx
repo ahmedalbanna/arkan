@@ -7,9 +7,11 @@ import { CardTitle } from '@/components/ui/card';
 import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 import type { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
 import { Textarea } from '@/components/ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: boolean }) {
   const { control } = useFormContext<AgentEditorFormValues>();
+  const { t } = useLocalization();
   
   const { fields, append, remove } = useFieldArray({
     control,
@@ -20,7 +22,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
     return (
         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground p-8 border rounded-lg">
             <AlertCircle className="h-10 w-10 mb-4" />
-            <p className="font-semibold">Not a Complex Prompt</p>
+            <p className="font-semibold">{t('agentEditor.complexPromptNote')}</p>
             <p>Guidelines can only be added to agents with a complex prompt (base + guidelines). This agent uses a simple string prompt.</p>
         </div>
     )
@@ -28,9 +30,9 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
 
   return (
     <div className="space-y-6">
-      <CardTitle>Guidelines</CardTitle>
+      <CardTitle>{t('agentEditor.guidelinesTitle')}</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Add a set of rules and instructions for the agent to follow. Guidelines help improve the quality and consistency of the agent's responses.
+        {t('agentEditor.guidelinesDesc')}
       </p>
 
       <div className="space-y-4">

@@ -92,7 +92,15 @@
     "dataSyncWarning": "ستقوم هذه العملية بالكتابة فوق أي تغييرات محلية في قاعدة بيانات SQLite بالبيانات الحالية من Firestore. هذا الإجراء لا رجعة فيه.",
     "triggerSyncButton": "تشغيل مزامنة Firestore إلى SQLite",
     "syncSuccessTitle": "بدأت المزامنة",
-    "syncErrorTitle": "فشلت المزامنة"
+    "syncErrorTitle": "فشلت المزامنة",
+    "defaultSettingsTitle": "إعدادات المستخدم الافتراضية",
+    "defaultSettingsDesc": "تكوين القيم الافتراضية للمستخدمين الجدد عند التسجيل.",
+    "newUserCreditsLabel": "أرصدة المستخدم الجديد",
+    "bankPaymentTitle": "تفاصيل الدفع البنكي",
+    "bankPaymentDesc": "حدد تفاصيل البنك التي سيراها المستخدمون في صفحة الدفع.",
+    "bankNameLabel": "اسم البنك",
+    "accountHolderLabel": "اسم صاحب الحساب",
+    "ibanLabel": "رقم الحساب المصرفي الدولي (IBAN)"
   },
   "adminDashboard": {
     "pageTitle": "لوحة تحكم التحليلات",
@@ -251,7 +259,23 @@
     "basePromptLabel": "المطالبة الأساسية",
     "promptLabel": "المطالبة",
     "complexPromptNote": "هذه مطالبة معقدة. المطالبة الأساسية فقط قابلة للتحرير هنا.",
-    "saveButton": "حفظ التغييرات"
+    "saveButton": "حفظ التغييرات",
+    "automationTitle": "الأتمتة",
+    "automationDesc": "استخدم وكيل الذكاء الاصطناعي الخاص بك كجزء من تدفق الأتمتة للتعامل مع المهام واتخاذ القرارات وتبسيط سير العمل. أنشئ مهام سير عمل وأدوات مخصصة لتمكين وكلائك بشكل أكبر. يمكن لوكلاء الذكاء الاصطناعي الاندماج بسلاسة في عمليات الأتمتة، مما يغير طريقة إدارتك للعمل. تعلم المزيد.",
+    "newAutomationBtn": "إضافة أتمتة جديدة",
+    "contextTitle": "مشاركة السياق",
+    "contextDesc": "حدد وكلاء آخرين يجب أن يكون ناتجهم متاحًا كسياق افتراضيًا عند تشغيل هذا الوكيل. هذا يسمح لك بربط إجراءات الوكيل معًا.",
+    "searchAgentsPlaceholder": "بحث عن الوكلاء المتاحين...",
+    "availableAgentsLabel": "الوكلاء المتاحون للسياق",
+    "generalTitle": "عام",
+    "guidelinesTitle": "الإرشادات",
+    "guidelinesDesc": "أضف مجموعة من القواعد والتعليمات ليتبعها الوكيل. تساعد الإرشادات على تحسين جودة واتساق استجابات الوكيل.",
+    "knowledgeTitle": "المعرفة",
+    "knowledgeDesc": "درب وكلاء الذكاء الاصطناعي الخاصين بك بمعرفة ديناميكية من المشاريع وروابط الويب والمستندات والمزيد. تعلم المزيد.",
+    "outputTitle": "الناتج",
+    "outputDesc": "حدد بنية JSON المتوقعة لإخراج الوكيل. هذا يضمن استجابات متسقة وقابلة للقراءة آليًا من الذكاء الاصطناعي.",
+    "toolsTitle": "الأدوات",
+    "toolsDesc": "جهز وكلاء الذكاء الاصطناعي بأدوات لجمع البيانات وإكمال المهام وأتمتة الإجراءات، أو أنشئ أدوات مخصصة لتدفقات العمل المستقلة. تعلم المزيد."
   },
   "agentManager": {
     "pageSubtitle": "تحكم في وكلاء الذكاء الاصطناعي المتاحين على المنصة وقم بتمكين أو تعطيل وظائفهم.",
@@ -373,7 +397,10 @@
       "document": "المستند",
       "diagram": "الرسوم البيانية",
       "code": "الكود",
-      "presentation": "العرض التقديمي"
+      "presentation": "العرض التقديمي",
+      "files": "الملفات",
+      "plan": "خطة المشروع",
+      "academic": "الحلال الأكاديمي"
     },
     "buttons": {
       "uploadProject": "تحميل مشروع",
@@ -650,7 +677,7 @@
       "historyEmpty": "لم يتم إنشاء عروض تقديمية بعد.",
       "viewerEmpty": "سيظهر عرضك التقديمي الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
-      "toolsDesc": "تكوين وإنشاء العرض التقديمي.",
+      "toolsDesc": "Upload or select context to generate a presentation.",
       "templateLabel": "قالب العرض التقديمي",
       "editDetails": "تعديل تفاصيل الإنشاء",
       "generateButton": "إنشاء العرض التقديمي",
@@ -668,13 +695,14 @@
       "prev": "السابق",
       "next": "التالي",
       "goToSlide": "الانتقال إلى الشريحة {slideNumber}",
+      "translateAllButton": "ترجمة العرض التقديمي",
+      "translateAllSuccess": "اكتملت الترجمة",
       "toasts": {
         "success": "تم إنشاء العرض التقديمي بنجاح!",
         "failed": "فشل إنشاء العرض التقديمي",
         "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي.",
         "translateAllStarted": "بدأت الترجمة المجمعة",
         "translateAllStartedDesc": "ترجمة جميع الشرائح. قد يستغرق هذا بعض الوقت...",
-        "translateAllSuccess": "اكتملت الترجمة",
         "translateAllSuccessDesc": "تمت ترجمة العرض التقديمي بنجاح.",
         "translateAllFailed": "فشلت الترجمة",
         "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض التقديمي."
@@ -724,13 +752,34 @@
       "historyDescription": "راجع حلولك السابقة.",
       "historyEmpty": "لا توجد مستندات محلولة بعد.",
       "clearHistoryTooltip": "مسح السجل",
+      "fileManagerTitle": "ملفات السياق",
+      "fileManagerDesc": "قم بتحميل وإدارة جميع الملفات السياقية لمشروعك هنا.",
+      "uploadFilesTab": "تحميل الملفات",
+      "pasteTextTab": "لصق النص",
+      "dropzoneLabel": "اسحب وأفلت الملفات هنا، أو انقر للتحديد",
+      "dropzoneHint": "PDF, DOCX, TXT, MD, صور (الحد الأقصى 5 ميجابايت)",
+      "analystAgentTitle": "وكيل المحلل",
+      "analystAgentDesc": "اطرح سؤالاً أو أعط تعليمات بناءً على ملفات السياق المدارة. سيقوم الذكاء الاصطناعي بإنشاء استجابة منظمة.",
+      "analystAgentPromptLabel": "مطالبتك",
+      "analystAgentRunButton": "تشغيل التحليل (2 أرصدة)",
+      "generatedReportTitle": "التقرير الذي تم إنشاؤه",
+      "viewJsonButton": "عرض JSON",
+      "jsonOutputTitle": "إخراج JSON الخام",
+      "saveResultButton": "حفظ النتيجة كملف سياق",
       "toasts": {
         "invalidFile": "نوع ملف غير صالح. يرجى تحميل ملف PDF.",
         "analysisError": "يرجى تحميل ملف وتحديد نوع المستند.",
         "errorTitle": "حدث خطأ",
         "analysisSuccess": "تم تحليل المستند بنجاح!",
         "analysisMissing": "لم يتم العثور على مستند تم تحليله. يرجى تحميل مستند وتحليله أولاً.",
-        "solvingSuccess": "تم حل المستند بنجاح!"
+        "solvingSuccess": "تم حل المستند بنجاح!",
+        "contextRequired": "السياق مطلوب",
+        "contextRequiredDesc": "يرجى تحميل ملف سياق واحد على الأقل لتحليله.",
+        "analysisComplete": "اكتمل التحليل",
+        "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
+        "analysisFailed": "فشل التحليل",
+        "analysisSaved": "تم حفظ التحليل",
+        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك."
       }
     }
   }

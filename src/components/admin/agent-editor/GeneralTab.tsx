@@ -13,6 +13,7 @@ import { Bot, MessageSquare, Plus, X } from 'lucide-react';
 import type { AgentPrompt } from '@/lib/agents';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface GeneralTabProps {
     isComplexPrompt: boolean;
@@ -21,6 +22,7 @@ interface GeneralTabProps {
 
 export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabProps) {
     const { control, watch } = useFormContext<AgentEditorFormValues>();
+    const { t } = useLocalization();
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -42,14 +44,14 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
 
     return (
         <div className='space-y-6'>
-            <CardTitle>General</CardTitle>
+            <CardTitle>{t('agentEditor.generalTitle')}</CardTitle>
             
             <FormField
               control={control}
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('agentEditor.nameLabel')}</FormLabel>
                   <FormControl><Input {...field} disabled={isPending} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -62,7 +64,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                 name="prompt.base"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prompt</FormLabel>
+                    <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
                     <FormControl>
                       <Textarea {...field} rows={8} className="font-mono text-sm" disabled={isPending} />
                     </FormControl>
@@ -76,7 +78,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                 name="prompt"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prompt</FormLabel>
+                    <FormLabel>{t('agentEditor.promptLabel')}</FormLabel>
                     <FormControl><Textarea {...field} value={field.value as string} rows={8} className="font-mono text-sm" disabled={isPending} /></FormControl>
                     <FormMessage />
                   </FormItem>
@@ -90,7 +92,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex justify-between items-center">
-                    <span>Introduction</span>
+                    <span>{t('agentEditor.introduction')}</span>
                     <span className="text-xs text-muted-foreground">{introLength}/500</span>
                   </FormLabel>
                   <FormControl><Textarea {...field} placeholder="Set your agent's introduction message here..." rows={3} /></FormControl>
@@ -104,7 +106,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
               name="placeholder"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Input Placeholder</FormLabel>
+                  <FormLabel>{t('agentEditor.placeholder')}</FormLabel>
                   <FormControl><Input {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,7 +114,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
             />
             
             <FormItem>
-                <FormLabel>Conversation Starters</FormLabel>
+                <FormLabel>{t('agentEditor.conversationStarters')}</FormLabel>
                 <div className="space-y-2">
                     {fields.map((field, index) => (
                         <div key={field.id} className="flex items-center gap-2">
@@ -122,7 +124,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                         </div>
                     ))}
                 </div>
-                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="mr-2 h-4 w-4"/> Add message</Button>
+                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="mr-2 h-4 w-4"/>{t('agentEditor.addMessage')}</Button>
             </FormItem>
 
             <div className="grid grid-cols-2 gap-4">
@@ -131,7 +133,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                     name="tone"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Tone</FormLabel>
+                            <FormLabel>{t('agentEditor.tone')}</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent>
@@ -147,7 +149,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                     name="language"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Language</FormLabel>
+                            <FormLabel>{t('agentEditor.language')}</FormLabel>
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent>
@@ -165,7 +167,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
               name="model"
               render={({ field }) => (
                   <FormItem>
-                      <FormLabel>AI Model</FormLabel>
+                      <FormLabel>{t('agentEditor.aiModel')}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                           <SelectContent>

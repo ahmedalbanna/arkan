@@ -65,7 +65,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                 </div>
                  {transaction.verifiedBy && transaction.verifiedAt && (
                     <p className="text-xs text-muted-foreground pt-2 border-t">
-                        {t('managePayments.processedOn').replace('{date}', format(new Date(transaction.verifiedAt), 'd MMM yyyy'))}
+                        {t('managePayments.processedOn', {date: format(new Date(transaction.verifiedAt), 'd MMM yyyy')})}
                     </p>
                 )}
             </CardContent>

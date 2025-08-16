@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus } from 'lucide-react';
 import { AVAILABLE_TOOLS, type AgentTool } from '@/lib/tools';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export default function ToolsTab() {
   const [activeFilter, setActiveFilter] = useState('All');
   const [tools, setTools] = useState<AgentTool[]>(AVAILABLE_TOOLS);
+  const { t } = useLocalization();
 
   const filters = ['All', 'Active', 'Taskade', 'Apps', 'Custom'];
 
@@ -28,9 +30,9 @@ export default function ToolsTab() {
 
   return (
     <div className="space-y-6">
-      <CardTitle>Tools</CardTitle>
+      <CardTitle>{t('agentEditor.toolsTitle')}</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Equip your AI Agents with tools to gather data, complete tasks, and automate actions, or build custom tools for autonomous workflows. <a href="#" className="text-primary underline">Learn more.</a>
+        {t('agentEditor.toolsDesc')}
       </p>
 
       <div className="flex flex-wrap items-center gap-2">

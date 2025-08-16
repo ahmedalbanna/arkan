@@ -17,17 +17,19 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { AVAILABLE_AUTOMATIONS } from '@/lib/automations';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export default function AutomationTab() {
+  const { t } = useLocalization();
   return (
     <div className="space-y-6">
-      <CardTitle>Automation</CardTitle>
+      <CardTitle>{t('agentEditor.automationTitle')}</CardTitle>
       <p className="text-sm text-muted-foreground">
-        Use your AI agent as part of an automation flow to handle tasks, make decisions, and streamline workflows. Build custom workflows and tools to further empower your agents. Your AI agents can seamlessly integrate into automations, transforming how you manage work. <a href="#" className="text-primary underline">Learn more.</a>
+        {t('agentEditor.automationDesc')}
       </p>
        <Button variant="outline" className="w-full justify-start">
           <Plus className="mr-2 h-4 w-4" />
-          Add new automation
+          {t('agentEditor.newAutomationBtn')}
         </Button>
       
       <div className="space-y-2">

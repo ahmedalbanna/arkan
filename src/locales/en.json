@@ -21,7 +21,7 @@
     "manageUsers": "Manage Users",
     "managePayments": "Manage Payments",
     "handwriting": "Text to Handwriting",
-    "admin": "Admin",
+    "admin": "Admin Panel",
     "logout": "Logout",
     "academicSolver": "Academic Solver",
     "adminSettings": "Settings",
@@ -34,55 +34,55 @@
     "navigationTitle": "Features",
     "howToUse": "How to Use",
     "proposalGenerator": {
-        "title": "Proposal Generator",
-        "description": "The Proposal Generator is the starting point for your projects. Describe your idea in a few sentences, and our AI will create a comprehensive, professional project proposal.",
-        "step1": "Navigate to the 'Builder' and select the 'Proposal Mode' tab.",
-        "step2": "Enter a clear description of your project idea into the text area.",
-        "step3": "Click 'Generate Proposal' and review the structured output, which you can edit directly."
+      "title": "Proposal Generator",
+      "description": "The Proposal Generator is the starting point for your projects. Describe your idea in a few sentences, and our AI will create a comprehensive, professional project proposal.",
+      "step1": "Navigate to the 'Builder' and select the 'Proposal Mode' tab.",
+      "step2": "Enter a clear description of your project idea into the text area.",
+      "step3": "Click 'Generate Proposal' and review the structured output, which you can edit directly."
     },
     "reportGenerator": {
-        "title": "Report Generator",
-        "description": "Once you have a proposal, the Report Generator can build out a full document, section by section, based on the proposal's context.",
-        "step1": "Ensure a proposal is loaded in the 'Proposal Mode' tab.",
-        "step2": "In the 'Document Generator' tab, open the accordion for the section you want to generate (e.g., Introduction, System Analysis).",
-        "step3": "Adjust any guidelines or controls for the AI.",
-        "step4": "Click the 'Generate' button for that section and watch the content appear."
+      "title": "Report Generator",
+      "description": "Once you have a proposal, the Report Generator can build out a full document, section by section, based on the proposal's context.",
+      "step1": "Ensure a proposal is loaded in the 'Proposal Mode' tab.",
+      "step2": "In the 'Document Generator' tab, open the accordion for the section you want to generate (e.g., Introduction, System Analysis).",
+      "step3": "Adjust any guidelines or controls for the AI.",
+      "step4": "Click the 'Generate' button for that section and watch the content appear."
     },
     "diagramGenerator": {
-        "title": "Diagram Generator",
-        "description": "Visualize your system's architecture, user flows, and database schemas with AI-powered PlantUML diagramming.",
-        "step1": "In the 'Diagram Generator' tab, select the type of diagram you wish to create (e.g., Use Case, Class, Sequence).",
-        "step2": "Provide additional context by selecting relevant report sections or other diagrams.",
-        "step3": "Click 'Generate' to produce the PlantUML code and a preview image."
+      "title": "Diagram Generator",
+      "description": "Visualize your system's architecture, user flows, and database schemas with AI-powered PlantUML diagramming.",
+      "step1": "In the 'Diagram Generator' tab, select the type of diagram you wish to create (e.g., Use Case, Class, Sequence).",
+      "step2": "Provide additional context by selecting relevant report sections or other diagrams.",
+      "step3": "Click 'Generate' to produce the PlantUML code and a preview image."
     },
     "codeGenerator": {
-        "title": "Code Generator",
-        "description": "Need a UI component? Describe it in plain language, and the Code Generator will provide you with the HTML, CSS, and JavaScript.",
-        "step1": "Go to the 'Code Generator' tab.",
-        "step2": "Write a clear prompt describing the component, its appearance, and its behavior (e.g., 'A responsive login form with a show/hide password button')."
+      "title": "Code Generator",
+      "description": "Need a UI component? Describe it in plain language, and the Code Generator will provide you with the HTML, CSS, and JavaScript.",
+      "step1": "Go to the 'Code Generator' tab.",
+      "step2": "Write a clear prompt describing the component, its appearance, and its behavior (e.g., 'A responsive login form with a show/hide password button')."
     },
     "presentationGenerator": {
-        "title": "Presentation Generator",
-        "description": "Instantly convert your project proposal and report sections into a professional slide deck.",
-        "step1": "After generating a proposal and some report content, switch to the 'Presentation Mode' tab.",
-        "step2": "Select which report sections you want to include as context for the presentation.",
-        "step3": "Click 'Generate Presentation' to create a full set of slides with titles, bullet points, and speaker notes."
+      "title": "Presentation Generator",
+      "description": "Instantly convert your project proposal and report sections into a professional slide deck.",
+      "step1": "After generating a proposal and some report content, switch to the 'Presentation Mode' tab.",
+      "step2": "Select which report sections you want to include as context for the presentation.",
+      "step3": "Click 'Generate Presentation' to create a full set of slides with titles, bullet points, and speaker notes."
     },
     "academicSolver": {
-        "title": "Academic Solver",
-        "description": "Upload an academic document like an exam or homework in PDF format, and let the AI analyze the questions and provide detailed solutions.",
-        "step1": "Navigate to the 'Academic Solver' page from the header.",
-        "step2": "Select whether you are uploading an 'Exam' or 'Homework'.",
-        "step3": "Upload a PDF file containing the questions.",
-        "step4": "The AI will first analyze and structure the document, then you can click 'Solve' to generate the answers."
+      "title": "Academic Solver",
+      "description": "Upload an academic document like an exam or homework in PDF format, and let the AI analyze the questions and provide detailed solutions.",
+      "step1": "Navigate to the 'Academic Solver' page from the header.",
+      "step2": "Select whether you are uploading an 'Exam' or 'Homework'.",
+      "step3": "Upload a PDF file containing the questions.",
+      "step4": "The AI will first analyze and structure the document, then you can click 'Solve' to generate the answers."
     },
     "admin": {
-        "title": "Admin Panel",
-        "description": "The admin panel provides a comprehensive suite of tools for managing the entire application.",
-        "step1": "Access the admin panel via the user dropdown menu in the header (visible only to admin accounts).",
-        "step2": "Use 'Manage Users' to view, edit, or delete user accounts and adjust their credit balances.",
-        "step3": "Use 'Manage Agents' and 'Manage Templates' to configure the behavior and output of the AI generation tools.",
-        "step4": "Review 'Activity History' to monitor all AI generations across the platform."
+      "title": "Admin Panel",
+      "description": "The admin panel provides a comprehensive suite of tools for managing the entire application.",
+      "step1": "Access the admin panel via the user dropdown menu in the header (visible only to admin accounts).",
+      "step2": "Use 'Manage Users' to view, edit, or delete user accounts and adjust their credit balances.",
+      "step3": "Use 'Manage Agents' and 'Manage Templates' to configure the behavior and output of the AI generation tools.",
+      "step4": "Review 'Activity History' to monitor all AI generations across the platform."
     }
   },
   "adminSettings": {
@@ -92,7 +92,15 @@
     "dataSyncWarning": "This process will overwrite any local changes in the SQLite database with the current data from Firestore. This action is irreversible.",
     "triggerSyncButton": "Trigger Firestore to SQLite Sync",
     "syncSuccessTitle": "Synchronization Started",
-    "syncErrorTitle": "Synchronization Failed"
+    "syncErrorTitle": "Synchronization Failed",
+    "defaultSettingsTitle": "Default User Settings",
+    "defaultSettingsDesc": "Configure the default values for new users when they sign up.",
+    "newUserCreditsLabel": "New User Credits",
+    "bankPaymentTitle": "Bank Payment Details",
+    "bankPaymentDesc": "Set the bank details that users will see on the payment page.",
+    "bankNameLabel": "Bank Name",
+    "accountHolderLabel": "Account Holder Name",
+    "ibanLabel": "IBAN"
   },
   "adminDashboard": {
     "pageTitle": "Analytics Dashboard",
@@ -251,7 +259,23 @@
     "basePromptLabel": "Base Prompt",
     "promptLabel": "Prompt",
     "complexPromptNote": "This is a complex prompt. Only the base prompt is editable here.",
-    "saveButton": "Save Changes"
+    "saveButton": "Save Changes",
+    "automationTitle": "Automation",
+    "automationDesc": "Use your AI agent as part of an automation flow to handle tasks, make decisions, and streamline workflows. Build custom workflows and tools to further empower your agents. Your AI agents can seamlessly integrate into automations, transforming how you manage work. Learn more.",
+    "newAutomationBtn": "Add new automation",
+    "contextTitle": "Share Context",
+    "contextDesc": "Select other agents whose output should be available as context by default when running this agent. This allows you to chain agent actions together.",
+    "searchAgentsPlaceholder": "Search available agents...",
+    "availableAgentsLabel": "Available Agents for Context",
+    "generalTitle": "General",
+    "guidelinesTitle": "Guidelines",
+    "guidelinesDesc": "Add a set of rules and instructions for the agent to follow. Guidelines help improve the quality and consistency of the agent's responses.",
+    "knowledgeTitle": "Knowledge",
+    "knowledgeDesc": "Train your AI Agents with dynamic knowledge from projects, web links, documents, and more. Learn more.",
+    "outputTitle": "Output",
+    "outputDesc": "Define the expected JSON structure for the agent's output. This ensures consistent, machine-readable responses from the AI.",
+    "toolsTitle": "Tools",
+    "toolsDesc": "Equip your AI Agents with tools to gather data, complete tasks, and automate actions, or build custom tools for autonomous workflows. Learn more."
   },
   "agentManager": {
     "pageSubtitle": "Control the AI agents available on the platform and enable or disable their functionality.",
@@ -373,7 +397,10 @@
       "document": "Document Generator",
       "diagram": "Diagram Generator",
       "code": "Code Generator",
-      "presentation": "Presentation Mode"
+      "presentation": "Presentation Mode",
+      "files": "Files",
+      "plan": "Project Plan",
+      "academic": "Academic Solver"
     },
     "buttons": {
       "uploadProject": "Upload Project",
@@ -668,13 +695,14 @@
       "prev": "Previous",
       "next": "Next",
       "goToSlide": "Go to slide {slideNumber}",
+      "translateAllButton": "Translate Presentation",
+      "translateAllSuccess": "Translation Complete",
       "toasts": {
         "success": "Presentation Generated Successfully!",
         "failed": "Presentation Generation Failed",
         "authError": "You must be logged in to generate a presentation.",
         "translateAllStarted": "Bulk Translation Started",
         "translateAllStartedDesc": "Translating all slides. This may take a moment...",
-        "translateAllSuccess": "Translation Complete",
         "translateAllSuccessDesc": "The presentation has been successfully translated.",
         "translateAllFailed": "Translation Failed",
         "translateAllFailedDesc": "An error occurred while translating the presentation."
@@ -724,13 +752,34 @@
       "historyDescription": "Review your past solutions.",
       "historyEmpty": "No solved documents yet.",
       "clearHistoryTooltip": "Clear History",
+      "fileManagerTitle": "Context Files",
+      "fileManagerDesc": "Upload and manage all contextual files for your project here.",
+      "uploadFilesTab": "Upload Files",
+      "pasteTextTab": "Paste Text",
+      "dropzoneLabel": "Drag & drop files here, or click to select",
+      "dropzoneHint": "PDF, DOCX, TXT, MD, Images (Max 5MB)",
+      "analystAgentTitle": "Analyst Agent",
+      "analystAgentDesc": "Ask a question or give an instruction based on the managed context files. The AI will generate a structured response.",
+      "analystAgentPromptLabel": "Your Prompt",
+      "analystAgentRunButton": "Run Analysis (2 Credits)",
+      "generatedReportTitle": "Generated Report",
+      "viewJsonButton": "View JSON",
+      "jsonOutputTitle": "Raw JSON Output",
+      "saveResultButton": "Save Result as Context File",
       "toasts": {
         "invalidFile": "Invalid file type. Please upload a PDF.",
         "analysisError": "Please upload a file and select a document type.",
         "errorTitle": "An Error Occurred",
         "analysisSuccess": "Document analyzed successfully!",
         "analysisMissing": "No analyzed document found. Please upload and analyze a document first.",
-        "solvingSuccess": "Document solved successfully!"
+        "solvingSuccess": "Document solved successfully!",
+        "contextRequired": "Context Required",
+        "contextRequiredDesc": "Please upload at least one context file to analyze.",
+        "analysisComplete": "Analysis Complete",
+        "analysisCompleteDesc": "The AI has analyzed the context and generated structured data.",
+        "analysisFailed": "Analysis Failed",
+        "analysisSaved": "Analysis Saved",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files."
       }
     }
   }
