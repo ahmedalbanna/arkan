@@ -344,6 +344,46 @@
     "enabled": "ممكّن",
     "disabled": "معطل"
   },
+  "agentManager": {
+    "pageTitle": "وكلاء الإنجاز",
+    "pageSubtitle": "أنشئ سلسلة من وكلاء الذكاء الاصطناعي لإنجاز المهام المعقدة. يمكن تكوين كل وكيل بمطالبات ومعرفة وأدوات فريدة.",
+    "searchPlaceholder": "ابحث عن الوكلاء بالاسم أو الوصف أو الفئة...",
+    "newAgentAiButton": "إنشاء وكيل جديد بالذكاء الاصطناعي",
+    "newAgentButton": "وكيل جديد",
+    "configureButton": "تكوين",
+    "createDialog": {
+      "title": "إنشاء وكيل ذكاء اصطناعي جديد",
+      "description": "حدد وكيلًا مخصصًا جديدًا. سيصبح هذا الوكيل متاحًا في التطبيق بمجرد إنشائه.",
+      "idLabel": "معرف الوكيل",
+      "idPlaceholder": "على سبيل المثال، my-custom-agent",
+      "idErrorMin": "يجب أن يتكون المعرف من 3 أحرف على الأقل",
+      "idErrorRegex": "يمكن أن يحتوي المعرف على أحرف صغيرة وأرقام وواصلات فقط.",
+      "nameLabel": "اسم الوكيل",
+      "namePlaceholder": "على سبيل المثال، وكيل تقارير مخصص",
+      "nameError": "الاسم مطلوب",
+      "descriptionLabel": "الوصف",
+      "descriptionError": "الوصف مطلوب",
+      "categoryLabel": "الفئة",
+      "selectCategoryPlaceholder": "حدد فئة",
+      "pageUrlLabel": "عنوان URL للصفحة",
+      "pageUrlPlaceholder": "/generate",
+      "pageUrlError": "يجب أن يبدأ عنوان URL بـ /",
+      "promptLabel": "المطالبة",
+      "promptError": "يجب أن تتكون المطالبة من 10 أحرف على الأقل",
+      "createButton": "إنشاء وكيل"
+    },
+    "categories": {
+      "Content Generation": "إنشاء المحتوى",
+      "Proposal Generation": "إنشاء العروض",
+      "Report Generation": "إنشاء التقارير",
+      "Diagram Generation": "إنشاء الرسوم البيانية",
+      "Presentation Generation": "إنشاء العروض التقديمية",
+      "Code Generation": "إنشاء الأكواد",
+      "Marketing": "التسويق",
+      "Legal": "قانوني",
+      "Admin Tools": "أدوات المسؤول"
+    }
+  },
   "agentEditor": {
     "pageTitle": "تعديل الوكيل",
     "pageSubtitle": "اضبط مطالبة الوكيل وتكوينه.",
@@ -379,23 +419,15 @@
     "toolsTitle": "الأدوات",
     "toolsDesc": "جهز وكلاء الذكاء الاصطناعي بأدوات لجمع البيانات وإكمال المهام وأتمتة الإجراءات، أو أنشئ أدوات مخصصة لتدفقات العمل المستقلة. تعلم المزيد.",
     "toolFilters": {
-        "all": "الكل",
-        "active": "نشط",
-        "taskade": "Taskade",
-        "apps": "التطبيقات",
-        "custom": "مخصص"
+      "all": "الكل",
+      "active": "نشط",
+      "taskade": "Taskade",
+      "apps": "التطبيقات",
+      "custom": "مخصص"
     },
     "filterToolsPlaceholder": "تصفية الأدوات...",
     "newToolButton": "أداة جديدة",
     "availableToolsTitle": "الأدوات المتاحة"
-  },
-  "agentManager": {
-    "pageSubtitle": "تحكم في وكلاء الذكاء الاصطناعي المتاحين على المنصة وقم بتمكين أو تعطيل وظائفهم.",
-    "enabled": "ممكّن",
-    "disabled": "معطل",
-    "goToTool": "انتقل إلى الأداة",
-    "editButton": "تعديل",
-    "errorLoading": "فشل تحميل تكوينات الوكيل."
   },
   "manageTemplates": {
     "pageSubtitle": "تخصيص شكل وأسلوب مستندات DOCX المصدرة.",
@@ -455,9 +487,9 @@
     "historyTitle": "سجل المعاملات",
     "historyDescription": "عرض وإدارة جميع معاملات المستخدمين.",
     "tabs": {
-        "pending": "معلقة",
-        "verified": "تم التحقق منها",
-        "rejected": "مرفوضة"
+      "pending": "معلقة",
+      "verified": "تم التحقق منها",
+      "rejected": "مرفوضة"
     },
     "loadingMore": "جارٍ تحميل المزيد...",
     "loadMore": "تحميل المزيد",
@@ -670,9 +702,6 @@
       "tool_context_desc": "حدد أقسامًا أو رسومًا بيانية أخرى تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
       "tool_context_sections": "الأقسام",
       "tool_context_diagrams": "الرسوم البيانية",
-      "errorInsufficientCredits": "أرصدة غير كافية. يرجى شراء المزيد من الأرصدة للمتابعة.",
-      "ContextualSections": "الأقسام السياقية",
-      "ContextualDiagrams": "الرسوم البيانية السياقية",
       "noOtherSections": "لم يتم إنشاء أقسام أخرى بعد.",
       "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد",
       "externalContext": "سياق خارجي",
@@ -748,7 +777,7 @@
       "toasts": {
         "success": "تم إنشاء رسم تخطيطي {{title}} بنجاح!",
         "failed": "فشل إنشاء رسم تخطيطي {{title}}.",
-        "generateButton":"إنشاء {{title}}",
+        "generateButton": "إنشاء {{title}}",
         "updateSuccess": "تم تحديث الرسم البياني بنجاح!",
         "updateFailed": "فشل تحديث الرسم البياني"
       },

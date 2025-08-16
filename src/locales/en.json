@@ -344,6 +344,46 @@
     "enabled": "Enabled",
     "disabled": "Disabled"
   },
+  "agentManager": {
+    "pageTitle": "Completion Agents",
+    "pageSubtitle": "Create a series of AI agents to complete complex tasks. Each agent can be configured with unique prompts, knowledge, and tools.",
+    "searchPlaceholder": "Search agents by name, description, or category...",
+    "newAgentAiButton": "Create New Agent with AI",
+    "newAgentButton": "New Agent",
+    "configureButton": "Configure",
+    "createDialog": {
+      "title": "Create New AI Agent",
+      "description": "Define a new custom agent. This agent will become available in the application once created.",
+      "idLabel": "Agent ID",
+      "idPlaceholder": "e.g., my-custom-agent",
+      "idErrorMin": "ID must be at least 3 characters",
+      "idErrorRegex": "ID must be lowercase and contain only letters, numbers, and hyphens.",
+      "nameLabel": "Agent Name",
+      "namePlaceholder": "e.g., Custom Report Agent",
+      "nameError": "Name is required",
+      "descriptionLabel": "Description",
+      "descriptionError": "Description is required",
+      "categoryLabel": "Category",
+      "selectCategoryPlaceholder": "Select a category",
+      "pageUrlLabel": "Page URL",
+      "pageUrlPlaceholder": "/generate",
+      "pageUrlError": "URL must start with /",
+      "promptLabel": "Prompt",
+      "promptError": "Prompt must be at least 10 characters",
+      "createButton": "Create Agent"
+    },
+    "categories": {
+      "Content Generation": "Content Generation",
+      "Proposal Generation": "Proposal Generation",
+      "Report Generation": "Report Generation",
+      "Diagram Generation": "Diagram Generation",
+      "Presentation Generation": "Presentation Generation",
+      "Code Generation": "Code Generation",
+      "Marketing": "Marketing",
+      "Legal": "Legal",
+      "Admin Tools": "Admin Tools"
+    }
+  },
   "agentEditor": {
     "pageTitle": "Edit Agent",
     "pageSubtitle": "Fine-tune the agent's prompt and configuration.",
@@ -379,23 +419,15 @@
     "toolsTitle": "Tools",
     "toolsDesc": "Equip your AI Agents with tools to gather data, complete tasks, and automate actions, or build custom tools for autonomous workflows. Learn more.",
     "toolFilters": {
-        "all": "All",
-        "active": "Active",
-        "taskade": "Taskade",
-        "apps": "Apps",
-        "custom": "Custom"
+      "all": "All",
+      "active": "Active",
+      "taskade": "Taskade",
+      "apps": "Apps",
+      "custom": "Custom"
     },
     "filterToolsPlaceholder": "Filter tools...",
     "newToolButton": "New tool",
     "availableToolsTitle": "Available Tools"
-  },
-  "agentManager": {
-    "pageSubtitle": "Control the AI agents available on the platform and enable or disable their functionality.",
-    "enabled": "Enabled",
-    "disabled": "Disabled",
-    "goToTool": "Go to Tool",
-    "editButton": "Edit",
-    "errorLoading": "Failed to load agent configurations."
   },
   "manageTemplates": {
     "pageSubtitle": "Customize the look and feel of exported DOCX documents.",
@@ -455,9 +487,9 @@
     "historyTitle": "Transaction History",
     "historyDescription": "View and manage all user transactions.",
     "tabs": {
-        "pending": "Pending",
-        "verified": "Verified",
-        "rejected": "Rejected"
+      "pending": "Pending",
+      "verified": "Verified",
+      "rejected": "Rejected"
     },
     "loadingMore": "Loading more...",
     "loadMore": "Load More",
@@ -670,9 +702,6 @@
       "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
       "tool_context_sections": "Sections",
       "tool_context_diagrams": "Diagrams",
-      "errorInsufficientCredits": "Insufficient credits. Please purchase more credits to continue.",
-      "ContextualSections": "Contextual Sections",
-      "ContextualDiagrams": "Contextual Diagrams",
       "noOtherSections": "No other sections generated yet.",
       "noOtherDiagrams": "No other diagrams generated yet",
       "externalContext": "External Context",
@@ -748,7 +777,7 @@
       "toasts": {
         "success": "Successfully generated {{title}} diagram!",
         "failed": "Failed to generate {{title}} diagram.",
-        "generateButton":"Generate {{title}}",
+        "generateButton": "Generate {{title}}",
         "updateSuccess": "Diagram updated successfully!",
         "updateFailed": "Diagram Update Failed"
       },
