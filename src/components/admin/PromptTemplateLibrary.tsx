@@ -13,6 +13,7 @@ import { HelpCircle, Search, Copy, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useRouter } from 'next/navigation';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export function PromptTemplateLibrary() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,6 +21,8 @@ export function PromptTemplateLibrary() {
   const [selectedAgent, setSelectedAgent] = useState('all');
   const { toast } = useToast();
   const router = useRouter();
+  const { t } = useLocalization();
+
 
   const filteredCategories = PROMPT_CATEGORIES;
 
@@ -47,12 +50,12 @@ export function PromptTemplateLibrary() {
   return (
     <Card className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold">AI Prompt Templates</h2>
+        <h2 className="text-lg font-semibold">{t('promptLibrary.headerTitle')}</h2>
         <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Search templates..."
+                    placeholder={t('promptLibrary.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-8 w-48"
@@ -60,16 +63,16 @@ export function PromptTemplateLibrary() {
             </div>
              <Select value={selectedAgent} onValueChange={setSelectedAgent}>
               <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Filter by Agent" />
+                  <SelectValue placeholder={t('promptLibrary.filterAgentPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                  <SelectItem value="all">All Agents</SelectItem>
+                  <SelectItem value="all">{t('promptLibrary.allAgents')}</SelectItem>
                   {AGENTS.map(agent => (
                       <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
                   ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4" />Learn More</Button>
+            <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4" />{t('promptLibrary.learnMore')}</Button>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">
@@ -82,7 +85,7 @@ export function PromptTemplateLibrary() {
                     className="w-full justify-start gap-2"
                 >
                     <Bot className="h-4 w-4" />
-                    <span className="flex-grow text-left">All</span>
+                    <span className="flex-grow text-left">{t('promptLibrary.categories.all')}</span>
                      <Badge variant="outline" className="text-xs">{PROMPT_TEMPLATES.length}</Badge>
                 </Button>
                 {filteredCategories.map(category => (
@@ -93,7 +96,7 @@ export function PromptTemplateLibrary() {
                         className="w-full justify-start gap-2"
                     >
                         <category.icon className="h-4 w-4" />
-                        <span className="flex-grow text-left">{category.name}</span>
+                        <span className="flex-grow text-left">{t(`promptLibrary.categories.${category.id}`)}</span>
                         <Badge variant="outline" className="text-xs">{category.count}</Badge>
                     </Button>
                 ))}
@@ -114,10 +117,10 @@ export function PromptTemplateLibrary() {
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button variant="ghost" size="sm" onClick={() => handleCopyPrompt(template.prompt)}>
-                                    <Copy className="mr-2 h-4 w-4"/> Copy
+                                    <Copy className="mr-2 h-4 w-4"/> {t('promptLibrary.copyButton')}
                                 </Button>
                                 {template.targetAgentIds && (
-                                    <Button size="sm" onClick={() => handleUseTemplate(template.targetAgentIds![0], template.prompt)}>Use Template</Button>
+                                    <Button size="sm" onClick={() => handleUseTemplate(template.targetAgentIds![0], template.prompt)}>{t('promptLibrary.useTemplateButton')}</Button>
                                 )}
                             </div>
                         </CardHeader>
@@ -128,7 +131,7 @@ export function PromptTemplateLibrary() {
                 ))}
                  {filteredTemplates.length === 0 && (
                     <div className="text-center text-muted-foreground py-16">
-                        <p>No prompt templates found matching your criteria.</p>
+                        <p>{t('promptLibrary.noResults')}</p>
                     </div>
                 )}
             </div>
