@@ -188,7 +188,7 @@ function GeneratePageContent() {
                 <LoadingSkeleton />
             ) : (
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
-                    <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-8">
+                    <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
                         <TabsTrigger value="files" className="gap-2">
                             <FolderKanban className="h-4 w-4" /> Files
                         </TabsTrigger>
