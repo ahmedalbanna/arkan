@@ -354,11 +354,14 @@
   },
   "builder": {
     "tabs": {
+      "files": "الملفات",
       "proposal": "وضع المقترح",
+      "plan": "خطة المشروع",
       "document": "منشئ المستندات",
       "diagram": "منشئ الرسوم",
       "code": "منشئ الأكواد",
-      "presentation": "وضع العرض التقديمي"
+      "presentation": "وضع العرض التقديمي",
+      "academic": "الحل الأكاديمي"
     },
     "buttons": {
       "uploadProject": "رفع مشروع",
@@ -473,7 +476,7 @@
       "translateAll": "ترجمة كل الأقسام",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDesc": "كوّن وأنشئ أقسام التقرير.",
-      "reportTemplate": "قالب التقرير",
+      "report_template": "قالب التقرير",
       "generateFullReport": "إنشاء التقرير بالكامل",
       "generateButton": "إنشاء",
       "externalContextTitle": "سياق خارجي",
@@ -523,7 +526,6 @@
       "disabledTooltip": "هذا الوكيل معطل",
       "updateSection": "تحديث القسم",
       "Select_template": "إختار قالب",
-      "report_template": "قالب التقرير",
       "sections": {
         "introduction": "المقدمة",
         "literatureReview": "مراجعة الأدبيات",
@@ -687,8 +689,8 @@
         "downloadPdf": "تنزيل PDF"
       },
       "toasts": {
-        "copiedMd": "تم النسخ بصيغة ماركداون",
-        "copiedText": "تم النسخ كنص عادي",
+        "copied": "تم النسخ إلى الحافظة",
+        "cleared": "تم مسح المحتوى",
         "translateSuccess": "اكتملت الترجمة!",
         "translateFailed": "فشلت الترجمة"
       }
@@ -716,6 +718,39 @@
         "analysisSuccess": "تم تحليل المستند بنجاح!",
         "analysisMissing": "لم يتم العثور على مستند محلل. يرجى رفع وتحليل مستند أولاً.",
         "solvingSuccess": "تم حل المستند بنجاح!"
+      }
+    },
+    "fileManager": {
+      "contextFilesTitle": "ملفات السياق",
+      "contextFilesDescription": "قم برفع وإدارة جميع الملفات السياقية لمشروعك هنا.",
+      "uploadFilesTab": "رفع الملفات",
+      "pasteTextTab": "لصق النص",
+      "dropzone": "اسحب وأفلت الملفات هنا، أو انقر للتحديد",
+      "dropzone_accepted": "PDF, DOCX, TXT, MD, صور (الحد الأقصى 5 ميجابايت)",
+      "uploadedContextTitle": "السياق المرفوع",
+      "addTextAsContextButton": "إضافة كنص سياقي",
+      "contextNameLabel": "اسم السياق",
+      "contextNamePlaceholder": "مثال: وثيقة المتطلبات، مواصفات API",
+      "pasteContentLabel": "لصق النص أو الماركدون",
+      "pasteContentPlaceholder": "الصق المحتوى الخاص بك هنا...",
+      "analystAgent": {
+        "title": "الوكيل المحلل",
+        "description": "اطرح سؤالاً أو أعطِ تعليمات بناءً على ملفات السياق المدارة. سيقوم الذكاء الاصطناعي بإنشاء استجابة منظمة.",
+        "promptLabel": "طلبك",
+        "promptPlaceholder": "مثال: 'اذكر جميع الأطراف المعنية في المشروع واهتماماتهم الرئيسية.'",
+        "runButton": "تشغيل التحليل ({creditCost} رصيد)",
+        "contextRequiredToast": "السياق مطلوب",
+        "contextRequiredToastDesc": "يرجى رفع ملف سياق واحد على الأقل لتحليله.",
+        "analysisCompleteToast": "اكتمل التحليل",
+        "analysisCompleteToastDesc": "قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
+        "analysisFailedToast": "فشل التحليل",
+        "generatedReportTitle": "التقرير المُنشأ",
+        "viewJsonButton": "عرض JSON",
+        "rawJsonTitle": "مخرجات JSON الخام",
+        "reportPlaceholder": "سيظهر تحليل الذكاء الاصطناعي هنا كتقرير منسق.",
+        "saveResultButton": "حفظ النتيجة كملف سياق",
+        "analysisSavedToast": "تم حفظ التحليل",
+        "analysisSavedToastDesc": "تمت إضافة '{fileName}' إلى ملفات السياق الخاصة بك."
       }
     }
   }
