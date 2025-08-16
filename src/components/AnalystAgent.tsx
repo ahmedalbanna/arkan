@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useLocalization } from '@/context/LocalizationContext';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -75,6 +76,7 @@ function jsonToMarkdown(json: any, level = 1): string {
 
 
 export default function AnalystAgent() {
+    const { t } = useLocalization();
     const { externalContext, addExternalContext } = useReportStore();
     const { firebaseUser, refetchUser, userProfile } = useAuth();
     const { resolvedTheme } = useTheme();
@@ -89,19 +91,19 @@ export default function AnalystAgent() {
         mutationFn: analyzeContextApi,
         onSuccess: (data) => {
             refetchUser(); // To update credits
-            toast({ title: 'Analysis Complete', description: 'The AI has analyzed the context and generated structured data.' });
+            toast({ title: t('builder.academicSolver.toasts.analysisComplete'), description: t('builder.academicSolver.toasts.analysisCompleteDesc') });
             // After successful analysis, convert JSON to Markdown
             const markdown = jsonToMarkdown(data.data);
             setMarkdownResult(markdown);
         },
         onError: (error: Error) => {
-            toast({ title: 'Analysis Failed', description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.academicSolver.toasts.analysisFailed'), description: error.message, variant: 'destructive' });
         }
     });
     
     const onSubmit = async (data: AnalysisFormValues) => {
         if (externalContext.length === 0) {
-            toast({ title: 'Context Required', description: 'Please upload at least one context file to analyze.', variant: 'destructive' });
+            toast({ title: t('builder.academicSolver.toasts.contextRequired'), description: t('builder.academicSolver.toasts.contextRequiredDesc'), variant: 'destructive' });
             return;
         }
         if (!firebaseUser) return;
@@ -116,7 +118,7 @@ export default function AnalystAgent() {
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
         
         addExternalContext(fileName, markdownResult, 'context');
-        toast({ title: "Analysis Saved", description: `"${fileName}" has been added to your context files.` });
+        toast({ title: t('builder.academicSolver.toasts.analysisSaved'), description: t('builder.academicSolver.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
     };
 
     const creditCost = 2;
@@ -126,8 +128,8 @@ export default function AnalystAgent() {
     return (
         <Card className="h-full flex flex-col">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> Analyst Agent</CardTitle>
-                <CardDescription>Ask a question or give an instruction based on the managed context files. The AI will generate a structured response.</CardDescription>
+                <CardTitle className="flex items-center gap-2"><BrainCircuit className="h-5 w-5 text-primary" /> {t('builder.academicSolver.analystAgentTitle')}</CardTitle>
+                <CardDescription>{t('builder.academicSolver.analystAgentDesc')}</CardDescription>
             </CardHeader>
             <Form {...form}>
                  <form onSubmit={form.handleSubmit(onSubmit)} className="flex-grow flex flex-col min-h-0">
@@ -137,10 +139,10 @@ export default function AnalystAgent() {
                             name="prompt"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Your Prompt</FormLabel>
+                                    <FormLabel>{t('builder.academicSolver.analystAgentPromptLabel')}</FormLabel>
                                     <FormControl>
                                         <Textarea 
-                                            placeholder="e.g., 'List all project stakeholders and their main interests.'"
+                                            placeholder={t('builder.academicSolver.analystAgentPromptPlaceholder')}
                                             {...field}
                                             rows={4}
                                             disabled={isProcessing}
@@ -152,23 +154,23 @@ export default function AnalystAgent() {
                         />
                         <Button type="submit" disabled={!canAnalyze}>
                             {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                            Run Analysis ({creditCost} Credits)
+                            {t('builder.academicSolver.analystAgentRunButton', {creditCost: creditCost})}
                         </Button>
                         
                         {(isProcessing || markdownResult) && (
                             <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0">
                                 <div className="flex justify-between items-center">
-                                    <h4 className="font-semibold text-sm">Generated Report</h4>
+                                    <h4 className="font-semibold text-sm">{t('builder.academicSolver.generatedReportTitle')}</h4>
                                     {analysisMutation.data && (
                                         <Dialog>
                                             <DialogTrigger asChild>
                                                 <Button variant="ghost" size="sm">
-                                                    <Braces className="mr-2 h-4 w-4"/> View JSON
+                                                    <Braces className="mr-2 h-4 w-4"/> {t('builder.academicSolver.viewJsonButton')}
                                                 </Button>
                                             </DialogTrigger>
                                             <DialogContent className="max-w-3xl">
                                                 <DialogHeader>
-                                                    <DialogTitle>Raw JSON Output</DialogTitle>
+                                                    <DialogTitle>{t('builder.academicSolver.jsonOutputTitle')}</DialogTitle>
                                                 </DialogHeader>
                                                  <ScrollArea className="max-h-[70vh] border rounded-md bg-muted text-xs p-2">
                                                     <ReactJson 
@@ -203,7 +205,7 @@ export default function AnalystAgent() {
                         <CardFooter>
                             <Button variant="secondary" onClick={handleSaveAnalysis} disabled={!markdownResult}>
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Save Result as Context File
+                                {t('builder.academicSolver.saveResultButton')}
                             </Button>
                         </CardFooter>
                     )}

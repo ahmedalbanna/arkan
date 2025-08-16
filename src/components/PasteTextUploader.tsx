@@ -10,8 +10,10 @@ import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { PlusCircle } from 'lucide-react';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export function PasteTextUploader() {
+    const { t } = useLocalization();
     const { toast } = useToast();
     const { addExternalContext } = useReportStore();
     const [text, setText] = useState('');
@@ -20,8 +22,8 @@ export function PasteTextUploader() {
     const handleAddContext = () => {
         if (!text.trim() || !fileName.trim()) {
             toast({
-                title: "Missing Information",
-                description: "Please provide both content and a name for the context.",
+                title: t('builder.academicSolver.toasts.missingInfoToastTitle'),
+                description: t('builder.academicSolver.toasts.missingInfoToastDesc'),
                 variant: "destructive"
             });
             return;
@@ -29,8 +31,8 @@ export function PasteTextUploader() {
 
         addExternalContext(`${fileName.trim()}.md`, text, 'context');
         toast({
-            title: "Context Added",
-            description: `"${fileName.trim()}.md" has been added to the context.`
+            title: t('builder.academicSolver.toasts.contextAddedToastTitle'),
+            description: t('builder.academicSolver.toasts.contextAddedToastDesc').replace('{fileName}', `${fileName.trim()}.md`),
         });
         setText('');
         setFileName('');
@@ -40,19 +42,19 @@ export function PasteTextUploader() {
         <Card>
             <CardContent className="p-6 space-y-4">
                  <div className="space-y-2">
-                    <Label htmlFor="context-name">Context Name</Label>
+                    <Label htmlFor="context-name">{t('builder.academicSolver.pasteText.titleLabel')}</Label>
                     <Input 
                         id="context-name"
-                        placeholder="e.g., Requirements Document, API Specs"
+                        placeholder={t('builder.academicSolver.pasteText.titlePlaceholder')}
                         value={fileName}
                         onChange={(e) => setFileName(e.target.value)}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="context-text">Paste Text or Markdown</Label>
+                    <Label htmlFor="context-text">{t('builder.academicSolver.pasteText.contentLabel')}</Label>
                     <Textarea
                         id="context-text"
-                        placeholder="Paste your content here..."
+                        placeholder={t('builder.academicSolver.pasteText.contentPlaceholder')}
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                         rows={10}
@@ -60,7 +62,7 @@ export function PasteTextUploader() {
                 </div>
                 <Button onClick={handleAddContext} disabled={!text.trim() || !fileName.trim()}>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Add as Context
+                    {t('builder.academicSolver.pasteText.addButton')}
                 </Button>
             </CardContent>
         </Card>

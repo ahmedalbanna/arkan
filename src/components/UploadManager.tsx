@@ -23,6 +23,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { PdfPreview } from './PdfPreview';
 import { useDropzone } from 'react-dropzone';
+import { useLocalization } from '@/context/LocalizationContext';
 
 function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ContextFileType }}) {
     const isDataUri = item.content.startsWith('data:');
@@ -57,6 +58,7 @@ function ViewContextDialog({ item }: { item: { fileName: string, content: string
 }
 
 function FileDropzone() {
+    const { t } = useLocalization();
     const { toast } = useToast();
     const { firebaseUser, refetchUser } = useAuth();
     const { addExternalContext } = useReportStore();
@@ -64,7 +66,7 @@ function FileDropzone() {
 
     const processAndAddFile = async (file: File) => {
         if (!firebaseUser) {
-            toast({ title: "Authentication Error", description: "You must be logged in to upload files.", variant: "destructive" });
+            toast({ title: t('builder.academicSolver.toasts.authError'), variant: "destructive" });
             return;
         }
 
@@ -74,10 +76,10 @@ function FileDropzone() {
             const content = reader.result as string;
             // The type is initially 'context' and can be changed by the user.
             addExternalContext(file.name, content, 'context');
-            toast({ title: "File Added", description: `${file.name} has been added to context.` });
+            toast({ title: t('builder.academicSolver.toasts.fileAdded'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
         };
         reader.onerror = () => {
-            toast({ title: "File Read Error", description: "Could not read the selected file.", variant: "destructive" });
+            toast({ title: t('builder.academicSolver.toasts.fileReadError'), description: t('builder.academicSolver.toasts.fileReadErrorDesc'), variant: "destructive" });
         }
     };
     
@@ -115,15 +117,15 @@ function FileDropzone() {
                 {isLoading ? (
                     <>
                         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                        <p className="mt-2 text-sm text-muted-foreground">Adding files...</p>
+                        <p className="mt-2 text-sm text-muted-foreground">{t('builder.academicSolver.toasts.processingFile')}</p>
                     </>
                 ) : (
                     <>
                         <UploadCloud className="h-10 w-10 text-muted-foreground" />
                         <p className="mt-2 text-sm font-semibold">
-                            {isDragActive ? 'Drop the files here...' : 'Drag & drop files here, or click to select'}
+                            {isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.dropzoneLabel')}
                         </p>
-                        <p className="text-xs text-muted-foreground">PDF, DOCX, TXT, MD, Images (Max 5MB)</p>
+                        <p className="text-xs text-muted-foreground">{t('builder.academicSolver.dropzoneHint')}</p>
                     </>
                 )}
             </CardContent>
@@ -132,22 +134,23 @@ function FileDropzone() {
 }
 
 export function UploadManager() {
+    const { t } = useLocalization();
     const { externalContext, removeExternalContext, updateExternalContextType } = useReportStore();
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
     
     return (
         <Card className="h-full flex flex-col">
           <CardHeader>
-            <CardTitle>Context Files</CardTitle>
+            <CardTitle>{t('builder.academicSolver.fileManagerTitle')}</CardTitle>
             <CardDescription>
-              Upload and manage all contextual files for your project here. 
+              {t('builder.academicSolver.fileManagerDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col gap-4">
             <Tabs defaultValue="upload" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">Upload Files</TabsTrigger>
-                    <TabsTrigger value="text">Paste Text</TabsTrigger>
+                    <TabsTrigger value="upload">{t('builder.academicSolver.uploadFilesTab')}</TabsTrigger>
+                    <TabsTrigger value="text">{t('builder.academicSolver.pasteTextTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="mt-4">
                     <FileDropzone />
@@ -159,7 +162,7 @@ export function UploadManager() {
             
             {externalContext && externalContext.length > 0 && (
                 <div className="space-y-2 flex-grow flex flex-col min-h-0">
-                    <h3 className="text-sm font-medium text-muted-foreground">UPLOADED CONTEXT</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">{t('builder.academicSolver.toasts.uploadedContext')}</h3>
                     <ScrollArea className="flex-grow border rounded-lg">
                         <ul className="space-y-1 list-none p-2">
                             {externalContext.map((item, index) => (

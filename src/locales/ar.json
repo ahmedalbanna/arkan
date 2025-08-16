@@ -205,6 +205,17 @@
       "step4": "راجع 'سجل النشاط' لمراقبة جميع عمليات إنشاء الذكاء الاصطناعي عبر النظام الأساسي."
     }
   },
+  "adminFinancialReport": {
+    "title": "تصدير تقرير مالي",
+    "description": "حدد نطاقًا زمنيًا لإنشاء تقرير PDF بجميع المعاملات.",
+    "datePlaceholder": "اختر نطاقًا زمنيًا",
+    "exportButton": "تصدير بصيغة PDF",
+    "missingInfoError": "معلومات ناقصة",
+    "missingInfoDesc": "يرجى تحديد تاريخ البدء والانتهاء للتقرير.",
+    "noData": "لا توجد بيانات",
+    "noDataDesc": "لا توجد معاملات في النطاق الزمني المحدد.",
+    "exportFailed": "فشل التصدير"
+  },
   "adminSettings": {
     "pageSubtitle": "إدارة الإعدادات على مستوى التطبيق وعمليات البيانات.",
     "defaultSettingsTitle": "إعدادات المستخدم الافتراضية",
@@ -232,17 +243,6 @@
     "usedAgent": "استخدام الوكيل:",
     "noActivity": "لا يوجد نشاط حديث.",
     "errorLoading": "فشل تحميل إحصائيات لوحة التحكم."
-  },
-  "adminFinancialReport": {
-    "title": "تصدير تقرير مالي",
-    "description": "حدد نطاقًا زمنيًا لإنشاء تقرير PDF بجميع المعاملات.",
-    "datePlaceholder": "اختر نطاقًا زمنيًا",
-    "exportButton": "تصدير بصيغة PDF",
-    "missingInfoError": "معلومات ناقصة",
-    "missingInfoDesc": "يرجى تحديد تاريخ البدء والانتهاء للتقرير.",
-    "noData": "لا توجد بيانات",
-    "noDataDesc": "لا توجد معاملات في النطاق الزمني المحدد.",
-    "exportFailed": "فشل التصدير"
   },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
@@ -432,20 +432,14 @@
       "description": "حدد وكيلًا مخصصًا جديدًا. سيصبح هذا الوكيل متاحًا في التطبيق بمجرد إنشائه.",
       "idLabel": "معرف الوكيل",
       "idPlaceholder": "على سبيل المثال، my-custom-agent",
-      "idErrorMin": "يجب أن يتكون المعرف من 3 أحرف على الأقل",
-      "idErrorRegex": "يمكن أن يحتوي المعرف على أحرف صغيرة وأرقام وواصلات فقط.",
       "nameLabel": "اسم الوكيل",
       "namePlaceholder": "على سبيل المثال، وكيل تقارير مخصص",
-      "nameError": "الاسم مطلوب",
       "descriptionLabel": "الوصف",
-      "descriptionError": "الوصف مطلوب",
       "categoryLabel": "الفئة",
       "selectCategoryPlaceholder": "حدد فئة",
       "pageUrlLabel": "عنوان URL للصفحة",
       "pageUrlPlaceholder": "/generate",
-      "pageUrlError": "يجب أن يبدأ عنوان URL بـ /",
       "promptLabel": "المطالبة",
-      "promptError": "يجب أن تتكون المطالبة من 10 أحرف على الأقل",
       "createButton": "إنشاء وكيل"
     },
     "categories": {
@@ -1056,11 +1050,19 @@
       "analystAgentTitle": "وكيل المحلل",
       "analystAgentDesc": "اطرح سؤالاً أو أعط تعليمات بناءً على ملفات السياق المدارة. سيقوم الذكاء الاصطناعي بإنشاء استجابة منظمة.",
       "analystAgentPromptLabel": "مطالبتك",
-      "analystAgentRunButton": "تشغيل التحليل (2 أرصدة)",
+      "analystAgentPromptPlaceholder": "على سبيل المثال، 'اذكر جميع أصحاب المصلحة في المشروع واهتماماتهم الرئيسية.'",
+      "analystAgentRunButton": "تشغيل التحليل ({creditCost} أرصدة)",
       "generatedReportTitle": "التقرير الذي تم إنشاؤه",
       "viewJsonButton": "عرض JSON",
       "jsonOutputTitle": "إخراج JSON الخام",
       "saveResultButton": "حفظ النتيجة كملف سياق",
+      "pasteText": {
+        "titleLabel": "اسم السياق",
+        "titlePlaceholder": "على سبيل المثال، وثيقة المتطلبات، مواصفات واجهة برمجة التطبيقات",
+        "contentLabel": "لصق النص أو Markdown",
+        "contentPlaceholder": "الصق المحتوى الخاص بك هنا...",
+        "addButton": "إضافة كسياق"
+      },
       "toasts": {
         "invalidFile": "نوع ملف غير صالح. يرجى تحميل ملف PDF.",
         "analysisError": "يرجى تحميل ملف وتحديد نوع المستند.",
@@ -1074,7 +1076,20 @@
         "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
         "analysisFailed": "فشل التحليل",
         "analysisSaved": "تم حفظ التحليل",
-        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك."
+        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك.",
+        "fileReadError": "خطأ في قراءة الملف",
+        "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
+        "fileAdded": "تمت إضافة الملف",
+        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
+        "processingFile": "جارٍ معالجة الملف...",
+        "dropHere": "أفلت الملفات هنا...",
+        "uploadedContext": "السياق الذي تم تحميله",
+        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
+        "authError": "يجب عليك تسجيل الدخول لتحميل الملفات.",
+        "contextAddedToastTitle": "تمت إضافة السياق",
+        "contextAddedToastDesc": "تمت إضافة \"{fileName}\" إلى السياق.",
+        "missingInfoToastTitle": "معلومات ناقصة",
+        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى واسم للسياق."
       }
     }
   }

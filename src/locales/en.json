@@ -205,6 +205,17 @@
       "step4": "Review 'Activity History' to monitor all AI generations across the platform."
     }
   },
+  "adminFinancialReport": {
+    "title": "Export Financial Report",
+    "description": "Select a date range to generate a PDF report of all transactions.",
+    "datePlaceholder": "Pick a date range",
+    "exportButton": "Export as PDF",
+    "missingInfoError": "Missing Information",
+    "missingInfoDesc": "Please select a start and end date for the report.",
+    "noData": "No Data",
+    "noDataDesc": "There are no transactions in the selected date range.",
+    "exportFailed": "Export Failed"
+  },
   "adminSettings": {
     "pageSubtitle": "Manage application-wide settings and data operations.",
     "defaultSettingsTitle": "Default User Settings",
@@ -232,17 +243,6 @@
     "usedAgent": "used agent:",
     "noActivity": "No recent activity.",
     "errorLoading": "Failed to load dashboard statistics."
-  },
-  "adminFinancialReport": {
-    "title": "Export Financial Report",
-    "description": "Select a date range to generate a PDF report of all transactions.",
-    "datePlaceholder": "Pick a date range",
-    "exportButton": "Export as PDF",
-    "missingInfoError": "Missing Information",
-    "missingInfoDesc": "Please select a start and end date for the report.",
-    "noData": "No Data",
-    "noDataDesc": "There are no transactions in the selected date range.",
-    "exportFailed": "Export Failed"
   },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
@@ -432,20 +432,14 @@
       "description": "Define a new custom agent. This agent will become available in the application once created.",
       "idLabel": "Agent ID",
       "idPlaceholder": "e.g., my-custom-agent",
-      "idErrorMin": "ID must be at least 3 characters",
-      "idErrorRegex": "ID must be lowercase and contain only letters, numbers, and hyphens.",
       "nameLabel": "Agent Name",
       "namePlaceholder": "e.g., Custom Report Agent",
-      "nameError": "Name is required",
       "descriptionLabel": "Description",
-      "descriptionError": "Description is required",
       "categoryLabel": "Category",
       "selectCategoryPlaceholder": "Select a category",
       "pageUrlLabel": "Page URL",
       "pageUrlPlaceholder": "/generate",
-      "pageUrlError": "URL must start with /",
       "promptLabel": "Prompt",
-      "promptError": "Prompt must be at least 10 characters",
       "createButton": "Create Agent"
     },
     "categories": {
@@ -688,11 +682,11 @@
   },
   "builder": {
     "tabs": {
-      "proposal": "Proposal Mode",
-      "document": "Document Generator",
-      "diagram": "Diagram Generator",
-      "code": "Code Generator",
-      "presentation": "Presentation Mode",
+      "proposal": "Proposal",
+      "document": "Document",
+      "diagram": "Diagrams",
+      "code": "Code",
+      "presentation": "Presentation",
       "files": "Files",
       "plan": "Project Plan",
       "academic": "Academic Solver"
@@ -1056,11 +1050,19 @@
       "analystAgentTitle": "Analyst Agent",
       "analystAgentDesc": "Ask a question or give an instruction based on the managed context files. The AI will generate a structured response.",
       "analystAgentPromptLabel": "Your Prompt",
-      "analystAgentRunButton": "Run Analysis (2 Credits)",
+      "analystAgentPromptPlaceholder": "e.g., 'List all project stakeholders and their main interests.'",
+      "analystAgentRunButton": "Run Analysis ({creditCost} Credits)",
       "generatedReportTitle": "Generated Report",
       "viewJsonButton": "View JSON",
       "jsonOutputTitle": "Raw JSON Output",
       "saveResultButton": "Save Result as Context File",
+      "pasteText": {
+        "titleLabel": "Context Name",
+        "titlePlaceholder": "e.g., Requirements Document, API Specs",
+        "contentLabel": "Paste Text or Markdown",
+        "contentPlaceholder": "Paste your content here...",
+        "addButton": "Add as Context"
+      },
       "toasts": {
         "invalidFile": "Invalid file type. Please upload a PDF.",
         "analysisError": "Please upload a file and select a document type.",
@@ -1074,7 +1076,20 @@
         "analysisCompleteDesc": "The AI has analyzed the context and generated structured data.",
         "analysisFailed": "Analysis Failed",
         "analysisSaved": "Analysis Saved",
-        "analysisSavedDesc": "\"{fileName}\" has been added to your context files."
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
+        "fileReadError": "File Read Error",
+        "fileReadErrorDesc": "Could not read the selected file.",
+        "fileAdded": "File Added",
+        "fileAddedDesc": "{fileName} has been added to context.",
+        "processingFile": "Processing file...",
+        "dropHere": "Drop the files here...",
+        "uploadedContext": "UPLOADED CONTEXT",
+        "noContext": "No context files uploaded yet.",
+        "authError": "You must be logged in to upload files.",
+        "contextAddedToastTitle": "Context Added",
+        "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
+        "missingInfoToastTitle": "Missing Information",
+        "missingInfoToastDesc": "Please provide both content and a name for the context."
       }
     }
   }
