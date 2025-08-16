@@ -84,7 +84,7 @@ export const SessionActions = () => {
                 store.loadState(parsedState);
             } catch (error) {
                 console.error('Failed to load project file:', error);
-                toast({ title: 'Load Failed', description: 'The selected file could not be read or is corrupted.', variant: 'destructive' });
+                toast({ title: t('builder.toasts.loadFailedTitle'), description: t('builder.toasts.loadFailedDesc'), variant: 'destructive' });
             }
         };
         reader.readAsText(file);
@@ -106,7 +106,7 @@ export const SessionActions = () => {
 
     const performSave = (name?: string) => {
         if (!hasAnyContent()) {
-            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
+            toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
             return;
         }
 
@@ -129,7 +129,7 @@ export const SessionActions = () => {
             // If it's a new project without a name but has content, prompt for one.
             setIsSavePromptOpen(true);
         } else {
-            toast({ title: "Cannot Save", description: "Project is empty.", variant: 'destructive' });
+            toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
         }
     }
     
@@ -139,7 +139,7 @@ export const SessionActions = () => {
             setIsSavePromptOpen(false);
             setProjectName('');
         } else {
-            toast({ title: "Name Required", description: "Please enter a name for your project.", variant: "destructive" });
+            toast({ title: t("projects.nameRequiredToastTitle"), description: t("projects.nameRequiredToastDesc"), variant: "destructive" });
         }
     };
 
@@ -150,8 +150,8 @@ export const SessionActions = () => {
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProject) => {
                  toast({
-                    title: 'Project Saved As New',
-                    description: `A new project "${newProject.name}" has been created.`,
+                    title: t("projects.projectSavedAsToastTitle"),
+                    description: t("projects.projectSavedAsToastDesc").replace('{name}', newProject.name),
                 });
                 setIsSaveAsOpen(false);
                 setSaveAsName('');
@@ -186,11 +186,11 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Upload className="h-4 w-4" />
-                            <span className="hidden md:inline ml-2">Load Project</span>
+                            <span className="hidden md:inline ml-2">{t('builder.buttons.uploadProject')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
-                        <p>Load Project</p>
+                        <p>{t('builder.tooltips.uploadProject')}</p>
                     </TooltipContent>
                 </Tooltip>
                 
@@ -202,26 +202,26 @@ export const SessionActions = () => {
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                     <span className="hidden md:inline ml-2">Save Project</span>
+                     <span className="hidden md:inline ml-2">{t('projects.saveButton')}</span>
                 </Button>
 
                 <AlertDialog open={isSavePromptOpen} onOpenChange={setIsSavePromptOpen}>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Save New Project</AlertDialogTitle>
-                            <AlertDialogDescription>Please provide a name for your new project before saving.</AlertDialogDescription>
+                            <AlertDialogTitle>{t('projects.savePromptTitle')}</AlertDialogTitle>
+                            <AlertDialogDescription>{t('projects.savePromptDescription')}</AlertDialogDescription>
                         </AlertDialogHeader>
                          <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="save-project-name" className="text-right">Name</Label>
+                                <Label htmlFor="save-project-name" className="text-right">{t('projects.nameLabel')}</Label>
                                 <Input id="save-project-name" value={projectName} onChange={(e) => setProjectName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setProjectName('')}>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel onClick={() => setProjectName('')}>{t('projects.cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={handleSaveFromPrompt} disabled={isSaving}>
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                                Save
+                                {t('projects.saveButton')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -236,31 +236,29 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Save className="h-4 w-4" />
-                            <span className="hidden md:inline ml-2">Save As...</span>
+                            <span className="hidden md:inline ml-2">{t('projects.saveAsButton')}</span>
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Save Project As</DialogTitle>
-                            <DialogDescription>
-                                Enter a new name and choose whether to save to the cloud or download a local file.
-                            </DialogDescription>
+                            <DialogTitle>{t('projects.saveAsTitle')}</DialogTitle>
+                            <DialogDescription>{t('projects.saveAsDescription')}</DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="save-as-name" className="text-right">Name</Label>
+                                <Label htmlFor="save-as-name" className="text-right">{t('projects.nameLabel')}</Label>
                                 <Input id="save-as-name" defaultValue={store.name || (store.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="secondary" onClick={handleDownloadAs}>
                                 <FileJson className="mr-2 h-4 w-4" />
-                                Download as .arkan
+                                {t('projects.downloadButton')}
                             </Button>
                             <Button onClick={handleSaveAsCloud} disabled={isSaving}>
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
                                 <Cloud className="mr-2 h-4 w-4" />
-                                Save to Cloud
+                                {t('projects.saveToCloudButton')}
                             </Button>
                         </DialogFooter>
                     </DialogContent>
@@ -276,11 +274,11 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
-                             <span className="hidden md:inline ml-2">New Session</span>
+                             <span className="hidden md:inline ml-2">{t('builder.buttons.newSession')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
-                        <p>Clear all content and start a new session</p>
+                        <p>{t('builder.tooltips.newSession')}</p>
                     </TooltipContent>
                 </Tooltip>
             </div>

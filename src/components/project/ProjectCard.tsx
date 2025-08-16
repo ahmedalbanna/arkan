@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
 import React from 'react'; // Import React for React.ReactNode type
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface ProjectCardProps {
     project: SavedProject;
@@ -28,6 +30,7 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project }: ProjectCardProps) {
     const router = useRouter();
+    const { t } = useLocalization();
     const loadState = useBuilderStore(state => state.loadState);
     const deleteProjectMutation = useDeleteProject();
 
@@ -41,7 +44,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         deleteProjectMutation.mutate(project.id);
     }
     
-    const projectTitle = project.name || project.proposal?.title || 'Untitled Project';
+    const projectTitle = project.name || project.proposal?.title || t('projects.untitled');
 
     const isDeletingThisProject = deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id;
 
@@ -63,32 +66,31 @@ export function ProjectCard({ project }: ProjectCardProps) {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('projects.deleteDialogTitle')}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your project
-                                    "{projectTitle  as React.ReactNode}".
+                                    {t('projects.deleteDialogDescription').replace('{projectTitle}', projectTitle as string)}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteProject}>Delete</AlertDialogAction>
+                                <AlertDialogCancel>{t('projects.cancelButton')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleDeleteProject}>{t('projects.deleteButton')}</AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>
                 </div>
                 <CardDescription>
-                    Updated {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
+                    {t('projects.updated', { time: formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true }) })}
                 </CardDescription>
             </CardHeader>
             <CardContent className="flex-grow">
                 <p className="text-sm text-muted-foreground line-clamp-3">
-                    {(project.proposal?.objective || 'No description available.') as React.ReactNode}
+                    {(project.proposal?.objective || t('projects.noDescription')) as React.ReactNode}
                 </p>
             </CardContent>
             <CardFooter>
                 <Button className="w-full" onClick={handleLoadProject}>
                     <FileText className="mr-2 h-4 w-4" />
-                    Load Project
+                    {t('projects.loadProjectButton')}
                 </Button>
             </CardFooter>
         </Card>
