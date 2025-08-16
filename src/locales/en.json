@@ -150,12 +150,6 @@
   },
   "adminSettings": {
     "pageSubtitle": "Manage application-wide settings and data operations.",
-    "dataSyncTitle": "Data Synchronization",
-    "dataSyncDescription": "Manually trigger a one-way synchronization from Firestore to the local SQLite database.",
-    "dataSyncWarning": "This process will overwrite any local changes in the SQLite database with the current data from Firestore. This action is irreversible.",
-    "triggerSyncButton": "Trigger Firestore to SQLite Sync",
-    "syncSuccessTitle": "Synchronization Started",
-    "syncErrorTitle": "Synchronization Failed",
     "defaultSettingsTitle": "Default User Settings",
     "defaultSettingsDesc": "Configure the default values for new users when they sign up.",
     "newUserCreditsLabel": "New User Credits",
@@ -163,7 +157,11 @@
     "bankPaymentDesc": "Set the bank details that users will see on the payment page.",
     "bankNameLabel": "Bank Name",
     "accountHolderLabel": "Account Holder Name",
-    "ibanLabel": "IBAN"
+    "ibanLabel": "IBAN",
+    "saveButton": "Save Settings",
+    "successToastTitle": "Success",
+    "successToastDesc": "Settings have been updated.",
+    "errorToastTitle": "Error"
   },
   "adminDashboard": {
     "pageTitle": "Analytics Dashboard",

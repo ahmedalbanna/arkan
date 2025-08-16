@@ -99,10 +99,10 @@ export default function AdminSettingsPage() {
     mutationFn: updateSettings,
     onSuccess: (data) => {
         queryClient.setQueryData(['settings'], data);
-        toast({ title: "Success", description: "Settings have been updated." });
+        toast({ title: t('adminSettings.successToastTitle'), description: t('adminSettings.successToastDesc') });
     },
     onError: (error: Error) => {
-        toast({ title: "Error", description: error.message, variant: "destructive" });
+        toast({ title: t('adminSettings.errorToastTitle'), description: error.message, variant: "destructive" });
     }
   });
 
@@ -156,9 +156,9 @@ export default function AdminSettingsPage() {
         <form onSubmit={form.handleSubmit(onSubmit)}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Default User Settings</CardTitle>
+                    <CardTitle>{t('adminSettings.defaultSettingsTitle')}</CardTitle>
                     <CardDescription>
-                        Configure the default values for new users when they sign up.
+                        {t('adminSettings.defaultSettingsDesc')}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -167,7 +167,7 @@ export default function AdminSettingsPage() {
                         name="newUserCredits"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>New User Credits</FormLabel>
+                                <FormLabel>{t('adminSettings.newUserCreditsLabel')}</FormLabel>
                                 <FormControl>
                                     <Input type="number" {...field} disabled={mutation.isPending} />
                                 </FormControl>
@@ -178,9 +178,9 @@ export default function AdminSettingsPage() {
                 </CardContent>
                 <Separator className="my-6" />
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> Bank Payment Details</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> {t('adminSettings.bankPaymentTitle')}</CardTitle>
                     <CardDescription>
-                        Set the bank details that users will see on the payment page.
+                        {t('adminSettings.bankPaymentDesc')}
                     </CardDescription>
                 </CardHeader>
                  <CardContent className="space-y-4">
@@ -189,7 +189,7 @@ export default function AdminSettingsPage() {
                         name="bankName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Bank Name</FormLabel>
+                                <FormLabel>{t('adminSettings.bankNameLabel')}</FormLabel>
                                 <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -200,7 +200,7 @@ export default function AdminSettingsPage() {
                         name="accountHolder"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Account Holder Name</FormLabel>
+                                <FormLabel>{t('adminSettings.accountHolderLabel')}</FormLabel>
                                 <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -211,7 +211,7 @@ export default function AdminSettingsPage() {
                         name="iban"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>IBAN</FormLabel>
+                                <FormLabel>{t('adminSettings.ibanLabel')}</FormLabel>
                                 <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -221,7 +221,7 @@ export default function AdminSettingsPage() {
                 <CardFooter>
                     <Button type="submit" disabled={mutation.isPending}>
                         {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save Settings
+                        {t('adminSettings.saveButton')}
                     </Button>
                 </CardFooter>
             </Card>

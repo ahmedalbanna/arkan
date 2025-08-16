@@ -150,12 +150,6 @@
   },
   "adminSettings": {
     "pageSubtitle": "إدارة الإعدادات على مستوى التطبيق وعمليات البيانات.",
-    "dataSyncTitle": "مزامنة البيانات",
-    "dataSyncDescription": "قم بتشغيل مزامنة أحادية الاتجاه يدويًا من Firestore إلى قاعدة بيانات SQLite المحلية.",
-    "dataSyncWarning": "ستقوم هذه العملية بالكتابة فوق أي تغييرات محلية في قاعدة بيانات SQLite بالبيانات الحالية من Firestore. هذا الإجراء لا رجعة فيه.",
-    "triggerSyncButton": "تشغيل مزامنة Firestore إلى SQLite",
-    "syncSuccessTitle": "بدأت المزامنة",
-    "syncErrorTitle": "فشلت المزامنة",
     "defaultSettingsTitle": "إعدادات المستخدم الافتراضية",
     "defaultSettingsDesc": "تكوين القيم الافتراضية للمستخدمين الجدد عند التسجيل.",
     "newUserCreditsLabel": "أرصدة المستخدم الجديد",
@@ -163,7 +157,11 @@
     "bankPaymentDesc": "حدد تفاصيل البنك التي سيراها المستخدمون في صفحة الدفع.",
     "bankNameLabel": "اسم البنك",
     "accountHolderLabel": "اسم صاحب الحساب",
-    "ibanLabel": "رقم الحساب المصرفي الدولي (IBAN)"
+    "ibanLabel": "رقم الحساب المصرفي الدولي (IBAN)",
+    "saveButton": "حفظ الإعدادات",
+    "successToastTitle": "نجاح",
+    "successToastDesc": "تم تحديث الإعدادات.",
+    "errorToastTitle": "خطأ"
   },
   "adminDashboard": {
     "pageTitle": "لوحة تحكم التحليلات",
