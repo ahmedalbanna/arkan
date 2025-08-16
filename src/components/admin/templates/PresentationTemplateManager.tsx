@@ -5,24 +5,25 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate } from '@/hooks/use-templates';
 import { type PresentationGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../../ui/accordion';
-import { Button } from '../../ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../ui/form';
-import { Input } from '../../ui/input';
-import { Textarea } from '../../ui/textarea';
-import { Checkbox } from '../../ui/checkbox';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AGENTS } from '@/lib/agents';
-import { Skeleton } from '../../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../../ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -44,6 +45,7 @@ const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
 
 
 function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+    const { t } = useLocalization();
     const form = useForm<PresentationFormValues>({
         resolver: zodResolver(presentationTemplateSchema),
         defaultValues: {
@@ -59,14 +61,14 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Template Name</FormLabel>
+                        <FormLabel>{t('manageTemplates.proposalDialog.nameLabel')}</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{t('manageTemplates.proposalDialog.descriptionLabel')}</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
@@ -77,8 +79,8 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                     render={() => (
                         <FormItem>
                             <div className="mb-4">
-                                <FormLabel className="text-base">Relevant Report Sections</FormLabel>
-                                <p className="text-sm text-muted-foreground">Select which report sections are most relevant for this presentation type.</p>
+                                <FormLabel className="text-base">{t('manageTemplates.presentationDialog.relevantSectionsLabel')}</FormLabel>
+                                <p className="text-sm text-muted-foreground">{t('manageTemplates.presentationDialog.relevantSectionsDesc')}</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 {reportAgents.map((agent) => (
@@ -119,24 +121,24 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                             <AlertDialogTrigger asChild>
                                  <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
                                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                    Delete
+                                    {t('manageTemplates.proposalDialog.deleteButton')}
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
+                                <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', template.name)}</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
                     )}
                     <Button type="submit" disabled={isSaving || isDeleting}>
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save Changes
+                        {t('manageTemplates.proposalDialog.saveButton')}
                     </Button>
                 </div>
             </form>
@@ -145,6 +147,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
 }
 
 function CreatePresentationTemplateDialog() {
+    const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
     const createMutation = useCreatePresentationTemplate();
@@ -162,7 +165,7 @@ function CreatePresentationTemplateDialog() {
      const handleSave = (data: CreatePresentationFormValues) => {
         createMutation.mutate(data, {
             onSuccess: () => {
-                toast({ title: 'Success', description: 'New presentation template created.' });
+                toast({ title: t('manageTemplates.createSuccessToast.title'), description: t('manageTemplates.createSuccessToast.presentationDesc') });
                 setIsOpen(false);
                 form.reset();
             },
@@ -181,34 +184,34 @@ function CreatePresentationTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create Presentation Template</DialogTitle>
+                    <DialogTitle>{t('manageTemplates.presentationDialog.title')}</DialogTitle>
                     <DialogDescription>
-                        Define a new template for generating presentations.
+                        {t('manageTemplates.presentationDialog.description')}
                     </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template ID</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., weekly-update" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.presentationDialog.idPlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template Name</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., Weekly Update" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.presentationDialog.namePlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} disabled={createMutation.isPending} rows={2} /></FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -218,7 +221,7 @@ function CreatePresentationTemplateDialog() {
                             name="relevantReportSectionIds"
                             render={() => (
                                 <FormItem>
-                                    <FormLabel className="text-base">Relevant Report Sections</FormLabel>
+                                    <FormLabel className="text-base">{t('manageTemplates.presentationDialog.relevantSectionsLabel')}</FormLabel>
                                     <div className="grid grid-cols-2 gap-4">
                                         {reportAgents.map((agent) => (
                                             <FormField key={agent.id} control={form.control} name="relevantReportSectionIds"
@@ -245,10 +248,10 @@ function CreatePresentationTemplateDialog() {
                             )}
                         />
                          <DialogFooter>
-                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Create
+                                {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -260,6 +263,7 @@ function CreatePresentationTemplateDialog() {
 
 
 export function PresentationTemplateManager() {
+    const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     
     const { data: templates, isLoading, isError } = useQuery({
@@ -267,7 +271,7 @@ export function PresentationTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchPresentationTemplates } = await import('@/services/template-service');
-            return fetchPresentationTemplates();
+            return fetchPresentationTemplates(await firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
     });
@@ -290,9 +294,9 @@ export function PresentationTemplateManager() {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Presentation Generation Templates</CardTitle>
+                    <CardTitle>{t('manageTemplates.presentationTitle')}</CardTitle>
                     <CardDescription>
-                    Configure the content structure for different types of presentations.
+                        {t('manageTemplates.presentationDescription')}
                     </CardDescription>
                 </div>
                  <CreatePresentationTemplateDialog />
@@ -319,3 +323,5 @@ export function PresentationTemplateManager() {
         </Card>
     );
 }
+
+    

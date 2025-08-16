@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -76,7 +75,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField // Outer FormField for the group
+                 <FormField
                     control={form.control}
                     name="agentIds"
                     render={() => (
@@ -123,7 +122,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
                                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                    {t('manageTemplates.deleteDialog.deleteButton')}
+                                    {t('manageTemplates.proposalDialog.deleteButton')}
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -148,7 +147,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     );
 }
 
-function CreateTemplateDialog() {
+function CreateReportTemplateDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const [name, setName] = useState('');
@@ -195,14 +194,14 @@ function CreateTemplateDialog() {
 
         createMutation.mutate(validation.data, {
             onSuccess: () => {
-                toast({ title: 'Success', description: 'New agent team created.' });
+                toast({ title: t('manageTemplates.createSuccessToast.title'), description: t('manageTemplates.createSuccessToast.reportDesc') });
                 setIsOpen(false);
                 setName('');
                 setDescription('');
                 setSelectedAgentIds([]);
             },
             onError: (error: any) => {
-                handleErrorUtility(error, "Failed to create team.");
+                handleErrorUtility(error, "Failed to create template.");
             }
         });
     }
@@ -217,22 +216,22 @@ function CreateTemplateDialog() {
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{t('team.createTeamTitle')}</DialogTitle>
-                    <DialogDescription>Choose agents you want to include in this team for group interactions.</DialogDescription>
+                    <DialogTitle>{t('manageTemplates.reportDialog.title')}</DialogTitle>
+                    <DialogDescription>{t('manageTemplates.reportDialog.description')}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="team-name">NAME</Label>
-                        <Input id="team-name" placeholder={t('manageTemplates.reportDialog.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} />
+                        <Label htmlFor="template-name">{t('manageTemplates.createDialog.nameLabel')}</Label>
+                        <Input id="template-name" placeholder={t('manageTemplates.reportDialog.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="team-description">DESCRIPTION</Label>
-                        <Textarea id="team-description" placeholder={t('manageTemplates.reportDialog.idPlaceholder')} value={description} onChange={e => setDescription(e.target.value)} rows={2} />
+                        <Label htmlFor="template-description">{t('manageTemplates.createDialog.descriptionLabel')}</Label>
+                        <Textarea id="template-description" placeholder={t('manageTemplates.reportDialog.descriptionPlaceholder')} value={description} onChange={e => setDescription(e.target.value)} rows={2} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>MANAGE TEAM ({selectedAgents.length})</Label>
+                            <Label>{t('manageTemplates.reportDialog.includedAgentsLabel')} ({selectedAgents.length})</Label>
                             <ScrollArea className="h-48 border rounded-md p-2">
                                {selectedAgents.map(agent => (
                                    <div key={agent.id} className="flex items-center justify-between p-1">
@@ -243,7 +242,7 @@ function CreateTemplateDialog() {
                             </ScrollArea>
                         </div>
                          <div className="space-y-2">
-                            <Label>ADD TO TEAM</Label>
+                            <Label>{t('manageTemplates.reportDialog.availableAgentsLabel')}</Label>
                             <ScrollArea className="h-48 border rounded-md p-2">
                                 <div className="p-1"><Input placeholder={t('manageTemplates.reportDialog.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
                                 {isLoaded && availableAgents.map(agent => (
@@ -258,10 +257,10 @@ function CreateTemplateDialog() {
                     </div>
                 </div>
                 <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
+                    <DialogClose asChild><Button type="button" variant="ghost">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                     <Button onClick={handleCreate} disabled={createMutation.isPending || !name || selectedAgentIds.length === 0}>
                         {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Create
+                        {t('manageTemplates.createButton')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -278,7 +277,7 @@ export function ReportTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchReportTemplates } = await import('@/services/template-service');
-            return fetchReportTemplates();
+            return fetchReportTemplates(firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
         meta: {
@@ -311,7 +310,7 @@ export function ReportTemplateManager() {
                         {t('manageTemplates.reportDescription')}
                     </CardDescription>
                 </div>
-                 <CreateTemplateDialog />
+                 <CreateReportTemplateDialog />
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">

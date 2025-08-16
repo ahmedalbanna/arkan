@@ -492,6 +492,7 @@
       "title": "Create New Report Template",
       "description": "Choose agents you want to include in this template for group interactions.",
       "namePlaceholder": "e.g., Technical Software Report",
+      "descriptionPlaceholder": "A short description of what this template is for.",
       "idPlaceholder": "e.g., tech-report",
       "includedAgentsLabel": "INCLUDED AGENTS",
       "availableAgentsLabel": "AVAILABLE AGENTS",
@@ -501,7 +502,9 @@
       "title": "Create Presentation Template",
       "description": "Define a new template for generating presentations.",
       "idPlaceholder": "e.g., weekly-update",
-      "namePlaceholder": "e.g., Weekly Update"
+      "namePlaceholder": "e.g., Weekly Update",
+      "relevantSectionsLabel": "Relevant Report Sections",
+      "relevantSectionsDesc": "Select which report sections are most relevant for this presentation type."
     },
     "deleteDialog": {
       "title": "Are you sure?",
@@ -515,7 +518,13 @@
     "fontColor": "Font Color",
     "bold": "Bold",
     "headingLevel": "Heading {level}",
-    "saveButton": "Save Template"
+    "saveButton": "Save Template",
+    "createSuccessToast": {
+        "title": "Success",
+        "proposalDesc": "New proposal template created.",
+        "reportDesc": "New report template created.",
+        "presentationDesc": "New presentation template created."
+    }
   },
   "templates": {
     "modern": {

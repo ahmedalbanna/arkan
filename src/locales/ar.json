@@ -492,6 +492,7 @@
       "title": "إنشاء قالب تقرير جديد",
       "description": "اختر الوكلاء الذين تريد تضمينهم في هذا القالب للتفاعلات الجماعية.",
       "namePlaceholder": "على سبيل المثال، تقرير برنامج فني",
+      "descriptionPlaceholder": "وصف قصير لما يستخدم له هذا القالب.",
       "idPlaceholder": "على سبيل المثال، tech-report",
       "includedAgentsLabel": "الوكلاء المضمنون",
       "availableAgentsLabel": "الوكلاء المتاحون",
@@ -501,7 +502,9 @@
       "title": "إنشاء قالب عرض تقديمي",
       "description": "تحديد قالب جديد لإنشاء العروض التقديمية.",
       "idPlaceholder": "على سبيل المثال، weekly-update",
-      "namePlaceholder": "على سبيل المثال، تحديث أسبوعي"
+      "namePlaceholder": "على سبيل المثال، تحديث أسبوعي",
+      "relevantSectionsLabel": "أقسام التقرير ذات الصلة",
+      "relevantSectionsDesc": "حدد أقسام التقرير الأكثر صلة بنوع هذا العرض التقديمي."
     },
     "deleteDialog": {
       "title": "هل أنت متأكد؟",
@@ -515,7 +518,13 @@
     "fontColor": "لون الخط",
     "bold": "عريض",
     "headingLevel": "عنوان المستوى {level}",
-    "saveButton": "حفظ القالب"
+    "saveButton": "حفظ القالب",
+    "createSuccessToast": {
+        "title": "نجاح",
+        "proposalDesc": "تم إنشاء قالب مقترح جديد.",
+        "reportDesc": "تم إنشاء قالب تقرير جديد.",
+        "presentationDesc": "تم إنشاء قالب عرض تقديمي جديد."
+    }
   },
   "templates": {
     "modern": {
@@ -780,7 +789,7 @@
       "tool_context_sections": "الأقسام",
       "tool_context_diagrams": "الرسوم البيانية",
       "noOtherSections": "لم يتم إنشاء أقسام أخرى بعد.",
-      "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد",
+      "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد.",
       "externalContext": "سياق خارجي",
       "ContextualSections": "العناصر السياقية",
       "GenerateFullReport": "إنشاء تقرير كامل",
