@@ -34,12 +34,7 @@ export type { SignupCredentials } from '@/components/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/schemas';
 export type { DiffPart } from '@/lib/diff';
-<<<<<<< Updated upstream
 export type { GenerateAgentConfigOutput } from '@/ai/schemas';
-=======
-export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
-export type { UploadedFile };
->>>>>>> Stashed changes
 
 // Re-exporting generated Template types from Zod schemas
 export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;

@@ -94,4 +94,3 @@ export const POST = withAuth(async ({ request, user }) => {
     return handleApiError(error);
   }
 });
-

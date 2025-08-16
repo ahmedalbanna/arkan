@@ -86,13 +86,8 @@ export default async function RootLayout({
 }>) {
 
   // We need to get the current path to check if it's protected
-<<<<<<< Updated upstream
   const headersList = headers();
   const pathname = (await headersList).get('x-next-pathname') || '/';
-=======
-  const headersList = await headers();
-  const pathname = headersList.get('x-next-pathname') || '/';
->>>>>>> Stashed changes
 
   // Run the server-side authentication check and redirects
   await handleAuthRedirects(pathname);
