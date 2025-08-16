@@ -93,7 +93,13 @@ export function ProposalModeGenerator() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+             {generationMutation.isPending && (
+                <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    <p className="text-muted-foreground">Generating your proposal, please wait...</p>
+                </div>
+            )}
              <div className="lg:col-span-4 lg:sticky top-24">
                 <ProposalGenerationTools
                     isDisabled={generationMutation.isPending || translateMutation.isPending}
@@ -101,13 +107,7 @@ export function ProposalModeGenerator() {
                 />
             </div>
             
-            <div className="lg:col-span-8 relative">
-                {generationMutation.isPending && (
-                    <div className="absolute inset-0 bg-background/80 z-10 flex flex-col items-center justify-center gap-4 rounded-lg">
-                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-muted-foreground">Generating your proposal, please wait...</p>
-                    </div>
-                )}
+            <div className="lg:col-span-8">
                 {proposal ? (
                     <Card className="h-full flex flex-col">
                         <CardHeader>
