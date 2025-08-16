@@ -1,3 +1,4 @@
+
 # Arkan Application: React Query Guide
 
 This document outlines the conventions and patterns for using TanStack React Query within the Arkan application. Following these guidelines ensures that our data fetching is consistent, efficient, and easy to maintain.
