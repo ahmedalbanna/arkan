@@ -456,7 +456,54 @@
     "createStructure": "Create Structure"
   },
   "manageTemplates": {
-    "pageSubtitle": "Customize the look and feel of exported DOCX documents.",
+    "pageTitle": "Manage Generation Templates",
+    "pageSubtitle": "Configure the prompts and settings for proposal, report, and presentation generation.",
+    "proposalTemplates": "Proposal Templates",
+    "reportTemplates": "Report Templates",
+    "presentationTemplates": "Presentation Templates",
+    "proposalTitle": "Proposal Generation Templates",
+    "proposalDescription": "Configure the templates used for generating project proposals. These settings control the prompts and guidelines provided to the AI.",
+    "reportTitle": "Report Generation Templates",
+    "reportDescription": "Configure which report sections are included in the 'Generate Full Report' option.",
+    "presentationTitle": "Presentation Generation Templates",
+    "presentationDescription": "Configure the content structure for different types of presentations.",
+    "createButton": "Create New",
+    "cancelButton": "Cancel",
+    "createDialog": {
+      "title": "Create Template",
+      "nameLabel": "Template Name",
+      "idLabel": "Template ID",
+      "descriptionLabel": "Description"
+    },
+    "proposalDialog": {
+      "title": "Create Proposal Template",
+      "description": "Define a new template for generating project proposals.",
+      "idPlaceholder": "e.g., my-custom-template",
+      "namePlaceholder": "e.g., My Custom Template",
+      "promptLabel": "Base Prompt",
+      "guidelinesLabel": "Guidelines",
+      "removeGuideline": "Remove",
+      "addGuideline": "Add Guideline",
+      "jsonStructureLabel": "JSON Structure"
+    },
+    "reportDialog": {
+      "title": "Create New Report Template",
+      "description": "Choose agents to include in this template for group interactions.",
+      "namePlaceholder": "e.g., Technical Software Report",
+      "includedAgentsLabel": "INCLUDED AGENTS",
+      "availableAgentsLabel": "AVAILABLE AGENTS"
+    },
+    "presentationDialog": {
+      "title": "Create Presentation Template",
+      "description": "Define a new template for generating presentations.",
+      "idPlaceholder": "e.g., weekly-update",
+      "namePlaceholder": "e.g., Weekly Update"
+    },
+    "deleteDialog": {
+      "title": "Are you sure?",
+      "description": "This action cannot be undone. This will permanently delete the \"{templateName}\" template.",
+      "deleteButton": "Delete"
+    },
     "generalStyles": "General Styles",
     "headingStyles": "Heading Styles",
     "fontFamily": "Font Family",
