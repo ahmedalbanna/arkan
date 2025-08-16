@@ -28,6 +28,44 @@
     "documentation": "Documentation",
     "pushNotifications": "Push Notifications"
   },
+  "agentGenerator": {
+    "title": "Generate Your AI Agent",
+    "placeholder": "Describe your AI Agent's specialty and task—more details, better customization!",
+    "addKnowledge": "Add knowledge",
+    "jsonOutput": "JSON Output",
+    "contextFiles": "Context Files",
+    "generatingSubtitle": "Generating your agent... Just a moment!",
+    "reviewTitle": "Review Your AI Agent",
+    "backToPrompt": "Back to Prompt",
+    "review": {
+      "name": "Name",
+      "category": "Category",
+      "description": "Description",
+      "instructions": "Instructions",
+      "guidelines": "Guidelines",
+      "acceptButton": "Accept & Save Agent",
+      "regenerateButton": "Regenerate"
+    },
+    "chips": {
+      "taskManager": "Task Manager",
+      "contentCreator": "Content Creator",
+      "socialMediaPlanner": "Social Media Planner",
+      "seoWriter": "Blog SEO Writer"
+    },
+    "toast": {
+      "promptEmpty": {
+        "title": "Prompt is empty",
+        "description": "Please describe the agent you want to create."
+      },
+      "generationFailed": {
+        "title": "Agent Generation Failed"
+      },
+      "creationFailed": {
+        "title": "Agent creation failed",
+        "description": "An agent with a similar ID might already exist. Please try a more specific description or edit the generated name."
+      }
+    }
+  },
   "docs": {
     "pageTitle": "Application Documentation",
     "pageSubtitle": "Learn how to use all the features Arkan has to offer.",

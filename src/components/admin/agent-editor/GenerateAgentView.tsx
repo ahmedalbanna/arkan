@@ -21,12 +21,13 @@ import { Switch } from '@/components/ui/switch';
 import { useDropzone } from 'react-dropzone';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const suggestionChips = [
-    { label: 'Task Manager', icon: Check },
-    { label: 'Content Creator', icon: Flame },
-    { label: 'Social Media Planner', icon: Copy },
-    { label: 'Blog SEO Writer', icon: Copy },
+    { label: 'agentGenerator.chips.taskManager', icon: Check },
+    { label: 'agentGenerator.chips.contentCreator', icon: Flame },
+    { label: 'agentGenerator.chips.socialMediaPlanner', icon: Copy },
+    { label: 'agentGenerator.chips.seoWriter', icon: Copy },
 ];
 
 type GenerationStep = 'prompting' | 'generating' | 'reviewing';
@@ -47,6 +48,7 @@ export interface UploadedFile {
 
 export function GenerateAgentView() {
     const router = useRouter();
+    const { t } = useLocalization();
     const [step, setStep] = useState<GenerationStep>('prompting');
     const [prompt, setPrompt] = useState('');
     const [includeJsonOutput, setIncludeJsonOutput] = useState(false);
@@ -76,7 +78,7 @@ export function GenerateAgentView() {
 
     const handleGenerate = () => {
         if (!prompt.trim()) {
-            toast({ title: "Prompt is empty", description: "Please describe the agent you want to create.", variant: "destructive" });
+            toast({ title: t('agentGenerator.toast.promptEmpty.title'), description: t('agentGenerator.toast.promptEmpty.description'), variant: "destructive" });
             return;
         }
         setStep('generating');
@@ -86,7 +88,7 @@ export function GenerateAgentView() {
                 setStep('reviewing');
             },
             onError: (error) => {
-                toast({ title: 'Agent Generation Failed', description: error.message, variant: 'destructive' });
+                toast({ title: t('agentGenerator.toast.generationFailed.title'), description: error.message, variant: 'destructive' });
                 setStep('prompting');
             }
         });
@@ -129,8 +131,8 @@ export function GenerateAgentView() {
             },
             onError: (error) => {
                 toast({
-                    title: 'Agent creation failed',
-                    description: 'An agent with a similar ID might already exist. Please try a more specific description or edit the generated name.',
+                    title: t('agentGenerator.toast.creationFailed.title'),
+                    description: t('agentGenerator.toast.creationFailed.description'),
                     variant: 'destructive',
                 });
             }
@@ -150,7 +152,7 @@ export function GenerateAgentView() {
         <div className="w-full max-w-4xl">
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    Generate Your AI Agent <Bot className="h-10 w-10" />
+                    {t('agentGenerator.title')} <Bot className="h-10 w-10" />
                 </h1>
             </div>
             <div className="relative">
@@ -158,7 +160,7 @@ export function GenerateAgentView() {
                     <Textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="Describe your AI Agent's specialty and task—more details, better customization!"
+                        placeholder={t('agentGenerator.placeholder')}
                         className="bg-black/80 border-none rounded-2xl min-h-[150px] text-lg text-white placeholder:text-gray-400 focus-visible:ring-0 focus-visible:ring-offset-0 p-6 pr-20"
                     />
                 </div>
@@ -170,18 +172,18 @@ export function GenerateAgentView() {
                         <input {...getInputProps()} />
                         <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
                             <BrainCircuit className="mr-2 h-4 w-4" />
-                            Add knowledge
+                            {t('agentGenerator.addKnowledge')}
                         </Button>
                     </div>
                     <div className="flex items-center space-x-2">
                         <Switch id="json-output" checked={includeJsonOutput} onCheckedChange={setIncludeJsonOutput} />
-                        <Label htmlFor="json-output" className="text-white text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> JSON Output</Label>
+                        <Label htmlFor="json-output" className="text-white text-xs flex items-center gap-1"><Braces className="h-4 w-4" /> {t('agentGenerator.jsonOutput')}</Label>
                     </div>
                 </div>
             </div>
             {contextFiles.length > 0 && (
                 <div className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10">
-                    <h4 className="text-sm font-semibold mb-2">Context Files ({contextFiles.length})</h4>
+                    <h4 className="text-sm font-semibold mb-2">{t('agentGenerator.contextFiles')} ({contextFiles.length})</h4>
                     <ScrollArea className="h-24">
                         <div className="space-y-1">
                             {contextFiles.map((file, index) => (
@@ -202,10 +204,10 @@ export function GenerateAgentView() {
                         key={label}
                         variant="secondary"
                         className="bg-white/10 text-white hover:bg-white/20 rounded-full"
-                        onClick={() => setPrompt(prev => prev ? `${prev}\n- ${label}` : label)}
+                        onClick={() => setPrompt(prev => prev ? `${prev}\n- ${t(label)}` : t(label))}
                     >
                         <Icon className="mr-2 h-4 w-4" />
-                        {label}
+                        {t(label)}
                     </Button>
                 ))}
             </div>
@@ -215,9 +217,9 @@ export function GenerateAgentView() {
     const renderGeneratingView = () => (
          <div className="w-full max-w-3xl text-center">
             <h1 className="text-4xl font-bold flex items-center justify-center gap-3 mb-2">
-                Generate Your AI Agent <Bot className="h-10 w-10" />
+                {t('agentGenerator.title')} <Bot className="h-10 w-10" />
             </h1>
-            <p className="text-muted-foreground mb-8">Generating your agent... Just a moment!</p>
+            <p className="text-muted-foreground mb-8">{t('agentGenerator.generatingSubtitle')}</p>
             <Loader2 className="h-16 w-16 mx-auto animate-spin" />
         </div>
     );
@@ -226,11 +228,11 @@ export function GenerateAgentView() {
         <div className="w-full max-w-3xl">
             <Button variant="ghost" onClick={() => setStep('prompting')} className="absolute top-8 left-8 text-white hover:bg-white/10">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Prompt
+                {t('agentGenerator.backToPrompt')}
             </Button>
             <div className="text-center mb-8">
                 <h1 className="text-4xl font-bold flex items-center justify-center gap-3">
-                    Review Your AI Agent <Bot className="h-10 w-10" />
+                    {t('agentGenerator.reviewTitle')} <Bot className="h-10 w-10" />
                 </h1>
             </div>
             <div className="space-y-6">
@@ -242,18 +244,18 @@ export function GenerateAgentView() {
                         <input {...getInputProps()} />
                         <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
                             <PlusCircle className="mr-2 h-4 w-4" />
-                            Add knowledge
+                            {t('agentGenerator.addKnowledge')}
                         </Button>
                     </div>
                 </div>
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">Name</Label>
+                            <Label htmlFor="agent-name" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.name')}</Label>
                             <Input id="agent-name" value={generatedData?.name || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, name: e.target.value } : null)} className="bg-white/5 border-white/20 h-12" />
                         </div>
                         <div>
-                            <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">Category</Label>
+                            <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.category')}</Label>
                              <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
                                 <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue /></SelectTrigger>
                                 <SelectContent>
@@ -263,26 +265,26 @@ export function GenerateAgentView() {
                         </div>
                     </div>
                      <div>
-                        <Label htmlFor="agent-description" className="text-xs uppercase text-muted-foreground">Description</Label>
+                        <Label htmlFor="agent-description" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.description')}</Label>
                         <Textarea id="agent-description" value={generatedData?.description || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, description: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[70px]" />
                     </div>
                     <div>
-                        <Label htmlFor="agent-instructions" className="text-xs uppercase text-muted-foreground">Instructions</Label>
+                        <Label htmlFor="agent-instructions" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.instructions')}</Label>
                         <Textarea id="agent-instructions" value={generatedData?.instructions || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, instructions: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
                      <div>
-                        <Label htmlFor="agent-guidelines" className="text-xs uppercase text-muted-foreground">Guidelines</Label>
+                        <Label htmlFor="agent-guidelines" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.guidelines')}</Label>
                         <Textarea id="agent-guidelines" value={generatedData?.guidelines || ''} onChange={(e) => setGeneratedData(prev => prev ? { ...prev, guidelines: e.target.value } : null)} className="bg-white/5 border-white/20 min-h-[100px]" />
                     </div>
                 </div>
                 <div className="flex justify-center gap-4">
                     <Button variant="secondary" onClick={handleAccept} disabled={createAgentMutation.isPending}>
                         {createAgentMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Check className="h-4 w-4"/>}
-                        <span className="ml-2">Accept & Save Agent</span>
+                        <span className="ml-2">{t('agentGenerator.review.acceptButton')}</span>
                     </Button>
                     <Button variant="outline" onClick={handleRegenerate} disabled={generateMutation.isPending}>
                         {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin"/> : <RotateCcw className="h-4 w-4" />}
-                        <span className="ml-2">Regenerate</span>
+                        <span className="ml-2">{t('agentGenerator.review.regenerateButton')}</span>
                     </Button>
                 </div>
             </div>

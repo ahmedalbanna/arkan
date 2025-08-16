@@ -28,6 +28,44 @@
     "documentation": "التوثيق",
     "pushNotifications": "إشعارات الدفع"
   },
+  "agentGenerator": {
+    "title": "أنشئ وكيلك الذكي",
+    "placeholder": "صف تخصص ومهام وكيلك الذكي - كلما زادت التفاصيل، كان التخصيص أفضل!",
+    "addKnowledge": "أضف معرفة",
+    "jsonOutput": "إخراج JSON",
+    "contextFiles": "ملفات السياق",
+    "generatingSubtitle": "جاري إنشاء وكيلك... لحظة من فضلك!",
+    "reviewTitle": "مراجعة وكيلك الذكي",
+    "backToPrompt": "العودة إلى المطالبة",
+    "review": {
+      "name": "الاسم",
+      "category": "الفئة",
+      "description": "الوصف",
+      "instructions": "التعليمات",
+      "guidelines": "الإرشادات",
+      "acceptButton": "قبول وحفظ الوكيل",
+      "regenerateButton": "إعادة الإنشاء"
+    },
+    "chips": {
+      "taskManager": "مدير المهام",
+      "contentCreator": "صانع المحتوى",
+      "socialMediaPlanner": "مخطط وسائل التواصل الاجتماعي",
+      "seoWriter": "كاتب SEO للمدونات"
+    },
+    "toast": {
+      "promptEmpty": {
+        "title": "المطالبة فارغة",
+        "description": "يرجى وصف الوكيل الذي تريد إنشاءه."
+      },
+      "generationFailed": {
+        "title": "فشل إنشاء الوكيل"
+      },
+      "creationFailed": {
+        "title": "فشل إنشاء الوكيل",
+        "description": "قد يكون هناك وكيل بمعرف مشابه بالفعل. يرجى تجربة وصف أكثر تحديدًا أو تعديل الاسم الذي تم إنشاؤه."
+      }
+    }
+  },
   "docs": {
     "pageTitle": "توثيق التطبيق",
     "pageSubtitle": "تعلم كيفية استخدام جميع الميزات التي يقدمها أركان.",
