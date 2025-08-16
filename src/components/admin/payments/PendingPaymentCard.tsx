@@ -27,7 +27,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
             userId: transaction.userId,
             creditsToGrant: transaction.credits,
             status,
-            adminNotes: adminNotes || (status === 'verified' ? 'Payment approved.' : 'Payment rejected.'),
+            adminNotes: adminNotes || (status === 'verified' ? t('managePayments.defaultApproveNote') : t('managePayments.defaultDeclineNote')),
         });
     }
 

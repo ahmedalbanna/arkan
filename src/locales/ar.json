@@ -258,6 +258,13 @@
     "nameLabel": "اسم الوكيل",
     "basePromptLabel": "المطالبة الأساسية",
     "promptLabel": "المطالبة",
+    "introduction": "المقدمة",
+    "placeholder": "العنصر النائب",
+    "conversationStarters": "بدايات المحادثة",
+    "addMessage": "إضافة رسالة",
+    "tone": "النبرة",
+    "language": "اللغة",
+    "aiModel": "نموذج الذكاء الاصطناعي",
     "complexPromptNote": "هذه مطالبة معقدة. المطالبة الأساسية فقط قابلة للتحرير هنا.",
     "saveButton": "حفظ التغييرات",
     "automationTitle": "الأتمتة",
@@ -275,7 +282,17 @@
     "outputTitle": "الناتج",
     "outputDesc": "حدد بنية JSON المتوقعة لإخراج الوكيل. هذا يضمن استجابات متسقة وقابلة للقراءة آليًا من الذكاء الاصطناعي.",
     "toolsTitle": "الأدوات",
-    "toolsDesc": "جهز وكلاء الذكاء الاصطناعي بأدوات لجمع البيانات وإكمال المهام وأتمتة الإجراءات، أو أنشئ أدوات مخصصة لتدفقات العمل المستقلة. تعلم المزيد."
+    "toolsDesc": "جهز وكلاء الذكاء الاصطناعي بأدوات لجمع البيانات وإكمال المهام وأتمتة الإجراءات، أو أنشئ أدوات مخصصة لتدفقات العمل المستقلة. تعلم المزيد.",
+    "toolFilters": {
+        "all": "الكل",
+        "active": "نشط",
+        "taskade": "Taskade",
+        "apps": "التطبيقات",
+        "custom": "مخصص"
+    },
+    "filterToolsPlaceholder": "تصفية الأدوات...",
+    "newToolButton": "أداة جديدة",
+    "availableToolsTitle": "الأدوات المتاحة"
   },
   "agentManager": {
     "pageSubtitle": "تحكم في وكلاء الذكاء الاصطناعي المتاحين على المنصة وقم بتمكين أو تعطيل وظائفهم.",
@@ -356,6 +373,8 @@
     "notesPlaceholder": "أضف ملاحظات التحقق (اختياري)...",
     "approveButton": "موافقة",
     "declineButton": "رفض",
+    "defaultApproveNote": "تمت الموافقة على الدفع.",
+    "defaultDeclineNote": "تم رفض الدفع.",
     "processedOn": "تمت المعالجة في {date}"
   },
   "submitPayment": {

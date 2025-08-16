@@ -258,6 +258,13 @@
     "nameLabel": "Agent Name",
     "basePromptLabel": "Base Prompt",
     "promptLabel": "Prompt",
+    "introduction": "Introduction",
+    "placeholder": "Placeholder",
+    "conversationStarters": "Conversation Starters",
+    "addMessage": "Add Message",
+    "tone": "Tone",
+    "language": "Language",
+    "aiModel": "AI Model",
     "complexPromptNote": "This is a complex prompt. Only the base prompt is editable here.",
     "saveButton": "Save Changes",
     "automationTitle": "Automation",
@@ -275,7 +282,17 @@
     "outputTitle": "Output",
     "outputDesc": "Define the expected JSON structure for the agent's output. This ensures consistent, machine-readable responses from the AI.",
     "toolsTitle": "Tools",
-    "toolsDesc": "Equip your AI Agents with tools to gather data, complete tasks, and automate actions, or build custom tools for autonomous workflows. Learn more."
+    "toolsDesc": "Equip your AI Agents with tools to gather data, complete tasks, and automate actions, or build custom tools for autonomous workflows. Learn more.",
+    "toolFilters": {
+        "all": "All",
+        "active": "Active",
+        "taskade": "Taskade",
+        "apps": "Apps",
+        "custom": "Custom"
+    },
+    "filterToolsPlaceholder": "Filter tools...",
+    "newToolButton": "New tool",
+    "availableToolsTitle": "Available Tools"
   },
   "agentManager": {
     "pageSubtitle": "Control the AI agents available on the platform and enable or disable their functionality.",
@@ -356,6 +373,8 @@
     "notesPlaceholder": "Add verification notes (optional)...",
     "approveButton": "Approve",
     "declineButton": "Decline",
+    "defaultApproveNote": "Payment approved.",
+    "defaultDeclineNote": "Payment rejected.",
     "processedOn": "Processed on {date}"
   },
   "submitPayment": {
@@ -554,7 +573,7 @@
       "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
       "tool_context_sections": "Sections",
       "tool_context_diagrams": "Diagrams",
-      "errorInsufficientCredits": "Insufficient credits. Please top-up your account.",
+      "errorInsufficientCredits": "Insufficient credits. Please purchase more credits to continue.",
       "ContextualSections": "Contextual Sections",
       "ContextualDiagrams": "Contextual Diagrams",
       "noOtherSections": "No other sections generated yet.",
