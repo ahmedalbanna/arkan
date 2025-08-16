@@ -87,7 +87,7 @@ export function Header() {
 
   const navLinks = [
     { href: '/', label: t('header.home'), icon: HomeIcon, auth: 'any' },
-    { href: '/projects', label: 'My Projects', icon: FolderOpen, auth: true },
+    { href: '/projects', label: t('header.projects'), icon: FolderOpen, auth: true },
     { href: '/generate', label: t('header.generateDocs'), icon: SlidersHorizontal, auth: true },
     { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck, auth: 'any'},
