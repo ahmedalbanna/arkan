@@ -45,10 +45,10 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
     onSuccess: (data) => {
         refetchUser();
         toast({
-            title: "Project Summary Ready",
+            title: t('builder.proposalActions.summaryReadyTitle'),
             description: (
                 <div className="space-y-2">
-                    <p>The AI has generated a summary of your project.</p>
+                    <p>{t('builder.proposalActions.summaryReadyDesc')}</p>
                     <textarea readOnly className="w-full h-32 p-2 border rounded-md bg-muted text-xs" value={data.summary} />
                     <Button size="sm" variant="outline" onClick={() => {
                         navigator.clipboard.writeText(data.summary);
@@ -56,7 +56,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                         setTimeout(() => setIsCopied(false), 2000);
                     }}>
                         {isCopied ? <ClipboardCheck className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
-                        Copy Summary
+                        {t('builder.proposalActions.copySummary')}
                     </Button>
                 </div>
             ),
@@ -104,7 +104,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                         {summarizeMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <BrainCircuit className="h-4 w-4" />}
                     </Button>
                 </TooltipTrigger>
-                <TooltipContent><p>Summarize Project</p></TooltipContent>
+                <TooltipContent><p>{t('builder.proposalActions.summarizeProject')}</p></TooltipContent>
             </Tooltip>
             
              <Tooltip>
@@ -121,7 +121,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </TooltipTrigger>
-                <TooltipContent><p>Translate Proposal</p></TooltipContent>
+                <TooltipContent><p>{t('builder.proposalActions.translateProposal')}</p></TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -151,16 +151,16 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                              <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleExport('docx')}>
                                 <FileText className="mr-2 h-4 w-4" />
-                                <span>Download as DOCX</span>
+                                <span>{t('builder.proposalActions.downloadDocx')}</span>
                             </DropdownMenuItem>
                              <DropdownMenuItem onClick={() => handleExport('pdf')}>
                                 <FileCode className="mr-2 h-4 w-4" />
-                                <span>Download as PDF</span>
+                                <span>{t('builder.proposalActions.downloadPdf')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </TooltipTrigger>
-                <TooltipContent><p>Export Options</p></TooltipContent>
+                <TooltipContent><p>{t('builder.proposalActions.exportOptions')}</p></TooltipContent>
             </Tooltip>
         </TooltipProvider>
     </div>

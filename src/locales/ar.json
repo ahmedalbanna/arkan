@@ -570,7 +570,7 @@
     },
     "generalStyles": "الأنماط العامة",
     "headingStyles": "أنماط العناوين",
-    "fontFamily": "عائلة الخط",
+    "fontFamily": "نوع الخط",
     "fontSize": "حجم الخط (نقطة)",
     "fontColor": "لون الخط",
     "bold": "عريض",
@@ -718,36 +718,24 @@
       "insufficientCredits": "أرصدة غير كافية. يرجى شراء المزيد من الأرصدة للمتابعة."
     },
     "proposalGenerator": {
-      "title": "صف فكرة مشروعك",
-      "placeholder": "تقرير تدريبي حول تقنيات تحليل البيانات الجديدة في القطاع المصرفي.",
-      "generatedTitle": "العرض الذي تم إنشاؤه",
-      "generatedDescription": "مراجعة وتعديل التفاصيل التي تم إنشاؤها أدناه.",
-      "exportJson": ".json",
-      "exportDocx": "DOCX",
-      "translateAllButton": "ترجمة العرض",
-      "emptyState": "سيظهر عرض مشروعك الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDescription": "صقل تعليمات الذكاء الاصطناعي.",
       "templateLabel": "قالب العرض",
-      "editPromptLabel": "تعديل تفاصيل المطالبة",
-      "basePromptLabel": "المطالبة الأساسية",
+      "generateButton": "إنشاء عرض",
+      "generationSettings": "إعدادات الإنشاء",
+      "mainSubjectLabel": "الموضوع الرئيسي أو الفكرة",
       "customGuidelinesLabel": "إرشادات مخصصة",
       "addGuidelinePlaceholder": "إضافة إرشادات مخصصة...",
-      "generateButton": "إنشاء عرض",
-      "toasts": {
-        "translateAllStarted": "بدأت الترجمة المجمعة",
-        "translateAllStartedDesc": "ترجمة جميع حقول العرض. قد يستغرق هذا بعض الوقت...",
-        "translateAllSuccess": "اكتملت الترجمة",
-        "translateAllSuccessDesc": "تمت ترجمة العرض بنجاح.",
-        "translateAllFailed": "فشلت الترجمة",
-        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض."
-      }
+      "generatedTitle": "العرض الذي تم إنشاؤه",
+      "generatedDescription": "مراجعة وتعديل التفاصيل التي تم إنشاؤها أدناه.",
+      "emptyState": "سيظهر عرض مشروعك الذي تم إنشاؤه هنا."
     },
     "proposalViewer": {
-      "category": "الفئة",
-      "title": "العنوان",
       "objective": "الهدف",
       "methodology": "المنهجية",
+      "outcomes": "النتائج المتوقعة",
+      "criteria": "معايير النجاح والتقييم",
+      "evaluationPlan": "خطة التقييم",
       "timeline": "الجدول الزمني",
       "startDate": "تاريخ البدء:",
       "endDate": "تاريخ الانتهاء:",
@@ -755,43 +743,23 @@
       "weeks": "أسابيع",
       "budget": "الميزانية",
       "total": "الإجمالي:",
-      "item": "البند",
-      "cost": "التكلفة",
-      "outcomes": "النتائج المتوقعة",
-      "successCriteria": "معايير النجاح والتقييم",
-      "criteria": "المعايير:",
-      "evaluationPlan": "خطة التقييم:",
       "stakeholders": "أصحاب المصلحة",
       "risks": "المخاطر والتخفيفات",
       "risk": "المخاطر:",
       "mitigation": "التخفيف:",
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",
       "reject": "رفض",
-      "accept": "قبول",
-      "aiActions": {
-        "title": "إجراءات الذكاء الاصطناعي",
-        "summarize": "تلخيص",
-        "expand": "توسيع",
-        "rewrite": "إعادة كتابة",
-        "checkGrammar": "تدقيق نحوي",
-        "translate": "ترجمة"
-      },
-      "markdownTools": {
-        "title": "أدوات Markdown",
-        "copy": "نسخ",
-        "viewAst": "عرض AST",
-        "astTitle": "Markdown AST (JSON)"
-      },
-      "destructive": {
-        "title": "مدمر",
-        "delete": "حذف"
-      },
-      "toasts": {
-        "copied": "تم النسخ إلى الحافظة",
-        "cleared": "تم مسح المحتوى",
-        "translateSuccess": "اكتملت الترجمة!",
-        "translateFailed": "فشلت الترجمة"
-      }
+      "accept": "قبول"
+    },
+    "proposalActions": {
+      "summarizeProject": "تلخيص المشروع",
+      "translateProposal": "ترجمة العرض",
+      "exportOptions": "خيارات التصدير",
+      "downloadDocx": "تنزيل بصيغة DOCX",
+      "downloadPdf": "تنزيل بصيغة PDF",
+      "summaryReadyTitle": "ملخص المشروع جاهز",
+      "summaryReadyDesc": "لقد قام الذكاء الاصطناعي بإنشاء ملخص لمشروعك.",
+      "copySummary": "نسخ الملخص"
     },
     "reportGenerator": {
       "noProposal": "لم يتم تحميل أي عرض",
@@ -1080,14 +1048,14 @@
         "fileReadError": "خطأ في قراءة الملف",
         "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
         "fileAdded": "تمت إضافة الملف",
-        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
+        "fileAddedDesc": "{fileName} has been added to context.",
         "processingFile": "جارٍ معالجة الملف...",
         "dropHere": "أفلت الملفات هنا...",
         "uploadedContext": "السياق الذي تم تحميله",
         "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
         "authError": "يجب عليك تسجيل الدخول لتحميل الملفات.",
         "contextAddedToastTitle": "تمت إضافة السياق",
-        "contextAddedToastDesc": "تمت إضافة \"{fileName}\" إلى السياق.",
+        "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "معلومات ناقصة",
         "missingInfoToastDesc": "يرجى تقديم كل من المحتوى واسم للسياق."
       }

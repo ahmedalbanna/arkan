@@ -722,30 +722,16 @@
       "placeholder": "A training report on new data analysis techniques in the banking sector.",
       "generatedTitle": "Generated Proposal",
       "generatedDescription": "Review and edit the generated details below.",
-      "exportJson": ".json",
-      "exportDocx": "DOCX",
-      "translateAllButton": "Translate Proposal",
-      "emptyState": "Your generated project proposal will appear here.",
       "toolsTitle": "Generation Tools",
       "toolsDescription": "Refine the AI's instructions.",
       "templateLabel": "Proposal Template",
-      "editPromptLabel": "Edit Prompt Details",
-      "basePromptLabel": "Base Prompt",
       "customGuidelinesLabel": "Custom Guidelines",
       "addGuidelinePlaceholder": "Add a custom guideline...",
       "generateButton": "Generate Proposal",
-      "toasts": {
-        "translateAllStarted": "Bulk Translation Started",
-        "translateAllStartedDesc": "Translating all proposal fields. This may take a moment...",
-        "translateAllSuccess": "Translation Complete",
-        "translateAllSuccessDesc": "The proposal has been successfully translated.",
-        "translateAllFailed": "Translation Failed",
-        "translateAllFailedDesc": "An error occurred while translating the proposal."
-      }
+      "generationSettings": "Generation Settings",
+      "mainSubjectLabel": "Main Subject or Idea"
     },
     "proposalViewer": {
-      "category": "Category",
-      "title": "Title",
       "objective": "Objective",
       "methodology": "Methodology",
       "timeline": "Timeline",
@@ -755,43 +741,26 @@
       "weeks": "weeks",
       "budget": "Budget",
       "total": "Total:",
-      "item": "Item",
-      "cost": "Cost",
       "outcomes": "Expected Outcomes",
-      "successCriteria": "Success Criteria & Evaluation",
-      "criteria": "Criteria:",
-      "evaluationPlan": "Evaluation Plan:",
+      "successCriteria": "Success Criteria",
+      "evaluationPlan": "Evaluation",
       "stakeholders": "Stakeholders",
-      "risks": "Risks & Mitigations",
+      "risks": "Risks and Mitigations",
       "risk": "Risk:",
       "mitigation": "Mitigation:",
       "aiSuggestion": "AI SUGGESTION",
       "reject": "Reject",
-      "accept": "Accept",
-      "aiActions": {
-        "title": "AI Actions",
-        "summarize": "Summarize",
-        "expand": "Expand",
-        "rewrite": "Rewrite",
-        "checkGrammar": "Check Grammar",
-        "translate": "Translate"
-      },
-      "markdownTools": {
-        "title": "Markdown Tools",
-        "copy": "Copy",
-        "viewAst": "View AST",
-        "astTitle": "Markdown AST (JSON)"
-      },
-      "destructive": {
-        "title": "Destructive",
-        "delete": "Delete"
-      },
-      "toasts": {
-        "copied": "Copied to clipboard",
-        "cleared": "Content cleared",
-        "translateSuccess": "Translation Complete!",
-        "translateFailed": "Translation Failed"
-      }
+      "accept": "Accept"
+    },
+    "proposalActions": {
+      "summarizeProject": "Summarize Project",
+      "translateProposal": "Translate Proposal",
+      "exportOptions": "Export Options",
+      "downloadDocx": "Download as DOCX",
+      "downloadPdf": "Download as PDF",
+      "summaryReadyTitle": "Project Summary Ready",
+      "summaryReadyDesc": "The AI has generated a summary of your project.",
+      "copySummary": "Copy Summary"
     },
     "reportGenerator": {
       "noProposal": "No Proposal Loaded",

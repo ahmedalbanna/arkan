@@ -119,14 +119,14 @@ export const ProposalGenerationTools = ({
             <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
                  <Accordion type="multiple" className="w-full space-y-4" defaultValue={['item-1']}>
                     <AccordionItem value="item-1">
-                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="mr-2 h-4 w-4"/> Generation Settings</AccordionTrigger>
+                        <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="mr-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-4">
                              <div>
-                                <Label htmlFor="project-idea">Main Subject or Idea</Label>
+                                <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
                                 <Textarea
                                     id="project-idea"
                                     name="projectIdea"
-                                    placeholder="e.g., A training report on new data analysis techniques in the banking sector."
+                                    placeholder={t('builder.proposalGenerator.placeholder')}
                                     rows={5}
                                     required
                                     value={projectIdea || ''}
