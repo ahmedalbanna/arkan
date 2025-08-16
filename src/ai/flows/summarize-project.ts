@@ -24,47 +24,54 @@ import {
     type SummarizeFullProjectOutput
 } from '../schemas';
 
-export async function summarizeProject(input: SummarizeProjectInput): Promise<SummarizeProjectOutput> {
-  return summarizeProjectFlow(input);
-}
+const summarizeProjectPrompt = ai.definePrompt({
+  name: 'summarizeProjectPrompt',
+  input: { schema: SummarizeProjectInputSchema },
+  output: { schema: SummarizeProjectOutputSchema },
+  model: 'googleai/gemini-1.5-flash',
+  prompt: `You are an AI assistant designed to analyze software project descriptions. Your tasks are:
+1. Provide a concise summary of the project, highlighting its key aspects.
+2. Identify and extract a list of all technologies, frameworks, and libraries mentioned.
 
-const summarizeProjectFlow = ai.defineFlow(
+Please analyze the following project description and provide the output in the required structured format.
+
+Description: {{{projectDescription}}}`,
+});
+
+export const summarizeProjectFlow = ai.defineFlow(
   {
     name: 'summarizeProjectFlow',
     inputSchema: SummarizeProjectInputSchema,
     outputSchema: SummarizeProjectOutputSchema,
   },
-  async input => {
-    const summarizeProjectPrompt = ai.definePrompt({
-      name: 'summarizeProjectPrompt',
-      input: { schema: SummarizeProjectInputSchema },
-      output: { schema: SummarizeProjectOutputSchema },
-      model: 'googleai/gemini-1.5-flash',
-      prompt: input.prompt,
-    });
-
+  async (input) => {
     const { output } = await summarizeProjectPrompt(input);
+    if (!output) {
+      throw new Error('Project summarization failed.');
+    }
     return {
-      ...output!,
+      ...output,
       progress: 'Generated a concise summary of the project and extracted key technologies.',
     };
   }
 );
 
+export async function summarizeProject(input: SummarizeProjectInput): Promise<SummarizeProjectOutput> {
+  const validation = SummarizeProjectInputSchema.safeParse(input);
+  if(!validation.success) {
+    throw new Error(`Invalid input for summarizeProject: ${validation.error.message}`);
+  }
+  return summarizeProjectFlow(validation.data);
+}
+
 
 // New flow for summarizing a full project
-export async function summarizeFullProject(input: SummarizeFullProjectInput): Promise<SummarizeFullProjectOutput> {
-  const { proposal, reportMarkdown } = input;
-  const stringifiedProposal = JSON.stringify(proposal, null, 2);
-
-  // If we only have a proposal, generate a summary suitable for the project planner.
-  if (!reportMarkdown && proposal) {
-      const planningSummaryPrompt = ai.definePrompt({
-          name: 'summarizeForPlanningPrompt',
-          input: { schema: z.any() },
-          output: { schema: SummarizeFullProjectOutputSchema },
-          model: 'googleai/gemini-1.5-flash',
-          prompt: `You are a project manager. The user has provided a project proposal and needs a summarized version to use for planning.
+const planningSummaryPrompt = ai.definePrompt({
+    name: 'summarizeForPlanningPrompt',
+    input: { schema: z.object({ jsonStringifiedProposal: z.string() }) },
+    output: { schema: SummarizeFullProjectOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: `You are a project manager. The user has provided a project proposal and needs a summarized version to use for planning.
 
 **Your Task:**
 1.  **Project Summary**: Read the \`objective\` from the proposal and write a concise, one-paragraph summary. Start it with "Project Summary:".
@@ -72,18 +79,14 @@ export async function summarizeFullProject(input: SummarizeFullProjectInput): Pr
 
 --- PROJECT PROPOSAL (JSON) ---
 \`\`\`json
-${stringifiedProposal}
+{{{jsonStringifiedProposal}}}
 \`\`\`
 `,
-      });
-      const { output } = await planningSummaryPrompt(input);
-      return output!;
-  }
+});
 
-
-  const prompt = ai.definePrompt({
+const fullReportSummaryPrompt = ai.definePrompt({
     name: 'summarizeFullProjectPrompt',
-    input: { schema: SummarizeFullProjectInputSchema },
+    input: { schema: SummarizeFullProjectInputSchema.extend({ jsonStringifiedProposal: z.string() }) },
     output: { schema: SummarizeFullProjectOutputSchema },
     model: 'googleai/gemini-1.5-flash',
     prompt: `You are an expert project analyst. Your task is to create a high-level executive summary based on a full project proposal (JSON) and a generated report (Markdown).
@@ -96,15 +99,37 @@ ${stringifiedProposal}
 
 --- PROJECT PROPOSAL (JSON) ---
 \`\`\`json
-${stringifiedProposal}
+{{{jsonStringifiedProposal}}}
 \`\`\`
 
 --- FULL REPORT (Markdown) ---
-${reportMarkdown}
+{{{reportMarkdown}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt({ proposal, reportMarkdown });
-  return output!;
+export const summarizeFullProjectFlow = ai.defineFlow({
+    name: 'summarizeFullProjectFlow',
+    inputSchema: SummarizeFullProjectInputSchema,
+    outputSchema: SummarizeFullProjectOutputSchema
+}, async ({ proposal, reportMarkdown }) => {
+    const jsonStringifiedProposal = JSON.stringify(proposal, null, 2);
+
+    if (!reportMarkdown && proposal) {
+        const { output } = await planningSummaryPrompt({ jsonStringifiedProposal });
+        if (!output) throw new Error("Failed to generate planning summary.");
+        return output;
+    }
+
+    const { output } = await fullReportSummaryPrompt({ proposal, reportMarkdown, jsonStringifiedProposal });
+    if (!output) throw new Error("Failed to generate full project summary.");
+    return output;
+});
+
+export async function summarizeFullProject(input: SummarizeFullProjectInput): Promise<SummarizeFullProjectOutput> {
+  const validation = SummarizeFullProjectInputSchema.safeParse(input);
+  if(!validation.success) {
+    throw new Error(`Invalid input for summarizeFullProject: ${validation.error.message}`);
+  }
+  return summarizeFullProjectFlow(validation.data);
 }

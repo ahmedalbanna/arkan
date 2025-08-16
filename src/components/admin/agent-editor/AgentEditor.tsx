@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -43,6 +44,7 @@ const agentPromptSchema = z.object({
   base: z.string().min(10, "Base prompt must be at least 10 characters."),
   guidelines: z.array(agentGuidelineSchema).optional(),
   jsonStructure: z.any().optional(),
+  defaultContext: z.array(z.string()).optional(), // Add this field
 });
 
 const agentEditorSchema = z.object({
@@ -93,12 +95,12 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           prompt: initialData.prompt,
           toolIds: initialData.toolIds || [],
           knowledge: initialData.knowledge || [],
-          introduction: '',
-          placeholder: 'Ask me anything about TypeScript...',
-          conversationStarters: [],
-          tone: 'Default',
-          language: 'English (US)',
-          model: 'googleai/gemini-2.0-flash',
+          introduction: initialData.introduction || '',
+          placeholder: initialData.placeholder || 'Ask me anything...',
+          conversationStarters: initialData.conversationStarters || [],
+          tone: initialData.tone || 'Default',
+          language: initialData.language || 'English (US)',
+          model: initialData.model || 'googleai/gemini-2.0-flash',
 
       }
   });
@@ -124,18 +126,18 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       prompt: getInitialPrompt(),
       toolIds: initialData.toolIds || [],
       knowledge: initialData.knowledge || [],
-      introduction: '',
-      placeholder: 'Ask me anything about TypeScript...',
-      conversationStarters: [],
-      tone: 'Default',
-      language: 'English (US)',
-      model: 'googleai/gemini-2.0-flash',
+      introduction: initialData.introduction || '',
+      placeholder: initialData.placeholder || 'Ask me anything about TypeScript...',
+      conversationStarters: initialData.conversationStarters || [],
+      tone: initialData.tone || 'Default',
+      language: initialData.language || 'English (US)',
+      model: initialData.model || 'googleai/gemini-2.0-flash',
     });
   }, [initialData, searchParams, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
     // We only update name and prompt for now
-    updateAgentMutation.mutate({ agentId, payload: { name: data.name, prompt: data.prompt, toolIds: data.toolIds } });
+    updateAgentMutation.mutate({ agentId, payload: data });
   };
 
   const navItems = [

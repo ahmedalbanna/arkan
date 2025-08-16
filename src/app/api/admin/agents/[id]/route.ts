@@ -4,7 +4,34 @@ import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS } from '@/lib/agents';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { ApiUpdateAgentSchema } from '@/ai/schemas';
+
+const agentGuidelineSchema = z.object({
+  text: z.string().min(1, "Guideline text cannot be empty."),
+  isDefault: z.boolean(),
+});
+
+const agentPromptSchema = z.object({
+  base: z.string().min(10, "Base prompt must be at least 10 characters."),
+  guidelines: z.array(agentGuidelineSchema).optional(),
+  jsonStructure: z.any().optional(),
+  defaultContext: z.array(z.string()).optional(),
+});
+
+const updateAgentSchema = z.object({
+  name: z.string().min(1, "Name is required").optional(),
+  prompt: z.union([
+    z.string().min(10),
+    agentPromptSchema
+  ]).optional(),
+  isEnabled: z.boolean().optional(),
+  toolIds: z.array(z.string()).optional(),
+  introduction: z.string().max(500).optional(),
+  placeholder: z.string().optional(),
+  conversationStarters: z.array(z.object({ value: z.string() })).optional(),
+  tone: z.string().optional(),
+  language: z.string().optional(),
+  model: z.string().optional(),
+});
 
 
 // GET /api/agents/[id]
@@ -37,15 +64,12 @@ export const PUT = withAuth(async ({ request, params }) => {
         }
 
         const body = await request.json();
-        const validation = ApiUpdateAgentSchema.safeParse(body);
+        const validation = updateAgentSchema.safeParse(body);
         if (!validation.success) {
             return handleApiError(validation.error);
         }
 
-        const updateData: any = {};
-        if (validation.data.name) updateData.name = validation.data.name;
-        if (validation.data.isEnabled !== undefined) updateData.isEnabled = validation.data.isEnabled;
-        if (validation.data.prompt) updateData.prompt = validation.data.prompt;
+        const updateData: any = { ...validation.data };
 
         await agentRef.update(updateData);
         const updatedDoc = await agentRef.get();

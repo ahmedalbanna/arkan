@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Bot, BrainCircuit, Check, Copy, Flame, SendHorizonal, ThumbsDown, RotateCcw, X, PlusCircle, Braces, UploadCloud, File, XCircle, ChevronDown, CheckCircle, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useCreateAgent } from '@/hooks/use-agents';
+import { useCreateAgent, useGenerateAgentConfig } from '@/hooks/use-agents';
 import { toast } from '@/hooks/use-toast';
 import { AgentCategory, type AgentPrompt } from '@/lib/agents';
 import { Loader2 } from 'lucide-react';
@@ -39,7 +39,7 @@ interface GeneratedAgentData {
     jsonStructure?: any;
 }
 
-interface UploadedFile {
+export interface UploadedFile {
     name: string;
     type: string;
     content: string; // data URI
@@ -54,8 +54,9 @@ export function GenerateAgentView() {
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
     const createAgentMutation = useCreateAgent();
-    const { firebaseUser } = useAuth();
     
+    const generateMutation = useGenerateAgentConfig();
+
     const onDrop = useCallback((acceptedFiles: File[]) => {
         acceptedFiles.forEach(file => {
             const reader = new FileReader();
@@ -73,29 +74,22 @@ export function GenerateAgentView() {
         setContextFiles(prev => prev.filter((_, i) => i !== index));
     };
 
-    const generateMutation = useMutation({
-        mutationFn: async (currentPrompt: string) => {
-            if (!firebaseUser) throw new Error("Authentication required.");
-            const token = await firebaseUser.getIdToken();
-            return generateAgentConfigApi(currentPrompt, includeJsonOutput, contextFiles, token);
-        },
-        onSuccess: (data) => {
-            setGeneratedData(data);
-            setStep('reviewing');
-        },
-        onError: (error: Error) => {
-            toast({ title: 'Agent Generation Failed', description: error.message, variant: 'destructive' });
-            setStep('prompting');
-        }
-    });
-
     const handleGenerate = () => {
         if (!prompt.trim()) {
             toast({ title: "Prompt is empty", description: "Please describe the agent you want to create.", variant: "destructive" });
             return;
         }
         setStep('generating');
-        generateMutation.mutate(prompt);
+        generateMutation.mutate({ prompt, includeJsonOutput, contextFiles }, {
+            onSuccess: (data) => {
+                setGeneratedData(data);
+                setStep('reviewing');
+            },
+            onError: (error) => {
+                toast({ title: 'Agent Generation Failed', description: error.message, variant: 'destructive' });
+                setStep('prompting');
+            }
+        });
     };
 
     const handleAccept = () => {

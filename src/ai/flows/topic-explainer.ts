@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -10,8 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { TopicExplainerInputSchema, type TopicExplainerInput, TopicExplainerOutputSchema, type TopicExplainerOutput } from '@/ai/schemas';
 
-export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
-  const prompt = ai.definePrompt({
+const topicExplainerPrompt = ai.definePrompt({
     name: 'topicExplainerPrompt',
     input: { schema: TopicExplainerInputSchema },
     output: { schema: TopicExplainerOutputSchema },
@@ -30,12 +28,25 @@ export async function topicExplainer(input: TopicExplainerInput): Promise<TopicE
 {{{topic}}}
 ---
 `,
-  });
+});
 
-  const { output } = await prompt(input);
-  if (!output) {
-      throw new Error("Failed to explain topic.");
+const topicExplainerFlow = ai.defineFlow({
+    name: 'topicExplainerFlow',
+    inputSchema: TopicExplainerInputSchema,
+    outputSchema: TopicExplainerOutputSchema
+}, async (input) => {
+    const { output } = await topicExplainerPrompt(input);
+    if (!output) {
+        throw new Error("Failed to explain topic.");
+    }
+    output.explanation = output.explanation.replace(/---/g, '').trim();
+    return output;
+});
+
+export async function topicExplainer(input: TopicExplainerInput): Promise<TopicExplainerOutput> {
+  const validation = TopicExplainerInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for topicExplainer: ${validation.error.message}`);
   }
-  output.explanation = output.explanation.replace(/---/g, '').trim();
-  return output;
+  return topicExplainerFlow(validation.data);
 }

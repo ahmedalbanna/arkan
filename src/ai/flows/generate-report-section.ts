@@ -18,19 +18,10 @@ const reportSectionPrompt = ai.definePrompt({
     name: 'generateReportSectionPrompt', // Static name
     input: { schema: z.any() }, // Input is manually constructed
     output: { schema: GenerateSectionOutputSchema },
-    model: 'googleai/gemini-2.0-flash',
+    model: 'googleai/gemini-1.5-flash', // Default model, will be overridden
     system: '{{systemPrompt}}', // System prompt will be passed in
     prompt: `
 CRITICAL: Your final output must be a JSON object where the 'sectionName' field exactly matches the requested section: '{{sectionToGenerate}}'. Your writing style should be natural and engaging, not robotic.
-
-{{#if tableOfContents}}
---- SECTION REPORT STRUCTURE (TABLE OF CONTENTS) ---
-{{#each tableOfContents}}
-- {{{this}}}
-{{/each}}
-Your section, '{{sectionToGenerate}}', fits into this overall structure. Write your content accordingly.
----
-{{/if}}
 
 {{#if guidelines}}
 --- Guidelines ---
@@ -121,7 +112,7 @@ export async function generateReportSection(input: GenerateSectionInput): Promis
     systemPrompt, 
     stringifiedProposal,
     stringifiedPlan
-  });
+  }, { model: agent.model || 'googleai/gemini-1.5-flash' });
   
   return output!;
 }

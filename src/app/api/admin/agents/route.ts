@@ -57,6 +57,12 @@ const createAgentSchema = z.object({
   pageUrl: z.string().min(1, "Page URL is required"),
   prompt: z.union([z.string().min(10), AgentPromptSchema]),
   knowledge: z.array(agentKnowledgeSourceSchema).optional(),
+  introduction: z.string().max(500).optional(),
+  placeholder: z.string().optional(),
+  conversationStarters: z.array(z.object({ value: z.string() })).optional(),
+  tone: z.string().optional(),
+  language: z.string().optional(),
+  model: z.string().optional(),
 });
 
 

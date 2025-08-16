@@ -1,5 +1,4 @@
 
-
 'use server';
 
 /**
@@ -10,8 +9,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { HumanizeTextInputSchema, type HumanizeTextInput, HumanizeTextOutputSchema, type HumanizeTextOutput } from '@/ai/schemas';
 
-export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTextOutput> {
-  const prompt = ai.definePrompt({
+const humanizeTextPrompt = ai.definePrompt({
     name: 'humanizeTextPrompt',
     input: { schema: HumanizeTextInputSchema },
     output: { schema: HumanizeTextOutputSchema },
@@ -32,10 +30,23 @@ export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTe
 **Humanized Text:**`,
   });
 
-  const { output } = await prompt(input);
-  if (!output) {
+const humanizeTextFlow = ai.defineFlow({
+    name: 'humanizeTextFlow',
+    inputSchema: HumanizeTextInputSchema,
+    outputSchema: HumanizeTextOutputSchema,
+}, async (input) => {
+    const { output } = await humanizeTextPrompt(input);
+    if (!output) {
       throw new Error("Failed to humanize text.");
+    }
+    output.humanizedText = output.humanizedText.replace(/---/g, '').trim();
+    return output;
+});
+
+export async function humanizeText(input: HumanizeTextInput): Promise<HumanizeTextOutput> {
+  const validation = HumanizeTextInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for humanizeText: ${validation.error.message}`);
   }
-  output.humanizedText = output.humanizedText.replace(/---/g, '').trim();
-  return output;
+  return humanizeTextFlow(validation.data);
 }

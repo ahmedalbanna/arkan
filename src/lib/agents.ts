@@ -18,7 +18,9 @@ export interface AgentPrompt {
   base: string;
   guidelines?: AgentGuideline[];
   jsonStructure?: any;
+  defaultContext?: ('proposal' | 'projectPlan' | string)[]; // Array of agent IDs or keywords
 }
+
 
  export enum AgentCategory {
   ContentGeneration = 'Content Generation',
@@ -42,6 +44,12 @@ export interface AgentData {
   prompt: AgentPrompt | string; // Can be simple string or complex object
   toolIds?: string[];
   knowledge?: AgentKnowledgeSource[];
+  introduction?: string;
+  placeholder?: string;
+  conversationStarters?: { value: string }[];
+  tone?: string;
+  language?: string;
+  model?: string;
 }
 
 export interface Agent extends AgentData {
@@ -80,7 +88,10 @@ export const AGENTS: Agent[] = [
 
 Please analyze the following project description and provide the output in the required structured format.
 
-Description: {{{projectDescription}}}`
+Description: {{{projectDescription}}}`,
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
    {
     id: 'generate-ui',
@@ -98,6 +109,9 @@ Guidelines:
 
 User Prompt: {{{prompt}}}
 `,
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-proposal',
@@ -118,7 +132,10 @@ Your entire response must be a valid JSON object that adheres to the structure p
 
 Project Idea: {{{projectIdea}}}`,
         guidelines: []
-    }
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
    {
     id: 'generate-ad-copy',
@@ -132,7 +149,10 @@ Project Idea: {{{projectIdea}}}`,
 
 Product Name: {{{productName}}}
 Product Description: {{{productDescription}}}
-Target Audience: {{{targetAudience}}}`
+Target Audience: {{{targetAudience}}}`,
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-nda',
@@ -147,7 +167,10 @@ Disclosing Party: {{{disclosingParty}}}
 Receiving Party: {{{receivingParty}}}
 Effective Date: {{{effectiveDate}}}
 
-Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.`
+Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal advice and a qualified lawyer should be consulted.`,
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   // Report Section Agents
   {
@@ -165,8 +188,12 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
             { text: "Clearly state the main objectives of the training.", isDefault: true },
             { text: "Briefly mention the key areas of the training program and technical skills acquired.", isDefault: true },
             { text: "Conclude with the most significant outcomes and recommendations.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
    {
     id: 'generate-acknowledgment-section',
@@ -182,8 +209,12 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
             { text: "Maintain a formal and appreciative tone.", isDefault: true },
             { text: "Mention specific roles like supervisors, team members, or company departments if context is available.", isDefault: true },
             { text: "Acknowledge the training institution or company by name.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-introduction-section',
@@ -204,8 +235,12 @@ The introduction should be well-structured, engaging, and must include:`,
         { text: "**Problem Definition**: A detailed identification and explanation of the problem the project addresses.", isDefault: true },
         { text: "**Overview of the Document**: An outline of the report structure, mentioning the main sections.", isDefault: true },
         { text: "**Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.", isDefault: true },
-      ]
-    }
+      ],
+      defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-trainingProgram-section',
@@ -222,8 +257,12 @@ The introduction should be well-structured, engaging, and must include:`,
             { text: "Describe the weekly or monthly schedule of activities and learning modules.", isDefault: true },
             { text: "List the key departments or areas covered during the training.", isDefault: true },
             { text: "Use a table to present the training timeline clearly.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-technicalExperience-section',
@@ -240,8 +279,12 @@ The introduction should be well-structured, engaging, and must include:`,
             { text: "Describe the tasks and projects the trainee worked on.", isDefault: true },
             { text: "Explain how theoretical knowledge was applied to practical problems.", isDefault: true },
             { text: "Use a dedicated subsection for each major skill or project area.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-recommendations-section',
@@ -257,8 +300,12 @@ The introduction should be well-structured, engaging, and must include:`,
             { text: "Structure the recommendations as a numbered or bulleted list.", isDefault: true },
             { text: "Ensure each recommendation is specific, measurable, and relevant.", isDefault: true },
             { text: "Provide a brief justification for each recommendation based on the experiences described in the report.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
    {
     id: 'generate-references-section',
@@ -274,8 +321,12 @@ The introduction should be well-structured, engaging, and must include:`,
             { text: "Format all citations consistently using a standard style (e.g., APA, MLA).", isDefault: true },
             { text: "Ensure the list is alphabetically sorted.", isDefault: true },
             { text: "If no specific sources are mentioned, create a plausible list of 5-7 relevant, fictional sources that fit the report's topic.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-appendices-section',
@@ -291,8 +342,12 @@ The introduction should be well-structured, engaging, and must include:`,
             { text: "Label each appendix clearly (e.g., 'Appendix A: Source Code for Module X').", isDefault: true },
             { text: "Use markdown code blocks for any source code.", isDefault: true },
             { text: "Use markdown tables for large datasets.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-literatureReview-section',
@@ -312,8 +367,12 @@ Your review should:`,
             { text: "Analyze current technologies, frameworks, and methodologies that are pertinent to the project's objective.", isDefault: true },
             { text: "Identify the gaps in the existing literature or technology that this project aims to address.", isDefault: true },
             { text: "Provide a strong justification for the project by positioning it within the context of current knowledge and practices.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemAnalysis-section',
@@ -333,8 +392,12 @@ Your analysis must cover:`,
             { text: "**Non-Functional Requirements**: Describe the system's quality attributes, such as performance, security, usability, and scalability. Infer these from the project's context and risks.", isDefault: true },
             { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.", isDefault: true },
             { text: "**Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-designStrategy-section',
@@ -354,8 +417,12 @@ This section should articulate:`,
             { text: "**Core Design Principles**: Define 3-5 key principles that will guide the design process (e.g., 'Clarity and Simplicity', 'Efficiency', 'Consistency').", isDefault: true },
             { text: "**User Experience (UX) Goals**: Describe the intended user experience, focusing on how the design will address stakeholder needs and solve the core problem.", isDefault: true },
             { text: "**User Interface (UI) Direction**: Outline the visual direction, including thoughts on layout, color palette, and typography that would align with the project's category and goals.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemDesign-section',
@@ -375,8 +442,12 @@ This section must detail:`,
             { text: "**Data Model / Schema**: Outline the key data entities, their attributes, and relationships. Think about users, primary objects, and configurations.", isDefault: true },
             { text: "**Component Breakdown**: Describe the major components of the system (e.g., Authentication Service, API Gateway, Frontend Application, Database) and their responsibilities.", isDefault: true },
             { text: "**Technology Stack**: Propose a specific and justified technology stack for the backend, frontend, database, and deployment based on the project's requirements.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemProgramming-section',
@@ -397,8 +468,12 @@ This section should outline:`,
             { text: "**Key Libraries & Frameworks**: Based on the project type, list the essential libraries and frameworks that will be used for implementation and justify their selection.", isDefault: true },
             { text: "**Environment Setup**: Briefly describe the development, staging, and production environments.", isDefault: true },
             { text: "**Version Control**: Specify the version control system (e.g., Git) and hosting platform (e.g., GitHub, GitLab).", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-systemTesting-section',
@@ -418,8 +493,12 @@ This section must define the testing strategy, including:`,
             { text: "**Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.", isDefault: true },
             { text: "**Tools and Automation**: Recommend specific tools for test automation (e.g., Selenium, Cypress, Jest), performance testing (e.g., JMeter), and bug tracking (e.g., Jira).", isDefault: true },
             { text: "**Test Metrics**: Identify key metrics for success, such as test coverage, bug detection rate, and UAT pass rate, linking them to the project's success criteria.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-conclusion-section',
@@ -439,8 +518,12 @@ The conclusion should:`,
             { text: "**Reiterate Expected Outcomes**: Restate the most important expected outcomes and the value the project will deliver.", isDefault: true },
             { text: "**Future Outlook**: Provide a forward-looking statement about the project's potential long-term impact or next steps after completion.", isDefault: true },
             { text: "**Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   // End Report Section Agents
   {
@@ -465,7 +548,10 @@ You will be provided with the full project proposal in JSON format, and may also
         { text: "Speaker notes must be detailed, providing elaboration for each bullet point.", isDefault: true },
         { text: "Maintain a professional and engaging tone throughout.", isDefault: true },
       ]
-    }
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   // Diagram Agents
   {
@@ -483,8 +569,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Define use cases based on the 'objective', 'expected_outcome', and any available functional requirements.", isDefault: true },
             { text: "Connect actors to their relevant use cases to show interactions.", isDefault: true },
             { text: "Use rectangles to group related use cases within a system boundary.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-class-diagram',
@@ -501,8 +591,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "For each class, define relevant attributes (fields) and methods (operations).", isDefault: true },
             { text: "Establish relationships (associations, aggregations, inheritance) between the classes with clear cardinality (e.g., '1' -- '*' 'many').", isDefault: true },
             { text: "Use visibility markers (+ for public, - for private, # for protected) for attributes and methods.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['generate-systemDesign-section']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-sequence-diagram',
@@ -520,8 +614,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Clearly show the order of messages exchanged between participants using arrows.", isDefault: true },
             { text: "Use activation boxes to represent processing time for each participant.", isDefault: true },
             { text: "Include at least one 'alt/else' block to show a conditional flow.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['generate-use-case-diagram', 'generate-class-diagram']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-activity-diagram',
@@ -539,8 +637,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Incorporate at least one decision point (conditional logic) with 'if/then/else' structures.", isDefault: true },
             { text: "Use partitions (swimlanes) to assign activities to different actors or system components.", isDefault: false },
             { text: "Include forks and joins if there are parallel activities that can occur simultaneously.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['proposal']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-component-diagram',
@@ -557,8 +659,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Show the primary dependencies between these components using relationship arrows.", isDefault: true },
             { text: "For at least one component, define a provided interface that other components use.", isDefault: true },
             { text: "Group related components into a package if the architecture is complex.", isDefault: false },
-        ]
-    }
+        ],
+        defaultContext: ['generate-systemDesign-section']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-archimate-diagram',
@@ -576,8 +682,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Define Business Functions or Processes based on the project's 'objective'.", isDefault: true },
             { text: "Identify Application Components that realize the business processes, as described in 'System Design'.", isDefault: true },
             { text: "Use proper ArchiMate relationships (e.g., assignment, realization, serving) to connect the elements.", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['proposal', 'generate-systemDesign-section']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'generate-er-diagram',
@@ -594,8 +704,12 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "For each entity, define attributes. Clearly mark the Primary Key (PK) and any Foreign Keys (FK).", isDefault: true },
             { text: "Establish relationships between entities using standard ERD notation (e.g., one-to-one, one-to-many, many-to-many).", isDefault: true },
             { text: "Use PlantUML's ER diagram syntax (e.g., `entity \"Name\" { ... }`, `User }o--|| Project`).", isDefault: true },
-        ]
-    }
+        ],
+        defaultContext: ['generate-systemDesign-section']
+    },
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
   {
     id: 'activity-history',
@@ -605,8 +719,14 @@ You will be provided with the full project proposal in JSON format, and may also
     icon: History,
     pageUrl: '/admin/manage-generations',
     isEnabled: true, // Typically for admins only, controlled by UI
-    prompt: ''
+    prompt: '',
+    tone: 'Default',
+    language: 'English (US)',
+    model: 'googleai/gemini-2.0-flash',
   },
 ];
 
     
+
+
+

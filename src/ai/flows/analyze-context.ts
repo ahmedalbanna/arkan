@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -11,15 +10,7 @@ import { z } from 'zod';
 import type { ExternalContext } from '@/hooks/useReportStore';
 import { AnalyzeContextInputSchema, type AnalyzeContextInput, AnalyzeContextOutputSchema, type AnalyzeContextOutput } from '@/ai/schemas';
 
-
-export async function analyzeContext(input: AnalyzeContextInput): Promise<AnalyzeContextOutput> {
-  const { prompt, contextFiles } = input;
-
-  // Separate media from text files
-  const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
-  const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
-
-  const analysisPrompt = ai.definePrompt({
+const analysisPrompt = ai.definePrompt({
     name: 'analyzeContextPrompt',
     input: { schema: z.object({
         prompt: z.string(),
@@ -70,8 +61,29 @@ export async function analyzeContext(input: AnalyzeContextInput): Promise<Analyz
 -   The Zod schema you generate for the \`schema\` field must be a valid, executable Zod schema string.
 -   The object you create for the \`data\` field must validate against the schema you designed.
 `,
-  });
+});
 
-  const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
-  return output!;
+const analyzeContextFlow = ai.defineFlow({
+    name: 'analyzeContextFlow',
+    inputSchema: AnalyzeContextInputSchema,
+    outputSchema: AnalyzeContextOutputSchema,
+}, async (input) => {
+    const { prompt, contextFiles } = input;
+    // Separate media from text files
+    const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
+    const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
+    
+    const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
+     if (!output) {
+      throw new Error('Context analysis failed to produce an output.');
+    }
+    return output;
+});
+
+export async function analyzeContext(input: AnalyzeContextInput): Promise<AnalyzeContextOutput> {
+  const validation = AnalyzeContextInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for analyzeContext: ${validation.error.message}`);
+  }
+  return analyzeContextFlow(validation.data);
 }

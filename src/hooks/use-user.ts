@@ -153,7 +153,8 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.clear();
       localStorage.clear();
-      router.push("/login");
+      router.push("/");
+      router.refresh();
       toast({
         title: "Logged Out",
         description: "You have been successfully signed out.",

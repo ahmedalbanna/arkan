@@ -4,6 +4,7 @@ import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntr
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
 import { z } from 'zod';
+import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 
 
 export type {
@@ -19,7 +20,7 @@ export type {
 
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
-export type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
+export type { Agent, AgentData, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/schemas';

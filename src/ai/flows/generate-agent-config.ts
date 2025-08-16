@@ -5,9 +5,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { GenerateAgentConfigInputSchema, GenerateAgentConfigOutputSchema, type GenerateAgentConfigOutput } from '@/ai/schemas';
 
-export async function generateAgentConfig(input: z.infer<typeof GenerateAgentConfigInputSchema>): Promise<GenerateAgentConfigOutput> {
-
-  const prompt = ai.definePrompt({
+const generateAgentConfigPrompt = ai.definePrompt({
     name: 'generateAgentConfigPrompt',
     input: { schema: GenerateAgentConfigInputSchema },
     output: { schema: GenerateAgentConfigOutputSchema },
@@ -52,6 +50,23 @@ The following files have been provided to give you more context about the desire
 `,
   });
 
-  const { output } = await prompt(input);
-  return output!;
+const generateAgentConfigFlow = ai.defineFlow({
+    name: 'generateAgentConfigFlow',
+    inputSchema: GenerateAgentConfigInputSchema,
+    outputSchema: GenerateAgentConfigOutputSchema
+}, async (input) => {
+    const { output } = await generateAgentConfigPrompt(input);
+    if (!output) {
+      throw new Error("Agent configuration generation failed.");
+    }
+    return output;
+});
+
+
+export async function generateAgentConfig(input: z.infer<typeof GenerateAgentConfigInputSchema>): Promise<GenerateAgentConfigOutput> {
+  const validation = GenerateAgentConfigInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for generateAgentConfig: ${validation.error.message}`);
+  }
+  return generateAgentConfigFlow(validation.data);
 }

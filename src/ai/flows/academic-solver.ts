@@ -1,5 +1,3 @@
-
-
 'use server';
 /**
  * @fileOverview AI agents for analyzing and solving academic documents (exams, homework).
@@ -13,11 +11,12 @@ import {
   SolvedDocumentSchema,
   type SolvedDocument,
   AnalyzeDocumentInputSchema,
+  SolveDocumentInputSchema,
+  type SolveDocumentInput,
 } from '@/ai/schemas';
 
 // 1. Analyze Document Flow
 
-// Define the analysis prompt outside the async function
 const analysisPrompt = ai.definePrompt({
   name: 'analyzeAcademicDocumentPrompt',
   input: { schema: AnalyzeDocumentInputSchema },
@@ -40,30 +39,35 @@ const analysisPrompt = ai.definePrompt({
     }
   });
 
-  export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocumentInputSchema>): Promise<AnalyzedDocument> {
-    const validation = AnalyzeDocumentInputSchema.safeParse(input);
-    if (!validation.success) {
-      throw new Error(`Invalid input for analyzeAcademicDocument: ${validation.error.message}`);
-    }
-  
-  const { output } = await analysisPrompt(validation.data);
-  if (!output) {
+const analyzeAcademicDocumentFlow = ai.defineFlow(
+  {
+    name: 'analyzeAcademicDocumentFlow',
+    inputSchema: AnalyzeDocumentInputSchema,
+    outputSchema: AnalyzedDocumentSchema,
+  },
+  async (input) => {
+    const { output } = await analysisPrompt(input);
+    if (!output) {
       throw new Error('Analysis failed to produce an output.');
+    }
+    // Clean up the generated content
+    output.structuredContent = output.structuredContent.replace(/---/g, '').trim();
+    return output;
   }
-  
-  // Clean up the generated content
-  output.structuredContent = output.structuredContent.replace(/---/g, '').trim();
-  return output;
+);
+
+
+export async function analyzeAcademicDocument(input: z.infer<typeof AnalyzeDocumentInputSchema>): Promise<AnalyzedDocument> {
+  const validation = AnalyzeDocumentInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for analyzeAcademicDocument: ${validation.error.message}`);
+  }
+  return analyzeAcademicDocumentFlow(validation.data);
 }
 
 
 // 2. Solve Document Flow
-const SolveDocumentInputSchema = z.object({
-  analyzedDocument: AnalyzedDocumentSchema,
-  contextMarkdown: z.string().optional().describe("Additional context from a syllabus or textbook to help answer the questions accurately."),
-});
 
-// Define the solve prompt outside the async function
 const solvePrompt = ai.definePrompt({
   name: 'solveAcademicDocumentPrompt',
   input: { schema: SolveDocumentInputSchema },
@@ -95,21 +99,30 @@ const solvePrompt = ai.definePrompt({
     }
   });
 
-  export async function solveAcademicDocument(input: z.infer<typeof SolveDocumentInputSchema>): Promise<SolvedDocument> {
-    const validation = SolveDocumentInputSchema.safeParse(input);
-    if (!validation.success) {
-      throw new Error(`Invalid input for solveAcademicDocument: ${validation.error.message}`);
-    }
-  const { output } = await solvePrompt(validation.data);
-  if (!output) {
+const solveAcademicDocumentFlow = ai.defineFlow({
+    name: 'solveAcademicDocumentFlow',
+    inputSchema: SolveDocumentInputSchema,
+    outputSchema: SolvedDocumentSchema,
+  },
+  async (input) => {
+    const { output } = await solvePrompt(input);
+    if (!output) {
       throw new Error('Solving failed to produce an output.');
-  }
+    }
 
-  // Clean up each solution
-  output.solutions = output.solutions.map(pair => ({
+    // Clean up each solution
+    output.solutions = output.solutions.map(pair => ({
       ...pair,
       solution: pair.solution.replace(/---/g, '').trim(),
-  }));
+    }));
 
-  return output;
+    return output;
+});
+
+export async function solveAcademicDocument(input: SolveDocumentInput): Promise<SolvedDocument> {
+  const validation = SolveDocumentInputSchema.safeParse(input);
+  if (!validation.success) {
+    throw new Error(`Invalid input for solveAcademicDocument: ${validation.error.message}`);
+  }
+  return solveAcademicDocumentFlow(validation.data);
 }

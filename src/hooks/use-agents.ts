@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-agents.md
 
 "use client";
@@ -11,20 +12,19 @@ import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
-  fetchAgent,
+  fetchAgents,
+  fetchAgent as fetchAgentApi,
   updateAgent as updateAgentApi,
   createAgent as createAgentApi,
   deleteAgent as deleteAgentApi,
+  generateAgentConfigApi
 } from "@/services/agent-service";
-import { fetchAgents } from "@/services/admin-service";
+import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
+import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 
 
-export interface UpdateAgentPayload {
-    name?: string;
-    prompt?: string | AgentPrompt;
-    isEnabled?: boolean;
-    toolIds?: string[];
-}
+export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
+
 
 export interface UpdateAgentVariables {
     agentId: string;
@@ -94,7 +94,7 @@ export function useAgent(agentId: string, options?: UseAgentOptions) {
     queryKey: agentKeys.detail(agentId),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchAgent(agentId, token);
+      return fetchAgentApi(agentId, token);
     },
     enabled: !!firebaseUser && !!agentId,
     ...options,
@@ -122,7 +122,7 @@ export function useUpdateAgent() {
     onSuccess: (data, variables) => {
       // Invalidate queries to refetch data
       queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-      queryClient.setQueryData(agentKeys.detail(variables.agentId), data);
+      queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
 
 
       toast({
@@ -181,4 +181,16 @@ export function useDeleteAgent() {
             handleErrorUtility(error, "Delete Agent Failed");
         }
     });
+}
+
+
+export function useGenerateAgentConfig() {
+    const { firebaseUser } = useAuth();
+
+    return useMutation({
+        mutationFn: async (variables: { prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[] }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return generateAgentConfigApi(variables.prompt, variables.includeJsonOutput, variables.contextFiles, token);
+        }
+    })
 }
