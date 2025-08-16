@@ -635,7 +635,7 @@
       "historyEmpty": "لم يتم إنشاء أي عروض تقديمية بعد.",
       "viewerEmpty": "سيظهر عرضك التقديمي الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
-      "toolsDesc": "كوّن وأنشئ العرض التقديمي.",
+      "toolsDesc": "ارفع السياق أو حدده لإنشاء عرض تقديمي.",
       "templateLabel": "قالب العرض التقديمي",
       "editDetails": "تعديل تفاصيل الإنشاء",
       "generateButton": "إنشاء العرض التقديمي",
@@ -656,7 +656,13 @@
       "toasts": {
         "success": "تم إنشاء العرض التقديمي بنجاح!",
         "failed": "فشل إنشاء العرض التقديمي",
-        "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي."
+        "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي.",
+        "translateAllStarted": "بدء الترجمة الجماعية",
+        "translateAllStartedDesc": "جارٍ ترجمة جميع الشرائح. قد يستغرق هذا بعض الوقت...",
+        "translateAllSuccess": "اكتملت الترجمة",
+        "translateAllSuccessDesc": "تمت ترجمة العرض التقديمي بنجاح.",
+        "translateAllFailed": "فشلت الترجمة",
+        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض التقديمي."
       }
     },
     "Section": {
