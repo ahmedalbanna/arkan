@@ -39,7 +39,7 @@ export function UserTable({ users }: UserTableProps) {
           ) : (
             <TableRow>
               <TableCell colSpan={6} className="h-24 text-center">
-                No users found.
+                {t('manageUsers.noUsersFound')}
               </TableCell>
             </TableRow>
           )}

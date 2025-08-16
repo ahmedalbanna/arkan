@@ -8,7 +8,7 @@
     "generateDocs": "المنشئ",
     "design": "تصميم",
     "generateCode": "توليد الكود",
-    "exportTemplates": "تصدير القوالب",
+    "exportTemplates": "قوالب التصدير",
     "activityHistory": "سجل النشاط",
     "agentManager": "إدارة الوكلاء",
     "manageFeatures": "إدارة الميزات",
@@ -16,17 +16,17 @@
     "openMenu": "فتح القائمة",
     "credits": "أرصدة",
     "pricing": "الأسعار",
-    "pptxTemplates": "قوالب PPTX",
-    "pdfToMarkdown": "PDF إلى Markdown",
+    "pptxTemplates": "قوالب العروض التقديمية",
+    "pdfToMarkdown": "تحويل PDF إلى Markdown",
     "manageUsers": "إدارة المستخدمين",
     "managePayments": "إدارة المدفوعات",
-    "handwriting": "نص إلى خط يد",
-    "admin": "المسؤول",
+    "handwriting": "تحويل النص إلى خط يد",
+    "admin": "لوحة التحكم",
     "logout": "تسجيل الخروج",
     "academicSolver": "الحلال الأكاديمي",
     "adminSettings": "الإعدادات",
     "documentation": "التوثيق",
-    "pushNotifications": "دفع الإخطارات"
+    "pushNotifications": "إشعارات الدفع"
   },
   "docs": {
     "pageTitle": "توثيق التطبيق",
@@ -36,7 +36,7 @@
     "proposalGenerator": {
       "title": "منشئ العروض",
       "description": "منشئ العروض هو نقطة البداية لمشاريعك. صف فكرتك في بضع جمل، وسيقوم الذكاء الاصطناعي لدينا بإنشاء عرض مشروع شامل واحترافي.",
-      "step1": "انتقِل إلى 'المنشئ' وحدد علامة التبويب 'وضع العرض'.",
+      "step1": "انتقل إلى 'المنشئ' وحدد علامة التبويب 'وضع العرض'.",
       "step2": "أدخل وصفًا واضحًا لفكرة مشروعك في منطقة النص.",
       "step3": "انقر فوق 'إنشاء عرض' وراجع المخرجات المنظمة، التي يمكنك تحريرها مباشرة."
     },
@@ -71,15 +71,15 @@
     "academicSolver": {
       "title": "الحلال الأكاديمي",
       "description": "قم بتحميل مستند أكاديمي مثل امتحان أو واجب منزلي بتنسيق PDF، ودع الذكاء الاصطناعي يحلل الأسئلة ويقدم حلولاً مفصلة.",
-      "step1": "انتقِل إلى صفحة 'الحلال الأكاديمي' من الرأس.",
+      "step1": "انتقل إلى صفحة 'الحلال الأكاديمي' من الرأس.",
       "step2": "حدد ما إذا كنت تقوم بتحميل 'امتحان' أو 'واجب منزلي'.",
       "step3": "قم بتحميل ملف PDF يحتوي على الأسئلة.",
       "step4": "سيقوم الذكاء الاصطناعي أولاً بتحليل وتنظيم المستند، ثم يمكنك النقر فوق 'حل' لإنشاء الإجابات."
     },
     "admin": {
-      "title": "لوحة المسؤول",
-      "description": "توفر لوحة المسؤول مجموعة شاملة من الأدوات لإدارة التطبيق بأكمله.",
-      "step1": "قم بالوصول إلى لوحة المسؤول عبر قائمة المستخدم المنسدلة في الرأس (مرئية فقط لحسابات المسؤولين).",
+      "title": "لوحة التحكم",
+      "description": "توفر لوحة التحكم مجموعة شاملة من الأدوات لإدارة التطبيق بأكمله.",
+      "step1": "قم بالوصول إلى لوحة التحكم عبر قائمة المستخدم المنسدلة في الرأس (مرئية فقط لحسابات المسؤولين).",
       "step2": "استخدم 'إدارة المستخدمين' لعرض حسابات المستخدمين أو تعديلها أو حذفها وضبط أرصدة الائتمان الخاصة بهم.",
       "step3": "استخدم 'إدارة الوكلاء' و 'إدارة القوالب' لتكوين سلوك ومخرجات أدوات إنشاء الذكاء الاصطناعي.",
       "step4": "راجع 'سجل النشاط' لمراقبة جميع عمليات إنشاء الذكاء الاصطناعي عبر النظام الأساسي."
@@ -186,6 +186,8 @@
     "tableHeadJoined": "انضم في",
     "tableHeadActions": "الإجراءات",
     "editUserSr": "تعديل المستخدم",
+    "chatWithUserSr": "الدردشة مع المستخدم",
+    "noUsersFound": "لم يتم العثور على مستخدمين.",
     "previousButton": "السابق",
     "pageLabel": "صفحة",
     "nextButton": "التالي"
@@ -201,7 +203,9 @@
     "actions": "الإجراءات",
     "filterAgentPlaceholder": "تصفية حسب معرف الوكيل...",
     "filterUserPlaceholder": "تصفية حسب معرف المستخدم...",
-    "noResults": "لم يتم العثور على نتائج مطابقة لاستعلامك."
+    "noResults": "لم يتم العثور على نتائج مطابقة لاستعلامك.",
+    "loadMore": "تحميل المزيد",
+    "loadingMore": "جارٍ تحميل المزيد..."
   },
   "roles": {
     "user": "مستخدم",
@@ -311,6 +315,16 @@
     "pageSubtitle": "مراجعة ومعالجة طلبات الدفع المعلقة من المستخدمين.",
     "errorLoading": "فشل تحميل طلبات الدفع",
     "noPending": "لا توجد طلبات دفع معلقة.",
+    "noTransactionsFound": "لم يتم العثور على معاملات {status}.",
+    "historyTitle": "سجل المعاملات",
+    "historyDescription": "عرض وإدارة جميع معاملات المستخدمين.",
+    "tabs": {
+        "pending": "معلقة",
+        "verified": "تم التحقق منها",
+        "rejected": "مرفوضة"
+    },
+    "loadingMore": "جارٍ تحميل المزيد...",
+    "loadMore": "تحميل المزيد",
     "userLabel": "المستخدم",
     "amountLabel": "المبلغ",
     "creditsLabel": "الأرصدة",
@@ -354,11 +368,11 @@
   },
   "builder": {
     "tabs": {
-      "proposal": "وضع الاقتراح",
-      "document": "مولد المستندات",
-      "diagram": "مولد الرسوم البيانية",
-      "code": "مولد الكود",
-      "presentation": "وضع العرض التقديمي"
+      "proposal": "العرض",
+      "document": "المستند",
+      "diagram": "الرسوم البيانية",
+      "code": "الكود",
+      "presentation": "العرض التقديمي"
     },
     "buttons": {
       "uploadProject": "تحميل مشروع",
@@ -389,27 +403,27 @@
     "proposalGenerator": {
       "title": "صف فكرة مشروعك",
       "placeholder": "تقرير تدريبي حول تقنيات تحليل البيانات الجديدة في القطاع المصرفي.",
-      "generatedTitle": "الاقتراح الذي تم إنشاؤه",
+      "generatedTitle": "العرض الذي تم إنشاؤه",
       "generatedDescription": "مراجعة وتعديل التفاصيل التي تم إنشاؤها أدناه.",
       "exportJson": ".json",
       "exportDocx": "DOCX",
-      "translateAllButton": "ترجمة الاقتراح",
-      "emptyState": "سيظهر اقتراح مشروعك الذي تم إنشاؤه هنا.",
+      "translateAllButton": "ترجمة العرض",
+      "emptyState": "سيظهر عرض مشروعك الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDescription": "صقل تعليمات الذكاء الاصطناعي.",
-      "templateLabel": "قالب الاقتراح",
+      "templateLabel": "قالب العرض",
       "editPromptLabel": "تعديل تفاصيل المطالبة",
       "basePromptLabel": "المطالبة الأساسية",
       "customGuidelinesLabel": "إرشادات مخصصة",
       "addGuidelinePlaceholder": "إضافة إرشادات مخصصة...",
-      "generateButton": "إنشاء اقتراح",
+      "generateButton": "إنشاء عرض",
       "toasts": {
         "translateAllStarted": "بدأت الترجمة المجمعة",
-        "translateAllStartedDesc": "ترجمة جميع حقول الاقتراح. قد يستغرق هذا بعض الوقت...",
+        "translateAllStartedDesc": "ترجمة جميع حقول العرض. قد يستغرق هذا بعض الوقت...",
         "translateAllSuccess": "اكتملت الترجمة",
-        "translateAllSuccessDesc": "تمت ترجمة الاقتراح بنجاح.",
+        "translateAllSuccessDesc": "تمت ترجمة العرض بنجاح.",
         "translateAllFailed": "فشلت الترجمة",
-        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة الاقتراح."
+        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض."
       }
     },
     "proposalViewer": {
@@ -461,8 +475,8 @@
       }
     },
     "reportGenerator": {
-      "noProposal": "لم يتم تحميل أي اقتراح",
-      "noProposalDesc": "يرجى إنشاء اقتراح في \"وضع الاقتراح\" أولاً، أو تحميل ملف مشروع.",
+      "noProposal": "لم يتم تحميل أي عرض",
+      "noProposalDesc": "يرجى إنشاء عرض في \"وضع العرض\" أولاً، أو تحميل ملف مشروع.",
       "resultsTitle": "محتوى التقرير",
       "emptyStateTitle": "سيظهر محتوى التقرير هنا",
       "emptyStateDesc": "استخدم أدوات الإنشاء لإنشاء أقسام لتقريرك.",
@@ -521,6 +535,8 @@
       "updateSection": "تحديث القسم",
       "Select_template": "حدد قالبًا",
       "context_diagrams": "الرسوم البيانية السياقية",
+      "ContextualSections": "الأقسام السياقية",
+      "ContextualDiagrams": "الرسوم البيانية السياقية",
       "sections": {
         "introduction": "المقدمة",
         "literatureReview": "مراجعة الأدبيات",
@@ -556,8 +572,8 @@
       }
     },
     "diagramGenerator": {
-      "noProposal": "لم يتم تحميل أي اقتراح",
-      "noProposalDesc": "يرجى إنشاء اقتراح في \"وضع الاقتراح\" أولاً، أو تحميل ملف مشروع.",
+      "noProposal": "لم يتم تحميل أي عرض",
+      "noProposalDesc": "يرجى إنشاء عرض في \"وضع العرض\" أولاً، أو تحميل ملف مشروع.",
       "title": "الرسوم البيانية التي تم إنشاؤها",
       "description": "مراجعة وتعديل وتحديث الرسوم البيانية التي تم إنشاؤها أدناه.",
       "emptyState": "ستظهر الرسوم البيانية التي تم إنشاؤها هنا في أكورديون.",
@@ -588,7 +604,7 @@
       "toasts": {
         "success": "تم إنشاء رسم تخطيطي {{title}} بنجاح!",
         "failed": "فشل إنشاء رسم تخطيطي {{title}}.",
-        "generateButton": "إنشاء {{title}}",
+        "generateButton":"إنشاء {{title}}",
         "updateSuccess": "تم تحديث الرسم البياني بنجاح!",
         "updateFailed": "فشل تحديث الرسم البياني"
       },
@@ -625,8 +641,8 @@
       }
     },
     "presentationGenerator": {
-      "noProposal": "لم يتم تحميل أي اقتراح",
-      "noProposalDesc": "يرجى إنشاء اقتراح في \"وضع الاقتراح\" أولاً، أو تحميل ملف مشروع.",
+      "noProposal": "لم يتم تحميل أي عرض",
+      "noProposalDesc": "يرجى إنشاء عرض في \"وضع العرض\" أولاً، أو تحميل ملف مشروع.",
       "historyTitle": "السجل",
       "historyDesc": "حدد عرضًا تقديميًا تم إنشاؤه مسبقًا.",
       "historyItem": "{slideCount} شرائح",
@@ -636,7 +652,7 @@
       "toolsDesc": "تكوين وإنشاء العرض التقديمي.",
       "templateLabel": "قالب العرض التقديمي",
       "editDetails": "تعديل تفاصيل الإنشاء",
-      "generateButton": "إنشاء عرض تقديمي",
+      "generateButton": "إنشاء العرض التقديمي",
       "actionsTitle": "الإجراءات",
       "actionsDesc": "تصدير مخرجاتك أو بدء جلسة جديدة.",
       "exportStyleLabel": "نمط تصدير PPTX",
@@ -685,8 +701,8 @@
         "downloadPdf": "تنزيل PDF"
       },
       "toasts": {
-        "copiedMd": "تم النسخ بصيغة Markdown",
-        "copiedText": "تم النسخ كنص عادي",
+        "copied": "تم النسخ إلى الحافظة",
+        "cleared": "تم مسح المحتوى",
         "translateSuccess": "اكتملت الترجمة!",
         "translateFailed": "فشلت الترجمة"
       }
@@ -718,5 +734,3 @@
     }
   }
 }
-
-    

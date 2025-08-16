@@ -74,9 +74,9 @@ export function UserTableRow({ user }: UserTableRowProps) {
             <TableCell className="text-right">
                <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
                   <MessageSquare className="h-4 w-4" />
-                  <span className="sr-only">Chat with user</span>
+                  <span className="sr-only">{t('manageUsers.chatWithUserSr')}</span>
                 </Button>
-              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`Edit ${user.name}`}>
+              <Button asChild variant="ghost" size="icon" onMouseEnter={() => prefetchUser(user.id)} aria-label={`${t('manageUsers.editUserSr')} ${user.name}`}>
                 <Link href={`/admin/manage-users/${user.id}/edit`}>
                    <Pencil className="h-4 w-4" />
                 </Link>

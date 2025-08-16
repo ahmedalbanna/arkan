@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TransactionData } from '@/lib/db/queries';
 import { FinancialReportExporter } from './FinancialReportExporter';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/card';
 
 const TRANSACTIONS_PER_PAGE = 6;
 type TransactionStatus = 'pending' | 'verified' | 'rejected';
@@ -90,7 +90,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
     if (allTransactions.length === 0) {
         return (
             <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                <p>No {status} transactions found.</p>
+                <p>{t('managePayments.noTransactionsFound').replace('{status}', status)}</p>
             </div>
         )
     }
@@ -106,7 +106,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
                 <div className="mt-8 text-center">
                     <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
                         {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                        {isFetchingNextPage ? t('managePayments.loadingMore') : t('managePayments.loadMore')}
                     </Button>
                 </div>
             )}
@@ -115,20 +115,21 @@ function TransactionList({ status }: { status: TransactionStatus }) {
 }
 
 export function PaymentVerificationConsole() {
+    const { t } = useLocalization();
     return (
         <div className="space-y-8">
             <FinancialReportExporter />
             <Card>
                 <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
-                    <CardDescription>View and manage all user transactions.</CardDescription>
+                    <CardTitle>{t('managePayments.historyTitle')}</CardTitle>
+                    <CardDescription>{t('managePayments.historyDescription')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Tabs defaultValue="pending" className="w-full">
                         <TabsList className="grid w-full grid-cols-3 mb-6">
-                            <TabsTrigger value="pending">Pending</TabsTrigger>
-                            <TabsTrigger value="verified">Verified</TabsTrigger>
-                            <TabsTrigger value="rejected">Rejected</TabsTrigger>
+                            <TabsTrigger value="pending">{t('managePayments.tabs.pending')}</TabsTrigger>
+                            <TabsTrigger value="verified">{t('managePayments.tabs.verified')}</TabsTrigger>
+                            <TabsTrigger value="rejected">{t('managePayments.tabs.rejected')}</TabsTrigger>
                         </TabsList>
                         <TabsContent value="pending">
                             <TransactionList status="pending" />

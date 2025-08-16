@@ -19,6 +19,7 @@ import { useTheme } from 'next-themes';
 import { useDebounce } from '@/hooks/use-debounce';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -95,6 +96,7 @@ export default function GenerationLogViewer() {
     const [userIdFilter, setUserIdFilter] = useState('');
     const debouncedAgentId = useDebounce(agentIdFilter, 500);
     const debouncedUserId = useDebounce(userIdFilter, 500);
+    const { t } = useLocalization();
 
     const { firebaseUser, isLoading: authLoading } = useAuth();
     
@@ -124,7 +126,7 @@ export default function GenerationLogViewer() {
     if (status === 'pending' || authLoading) {
         return (
             <Card>
-                <CardHeader><CardTitle>Generation Log</CardTitle></CardHeader>
+                <CardHeader><CardTitle>{t('manageGenerations.cardTitle')}</CardTitle></CardHeader>
                 <CardContent><LogTableSkeleton /></CardContent>
             </Card>
         );
@@ -135,7 +137,7 @@ export default function GenerationLogViewer() {
             <Card>
                 <CardContent className="p-8 text-center text-destructive">
                     <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                    <p>Failed to load generation logs: {error?.message}</p>
+                    <p>{t('manageGenerations.errorLoading')}: {error?.message}</p>
                 </CardContent>
             </Card>
         );
@@ -145,14 +147,14 @@ export default function GenerationLogViewer() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex justify-between items-center">
-                    <span>Generation Log</span>
+                    <span>{t('manageGenerations.cardTitle')}</span>
                     {isFetching && !isFetchingNextPage && <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />}
                 </CardTitle>
                 <div className="flex flex-col md:flex-row gap-4 pt-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder="Filter by agent ID..."
+                            placeholder={t('manageGenerations.filterAgentPlaceholder')}
                             value={agentIdFilter} 
                             onChange={(e) => setAgentIdFilter(e.target.value)}
                             className="pl-10"
@@ -161,7 +163,7 @@ export default function GenerationLogViewer() {
                      <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder="Filter by user ID..."
+                            placeholder={t('manageGenerations.filterUserPlaceholder')}
                             value={userIdFilter} 
                             onChange={(e) => setUserIdFilter(e.target.value)}
                             className="pl-10"
@@ -174,10 +176,10 @@ export default function GenerationLogViewer() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Agent</TableHead>
-                                <TableHead>User</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>{t('manageGenerations.agent')}</TableHead>
+                                <TableHead>{t('manageGenerations.user')}</TableHead>
+                                <TableHead>{t('manageGenerations.date')}</TableHead>
+                                <TableHead className="text-right">{t('manageGenerations.actions')}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -205,7 +207,7 @@ export default function GenerationLogViewer() {
                                 ))
                             ) : (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center h-24">No results found matching your query.</TableCell>
+                                    <TableCell colSpan={4} className="text-center h-24">{t('manageGenerations.noResults')}</TableCell>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -219,7 +221,7 @@ export default function GenerationLogViewer() {
                         {isFetchingNextPage ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         ) : null}
-                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                        {isFetchingNextPage ? t('manageGenerations.loadingMore') : t('manageGenerations.loadMore')}
                     </Button>
                 </div>
             </CardContent>
