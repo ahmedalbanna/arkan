@@ -492,8 +492,10 @@
       "title": "إنشاء قالب تقرير جديد",
       "description": "اختر الوكلاء الذين تريد تضمينهم في هذا القالب للتفاعلات الجماعية.",
       "namePlaceholder": "على سبيل المثال، تقرير برنامج فني",
+      "idPlaceholder": "على سبيل المثال، tech-report",
       "includedAgentsLabel": "الوكلاء المضمنون",
-      "availableAgentsLabel": "الوكلاء المتاحون"
+      "availableAgentsLabel": "الوكلاء المتاحون",
+      "searchPlaceholder": "ابحث عن وكلاء..."
     },
     "presentationDialog": {
       "title": "إنشاء قالب عرض تقديمي",

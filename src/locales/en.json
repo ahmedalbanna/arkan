@@ -492,8 +492,10 @@
       "title": "Create New Report Template",
       "description": "Choose agents you want to include in this template for group interactions.",
       "namePlaceholder": "e.g., Technical Software Report",
+      "idPlaceholder": "e.g., tech-report",
       "includedAgentsLabel": "INCLUDED AGENTS",
-      "availableAgentsLabel": "AVAILABLE AGENTS"
+      "availableAgentsLabel": "AVAILABLE AGENTS",
+      "searchPlaceholder": "Search agents..."
     },
     "presentationDialog": {
       "title": "Create Presentation Template",
