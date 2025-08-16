@@ -23,6 +23,7 @@ import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../ui/alert-dialog';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
@@ -45,6 +46,7 @@ type CreateProposalFormValues = z.infer<typeof createProposalTemplateSchema>;
 
 
 function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ProposalTemplate, onSave: (data: ProposalFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+    const { t } = useLocalization();
     const { resolvedTheme } = useTheme();
     const form = useForm<ProposalFormValues>({
         resolver: zodResolver(proposalTemplateSchema),
@@ -67,42 +69,42 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
                  <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Template Name</FormLabel>
+                        <FormLabel>{t('manageTemplates.proposalDialog.nameLabel')}</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Description</FormLabel>
+                        <FormLabel>{t('manageTemplates.proposalDialog.descriptionLabel')}</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <FormField control={form.control} name="prompt" render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Base Prompt</FormLabel>
+                        <FormLabel>{t('manageTemplates.proposalDialog.promptLabel')}</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={8} className="font-mono text-xs" /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
                  <div>
-                    <FormLabel>Guidelines</FormLabel>
+                    <FormLabel>{t('manageTemplates.proposalDialog.guidelinesLabel')}</FormLabel>
                     <div className="space-y-2 mt-2">
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex items-center gap-2">
                                 <FormField control={form.control} name={`guidelines.${index}` as any} render={({ field }) => (
                                     <Input {...field} disabled={isSaving || isDeleting} />
                                 )} />
-                                <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isSaving || isDeleting}>Remove</Button>
+                                <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)} disabled={isSaving || isDeleting}>{t('agentEditor.remove')}</Button>
                             </div>
                         ))}
-                        <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>Add Guideline</Button>
+                        <Button type="button" variant="outline" size="sm" onClick={() => append("")} disabled={isSaving || isDeleting}>{t('manageTemplates.proposalDialog.addGuideline')}</Button>
                     </div>
                 </div>
                  <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="json-structure">
-                        <AccordionTrigger>JSON Structure</AccordionTrigger>
+                        <AccordionTrigger>{t('manageTemplates.proposalDialog.jsonStructureLabel')}</AccordionTrigger>
                         <AccordionContent>
                              <div className="p-2 border rounded-md bg-background">
                                  <ReactJson 
@@ -124,24 +126,24 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
                                     {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                                    Delete
+                                    {t('manageTemplates.proposalDialog.deleteButton')}
                                 </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
+                                <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', template.name)}</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={onDelete}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
                     )}
                     <Button type="submit" disabled={isSaving || isDeleting}>
                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save Changes
+                        {t('manageTemplates.proposalDialog.saveButton')}
                     </Button>
                 </div>
             </form>
@@ -150,6 +152,7 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
 }
 
 function CreateProposalTemplateDialog() {
+    const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
     const createMutation = useCreateProposalTemplate();
@@ -179,7 +182,6 @@ function CreateProposalTemplateDialog() {
             },
             onError: (error: any) => {
                  if (error.errors) {
-                    // Set form errors from server validation
                     for (const key in error.errors) {
                         form.setError(key as keyof CreateProposalFormValues, { message: error.errors[key][0] });
                     }
@@ -193,65 +195,65 @@ function CreateProposalTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create Proposal Template</DialogTitle>
+                    <DialogTitle>{t('manageTemplates.proposalDialog.title')}</DialogTitle>
                     <DialogDescription>
-                        Define a new template for generating project proposals.
+                        {t('manageTemplates.proposalDialog.description')}
                     </DialogDescription>
                 </DialogHeader>
                  <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template ID</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., my-custom-template" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.proposalDialog.idPlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template Name</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., My Custom Template" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.proposalDialog.namePlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} disabled={createMutation.isPending} rows={2} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="prompt" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Base Prompt</FormLabel>
+                                <FormLabel>{t('manageTemplates.proposalDialog.promptLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} disabled={createMutation.isPending} rows={5} className="font-mono text-xs" /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                          <div>
-                            <FormLabel>Guidelines</FormLabel>
+                            <FormLabel>{t('manageTemplates.proposalDialog.guidelinesLabel')}</FormLabel>
                             <div className="space-y-2 mt-2">
                                 {fields.map((field, index) => (
                                     <div key={field.id} className="flex items-center gap-2">
                                         <FormField control={form.control} name={`guidelines.${index}` as any} render={({ field }) => (
                                             <Input {...field} disabled={createMutation.isPending} />
                                         )} />
-                                        <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>Remove</Button>
+                                        <Button type="button" variant="destructive" size="sm" onClick={() => remove(index)}>{t('agentEditor.remove')}</Button>
                                     </div>
                                 ))}
-                                <Button type="button" variant="outline" size="sm" onClick={() => append("")}>Add Guideline</Button>
+                                <Button type="button" variant="outline" size="sm" onClick={() => append("")}>{t('manageTemplates.proposalDialog.addGuideline')}</Button>
                             </div>
                         </div>
 
                         <DialogFooter>
-                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                Create
+                                {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
                     </form>
@@ -263,6 +265,7 @@ function CreateProposalTemplateDialog() {
 
 
 export function ProposalTemplateManager() {
+    const { t } = useLocalization();
     const { firebaseUser } = useAuth();
     const { toast } = useToast();
 
@@ -290,9 +293,9 @@ export function ProposalTemplateManager() {
         <Card>
             <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                    <CardTitle>Proposal Generation Templates</CardTitle>
+                    <CardTitle>{t('manageTemplates.proposalTitle')}</CardTitle>
                     <CardDescription>
-                        Configure the templates used for generating project proposals. These settings control the prompts and guidelines provided to the AI.
+                        {t('manageTemplates.proposalDescription')}
                     </CardDescription>
                 </div>
                 <CreateProposalTemplateDialog />
@@ -303,7 +306,7 @@ export function ProposalTemplateManager() {
                         return (
                         <AccordionItem value={template.id} key={template.id}>
                            <div className="flex items-center justify-between">
-                                <AccordionTrigger className="flex-1">{template.name}</AccordionTrigger>
+                                <AccordionTrigger className="flex-1">{t(template.name)}</AccordionTrigger>
                             </div>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
                                 <ProposalTemplateForm 

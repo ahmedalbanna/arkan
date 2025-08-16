@@ -484,7 +484,9 @@
       "guidelinesLabel": "الإرشادات",
       "removeGuideline": "إزالة",
       "addGuideline": "إضافة إرشادات",
-      "jsonStructureLabel": "بنية JSON"
+      "jsonStructureLabel": "بنية JSON",
+      "saveButton": "حفظ التغييرات",
+      "deleteButton": "حذف"
     },
     "reportDialog": {
       "title": "إنشاء قالب تقرير جديد",

@@ -484,11 +484,13 @@
       "guidelinesLabel": "Guidelines",
       "removeGuideline": "Remove",
       "addGuideline": "Add Guideline",
-      "jsonStructureLabel": "JSON Structure"
+      "jsonStructureLabel": "JSON Structure",
+      "saveButton": "Save Changes",
+      "deleteButton": "Delete"
     },
     "reportDialog": {
       "title": "Create New Report Template",
-      "description": "Choose agents to include in this template for group interactions.",
+      "description": "Choose agents you want to include in this template for group interactions.",
       "namePlaceholder": "e.g., Technical Software Report",
       "includedAgentsLabel": "INCLUDED AGENTS",
       "availableAgentsLabel": "AVAILABLE AGENTS"
