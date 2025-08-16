@@ -33,7 +33,12 @@
     "tools": "Tools",
     "notifications": "Notifications",
     "clearAll": "Clear All",
-    "noNotifications": "You have no new notifications."
+    "noNotifications": "You have no new notifications.",
+    "chats": "Chats",
+    "automations": "Automations",
+    "templates": "Templates",
+    "generationTemplates": "Generation Templates",
+    "promptTemplates": "Prompt Templates"
   },
   "notifications": {
     "newPayment": {
@@ -578,10 +583,10 @@
     "headingLevel": "Heading {level}",
     "saveButton": "Save Template",
     "createSuccessToast": {
-        "title": "Success",
-        "proposalDesc": "New proposal template created.",
-        "reportDesc": "New report template created.",
-        "presentationDesc": "New presentation template created."
+      "title": "Success",
+      "proposalDesc": "New proposal template created.",
+      "reportDesc": "New report template created.",
+      "presentationDesc": "New presentation template created."
     }
   },
   "templates": {

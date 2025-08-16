@@ -33,7 +33,12 @@
     "tools": "الأدوات",
     "notifications": "الإشعارات",
     "clearAll": "مسح الكل",
-    "noNotifications": "ليس لديك إشعارات جديدة."
+    "noNotifications": "ليس لديك إشعارات جديدة.",
+    "chats": "الدردشات",
+    "automations": "الأتمتة",
+    "templates": "القوالب",
+    "generationTemplates": "قوالب الإنشاء",
+    "promptTemplates": "قوالب الأوامر"
   },
   "notifications": {
     "newPayment": {
@@ -578,10 +583,10 @@
     "headingLevel": "عنوان المستوى {level}",
     "saveButton": "حفظ القالب",
     "createSuccessToast": {
-        "title": "نجاح",
-        "proposalDesc": "تم إنشاء قالب مقترح جديد.",
-        "reportDesc": "تم إنشاء قالب تقرير جديد.",
-        "presentationDesc": "تم إنشاء قالب عرض تقديمي جديد."
+      "title": "نجاح",
+      "proposalDesc": "تم إنشاء قالب مقترح جديد.",
+      "reportDesc": "تم إنشاء قالب تقرير جديد.",
+      "presentationDesc": "تم إنشاء قالب عرض تقديمي جديد."
     }
   },
   "templates": {
