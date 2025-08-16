@@ -160,6 +160,17 @@
     "noActivity": "لا يوجد نشاط حديث.",
     "errorLoading": "فشل تحميل إحصائيات لوحة التحكم."
   },
+  "adminFinancialReport": {
+    "title": "تصدير تقرير مالي",
+    "description": "حدد نطاقًا زمنيًا لإنشاء تقرير PDF بجميع المعاملات.",
+    "datePlaceholder": "اختر نطاقًا زمنيًا",
+    "exportButton": "تصدير بصيغة PDF",
+    "missingInfoError": "معلومات ناقصة",
+    "missingInfoDesc": "يرجى تحديد تاريخ البدء والانتهاء للتقرير.",
+    "noData": "لا توجد بيانات",
+    "noDataDesc": "لا توجد معاملات في النطاق الزمني المحدد.",
+    "exportFailed": "فشل التصدير"
+  },
   "footer": {
     "copyright": "© {year} أركان. جميع الحقوق محفوظة."
   },
@@ -787,7 +798,7 @@
       "editDetails": "تعديل تفاصيل الإنشاء",
       "generateButton": "إنشاء العرض التقديمي",
       "actionsTitle": "الإجراءات",
-      "actionsDesc": "تصدير مخرجاتك أو بدء جلسة جديدة.",
+      "actionsDesc": "تصدير مخرجاتك.",
       "exportStyleLabel": "نمط تصدير PPTX",
       "exportStylePlaceholder": "حدد نمطًا",
       "exportButton": "تصدير العرض التقديمي",

@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState } from 'react';
@@ -17,6 +16,7 @@ import type { TransactionData } from '@/lib/db/queries';
 import { useToast } from '@/hooks/use-toast';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function generatePdf(data: TransactionData[], dateRange: DateRange) {
     const doc = new jsPDF();
@@ -90,12 +90,13 @@ export function FinancialReportExporter() {
     const [isLoading, setIsLoading] = useState(false);
     const { firebaseUser } = useAuth();
     const { toast } = useToast();
+    const { t } = useLocalization();
 
     const handleExport = async () => {
         if (!dateRange?.from || !dateRange?.to || !firebaseUser) {
             toast({
-                title: 'Missing Information',
-                description: 'Please select a start and end date for the report.',
+                title: t('adminFinancialReport.missingInfoError'),
+                description: t('adminFinancialReport.missingInfoDesc'),
                 variant: 'destructive',
             });
             return;
@@ -112,8 +113,8 @@ export function FinancialReportExporter() {
 
             if (transactions.length === 0) {
                  toast({
-                    title: 'No Data',
-                    description: 'There are no transactions in the selected date range.',
+                    title: t('adminFinancialReport.noData'),
+                    description: t('adminFinancialReport.noDataDesc'),
                 });
                 return;
             }
@@ -122,7 +123,7 @@ export function FinancialReportExporter() {
 
         } catch (error: any) {
             toast({
-                title: 'Export Failed',
+                title: t('adminFinancialReport.exportFailed'),
                 description: error.message || 'An unexpected error occurred.',
                 variant: 'destructive',
             });
@@ -134,8 +135,8 @@ export function FinancialReportExporter() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Export Financial Report</CardTitle>
-                <CardDescription>Select a date range to generate a PDF report of all transactions.</CardDescription>
+                <CardTitle>{t('adminFinancialReport.title')}</CardTitle>
+                <CardDescription>{t('adminFinancialReport.description')}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col sm:flex-row items-center gap-4">
                 <Popover>
@@ -159,7 +160,7 @@ export function FinancialReportExporter() {
                                     format(dateRange.from, "LLL dd, y")
                                 )
                             ) : (
-                                <span>Pick a date range</span>
+                                <span>{t('adminFinancialReport.datePlaceholder')}</span>
                             )}
                         </Button>
                     </PopoverTrigger>
@@ -176,7 +177,7 @@ export function FinancialReportExporter() {
                 </Popover>
                 <Button onClick={handleExport} disabled={isLoading}>
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                    Export as PDF
+                    {t('adminFinancialReport.exportButton')}
                 </Button>
             </CardContent>
         </Card>

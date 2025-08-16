@@ -160,6 +160,17 @@
     "noActivity": "No recent activity.",
     "errorLoading": "Failed to load dashboard statistics."
   },
+  "adminFinancialReport": {
+    "title": "Export Financial Report",
+    "description": "Select a date range to generate a PDF report of all transactions.",
+    "datePlaceholder": "Pick a date range",
+    "exportButton": "Export as PDF",
+    "missingInfoError": "Missing Information",
+    "missingInfoDesc": "Please select a start and end date for the report.",
+    "noData": "No Data",
+    "noDataDesc": "There are no transactions in the selected date range.",
+    "exportFailed": "Export Failed"
+  },
   "footer": {
     "copyright": "© {year} Arkan. All rights reserved."
   },
@@ -182,6 +193,45 @@
   "login": {
     "pageTitle": "Welcome Back",
     "pageSubtitle": "Sign in to access your projects and continue creating."
+  },
+  "projects": {
+    "pageTitle": "My Projects",
+    "pageSubtitle": "Load, manage, and continue working on your saved projects.",
+    "refreshButton": "Refresh",
+    "createButton": "Create New Project",
+    "errorLoading": "Failed to load projects",
+    "noProjectsTitle": "No Projects Found",
+    "noProjectsDescription": "You haven't saved any projects yet. Start by creating a new one.",
+    "createDialogTitle": "Create a New Project",
+    "createDialogDescription": "Give your new project a name and a brief description to start. You can also add context files below.",
+    "projectNameLabel": "Project Name",
+    "projectIdeaLabel": "Project Idea / Description",
+    "projectNamePlaceholder": "e.g., Q4 Marketing Campaign",
+    "projectIdeaPlaceholder": "e.g., A mobile app for tracking personal fitness goals...",
+    "startBuildingButton": "Start Building",
+    "saveAsTitle": "Save Project As",
+    "saveAsDescription": "Enter a new name and choose whether to save to the cloud or download a local file.",
+    "nameLabel": "Name",
+    "downloadButton": "Download as .arkan File",
+    "saveToCloudButton": "Save to Cloud",
+    "projectSavedAsToastTitle": "Project Saved as New",
+    "projectSavedAsToastDesc": "New project \"{name}\" has been created.",
+    "cannotSaveToastTitle": "Cannot Save",
+    "cannotSaveToastDesc": "The project is empty.",
+    "savePromptTitle": "Save New Project",
+    "savePromptDescription": "Please provide a name for your new project before saving.",
+    "nameRequiredToastTitle": "Name Required",
+    "nameRequiredToastDesc": "Please enter a name for your project.",
+    "loadProjectButton": "Load Project",
+    "deleteDialogTitle": "Are you absolutely sure?",
+    "deleteDialogDescription": "This action cannot be undone. This will permanently delete your \"{projectTitle}\" project.",
+    "deleteButton": "Delete",
+    "projectDeletedToastTitle": "Project Deleted",
+    "projectDeletedToastDesc": "The project has been successfully deleted.",
+    "deleteFailedToastTitle": "Delete Failed",
+    "noDescription": "No description available.",
+    "untitled": "Untitled Project",
+    "updated": "Updated {time}"
   },
   "signup": {
     "pageTitle": "Create Your Account",
