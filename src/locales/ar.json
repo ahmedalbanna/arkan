@@ -558,6 +558,12 @@
       "relevantSectionsLabel": "أقسام التقرير ذات الصلة",
       "relevantSectionsDesc": "حدد أقسام التقرير الأكثر صلة بنوع هذا العرض التقديمي."
     },
+    "pptxDialog": {
+      "title": "إنشاء قالب PPTX جديد",
+      "description": "تحديد قالب نمط جديد لصادرات PPTX. سيتم تهيئته بنمط \"حديث\" كأساس.",
+      "idPlaceholder": "على سبيل المثال، my-corporate-style",
+      "namePlaceholder": "على سبيل المثال، My Corporate Style"
+    },
     "deleteDialog": {
       "title": "هل أنت متأكد؟",
       "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف قالب '{templateName}' نهائيًا.",

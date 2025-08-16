@@ -546,8 +546,8 @@
       "namePlaceholder": "e.g., Technical Software Report",
       "descriptionPlaceholder": "A short description of what this template is for.",
       "idPlaceholder": "e.g., tech-report",
-      "includedAgentsLabel": "INCLUDED AGENTS",
-      "availableAgentsLabel": "AVAILABLE AGENTS",
+      "includedAgentsLabel": "Included Agents",
+      "availableAgentsLabel": "Available Agents",
       "searchPlaceholder": "Search agents..."
     },
     "presentationDialog": {
@@ -557,6 +557,12 @@
       "namePlaceholder": "e.g., Weekly Update",
       "relevantSectionsLabel": "Relevant Report Sections",
       "relevantSectionsDesc": "Select which report sections are most relevant for this presentation type."
+    },
+    "pptxDialog": {
+      "title": "Create New PPTX Template",
+      "description": "Define a new style template for PPTX exports. It will be initialized with the \"Modern\" style as a base.",
+      "idPlaceholder": "e.g., my-corporate-style",
+      "namePlaceholder": "e.g., My Corporate Style"
     },
     "deleteDialog": {
       "title": "Are you sure?",

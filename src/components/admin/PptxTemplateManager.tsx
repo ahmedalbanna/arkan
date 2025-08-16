@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
+import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -21,7 +22,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
-import type { PptxStyleOptions, PptxTemplate, PptxTemplateKey } from '@/lib/types';
+import type { PptxStyleOptions, PptxTemplate } from '@/lib/types';
 
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
@@ -35,6 +36,7 @@ type CreatePptxTemplateValues = z.infer<typeof createPptxTemplateSchema>;
 
 
 function CreateTemplateDialog() {
+    const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const createMutation = useCreatePptxTemplate();
 
@@ -62,41 +64,41 @@ function CreateTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                  <DialogHeader>
-                    <DialogTitle>Create New PPTX Template</DialogTitle>
-                    <DialogDescription>Define a new style template for PPTX exports. It will be initialized with the "Modern" style as a base.</DialogDescription>
+                    <DialogTitle>{t('manageTemplates.pptxDialog.title')}</DialogTitle>
+                    <DialogDescription>{t('manageTemplates.pptxDialog.description')}</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                      <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template ID</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., my-corporate-style" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.pptxDialog.idPlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template Name</FormLabel>
-                                <FormControl><Input {...field} placeholder="e.g., My Corporate Style" disabled={createMutation.isPending} /></FormControl>
+                                <FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.pptxDialog.namePlaceholder')} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} rows={2} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <DialogFooter>
-                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Create Template
+                                {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
                      </form>
@@ -217,14 +219,12 @@ export default function PptxTemplateManager() {
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
                                     <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. The template "{t(template.name)}" will be permanently deleted.
-                                        </AlertDialogDescription>
+                                        <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
+                                        <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', t(template.name))}</AlertDialogDescription>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction onClick={() => handleDelete(key)}>Delete</AlertDialogAction>
+                                        <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => handleDelete(key)}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
                                     </AlertDialogFooter>
                                 </AlertDialogContent>
                             </AlertDialog>
