@@ -16,7 +16,6 @@ import { ProposalActions } from './ProposalActions';
 import { lazy, Suspense } from 'react';
 import { translateProposalApi } from '@/services/translation-service';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
-import { ScrollArea } from '../ui/scroll-area';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -130,16 +129,14 @@ export function ProposalModeGenerator() {
                                 </div>
                             </div>
                         </CardHeader>
-                         <CardContent className="flex-grow overflow-hidden">
-                            <ScrollArea className="h-[calc(100vh-300px)] pr-4" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                                <Suspense fallback={<ProposalSkeleton/>}>
-                                    <FormattedProposalView
-                                        proposal={proposal}
-                                        onUpdate={handleProposalUpdate}
-                                        readOnly={generationMutation.isPending || translateMutation.isPending}
-                                    />
-                                </Suspense>
-                            </ScrollArea>
+                        <CardContent className="flex-grow" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+                            <Suspense fallback={<ProposalSkeleton/>}>
+                                <FormattedProposalView
+                                    proposal={proposal}
+                                    onUpdate={handleProposalUpdate}
+                                    readOnly={generationMutation.isPending || translateMutation.isPending}
+                                />
+                            </Suspense>
                         </CardContent>
                     </Card>
                 ) : (
