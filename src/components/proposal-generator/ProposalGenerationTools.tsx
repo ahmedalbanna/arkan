@@ -51,8 +51,17 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
             className="font-headline w-full"
             title={!hasCredits ? t('builder.toasts.insufficientCredits') : t('builder.proposalGenerator.generateButton')}
         >
-            {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            {`${t('builder.proposalGenerator.generateButton')} (1 Credit)`}
+            {isGenerating ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('builder.codeGenerator.generateButtonLoading')}
+                </>
+            ) : (
+                <>
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {`${t('builder.proposalGenerator.generateButton')} (1 Credit)`}
+                </>
+            )}
         </Button>
     );
 }
@@ -152,7 +161,7 @@ export const ProposalGenerationTools = ({
                                 ))}
                                 <div className="flex gap-2">
                                     <Input
-                                        placeholder={t('builder.proposalGenerator.customGuidelinePlaceholder')}
+                                        placeholder={t('builder.proposalGenerator.addGuidelinePlaceholder')}
                                         value={customGuidelineInput}
                                         onChange={(e) => setCustomGuidelineInput(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGuideline())}
