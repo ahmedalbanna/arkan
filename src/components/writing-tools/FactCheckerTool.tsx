@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud } from 'lucide-react';
+import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { useFactCheck } from '@/hooks/use-writing-tools';
@@ -19,6 +19,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const factCheckerSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters for a thorough fact-check.'),
@@ -28,6 +30,7 @@ type FactCheckerFormValues = z.infer<typeof factCheckerSchema>;
 
 
 export function FactCheckerTool() {
+  const { t } = useLocalization();
   const mutation = useFactCheck();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
@@ -76,7 +79,7 @@ export function FactCheckerTool() {
   const onSubmit = async (data: FactCheckerFormValues) => {
     mutation.mutate({ text: data.text }, {
       onError: (error) => {
-        toast({ title: 'Fact-Check Failed', description: error.message, variant: 'destructive' });
+        toast({ title: t('writingTools.factChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
       }
     });
   };
@@ -97,21 +100,21 @@ export function FactCheckerTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Fact Checker</CardTitle>
-        <CardDescription>Enter text containing claims, and the AI will attempt to verify them against reliable sources.</CardDescription>
+        <CardTitle>{t('writingTools.factChecker.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.factChecker.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                    <TabsTrigger value="paste">{t('writingTools.factChecker.pasteTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('writingTools.factChecker.uploadTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="pt-4">
                      <Textarea
                         {...form.register('text')}
                         rows={12}
-                        placeholder="e.g., The first person to walk on the moon was Neil Armstrong..."
+                        placeholder={t('writingTools.factChecker.placeholder')}
                         className="resize-none"
                         disabled={mutation.isPending || isUploading}
                         />
@@ -121,11 +124,11 @@ export function FactCheckerTool() {
                         <input {...getInputProps()} />
                         <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                         {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.processingFile')}</p>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.factChecker.dropzoneHint')}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.supportedFiles')}</p>
                     </div>
                 </TabsContent>
             </Tabs>
@@ -133,7 +136,7 @@ export function FactCheckerTool() {
 
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
             {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Check Facts
+            {t('writingTools.factChecker.checkButton')}
           </Button>
         </form>
 
@@ -141,28 +144,31 @@ export function FactCheckerTool() {
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing claims and searching for sources...
+                    {t('writingTools.factChecker.analyzing')}
                 </div>
             </div>
         )}
 
         {results && (
           <div className="space-y-4 pt-6 border-t">
-            <h3 className="font-semibold text-lg">Fact-Check Report</h3>
+            <h3 className="font-semibold text-lg">{t('writingTools.factChecker.reportTitle')}</h3>
             <Card className="bg-muted/50">
                 <CardContent className="p-4 flex items-center justify-center text-center gap-4">
                      <div className={`text-6xl font-bold ${getScoreColor(results.originalityScore)}`}>
                         {results.originalityScore}%
                     </div>
                     <div>
-                        <p className="font-semibold">Originality & Accuracy Score</p>
-                        <p className="text-xs text-muted-foreground">This score represents the factual accuracy of the text.</p>
+                        <p className="font-semibold">{t('writingTools.factChecker.originalityScore')}</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.originalityScoreDesc')}</p>
                     </div>
                 </CardContent>
             </Card>
             <div className="space-y-2">
-              <h4 className="font-semibold">Identified Claims</h4>
-              {results.claims.length > 0 ? (
+              <h4 className="font-semibold">{t('writingTools.factChecker.matchesTitle')}</h4>
+              <p className="text-sm text-muted-foreground">
+                {t('writingTools.factChecker.matchesDescription')}
+              </p>
+               {results.claims.length > 0 ? (
                 <div className="space-y-4">
                     {results.claims.map((claim: FactCheckOutput['claims'][0], index: number) => {
                         const { icon: Icon, color, badgeVariant } = getStatusInfo(claim.status);
@@ -176,7 +182,7 @@ export function FactCheckerTool() {
                                     </Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground">{claim.explanation}</p>
-                                <p className="text-xs text-muted-foreground">Source: 
+                                <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.sourceLabel')} 
                                     <Link href={`https://${claim.source}`} target="_blank" className="hover:underline text-primary">
                                         {claim.source} <ExternalLink className="inline h-3 w-3" />
                                     </Link>
@@ -186,8 +192,8 @@ export function FactCheckerTool() {
                     })}
                 </div>
                 ) : (
-                     <div className="text-center text-muted-foreground py-8">
-                        <p>No verifiable claims were found in the provided text.</p>
+                     <div className="text-center text-muted-foreground py-8 border-dashed border-2 rounded-lg">
+                        <p>{t('writingTools.factChecker.noClaims')}</p>
                     </div>
                 )}
             </div>
