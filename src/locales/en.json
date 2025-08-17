@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "Arkan",
@@ -1116,7 +1117,8 @@
       },
       "toasts": {
         "invalidFile": "Invalid file type. Please upload a PDF.",
-        "analysisError": "Please upload a file and select a document type.",
+        "analysisError": "Analysis Error",
+        "analysisErrorDesc": "Please provide the document content and select a document type.",
         "errorTitle": "An Error Occurred",
         "analysisSuccess": "Document analyzed successfully!",
         "analysisMissing": "No analyzed document found. Please upload and analyze a document first.",
@@ -1140,7 +1142,9 @@
         "contextAddedToastTitle": "Context Added",
         "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "Missing Information",
-        "missingInfoToastDesc": "Please provide both content and a name for the context."
+        "missingInfoToastDesc": "Please provide both content and a name for the context.",
+        "uploadFailed": "Upload Failed",
+        "analyzingInProgress": "Analyzing {type}..."
       },
       "questionsDocument": "Questions Document",
       "contextSyllabus": "Context/Syllabus Document (Optional)",
@@ -1155,9 +1159,14 @@
         "title": "Title",
         "dropzoneHint": "Drag 'n' drop, or click to select files",
         "pasteTitle": "Title",
+        "contentPlaceholder": "Paste your text or markdown here...",
         "pasteContent": "Content",
-        "addButton": "Add Text"
-      }
+        "addButton": "Add Text",
+        "uploadFile": "Upload File",
+        "pasteText": "Paste Text"
+      },
+      "creditLabel": "Credit",
+      "creditLabelPlural": "Credits"
     }
   }
 }

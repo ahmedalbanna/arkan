@@ -51,7 +51,7 @@ export default function AcademicSolver() {
 
   const handleAnalyze = async () => {
     if (questionDocuments.length === 0 || !documentType || !firebaseUser) {
-      toast({ title: t('builder.academicSolver.toasts.analysisError'), description: "Please provide the document content and select a document type.", variant: 'destructive' });
+      toast({ title: t('builder.academicSolver.toasts.analysisError'), description: t('builder.academicSolver.toasts.analysisErrorDesc'), variant: 'destructive' });
       return;
     }
     setStage('analyzing');
@@ -66,7 +66,7 @@ export default function AcademicSolver() {
             toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
         },
         onError: (error: any) => {
-            toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             setStage('idle');
         }
     });
@@ -92,7 +92,7 @@ export default function AcademicSolver() {
             toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
         },
         onError: (error: any) => {
-            toast({ title: t('builder.academicSolver.toasts.errorTitle'), description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             setStage('readyToSolve');
         }
     });
@@ -159,7 +159,7 @@ export default function AcademicSolver() {
                 ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                {t('builder.academicSolver.analyzeButton')} ({creditCostAnalyze} Credit)
+                {t('builder.academicSolver.analyzeButton')} ({creditCostAnalyze} {t('builder.academicSolver.creditLabel')})
             </Button>
         </CardContent>
         <CardFooter>
@@ -189,7 +189,7 @@ export default function AcademicSolver() {
                       {stage === 'analyzing' || analyzeMutation.isPending ? (
                           <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                               <Loader2 className="h-12 w-12 animate-spin mb-4" />
-                              <p>{`Analyzing ${documentType}...`}</p>
+                              <p>{t('builder.academicSolver.toasts.analyzingInProgress', {type: documentType})}</p>
                           </div>
                       ) : analyzedDocument ? (
                           <ReactMarkdown components={markdownComponents}>{analyzedDocument.structuredContent}</ReactMarkdown> 
@@ -205,7 +205,7 @@ export default function AcademicSolver() {
                  {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
                       <Button onClick={handleSolve} disabled={!canSolve} className="w-full">
                           {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                          {t('builder.academicSolver.solveButton')} ({creditCostSolve} Credits)
+                          {t('builder.academicSolver.solveButton')} ({creditCostSolve} {t('builder.academicSolver.creditLabelPlural')})
                       </Button>
                   )}
              </CardFooter>

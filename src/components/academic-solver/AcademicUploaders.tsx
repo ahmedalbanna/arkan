@@ -38,7 +38,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
         setIsLoading(true);
         for (const file of acceptedFiles) {
             if (!firebaseUser) {
-                toast({ title: "Authentication Error", description: "You must be logged in.", variant: "destructive" });
+                toast({ title: t('builder.academicSolver.toasts.authError'), variant: "destructive" });
                 continue;
             }
             try {
@@ -47,14 +47,14 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                 formData.append('file', file);
                 const result = await processFileApi(formData, token);
                 onContentAdded(file.name, result.markdown);
-                toast({ title: "File Processed", description: `Content from ${file.name} extracted.` });
+                toast({ title: t('builder.academicSolver.toasts.fileProcessed'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
                 refetchUser();
             } catch (error: any) {
-                toast({ title: "Processing Failed", description: error.message, variant: "destructive" });
+                toast({ title: t('builder.academicSolver.toasts.uploadFailed'), description: error.message, variant: "destructive" });
             }
         }
         setIsLoading(false);
-    }, [firebaseUser, onContentAdded, refetchUser, toast]);
+    }, [firebaseUser, onContentAdded, refetchUser, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -72,7 +72,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
 
     const handleAddPastedText = () => {
         if (!pastedTitle.trim() || !pastedText.trim()) {
-            toast({ title: "Missing Information", description: "Please provide a title and content.", variant: 'destructive' });
+            toast({ title: t('builder.academicSolver.toasts.missingInfoToastTitle'), description: t('builder.academicSolver.toasts.missingInfoToastDesc'), variant: 'destructive' });
             return;
         }
         onContentAdded(`${pastedTitle}.md`, pastedText);
@@ -100,9 +100,9 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                     </TabsContent>
                     <TabsContent value="paste" className="mt-4 space-y-2">
                         <Label htmlFor="paste-title">{t('builder.academicSolver.uploaders.pasteTitle')}</Label>
-                        <Input id="paste-title" placeholder="e.g., Chapter 1 Notes" value={pastedTitle} onChange={e => setPastedTitle(e.target.value)} />
+                        <Input id="paste-title" placeholder={t('builder.academicSolver.uploaders.titlePlaceholder')} value={pastedTitle} onChange={e => setPastedTitle(e.target.value)} />
                         <Label htmlFor="paste-content">{t('builder.academicSolver.uploaders.pasteContent')}</Label>
-                        <Textarea id="paste-content" placeholder="Paste your text or markdown here..." value={pastedText} onChange={e => setPastedText(e.target.value)} rows={5} />
+                        <Textarea id="paste-content" placeholder={t('builder.academicSolver.uploaders.contentPlaceholder')} value={pastedText} onChange={e => setPastedText(e.target.value)} rows={5} />
                         <Button onClick={handleAddPastedText} size="sm">{t('builder.academicSolver.uploaders.addButton')}</Button>
                     </TabsContent>
                 </Tabs>
@@ -111,7 +111,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
                 
                 {uploadedContent.length > 0 && (
                     <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-semibold">Uploaded Content:</h4>
+                        <h4 className="text-sm font-semibold">{t('builder.academicSolver.toasts.uploadedContext')}</h4>
                         <ScrollArea className="h-24 w-full rounded-md border p-2">
                             <div className="space-y-1">
                                 {uploadedContent.map((item, index) => (
