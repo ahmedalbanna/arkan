@@ -1,4 +1,3 @@
-
 {
   "header": {
     "title": "Arkan",
@@ -43,6 +42,33 @@
   "writingTools": {
     "pageTitle": "AI Writing Tools",
     "pageSubtitle": "A suite of powerful AI tools to enhance your writing and research.",
+    "textStylist": {
+      "pageTitle": "TextStylist.ai",
+      "pageSubtitle": "Refine your writing by rewriting text in various styles or summarizing it to a specific length.",
+      "yourTextLabel": "Your Text",
+      "aiToolsTitle": "AI Tools",
+      "aiToolsDescription": "Use the tools below to refine your text.",
+      "rewriteTitle": "Rewrite Text",
+      "styleLabel": "Style",
+      "stylePlaceholder": "Select a style...",
+      "styleNone": "None",
+      "rewriteButton": "Rewrite",
+      "summarizeTitle": "Summarize Text",
+      "compressionRatioLabel": "Compression Ratio",
+      "summarizeButton": "Summarize",
+      "comparisonTitle": "Comparison",
+      "comparisonDescription": "View your original text and the AI-processed version.",
+      "sideBySideTab": "Side-by-side",
+      "diffTab": "Diff",
+      "copyButton": "Copy",
+      "originalTextLabel": "Original Text",
+      "originalTextPlaceholder": "Your original text will appear here once you process it.",
+      "processedTextLabel": "Processed Text",
+      "processedTextPlaceholder": "Your processed text will appear here...",
+      "changesLabel": "Changes",
+      "toastStyleRequired": "Style required",
+      "toastStyleRequiredDesc": "Please select a style to rewrite the text."
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
@@ -922,8 +948,7 @@
         "translateAllStarted": "Bulk Translation Started",
         "translateAllStartedDesc": "Translating all sections. This may take a moment...",
         "translateAllSuccess": "Translation Complete",
-        "translateAllSuccessDesc": "All sections have been successfully translated.",
-        "deleteSectionConfirmation": "Are you sure you want to delete the '{sectionName}' section? This action cannot be undone."
+        "translateAllSuccessDesc": "All sections have been successfully translated."
       }
     },
     "diagramGenerator": {

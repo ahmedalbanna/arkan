@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import type { RewriteTextOutput, DiffPart } from '@/lib/types';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { computeDiff } from '@/lib/diff';
+import { useLocalization } from '@/context/LocalizationContext';
 
 
 const formSchema = z.object({
@@ -54,6 +55,7 @@ const DiffView = ({ diff }: { diff: DiffPart[] }) => {
 }
 
 export function AITextTune() {
+  const { t } = useLocalization();
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState('');
   const [diff, setDiff] = useState<DiffPart[] | null>(null);
@@ -72,7 +74,7 @@ export function AITextTune() {
 
   const onSubmitRewrite = (data: FormValues) => {
     if (!data.style || data.style === 'None') {
-      toast({ title: 'Style required', description: 'Please select a style to rewrite the text.', variant: 'destructive' });
+      toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: t('writingTools.textStylist.toastStyleRequiredDesc'), variant: 'destructive' });
       return;
     }
     setOriginalText(data.text);
@@ -112,7 +114,7 @@ export function AITextTune() {
         <CardContent className="p-6">
           <form className="space-y-4">
              <div className="space-y-2">
-                <Label htmlFor="input-text" className="text-lg font-semibold">Your Text</Label>
+                <Label htmlFor="input-text" className="text-lg font-semibold">{t('writingTools.textStylist.yourTextLabel')}</Label>
                 <Textarea
                     id="input-text"
                     {...form.register('text')}
@@ -129,24 +131,24 @@ export function AITextTune() {
       
       <Card>
         <CardHeader>
-            <CardTitle>AI Tools</CardTitle>
-            <CardDescription>Use the tools below to refine your text.</CardDescription>
+            <CardTitle>{t('writingTools.textStylist.aiToolsTitle')}</CardTitle>
+            <CardDescription>{t('writingTools.textStylist.aiToolsDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <form onSubmit={form.handleSubmit(onSubmitRewrite)} className="space-y-4">
-                <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5"/> Rewrite Text</h3>
+                <h3 className="font-semibold flex items-center gap-2"><Wand2 className="h-5 w-5"/> {t('writingTools.textStylist.rewriteTitle')}</h3>
                 <div className="space-y-2">
-                    <Label htmlFor="style-select">Style</Label>
+                    <Label htmlFor="style-select">{t('writingTools.textStylist.styleLabel')}</Label>
                     <Controller
                     name="style"
                     control={form.control}
                     render={({ field }) => (
                         <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isProcessing}>
                         <SelectTrigger id="style-select">
-                            <SelectValue placeholder="Select a style..." />
+                            <SelectValue placeholder={t('writingTools.textStylist.stylePlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="None">None</SelectItem>
+                            <SelectItem value="None">{t('writingTools.textStylist.styleNone')}</SelectItem>
                             {styles.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
                         </Select>
@@ -155,15 +157,15 @@ export function AITextTune() {
                 </div>
                 <Button type="submit" disabled={isProcessing} className="w-full">
                     {rewriteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                    Rewrite
+                    {t('writingTools.textStylist.rewriteButton')}
                 </Button>
             </form>
 
             <form onSubmit={form.handleSubmit(onSubmitSummarize)} className="space-y-4">
-                <h3 className="font-semibold flex items-center gap-2"><BookOpenText className="h-5 w-5"/> Summarize Text</h3>
+                <h3 className="font-semibold flex items-center gap-2"><BookOpenText className="h-5 w-5"/> {t('writingTools.textStylist.summarizeTitle')}</h3>
                 <div className="space-y-2">
                     <div className="flex justify-between">
-                        <Label>Compression Ratio</Label>
+                        <Label>{t('writingTools.textStylist.compressionRatioLabel')}</Label>
                         <Badge variant="outline">{compressionRatio}%</Badge>
                     </div>
                     <Slider
@@ -175,7 +177,7 @@ export function AITextTune() {
                 </div>
                 <Button type="submit" disabled={isProcessing} className="w-full">
                     {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
-                    Summarize
+                    {t('writingTools.textStylist.summarizeButton')}
                 </Button>
             </form>
         </CardContent>
@@ -186,15 +188,15 @@ export function AITextTune() {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>Comparison</CardTitle>
-                        <CardDescription>View your original text and the AI-processed version.</CardDescription>
+                        <CardTitle>{t('writingTools.textStylist.comparisonTitle')}</CardTitle>
+                        <CardDescription>{t('writingTools.textStylist.comparisonDescription')}</CardDescription>
                     </div>
                      <div className="flex items-center gap-2">
                         {diff && (
                              <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)}>
                                 <TabsList>
-                                    <TabsTrigger value="side-by-side">Side-by-side</TabsTrigger>
-                                    <TabsTrigger value="diff">Diff</TabsTrigger>
+                                    <TabsTrigger value="side-by-side">{t('writingTools.textStylist.sideBySideTab')}</TabsTrigger>
+                                    <TabsTrigger value="diff">{t('writingTools.textStylist.diffTab')}</TabsTrigger>
                                 </TabsList>
                              </Tabs>
                         )}
@@ -208,15 +210,15 @@ export function AITextTune() {
                  {activeView === 'side-by-side' ? (
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="input-text">Original Text</Label>
+                            <Label htmlFor="input-text">{t('writingTools.textStylist.originalTextLabel')}</Label>
                             <ScrollArea className="h-72 rounded-md border p-4 bg-background">
                                 <div className="prose dark:prose-invert max-w-none text-sm">
-                                    <ReactMarkdown components={markdownComponents}>{originalText || "Your original text will appear here once you process it."}</ReactMarkdown>
+                                    <ReactMarkdown components={markdownComponents}>{originalText || t('writingTools.textStylist.originalTextPlaceholder')}</ReactMarkdown>
                                 </div>
                             </ScrollArea>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="output-text">Processed Text</Label>
+                            <Label htmlFor="output-text">{t('writingTools.textStylist.processedTextLabel')}</Label>
                             <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
                                 {isProcessing ? (
                                     <div className="flex items-center justify-center h-full">
@@ -224,7 +226,7 @@ export function AITextTune() {
                                     </div>
                                 ) : (
                                     <div className="prose dark:prose-invert max-w-none text-sm">
-                                        <ReactMarkdown components={markdownComponents}>{processedText || "Your processed text will appear here..."}</ReactMarkdown>
+                                        <ReactMarkdown components={markdownComponents}>{processedText || t('writingTools.textStylist.processedTextPlaceholder')}</ReactMarkdown>
                                     </div>
                                 )}
                             </ScrollArea>
@@ -232,7 +234,7 @@ export function AITextTune() {
                     </div>
                  ) : (
                     <div className="space-y-2">
-                        <Label>Changes</Label>
+                        <Label>{t('writingTools.textStylist.changesLabel')}</Label>
                         <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
                            {isProcessing ? (
                                 <div className="flex items-center justify-center h-full">
