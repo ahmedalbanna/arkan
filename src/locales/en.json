@@ -162,6 +162,37 @@
       "toastFileFailed": "File Processing Failed",
       "toastAnalysisFailed": "Analysis Failed"
     },
+    "paraphraser": {
+      "pageTitle": "AI Paraphraser",
+      "pageSubtitle": "Rewrite your text in different styles to enhance clarity, fluency, or creativity.",
+      "cardTitle": "Paraphrasing Tool",
+      "cardDescription": "Enter the text you want to rewrite, select a mode, and let the AI do the rest.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "placeholder": "Paste your text here...",
+      "dropzoneHint": "Drag 'n' drop a file here, or click to select a file",
+      "supportedFiles": "Supported: PDF, TXT, MD",
+      "processingFile": "Processing file...",
+      "modeLabel": "Mode",
+      "modePlaceholder": "Select a paraphrasing mode",
+      "modes": {
+        "standard": "Standard",
+        "fluent": "Fluent",
+        "formal": "Formal",
+        "creative": "Creative",
+        "simplify": "Simplify"
+      },
+      "buttonText": "Paraphrase Text",
+      "originalLabel": "Original Text",
+      "processedLabel": "Paraphrased Text",
+      "toastSuccess": "Paraphrasing successful!",
+      "toastError": "Error",
+      "toastAuthError": "Authentication Error",
+      "toastAuthErrorDesc": "You must be logged in to process files.",
+      "toastFileProcessed": "File Processed",
+      "toastFileProcessedDesc": "Text extracted from {fileName}.",
+      "toastFileFailed": "File Processing Failed"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",

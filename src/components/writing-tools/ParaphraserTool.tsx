@@ -20,6 +20,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const paraphraserSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters to paraphrase.'),
@@ -29,6 +30,7 @@ const paraphraserSchema = z.object({
 type ParaphraserFormValues = z.infer<typeof paraphraserSchema>;
 
 export function ParaphraserTool() {
+  const { t } = useLocalization();
   const [originalText, setOriginalText] = useState('');
   const [paraphrasedText, setParaphrasedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
@@ -46,7 +48,7 @@ export function ParaphraserTool() {
     if (!file) return;
 
     if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
+        toast({ title: t('writingTools.paraphraser.toastAuthError'), description: t('writingTools.paraphraser.toastAuthErrorDesc'), variant: "destructive" });
         return;
     }
 
@@ -58,14 +60,14 @@ export function ParaphraserTool() {
         const token = await firebaseUser.getIdToken();
         const result = await processFileApi(formData, token);
         form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}.` });
+        toast({ title: t('writingTools.paraphraser.toastFileProcessed'), description: t('writingTools.paraphraser.toastFileProcessedDesc').replace('{fileName}', file.name) });
         refetchUser();
     } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
+        toast({ title: t('writingTools.paraphraser.toastFileFailed'), description: error.message, variant: "destructive" });
     } finally {
         setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [firebaseUser, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -82,10 +84,10 @@ export function ParaphraserTool() {
     paraphraseMutation.mutate(data, {
       onSuccess: (result) => {
         setParaphrasedText(result.paraphrasedText);
-        toast({ title: 'Paraphrasing successful!' });
+        toast({ title: t('writingTools.paraphraser.toastSuccess') });
       },
       onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+        toast({ title: t('writingTools.paraphraser.toastError'), description: error.message, variant: 'destructive' });
       },
     });
   };
@@ -102,22 +104,22 @@ export function ParaphraserTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Paraphrasing Tool</CardTitle>
-        <CardDescription>Enter the text you want to rewrite, select a mode, and let the AI do the rest.</CardDescription>
+        <CardTitle>{t('writingTools.paraphraser.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.paraphraser.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           
            <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                    <TabsTrigger value="paste">{t('writingTools.paraphraser.pasteTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('writingTools.paraphraser.uploadTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="pt-4">
                      <Textarea
                         {...form.register('text')}
                         rows={8}
-                        placeholder="Paste your text here..."
+                        placeholder={t('writingTools.paraphraser.placeholder')}
                         className="resize-none"
                         />
                 </TabsContent>
@@ -126,11 +128,11 @@ export function ParaphraserTool() {
                         <input {...getInputProps()} />
                         <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                         {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.paraphraser.processingFile')}</p>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.paraphraser.dropzoneHint')}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.paraphraser.supportedFiles')}</p>
                     </div>
                 </TabsContent>
             </Tabs>
@@ -138,21 +140,21 @@ export function ParaphraserTool() {
           
 
           <div className="space-y-2">
-            <Label htmlFor="paraphrase-mode">Mode</Label>
+            <Label htmlFor="paraphrase-mode">{t('writingTools.paraphraser.modeLabel')}</Label>
             <Controller
               name="mode"
               control={form.control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger id="paraphrase-mode">
-                    <SelectValue placeholder="Select a paraphrasing mode" />
+                    <SelectValue placeholder={t('writingTools.paraphraser.modePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="fluent">Fluent</SelectItem>
-                    <SelectItem value="formal">Formal</SelectItem>
-                    <SelectItem value="creative">Creative</SelectItem>
-                    <SelectItem value="simplify">Simplify</SelectItem>
+                    <SelectItem value="standard">{t('writingTools.paraphraser.modes.standard')}</SelectItem>
+                    <SelectItem value="fluent">{t('writingTools.paraphraser.modes.fluent')}</SelectItem>
+                    <SelectItem value="formal">{t('writingTools.paraphraser.modes.formal')}</SelectItem>
+                    <SelectItem value="creative">{t('writingTools.paraphraser.modes.creative')}</SelectItem>
+                    <SelectItem value="simplify">{t('writingTools.paraphraser.modes.simplify')}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -161,21 +163,21 @@ export function ParaphraserTool() {
 
           <Button type="submit" disabled={paraphraseMutation.isPending || isUploading} className="w-full">
             {paraphraseMutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Paraphrase Text
+            {t('writingTools.paraphraser.buttonText')}
           </Button>
         </form>
 
         {(paraphraseMutation.isPending || paraphrasedText) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t">
             <div className="space-y-2">
-              <h3 className="font-semibold text-muted-foreground">Original Text</h3>
+              <h3 className="font-semibold text-muted-foreground">{t('writingTools.paraphraser.originalLabel')}</h3>
               <ScrollArea className="h-64 rounded-md border p-4">
                  <div className="prose dark:prose-invert max-w-none text-sm"><ReactMarkdown components={markdownComponents}>{originalText}</ReactMarkdown></div>
               </ScrollArea>
             </div>
             <div className="space-y-2">
                <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
-                <span>Paraphrased Text</span>
+                <span>{t('writingTools.paraphraser.processedLabel')}</span>
                  <Button variant="ghost" size="icon" onClick={handleCopy}>
                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>

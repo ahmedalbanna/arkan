@@ -162,6 +162,37 @@
       "toastFileFailed": "فشل معالجة الملف",
       "toastAnalysisFailed": "فشل التحليل"
     },
+    "paraphraser": {
+      "pageTitle": "معيد الصياغة بالذكاء الاصطناعي",
+      "pageSubtitle": "أعد كتابة نصك بأنماط مختلفة لتعزيز الوضوح أو الطلاقة أو الإبداع.",
+      "cardTitle": "أداة إعادة الصياغة",
+      "cardDescription": "أدخل النص الذي تريد إعادة كتابته، وحدد وضعًا، ودع الذكاء الاصطناعي يقوم بالباقي.",
+      "pasteTab": "لصق النص",
+      "uploadTab": "تحميل ملف",
+      "placeholder": "الصق النص هنا...",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر للتحديد",
+      "supportedFiles": "يدعم: PDF، TXT، MD",
+      "processingFile": "جارٍ معالجة الملف...",
+      "modeLabel": "الوضع",
+      "modePlaceholder": "حدد وضع إعادة الصياغة",
+      "modes": {
+        "standard": "قياسي",
+        "fluent": "بطلاقة",
+        "formal": "رسمي",
+        "creative": "إبداعي",
+        "simplify": "تبسيط"
+      },
+      "buttonText": "إعادة صياغة النص",
+      "originalLabel": "النص الأصلي",
+      "processedLabel": "النص المعاد صياغته",
+      "toastSuccess": "تمت إعادة الصياغة بنجاح!",
+      "toastError": "خطأ",
+      "toastAuthError": "خطأ في المصادقة",
+      "toastAuthErrorDesc": "يجب عليك تسجيل الدخول لمعالجة الملفات.",
+      "toastFileProcessed": "تمت معالجة الملف",
+      "toastFileProcessedDesc": "تم استخراج النص من {fileName}.",
+      "toastFileFailed": "فشل معالجة الملف"
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
@@ -1178,21 +1209,21 @@
         "guidelines": "الإرشادات:"
       },
       "tooltips": {
-        "viewPlan": "عرض خطة الإنشاء",
-        "noContent": "يرجى تحديد أو تحميل محتوى لإنشاء عرض تقديمي."
+        "viewPlan": "View Generation Plan",
+        "noContent": "Please select or upload content to generate a presentation."
       },
-      "sourceDocuments": "مستندات المصدر",
-      "selectExistingContext": "تحديد السياق الحالي",
-      "uploadNewContext": "تحميل سياق جديد",
-      "generationSettings": "إعدادات الإنشاء",
-      "advancedSettings": "إعدادات متقدمة",
-      "promptAndGuidelines": "المطالبة والإرشادات",
-      "toneEnthusiastic": "حماسي",
-      "complexity": "التعقيد",
-      "complexityDefault": "افتراضي",
-      "complexitySummary": "ملخص عالي المستوى",
-      "complexityDetailed": "مفصل",
-      "complexityTechnical": "تقني"
+      "sourceDocuments": "Source Documents",
+      "selectExistingContext": "Select Existing Context",
+      "uploadNewContext": "Upload New Context",
+      "generationSettings": "Generation Settings",
+      "advancedSettings": "Advanced Settings",
+      "promptAndGuidelines": "Prompt & Guidelines",
+      "toneEnthusiastic": "Enthusiastic",
+      "complexity": "Complexity",
+      "complexityDefault": "Default",
+      "complexitySummary": "High-level Summary",
+      "complexityDetailed": "Detailed",
+      "complexityTechnical": "Technical"
     },
     "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",
@@ -1298,7 +1329,7 @@
         "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
         "analysisFailed": "فشل التحليل",
         "analysisSaved": "تم حفظ التحليل",
-        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك.",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
         "fileReadError": "خطأ في قراءة الملف",
         "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
         "fileAdded": "تمت إضافة الملف",
