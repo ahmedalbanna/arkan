@@ -63,7 +63,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-full items-start">
             <div className="lg:col-span-3 border-r h-full">
                  <CardHeader className="p-4 border-b">
-                    <CardTitle className="font-headline text-lg">Report Sections</CardTitle>
+                    <CardTitle className="font-headline text-lg">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2">
                     <ScrollArea className="h-[calc(80vh-100px)]">
@@ -86,14 +86,14 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                <AlertDialogTitle>{t('projects.deleteDialogTitle')}</AlertDialogTitle>
                                                 <AlertDialogDescription>
-                                                    This will permanently delete the "{t(sectionConfig[key].title)}" section. This action cannot be undone.
+                                                    {t('builder.reportGenerator.toasts.deleteSectionConfirmation').replace('{sectionName}', t(sectionConfig[key].title))}
                                                 </AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => removeSection(key)}>Delete</AlertDialogAction>
+                                                <AlertDialogCancel>{t('projects.cancelButton')}</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => removeSection(key)}>{t('projects.deleteButton')}</AlertDialogAction>
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
@@ -108,8 +108,8 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                     <div className="p-4">
                         <Tabs defaultValue="view" className="w-full">
                             <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="view">View & Edit</TabsTrigger>
-                                <TabsTrigger value="evaluation">Evaluation</TabsTrigger>
+                                <TabsTrigger value="view">{t('builder.Section.viewEditTab')}</TabsTrigger>
+                                <TabsTrigger value="evaluation">{t('builder.Section.evaluationTab')}</TabsTrigger>
                             </TabsList>
                             <TabsContent value="view" className="mt-4">
                                 <Section
@@ -131,7 +131,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                     </div>
                  ) : (
                     <div className="flex h-full items-center justify-center text-muted-foreground min-h-[400px]">
-                        <p>Select a section from the left to view or edit it.</p>
+                        <p>{t('builder.reportGenerator.selectSectionPrompt')}</p>
                     </div>
                  )}
             </div>

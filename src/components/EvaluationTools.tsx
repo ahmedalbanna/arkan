@@ -36,14 +36,14 @@ export const EvaluationTools = () => {
         if (file && file.type === 'application/pdf') {
             setPdfFile(file);
         } else if (file) {
-            toast({ title: 'Invalid File', description: 'Please select a PDF file.', variant: 'destructive' });
+            toast({ title: t('builder.toasts.invalidFile'), description: t('builder.reportGenerator.toasts.pdfOnly'), variant: 'destructive' });
             setPdfFile(null);
         }
     };
 
     const handleProcessPdf = async () => {
         if (!pdfFile || !firebaseUser) {
-             toast({ title: "Authentication Error", description: "You must be logged in to process a file.", variant: 'destructive' });
+             toast({ title: t('builder.toasts.authError'), description: t('builder.reportGenerator.toasts.loginToProcess'), variant: 'destructive' });
             return
         };
         setIsProcessingPdf(true);
@@ -62,7 +62,7 @@ export const EvaluationTools = () => {
             queryClient.invalidateQueries({ queryKey: ['user'] }); // Invalidate user to refetch credits
             toast({ title: t('builder.reportGenerator.toasts.fileProcessed'), description: t('builder.reportGenerator.toasts.fileProcessedDesc') });
         } catch (error: any) {
-            toast({ title: 'Error', description: error.message, variant: 'destructive' });
+            toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
         } finally {
             setIsProcessingPdf(false);
         }
@@ -71,7 +71,7 @@ export const EvaluationTools = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: "You must be logged in to evaluate a report.", variant: 'destructive' });
+            toast({ title: t('builder.toasts.authError'), description: t('builder.reportGenerator.toasts.loginToEvaluate'), variant: 'destructive' });
             return;
         }
         if (!criteria.trim()) {

@@ -104,7 +104,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">Original ({locale === 'en' ? 'English' : 'Arabic'})</h4>
+                    <h4 className="font-semibold text-sm">{t('builder.Section.originalLabel')} ({locale === 'en' ? 'English' : 'Arabic'})</h4>
                     <Card className="h-64">
                         <ScrollArea className="h-full">
                             <div className="p-4 prose dark:prose-invert max-w-none text-sm">
@@ -114,13 +114,13 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
                     </Card>
                 </div>
                 <div className="space-y-2">
-                     <h4 className="font-semibold text-sm">Translation ({locale === 'en' ? 'Arabic' : 'English'})</h4>
+                     <h4 className="font-semibold text-sm">{t('builder.Section.translationLabel')} ({locale === 'en' ? 'Arabic' : 'English'})</h4>
                     <Card className="h-64">
                         <ScrollArea className="h-full">
                             <div className="p-4 prose dark:prose-invert max-w-none text-sm">
                                {translateMutation.isPending && <Loader2 className="h-5 w-5 animate-spin" />}
                                {!translateMutation.isPending && translatedContent && <ReactMarkdown components={markdownComponents}>{translatedContent}</ReactMarkdown>}
-                               {!translateMutation.isPending && !translatedContent && <p className="text-xs text-muted-foreground">Click translate to see the result here.</p>}
+                               {!translateMutation.isPending && !translatedContent && <p className="text-xs text-muted-foreground">{t('builder.Section.translatePlaceholder')}</p>}
                             </div>
                         </ScrollArea>
                     </Card>
@@ -128,7 +128,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
             </div>
              <Button onClick={handleTranslate} disabled={translateMutation.isPending}>
                 {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRightLeft className="mr-2 h-4 w-4" />}
-                Translate
+                {t('builder.Section.translateButton')}
             </Button>
         </div>
     )
@@ -159,7 +159,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             setAiSuggestion(data.rewrittenText);
             setDiff(computeDiff(content, data.rewrittenText));
             refetchUser();
-            toast({ title: "Suggestion Ready", description: "The AI has provided a suggestion." });
+            toast({ title: t('builder.Section.toasts.suggestionReadyTitle'), description: t('builder.Section.toasts.suggestionReadyDesc') });
         },
         onError: (error: Error) => {
             const isCreditError = error.message.toLowerCase().includes('credit');
@@ -180,7 +180,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 setDiff(computeDiff(content, data.rewrittenText));
                 refetchUser();
             },
-            onError: (error) => toast({ title: "Rewrite Failed", description: error.message, variant: "destructive"})
+            onError: (error) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive"})
         });
     }
 
@@ -193,7 +193,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                 setDiff(computeDiff(content, data.humanizedText));
                 refetchUser();
             },
-            onError: (error) => toast({ title: "Humanize Failed", description: error.message, variant: "destructive"})
+            onError: (error) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive"})
         });
     }
 
@@ -228,7 +228,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             onSuccess: (data) => {
                 setAudioSrc(data.audioDataUri);
                 setShowAudioPlayer(true);
-                toast({ title: "Reading Aloud", description: "Audio generation successful."});
+                toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc')});
             },
         });
     };
@@ -252,14 +252,14 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         <Tabs defaultValue="view">
             <div className="flex justify-between items-center mb-2">
                 <TabsList>
-                    <TabsTrigger value="view">View</TabsTrigger>
-                    <TabsTrigger value="edit">Edit</TabsTrigger>
-                    <TabsTrigger value="translate">Translate</TabsTrigger>
+                    <TabsTrigger value="view">{t('builder.Section.viewTab')}</TabsTrigger>
+                    <TabsTrigger value="edit">{t('builder.Section.editTab')}</TabsTrigger>
+                    <TabsTrigger value="translate">{t('builder.Section.translateTab')}</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center text-xs text-muted-foreground">
-                    <span>{words} words</span>
+                    <span>{words} {t('builder.Section.words')}</span>
                     <span className="mx-2">|</span>
-                    <span>{chars} characters</span>
+                    <span>{chars} {t('builder.Section.characters')}</span>
                  </div>
             </div>
             <TabsContent value="view">
@@ -312,12 +312,12 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                     <span tabIndex={0}> {/* Wrapper for disabled button */}
                                         <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={true}>
                                             <Volume2 className="h-4 w-4 mr-2" />
-                                            Read Aloud
+                                            {t('builder.Section.readAloud')}
                                         </Button>
                                     </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>Coming Soon!</p>
+                                    <p>{t('builder.toasts.comingSoon')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
@@ -325,25 +325,25 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
-                                    <Wand2 className="h-4 w-4 mr-2" /> AI Actions
+                                    <Wand2 className="h-4 w-4 mr-2" /> {t('builder.Section.aiActions.title')}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleAiAction('Summarize this text concisely.')}><BookText className="mr-2 h-4 w-4" />Summarize</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction('Expand on this topic, adding more detail.')}><Maximize className="mr-2 h-4 w-4" />Expand</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction('Correct any grammar and spelling mistakes.')}><SpellCheck className="mr-2 h-4 w-4" />Check Grammar</DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="mr-2 h-4 w-4" />Humanize</DropdownMenuItem>
-                                <DropdownMenuItem><GitCommitVertical className="mr-2 h-4 w-4" />Version History</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.summarizePrompt'))}><BookText className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.summarize')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.expandPrompt'))}><Maximize className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.expand')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))}><SpellCheck className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.checkGrammar')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
+                                <DropdownMenuItem><GitCommitVertical className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.versionHistory')}</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />Rewrite</DropdownMenuSubTrigger>
+                                    <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
                                      <DropdownMenuSubContent>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>Formal</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>Friendly</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>Simple</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Creative')}>Creative</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Professional')}>Professional</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleRewriteAction('Academic')}>Academic</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Simple')}>{t('builder.Section.aiActions.styles.simple')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Creative')}>{t('builder.Section.aiActions.styles.creative')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Professional')}>{t('builder.Section.aiActions.styles.professional')}</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleRewriteAction('Academic')}>{t('builder.Section.aiActions.styles.academic')}</DropdownMenuItem>
                                     </DropdownMenuSubContent>
                                 </DropdownMenuSub>
                             </DropdownMenuContent>

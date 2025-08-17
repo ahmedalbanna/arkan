@@ -87,7 +87,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                 </div>
             </div>
             <div className="space-y-2 p-4 border rounded-lg">
-                <h4 className="font-semibold">Summary & Feedback</h4>
+                <h4 className="font-semibold">{t('builder.reportGenerator.summaryAndFeedback')}</h4>
                 <p className="text-sm text-muted-foreground">{evaluation.summary}</p>
                 <ul className="space-y-4 text-sm list-none pt-4 mt-4 border-t">
                     {evaluation.feedback.map((item, index) => {
@@ -110,7 +110,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                                             disabled={generationMutation.isPending && generationMutation.variables?.body.sectionToGenerate === item.sectionKey}
                                         >
                                             <Wand2 className="mr-2 h-4 w-4"/>
-                                            Fix with AI
+                                            {t('builder.reportGenerator.fixWithAi')}
                                         </Button>
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
             <div className="pt-4 flex justify-end">
                 <Button variant="outline" onClick={() => setEvaluation(null)}>
                     <RefreshCw className="mr-2 h-4 w-4" />
-                    Re-evaluate
+                    {t('builder.reportGenerator.reevaluate')}
                 </Button>
             </div>
         </div>
