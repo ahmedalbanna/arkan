@@ -136,7 +136,7 @@ export default function AcademicSolver() {
             </RadioGroup>
 
              <AcademicUploaders
-                title="Questions Document"
+                title={t('builder.academicSolver.questionsDocument')}
                 onContentAdded={addQuestionDocument}
                 onContentRemoved={removeQuestionDocument}
                 isProcessing={isProcessing}
@@ -145,7 +145,7 @@ export default function AcademicSolver() {
              />
              
              <AcademicUploaders
-                title="Context/Syllabus Document (Optional)"
+                title={t('builder.academicSolver.contextSyllabus')}
                 onContentAdded={addExternalContext}
                 onContentRemoved={removeExternalContext}
                 isProcessing={isProcessing}
@@ -163,7 +163,7 @@ export default function AcademicSolver() {
             </Button>
         </CardContent>
         <CardFooter>
-             <Button onClick={resetCurrent} variant="outline" className="w-full">New Session</Button>
+             <Button onClick={resetCurrent} variant="outline" className="w-full">{t('builder.academicSolver.newSession')}</Button>
         </CardFooter>
     </Card>
   );
@@ -174,12 +174,12 @@ export default function AcademicSolver() {
           <CardHeader>
              <div className="flex justify-between items-start">
                   <div>
-                      <CardTitle>{analyzedDocument ? analyzedDocument.subject : "Academic Document"}</CardTitle>
-                      <CardDescription>{analyzedDocument ? analyzedDocument.title : "Upload a file and analyze to begin"}</CardDescription>
+                      <CardTitle>{analyzedDocument ? analyzedDocument.subject : t('builder.academicSolver.documentTitle')}</CardTitle>
+                      <CardDescription>{analyzedDocument ? analyzedDocument.title : t('builder.academicSolver.begin')}</CardDescription>
                   </div>
                    <TabsList>
-                      <TabsTrigger value="analysis">Analysis</TabsTrigger>
-                      <TabsTrigger value="solution" disabled={stage !== 'solved' && stage !== 'solving'}>Solution</TabsTrigger>
+                      <TabsTrigger value="analysis">{t('builder.academicSolver.analysisTab')}</TabsTrigger>
+                      <TabsTrigger value="solution" disabled={stage !== 'solved' && stage !== 'solving'}>{t('builder.academicSolver.solutionTab')}</TabsTrigger>
                   </TabsList>
              </div>
           </CardHeader>
@@ -239,10 +239,10 @@ export default function AcademicSolver() {
               </CardContent>
               <CardFooter className="flex gap-2">
                 <Button onClick={handleExportDocx} disabled={stage !== 'solved'} className="flex-1">
-                    <FileText className="mr-2 h-4 w-4" /> Export DOCX
+                    <FileText className="mr-2 h-4 w-4" /> {t('builder.academicSolver.exportDocx')}
                 </Button>
                 <Button onClick={() => alert("PDF Export coming soon!")} disabled={stage !== 'solved'} className="flex-1">
-                    <Download className="mr-2 h-4 w-4" /> Export PDF
+                    <Download className="mr-2 h-4 w-4" /> {t('builder.academicSolver.exportPdf')}
                 </Button>
               </CardFooter>
            </TabsContent>

@@ -1079,7 +1079,7 @@
     "academicSolver": {
       "pageTitle": "AI Academic Solver",
       "pageSubtitle": "Upload a document, and let the AI analyze and solve it for you.",
-      "uploadCardTitle": "Upload Academic Document (PDF)",
+      "uploadCardTitle": "Upload Academic Document",
       "examType": "Exam",
       "homeworkType": "Homework",
       "uploadLabel": "Select PDF File",
@@ -1141,6 +1141,22 @@
         "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "Missing Information",
         "missingInfoToastDesc": "Please provide both content and a name for the context."
+      },
+      "questionsDocument": "Questions Document",
+      "contextSyllabus": "Context/Syllabus Document (Optional)",
+      "newSession": "New Session",
+      "documentTitle": "Academic Document",
+      "begin": "Upload a file and analyze to begin",
+      "analysisTab": "Analysis",
+      "solutionTab": "Solution",
+      "exportDocx": "Export DOCX",
+      "exportPdf": "Export PDF",
+      "uploaders": {
+        "title": "Title",
+        "dropzoneHint": "Drag 'n' drop, or click to select files",
+        "pasteTitle": "Title",
+        "pasteContent": "Content",
+        "addButton": "Add Text"
       }
     }
   }

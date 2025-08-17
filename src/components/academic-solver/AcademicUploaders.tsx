@@ -31,6 +31,7 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
     const { toast } = useToast();
     const { firebaseUser, refetchUser } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const { t } = useLocalization();
 
     const onDrop = useCallback(async (acceptedFiles: File[]) => {
         setIsLoading(true);
@@ -86,23 +87,22 @@ export const AcademicUploaders = ({ title, onContentAdded, onContentRemoved, isP
             <CardContent className="p-4 pt-0">
                 <Tabs defaultValue="upload">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="upload">Upload File</TabsTrigger>
-                        <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                        <TabsTrigger value="upload">{t('builder.academicSolver.uploaders.uploadFile')}</TabsTrigger>
+                        <TabsTrigger value="paste">{t('builder.academicSolver.uploaders.pasteText')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="upload" className="mt-4">
                         <div {...getRootProps()} className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer ${isDragActive ? 'border-primary' : ''}`}>
                             <input {...getInputProps()} />
                             <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop, or click to select files</p>
-                            <p className="text-xs text-muted-foreground">PDF, JPG, PNG supported</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.uploaders.dropzoneHint')}</p>
                         </div>
                     </TabsContent>
                     <TabsContent value="paste" className="mt-4 space-y-2">
-                        <Label htmlFor="paste-title">Title</Label>
+                        <Label htmlFor="paste-title">{t('builder.academicSolver.uploaders.pasteTitle')}</Label>
                         <Input id="paste-title" placeholder="e.g., Chapter 1 Notes" value={pastedTitle} onChange={e => setPastedTitle(e.target.value)} />
-                        <Label htmlFor="paste-content">Content</Label>
+                        <Label htmlFor="paste-content">{t('builder.academicSolver.uploaders.pasteContent')}</Label>
                         <Textarea id="paste-content" placeholder="Paste your text or markdown here..." value={pastedText} onChange={e => setPastedText(e.target.value)} rows={5} />
-                        <Button onClick={handleAddPastedText} size="sm">Add Text</Button>
+                        <Button onClick={handleAddPastedText} size="sm">{t('builder.academicSolver.uploaders.addButton')}</Button>
                     </TabsContent>
                 </Tabs>
                 
