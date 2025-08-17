@@ -562,6 +562,10 @@
       "idPlaceholder": "على سبيل المثال، my-corporate-style",
       "namePlaceholder": "على سبيل المثال، My Corporate Style"
     },
+    "docxDialog": {
+      "title": "إنشاء قالب DOCX جديد",
+      "description": "تحديد قالب نمط جديد لصادرات DOCX. سيتم تهيئته بنمط \"حديث\" كأساس."
+    },
     "deleteDialog": {
       "title": "هل أنت متأكد؟",
       "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف قالب '{templateName}' نهائيًا.",
@@ -1013,7 +1017,13 @@
       "uploadNewContext": "تحميل سياق جديد",
       "generationSettings": "إعدادات الإنشاء",
       "advancedSettings": "إعدادات متقدمة",
-      "promptAndGuidelines": "المطالبة والإرشادات"
+      "promptAndGuidelines": "المطالبة والإرشادات",
+      "toneEnthusiastic": "حماسي",
+      "complexity": "التعقيد",
+      "complexityDefault": "افتراضي",
+      "complexitySummary": "ملخص عالي المستوى",
+      "complexityDetailed": "مفصل",
+      "complexityTechnical": "تقني"
     },
     "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",
@@ -1117,7 +1127,7 @@
         "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
         "analysisFailed": "فشل التحليل",
         "analysisSaved": "تم حفظ التحليل",
-        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك.",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
         "fileReadError": "خطأ في قراءة الملف",
         "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
         "fileAdded": "تمت إضافة الملف",

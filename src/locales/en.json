@@ -562,6 +562,10 @@
       "idPlaceholder": "e.g., my-corporate-style",
       "namePlaceholder": "e.g., My Corporate Style"
     },
+    "docxDialog": {
+      "title": "Create New DOCX Template",
+      "description": "Define a new style template for DOCX exports. It will be initialized with the \"Modern\" style as a base."
+    },
     "deleteDialog": {
       "title": "Are you sure?",
       "description": "This action cannot be undone. This will permanently delete the \"{templateName}\" template.",
@@ -1013,7 +1017,13 @@
       "uploadNewContext": "Upload New Context",
       "generationSettings": "Generation Settings",
       "advancedSettings": "Advanced Settings",
-      "promptAndGuidelines": "Prompt & Guidelines"
+      "promptAndGuidelines": "Prompt & Guidelines",
+      "toneEnthusiastic": "Enthusiastic",
+      "complexity": "Complexity",
+      "complexityDefault": "Default",
+      "complexitySummary": "High-level Summary",
+      "complexityDetailed": "Detailed",
+      "complexityTechnical": "Technical"
     },
     "Section": {
       "aiSuggestion": "AI Suggestion",

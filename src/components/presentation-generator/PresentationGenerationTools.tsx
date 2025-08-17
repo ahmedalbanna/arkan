@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -281,7 +282,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                     <SelectContent>
                                                         <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
                                                         <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                                                        <SelectItem value="enthusiastic">Enthusiastic</SelectItem>
+                                                        <SelectItem value="enthusiastic">{t('builder.presentationGenerator.toneEnthusiastic')}</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
