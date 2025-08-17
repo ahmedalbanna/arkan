@@ -16,6 +16,7 @@ import { Label } from '../ui/label';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useMutation } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {
     const response = await fetch('/api/summarize-project', {
@@ -35,6 +36,7 @@ async function summarizeProposalForPlanApi(proposal: any, token: string): Promis
 
 
 export default function ProjectPlanGenerator() {
+  const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, userProfile } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
@@ -98,20 +100,20 @@ export default function ProjectPlanGenerator() {
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle>Project Planning</CardTitle>
+              <CardTitle>{t('builder.projectPlan.title')}</CardTitle>
                <Button variant="ghost" size="sm" onClick={() => suggestionMutation.mutate()} disabled={!proposal || isProcessing}>
                 <BrainCircuit className="mr-2 h-4 w-4" />
-                AI Suggest
+                {t('builder.projectPlan.aiSuggest')}
               </Button>
             </div>
-            <CardDescription>Generate an actionable project plan from your project's description and key deliverables.</CardDescription>
+            <CardDescription>{t('builder.projectPlan.description')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="plan-description">Project Description</Label>
+                <Label htmlFor="plan-description">{t('builder.projectPlan.projectDescriptionLabel')}</Label>
                 <Textarea 
                     id="plan-description"
-                    placeholder="Describe the main goals and purpose of the project."
+                    placeholder={t('builder.projectPlan.projectDescriptionPlaceholder')}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={6}
@@ -119,10 +121,10 @@ export default function ProjectPlanGenerator() {
                 />
             </div>
              <div className="space-y-2">
-                <Label htmlFor="plan-deliverables">Key Deliverables / Features</Label>
+                <Label htmlFor="plan-deliverables">{t('builder.projectPlan.keyDeliverablesLabel')}</Label>
                 <Textarea 
                     id="plan-deliverables"
-                    placeholder="List the main features or outcomes, one per line."
+                    placeholder={t('builder.projectPlan.keyDeliverablesPlaceholder')}
                     value={deliverables}
                     onChange={(e) => setDeliverables(e.target.value)}
                     rows={4}
@@ -131,7 +133,7 @@ export default function ProjectPlanGenerator() {
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
               {planGenerationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generate Plan ({creditCost} Credits)
+              {t('builder.projectPlan.generateButton', { creditCost })}
             </Button>
           </CardContent>
         </Card>
@@ -141,7 +143,7 @@ export default function ProjectPlanGenerator() {
           <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
               <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
-              <p>AI is analyzing your input and building the plan...</p>
+              <p>{t('builder.projectPlan.generatingToast')}</p>
             </div>
           </Card>
         )}
@@ -152,8 +154,8 @@ export default function ProjectPlanGenerator() {
             <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
                 <GanttChartSquare className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">Project Plan Will Appear Here</h3>
-                <p>Fill out the description and deliverables, then click "Generate Plan" to create an actionable project plan.</p>
+                <h3 className="text-lg font-semibold">{t('builder.projectPlan.emptyStateTitle')}</h3>
+                <p>{t('builder.projectPlan.emptyStateDescription')}</p>
               </div>
             </Card>
           )

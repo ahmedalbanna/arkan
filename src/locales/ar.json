@@ -717,18 +717,35 @@
       "generationSuccessDesc": "تم إنشاء {item} بنجاح.",
       "insufficientCredits": "أرصدة غير كافية. يرجى شراء المزيد من الأرصدة للمتابعة."
     },
+    "projectPlan": {
+        "title": "تخطيط المشروع",
+        "aiSuggest": "اقتراح الذكاء الاصطناعي",
+        "description": "أنشئ خطة مشروع قابلة للتنفيذ من وصف مشروعك ومخرجاته الرئيسية.",
+        "projectDescriptionLabel": "وصف المشروع",
+        "projectDescriptionPlaceholder": "صف الأهداف والغرض الرئيسي للمشروع.",
+        "keyDeliverablesLabel": "المخرجات / الميزات الرئيسية",
+        "keyDeliverablesPlaceholder": "اذكر الميزات أو النتائج الرئيسية، كل منها في سطر.",
+        "generateButton": "إنشاء خطة ({creditCost} أرصدة)",
+        "generatingToast": "يقوم الذكاء الاصطناعي بتحليل مدخلاتك وبناء الخطة...",
+        "emptyStateTitle": "ستظهر خطة المشروع هنا",
+        "emptyStateDescription": "املأ الوصف والمخرجات، ثم انقر فوق \"إنشاء خطة\" لإنشاء خطة مشروع قابلة للتنفيذ.",
+        "viewerTitle": "خطة تنفيذ المشروع",
+        "viewerDescription": "تفصيل تفصيلي للمراحل والمهام ومعايير القبول التي أنشأها الذكاء الاصطناعي.",
+        "acceptanceCriteria": "معايير القبول"
+    },
     "proposalGenerator": {
+      "title": "صف فكرة مشروعك",
+      "placeholder": "تقرير تدريبي عن تقنيات تحليل البيانات الجديدة في القطاع المصرفي.",
+      "generatedTitle": "العرض الذي تم إنشاؤه",
+      "generatedDescription": "مراجعة وتعديل التفاصيل التي تم إنشاؤها أدناه.",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDescription": "صقل تعليمات الذكاء الاصطناعي.",
       "templateLabel": "قالب العرض",
-      "generateButton": "إنشاء عرض",
-      "generationSettings": "إعدادات الإنشاء",
-      "mainSubjectLabel": "الموضوع الرئيسي أو الفكرة",
       "customGuidelinesLabel": "إرشادات مخصصة",
       "addGuidelinePlaceholder": "إضافة إرشادات مخصصة...",
-      "generatedTitle": "العرض الذي تم إنشاؤه",
-      "generatedDescription": "مراجعة وتعديل التفاصيل التي تم إنشاؤها أدناه.",
-      "emptyState": "سيظهر عرض مشروعك الذي تم إنشاؤه هنا."
+      "generateButton": "إنشاء عرض",
+      "generationSettings": "إعدادات الإنشاء",
+      "mainSubjectLabel": "الموضوع الرئيسي أو الفكرة"
     },
     "proposalViewer": {
       "objective": "الهدف",
