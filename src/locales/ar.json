@@ -784,6 +784,7 @@
       "resultsTitle": "محتوى التقرير",
       "resultsDesc": "مراجعة وإدارة أقسام تقريرك التي تم إنشاؤها.",
       "selectSectionPrompt": "حدد قسمًا من اليسار لعرض محتواه أو تعديله.",
+      "deleteSectionConfirmation": "هل أنت متأكد أنك تريد حذف قسم '{sectionName}'؟ لا يمكن التراجع عن هذا الإجراء.",
       "emptyStateTitle": "سيظهر محتوى التقرير هنا",
       "emptyStateDesc": "استخدم أدوات الإنشاء لإنشاء أقسام لتقريرك.",
       "actionsTitle": "الإجراءات",
@@ -900,6 +901,9 @@
       "generateButton": "إنشاء",
       "disabledTooltip": "هذا الوكيل معطل",
       "updateDiagram": "تحديث الرسم البياني",
+      "view": "عرض",
+      "edit": "تعديل",
+      "explain": "شرح",
       "diagrams": {
         "useCase": "رسم تخطيطي لحالة الاستخدام",
         "class": "رسم تخطيطي للفئة",
@@ -920,7 +924,12 @@
         "download": "تنزيل الصورة",
         "copy": "نسخ الكود",
         "copied": "تم النسخ!",
-        "openRenderer": "فتح العارض عبر الإنترنت"
+        "openRenderer": "فتح العارض عبر الإنترنت",
+        "noContext": "يرجى تحديد سياق (مثل الاقتراح) لإنشاء هذا الرسم التخطيطي.",
+        "explanationReady": "الشرح جاهز",
+        "explanationFailed": "فشل الشرح",
+        "explaining": "يقوم الذكاء الاصطناعي بتحليل الرسم التخطيطي...",
+        "explanationPlaceholder": "انقر فوق الزر \"شرح\" مرة أخرى لإنشاء شرح."
       }
     },
     "codeGenerator": {

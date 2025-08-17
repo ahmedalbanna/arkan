@@ -4,7 +4,7 @@
 import React from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
@@ -173,7 +173,7 @@ export const DiagramGenerationTools = () => {
                                                     </TooltipContent>
                                                 ) : !hasSelectedContext ? (
                                                     <TooltipContent>
-                                                        <p>Please select a context (like the proposal) to generate this diagram.</p>
+                                                        <p>{t('builder.diagramGenerator.tooltips.noContext')}</p>
                                                     </TooltipContent>
                                                 ) : null}
                                             </Tooltip>

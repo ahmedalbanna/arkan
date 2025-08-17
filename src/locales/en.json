@@ -876,7 +876,8 @@
         "translateAllStarted": "Bulk Translation Started",
         "translateAllStartedDesc": "Translating all sections. This may take a moment...",
         "translateAllSuccess": "Translation Complete",
-        "translateAllSuccessDesc": "All sections have been successfully translated."
+        "translateAllSuccessDesc": "All sections have been successfully translated.",
+        "deleteSectionConfirmation": "Are you sure you want to delete the '{sectionName}' section? This action cannot be undone."
       }
     },
     "diagramGenerator": {
@@ -900,6 +901,9 @@
       "generateButton": "Generate",
       "disabledTooltip": "This agent is disabled",
       "updateDiagram": "Update Diagram",
+      "view": "View",
+      "edit": "Edit",
+      "explain": "Explain",
       "diagrams": {
         "useCase": "Use Case Diagram",
         "class": "Class Diagram",
@@ -920,7 +924,12 @@
         "download": "Download Image",
         "copy": "Copy Code",
         "copied": "Copied!",
-        "openRenderer": "Open Online Renderer"
+        "openRenderer": "Open Online Renderer",
+        "noContext": "Please select a context (like the proposal) to generate this diagram.",
+        "explanationReady": "Explanation Ready",
+        "explanationFailed": "Explanation Failed",
+        "explaining": "The AI is analyzing the diagram...",
+        "explanationPlaceholder": "Click the \"Explain\" button again to generate an explanation."
       }
     },
     "codeGenerator": {

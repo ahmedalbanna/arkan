@@ -84,10 +84,10 @@ export default function DiagramViewer({
                      explainMutation.mutate(base64data, {
                         onSuccess: (data) => {
                             onExplanationSave(data.explanation);
-                            toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
+                            toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
                         },
                         onError: (error) => {
-                            toast({ title: "Explanation Failed", description: error.message, variant: "destructive" });
+                            toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: "destructive" });
                             setViewMode('image'); // Go back to image view on error
                         }
                     });
@@ -125,13 +125,13 @@ export default function DiagramViewer({
                                 {explainMutation.isPending ? (
                                     <div className="text-center p-8 text-muted-foreground">
                                         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                                        <p>The AI is analyzing the diagram...</p>
+                                        <p>{t('builder.diagramGenerator.tooltips.explaining')}</p>
                                    </div>
                                 ) : diagramData.explanation ? (
                                     <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
                                 ) : (
                                     <div className="text-center p-8 text-muted-foreground">
-                                        <p>Click the "Explain" button again to generate an explanation.</p>
+                                        <p>{t('builder.diagramGenerator.tooltips.explanationPlaceholder')}</p>
                                    </div>
                                 )}
                             </div>
@@ -142,21 +142,21 @@ export default function DiagramViewer({
              <div className="flex items-center justify-between p-2 border-t bg-background rounded-b-lg">
                 <div className="flex items-center gap-1">
                     <Button variant={viewMode === 'image' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('image')}>
-                        <Eye className="h-4 w-4 mr-2"/> View
+                        <Eye className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.view')}
                     </Button>
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
-                        <PenSquare className="h-4 w-4 mr-2"/> Edit
+                        <PenSquare className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.edit')}
                     </Button>
                     <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={explainMutation.isPending}>
                         {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2"/>}
-                        Explain
+                        {t('builder.diagramGenerator.explain')}
                     </Button>
                 </div>
                  <div className="flex items-center gap-1">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} type="button" aria-label="Copy Code">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy} type="button" aria-label={t('builder.diagramGenerator.tooltips.copy')}>
                                     {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
@@ -166,7 +166,7 @@ export default function DiagramViewer({
                      <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isDownloading} aria-label="Download Image">
+                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDownload} disabled={isDownloading} aria-label={t('builder.diagramGenerator.tooltips.download')}>
                                     {isDownloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                                 </Button>
                             </TooltipTrigger>
@@ -180,7 +180,7 @@ export default function DiagramViewer({
                             disabled={isUpdating || isReadOnly}
                             >
                             {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                            Update Diagram
+                            {t('builder.diagramGenerator.updateDiagram')}
                         </Button>
                     )}
                  </div>
