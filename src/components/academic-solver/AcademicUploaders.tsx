@@ -17,6 +17,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import type { ExternalContext } from '@/hooks/useReportStore';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface AcademicUploadersProps {
     title: string;
