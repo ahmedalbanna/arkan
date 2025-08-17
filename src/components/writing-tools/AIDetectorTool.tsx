@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const aiDetectorSchema = z.object({
   text: z.string().min(100, 'Please enter at least 100 characters for an accurate analysis.'),
@@ -30,6 +31,7 @@ interface AIAnalysisResult {
 }
 
 export function AIDetectorTool() {
+  const { t } = useLocalization();
   const mutation = useDetectAiContent();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
@@ -56,14 +58,14 @@ export function AIDetectorTool() {
         const token = await firebaseUser.getIdToken();
         const result = await processFileApi(formData, token);
         form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}. You can now start the analysis.` });
+        toast({ title: t('writingTools.aiDetector.toastFileProcessed'), description: t('writingTools.aiDetector.toastFileExtracted').replace('{fileName}', file.name) });
         refetchUser(); // Update credits
     } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
+        toast({ title: t('writingTools.aiDetector.toastFileFailed'), description: error.message, variant: "destructive" });
     } finally {
         setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [firebaseUser, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -78,7 +80,7 @@ export function AIDetectorTool() {
   const onSubmit = async (data: AIDetectorFormValues) => {
     mutation.mutate({ text: data.text }, {
         onError: (error) => {
-            toast({ title: "Analysis Failed", description: error.message, variant: 'destructive' });
+            toast({ title: t('writingTools.aiDetector.toastAnalysisFailed'), description: error.message, variant: 'destructive' });
         }
     });
   };
@@ -94,22 +96,22 @@ export function AIDetectorTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Content Analyzer</CardTitle>
-        <CardDescription>Paste your text or upload a file. Our AI will analyze it and provide a probability score of it being AI-generated.</CardDescription>
+        <CardTitle>{t('writingTools.aiDetector.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.aiDetector.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                    <TabsTrigger value="paste">{t('writingTools.aiDetector.pasteTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('writingTools.aiDetector.uploadTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="pt-4">
                      <Textarea
                         id="text-to-analyze"
                         {...form.register('text')}
                         rows={12}
-                        placeholder="Enter text to analyze for AI generation..."
+                        placeholder={t('writingTools.aiDetector.placeholder')}
                         className="resize-none"
                         />
                 </TabsContent>
@@ -118,11 +120,11 @@ export function AIDetectorTool() {
                         <input {...getInputProps()} />
                         <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                         {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.aiDetector.processingFile')}</p>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select a file</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.aiDetector.dropzoneHint')}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.aiDetector.supportedFiles')}</p>
                     </div>
                 </TabsContent>
             </Tabs>
@@ -131,7 +133,7 @@ export function AIDetectorTool() {
 
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
             {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Analyze Text
+            {t('writingTools.aiDetector.analyzeButton')}
           </Button>
         </form>
 
@@ -139,7 +141,7 @@ export function AIDetectorTool() {
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing linguistic patterns...
+                    {t('writingTools.aiDetector.analyzing')}
                 </div>
                 <Progress value={50} className="w-full" />
             </div>
@@ -147,10 +149,10 @@ export function AIDetectorTool() {
 
         {result && (
           <div className="space-y-4 pt-6 border-t">
-            <h3 className="font-semibold text-lg">Analysis Report</h3>
+            <h3 className="font-semibold text-lg">{t('writingTools.aiDetector.reportTitle')}</h3>
             <Card className="bg-muted/50">
                 <CardContent className="p-4 flex flex-col items-center justify-center text-center gap-2">
-                    <p className="text-sm font-medium text-muted-foreground">AI-Generated Content Probability</p>
+                    <p className="text-sm font-medium text-muted-foreground">{t('writingTools.aiDetector.probabilityScore')}</p>
                     <div className={`text-6xl font-bold ${getScoreColor(result.score)}`}>
                         {result.score}%
                     </div>

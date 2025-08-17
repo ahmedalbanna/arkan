@@ -142,6 +142,26 @@
       "processedLabel": "Humanized Text",
       "toastSuccess": "Text successfully humanized!"
     },
+    "aiDetector": {
+      "pageTitle": "AI Content Detector",
+      "pageSubtitle": "Analyze text to determine the likelihood that it was written by AI.",
+      "cardTitle": "AI Content Analyzer",
+      "cardDescription": "Paste your text or upload a file. Our AI will analyze it and provide a probability score of it being AI-generated.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "placeholder": "Enter text to analyze for AI generation...",
+      "dropzoneHint": "Drag 'n' drop a file here, or click to select a file",
+      "supportedFiles": "Supported: PDF, TXT, MD",
+      "processingFile": "Processing file...",
+      "analyzeButton": "Analyze Text",
+      "analyzing": "Analyzing linguistic patterns...",
+      "reportTitle": "Analysis Report",
+      "probabilityScore": "AI-Generated Content Probability",
+      "toastFileProcessed": "File Processed",
+      "toastFileExtracted": "Text extracted from {fileName}. You can now start the analysis.",
+      "toastFileFailed": "File Processing Failed",
+      "toastAnalysisFailed": "Analysis Failed"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
