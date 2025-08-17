@@ -768,7 +768,7 @@
       "risks": "Risks and Mitigations",
       "risk": "Risk:",
       "mitigation": "Mitigation:",
-      "aiSuggestion": "AI SUGGESTION",
+      "aiSuggestion": "AI Suggestion",
       "reject": "Reject",
       "accept": "Accept"
     },
@@ -865,6 +865,7 @@
         "appendices": "Appendices"
       },
       "toasts": {
+        "invalidFile": "Invalid file type. Please upload a PDF.",
         "evaluationComplete": "Evaluation Complete!",
         "evaluationFailed": "Evaluation Failed",
         "evaluationSkipped": "Evaluation Skipped",
@@ -1167,6 +1168,52 @@
       },
       "creditLabel": "Credit",
       "creditLabelPlural": "Credits"
+    },
+    "files": {
+      "fileManagerTitle": "File Manager",
+      "fileManagerDesc": "Upload and manage all contextual files for your project here.",
+      "uploadFilesTab": "Upload Files",
+      "pasteTextTab": "Paste Text",
+      "dropzoneLabel": "Drag & drop files here, or click to select",
+      "dropzoneHint": "PDF, DOCX, TXT, MD, Images (Max 5MB)",
+      "analystAgentTitle": "Analyst Agent",
+      "analystAgentDesc": "Ask a question or give an instruction based on the managed context files. The AI will generate a structured response.",
+      "analystAgentPromptLabel": "Your Prompt",
+      "analystAgentPromptPlaceholder": "e.g., 'List all project stakeholders and their main interests.'",
+      "analystAgentRunButton": "Run Analysis ({creditCost} Credits)",
+      "generatedReportTitle": "Generated Report",
+      "viewJsonButton": "View JSON",
+      "jsonOutputTitle": "Raw JSON Output",
+      "saveResultButton": "Save Result as Context File",
+      "reportPlaceholder": "Your AI's analysis will appear here as a formatted report.",
+      "pasteText": {
+        "titleLabel": "Context Name",
+        "titlePlaceholder": "e.g., Requirements Document, API Specs",
+        "contentLabel": "Paste Text or Markdown",
+        "contentPlaceholder": "Paste your content here...",
+        "addButton": "Add as Context"
+      },
+      "toasts": {
+        "contextRequired": "Context Required",
+        "contextRequiredDesc": "Please upload at least one context file to analyze.",
+        "analysisComplete": "Analysis Complete",
+        "analysisCompleteDesc": "The AI has analyzed the context and generated structured data.",
+        "analysisFailed": "Analysis Failed",
+        "analysisSaved": "Analysis Saved",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
+        "fileReadError": "File Read Error",
+        "fileReadErrorDesc": "Could not read the selected file.",
+        "fileAdded": "File Added",
+        "fileAddedDesc": "{fileName} has been added to context.",
+        "processingFile": "Processing file...",
+        "dropHere": "Drop the files here...",
+        "uploadedContext": "UPLOADED CONTEXT",
+        "noContext": "No context files uploaded yet.",
+        "missingInfoToastTitle": "Missing Information",
+        "missingInfoToastDesc": "Please provide both content and a name for the context."
+      }
     }
   }
 }
+
+    

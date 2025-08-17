@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { UploadManager } from "./UploadManager";
-import AnalystAgent from "./AnalystAgent"; // Assuming AnalystAgent is extracted
+import AnalystAgent from "./AnalystAgent"; 
 
 export default function FileManager() {
   return (
@@ -17,3 +17,5 @@ export default function FileManager() {
     </div>
   );
 }
+
+    

@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { useProject } from '@/hooks/use-projects';
 import ProjectChat from '@/components/chat/ProjectChat';
 import { formatDistanceToNow } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 
 const LoadingSkeleton = () => (
@@ -85,7 +86,7 @@ async function markOnboardingComplete(userId: string, token: string) {
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
   const { proposal, currentProjectId, loadState, name: projectName, projectIdea } = useBuilderStore();
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
   const { features, isLoaded: featuresLoaded } = useFeatures();
@@ -168,14 +169,14 @@ function GeneratePageContent() {
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
           <div className="flex-1 space-y-1 overflow-auto">
              <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>
-              {projectName || 'New Project'}
+              {projectName || t('projects.untitled')}
             </h1>
             <p className="text-sm text-muted-foreground truncate" title={projectIdea}>
-              {projectIdea || 'No description provided.'}
+              {projectIdea || t('projects.noDescription')}
             </p>
              {projectData?.updatedAt && (
               <p className="text-xs text-muted-foreground">
-                Last updated: {formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true })}
+                {t('projects.updated', { time: formatDistanceToNow(new Date(projectData.updatedAt), { addSuffix: true, locale: locale === 'ar' ? ar : enUS }) })}
               </p>
             )}
           </div>
@@ -270,4 +271,5 @@ export default function GeneratePage() {
     )
 }
 
+    
     

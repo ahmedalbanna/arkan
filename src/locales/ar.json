@@ -306,7 +306,7 @@
     "projectDeletedToastDesc": "تم حذف المشروع بنجاح.",
     "deleteFailedToastTitle": "فشل الحذف",
     "noDescription": "لا يوجد وصف متاح.",
-    "untitled": "بدون عنوان",
+    "untitled": "مشروع بدون عنوان",
     "updated": "تم التحديث {time}"
   },
   "signup": {
@@ -865,6 +865,7 @@
         "appendices": "الملاحق"
       },
       "toasts": {
+        "invalidFile": "Invalid file type. Please upload a PDF.",
         "evaluationComplete": "اكتمل التقييم!",
         "evaluationFailed": "فشل التقييم",
         "evaluationSkipped": "تم تخطي التقييم",
@@ -1167,6 +1168,52 @@
       },
       "creditLabel": "رصيد",
       "creditLabelPlural": "أرصدة"
+    },
+    "files": {
+      "fileManagerTitle": "إدارة الملفات",
+      "fileManagerDesc": "قم بإدارة جميع الملفات السياقية لمشروعك هنا.",
+      "uploadFilesTab": "تحميل الملفات",
+      "pasteTextTab": "لصق النص",
+      "dropzoneLabel": "اسحب وأفلت الملفات هنا، أو انقر للتحديد",
+      "dropzoneHint": "PDF, DOCX, TXT, MD, Images (Max 5MB)",
+      "analystAgentTitle": "وكيل المحلل",
+      "analystAgentDesc": "اطرح سؤالاً أو أعط تعليمات بناءً على ملفات السياق المدارة. سيقوم الذكاء الاصطناعي بإنشاء استجابة منظمة.",
+      "analystAgentPromptLabel": "مطالبتك",
+      "analystAgentPromptPlaceholder": "على سبيل المثال، 'اذكر جميع أصحاب المصلحة في المشروع واهتماماتهم الرئيسية.'",
+      "analystAgentRunButton": "تشغيل التحليل ({creditCost} أرصدة)",
+      "generatedReportTitle": "التقرير الذي تم إنشاؤه",
+      "viewJsonButton": "عرض JSON",
+      "jsonOutputTitle": "إخراج JSON الخام",
+      "saveResultButton": "حفظ النتيجة كملف سياق",
+      "reportPlaceholder": "سيظهر تحليل الذكاء الاصطناعي الخاص بك هنا كتقرير منسق.",
+      "pasteText": {
+        "titleLabel": "اسم السياق",
+        "titlePlaceholder": "على سبيل المثال، وثيقة المتطلبات، مواصفات واجهة برمجة التطبيقات",
+        "contentLabel": "لصق النص أو Markdown",
+        "contentPlaceholder": "الصق المحتوى الخاص بك هنا...",
+        "addButton": "إضافة كسياق"
+      },
+      "toasts": {
+        "contextRequired": "السياق مطلوب",
+        "contextRequiredDesc": "يرجى تحميل ملف سياق واحد على الأقل لتحليله.",
+        "analysisComplete": "اكتمل التحليل",
+        "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
+        "analysisFailed": "فشل التحليل",
+        "analysisSaved": "تم حفظ التحليل",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
+        "fileReadError": "File Read Error",
+        "fileReadErrorDesc": "Could not read the selected file.",
+        "fileAdded": "تمت إضافة الملف",
+        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
+        "processingFile": "جارٍ معالجة الملف...",
+        "dropHere": "أفلت الملفات هنا...",
+        "uploadedContext": "السياق الذي تم تحميله",
+        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
+        "missingInfoToastTitle": "معلومات ناقصة",
+        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى واسم للسياق."
+      }
     }
   }
 }
+
+    

@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { toast, useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
 import { useQueryClient } from '@tanstack/react-query';
@@ -66,7 +66,7 @@ function FileDropzone() {
 
     const processAndAddFile = async (file: File) => {
         if (!firebaseUser) {
-            toast({ title: t('builder.academicSolver.toasts.authError'), variant: "destructive" });
+            toast({ title: t('builder.toasts.authError'), variant: "destructive" });
             return;
         }
 
@@ -76,10 +76,10 @@ function FileDropzone() {
             const content = reader.result as string;
             // The type is initially 'context' and can be changed by the user.
             addExternalContext(file.name, content, 'context');
-            toast({ title: t('builder.academicSolver.toasts.fileAdded'), description: t('builder.academicSolver.toasts.fileAddedDesc').replace('{fileName}', file.name) });
+            toast({ title: t('builder.files.toasts.fileAdded'), description: t('builder.files.toasts.fileAddedDesc').replace('{fileName}', file.name) });
         };
         reader.onerror = () => {
-            toast({ title: t('builder.academicSolver.toasts.fileReadError'), description: t('builder.academicSolver.toasts.fileReadErrorDesc'), variant: "destructive" });
+            toast({ title: t('builder.files.toasts.fileReadError'), description: t('builder.files.toasts.fileReadErrorDesc'), variant: "destructive" });
         }
     };
     
@@ -90,7 +90,7 @@ function FileDropzone() {
            await processAndAddFile(file);
         }
         setIsLoading(false);
-    }, [firebaseUser, addExternalContext, toast]);
+    }, [firebaseUser, addExternalContext, toast, t]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
@@ -117,15 +117,15 @@ function FileDropzone() {
                 {isLoading ? (
                     <>
                         <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                        <p className="mt-2 text-sm text-muted-foreground">{t('builder.academicSolver.toasts.processingFile')}</p>
+                        <p className="mt-2 text-sm text-muted-foreground">{t('builder.files.toasts.processingFile')}</p>
                     </>
                 ) : (
                     <>
                         <UploadCloud className="h-10 w-10 text-muted-foreground" />
                         <p className="mt-2 text-sm font-semibold">
-                            {isDragActive ? t('builder.academicSolver.toasts.dropHere') : t('builder.academicSolver.dropzoneLabel')}
+                            {isDragActive ? t('builder.files.toasts.dropHere') : t('builder.files.dropzoneLabel')}
                         </p>
-                        <p className="text-xs text-muted-foreground">{t('builder.academicSolver.dropzoneHint')}</p>
+                        <p className="text-xs text-muted-foreground">{t('builder.files.dropzoneHint')}</p>
                     </>
                 )}
             </CardContent>
@@ -141,16 +141,16 @@ export function UploadManager() {
     return (
         <Card className="h-full flex flex-col">
           <CardHeader>
-            <CardTitle>{t('builder.academicSolver.fileManagerTitle')}</CardTitle>
+            <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
             <CardDescription>
-              {t('builder.academicSolver.fileManagerDesc')}
+              {t('builder.files.fileManagerDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex-grow flex flex-col gap-4">
             <Tabs defaultValue="upload" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">{t('builder.academicSolver.uploadFilesTab')}</TabsTrigger>
-                    <TabsTrigger value="text">{t('builder.academicSolver.pasteTextTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('builder.files.uploadFilesTab')}</TabsTrigger>
+                    <TabsTrigger value="text">{t('builder.files.pasteTextTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="upload" className="mt-4">
                     <FileDropzone />
@@ -162,7 +162,7 @@ export function UploadManager() {
             
             {externalContext && externalContext.length > 0 && (
                 <div className="space-y-2 flex-grow flex flex-col min-h-0">
-                    <h3 className="text-sm font-medium text-muted-foreground">{t('builder.academicSolver.toasts.uploadedContext')}</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">{t('builder.files.toasts.uploadedContext')}</h3>
                     <ScrollArea className="flex-grow border rounded-lg">
                         <ul className="space-y-1 list-none p-2">
                             {externalContext.map((item, index) => (
@@ -201,3 +201,5 @@ export function UploadManager() {
     </Card>
     );
 }
+
+    
