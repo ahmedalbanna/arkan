@@ -232,6 +232,19 @@
       "changesLabel": "Changes & Explanations",
       "noCorrections": "No corrections were needed."
     },
+    "aiQuizGenerator": {
+        "pageTitle": "AI Quiz Generator",
+        "pageSubtitle": "Turn any text into an engaging quiz with just a few clicks.",
+        "cardTitle": "Quiz Generator",
+        "cardDescription": "Enter text and the AI will create a multiple-choice quiz based on the content.",
+        "sourceTextLabel": "Source Text",
+        "placeholder": "Paste the article, notes, or any text you want to create a quiz from...",
+        "numQuestionsLabel": "Number of Questions",
+        "generateButton": "Generate Quiz",
+        "generatedQuizTitle": "Generated Quiz",
+        "showAnswers": "Show Answers",
+        "hideAnswers": "Hide Answers"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",

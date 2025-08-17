@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { Slider } from '../ui/slider';
 import { Badge } from '../ui/badge';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const quizGeneratorSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters to generate a meaningful quiz.'),
@@ -24,6 +25,7 @@ const quizGeneratorSchema = z.object({
 type QuizFormValues = z.infer<typeof quizGeneratorSchema>;
 
 export function QuizGeneratorTool() {
+  const { t } = useLocalization();
   const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
   const [showAnswers, setShowAnswers] = useState(false);
   const quizMutation = useGenerateQuiz();
@@ -50,18 +52,18 @@ export function QuizGeneratorTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Quiz Generator</CardTitle>
-        <CardDescription>Enter text and the AI will create a multiple-choice quiz based on the content.</CardDescription>
+        <CardTitle>{t('writingTools.aiQuizGenerator.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.aiQuizGenerator.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="text-to-quiz">Source Text</Label>
+            <Label htmlFor="text-to-quiz">{t('writingTools.aiQuizGenerator.sourceTextLabel')}</Label>
             <Textarea
               id="text-to-quiz"
               {...form.register('text')}
               rows={10}
-              placeholder="Paste the article, notes, or any text you want to create a quiz from..."
+              placeholder={t('writingTools.aiQuizGenerator.placeholder')}
               className="resize-none"
             />
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
@@ -73,7 +75,7 @@ export function QuizGeneratorTool() {
             render={({ field }) => (
                 <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                        <Label>Number of Questions</Label>
+                        <Label>{t('writingTools.aiQuizGenerator.numQuestionsLabel')}</Label>
                         <Badge variant="outline">{field.value}</Badge>
                     </div>
                     <Slider
@@ -89,7 +91,7 @@ export function QuizGeneratorTool() {
 
           <Button type="submit" disabled={quizMutation.isPending} className="w-full">
             {quizMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate Quiz
+            {t('writingTools.aiQuizGenerator.generateButton')}
           </Button>
         </form>
 
@@ -98,11 +100,11 @@ export function QuizGeneratorTool() {
             <div className="flex justify-between items-center">
                  <h3 className="font-semibold text-muted-foreground flex items-center gap-2">
                     <FileText className="h-5 w-5"/>
-                    Generated Quiz
+                    {t('writingTools.aiQuizGenerator.generatedQuizTitle')}
                 </h3>
                 {generatedQuiz.length > 0 && (
                     <Button variant="outline" size="sm" onClick={() => setShowAnswers(prev => !prev)}>
-                        {showAnswers ? 'Hide Answers' : 'Show Answers'}
+                        {showAnswers ? t('writingTools.aiQuizGenerator.hideAnswers') : t('writingTools.aiQuizGenerator.showAnswers')}
                     </Button>
                 )}
             </div>

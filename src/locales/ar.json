@@ -170,7 +170,7 @@
       "pasteTab": "لصق النص",
       "uploadTab": "تحميل ملف",
       "placeholder": "الصق النص هنا...",
-      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر للتحديد",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر لتحديد ملف",
       "supportedFiles": "يدعم: PDF، TXT، MD",
       "processingFile": "جارٍ معالجة الملف...",
       "modeLabel": "الوضع",
@@ -231,6 +231,19 @@
       "correctedLabel": "النص المصحح",
       "changesLabel": "التغييرات والتوضيحات",
       "noCorrections": "لم تكن هناك حاجة لتصحيحات."
+    },
+    "aiQuizGenerator": {
+      "pageTitle": "مولد الاختبارات بالذكاء الاصطناعي",
+      "pageSubtitle": "حوّل أي نص إلى اختبار جذاب ببضع نقرات.",
+      "cardTitle": "مولد الاختبارات",
+      "cardDescription": "أدخل النص وسيقوم الذكاء الاصطناعي بإنشاء اختبار متعدد الخيارات بناءً على المحتوى.",
+      "sourceTextLabel": "النص المصدر",
+      "placeholder": "الصق المقال أو الملاحظات أو أي نص تريد إنشاء اختبار منه...",
+      "numQuestionsLabel": "عدد الأسئلة",
+      "generateButton": "إنشاء اختبار",
+      "generatedQuizTitle": "الاختبار الذي تم إنشاؤه",
+      "showAnswers": "إظهار الإجابات",
+      "hideAnswers": "إخفاء الإجابات"
     },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
