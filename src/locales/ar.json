@@ -718,20 +718,20 @@
       "insufficientCredits": "أرصدة غير كافية. يرجى شراء المزيد من الأرصدة للمتابعة."
     },
     "projectPlan": {
-        "title": "تخطيط المشروع",
-        "aiSuggest": "اقتراح الذكاء الاصطناعي",
-        "description": "أنشئ خطة مشروع قابلة للتنفيذ من وصف مشروعك ومخرجاته الرئيسية.",
-        "projectDescriptionLabel": "وصف المشروع",
-        "projectDescriptionPlaceholder": "صف الأهداف والغرض الرئيسي للمشروع.",
-        "keyDeliverablesLabel": "المخرجات / الميزات الرئيسية",
-        "keyDeliverablesPlaceholder": "اذكر الميزات أو النتائج الرئيسية، كل منها في سطر.",
-        "generateButton": "إنشاء خطة ({creditCost} أرصدة)",
-        "generatingToast": "يقوم الذكاء الاصطناعي بتحليل مدخلاتك وبناء الخطة...",
-        "emptyStateTitle": "ستظهر خطة المشروع هنا",
-        "emptyStateDescription": "املأ الوصف والمخرجات، ثم انقر فوق \"إنشاء خطة\" لإنشاء خطة مشروع قابلة للتنفيذ.",
-        "viewerTitle": "خطة تنفيذ المشروع",
-        "viewerDescription": "تفصيل تفصيلي للمراحل والمهام ومعايير القبول التي أنشأها الذكاء الاصطناعي.",
-        "acceptanceCriteria": "معايير القبول"
+      "title": "تخطيط المشروع",
+      "aiSuggest": "اقتراح الذكاء الاصطناعي",
+      "description": "أنشئ خطة مشروع قابلة للتنفيذ من وصف مشروعك ومخرجاته الرئيسية.",
+      "projectDescriptionLabel": "وصف المشروع",
+      "projectDescriptionPlaceholder": "صف الأهداف والغرض الرئيسي للمشروع.",
+      "keyDeliverablesLabel": "المخرجات / الميزات الرئيسية",
+      "keyDeliverablesPlaceholder": "اذكر الميزات أو النتائج الرئيسية، كل منها في سطر.",
+      "generateButton": "إنشاء خطة ({creditCost} أرصدة)",
+      "generatingToast": "يقوم الذكاء الاصطناعي بتحليل مدخلاتك وبناء الخطة...",
+      "emptyStateTitle": "ستظهر خطة المشروع هنا",
+      "emptyStateDescription": "املأ الوصف والمخرجات، ثم انقر فوق \"إنشاء خطة\" لإنشاء خطة مشروع قابلة للتنفيذ.",
+      "viewerTitle": "خطة تنفيذ المشروع",
+      "viewerDescription": "تفصيل تفصيلي للمراحل والمهام ومعايير القبول التي أنشأها الذكاء الاصطناعي.",
+      "acceptanceCriteria": "معايير القبول"
     },
     "proposalGenerator": {
       "title": "صف فكرة مشروعك",
@@ -751,7 +751,7 @@
       "objective": "الهدف",
       "methodology": "المنهجية",
       "outcomes": "النتائج المتوقعة",
-      "criteria": "معايير النجاح والتقييم",
+      "successCriteria": "معايير النجاح والتقييم",
       "evaluationPlan": "خطة التقييم",
       "timeline": "الجدول الزمني",
       "startDate": "تاريخ البدء:",
@@ -782,6 +782,8 @@
       "noProposal": "لم يتم تحميل أي عرض",
       "noProposalDesc": "يرجى إنشاء عرض في \"وضع العرض\" أولاً، أو تحميل ملف مشروع.",
       "resultsTitle": "محتوى التقرير",
+      "resultsDesc": "مراجعة وإدارة أقسام تقريرك التي تم إنشاؤها.",
+      "selectSectionPrompt": "حدد قسمًا من اليسار لعرض محتواه أو تعديله.",
       "emptyStateTitle": "سيظهر محتوى التقرير هنا",
       "emptyStateDesc": "استخدم أدوات الإنشاء لإنشاء أقسام لتقريرك.",
       "actionsTitle": "الإجراءات",
@@ -804,6 +806,9 @@
       "processPdf": "معالجة",
       "evaluationResult": "نتيجة التقييم",
       "qualityScore": "درجة الجودة",
+      "summaryAndFeedback": "ملخص وملاحظات",
+      "fixWithAi": "إصلاح بالذكاء الاصطناعي",
+      "reevaluate": "إعادة التقييم",
       "evaluateReport": "تقييم التقرير",
       "guidelines": "الإرشادات",
       "customGuidelines": "إرشادات مخصصة",
@@ -870,7 +875,8 @@
         "translateAllStarted": "بدأت الترجمة المجمعة",
         "translateAllStartedDesc": "ترجمة جميع الأقسام. قد يستغرق هذا بعض الوقت...",
         "translateAllSuccess": "اكتملت الترجمة",
-        "translateAllSuccessDesc": "تمت ترجمة جميع الأقسام بنجاح."
+        "translateAllSuccessDesc": "تمت ترجمة جميع الأقسام بنجاح.",
+        "deleteSectionConfirmation": "هل أنت متأكد أنك تريد حذف قسم '{sectionName}'؟ لا يمكن التراجع عن هذا الإجراء."
       }
     },
     "diagramGenerator": {
@@ -992,10 +998,21 @@
       },
       "aiActions": {
         "summarize": "تلخيص",
+        "summarizePrompt": "لخص هذا النص بشكل موجز.",
         "expand": "توسيع",
+        "expandPrompt": "توسع في هذا الموضوع، مضيفًا المزيد من التفاصيل والشرح.",
         "rewrite": "إعادة كتابة",
         "checkGrammar": "تدقيق نحوي",
-        "translate": "ترجمة"
+        "checkGrammarPrompt": "صحح أي أخطاء إملائية ونحوية في هذا النص.",
+        "translate": "ترجمة",
+        "styles": {
+          "formal": "رسمي",
+          "friendly": "ودي",
+          "simple": "بسيط",
+          "creative": "إبداعي",
+          "professional": "احترافي",
+          "academic": "أكاديمي"
+        }
       },
       "editorActions": {
         "copyMd": "نسخ Markdown",
@@ -1007,8 +1024,27 @@
         "copied": "تم النسخ إلى الحافظة",
         "cleared": "تم مسح المحتوى",
         "translateSuccess": "اكتملت الترجمة!",
-        "translateFailed": "فشلت الترجمة"
-      }
+        "translateFailed": "فشلت الترجمة",
+        "suggestionReadyTitle": "الاقتراح جاهز",
+        "suggestionReadyDesc": "أنهى الذكاء الاصطناعي معالجة طلبك.",
+        "rewriteFailed": "فشلت إعادة الكتابة",
+        "humanizeFailed": "فشل التحويل إلى نص بشري",
+        "ttsSuccessTitle": "الصوت جاهز!",
+        "ttsSuccessDesc": "تم تحويل النص إلى كلام."
+      },
+      "viewTab": "عرض",
+      "editTab": "تعديل",
+      "translateTab": "ترجمة",
+      "words": "كلمات",
+      "characters": "حروف",
+      "readAloud": "قراءة بصوت عالٍ",
+      "originalLabel": "الأصلي",
+      "translationLabel": "الترجمة",
+      "translatePlaceholder": "ستظهر الترجمة هنا.",
+      "translateButton": "ترجمة",
+      "viewEditTab": "عرض وتعديل",
+      "evaluationTab": "تقييم",
+      "humanize": "تحويل إلى نص بشري"
     },
     "academicSolver": {
       "pageTitle": "الحلال الأكاديمي بالذكاء الاصطناعي",
