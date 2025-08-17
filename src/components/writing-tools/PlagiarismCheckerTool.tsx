@@ -14,12 +14,13 @@ import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { usePlagiarismCheck } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
-import type { ClaimStatus } from '@/ai/schemas';
+import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
 import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const plagiarismSchema = z.object({
   text: z.string().min(100, 'Please enter at least 100 characters for a plagiarism check.'),
@@ -29,6 +30,7 @@ type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
 
 
 export function PlagiarismCheckerTool() {
+  const { t } = useLocalization();
   const mutation = usePlagiarismCheck();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
@@ -43,7 +45,7 @@ export function PlagiarismCheckerTool() {
     if (!file) return;
 
     if (!firebaseUser) {
-        toast({ title: "Authentication Error", description: "You must be logged in to process files.", variant: "destructive" });
+        toast({ title: t('writingTools.plagiarismChecker.authErrorTitle'), description: t('writingTools.plagiarismChecker.authErrorDesc'), variant: "destructive" });
         return;
     }
 
@@ -55,14 +57,14 @@ export function PlagiarismCheckerTool() {
         const token = await firebaseUser.getIdToken();
         const result = await processFileApi(formData, token);
         form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}.` });
+        toast({ title: t('writingTools.plagiarismChecker.fileProcessedTitle'), description: t('writingTools.plagiarismChecker.fileProcessedDesc').replace('{fileName}', file.name) });
         refetchUser();
     } catch (error: any) {
-        toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
+        toast({ title: t('writingTools.plagiarismChecker.fileProcessingFailedTitle'), description: error.message, variant: "destructive" });
     } finally {
         setIsUploading(false);
     }
-  }, [firebaseUser, form, refetchUser, toast]);
+  }, [firebaseUser, form, refetchUser, toast, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -77,7 +79,7 @@ export function PlagiarismCheckerTool() {
   const onSubmit = async (data: PlagiarismFormValues) => {
     mutation.mutate({ text: data.text }, {
       onError: (error) => {
-        toast({ title: 'Plagiarism Check Failed', description: error.message, variant: 'destructive' });
+        toast({ title: t('writingTools.plagiarismChecker.checkFailedTitle'), description: error.message, variant: 'destructive' });
       }
     });
   };
@@ -87,21 +89,21 @@ export function PlagiarismCheckerTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Plagiarism Checker</CardTitle>
-        <CardDescription>Enter your text below to check it for potential plagiarism and ensure its originality.</CardDescription>
+        <CardTitle>{t('writingTools.plagiarismChecker.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.plagiarismChecker.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                    <TabsTrigger value="paste">{t('writingTools.plagiarismChecker.pasteTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('writingTools.plagiarismChecker.uploadTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="pt-4">
                      <Textarea
                         {...form.register('text')}
                         rows={12}
-                        placeholder="Paste your article, essay, or any text here..."
+                        placeholder={t('writingTools.plagiarismChecker.placeholder')}
                         className="resize-none"
                         disabled={mutation.isPending || isUploading}
                         />
@@ -111,11 +113,11 @@ export function PlagiarismCheckerTool() {
                         <input {...getInputProps()} />
                         <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                         {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.plagiarismChecker.processingFile')}</p>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.plagiarismChecker.dropzoneHint')}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.plagiarismChecker.supportedFiles')}</p>
                     </div>
                 </TabsContent>
             </Tabs>
@@ -123,7 +125,7 @@ export function PlagiarismCheckerTool() {
 
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
             {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
-            Check for Plagiarism
+            {t('writingTools.plagiarismChecker.checkButton')}
           </Button>
         </form>
 
@@ -131,29 +133,29 @@ export function PlagiarismCheckerTool() {
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Checking against billions of sources...
+                    {t('writingTools.plagiarismChecker.analyzing')}
                 </div>
             </div>
         )}
 
         {results && (
           <div className="space-y-4 pt-6 border-t">
-            <h3 className="font-semibold text-lg">Plagiarism Report</h3>
+            <h3 className="font-semibold text-lg">{t('writingTools.plagiarismChecker.reportTitle')}</h3>
             <Card className="bg-muted/50">
                 <CardContent className="p-4 flex items-center justify-center text-center gap-4">
                      <div className={`text-6xl font-bold ${getScoreColor(results.originalityScore)}`}>
                         {results.originalityScore}%
                     </div>
                     <div>
-                        <p className="font-semibold">Originality Score</p>
-                        <p className="text-xs text-muted-foreground">This score represents the percentage of your text that is unique.</p>
+                        <p className="font-semibold">{t('writingTools.plagiarismChecker.originalityScore')}</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.plagiarismChecker.originalityScoreDesc')}</p>
                     </div>
                 </CardContent>
             </Card>
             <div className="space-y-2">
-              <h4 className="font-semibold">Potential Matches Found</h4>
+              <h4 className="font-semibold">{t('writingTools.plagiarismChecker.matchesTitle')}</h4>
               <p className="text-sm text-muted-foreground">
-                We found potential matches from the following sources. Review them to ensure proper citation.
+                {t('writingTools.plagiarismChecker.matchesDescription')}
               </p>
                {results.matches.length > 0 ? (
                 <div className="space-y-4">
@@ -162,7 +164,7 @@ export function PlagiarismCheckerTool() {
                             <div className="flex justify-between items-start gap-4">
                                 <p className="font-semibold">{match.title}</p>
                                 <Badge variant={match.similarity > 75 ? 'destructive' : match.similarity > 50 ? 'secondary' : 'outline'}>
-                                  {match.similarity}% Match
+                                  {t('writingTools.plagiarismChecker.matchBadge').replace('{similarity}', match.similarity.toString())}
                                 </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground italic">"{match.summary}"</p>
@@ -173,8 +175,8 @@ export function PlagiarismCheckerTool() {
                     ))}
                 </div>
                 ) : (
-                  <div className="text-center text-muted-foreground p-8 border-dashed border-2 rounded-lg">
-                    <p>No direct matches found. The content appears to be original.</p>
+                  <div className="text-center text-muted-foreground py-8 border-dashed border-2 rounded-lg">
+                    <p>{t('writingTools.plagiarismChecker.noMatches')}</p>
                   </div>
                 )}
             </div>

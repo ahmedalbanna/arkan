@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "أركان",
@@ -101,6 +102,33 @@
       "documentationPlaceholder": "الصق أي سياق أو مقالات أو ملاحظات ذات صلة هنا لتوجيه إنشاء المخطط...",
       "generateButton": "إنشاء مخطط",
       "generatedOutline": "المخطط الذي تم إنشاؤه"
+    },
+    "plagiarismChecker": {
+      "pageTitle": "مدقق الانتحال بالذكاء الاصطناعي",
+      "pageSubtitle": "تحقق من نصك للكشف عن الانتحال المحتمل مقابل المصادر عبر الإنترنت.",
+      "cardTitle": "مدقق الانتحال",
+      "cardDescription": "أدخل النص الخاص بك أدناه للتحقق من الانتحال المحتمل وضمان أصالته.",
+      "pasteTab": "لصق النص",
+      "uploadTab": "تحميل ملف",
+      "placeholder": "الصق مقالتك أو أي نص هنا...",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر للتحديد",
+      "supportedFiles": "يدعم: PDF, TXT, MD",
+      "processingFile": "جارٍ معالجة الملف...",
+      "checkButton": "التحقق من الانتحال",
+      "analyzing": "جارٍ تحليل المطالبات والبحث عن المصادر...",
+      "reportTitle": "تقرير الانتحال",
+      "originalityScore": "درجة الأصالة",
+      "originalityScoreDesc": "تمثل هذه النتيجة النسبة المئوية للنص الفريد الخاص بك.",
+      "matchesTitle": "المطابقات المحتملة التي تم العثور عليها",
+      "matchesDescription": "وجدنا مطابقات محتملة من المصادر التالية. راجعها لضمان الاقتباس الصحيح.",
+      "matchBadge": "{similarity}% تطابق",
+      "noMatches": "لم يتم العثور على مطابقات مباشرة. يبدو أن المحتوى أصلي.",
+      "authErrorTitle": "خطأ في المصادقة",
+      "authErrorDesc": "يجب عليك تسجيل الدخول لمعالجة الملفات.",
+      "fileProcessedTitle": "تمت معالجة الملف",
+      "fileProcessedDesc": "تم استخراج النص من {fileName}.",
+      "fileProcessingFailedTitle": "فشل معالجة الملف",
+      "checkFailedTitle": "فشل التحقق من الانتحال"
     },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
@@ -1242,7 +1270,7 @@
         "fileReadError": "خطأ في قراءة الملف",
         "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
         "fileAdded": "تمت إضافة الملف",
-        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
+        "fileAddedDesc": "{fileName} has been added to context.",
         "processingFile": "جارٍ معالجة الملف...",
         "dropHere": "أفلت الملفات هنا...",
         "uploadedContext": "السياق الذي تم تحميله",
@@ -1305,17 +1333,17 @@
         "analysisCompleteDesc": "لقد قام الذكاء الاصطناعي بتحليل السياق وإنشاء بيانات منظمة.",
         "analysisFailed": "فشل التحليل",
         "analysisSaved": "تم حفظ التحليل",
-        "analysisSavedDesc": "تمت إضافة \"{fileName}\" إلى ملفات السياق الخاصة بك.",
-        "fileReadError": "خطأ في قراءة الملف",
-        "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
-        "fileAdded": "تمت إضافة الملف",
+        "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
+        "fileReadError": "File Read Error",
+        "fileReadErrorDesc": "Could not read the selected file.",
+        "fileAdded": "File Added",
         "fileAddedDesc": "{fileName} has been added to context.",
-        "processingFile": "جارٍ معالجة الملف...",
-        "dropHere": "أفلت الملفات هنا...",
-        "uploadedContext": "السياق الذي تم تحميله",
-        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
-        "missingInfoToastTitle": "معلومات ناقصة",
-        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى والاسم للسياق."
+        "processingFile": "Processing file...",
+        "dropHere": "Drop the files here...",
+        "uploadedContext": "Uploaded Context",
+        "noContext": "No context files uploaded yet.",
+        "missingInfoToastTitle": "Missing Information",
+        "missingInfoToastDesc": "Please provide both content and a name for the context."
       }
     }
   }

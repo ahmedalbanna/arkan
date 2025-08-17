@@ -1,3 +1,4 @@
+
 {
   "header": {
     "title": "Arkan",
@@ -101,6 +102,33 @@
       "documentationPlaceholder": "Paste any relevant context, articles, or notes here to guide the outline generation...",
       "generateButton": "Generate Outline",
       "generatedOutline": "Generated Outline"
+    },
+    "plagiarismChecker": {
+      "pageTitle": "AI Plagiarism Checker",
+      "pageSubtitle": "Check your text for potential plagiarism against online sources.",
+      "cardTitle": "Plagiarism Checker",
+      "cardDescription": "Enter your text below to check it for potential plagiarism and ensure its originality.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "placeholder": "Paste your article, essay, or any text here...",
+      "dropzoneHint": "Drag 'n' drop a file here, or click to select",
+      "supportedFiles": "Supported: PDF, TXT, MD",
+      "processingFile": "Processing file...",
+      "checkButton": "Check for Plagiarism",
+      "analyzing": "Analyzing claims and searching for sources...",
+      "reportTitle": "Plagiarism Report",
+      "originalityScore": "Originality Score",
+      "originalityScoreDesc": "This score represents the percentage of your text that is unique.",
+      "matchesTitle": "Potential Matches Found",
+      "matchesDescription": "We found potential matches from the following sources. Review them to ensure proper citation.",
+      "matchBadge": "{similarity}% Match",
+      "noMatches": "No direct matches found. The content appears to be original.",
+      "authErrorTitle": "Authentication Error",
+      "authErrorDesc": "You must be logged in to process files.",
+      "fileProcessedTitle": "File Processed",
+      "fileProcessedDesc": "Text extracted from {fileName}.",
+      "fileProcessingFailedTitle": "File Processing Failed",
+      "checkFailedTitle": "Plagiarism Check Failed"
     },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
