@@ -40,6 +40,27 @@
     "generationTemplates": "قوالب الإنشاء",
     "promptTemplates": "قوالب الأوامر"
   },
+  "writingTools": {
+    "pageTitle": "أدوات الكتابة بالذكاء الاصطناعي",
+    "pageSubtitle": "مجموعة من أدوات الذكاء الاصطناعي القوية لتعزيز كتابتك وبحثك.",
+    "cards": {
+      "textStylist": "منسق النصوص والملخصات",
+      "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
+      "presentationOutline": "مولد مخططات العروض التقديمية",
+      "plagiarismChecker": "مدقق الانتحال",
+      "aiHumanizer": "محسن النصوص ليصبح أقرب للطابع البشري",
+      "aiDetector": "كاشف المحتوى المولد بالذكاء الاصطناعي",
+      "aiParaphraser": "معيد الصياغة بالذكاء الاصطناعي",
+      "aiSummarizer": "الملخص بالذكاء الاصطناعي",
+      "grammarChecker": "المدقق النحوي",
+      "aiQuizGenerator": "مولد الاختبارات بالذكاء الاصطناعي",
+      "factChecker": "مدقق الحقائق",
+      "citationGenerator": "مولد الاقتباسات",
+      "aiResearcher": "الباحث بالذكاء الاصطناعي",
+      "topicExplainer": "شرح المواضيع",
+      "textToHandwriting": "تحويل النص إلى خط يد"
+    }
+  },
   "userDashboard": {
     "pageTitle": "لوحة التحكم الخاصة بي",
     "pageSubtitle": "ها هو ملخص نشاطك، {name}.",
@@ -1057,7 +1078,7 @@
       "tooltips": {
         "aiActions": "إجراءات الذكاء الاصطناعي",
         "editorOptions": "خيارات المحرر",
-        "readAloud": "قراءة بصوت عالٍ (قريبًا)",
+        "readAloud": "قراءة بصوت عالٍ",
         "comingSoon": "قريبًا!",
         "copyMd": "نسخ Markdown",
         "copyText": "نسخ نص عادي",
@@ -1132,6 +1153,7 @@
       "viewJsonButton": "عرض JSON",
       "jsonOutputTitle": "إخراج JSON الخام",
       "saveResultButton": "حفظ النتيجة كملف سياق",
+      "reportPlaceholder": "سيظهر تحليل الذكاء الاصطناعي الخاص بك هنا كتقرير منسق.",
       "pasteText": {
         "titleLabel": "Context Name",
         "titlePlaceholder": "e.g., Requirements Document, API Specs",
@@ -1162,9 +1184,6 @@
         "dropHere": "Drop the files here...",
         "uploadedContext": "UPLOADED CONTEXT",
         "noContext": "No context files uploaded yet.",
-        "authError": "You must be logged in to upload files.",
-        "contextAddedToastTitle": "Context Added",
-        "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "معلومات ناقصة",
         "missingInfoToastDesc": "Please provide both content and a name for the context.",
         "uploadFailed": "فشل التحميل",

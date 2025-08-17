@@ -40,6 +40,27 @@
     "generationTemplates": "Generation Templates",
     "promptTemplates": "Prompt Templates"
   },
+  "writingTools": {
+    "pageTitle": "AI Writing Tools",
+    "pageSubtitle": "A suite of powerful AI tools to enhance your writing and research.",
+    "cards": {
+      "textStylist": "Text Stylist & Summarizer",
+      "documentWriter": "AI Document Writer",
+      "presentationOutline": "Presentation Outline Generator",
+      "plagiarismChecker": "Plagiarism Checker",
+      "aiHumanizer": "AI Humanizer",
+      "aiDetector": "AI Detector",
+      "aiParaphraser": "AI Paraphraser",
+      "aiSummarizer": "AI Summarizer",
+      "grammarChecker": "Grammar Checker",
+      "aiQuizGenerator": "AI Quiz Generator",
+      "factChecker": "Fact Checker",
+      "citationGenerator": "Citation Generator",
+      "aiResearcher": "AI Researcher",
+      "topicExplainer": "Topic Explainer",
+      "textToHandwriting": "Text to Handwriting"
+    }
+  },
   "userDashboard": {
     "pageTitle": "My Dashboard",
     "pageSubtitle": "Here's a summary of your activity, {name}.",
@@ -1057,7 +1078,7 @@
       "tooltips": {
         "aiActions": "AI Actions",
         "editorOptions": "Editor Options",
-        "readAloud": "Read Aloud (Coming Soon)",
+        "readAloud": "Read Aloud",
         "comingSoon": "Coming Soon!",
         "copyMd": "Copy Markdown",
         "copyText": "Copy Plain Text",
@@ -1132,6 +1153,7 @@
       "viewJsonButton": "View JSON",
       "jsonOutputTitle": "Raw JSON Output",
       "saveResultButton": "Save Result as Context File",
+      "reportPlaceholder": "Your AI's analysis will appear here as a formatted report.",
       "pasteText": {
         "titleLabel": "Context Name",
         "titlePlaceholder": "e.g., Requirements Document, API Specs",
@@ -1162,9 +1184,6 @@
         "dropHere": "Drop the files here...",
         "uploadedContext": "UPLOADED CONTEXT",
         "noContext": "No context files uploaded yet.",
-        "authError": "You must be logged in to upload files.",
-        "contextAddedToastTitle": "Context Added",
-        "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "Missing Information",
         "missingInfoToastDesc": "Please provide both content and a name for the context.",
         "uploadFailed": "Upload Failed",
