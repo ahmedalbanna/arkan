@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -13,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const citationGeneratorSchema = z.object({
   sourceText: z.string().min(10, 'Please enter at least 10 characters of source material.'),
@@ -22,6 +22,7 @@ const citationGeneratorSchema = z.object({
 type CitationFormValues = z.infer<typeof citationGeneratorSchema>;
 
 export function CitationGeneratorTool() {
+  const { t } = useLocalization();
   const [generatedCitation, setGeneratedCitation] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const citationMutation = useGenerateCitation();
@@ -36,7 +37,7 @@ export function CitationGeneratorTool() {
     citationMutation.mutate(data, {
       onSuccess: (result) => {
         setGeneratedCitation(result.citation);
-        toast({ title: 'Citation generated successfully!' });
+        toast({ title: t('writingTools.citationGenerator.toastSuccess') });
       },
       onError: (error) => {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -56,32 +57,32 @@ export function CitationGeneratorTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Citation Generator</CardTitle>
-        <CardDescription>Enter a URL, book title, or any source material, and the AI will generate the citation for you.</CardDescription>
+        <CardTitle>{t('writingTools.citationGenerator.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.citationGenerator.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="source-text">Source Material</Label>
+            <Label htmlFor="source-text">{t('writingTools.citationGenerator.sourceLabel')}</Label>
             <Textarea
               id="source-text"
               {...form.register('sourceText')}
               rows={8}
-              placeholder="e.g., https://www.example.com/article or 'The Great Gatsby by F. Scott Fitzgerald'"
+              placeholder={t('writingTools.citationGenerator.placeholder')}
               className="resize-none"
             />
             {form.formState.errors.sourceText && <p className="text-sm text-destructive">{form.formState.errors.sourceText.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="citation-style">Citation Style</Label>
+            <Label htmlFor="citation-style">{t('writingTools.citationGenerator.styleLabel')}</Label>
             <Controller
               name="style"
               control={form.control}
               render={({ field }) => (
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <SelectTrigger id="citation-style">
-                    <SelectValue placeholder="Select a citation style" />
+                    <SelectValue placeholder={t('writingTools.citationGenerator.stylePlaceholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="apa">APA</SelectItem>
@@ -96,14 +97,14 @@ export function CitationGeneratorTool() {
 
           <Button type="submit" disabled={citationMutation.isPending} className="w-full">
             {citationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate Citation
+            {t('writingTools.citationGenerator.generateButton')}
           </Button>
         </form>
 
         {(citationMutation.isPending || generatedCitation) && (
           <div className="space-y-2 pt-6 border-t">
             <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
-              <span>Generated Citation</span>
+              <span>{t('writingTools.citationGenerator.generatedLabel')}</span>
               {generatedCitation && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}

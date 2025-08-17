@@ -268,6 +268,19 @@
       "sourceLabel": "Source:",
       "checkFailedTitle": "Fact-Check Failed"
     },
+    "citationGenerator": {
+      "pageTitle": "AI Citation Generator",
+      "pageSubtitle": "Generate accurate citations in APA, MLA, Chicago, and more styles from any source.",
+      "cardTitle": "Citation Generator",
+      "cardDescription": "Enter a URL, book title, or any source material, and the AI will generate the citation for you.",
+      "sourceLabel": "Source Material",
+      "placeholder": "e.g., https://www.example.com/article or 'The Great Gatsby by F. Scott Fitzgerald'",
+      "styleLabel": "Citation Style",
+      "stylePlaceholder": "Select a citation style",
+      "generateButton": "Generate Citation",
+      "generatedLabel": "Generated Citation",
+      "toastSuccess": "Citation generated successfully!"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
