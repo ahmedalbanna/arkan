@@ -130,6 +130,18 @@
       "fileProcessingFailedTitle": "File Processing Failed",
       "checkFailedTitle": "Plagiarism Check Failed"
     },
+    "humanizer": {
+      "pageTitle": "AI Humanizer",
+      "pageSubtitle": "Make AI-generated text sound more natural and less robotic.",
+      "cardTitle": "AI Humanizer",
+      "cardDescription": "Paste your AI-generated text below, and the tool will rewrite it to have a more human-like tone and style.",
+      "textLabel": "Your Text",
+      "placeholder": "Paste your AI-generated text here...",
+      "buttonText": "Humanize Text",
+      "originalLabel": "Original AI Text",
+      "processedLabel": "Humanized Text",
+      "toastSuccess": "Text successfully humanized!"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",

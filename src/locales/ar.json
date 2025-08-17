@@ -130,6 +130,18 @@
       "fileProcessingFailedTitle": "فشل معالجة الملف",
       "checkFailedTitle": "فشل التحقق من الانتحال"
     },
+    "humanizer": {
+      "pageTitle": "محسن النصوص ليصبح أقرب للطابع البشري",
+      "pageSubtitle": "اجعل النص الذي تم إنشاؤه بواسطة الذكاء الاصطناعي يبدو طبيعيًا وأقل آلية.",
+      "cardTitle": "محسن النصوص",
+      "cardDescription": "الصق النص الذي تم إنشاؤه بواسطة الذكاء الاصطناعي أدناه، وستقوم الأداة بإعادة كتابته ليكون له نبرة وأسلوب أكثر شبهاً بالإنسان.",
+      "textLabel": "النص الخاص بك",
+      "placeholder": "الصق النص الذي تم إنشاؤه بواسطة الذكاء الاصطناعي هنا...",
+      "buttonText": "أنسنة النص",
+      "originalLabel": "نص الذكاء الاصطناعي الأصلي",
+      "processedLabel": "النص المحسن",
+      "toastSuccess": "تمت أنسنة النص بنجاح!"
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
@@ -1334,16 +1346,16 @@
         "analysisFailed": "فشل التحليل",
         "analysisSaved": "تم حفظ التحليل",
         "analysisSavedDesc": "\"{fileName}\" has been added to your context files.",
-        "fileReadError": "File Read Error",
-        "fileReadErrorDesc": "Could not read the selected file.",
-        "fileAdded": "File Added",
+        "fileReadError": "خطأ في قراءة الملف",
+        "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
+        "fileAdded": "تمت إضافة الملف",
         "fileAddedDesc": "{fileName} has been added to context.",
-        "processingFile": "Processing file...",
-        "dropHere": "Drop the files here...",
-        "uploadedContext": "Uploaded Context",
-        "noContext": "No context files uploaded yet.",
-        "missingInfoToastTitle": "Missing Information",
-        "missingInfoToastDesc": "Please provide both content and a name for the context."
+        "processingFile": "جارٍ معالجة الملف...",
+        "dropHere": "أفلت الملفات هنا...",
+        "uploadedContext": "السياق الذي تم تحميله",
+        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
+        "missingInfoToastTitle": "معلومات ناقصة",
+        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى والاسم للسياق."
       }
     }
   }

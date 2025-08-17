@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { useHumanizeText } from '@/hooks/use-writing-tools';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   text: z.string().min(10, 'Please enter at least 10 characters.'),
@@ -24,6 +25,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 
 export function HumanizerTool() {
+  const { t } = useLocalization();
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
@@ -41,7 +43,7 @@ export function HumanizerTool() {
     mutation.mutate({ text: data.text }, {
       onSuccess: (result) => {
         setProcessedText(result.humanizedText);
-        toast({ title: 'Text successfully humanized!' });
+        toast({ title: t('writingTools.humanizer.toastSuccess') });
       },
       onError: (error) => {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
@@ -61,18 +63,18 @@ export function HumanizerTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Humanizer</CardTitle>
-        <CardDescription>Paste your AI-generated text below, and the tool will rewrite it to have a more human-like tone and style.</CardDescription>
+        <CardTitle>{t('writingTools.humanizer.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.humanizer.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="text-input">Your Text</Label>
+            <Label htmlFor="text-input">{t('writingTools.humanizer.textLabel')}</Label>
             <Textarea
               id="text-input"
               {...form.register('text')}
               rows={8}
-              placeholder="Paste your AI-generated text here..."
+              placeholder={t('writingTools.humanizer.placeholder')}
               className="resize-none"
             />
             {form.formState.errors.text && (
@@ -86,14 +88,14 @@ export function HumanizerTool() {
             ) : (
               <Sparkles className="mr-2 h-4 w-4" />
             )}
-            Humanize Text
+            {t('writingTools.humanizer.buttonText')}
           </Button>
         </form>
 
         {(mutation.isPending || processedText) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t">
             <div className="space-y-2">
-              <h3 className="font-semibold text-muted-foreground">Original AI Text</h3>
+              <h3 className="font-semibold text-muted-foreground">{t('writingTools.humanizer.originalLabel')}</h3>
               <ScrollArea className="h-64 rounded-md border p-4">
                 <div className="prose dark:prose-invert max-w-none text-sm">
                   <ReactMarkdown components={markdownComponents}>{originalText}</ReactMarkdown>
@@ -101,10 +103,10 @@ export function HumanizerTool() {
               </ScrollArea>
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
-                <span>Humanized Text</span>
-                <Button variant="ghost" size="icon" onClick={handleCopy}>
-                  {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+               <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
+                <span>{t('writingTools.humanizer.processedLabel')}</span>
+                 <Button variant="ghost" size="icon" onClick={handleCopy}>
+                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>
               </h3>
               <ScrollArea className="h-64 rounded-md border p-4 bg-muted/30">
@@ -125,4 +127,3 @@ export function HumanizerTool() {
     </Card>
   );
 }
-
