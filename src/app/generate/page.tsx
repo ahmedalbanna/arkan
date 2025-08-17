@@ -190,7 +190,7 @@ function GeneratePageContent() {
                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col flex-grow">
                     <TabsList className="grid w-full h-auto grid-cols-2 sm:grid-cols-4 lg:grid-cols-8">
                         <TabsTrigger value="files" className="gap-2">
-                            <FolderKanban className="h-4 w-4" /> Files
+                            <FolderKanban className="h-4 w-4" /> {t('builder.tabs.files')}
                         </TabsTrigger>
                         {isFeatureEnabled('proposal') && (
                             <TabsTrigger value="proposal" className="gap-2">
@@ -199,7 +199,7 @@ function GeneratePageContent() {
                         )}
                         {isFeatureEnabled('plan') && (
                             <TabsTrigger value="plan" className="gap-2">
-                                <GanttChartSquare className="h-4 w-4" /> Project Plan
+                                <GanttChartSquare className="h-4 w-4" /> {t('builder.tabs.plan')}
                             </TabsTrigger>
                         )}
                         {isFeatureEnabled('report') && (
