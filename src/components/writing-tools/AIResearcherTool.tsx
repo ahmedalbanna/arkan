@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
@@ -28,6 +27,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addContextToProjectApi } from '@/services/project-service';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const researcherSchema = z.object({
   topic: z.string().min(3, 'Please enter a topic to research.'),
@@ -36,8 +36,9 @@ const researcherSchema = z.object({
 type ResearcherFormValues = z.infer<typeof researcherSchema>;
 
 // Helper function to format the research output as Markdown
-const formatResearchToMarkdown = (data: AIResearcherOutput): string => {
-  let markdown = `# Research Summary: ${data.summary}\n\n`;
+const formatResearchToMarkdown = (data: AIResearcherOutput, title: string): string => {
+  let markdown = `# Research Report: ${title}\n\n`;
+  markdown += `## Summary\n${data.summary}\n\n`;
   markdown += `## Key Points\n`;
   data.keyPoints.forEach(point => {
     markdown += `- ${point}\n`;
@@ -53,19 +54,20 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
     const { projects, isLoading, isError } = useProjects();
     const { firebaseUser } = useAuth();
     const queryClient = useQueryClient();
+    const { t } = useLocalization();
 
     const mutation = useMutation({
         mutationFn: addContextToProjectApi,
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['projects', variables.projectId] });
             toast({
-                title: "Context Added",
-                description: `Research on "${researchTitle}" has been added to the project.`
+                title: t('writingTools.aiResearcher.toastContextAddedTitle'),
+                description: t('writingTools.aiResearcher.toastContextAddedDesc').replace('{researchTitle}', researchTitle)
             });
             onOpenChange(false);
         },
-        onError: (error) => {
-            toast({ title: "Failed to Add Context", description: error.message, variant: "destructive" });
+        onError: (error: any) => {
+            toast({ title: t('writingTools.aiResearcher.toastContextFailedTitle'), description: error.message, variant: "destructive" });
         }
     });
 
@@ -78,8 +80,8 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
     return (
         <DialogContent>
             <DialogHeader>
-                <DialogTitle>Add Research to Project</DialogTitle>
-                <DialogDescription>Select a project to add this research report as a context file.</DialogDescription>
+                <DialogTitle>{t('writingTools.aiResearcher.addToProjectTitle')}</DialogTitle>
+                <DialogDescription>{t('writingTools.aiResearcher.addToProjectDesc')}</DialogDescription>
             </DialogHeader>
             <div className="max-h-96 overflow-y-auto">
                 {isLoading && (
@@ -92,7 +94,7 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
                 {isError && (
                     <div className="p-4 text-center text-destructive">
                         <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                        <p>Could not load projects.</p>
+                        <p>{t('writingTools.aiResearcher.loadProjectsError')}</p>
                     </div>
                 )}
                 <div className="space-y-2">
@@ -115,13 +117,14 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
                 </div>
             </div>
              <DialogClose asChild>
-                <Button variant="ghost">Cancel</Button>
+                <Button variant="ghost">{t('writingTools.aiResearcher.cancelButton')}</Button>
             </DialogClose>
         </DialogContent>
     );
 }
 
 export function AIResearcherTool() {
+  const { t } = useLocalization();
   const mutation = useAiResearcher();
   const reportRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = useState(false);
@@ -135,18 +138,18 @@ export function AIResearcherTool() {
   const onSubmit = async (data: ResearcherFormValues) => {
     mutation.mutate({ topic: data.topic }, {
         onError: (error) => {
-            toast({ title: "Research Failed", description: error.message, variant: "destructive" });
+            toast({ title: t('writingTools.aiResearcher.toastResearchFailed'), description: error.message, variant: "destructive" });
         }
     });
   };
   
   const results = mutation.data;
-  const markdownResult = results ? formatResearchToMarkdown(results) : '';
+  const markdownResult = results ? formatResearchToMarkdown(results, form.getValues('topic')) : '';
 
   const handleCopyToClipboard = () => {
     if (!markdownResult) return;
     navigator.clipboard.writeText(markdownResult);
-    toast({ title: 'Copied to clipboard!' });
+    toast({ title: t('writingTools.aiResearcher.toastCopied') });
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -166,17 +169,17 @@ export function AIResearcherTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Research Assistant</CardTitle>
-        <CardDescription>Enter a topic, and the AI will conduct research and provide a structured report.</CardDescription>
+        <CardTitle>{t('writingTools.aiResearcher.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.aiResearcher.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="research-topic">Research Topic</Label>
+            <Label htmlFor="research-topic">{t('writingTools.aiResearcher.topicLabel')}</Label>
             <Input
               id="research-topic"
               {...form.register('topic')}
-              placeholder="e.g., The impact of quantum computing on cryptography"
+              placeholder={t('writingTools.aiResearcher.topicPlaceholder')}
               disabled={mutation.isPending}
             />
             {form.formState.errors.topic && <p className="text-sm text-destructive">{form.formState.errors.topic.message}</p>}
@@ -184,7 +187,7 @@ export function AIResearcherTool() {
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Start Research
+            {t('writingTools.aiResearcher.buttonText')}
           </Button>
         </form>
 
@@ -192,7 +195,7 @@ export function AIResearcherTool() {
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Researching... This may take a moment as the AI browses and synthesizes information.
+                    {t('writingTools.aiResearcher.researching')}
                 </div>
             </div>
         )}
@@ -202,18 +205,18 @@ export function AIResearcherTool() {
             <div className="flex justify-between items-center">
                  <h3 className="font-semibold text-lg flex items-center gap-2">
                     <FileText className="h-5 w-5" />
-                    Research Report
+                    {t('writingTools.aiResearcher.reportTitle')}
                 </h3>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
                         {isCopied ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
-                        Copy
+                        {t('writingTools.aiResearcher.copyButton')}
                     </Button>
                     <Dialog open={isAddToProjectOpen} onOpenChange={setIsAddToProjectOpen}>
                         <DialogTrigger asChild>
                              <Button variant="outline" size="sm">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Add to Project
+                                {t('writingTools.aiResearcher.addToProjectButton')}
                             </Button>
                         </DialogTrigger>
                         <AddToProjectDialog 
@@ -230,8 +233,8 @@ export function AIResearcherTool() {
                 </div>
             </ScrollArea>
              <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={handleExportDocx}><FileDown className="mr-2 h-4 w-4"/>Export as DOCX</Button>
-                <Button variant="secondary" onClick={handleExportPdf}><FileDown className="mr-2 h-4 w-4"/>Export as PDF</Button>
+                <Button variant="secondary" onClick={handleExportDocx}><FileDown className="mr-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportDocx')}</Button>
+                <Button variant="secondary" onClick={handleExportPdf}><FileDown className="mr-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportPdf')}</Button>
             </div>
           </div>
         )}
