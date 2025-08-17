@@ -19,6 +19,7 @@ import { Tabs, TabsTrigger, TabsList, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const grammarSchema = z.object({
   text: z.string().min(5, 'Text must be at least 5 characters to check.'),
@@ -27,6 +28,7 @@ const grammarSchema = z.object({
 type GrammarFormValues = z.infer<typeof grammarSchema>;
 
 export function GrammarCheckerTool() {
+  const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
   const mutation = useGrammarCheck();
   const { firebaseUser, refetchUser } = useAuth();
@@ -55,7 +57,7 @@ export function GrammarCheckerTool() {
         const result = await processFileApi(formData, token);
         form.setValue('text', result.markdown, { shouldValidate: true });
         toast({ title: "File Processed", description: `Text extracted from ${file.name}. You can now start the analysis.` });
-        refetchUser(); // Update credits
+        refetchUser();
     } catch (error: any) {
         toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
     } finally {
@@ -98,21 +100,21 @@ export function GrammarCheckerTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Grammar Checker</CardTitle>
-        <CardDescription>Enter the text you want to check, and the AI will correct any mistakes and explain the changes.</CardDescription>
+        <CardTitle>{t('writingTools.grammarChecker.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.grammarChecker.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
            <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="paste">Paste Text</TabsTrigger>
-                    <TabsTrigger value="upload">Upload File</TabsTrigger>
+                    <TabsTrigger value="paste">{t('writingTools.grammarChecker.pasteTab')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('writingTools.grammarChecker.uploadTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="paste" className="pt-4">
                      <Textarea
                         {...form.register('text')}
                         rows={12}
-                        placeholder="Paste your text here..."
+                        placeholder={t('writingTools.grammarChecker.placeholder')}
                         className="resize-none"
                         />
                 </TabsContent>
@@ -121,18 +123,18 @@ export function GrammarCheckerTool() {
                         <input {...getInputProps()} />
                         <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
                         {isUploading ? (
-                            <p className="mt-2 text-sm text-muted-foreground">Processing file...</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.grammarChecker.processingFile')}</p>
                         ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">Drag 'n' drop a file here, or click to select a file</p>
+                            <p className="mt-2 text-sm text-muted-foreground">{t('writingTools.grammarChecker.dropzoneHint')}</p>
                         )}
-                        <p className="text-xs text-muted-foreground">Supported: PDF, TXT, MD</p>
+                        <p className="text-xs text-muted-foreground">{t('writingTools.grammarChecker.supportedFiles')}</p>
                     </div>
                 </TabsContent>
             </Tabs>
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
             {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Check & Correct Text
+            {t('writingTools.grammarChecker.buttonText')}
           </Button>
         </form>
 
@@ -140,7 +142,7 @@ export function GrammarCheckerTool() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 border-t">
             <div className="space-y-2">
               <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
-                <span>Corrected Text</span>
+                <span>{t('writingTools.grammarChecker.correctedLabel')}</span>
                 <Button variant="ghost" size="icon" onClick={handleCopy} disabled={!results}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>
@@ -158,7 +160,7 @@ export function GrammarCheckerTool() {
               </ScrollArea>
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold text-muted-foreground">Changes & Explanations</h3>
+              <h3 className="font-semibold text-muted-foreground">{t('writingTools.grammarChecker.changesLabel')}</h3>
               <ScrollArea className="h-96 rounded-md border p-4">
                 {mutation.isPending ? (
                    <div className="flex items-center justify-center h-full">
@@ -179,7 +181,7 @@ export function GrammarCheckerTool() {
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full text-muted-foreground">
-                        <p>No corrections were needed.</p>
+                        <p>{t('writingTools.grammarChecker.noCorrections')}</p>
                     </div>
                 )}
               </ScrollArea>

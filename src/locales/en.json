@@ -216,6 +216,22 @@
       "successToast": "Summarization successful!",
       "errorToast": "Error"
     },
+    "grammarChecker": {
+      "pageTitle": "AI Grammar Checker",
+      "pageSubtitle": "Correct spelling and grammar mistakes in your text instantly.",
+      "cardTitle": "Grammar Checker",
+      "cardDescription": "Enter the text you want to check, and the AI will correct any mistakes and explain the changes.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "placeholder": "Paste your text here...",
+      "dropzoneHint": "Drag 'n' drop a file here, or click to select a file",
+      "supportedFiles": "Supported: PDF, TXT, MD",
+      "processingFile": "Processing file...",
+      "buttonText": "Check & Correct Text",
+      "correctedLabel": "Corrected Text",
+      "changesLabel": "Changes & Explanations",
+      "noCorrections": "No corrections were needed."
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",

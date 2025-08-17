@@ -216,6 +216,22 @@
       "successToast": "تم التلخيص بنجاح!",
       "errorToast": "خطأ"
     },
+    "grammarChecker": {
+      "pageTitle": "مدقق نحوي بالذكاء الاصطناعي",
+      "pageSubtitle": "صحح الأخطاء الإملائية والنحوية في نصك على الفور.",
+      "cardTitle": "مدقق نحوي",
+      "cardDescription": "أدخل النص الذي تريد التحقق منه، وسيقوم الذكاء الاصطناعي بتصحيح أي أخطاء وشرح التغييرات.",
+      "pasteTab": "لصق النص",
+      "uploadTab": "تحميل ملف",
+      "placeholder": "الصق النص هنا...",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر لتحديد ملف",
+      "supportedFiles": "يدعم: PDF، TXT، MD",
+      "processingFile": "جارٍ معالجة الملف...",
+      "buttonText": "تحقق وصحح النص",
+      "correctedLabel": "النص المصحح",
+      "changesLabel": "التغييرات والتوضيحات",
+      "noCorrections": "لم تكن هناك حاجة لتصحيحات."
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
