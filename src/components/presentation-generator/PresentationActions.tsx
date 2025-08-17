@@ -39,7 +39,7 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
         ) : (
           <Languages className="mr-2 h-4 w-4" />
         )}
-        {locale === 'en' ? 'Translate to Arabic' : 'Translate to English'}
+        {locale === 'en' ? t('builder.presentationGenerator.translateButton.ar') : t('builder.presentationGenerator.translateButton.en')}
       </Button>
     </div>
   );

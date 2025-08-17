@@ -795,8 +795,8 @@
       "toolsTitle": "أدوات الإنشاء",
       "toolsDesc": "تكوين وإنشاء أقسام التقرير.",
       "report_template": "قالب التقرير",
-      "generateFullReport": "إنشاء تقرير كامل",
-      "generateButton": "إنشاء",
+      "GenerateFullReport": "إنشاء تقرير كامل",
+      "GenerateButton": "إنشاء",
       "externalContextTitle": "سياق خارجي",
       "uploadButton": "تحميل ومعالجة PDF",
       "viewContent": "عرض المحتوى",
@@ -835,17 +835,15 @@
       "tool_context_label": "تضمين سياق من عناصر أخرى",
       "tool_context_desc": "حدد أقسامًا أو رسومًا بيانية أخرى تم إنشاؤها لتوفيرها كسياق للذكاء الاصطناعي.",
       "tool_context_sections": "الأقسام",
-      "tool_context_diagrams": "الرسوم البيانية",
+      "context_diagrams": "الرسوم البيانية السياقية",
       "noOtherSections": "لم يتم إنشاء أقسام أخرى بعد.",
       "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد.",
       "externalContext": "سياق خارجي",
       "ContextualSections": "العناصر السياقية",
       "GenerateFullReport": "إنشاء تقرير كامل",
-      "GenerateButton": "إنشاء",
       "disabledTooltip": "هذا الوكيل معطل",
       "updateSection": "تحديث القسم",
       "Select_template": "حدد قالبًا",
-      "report_template": "قالب التقرير",
       "sections": {
         "introduction": "المقدمة",
         "literatureReview": "مراجعة الأدبيات",
@@ -967,6 +965,7 @@
       "viewerEmpty": "سيظهر عرضك التقديمي الذي تم إنشاؤه هنا.",
       "toolsTitle": "أدوات الإنشاء",
       "toolsDesc": "قم بتحميل السياق أو تحديده لإنشاء عرض تقديمي.",
+      "newPresentationName": "عرض تقديمي - {time}",
       "templateLabel": "قالب العرض التقديمي",
       "editDetails": "تعديل تفاصيل الإنشاء",
       "generateButton": "إنشاء العرض التقديمي",
@@ -984,18 +983,38 @@
       "prev": "السابق",
       "next": "التالي",
       "goToSlide": "الانتقال إلى الشريحة {slideNumber}",
-      "translateAllButton": "ترجمة العرض التقديمي",
-      "translateAllSuccess": "اكتملت الترجمة",
+      "translateButton": {
+        "en": "ترجمة إلى الإنجليزية",
+        "ar": "ترجمة إلى العربية"
+      },
       "toasts": {
         "success": "تم إنشاء العرض التقديمي بنجاح!",
         "failed": "فشل إنشاء العرض التقديمي",
         "authError": "يجب عليك تسجيل الدخول لإنشاء عرض تقديمي.",
         "translateAllStarted": "بدأت الترجمة المجمعة",
         "translateAllStartedDesc": "ترجمة جميع الشرائح. قد يستغرق هذا بعض الوقت...",
+        "translateAllSuccess": "اكتملت الترجمة",
         "translateAllSuccessDesc": "تمت ترجمة العرض التقديمي بنجاح.",
         "translateAllFailed": "فشلت الترجمة",
         "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض التقديمي."
-      }
+      },
+      "planViewer": {
+        "title": "خطة إنشاء تقرير كامل",
+        "description": "لقد أنشأ الذكاء الاصطناعي الخطة التالية لإنشاء أقسام التقرير. لقد اختار السياق والإرشادات الأكثر صلة لكل خطوة.",
+        "contextItems": "عناصر السياق:",
+        "instructions": "التعليمات:",
+        "guidelines": "الإرشادات:"
+      },
+      "tooltips": {
+        "viewPlan": "عرض خطة الإنشاء",
+        "noContent": "يرجى تحديد أو تحميل محتوى لإنشاء عرض تقديمي."
+      },
+      "sourceDocuments": "مستندات المصدر",
+      "selectExistingContext": "تحديد السياق الحالي",
+      "uploadNewContext": "تحميل سياق جديد",
+      "generationSettings": "إعدادات الإنشاء",
+      "advancedSettings": "إعدادات متقدمة",
+      "promptAndGuidelines": "المطالبة والإرشادات"
     },
     "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",

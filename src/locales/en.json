@@ -795,8 +795,8 @@
       "toolsTitle": "Generation Tools",
       "toolsDesc": "Configure and generate report sections.",
       "report_template": "Report Template",
-      "generateFullReport": "Generate Full Report",
-      "generateButton": "Generate",
+      "GenerateFullReport": "Generate Full Report",
+      "GenerateButton": "Generate",
       "externalContextTitle": "External Context",
       "uploadButton": "Upload & Process PDF",
       "viewContent": "View Content",
@@ -835,17 +835,15 @@
       "tool_context_label": "Include Context from Other Items",
       "tool_context_desc": "Select other generated sections or diagrams to provide as context to the AI.",
       "tool_context_sections": "Sections",
-      "tool_context_diagrams": "Diagrams",
+      "context_diagrams": "Contextual Diagrams",
       "noOtherSections": "No other sections generated yet.",
       "noOtherDiagrams": "No other diagrams generated yet.",
       "externalContext": "External Context",
       "ContextualSections": "Contextual Items",
       "GenerateFullReport": "Generate Full Report",
-      "GenerateButton": "Generate",
       "disabledTooltip": "This agent is disabled",
       "updateSection": "Update Section",
       "Select_template": "Select a template",
-      "report_template": "Report Template",
       "sections": {
         "introduction": "Introduction",
         "literatureReview": "Literature Review",
@@ -967,6 +965,7 @@
       "viewerEmpty": "Your generated presentation will appear here.",
       "toolsTitle": "Generation Tools",
       "toolsDesc": "Upload or select context to generate a presentation.",
+      "newPresentationName": "Presentation - {time}",
       "templateLabel": "Presentation Template",
       "editDetails": "Edit Generation Details",
       "generateButton": "Generate Presentation",
@@ -984,18 +983,38 @@
       "prev": "Previous",
       "next": "Next",
       "goToSlide": "Go to slide {slideNumber}",
-      "translateAllButton": "Translate Presentation",
-      "translateAllSuccess": "Translation Complete",
+      "translateButton": {
+        "en": "Translate to English",
+        "ar": "Translate to Arabic"
+      },
       "toasts": {
         "success": "Presentation Generated Successfully!",
         "failed": "Presentation Generation Failed",
         "authError": "You must be logged in to generate a presentation.",
         "translateAllStarted": "Bulk Translation Started",
         "translateAllStartedDesc": "Translating all slides. This may take a moment...",
+        "translateAllSuccess": "Translation Complete",
         "translateAllSuccessDesc": "The presentation has been successfully translated.",
         "translateAllFailed": "Translation Failed",
         "translateAllFailedDesc": "An error occurred while translating the presentation."
-      }
+      },
+      "planViewer": {
+        "title": "Full Report Generation Plan",
+        "description": "The AI has created the following plan to generate the report sections. It has selected the most relevant context and guidelines for each step.",
+        "contextItems": "Context Items:",
+        "instructions": "Instructions:",
+        "guidelines": "Guidelines:"
+      },
+      "tooltips": {
+        "viewPlan": "View Generation Plan",
+        "noContent": "Please select or upload content to generate a presentation."
+      },
+      "sourceDocuments": "Source Documents",
+      "selectExistingContext": "Select Existing Context",
+      "uploadNewContext": "Upload New Context",
+      "generationSettings": "Generation Settings",
+      "advancedSettings": "Advanced Settings",
+      "promptAndGuidelines": "Prompt & Guidelines"
     },
     "Section": {
       "aiSuggestion": "AI Suggestion",
@@ -1046,8 +1065,7 @@
       "translatePlaceholder": "The translation will appear here.",
       "translateButton": "Translate",
       "viewEditTab": "View & Edit",
-      "evaluationTab": "Evaluation",
-      "humanize": "Humanize Text"
+      "evaluationTab": "Evaluation"
     },
     "academicSolver": {
       "pageTitle": "AI Academic Solver",

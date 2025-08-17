@@ -1,12 +1,10 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import type { PresentationHistoryEntry } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, FileDown, Languages, Loader2, Presentation } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -21,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { PresentationActions } from './PresentationActions';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PresentationViewerProps {
   activePresentation: PresentationHistoryEntry;
@@ -30,10 +29,9 @@ interface PresentationViewerProps {
 
 export default function PresentationViewer({ activePresentation, onTranslateAll, isTranslating }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { t, locale } = useLocalization();
+  const { t } = useLocalization();
   
 
-  // Add a guard clause to handle cases where activePresentation might be undefined.
   if (!activePresentation || !activePresentation.slides || activePresentation.slides.length === 0) {
     return (
       <Card>
@@ -51,7 +49,6 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
   const slides = activePresentation.slides;
 
   useEffect(() => {
-    // When a new presentation is passed, reset to the first slide.
     setCurrentSlide(0);
   }, [activePresentation.id]);
   
@@ -62,11 +59,6 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
 
   const handlePrev = () => {
     setCurrentSlide((prev) => (prev > 0 ? prev - 1 : prev));
-  };
-
-  const handleTranslate = () => {
-    const targetLang = locale === 'en' ? 'ar' : 'en';
-    onTranslateAll(targetLang);
   };
 
   const slide = slides?.[currentSlide];
@@ -87,12 +79,10 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
       <CardHeader>
         <div className="flex justify-between items-center flex-wrap gap-2">
             <h2 className="font-headline text-2xl text-primary">{activePresentation.name}</h2>
-            <PresentationActions isGenerating={isTranslating} onTranslateAll={function (targetLang: 'en' | 'ar'): void {
-            throw new Error('Function not implemented.');
-          } } isTranslating={false} />
+            <PresentationActions isGenerating={isTranslating} onTranslateAll={onTranslateAll} isTranslating={isTranslating} />
         </div>
         <CardDescription>
-          {t('builder.presentationGenerator.slideLabel').replace('{current}', (currentSlide + 1).toString()).replace('{total}', slides.length.toString())}
+          {t('builder.presentationGenerator.slideLabel', {current: currentSlide + 1, total: slides.length})}
         </CardDescription>
       </CardHeader>
 
@@ -128,7 +118,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
               key={index}
               onClick={() => setCurrentSlide(index)}
               className={`h-2 w-2 rounded-full ${currentSlide === index ? 'bg-primary' : 'bg-muted hover:bg-muted-foreground'}`}
-              aria-label={t('builder.presentationGenerator.goToSlide').replace('{slideNumber}', (index + 1).toString())}
+              aria-label={t('builder.presentationGenerator.goToSlide', {slideNumber: index + 1})}
             />
           ))}
         </div>
