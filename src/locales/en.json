@@ -1,4 +1,3 @@
-
 {
   "header": {
     "title": "Arkan",
@@ -840,7 +839,6 @@
       "noOtherDiagrams": "No other diagrams generated yet.",
       "externalContext": "External Context",
       "ContextualSections": "Contextual Items",
-      "GenerateFullReport": "Generate Full Report",
       "disabledTooltip": "This agent is disabled",
       "updateSection": "Update Section",
       "Select_template": "Select a template",
@@ -996,7 +994,8 @@
         "translateAllSuccess": "Translation Complete",
         "translateAllSuccessDesc": "The presentation has been successfully translated.",
         "translateAllFailed": "Translation Failed",
-        "translateAllFailedDesc": "An error occurred while translating the presentation."
+        "translateAllFailedDesc": "An error occurred while translating the presentation.",
+        "selectTemplate": "Please select a presentation template."
       },
       "planViewer": {
         "title": "Full Report Generation Plan",

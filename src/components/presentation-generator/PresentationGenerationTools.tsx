@@ -277,7 +277,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                             <div className="space-y-2">
                                                 <Label htmlFor="tone-select">{t('builder.reportGenerator.tool_tone_label')}</Label>
                                                 <Select value={tone} onValueChange={setTone}>
-                                                    <SelectTrigger id="tone-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                    <SelectTrigger id="tone-select"><SelectValue placeholder={t('builder.reportGenerator.tool_tone_professional')} /></SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
                                                         <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
@@ -286,13 +286,13 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 </Select>
                                             </div>
                                             <div className="space-y-2">
-                                                <Label htmlFor="complexity-select">Complexity</Label>
+                                                <Label htmlFor="complexity-select">{t('builder.presentationGenerator.complexity')}</Label>
                                                 <Select value={complexity} onValueChange={setComplexity}>
-                                                    <SelectTrigger id="complexity-select"><SelectValue placeholder="Default" /></SelectTrigger>
+                                                    <SelectTrigger id="complexity-select"><SelectValue placeholder={t('builder.presentationGenerator.complexityDefault')} /></SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="summary">High-level Summary</SelectItem>
-                                                        <SelectItem value="detailed">Detailed</SelectItem>
-                                                        <SelectItem value="technical">For Technical Audience</SelectItem>
+                                                        <SelectItem value="summary">{t('builder.presentationGenerator.complexitySummary')}</SelectItem>
+                                                        <SelectItem value="detailed">{t('builder.presentationGenerator.complexityDetailed')}</SelectItem>
+                                                        <SelectItem value="technical">{t('builder.presentationGenerator.complexityTechnical')}</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>

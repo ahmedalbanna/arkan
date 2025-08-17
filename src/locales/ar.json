@@ -1,4 +1,3 @@
-
 {
   "header": {
     "title": "أركان",
@@ -840,7 +839,6 @@
       "noOtherDiagrams": "لم يتم إنشاء رسوم بيانية أخرى بعد.",
       "externalContext": "سياق خارجي",
       "ContextualSections": "العناصر السياقية",
-      "GenerateFullReport": "إنشاء تقرير كامل",
       "disabledTooltip": "هذا الوكيل معطل",
       "updateSection": "تحديث القسم",
       "Select_template": "حدد قالبًا",
@@ -996,7 +994,8 @@
         "translateAllSuccess": "اكتملت الترجمة",
         "translateAllSuccessDesc": "تمت ترجمة العرض التقديمي بنجاح.",
         "translateAllFailed": "فشلت الترجمة",
-        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض التقديمي."
+        "translateAllFailedDesc": "حدث خطأ أثناء ترجمة العرض التقديمي.",
+        "selectTemplate": "يرجى تحديد قالب عرض تقديمي."
       },
       "planViewer": {
         "title": "خطة إنشاء تقرير كامل",
@@ -1027,8 +1026,8 @@
         "comingSoon": "قريبا!",
         "copyMd": "نسخ Markdown",
         "copyText": "نسخ نص عادي",
-        "downloadDocx": "تنزيل DOCX",
-        "downloadPdf": "تنزيل PDF"
+        "downloadDocx": "تنزيل بصيغة DOCX",
+        "downloadPdf": "تنزيل بصيغة PDF"
       },
       "aiActions": {
         "title": "إجراءات الذكاء الاصطناعي",
