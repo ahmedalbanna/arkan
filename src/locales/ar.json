@@ -90,6 +90,18 @@
       "generateButton": "كتابة المستند (3 أرصدة)",
       "generatedDocument": "المستند الذي تم إنشاؤه"
     },
+    "presentationOutline": {
+      "pageTitle": "مولد مخطط العروض التقديمية",
+      "pageSubtitle": "أنشئ مخططًا منظمًا لعرضك التقديمي من موضوع واحد.",
+      "cardTitle": "مخطط العرض التقديمي",
+      "cardDescription": "قدم موضوعًا، وسيقوم الذكاء الاصطناعي بإنشاء مخطط منظم لعرضك التقديمي.",
+      "topicLabel": "الموضوع",
+      "topicPlaceholder": "على سبيل المثال، مستقبل الذكاء الاصطناعي",
+      "documentationLabel": "التوثيق (اختياري)",
+      "documentationPlaceholder": "الصق أي سياق أو مقالات أو ملاحظات ذات صلة هنا لتوجيه إنشاء المخطط...",
+      "generateButton": "إنشاء مخطط",
+      "generatedOutline": "المخطط الذي تم إنشاؤه"
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
@@ -961,7 +973,7 @@
         "appendices": "الملاحق"
       },
       "toasts": {
-        "invalidFile": "Invalid file type. Please upload a PDF.",
+        "invalidFile": "نوع ملف غير صالح. يرجى تحميل PDF.",
         "evaluationComplete": "اكتمل التقييم!",
         "evaluationFailed": "فشل التقييم",
         "evaluationSkipped": "تم تخطي التقييم",
@@ -1297,7 +1309,7 @@
         "fileReadError": "خطأ في قراءة الملف",
         "fileReadErrorDesc": "تعذر قراءة الملف المحدد.",
         "fileAdded": "تمت إضافة الملف",
-        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
+        "fileAddedDesc": "{fileName} has been added to context.",
         "processingFile": "جارٍ معالجة الملف...",
         "dropHere": "أفلت الملفات هنا...",
         "uploadedContext": "السياق الذي تم تحميله",

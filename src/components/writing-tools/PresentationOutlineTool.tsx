@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useGeneratePresentationOutline } from '@/hooks/use-presentation-generation';
@@ -15,6 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import { Textarea } from '../ui/textarea';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   prompt: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
@@ -48,6 +49,7 @@ const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOut
 }
 
 export function PresentationOutlineTool() {
+  const { t } = useLocalization();
   const mutation = useGeneratePresentationOutline();
   const [isCopied, setIsCopied] = useState(false);
   const [generatedOutline, setGeneratedOutline] = useState<GeneratePresentationOutlineOutput | null>(null);
@@ -85,43 +87,43 @@ export function PresentationOutlineTool() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Presentation Outline</CardTitle>
-        <CardDescription>Provide a topic, and the AI will generate a structured outline for your presentation.</CardDescription>
+        <CardTitle>{t('writingTools.presentationOutline.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.presentationOutline.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="topic">Topic</Label>
+            <Label htmlFor="topic">{t('writingTools.presentationOutline.topicLabel')}</Label>
             <Input
               id="topic"
               {...form.register('prompt')}
-              placeholder="e.g., The Future of Artificial Intelligence"
+              placeholder={t('writingTools.presentationOutline.topicPlaceholder')}
               disabled={mutation.isPending}
             />
             {form.formState.errors.prompt && <p className="text-sm text-destructive">{form.formState.errors.prompt.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="documentation">Documentation (Optional)</Label>
+            <Label htmlFor="documentation">{t('writingTools.presentationOutline.documentationLabel')}</Label>
             <Textarea
               id="documentation"
               {...form.register('documentation')}
               rows={8}
-              placeholder="Paste any relevant context, articles, or notes here to guide the outline generation..."
+              placeholder={t('writingTools.presentationOutline.documentationPlaceholder')}
               disabled={mutation.isPending}
             />
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Generate Outline
+            {t('writingTools.presentationOutline.generateButton')}
           </Button>
         </form>
 
         {(mutation.isPending || generatedOutline) && (
           <div className="space-y-2 pt-6 border-t">
             <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-muted-foreground">Generated Outline</h3>
+              <h3 className="font-semibold text-muted-foreground">{t('writingTools.presentationOutline.generatedOutline')}</h3>
               {generatedOutline && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}

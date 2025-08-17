@@ -90,6 +90,18 @@
       "generateButton": "Write Document (3 Credits)",
       "generatedDocument": "Generated Document"
     },
+    "presentationOutline": {
+      "pageTitle": "Presentation Outline Generator",
+      "pageSubtitle": "Generate a structured outline for your presentation from a single topic.",
+      "cardTitle": "Presentation Outline",
+      "cardDescription": "Provide a topic, and the AI will generate a structured outline for your presentation.",
+      "topicLabel": "Topic",
+      "topicPlaceholder": "e.g., The Future of Artificial Intelligence",
+      "documentationLabel": "Documentation (Optional)",
+      "documentationPlaceholder": "Paste any relevant context, articles, or notes here to guide the outline generation...",
+      "generateButton": "Generate Outline",
+      "generatedOutline": "Generated Outline"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
@@ -1180,9 +1192,9 @@
       "examType": "Exam",
       "homeworkType": "Homework",
       "uploadLabel": "Select PDF File",
-      "analyzeButton": "Upload & Analyze",
+      "analyzeButton": "Upload & Analyze ({creditCost} Credit)",
       "analysisPlaceholder": "No document has been analyzed yet. Please upload a file first.",
-      "solveButton": "Solve Document",
+      "solveButton": "Solve Document ({creditCost} Credits)",
       "solvingInProgress": "Solving in progress... The AI is working on the solution.",
       "solutionPlaceholder": "The solution will appear here after the document is solved.",
       "historyTitle": "History",
