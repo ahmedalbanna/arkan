@@ -40,6 +40,29 @@
     "generationTemplates": "Generation Templates",
     "promptTemplates": "Prompt Templates"
   },
+  "userDashboard": {
+    "pageTitle": "My Dashboard",
+    "pageSubtitle": "Here's a summary of your activity, {name}.",
+    "contactAdmin": "Contact Admin",
+    "totalGenerations": "Total AI Generations",
+    "creditsRemaining": "Credits Remaining",
+    "creditsUsed": "Total Credits Used",
+    "startChatError": "Error starting chat",
+    "errorLoading": "Could not load your analytics: {message}"
+  },
+  "paymentHistory": {
+    "pageTitle": "Payment History",
+    "pageSubtitle": "Review all your past transactions and credit purchases.",
+    "cardTitle": "Your Transactions",
+    "cardDescription": "A complete log of your payment history.",
+    "tableDate": "Date",
+    "tablePlan": "Plan",
+    "tableAmount": "Amount",
+    "tableStatus": "Status",
+    "errorLoading": "Failed to load payment history: {message}",
+    "noTransactionsTitle": "No Transactions Yet",
+    "noTransactionsDescription": "You haven't made any payments or credit purchases."
+  },
   "notifications": {
     "newPayment": {
       "title": "New Payment Request",
@@ -1215,5 +1238,3 @@
     }
   }
 }
-
-    

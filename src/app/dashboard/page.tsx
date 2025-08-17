@@ -3,9 +3,9 @@
 
 import { useUserStats } from '@/hooks/use-analytics';
 import { useAuth } from '@/context/AuthContext';
-import { StatCard } from '@/components/admin/StatCard';
-import { AgentUsageChart } from '@/components/admin/AgentUsageChart';
-import { RecentActivity } from '@/components/admin/RecentActivity';
+import { StatCard } from '@/components/admin/dashboard/StatCard';
+import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
+import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
 import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/lib/types';
+import { useLocalization } from '@/context/LocalizationContext';
 
 
 function DashboardSkeleton() {
@@ -45,6 +46,7 @@ function DashboardSkeleton() {
 }
 
 export default function UserDashboardPage() {
+    const { t } = useLocalization();
     const { userProfile, firebaseUser } = useAuth();
     const { data: stats, isLoading, isError, error } = useUserStats();
     const router = useRouter();
@@ -80,7 +82,7 @@ export default function UserDashboardPage() {
             openChat();
 
         } catch (error: any) {
-            toast({ title: "Error starting chat", description: error.message, variant: "destructive" });
+            toast({ title: t('userDashboard.startChatError'), description: error.message, variant: "destructive" });
         } finally {
             setIsCreatingChat(false);
         }
@@ -93,15 +95,15 @@ export default function UserDashboardPage() {
                 <div className="text-center sm:text-left">
                     <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary flex items-center justify-center sm:justify-start gap-4">
                         <AreaChart className="w-10 h-10" />
-                        My Dashboard
+                        {t('userDashboard.pageTitle')}
                     </h1>
                     <p className="text-lg text-muted-foreground mt-2">
-                        Here's a summary of your activity, {userProfile?.name}.
+                        {t('userDashboard.pageSubtitle', { name: userProfile?.name })}
                     </p>
                 </div>
                 <Button onClick={handleStartChatWithAdmins} disabled={isCreatingChat}>
                     {isCreatingChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
-                    Contact Admin
+                    {t('userDashboard.contactAdmin')}
                 </Button>
             </div>
 
@@ -110,16 +112,16 @@ export default function UserDashboardPage() {
             {isError && (
                  <div className="p-8 text-center text-destructive border rounded-lg">
                     <AlertCircle className="mx-auto h-8 w-8 mb-2" />
-                    <p>Could not load your analytics: {error.message}</p>
+                    <p>{t('userDashboard.errorLoading', { message: error.message })}</p>
                 </div>
             )}
 
             {stats && !isLoading && (
                 <div className="space-y-8">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        <StatCard title="Total AI Generations" value={stats.totalGenerations.toString()} icon={Bot} />
-                        <StatCard title="Credits Remaining" value={userProfile?.credits.toString()} icon={Gem} />
-                        <StatCard title="Total Credits Used" value={stats.creditsUsed.toString()} icon={TrendingDown} />
+                        <StatCard title={t('userDashboard.totalGenerations')} value={stats.totalGenerations.toString()} icon={Bot} />
+                        <StatCard title={t('userDashboard.creditsRemaining')} value={userProfile?.credits.toString()} icon={Gem} />
+                        <StatCard title={t('userDashboard.creditsUsed')} value={stats.creditsUsed.toString()} icon={TrendingDown} />
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">

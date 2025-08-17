@@ -40,6 +40,29 @@
     "generationTemplates": "قوالب الإنشاء",
     "promptTemplates": "قوالب الأوامر"
   },
+  "userDashboard": {
+    "pageTitle": "لوحة التحكم الخاصة بي",
+    "pageSubtitle": "ها هو ملخص نشاطك، {name}.",
+    "contactAdmin": "اتصل بالمسؤول",
+    "totalGenerations": "إجمالي عمليات الإنشاء بالذكاء الاصطناعي",
+    "creditsRemaining": "الأرصدة المتبقية",
+    "creditsUsed": "إجمالي الأرصدة المستخدمة",
+    "startChatError": "خطأ في بدء المحادثة",
+    "errorLoading": "تعذر تحميل تحليلاتك: {message}"
+  },
+  "paymentHistory": {
+    "pageTitle": "سجل المدفوعات",
+    "pageSubtitle": "راجع جميع معاملاتك السابقة ومشتريات الأرصدة.",
+    "cardTitle": "معاملاتك",
+    "cardDescription": "سجل كامل لتاريخ مدفوعاتك.",
+    "tableDate": "التاريخ",
+    "tablePlan": "الخطة",
+    "tableAmount": "المبلغ",
+    "tableStatus": "الحالة",
+    "errorLoading": "فشل تحميل سجل المدفوعات: {message}",
+    "noTransactionsTitle": "لا توجد معاملات بعد",
+    "noTransactionsDescription": "لم تقم بأي مدفوعات أو شراء أرصدة."
+  },
   "notifications": {
     "newPayment": {
       "title": "طلب دفع جديد",
@@ -1110,11 +1133,11 @@
       "jsonOutputTitle": "إخراج JSON الخام",
       "saveResultButton": "حفظ النتيجة كملف سياق",
       "pasteText": {
-        "titleLabel": "اسم السياق",
-        "titlePlaceholder": "على سبيل المثال، وثيقة المتطلبات، مواصفات واجهة برمجة التطبيقات",
-        "contentLabel": "لصق النص أو Markdown",
-        "contentPlaceholder": "الصق المحتوى الخاص بك هنا...",
-        "addButton": "إضافة كسياق"
+        "titleLabel": "Context Name",
+        "titlePlaceholder": "e.g., Requirements Document, API Specs",
+        "contentLabel": "Paste Text or Markdown",
+        "contentPlaceholder": "Paste your content here...",
+        "addButton": "Add as Context"
       },
       "toasts": {
         "invalidFile": "Invalid file type. Please upload a PDF.",
@@ -1134,18 +1157,18 @@
         "fileReadError": "File Read Error",
         "fileReadErrorDesc": "Could not read the selected file.",
         "fileAdded": "تمت إضافة الملف",
-        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
-        "processingFile": "جارٍ معالجة الملف...",
-        "dropHere": "أفلت الملفات هنا...",
-        "uploadedContext": "السياق الذي تم تحميله",
-        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
-        "authError": "يجب عليك تسجيل الدخول لتحميل الملفات.",
+        "fileAddedDesc": "{fileName} has been added to context.",
+        "processingFile": "Processing file...",
+        "dropHere": "Drop the files here...",
+        "uploadedContext": "UPLOADED CONTEXT",
+        "noContext": "No context files uploaded yet.",
+        "authError": "You must be logged in to upload files.",
         "contextAddedToastTitle": "Context Added",
         "contextAddedToastDesc": "\"{fileName}\" has been added to the context.",
         "missingInfoToastTitle": "معلومات ناقصة",
-        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى واسم للسياق.",
+        "missingInfoToastDesc": "Please provide both content and a name for the context.",
         "uploadFailed": "فشل التحميل",
-        "analyzingInProgress": "جاري تحليل {type}..."
+        "analyzingInProgress": "Analyzing {type}..."
       },
       "questionsDocument": "مستند الأسئلة",
       "contextSyllabus": "مستند السياق / المنهج (اختياري)",
@@ -1187,11 +1210,11 @@
       "saveResultButton": "حفظ النتيجة كملف سياق",
       "reportPlaceholder": "سيظهر تحليل الذكاء الاصطناعي الخاص بك هنا كتقرير منسق.",
       "pasteText": {
-        "titleLabel": "اسم السياق",
-        "titlePlaceholder": "على سبيل المثال، وثيقة المتطلبات، مواصفات واجهة برمجة التطبيقات",
-        "contentLabel": "لصق النص أو Markdown",
-        "contentPlaceholder": "الصق المحتوى الخاص بك هنا...",
-        "addButton": "إضافة كسياق"
+        "titleLabel": "Context Name",
+        "titlePlaceholder": "e.g., Requirements Document, API Specs",
+        "contentLabel": "Paste Text or Markdown",
+        "contentPlaceholder": "Paste your content here...",
+        "addButton": "Add as Context"
       },
       "toasts": {
         "contextRequired": "السياق مطلوب",
@@ -1204,16 +1227,14 @@
         "fileReadError": "File Read Error",
         "fileReadErrorDesc": "Could not read the selected file.",
         "fileAdded": "تمت إضافة الملف",
-        "fileAddedDesc": "تمت إضافة {fileName} إلى السياق.",
-        "processingFile": "جارٍ معالجة الملف...",
-        "dropHere": "أفلت الملفات هنا...",
-        "uploadedContext": "السياق الذي تم تحميله",
-        "noContext": "لم يتم تحميل أي ملفات سياق بعد.",
+        "fileAddedDesc": "{fileName} has been added to context.",
+        "processingFile": "Processing file...",
+        "dropHere": "Drop the files here...",
+        "uploadedContext": "UPLOADED CONTEXT",
+        "noContext": "No context files uploaded yet.",
         "missingInfoToastTitle": "معلومات ناقصة",
-        "missingInfoToastDesc": "يرجى تقديم كل من المحتوى واسم للسياق."
+        "missingInfoToastDesc": "Please provide both content and a name for the context."
       }
     }
   }
 }
-
-    
