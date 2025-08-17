@@ -193,6 +193,29 @@
       "toastFileProcessedDesc": "تم استخراج النص من {fileName}.",
       "toastFileFailed": "فشل معالجة الملف"
     },
+    "summarizer": {
+      "pageTitle": "الملخص بالذكاء الاصطناعي",
+      "pageSubtitle": "كثف النصوص الطويلة إلى ملخصات موجزة بالطول الذي تريده.",
+      "cardTitle": "أداة التلخيص",
+      "cardDescription": "أدخل النص الذي تريد تلخيصه، وحدد الطول المطلوب، ودع الذكاء الاصطناعي يقوم بالعمل.",
+      "pasteTab": "لصق النص",
+      "uploadTab": "تحميل ملف",
+      "placeholder": "الصق مقالتك الطويلة أو تقريرك أو أي نص هنا...",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر للتحديد",
+      "supportedFiles": "يدعم: PDF، TXT، MD",
+      "processingFile": "جارٍ معالجة الملف...",
+      "lengthLabel": "طول الملخص",
+      "lengthPlaceholder": "حدد طول الملخص",
+      "lengths": {
+        "short": "قصير",
+        "medium": "متوسط",
+        "long": "طويل"
+      },
+      "buttonText": "لخص النص",
+      "generatedSummaryLabel": "الملخص الذي تم إنشاؤه",
+      "successToast": "تم التلخيص بنجاح!",
+      "errorToast": "خطأ"
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",

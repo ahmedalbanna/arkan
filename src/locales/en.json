@@ -193,6 +193,29 @@
       "toastFileProcessedDesc": "Text extracted from {fileName}.",
       "toastFileFailed": "File Processing Failed"
     },
+    "summarizer": {
+      "pageTitle": "AI Summarizer",
+      "pageSubtitle": "Condense long texts into concise summaries of your desired length.",
+      "cardTitle": "Summarizer Tool",
+      "cardDescription": "Enter the text you want to summarize, select the desired length, and let the AI do the work.",
+      "pasteTab": "Paste Text",
+      "uploadTab": "Upload File",
+      "placeholder": "Paste your long article, report, or any text here...",
+      "dropzoneHint": "Drag 'n' drop a file here, or click to select",
+      "supportedFiles": "Supported: PDF, TXT, MD",
+      "processingFile": "Processing file...",
+      "lengthLabel": "Summary Length",
+      "lengthPlaceholder": "Select summary length",
+      "lengths": {
+        "short": "Short",
+        "medium": "Medium",
+        "long": "Long"
+      },
+      "buttonText": "Summarize Text",
+      "generatedSummaryLabel": "Generated Summary",
+      "successToast": "Summarization successful!",
+      "errorToast": "Error"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
