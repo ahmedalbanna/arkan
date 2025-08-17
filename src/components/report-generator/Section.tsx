@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -310,22 +311,22 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <span tabIndex={0}> {/* Wrapper for disabled button */}
-                                        <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={true}>
-                                            <Volume2 className="h-4 w-4 mr-2" />
+                                        <Button variant="ghost" size="sm" onClick={handleReadAloud} disabled={ttsMutation.isPending}>
+                                            {ttsMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Volume2 className="h-4 w-4 mr-2" />}
                                             {t('builder.Section.readAloud')}
                                         </Button>
                                     </span>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                    <p>{t('builder.toasts.comingSoon')}</p>
+                                    <p>{t('builder.Section.tooltips.readAloud')}</p>
                                 </TooltipContent>
                             </Tooltip>
                         </TooltipProvider>
 
                          <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                    <Wand2 className="h-4 w-4 mr-2" /> {t('builder.Section.aiActions.title')}
+                                <Button variant="ghost" size="sm" disabled={isProcessingAi}>
+                                    {isProcessingAi ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Wand2 className="h-4 w-4 mr-2" />} {t('builder.Section.aiActions.title')}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>

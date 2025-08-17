@@ -998,14 +998,21 @@
       }
     },
     "Section": {
-      "aiSuggestion": "AI SUGGESTION",
+      "aiSuggestion": "AI Suggestion",
       "reject": "Reject",
       "accept": "Accept",
       "tooltips": {
         "aiActions": "AI Actions",
-        "editorOptions": "Editor Options"
+        "editorOptions": "Editor Options",
+        "readAloud": "Read Aloud (Coming Soon)",
+        "comingSoon": "Coming Soon!",
+        "copyMd": "Copy Markdown",
+        "copyText": "Copy Plain Text",
+        "downloadDocx": "Download as DOCX",
+        "downloadPdf": "Download as PDF"
       },
       "aiActions": {
+        "title": "AI Actions",
         "summarize": "Summarize",
         "summarizePrompt": "Summarize this text concisely.",
         "expand": "Expand",
@@ -1014,6 +1021,8 @@
         "checkGrammar": "Check Grammar",
         "checkGrammarPrompt": "Correct any spelling and grammar mistakes in this text.",
         "translate": "Translate",
+        "versionHistory": "Version History",
+        "humanize": "Humanize",
         "styles": {
           "formal": "Formal",
           "friendly": "Friendly",
@@ -1024,22 +1033,7 @@
         }
       },
       "editorActions": {
-        "copyMd": "Copy Markdown",
-        "copyText": "Copy Plain Text",
-        "downloadDocx": "Download DOCX",
-        "downloadPdf": "Download PDF"
-      },
-      "toasts": {
-        "copied": "Copied to clipboard",
-        "cleared": "Content cleared",
-        "translateSuccess": "Translation Complete!",
-        "translateFailed": "Translation Failed",
-        "suggestionReadyTitle": "Suggestion Ready",
-        "suggestionReadyDesc": "The AI has finished processing your request.",
-        "rewriteFailed": "Rewrite Failed",
-        "humanizeFailed": "Humanize Failed",
-        "ttsSuccessTitle": "Audio Ready!",
-        "ttsSuccessDesc": "The text has been converted to speech."
+        "title": "Editor"
       },
       "viewTab": "View",
       "editTab": "Edit",

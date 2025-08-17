@@ -1003,9 +1003,16 @@
       "accept": "قبول",
       "tooltips": {
         "aiActions": "إجراءات الذكاء الاصطناعي",
-        "editorOptions": "خيارات المحرر"
+        "editorOptions": "خيارات المحرر",
+        "readAloud": "قراءة بصوت عالٍ (قريبًا)",
+        "comingSoon": "قريبا!",
+        "copyMd": "نسخ Markdown",
+        "copyText": "نسخ نص عادي",
+        "downloadDocx": "تنزيل DOCX",
+        "downloadPdf": "تنزيل PDF"
       },
       "aiActions": {
+        "title": "إجراءات الذكاء الاصطناعي",
         "summarize": "تلخيص",
         "summarizePrompt": "لخص هذا النص بشكل موجز.",
         "expand": "توسيع",
@@ -1014,6 +1021,8 @@
         "checkGrammar": "تدقيق نحوي",
         "checkGrammarPrompt": "صحح أي أخطاء إملائية ونحوية في هذا النص.",
         "translate": "ترجمة",
+        "versionHistory": "سجل الإصدارات",
+        "humanize": "إضفاء طابع إنساني",
         "styles": {
           "formal": "رسمي",
           "friendly": "ودي",
@@ -1024,22 +1033,7 @@
         }
       },
       "editorActions": {
-        "copyMd": "نسخ Markdown",
-        "copyText": "نسخ نص عادي",
-        "downloadDocx": "تنزيل DOCX",
-        "downloadPdf": "تنزيل PDF"
-      },
-      "toasts": {
-        "copied": "تم النسخ إلى الحافظة",
-        "cleared": "تم مسح المحتوى",
-        "translateSuccess": "اكتملت الترجمة!",
-        "translateFailed": "فشلت الترجمة",
-        "suggestionReadyTitle": "الاقتراح جاهز",
-        "suggestionReadyDesc": "أنهى الذكاء الاصطناعي معالجة طلبك.",
-        "rewriteFailed": "فشلت إعادة الكتابة",
-        "humanizeFailed": "فشل التحويل إلى نص بشري",
-        "ttsSuccessTitle": "الصوت جاهز!",
-        "ttsSuccessDesc": "تم تحويل النص إلى كلام."
+        "title": "محرر"
       },
       "viewTab": "عرض",
       "editTab": "تعديل",
@@ -1052,8 +1046,7 @@
       "translatePlaceholder": "ستظهر الترجمة هنا.",
       "translateButton": "ترجمة",
       "viewEditTab": "عرض وتعديل",
-      "evaluationTab": "تقييم",
-      "humanize": "تحويل إلى نص بشري"
+      "evaluationTab": "تقييم"
     },
     "academicSolver": {
       "pageTitle": "الحلال الأكاديمي بالذكاء الاصطناعي",
