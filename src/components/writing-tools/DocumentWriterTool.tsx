@@ -17,6 +17,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
   topic: z.string().min(5, 'Please enter a topic with at least 5 characters.'),
@@ -28,6 +29,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function DocumentWriterTool() {
+  const { t } = useLocalization();
   const mutation = useWriteDocument();
   const [isCopied, setIsCopied] = useState(false);
   const [generatedContent, setGeneratedContent] = useState('');
@@ -62,39 +64,45 @@ export function DocumentWriterTool() {
     });
   };
 
-  const docTypes = ['Essay', 'Blog Post', 'Formal Report', 'Technical Article', 'Creative Story'];
+  const docTypes = [
+    { value: 'essay', label: t('writingTools.documentWriter.docTypeEssay') },
+    { value: 'blog post', label: t('writingTools.documentWriter.docTypeBlogPost') },
+    { value: 'formal report', label: t('writingTools.documentWriter.docTypeFormalReport') },
+    { value: 'technical article', label: t('writingTools.documentWriter.docTypeTechnicalArticle') },
+    { value: 'creative story', label: t('writingTools.documentWriter.docTypeCreativeStory') },
+  ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Document Writer</CardTitle>
-        <CardDescription>Provide a topic and let the AI generate a complete document for you.</CardDescription>
+        <CardTitle>{t('writingTools.documentWriter.cardTitle')}</CardTitle>
+        <CardDescription>{t('writingTools.documentWriter.cardDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="topic">Topic</Label>
+              <Label htmlFor="topic">{t('writingTools.documentWriter.topicLabel')}</Label>
               <Input
                 id="topic"
                 {...form.register('topic')}
-                placeholder="e.g., The Future of Renewable Energy"
+                placeholder={t('writingTools.documentWriter.topicPlaceholder')}
                 disabled={mutation.isPending}
               />
               {form.formState.errors.topic && <p className="text-sm text-destructive">{form.formState.errors.topic.message}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="document-type">Document Type</Label>
+              <Label htmlFor="document-type">{t('writingTools.documentWriter.docTypeLabel')}</Label>
               <Controller
                 name="documentType"
                 control={form.control}
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <SelectTrigger id="document-type">
-                      <SelectValue placeholder="Select document type" />
+                      <SelectValue placeholder={t('writingTools.documentWriter.docTypePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {docTypes.map(type => <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>)}
+                      {docTypes.map(type => <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 )}
@@ -102,35 +110,35 @@ export function DocumentWriterTool() {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="knowledge">Knowledge & Instructions (Optional)</Label>
+            <Label htmlFor="knowledge">{t('writingTools.documentWriter.knowledgeLabel')}</Label>
             <Textarea
               id="knowledge"
               {...form.register('knowledge')}
               rows={3}
-              placeholder="e.g., Keep the tone formal and include a section on challenges."
+              placeholder={t('writingTools.documentWriter.knowledgePlaceholder')}
               disabled={mutation.isPending}
             />
           </div>
            <div className="space-y-2">
-            <Label htmlFor="toc">Table of Contents (Optional)</Label>
+            <Label htmlFor="toc">{t('writingTools.documentWriter.tocLabel')}</Label>
             <Textarea
               id="toc"
               {...form.register('tableOfContents')}
               rows={5}
-              placeholder="Enter one heading per line to define the document structure."
+              placeholder={t('writingTools.documentWriter.tocPlaceholder')}
               disabled={mutation.isPending}
             />
           </div>
           <Button type="submit" disabled={mutation.isPending} className="w-full">
             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-            Write Document (3 Credits)
+            {t('writingTools.documentWriter.generateButton')}
           </Button>
         </form>
 
         {(mutation.isPending || generatedContent) && (
           <div className="space-y-2 pt-6 border-t">
             <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-muted-foreground">Generated Document</h3>
+              <h3 className="font-semibold text-muted-foreground">{t('writingTools.documentWriter.generatedDocument')}</h3>
               {generatedContent && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}

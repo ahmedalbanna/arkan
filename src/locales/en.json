@@ -69,6 +69,27 @@
       "toastStyleRequired": "Style required",
       "toastStyleRequiredDesc": "Please select a style to rewrite the text."
     },
+    "documentWriter": {
+      "pageTitle": "AI Document Writer",
+      "pageSubtitle": "Generate complete documents, essays, or reports from a single topic.",
+      "cardTitle": "Document Writer",
+      "cardDescription": "Provide a topic and let the AI generate a complete document for you.",
+      "topicLabel": "Topic",
+      "topicPlaceholder": "e.g., The Future of Renewable Energy",
+      "docTypeLabel": "Document Type",
+      "docTypePlaceholder": "Select document type",
+      "docTypeEssay": "Essay",
+      "docTypeBlogPost": "Blog Post",
+      "docTypeFormalReport": "Formal Report",
+      "docTypeTechnicalArticle": "Technical Article",
+      "docTypeCreativeStory": "Creative Story",
+      "knowledgeLabel": "Knowledge & Instructions (Optional)",
+      "knowledgePlaceholder": "e.g., Keep the tone formal and include a section on challenges.",
+      "tocLabel": "Table of Contents (Optional)",
+      "tocPlaceholder": "Enter one heading per line to define the document structure.",
+      "generateButton": "Write Document (3 Credits)",
+      "generatedDocument": "Generated Document"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
@@ -95,7 +116,12 @@
     "creditsRemaining": "Credits Remaining",
     "creditsUsed": "Total Credits Used",
     "startChatError": "Error starting chat",
-    "errorLoading": "Could not load your analytics: {message}"
+    "errorLoading": "Could not load your analytics: {message}",
+    "agentUsageTitle": "Agent Usage",
+    "recentActivityTitle": "Recent Activity",
+    "generationBy": "Generation by",
+    "usedAgent": "used agent:",
+    "noActivity": "No recent activity."
   },
   "paymentHistory": {
     "pageTitle": "Payment History",
@@ -1207,7 +1233,7 @@
         "fileAddedDesc": "{fileName} has been added to context.",
         "processingFile": "Processing file...",
         "dropHere": "Drop the files here...",
-        "uploadedContext": "UPLOADED CONTEXT",
+        "uploadedContext": "Uploaded Context",
         "noContext": "No context files uploaded yet.",
         "missingInfoToastTitle": "Missing Information",
         "missingInfoToastDesc": "Please provide both content and a name for the context.",
@@ -1274,7 +1300,7 @@
         "fileAddedDesc": "{fileName} has been added to context.",
         "processingFile": "Processing file...",
         "dropHere": "Drop the files here...",
-        "uploadedContext": "UPLOADED CONTEXT",
+        "uploadedContext": "Uploaded Context",
         "noContext": "No context files uploaded yet.",
         "missingInfoToastTitle": "Missing Information",
         "missingInfoToastDesc": "Please provide both content and a name for the context."
