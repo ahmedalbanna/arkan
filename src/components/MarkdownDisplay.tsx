@@ -181,7 +181,7 @@ function helloWorld() {
               </CardContent>
               <CardFooter>
                  <Button onClick={handleExport} disabled={isExporting || !markdown}>
-                  {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
+                  {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <FileDown className="me-2 h-4 w-4" />}
                   {t('markdownDisplay.exportButton')}
                 </Button>
               </CardFooter>
