@@ -492,6 +492,26 @@
     "pageSubtitle": "Learn how to use all the features Arkan has to offer.",
     "navigationTitle": "Features",
     "howToUse": "How to Use",
+    "teamManagement": {
+      "title": "Team Management",
+      "description": "Collaborate with others by creating teams, inviting members, and sharing projects.",
+      "step1": "Navigate to 'Manage Team' from your user profile dropdown.",
+      "step2": "Create a new team by giving it a name.",
+      "step3": "Invite members to your team using their email address.",
+      "step4": "Team projects will appear alongside your personal projects on the 'My Projects' page."
+    },
+    "designStudio": {
+      "title": "Design Studio",
+      "description": "Customize the visual appearance of your exported documents using a live template editor.",
+      "step1": "Navigate to the Admin Panel and select one of the Template managers (e.g., Export Templates).",
+      "step2": "Use the controls in the template cards to change fonts, colors, and other styles.",
+      "step3": "The live preview will instantly update to show your changes.",
+      "step4": "Click 'Save Template' to persist your new design for future exports."
+    },
+    "pushNotifications": {
+      "title": "Push Notifications",
+      "description": "Implement push notifications for task reminders, feedback requests, or marketing updates."
+    },
     "proposalGenerator": {
       "title": "Proposal Generator",
       "description": "The Proposal Generator is the starting point for your projects. Describe your idea in a few sentences, and our AI will create a comprehensive, professional project proposal.",
