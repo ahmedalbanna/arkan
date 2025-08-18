@@ -15,6 +15,7 @@ interface FormattedProposalViewProps {
     proposal: AnyProjectProposal;
     onUpdate: (path: string, value: any) => void;
     readOnly?: boolean;
+    currentPage: number;
 }
 
 // Helper to check if a value is considered to have content
@@ -27,19 +28,13 @@ const hasContent = (value: any): boolean => {
 };
 
 // A styled container for each "page"
-const A4Page = ({ children }: { children: React.ReactNode }) => (
-    <div className="bg-background shadow-lg p-12 md:p-16 mx-auto my-8" style={{ width: '210mm', minHeight: '297mm' }}>
-        {children}
-    </div>
-);
-
-// A component to render individual sections
-const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="space-y-2 mb-6">
-        <h2 className="font-semibold text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>
+const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
+    <div className="bg-background shadow-lg p-8 md:p-16 mx-auto my-4" style={{ width: '210mm', minHeight: '297mm' }}>
+        {title && <h2 className="font-semibold text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>}
         <div className="prose dark:prose-invert max-w-none text-sm">{children}</div>
     </div>
 );
+
 
 // Helper to format keys into readable titles
 const formatKeyToTitle = (key: string): string => {
@@ -49,7 +44,7 @@ const formatKeyToTitle = (key: string): string => {
     .replace(/\b\w/g, char => char.toUpperCase());
 }
 
-export default function FormattedProposalView({ proposal }: FormattedProposalViewProps) {
+export default function FormattedProposalView({ proposal, currentPage }: FormattedProposalViewProps) {
     if (!proposal) return null;
 
     const renderValue = (value: any, key: string) => {
@@ -86,31 +81,12 @@ export default function FormattedProposalView({ proposal }: FormattedProposalVie
     }
 
     const orderedKeys = Object.keys(ProjectProposalSchema.shape);
+    const currentPageKey = orderedKeys[currentPage];
+    const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 
     return (
-        <div className="space-y-4">
-             {/* Main Title Page */}
-            <A4Page>
-                 <div className="flex flex-col items-center justify-center h-full text-center">
-                    <h1 className="text-4xl font-bold font-headline">{proposal.title}</h1>
-                    {proposal.category && <p className="text-lg text-muted-foreground mt-4">{proposal.category}</p>}
-                </div>
-            </A4Page>
-            
-            {/* Subsequent pages for each section */}
-            {orderedKeys.map((key) => {
-                const value = proposal[key as keyof typeof proposal];
-                if (key === 'title' || key === 'category' || !hasContent(value)) return null;
-
-                return (
-                    <A4Page key={key}>
-                        <Section title={formatKeyToTitle(key)}>
-                           {renderValue(value, key)}
-                        </Section>
-                    </A4Page>
-                )
-            })}
-        </div>
+        <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
+            {renderValue(currentPageValue, currentPageKey)}
+        </A4Page>
     );
 }
-
