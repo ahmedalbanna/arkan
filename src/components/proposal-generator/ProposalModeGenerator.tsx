@@ -16,6 +16,7 @@ import { ProposalActions } from './ProposalActions';
 import { lazy, Suspense } from 'react';
 import { translateProposalApi } from '@/services/translation-service';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
+import { ScrollArea } from '../ui/scroll-area';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -109,8 +110,8 @@ export function ProposalModeGenerator() {
             
             <div className="lg:col-span-8">
                 {proposal ? (
-                    <Card className="h-full flex flex-col">
-                        <CardHeader>
+                     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg">
+                         <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                             <div className="flex justify-between items-start gap-4">
                                 <div className="flex-1">
                                     <CardTitle className="font-headline text-2xl text-primary">
@@ -129,16 +130,18 @@ export function ProposalModeGenerator() {
                                 </div>
                             </div>
                         </CardHeader>
-                        <CardContent className="flex-grow" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-                            <Suspense fallback={<ProposalSkeleton/>}>
-                                <FormattedProposalView
-                                    proposal={proposal}
-                                    onUpdate={handleProposalUpdate}
-                                    readOnly={generationMutation.isPending || translateMutation.isPending}
-                                />
-                            </Suspense>
-                        </CardContent>
-                    </Card>
+                        <ScrollArea className="h-[calc(100vh-280px)]">
+                             <div className="bg-background shadow-lg p-8 md:p-12" style={{ minHeight: '11in', width: '8.5in' }}>
+                                <Suspense fallback={<ProposalSkeleton/>}>
+                                    <FormattedProposalView
+                                        proposal={proposal}
+                                        onUpdate={handleProposalUpdate}
+                                        readOnly={generationMutation.isPending || translateMutation.isPending}
+                                    />
+                                </Suspense>
+                            </div>
+                        </ScrollArea>
+                    </div>
                 ) : (
                     <Card className="flex items-center justify-center h-full min-h-[400px]">
                         <div className="text-center text-muted-foreground p-8">
