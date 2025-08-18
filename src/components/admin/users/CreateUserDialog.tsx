@@ -75,7 +75,7 @@ export function CreateUserDialog() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <PlusCircle className="mr-2 h-4 w-4" />
+          <PlusCircle className="me-2 h-4 w-4" />
           Create User
         </Button>
       </DialogTrigger>
@@ -153,7 +153,7 @@ export function CreateUserDialog() {
             />
             <DialogFooter>
                 <Button type="submit" disabled={mutation.isPending}>
-                    {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {mutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                     Create User
                 </Button>
             </DialogFooter>

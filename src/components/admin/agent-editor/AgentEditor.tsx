@@ -75,7 +75,7 @@ const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.Element
       isActive && 'bg-accent text-accent-foreground'
     )}
   >
-    <Icon className="mr-2 h-4 w-4" />
+    <Icon className="me-2 h-4 w-4" />
     {label}
   </Button>
 );
@@ -85,7 +85,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const searchParams = useSearchParams();
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
-  
+
   const updateAgentMutation = useUpdateAgent();
 
   const form = useForm<AgentEditorFormValues>({
@@ -109,7 +109,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
   useEffect(() => {
     const promptFromUrl = searchParams.get('prompt');
-    
+
     const getInitialPrompt = () => {
         if(typeof initialData.prompt === 'string') {
             return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
@@ -195,7 +195,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           <CardFooter className="justify-end gap-2 border-t pt-6 mt-0">
             <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
             <Button type="submit" disabled={updateAgentMutation.isPending}>
-              {updateAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updateAgentMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
               {t('agentEditor.saveButton')}
             </Button>
           </CardFooter>

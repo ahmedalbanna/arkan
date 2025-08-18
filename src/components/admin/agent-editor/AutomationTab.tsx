@@ -28,10 +28,10 @@ export default function AutomationTab() {
         {t('agentEditor.automationDesc')}
       </p>
        <Button variant="outline" className="w-full justify-start">
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="me-2 h-4 w-4" />
           {t('agentEditor.newAutomationBtn')}
         </Button>
-      
+
       <div className="space-y-2">
         {AVAILABLE_AUTOMATIONS.map((automation, index) => (
             <Button key={index} variant="outline" className="w-full h-auto justify-start text-left">

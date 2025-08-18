@@ -61,7 +61,7 @@ function jsonToMarkdown(json: any, level = 1): string {
         const value = json[key];
         // Convert camelCase or snake_case to Title Case for headings
         const title = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').replace(/^./, str => str.toUpperCase());
-        
+
         if (typeof value === 'object' && value !== null) {
           markdown += `\n${'#'.repeat(level + 1)} ${title}\n\n`;
           markdown += jsonToMarkdown(value, level + 1);
@@ -86,7 +86,7 @@ export default function AnalystAgent() {
         resolver: zodResolver(analysisSchema),
         defaultValues: { prompt: '' },
     });
-    
+
     const analysisMutation = useMutation({
         mutationFn: analyzeContextApi,
         onSuccess: (data) => {
@@ -100,7 +100,7 @@ export default function AnalystAgent() {
             toast({ title: t('builder.files.toasts.analysisFailed'), description: error.message, variant: 'destructive' });
         }
     });
-    
+
     const onSubmit = async (data: AnalysisFormValues) => {
         if (externalContext.length === 0) {
             toast({ title: t('builder.files.toasts.contextRequired'), description: t('builder.files.toasts.contextRequiredDesc'), variant: 'destructive' });
@@ -116,7 +116,7 @@ export default function AnalystAgent() {
         if (!markdownResult || !form.getValues('prompt')) return;
 
         const fileName = form.getValues('prompt').toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 50) + '.md';
-        
+
         addExternalContext(fileName, markdownResult, 'context');
         toast({ title: t('builder.files.toasts.analysisSaved'), description: t('builder.files.toasts.analysisSavedDesc').replace('{fileName}', fileName) });
     };
@@ -141,7 +141,7 @@ export default function AnalystAgent() {
                                 <FormItem>
                                     <FormLabel>{t('builder.files.analystAgentPromptLabel')}</FormLabel>
                                     <FormControl>
-                                        <Textarea 
+                                        <Textarea
                                             placeholder={t('builder.files.analystAgentPromptPlaceholder')}
                                             {...field}
                                             rows={4}
@@ -153,10 +153,10 @@ export default function AnalystAgent() {
                             )}
                         />
                         <Button type="submit" disabled={!canAnalyze}>
-                            {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                            {isProcessing ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Wand2 className="me-2 h-4 w-4" />}
                             {t('builder.files.analystAgentRunButton', {creditCost: creditCost})}
                         </Button>
-                        
+
                         {(isProcessing || markdownResult) && (
                             <div className="space-y-2 pt-4 border-t flex-grow flex flex-col min-h-0">
                                 <div className="flex justify-between items-center">
@@ -165,7 +165,7 @@ export default function AnalystAgent() {
                                         <Dialog>
                                             <DialogTrigger asChild>
                                                 <Button variant="ghost" size="sm">
-                                                    <Braces className="mr-2 h-4 w-4"/> {t('builder.files.viewJsonButton')}
+                                                    <Braces className="me-2 h-4 w-4"/> {t('builder.files.viewJsonButton')}
                                                 </Button>
                                             </DialogTrigger>
                                             <DialogContent className="max-w-3xl">
@@ -173,9 +173,9 @@ export default function AnalystAgent() {
                                                     <DialogTitle>{t('builder.files.jsonOutputTitle')}</DialogTitle>
                                                 </DialogHeader>
                                                  <ScrollArea className="max-h-[70vh] border rounded-md bg-muted text-xs p-2">
-                                                    <ReactJson 
-                                                        src={analysisMutation.data.data} 
-                                                        theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                                                    <ReactJson
+                                                        src={analysisMutation.data.data}
+                                                        theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                                                         collapsed={false}
                                                         displayDataTypes={false}
                                                         name={false}
@@ -204,7 +204,7 @@ export default function AnalystAgent() {
                     {markdownResult && !isProcessing && (
                         <CardFooter>
                             <Button variant="secondary" onClick={handleSaveAnalysis} disabled={!markdownResult}>
-                                <PlusCircle className="mr-2 h-4 w-4" />
+                                <PlusCircle className="me-2 h-4 w-4" />
                                 {t('builder.files.saveResultButton')}
                             </Button>
                         </CardFooter>
@@ -215,4 +215,3 @@ export default function AnalystAgent() {
     );
 }
 
-    

@@ -53,7 +53,7 @@ export default function KnowledgeTab() {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
       setIsUploading(true);
-      
+
       acceptedFiles.forEach(file => {
           const reader = new FileReader();
           reader.onload = () => {
@@ -67,13 +67,13 @@ export default function KnowledgeTab() {
           };
           reader.readAsDataURL(file);
       });
-      
+
       setIsUploading(false);
       toast({ title: `${acceptedFiles.length} file(s) added successfully.`});
   }, [append, toast]);
-  
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, noClick: true, noKeyboard: true });
-  
+
   const handleAddText = () => {
     if(!textInput.trim() || !textTitle.trim()) {
         toast({ title: 'Title and content are required.', variant: 'destructive'});
@@ -114,14 +114,14 @@ export default function KnowledgeTab() {
              <input {...getInputProps()} id="file-upload" />
              <UploadCloud className="mx-auto h-12 w-12 text-muted-foreground" />
              {isUploading ? (
-                <p className="mt-4 text-sm text-muted-foreground flex items-center justify-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Processing files...</p>
+                <p className="mt-4 text-sm text-muted-foreground flex items-center justify-center"><Loader2 className="me-2 h-4 w-4 animate-spin" />Processing files...</p>
              ): (
                 <p className="mt-4 text-sm text-muted-foreground">
                     Drag multiple files here or click to upload. Supports .pdf, .docx, .txt, .md, and more.
                 </p>
              )}
         </label>
-        
+
         <div className="space-y-2 pt-2">
             <Label htmlFor="text-title">Add Text or Markdown</Label>
             <Input id="text-title" placeholder="Title for this text snippet" value={textTitle} onChange={e => setTextTitle(e.target.value)} />
@@ -132,10 +132,10 @@ export default function KnowledgeTab() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <Button variant="outline" disabled><FolderKanban className="mr-2 h-4 w-4" /> Add Project</Button>
-            <Button variant="outline" disabled><ImageIcon className="mr-2 h-4 w-4" /> Add Media</Button>
-            <Button variant="outline" disabled><LinkIcon className="mr-2 h-4 w-4" /> Add Link</Button>
-            <Button variant="outline" disabled><Youtube className="mr-2 h-4 w-4" /> Add Youtube</Button>
+            <Button variant="outline" disabled><FolderKanban className="me-2 h-4 w-4" /> Add Project</Button>
+            <Button variant="outline" disabled><ImageIcon className="me-2 h-4 w-4" /> Add Media</Button>
+            <Button variant="outline" disabled><LinkIcon className="me-2 h-4 w-4" /> Add Link</Button>
+            <Button variant="outline" disabled><Youtube className="me-2 h-4 w-4" /> Add Youtube</Button>
         </div>
       </div>
 

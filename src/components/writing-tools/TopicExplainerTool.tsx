@@ -39,7 +39,7 @@ export function TopicExplainerTool() {
         }
     });
   };
-  
+
   const results = mutation.data;
 
   return (
@@ -62,7 +62,7 @@ export function TopicExplainerTool() {
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.topicExplainer.generateButton')}
           </Button>
         </form>
@@ -70,7 +70,7 @@ export function TopicExplainerTool() {
         {mutation.isPending && (
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                     {t('writingTools.topicExplainer.analyzing')}
                 </div>
             </div>

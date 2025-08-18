@@ -55,7 +55,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                         setIsCopied(true);
                         setTimeout(() => setIsCopied(false), 2000);
                     }}>
-                        {isCopied ? <ClipboardCheck className="mr-2 h-4 w-4" /> : <Clipboard className="mr-2 h-4 w-4" />}
+                        {isCopied ? <ClipboardCheck className="me-2 h-4 w-4" /> : <Clipboard className="me-2 h-4 w-4" />}
                         {t('builder.proposalActions.copySummary')}
                     </Button>
                 </div>
@@ -106,7 +106,7 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                 </TooltipTrigger>
                 <TooltipContent><p>{t('builder.proposalActions.summarizeProject')}</p></TooltipContent>
             </Tooltip>
-            
+
              <Tooltip>
                 <TooltipTrigger asChild>
                     <DropdownMenu>
@@ -150,11 +150,11 @@ export const ProposalActions = ({ isGenerating, isTranslating, onTranslate }: Pr
                              </div>
                              <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleExport('docx')}>
-                                <FileText className="mr-2 h-4 w-4" />
+                                <FileText className="me-2 h-4 w-4" />
                                 <span>{t('builder.proposalActions.downloadDocx')}</span>
                             </DropdownMenuItem>
                              <DropdownMenuItem onClick={() => handleExport('pdf')}>
-                                <FileCode className="mr-2 h-4 w-4" />
+                                <FileCode className="me-2 h-4 w-4" />
                                 <span>{t('builder.proposalActions.downloadPdf')}</span>
                             </DropdownMenuItem>
                         </DropdownMenuContent>

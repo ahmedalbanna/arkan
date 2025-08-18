@@ -107,7 +107,7 @@ export function SummarizerTool() {
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          
+
            <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="paste">{t('writingTools.summarizer.pasteTab')}</TabsTrigger>
@@ -157,7 +157,7 @@ export function SummarizerTool() {
           </div>
 
           <Button type="submit" disabled={summarizeMutation.isPending || isUploading} className="w-full">
-            {summarizeMutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {summarizeMutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.summarizer.buttonText')}
           </Button>
         </form>

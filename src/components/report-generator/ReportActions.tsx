@@ -53,7 +53,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
     setSelectedDocxTemplate(key);
     localStorage.setItem(DOCX_TEMPLATE_KEY, key);
   }
-  
+
   const hasContent = Object.values(sections).some(s => !!s) || Object.values(diagrams || {}).some(d => !!d);
 
   const handleExportReportDOCX = async () => {
@@ -106,14 +106,14 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button disabled={!hasContent || isBusy} className="w-full font-headline">
-                      {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                      {isExporting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                       {t('builder.reportGenerator.exportReport')}
                     </Button>
                 </DropdownMenuTrigger>
                  <DropdownMenuContent className="w-64">
                     <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
-                             <FileText className="mr-2 h-4 w-4" />
+                             <FileText className="me-2 h-4 w-4" />
                              <span>Download as DOCX</span>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent className="p-0">
@@ -133,14 +133,14 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                                 </DropdownMenuCheckboxItem>
                                 <DropdownMenuSeparator />
                             </div>
-                           
+
                             {generatedSectionKeys.map(key => (
                                 <DropdownMenuCheckboxItem
                                     key={key}
                                     checked={selectedSectionsForExport.includes(key)}
                                     onSelect={(e) => {
                                         e.preventDefault();
-                                        setSelectedSectionsForExport(prev => 
+                                        setSelectedSectionsForExport(prev =>
                                             prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
                                         );
                                     }}
@@ -149,12 +149,12 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                                 </DropdownMenuCheckboxItem>
                             ))}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                                onClick={handleExportReportDOCX} 
+                            <DropdownMenuItem
+                                onClick={handleExportReportDOCX}
                                 disabled={selectedSectionsForExport.length === 0}
                                 className="font-semibold"
                             >
-                                <Download className="mr-2 h-4 w-4" />
+                                <Download className="me-2 h-4 w-4" />
                                 Export ({selectedSectionsForExport.length}) Section(s)
                             </DropdownMenuItem>
                         </DropdownMenuSubContent>
@@ -164,7 +164,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="secondary" className='w-full' disabled={isBusy || !hasContent}>
-                        {isTranslating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Languages className="mr-2 h-4 w-4" />}
+                        {isTranslating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Languages className="me-2 h-4 w-4" />}
                         {t('builder.reportGenerator.translateAll')}
                     </Button>
                 </DropdownMenuTrigger>

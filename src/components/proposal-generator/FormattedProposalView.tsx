@@ -110,8 +110,11 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
     }
 
     return (
-        <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
-            {renderValue(currentPageValue, currentPageKey)}
-        </A4Page>
+        <div className="relative" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+
+            <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
+                {renderValue(currentPageValue, currentPageKey)}
+            </A4Page>
+        </div>
     );
 }

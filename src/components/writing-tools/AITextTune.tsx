@@ -128,7 +128,7 @@ export function AITextTune() {
           </form>
         </CardContent>
       </Card>
-      
+
       <Card>
         <CardHeader>
             <CardTitle>{t('writingTools.textStylist.aiToolsTitle')}</CardTitle>
@@ -156,7 +156,7 @@ export function AITextTune() {
                     />
                 </div>
                 <Button type="submit" disabled={isProcessing} className="w-full">
-                    {rewriteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                    {rewriteMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <Sparkles className="me-2 h-4 w-4" />}
                     {t('writingTools.textStylist.rewriteButton')}
                 </Button>
             </form>
@@ -176,7 +176,7 @@ export function AITextTune() {
                     />
                 </div>
                 <Button type="submit" disabled={isProcessing} className="w-full">
-                    {summarizeMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
+                    {summarizeMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <Sparkles className="me-2 h-4 w-4" />}
                     {t('writingTools.textStylist.summarizeButton')}
                 </Button>
             </form>

@@ -79,7 +79,7 @@ export default function DiagramGenerator() {
                                    <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
                                       <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
                                          <div className="flex items-center">
-                                              <Icon className="mr-2 h-5 w-5 text-primary" />
+                                              <Icon className="me-2 h-5 w-5 text-primary" />
                                               {t(diagramConfig[key].title)}
                                          </div>
                                       </AccordionTrigger>

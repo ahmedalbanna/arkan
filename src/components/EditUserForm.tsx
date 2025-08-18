@@ -90,7 +90,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(user.profilePictureUrl || null);
 
-  
+
   const [updateState, updateFormAction] = useActionState(handleUpdateUser, { errors: {} });
   const [deleteState, deleteFormAction] = useActionState(handleDeleteUser, { error: '' });
 
@@ -141,7 +141,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
       setPreviewImageUrl(URL.createObjectURL(file));
     }
   };
-  
+
   const handleUploadImage = async () => {
       if (!profileImageFile || !firebaseUser) return;
       const token = await firebaseUser.getIdToken();
@@ -159,7 +159,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
            toast({ title: t('editUser.deleteErrorToastTitle'), description: error.message, variant: 'destructive' });
       }
   });
-  
+
   const passwordResetMutation = useSendPasswordReset();
 
   const onDelete = async () => {
@@ -167,7 +167,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
     const token = await firebaseUser.getIdToken();
     deleteUserMutation.mutate({ userId: user.id, token });
   };
-  
+
   const onPasswordReset = () => {
     passwordResetMutation.mutate(user.id);
   };
@@ -196,13 +196,13 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                     <div className="flex gap-2">
                         <Button asChild variant="outline">
                             <Label htmlFor="profile-picture-upload">
-                                <Camera className="mr-2 h-4 w-4" />
+                                <Camera className="me-2 h-4 w-4" />
                                 Change Picture
                             </Label>
                         </Button>
                         <Input id="profile-picture-upload" type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/webp" />
                          <Button onClick={handleUploadImage} disabled={!profileImageFile || uploadMutation.isPending}>
-                            {uploadMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                            {uploadMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Upload className="me-2 h-4 w-4" />}
                             Upload
                         </Button>
                     </div>
@@ -282,12 +282,12 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
             </CardContent>
             <CardFooter className="justify-between">
                  <Button type="submit" disabled={isPending} className="font-headline">
-                    <Save className="mr-2 h-4 w-4" />
+                    <Save className="me-2 h-4 w-4" />
                     {t('editUser.saveButton')}
                 </Button>
                  <Button asChild variant="outline">
                     <Link href="/admin/manage-users">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <ArrowLeft className="me-2 h-4 w-4" />
                         Back to Manage Users
                     </Link>
                 </Button>
@@ -295,7 +295,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
             </Card>
         </form>
       </Form>
-      
+
       {isAdmin && (
          <div className="mt-8 pt-6 border-t border-destructive/20">
             <h3 className="text-lg font-semibold text-destructive">{t('editUser.dangerZoneTitle')}</h3>
@@ -304,14 +304,14 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
             </p>
             <div className="flex gap-2">
                 <Button variant="outline" onClick={onPasswordReset} disabled={isPending}>
-                    {passwordResetMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MailQuestion className="mr-2 h-4 w-4" />}
+                    {passwordResetMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MailQuestion className="me-2 h-4 w-4" />}
                     Send Password Reset
                 </Button>
                 {user.id !== firebaseUser?.uid && (
                     <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="destructive" type="button" disabled={isPending}>
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 className="me-2 h-4 w-4" />
                             {t('editUser.deleteUserButton')}
                         </Button>
                     </AlertDialogTrigger>
@@ -325,7 +325,7 @@ export default function EditUserForm({ user }: { user: UserProfile }) {
                         <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={onDelete} disabled={deleteUserMutation.isPending}>
-                            {deleteUserMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
+                            {deleteUserMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : t('editUser.deleteConfirmButton')}
                         </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>

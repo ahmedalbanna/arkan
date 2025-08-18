@@ -169,7 +169,7 @@ export default function PptxTemplateManager() {
             </CardContent>
             <CardFooter>
               <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                 {t('pptxTemplates.saveButton')}
               </Button>
             </CardFooter>

@@ -330,7 +330,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                                 disabled={isDisabled || isGenerating || !hasCreditsForGeneration || !hasContent}
                                                 className="font-headline w-full"
                                             >
-                                                {isGenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                {isGenerating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                                                 {t('builder.presentationGenerator.generateButton')}
                                             </Button>
                                         </div>

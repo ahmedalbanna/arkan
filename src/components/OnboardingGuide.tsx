@@ -89,7 +89,7 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
   };
 
   const currentStep = steps[step];
-  
+
   if (!isOpen) {
     return null;
   }
@@ -128,7 +128,7 @@ export default function OnboardingGuide({ isOpen, onOpenChange, onComplete }: On
           <div className="flex gap-2 justify-between sm:justify-end w-full sm:w-auto">
             {step > 0 && (
               <Button variant="outline" onClick={handlePrev} className="flex-1 sm:flex-none">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="me-2 h-4 w-4" />
                 Previous
               </Button>
             )}

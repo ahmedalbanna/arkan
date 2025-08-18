@@ -64,7 +64,7 @@ function CreateTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                  <DialogHeader>
@@ -97,7 +97,7 @@ function CreateTemplateDialog() {
                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
-                                {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                                 {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
@@ -174,11 +174,11 @@ export default function PptxTemplateManager() {
   const handleDelete = (key: PptxTemplateKey) => {
     deleteMutation.mutate(key);
   }
-  
+
   const handleRefreshImage = (templateId: string, prompt: string) => {
     refreshImageMutation.mutate({ templateId, prompt });
   };
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, templateId: string) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -376,7 +376,7 @@ export default function PptxTemplateManager() {
             </CardContent>
             <CardFooter>
               <Button onClick={() => handleSave(key)} disabled={isSaving} className="font-headline">
-                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                 {t('pptxTemplates.saveButton')}
               </Button>
             </CardFooter>

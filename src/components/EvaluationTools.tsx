@@ -28,7 +28,7 @@ export const EvaluationTools = () => {
     const [criteria, setCriteria] = useState('');
     const [pdfFile, setPdfFile] = useState<File | null>(null);
     const [isProcessingPdf, setIsProcessingPdf] = useState(false);
-    
+
     const mutation = useEvaluateReport();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,7 +49,7 @@ export const EvaluationTools = () => {
         setIsProcessingPdf(true);
         const formData = new FormData();
         formData.append('file', pdfFile);
-        
+
         try {
             const token = await firebaseUser.getIdToken();
             const result = await processFileApi(formData, token);
@@ -105,7 +105,7 @@ export const EvaluationTools = () => {
         };
         mutation.mutate({...body, proposal: body.proposal as any});
     }
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -121,7 +121,7 @@ export const EvaluationTools = () => {
         <div className="flex gap-2">
             <Input type="file" accept=".pdf" onChange={handleFileChange} disabled={mutation.isPending || isProcessingPdf} className="text-xs" />
             <Button type="button" size="sm" onClick={handleProcessPdf} disabled={!pdfFile || mutation.isPending || isProcessingPdf}>
-                {isProcessingPdf ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <FileText className="mr-2 h-4 w-4"/>}
+                {isProcessingPdf ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <FileText className="me-2 h-4 w-4"/>}
                 {t('builder.reportGenerator.processPdf')}
             </Button>
         </div>
@@ -130,7 +130,7 @@ export const EvaluationTools = () => {
             disabled={mutation.isPending || !criteria}
             className="w-full font-headline"
         >
-        {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+        {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <CheckCircle className="me-2 h-4 w-4" />}
         {t('builder.reportGenerator.evaluateReport')}
         </Button>
     </form>

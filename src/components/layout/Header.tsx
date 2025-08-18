@@ -45,7 +45,7 @@ export function Header() {
   const pathname = usePathname();
   const router = useRouter();
   const { t, locale, setLocale } = useLocalization();
-  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();  
+  const { firebaseUser, userProfile, isLoading: isLoadingAuth } = useAuth();
   const logoutMutation = useLogout();
   const [isClient, setIsClient] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -79,7 +79,7 @@ export function Header() {
         clearAllMutation.mutate(notificationIds);
     }
   };
-  
+
 
   const toggleLocale = () => {
     setLocale(locale === 'en' ? 'ar' : 'en');
@@ -92,7 +92,7 @@ export function Header() {
     { href: '/pricing', label: t('header.pricing'), icon: Gem, auth: 'any' },
     { href: '/docs', label: t('header.documentation'), icon: BookOpenCheck, auth: 'any'},
   ];
-  
+
   const toolsLinks = [
       { href: '/writing-tools', label: 'Writing Tools', icon: PenSquare },
       { href: '/handwriting', label: 'Text to Handwriting', icon: PencilLine },
@@ -111,7 +111,7 @@ export function Header() {
     { href: '/admin/manage-pptx-templates', label: t('header.pptxTemplates'), icon: FileImage },
     { href: '/admin/settings', label: t('header.adminSettings'), icon: Settings },
   ];
-  
+
   const handleLinkClick = () => {
     setIsSheetOpen(false);
   };
@@ -136,7 +136,7 @@ export function Header() {
           </Link>
         </Button>
       ));
-    
+
   const handleLogout = async () => {
     await logoutMutation.mutate();
   };
@@ -238,37 +238,37 @@ export function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>{userProfile.name}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="mr-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="mr-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="mr-2 h-4 w-4" />{t('header.manageTeam')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href={`/profile/${firebaseUser.uid}`}><UserCog className="me-2 h-4 w-4" />{t('header.profile')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/dashboard"><AreaChart className="me-2 h-4 w-4" />{t('header.myDashboard')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/team/manage"><Users className="me-2 h-4 w-4" />{t('header.manageTeam')}</Link></DropdownMenuItem>
                    <DropdownMenuSub>
                         <DropdownMenuSubTrigger>
-                            <Wrench className="mr-2 h-4 w-4" />
+                            <Wrench className="me-2 h-4 w-4" />
                             <span>{t('header.tools')}</span>
                         </DropdownMenuSubTrigger>
                         <DropdownMenuSubContent>
                              {toolsLinks.map(link => (
                                 <DropdownMenuItem key={link.href} asChild>
                                     <Link href={link.href}>
-                                        <link.icon className="mr-2 h-4 w-4" />
+                                        <link.icon className="me-2 h-4 w-4" />
                                         {link.label}
                                     </Link>
                                 </DropdownMenuItem>
                             ))}
                         </DropdownMenuSubContent>
                     </DropdownMenuSub>
-                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="mr-2 h-4 w-4" />{t('header.paymentHistory')}</Link></DropdownMenuItem>
+                  <DropdownMenuItem asChild><Link href="/payment-history"><CreditCard className="me-2 h-4 w-4" />{t('header.paymentHistory')}</Link></DropdownMenuItem>
                   {userProfile?.role === 'admin' && (
                     <DropdownMenuItem asChild>
                         <Link href="/admin/dashboard">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <LayoutDashboard className="me-2 h-4 w-4" />
                         {t('header.admin')}
                         </Link>
                     </DropdownMenuItem>
                    )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="me-2 h-4 w-4" />
                     {t('header.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>

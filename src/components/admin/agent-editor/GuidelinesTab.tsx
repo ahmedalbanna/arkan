@@ -13,7 +13,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: boolean }) {
   const { control } = useFormContext<AgentEditorFormValues>();
   const { t } = useLocalization();
-  
+
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'prompt.guidelines',
@@ -63,7 +63,7 @@ export default function GuidelinesTab({ isComplexPrompt }: { isComplexPrompt: bo
         onClick={() => append({ text: '', isDefault: false })}
         className="w-full justify-start"
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="me-2 h-4 w-4" />
         {t('agentEditor.addGuideline')}
       </Button>
     </div>

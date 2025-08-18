@@ -52,7 +52,7 @@ export default function PdfToMarkdownConverter() {
 
     const formData = new FormData();
     formData.append('file', file);
-    
+
     try {
       const token = await firebaseUser.getIdToken();
       const response = await fetch('/api/pdf-to-markdown', {
@@ -115,7 +115,7 @@ export default function PdfToMarkdownConverter() {
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoading || !file}>
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              {isLoading ? <Loader2 className="m2-2 h-4 w-4 animate-spin" /> : <UploadCloud className="m2-2 h-4 w-4" />}
               {isLoading ? 'Processing...' : 'Convert to Markdown'}
             </Button>
           </CardFooter>
@@ -137,7 +137,7 @@ export default function PdfToMarkdownConverter() {
             <div className="flex justify-between items-center">
                 <CardTitle className="font-headline">Generated Markdown</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
-                    {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                {isCopied ? <Check className="me-2 h-4 w-4 text-green-500" /> : <Copy className="me-2 h-4 w-4" />}
                 </Button>
             </div>
             <CardDescription>

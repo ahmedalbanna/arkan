@@ -35,7 +35,7 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
     const targetLang = locale === 'en' ? 'ar' : 'en';
     onTranslateAll(targetLang);
   };
-  
+
   const handleExport = (format: 'pptx') => {
     if (slides) {
       if (format === 'pptx') {
@@ -53,9 +53,9 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
         disabled={isBusy || !slides || slides.length === 0}
       >
         {isTranslating ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="me-2 h-4 w-4 animate-spin" />
         ) : (
-          <Languages className="mr-2 h-4 w-4" />
+          <Languages className="me-2 h-4 w-4" />
         )}
         {locale === 'en' ? t('builder.presentationGenerator.translateButton.ar') : t('builder.presentationGenerator.translateButton.en')}
       </Button>
@@ -63,7 +63,7 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={isBusy || !slides}>
-                <Download className="mr-2 h-4 w-4" />
+                <Download className="me-2 h-4 w-4" />
                 {t('builder.reportGenerator.exportReport')}
             </Button>
         </DropdownMenuTrigger>
@@ -85,7 +85,7 @@ export const PresentationActions = ({ isGenerating, onTranslateAll, isTranslatin
              </div>
              <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => handleExport('pptx')} disabled={isBusy || !slides}>
-                <FileText className="mr-2 h-4 w-4" />
+                <FileText className="me-2 h-4 w-4" />
                 <span>Export as PPTX</span>
             </DropdownMenuItem>
         </DropdownMenuContent>

@@ -219,7 +219,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
             toast({ title: "No Template Selected", variant: "destructive" });
             return null;
         }
-        
+
         const sectionsToGenerate = template.agentIds
             .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
             .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
@@ -259,7 +259,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         setIsPlanning(true);
         const plan = await getGenerationPlan();
         setIsPlanning(false);
-        
+
         if (plan) {
             setActiveMutationKey('full-report');
             const fullReportBody = {
@@ -330,7 +330,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                     className="w-full mb-4 font-headline flex-grow"
                                     disabled={!canGenerateFullReport || isAnythingGenerating || isPlanning}
                                 >
-                                    {activeMutationKey === 'full-report' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                    {activeMutationKey === 'full-report' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                                     {fullReportCreditCost > 1 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
                                 </Button>
                                 <TooltipProvider>
@@ -401,7 +401,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                                         </div>
                                                     </div>
                                                 </TabsContent>
-                                                
+
                                                 <TabsContent value="context" className="pt-4">
                                                     <ContextSelector itemKey={key} />
                                                 </TabsContent>
@@ -417,7 +417,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                                                     disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
                                                                     className="font-headline w-full"
                                                                 >
-                                                                    {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                                    {isGeneratingThis ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                                                                     {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
                                                                 </Button>
                                                             </div>
@@ -439,7 +439,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                 );
                             })}
                         </Accordion>
-                       
+
                     </TabsContent>
                     <TabsContent value="actions" className="pt-6">
                         <ReportActions onTranslateAll={onTranslateAll} isTranslating={isTranslating} />

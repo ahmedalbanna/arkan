@@ -75,7 +75,7 @@ async function generatePdf(data: TransactionData[], dateRange: DateRange) {
 
     const canvas = await html2canvas(container);
     const imgData = canvas.toDataURL('image/png');
-    
+
     const pdfWidth = doc.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
     doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
@@ -147,7 +147,7 @@ export function FinancialReportExporter() {
                                 !dateRange && "text-muted-foreground"
                             )}
                         >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            <CalendarIcon className="me-2 h-4 w-4" />
                             {dateRange?.from ? (
                                 dateRange.to ? (
                                     <>
@@ -174,7 +174,7 @@ export function FinancialReportExporter() {
                     </PopoverContent>
                 </Popover>
                 <Button onClick={handleExport} disabled={isLoading}>
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                    {isLoading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                     Export as PDF
                 </Button>
             </CardContent>

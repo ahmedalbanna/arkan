@@ -66,7 +66,7 @@ function CreateAgentDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                 <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('agentManager.newAgentButton')}</Button>
+                 <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('agentManager.newAgentButton')}</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[625px]">
                 <DialogHeader>
@@ -129,7 +129,7 @@ function CreateAgentDialog() {
                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">{t('editUser.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createAgentMutation.isPending}>
-                                {createAgentMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {createAgentMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                                 {t('agentManager.createDialog.createButton')}
                             </Button>
                         </DialogFooter>
@@ -155,10 +155,10 @@ function AgentCard({ agent }: { agent: Agent }) {
   const { id, name, description, isEnabled } = agent;
   const updateAgentMutation = useUpdateAgent();
   const { t } = useLocalization();
-  
+
   const localAgentConfig = AGENTS.find(a => a.id === id);
   const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
-  
+
   const handleToggle = (checked: boolean) => {
     updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
   }
@@ -181,7 +181,7 @@ function AgentCard({ agent }: { agent: Agent }) {
             />
             <Button asChild variant="outline" size="sm">
               <Link href={`/admin/manage-agents/${id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4"/>
+                <Pencil className="me-2 h-4 w-4"/>
                 {t('agentManager.configureButton')}
               </Link>
             </Button>
@@ -194,7 +194,7 @@ export default function AgentManager() {
   const { agents, isLoaded, isError } = useAgents();
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLocalization();
-  
+
   const groupedAgents = useMemo(() => {
     const groupedAgents: Record<AgentCategory, Agent[]> = {
         [AgentCategory.ContentGeneration]: [],
@@ -251,7 +251,7 @@ export default function AgentManager() {
       <div className="flex justify-between items-center gap-4">
         <div className="relative flex-grow">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
+            <Input
                 placeholder={t('agentManager.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -261,7 +261,7 @@ export default function AgentManager() {
         <div className="flex items-center gap-2">
             <Button asChild size="sm">
                 <Link href="/admin/manage-agents/new">
-                    <Bot className="mr-2 h-4 w-4" />
+                    <Bot className="me-2 h-4 w-4" />
                     {t('agentManager.newAgentAiButton')}
                 </Link>
             </Button>

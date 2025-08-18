@@ -68,7 +68,7 @@ function helloWorld() {
     await exportMarkdownAsDocx(markdown, "markdown-export");
     setIsExporting(false);
   };
-  
+
   const improveMutation = useMutation({
       mutationFn: improveMarkdownApi,
       onSuccess: (data) => {
@@ -89,7 +89,7 @@ function helloWorld() {
     const token = await getAuthenticatedToken(firebaseUser);
     improveMutation.mutate({ markdownContent: markdown, userPrompt, token });
   };
-  
+
   const handleAcceptSuggestion = () => {
     if (aiSuggestion !== null) {
         setMarkdown(aiSuggestion);
@@ -138,7 +138,7 @@ function helloWorld() {
                                 />
                             </div>
                             <Button onClick={handleImproveMarkdown} disabled={improveMutation.isPending}>
-                                {improveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
+                                {improveMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <Sparkles className="me-2 h-4 w-4"/>}
                                 {t('markdownDisplay.improveButton')}
                             </Button>
                         </CardContent>
@@ -165,8 +165,8 @@ function helloWorld() {
                             </div>
                         </ScrollArea>
                         <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={() => setAiSuggestion(null)}><ThumbsDown className="mr-2 h-4 w-4"/> {t('markdownDisplay.rejectButton')}</Button>
-                            <Button onClick={handleAcceptSuggestion}><Check className="mr-2 h-4 w-4"/> {t('markdownDisplay.acceptButton')}</Button>
+                            <Button variant="ghost" onClick={() => setAiSuggestion(null)}><ThumbsDown className="me-2 h-4 w-4"/> {t('markdownDisplay.rejectButton')}</Button>
+                            <Button onClick={handleAcceptSuggestion}><Check className="me-2 h-4 w-4"/> {t('markdownDisplay.acceptButton')}</Button>
                         </div>
                     </div>
                  ) : (

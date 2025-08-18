@@ -84,13 +84,13 @@ export function AIDetectorTool() {
         }
     });
   };
-  
+
   const getScoreColor = (score: number) => {
     if (score > 75) return 'text-destructive';
     if (score > 40) return 'text-yellow-500';
     return 'text-green-500';
   };
-  
+
   const result = mutation.data;
 
   return (
@@ -128,11 +128,11 @@ export function AIDetectorTool() {
                     </div>
                 </TabsContent>
             </Tabs>
-           
+
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
 
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
-            {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.aiDetector.analyzeButton')}
           </Button>
         </form>
@@ -140,7 +140,7 @@ export function AIDetectorTool() {
         {(mutation.isPending) && (
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                     {t('writingTools.aiDetector.analyzing')}
                 </div>
                 <Progress value={50} className="w-full" />

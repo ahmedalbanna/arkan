@@ -65,9 +65,9 @@ function LogDetailView({ log }: { log: GenerationLog }) {
                 <div className="space-y-2">
                     <h4 className="font-semibold">Input</h4>
                     <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.input} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                        <ReactJson
+                            src={log.input}
+                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                             collapsed={2}
                             displayDataTypes={false}
                             name={false}
@@ -77,9 +77,9 @@ function LogDetailView({ log }: { log: GenerationLog }) {
                 <div className="space-y-2">
                     <h4 className="font-semibold">Output</h4>
                      <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.output} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                        <ReactJson
+                            src={log.output}
+                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                             collapsed={2}
                             displayDataTypes={false}
                             name={false}
@@ -99,14 +99,14 @@ export default function GenerationLogViewer() {
     const { t } = useLocalization();
 
     const { firebaseUser, isLoading: authLoading } = useAuth();
-    
-    const { 
-      data, 
-      error, 
-      fetchNextPage, 
-      hasNextPage, 
+
+    const {
+      data,
+      error,
+      fetchNextPage,
+      hasNextPage,
       isFetching,
-      isFetchingNextPage, 
+      isFetchingNextPage,
       status,
     } = useInfiniteQuery({
         queryKey: generationLogKeys.list({ agentId: debouncedAgentId, userId: debouncedUserId }),
@@ -142,7 +142,7 @@ export default function GenerationLogViewer() {
             </Card>
         );
     }
-    
+
     return (
         <Card>
             <CardHeader>
@@ -153,18 +153,18 @@ export default function GenerationLogViewer() {
                 <div className="flex flex-col md:flex-row gap-4 pt-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
+                        <Input
                             placeholder={t('manageGenerations.filterAgentPlaceholder')}
-                            value={agentIdFilter} 
+                            value={agentIdFilter}
                             onChange={(e) => setAgentIdFilter(e.target.value)}
                             className="pl-10"
                         />
                     </div>
                      <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
+                        <Input
                             placeholder={t('manageGenerations.filterUserPlaceholder')}
-                            value={userIdFilter} 
+                            value={userIdFilter}
                             onChange={(e) => setUserIdFilter(e.target.value)}
                             className="pl-10"
                         />
@@ -219,7 +219,7 @@ export default function GenerationLogViewer() {
                         disabled={!hasNextPage || isFetchingNextPage}
                     >
                         {isFetchingNextPage ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            <Loader2 className="me-2 h-4 w-4 animate-spin" />
                         ) : null}
                         {isFetchingNextPage ? t('manageGenerations.loadingMore') : t('manageGenerations.loadMore')}
                     </Button>

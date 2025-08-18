@@ -101,7 +101,7 @@ export default function FileTreeView({ codebase }: FileTreeViewProps) {
                 <CardDescription>Review the generated files and download the ZIP archive.</CardDescription>
             </div>
             <Button onClick={handleDownload} disabled={isZipping}>
-                {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                {isZipping ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                 Download .ZIP
             </Button>
         </div>

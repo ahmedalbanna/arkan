@@ -30,7 +30,7 @@ interface PresentationViewerProps {
 export default function PresentationViewer({ activePresentation, onTranslateAll, isTranslating }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useLocalization();
-  
+
 
   if (!activePresentation || !activePresentation.slides || activePresentation.slides.length === 0) {
     return (
@@ -52,7 +52,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
     // When a new presentation is passed, reset to the first slide.
     setCurrentSlide(0);
   }, [activePresentation.id]);
-  
+
 
   const handleNext = () => {
     setCurrentSlide((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
@@ -119,7 +119,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
 
         <div className="flex justify-between items-center p-2 border-t bg-background">
             <Button onClick={handlePrev} disabled={currentSlide === 0} variant="ghost">
-            <ChevronLeft className="mr-2 h-4 w-4" /> {t('builder.presentationGenerator.prev')}
+            <ChevronLeft className="me-2 h-4 w-4" /> {t('builder.presentationGenerator.prev')}
             </Button>
             <div className="flex space-x-1">
             {slides.map((_, index) => (

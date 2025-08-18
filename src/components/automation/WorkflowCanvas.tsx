@@ -19,7 +19,7 @@ export function WorkflowCanvas() {
            <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" className="w-full h-14 border-dashed text-muted-foreground">
-                  <Plus className="mr-2 h-4 w-4"/> Add Trigger
+                  <Plus className="me-2 h-4 w-4"/> Add Trigger
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-4xl h-[80vh] p-0">
@@ -34,7 +34,7 @@ export function WorkflowCanvas() {
             <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="outline" className="w-full h-14 border-dashed text-muted-foreground">
-                        <Plus className="mr-2 h-4 w-4"/> Add Step
+                        <Plus className="me-2 h-4 w-4"/> Add Step
                     </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl h-[80vh] p-0">

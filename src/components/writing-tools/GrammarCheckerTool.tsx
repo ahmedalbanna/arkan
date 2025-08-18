@@ -33,7 +33,7 @@ export function GrammarCheckerTool() {
   const mutation = useGrammarCheck();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const form = useForm<GrammarFormValues>({
     resolver: zodResolver(grammarSchema),
     defaultValues: { text: '' },
@@ -133,7 +133,7 @@ export function GrammarCheckerTool() {
             </Tabs>
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
-            {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.grammarChecker.buttonText')}
           </Button>
         </form>

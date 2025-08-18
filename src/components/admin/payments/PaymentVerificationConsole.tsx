@@ -105,7 +105,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
             {hasNextPage && (
                 <div className="mt-8 text-center">
                     <Button onClick={() => fetchNextPage()} disabled={isFetchingNextPage}>
-                        {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
                         {isFetchingNextPage ? t('managePayments.loadingMore') : t('managePayments.loadMore')}
                     </Button>
                 </div>

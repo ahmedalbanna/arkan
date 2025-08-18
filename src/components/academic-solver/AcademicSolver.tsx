@@ -232,9 +232,9 @@ export default function AcademicSolver() {
 
             <Button onClick={handleAnalyze} disabled={!canAnalyze} className="w-full">
                 {analyzeMutation.isPending ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                 ) : (
-                    <Sparkles className="mr-2 h-4 w-4" />
+                    <Sparkles className="me-2 h-4 w-4" />
                 )}
                 {t('builder.academicSolver.analyzeButton')}
             </Button>
@@ -256,13 +256,13 @@ export default function AcademicSolver() {
               <div className="flex gap-2 flex-col sm:flex-row">
                  {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
                       <Button onClick={handleSolve} disabled={!canSolve}>
-                          {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                          {solveMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Wand2 className="me-2 h-4 w-4" />}
                           {t('builder.academicSolver.solveButton')}
                       </Button>
                   )}
                  {stage === 'solved' && (
                      <Button onClick={handleExportDocx}>
-                        <FileText className="mr-2 h-4 w-4" /> {t('builder.academicSolver.exportDocx')}
+                        <FileText className="me-2 h-4 w-4" /> {t('builder.academicSolver.exportDocx')}
                     </Button>
                  )}
               </div>

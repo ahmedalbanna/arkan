@@ -29,7 +29,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
     const { firebaseUser, userProfile: adminProfile } = useAuth();
     const router = useRouter();
     const { createConversation } = useChatStore();
-    
+
     // Prefetch user profile on hover for a smoother navigation experience
     const prefetchUser = async (userId: string) => {
         if (!firebaseUser) return;
@@ -40,7 +40,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
             staleTime: 1000 * 60 * 1, // Prefetched data is fresh for 1 minute
         });
     };
-    
+
     const handleStartChat = async (targetUser: UserProfile) => {
         if (!firebaseUser || !adminProfile) return;
         try {

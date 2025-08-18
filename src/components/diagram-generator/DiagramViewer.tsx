@@ -45,9 +45,9 @@ export default function DiagramViewer({
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
-    
+
     const explainMutation = useExplainDiagram();
-    
+
     const handleCopy = () => {
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
@@ -95,7 +95,7 @@ export default function DiagramViewer({
              });
         }
     };
-    
+
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
             <CardContent className="flex-grow p-4 md:p-6">
@@ -179,7 +179,7 @@ export default function DiagramViewer({
                             size="sm"
                             disabled={isUpdating || isReadOnly}
                             >
-                            {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                            {isUpdating ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <RefreshCw className="me-2 h-4 w-4" />}
                             {t('builder.diagramGenerator.updateDiagram')}
                         </Button>
                     )}

@@ -113,7 +113,7 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
                 <CardDescription>{t('builder.codeGenerator.codebaseGenerator.fileTreeView.description')}</CardDescription>
             </div>
             <Button onClick={handleDownload} disabled={isZipping}>
-                {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                {isZipping ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                 {t('builder.codeGenerator.codebaseGenerator.fileTreeView.downloadButton')}
             </Button>
         </div>
@@ -360,12 +360,12 @@ function ComponentGenerator() {
                            <Button type="submit" disabled={mutation.isPending} className="font-headline w-full">
                                 {mutation.isPending ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <Loader2 className="me-2 h-4 w-4 animate-spin" />
                                         {t('builder.codeGenerator.componentGenerator.generateButtonLoading')}
                                     </>
                                 ) : (
                                     <>
-                                        <Sparkles className="mr-2 h-4 w-4" />
+                                        <Sparkles className="me-2 h-4 w-4" />
                                         {t('builder.codeGenerator.componentGenerator.generateButton')}
                                     </>
                                 )}
@@ -408,7 +408,7 @@ function ComponentGenerator() {
                             <CardHeader className="flex-row items-center justify-between">
                                 <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.generatedCode')}</CardTitle>
                                 <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
-                                    {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                    {isDownloading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Download className="me-2 h-4 w-4" />}
                                     {t('builder.codeGenerator.componentGenerator.downloadZip')}
                                 </Button>
                             </CardHeader>
@@ -494,7 +494,7 @@ function FullCodebaseGenerator() {
           </CardHeader>
           <CardContent>
             <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
-              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
               {t('builder.codeGenerator.codebaseGenerator.generateButton')}
             </Button>
           </CardContent>

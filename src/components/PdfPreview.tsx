@@ -72,30 +72,30 @@ export function PdfPreview({ fileUri }: PdfPreviewProps) {
         };
         renderPage();
     }, [pdf, currentPage, scale]);
-    
+
     const goToPrevPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
     const goToNextPage = () => setCurrentPage(prev => Math.min(numPages, prev + 1));
 
     if (error) {
         return <div className="p-4 text-center text-destructive">{error}</div>;
     }
-    
+
     return (
         <div className="flex flex-col h-full items-center gap-2">
             <div className="flex items-center justify-center gap-2 p-2 bg-muted rounded-md w-full sticky top-0 z-10">
                 <Button variant="outline" size="icon" onClick={goToPrevPage} disabled={currentPage <= 1 || isLoading}>
-                    <ChevronLeft className="h-4 w-4" />
+                    <ChevronLeft className="me-2 h-4 w-4" />
                 </Button>
                  <span className="text-sm font-medium">Page {currentPage} of {numPages}</span>
                 <Button variant="outline" size="icon" onClick={goToNextPage} disabled={currentPage >= numPages || isLoading}>
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="me-2 h-4 w-4" />
                 </Button>
                 <div className="flex-grow" />
                 <Button variant="outline" size="icon" onClick={() => setScale(s => s - 0.2)} disabled={scale <= 0.5 || isLoading}>
-                    <ZoomOut className="h-4 w-4" />
+                    <ZoomOut className="me-2 h-4 w-4" />
                 </Button>
                  <Button variant="outline" size="icon" onClick={() => setScale(s => s + 0.2)} disabled={scale >= 3 || isLoading}>
-                    <ZoomIn className="h-4 w-4" />
+                    <ZoomIn className="me-2 h-4 w-4" />
                 </Button>
             </div>
             <div className="flex-grow w-full relative">

@@ -43,7 +43,7 @@ export function PasteTextUploader() {
             <CardContent className="p-6 space-y-4">
                  <div className="space-y-2">
                     <Label htmlFor="context-name">{t('builder.files.pasteText.titleLabel')}</Label>
-                    <Input 
+                    <Input
                         id="context-name"
                         placeholder={t('builder.files.pasteText.titlePlaceholder')}
                         value={fileName}
@@ -61,7 +61,7 @@ export function PasteTextUploader() {
                     />
                 </div>
                 <Button onClick={handleAddContext} disabled={!text.trim() || !fileName.trim()}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <PlusCircle className="me-2 h-4 w-4" />
                     {t('builder.files.pasteText.addButton')}
                 </Button>
             </CardContent>
@@ -69,4 +69,3 @@ export function PasteTextUploader() {
     );
 }
 
-    

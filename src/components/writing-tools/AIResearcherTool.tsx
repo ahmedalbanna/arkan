@@ -107,9 +107,9 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
                             disabled={mutation.isPending && mutation.variables?.projectId === project.id}
                         >
                             {mutation.isPending && mutation.variables?.projectId === project.id ? (
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                             ) : (
-                                <FileText className="mr-2 h-4 w-4" />
+                                <FileText className="me-2 h-4 w-4" />
                             )}
                             {project.name}
                         </Button>
@@ -142,7 +142,7 @@ export function AIResearcherTool() {
         }
     });
   };
-  
+
   const results = mutation.data;
   const markdownResult = results ? formatResearchToMarkdown(results, form.getValues('topic')) : '';
 
@@ -158,7 +158,7 @@ export function AIResearcherTool() {
     if (!markdownResult) return;
     exportMarkdownAsDocx(markdownResult, 'ai_research_report');
   };
-  
+
   const handleExportPdf = () => {
       if(reportRef.current) {
           exportComponentAsPDF(reportRef.current, 'ai_research_report.pdf');
@@ -186,7 +186,7 @@ export function AIResearcherTool() {
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.aiResearcher.buttonText')}
           </Button>
         </form>
@@ -194,7 +194,7 @@ export function AIResearcherTool() {
         {mutation.isPending && (
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                     {t('writingTools.aiResearcher.researching')}
                 </div>
             </div>
@@ -209,17 +209,17 @@ export function AIResearcherTool() {
                 </h3>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={handleCopyToClipboard}>
-                        {isCopied ? <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> : <Copy className="mr-2 h-4 w-4" />}
+                        {isCopied ? <CheckCircle className="me-2 h-4 w-4 text-green-500" /> : <Copy className="me-2 h-4 w-4" />}
                         {t('writingTools.aiResearcher.copyButton')}
                     </Button>
                     <Dialog open={isAddToProjectOpen} onOpenChange={setIsAddToProjectOpen}>
                         <DialogTrigger asChild>
                              <Button variant="outline" size="sm">
-                                <PlusCircle className="mr-2 h-4 w-4" />
+                                <PlusCircle className="me-2 h-4 w-4" />
                                 {t('writingTools.aiResearcher.addToProjectButton')}
                             </Button>
                         </DialogTrigger>
-                        <AddToProjectDialog 
+                        <AddToProjectDialog
                             researchMarkdown={markdownResult}
                             researchTitle={form.getValues('topic')}
                             onOpenChange={setIsAddToProjectOpen}
@@ -233,8 +233,8 @@ export function AIResearcherTool() {
                 </div>
             </ScrollArea>
              <div className="flex justify-end gap-2">
-                <Button variant="secondary" onClick={handleExportDocx}><FileDown className="mr-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportDocx')}</Button>
-                <Button variant="secondary" onClick={handleExportPdf}><FileDown className="mr-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportPdf')}</Button>
+                <Button variant="secondary" onClick={handleExportDocx}><FileDown className="me-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportDocx')}</Button>
+                <Button variant="secondary" onClick={handleExportPdf}><FileDown className="me-2 h-4 w-4"/>{t('writingTools.aiResearcher.exportPdf')}</Button>
             </div>
           </div>
         )}

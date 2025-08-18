@@ -85,7 +85,7 @@ export function CreateTeamForm() {
                     </CardContent>
                     <CardFooter>
                         <Button type="submit" disabled={mutation.isPending}>
-                            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <PlusCircle className="me-2 h-4 w-4" />}
                             {t('team.createButton')}
                         </Button>
                     </CardFooter>

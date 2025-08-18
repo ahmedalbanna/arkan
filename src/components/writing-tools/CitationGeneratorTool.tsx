@@ -96,7 +96,7 @@ export function CitationGeneratorTool() {
           </div>
 
           <Button type="submit" disabled={citationMutation.isPending} className="w-full">
-            {citationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {citationMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.citationGenerator.generateButton')}
           </Button>
         </form>

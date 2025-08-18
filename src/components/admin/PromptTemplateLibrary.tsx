@@ -32,10 +32,10 @@ export function PromptTemplateLibrary() {
     const searchMatch =
       template.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.prompt.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return categoryMatch && agentMatch && searchMatch;
   });
-  
+
   const handleCopyPrompt = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
     toast({ title: 'Prompt Copied!', description: 'The template has been copied to your clipboard.' });
@@ -72,7 +72,7 @@ export function PromptTemplateLibrary() {
                   ))}
               </SelectContent>
             </Select>
-            <Button variant="ghost"><HelpCircle className="mr-2 h-4 w-4" />{t('promptLibrary.learnMore')}</Button>
+            <Button variant="ghost"><HelpCircle className="me-2 h-4 w-4" />{t('promptLibrary.learnMore')}</Button>
         </div>
       </div>
       <div className="flex flex-1 overflow-hidden">
@@ -117,7 +117,7 @@ export function PromptTemplateLibrary() {
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button variant="ghost" size="sm" onClick={() => handleCopyPrompt(template.prompt)}>
-                                    <Copy className="mr-2 h-4 w-4"/> {t('promptLibrary.copyButton')}
+                                    <Copy className="me-2 h-4 w-4"/> {t('promptLibrary.copyButton')}
                                 </Button>
                                 {template.targetAgentIds && (
                                     <Button size="sm" onClick={() => handleUseTemplate(template.targetAgentIds![0], template.prompt)}>{t('promptLibrary.useTemplateButton')}</Button>

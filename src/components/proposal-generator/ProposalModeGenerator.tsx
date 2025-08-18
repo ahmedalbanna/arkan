@@ -202,7 +202,7 @@ export function ProposalModeGenerator() {
                         </ScrollArea>
                     </div>
                      {proposal && totalPages > 1 && (
-                        <div className="flex justify-center items-center p-2 border-t bg-background rounded-b-lg">
+                        <div className="flex justify-center items-center p-2 border-t bg-background rounded-b-lg" dir={locale === 'ar' ? 'ltr' : 'rtl'}>
                             <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
                                 <ChevronLeft className="h-4 w-4 mr-2" />
                                 {t('builder.presentationGenerator.prev')}

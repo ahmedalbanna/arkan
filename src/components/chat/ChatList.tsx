@@ -35,9 +35,9 @@ interface ChatListProps {
 function NewChatDialog() {
     const [open, setOpen] = useState(false);
     const { firebaseUser, userProfile: adminProfile } = useAuth();
-    
-    const { 
-        data, 
+
+    const {
+        data,
         isLoading: usersLoading,
         fetchNextPage,
         hasNextPage,
@@ -45,7 +45,7 @@ function NewChatDialog() {
     } = useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
-            const token = await firebaseUser!.getIdToken(); 
+            const token = await firebaseUser!.getIdToken();
             return fetchUsers(50, pageParam, token); // Fetch more users for the command list
         },
         initialPageParam: undefined,
@@ -83,7 +83,7 @@ function NewChatDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4"/>New Chat</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4"/>New Chat</Button>
             </DialogTrigger>
             <DialogContent className="p-0">
                 <DialogHeader className="p-4 border-b">
@@ -97,10 +97,10 @@ function NewChatDialog() {
                     <CommandList>
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
-                            {usersLoading && !data && <CommandItem><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
+                            {usersLoading && !data && <CommandItem><Loader2 className="me-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
                             {allUsers?.map((user: UserProfile) => (
                                 <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
-                                    <Avatar className="mr-2 h-6 w-6">
+                                    <Avatar className="me-2 h-6 w-6">
                                         <AvatarImage src={user.profilePictureUrl}/>
                                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
@@ -114,7 +114,7 @@ function NewChatDialog() {
                         </CommandGroup>
                         {hasNextPage && (
                              <CommandItem onSelect={() => fetchNextPage()} className="justify-center text-sm text-muted-foreground cursor-pointer">
-                                {isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
+                                {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : null}
                                 Load More
                             </CommandItem>
                         )}
@@ -185,11 +185,11 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
          <nav className="grid gap-1">
             {activeTab === 'chats' && (
                 liveChats.length > 0 ? liveChats.map(chat => (
-                    <LiveChatListItem 
-                        key={chat.id} 
-                        chat={chat} 
-                        isSelected={selectedChat?.id === chat.id} 
-                        onSelect={() => onSelectChat(chat)} 
+                    <LiveChatListItem
+                        key={chat.id}
+                        chat={chat}
+                        isSelected={selectedChat?.id === chat.id}
+                        onSelect={() => onSelectChat(chat)}
                     />
                 )) : (
                     <div className="text-center text-sm text-muted-foreground p-8">
@@ -200,7 +200,7 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
             )}
             {activeTab === 'agents' && (
                 agents.length > 0 ? agents.map((agent) => (
-                    <AgentListItem 
+                    <AgentListItem
                         key={agent.id}
                         agent={agent}
                         isSelected={selectedChat?.id === agent.id}

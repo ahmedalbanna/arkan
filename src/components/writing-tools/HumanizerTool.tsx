@@ -29,7 +29,7 @@ export function HumanizerTool() {
   const [originalText, setOriginalText] = useState('');
   const [processedText, setProcessedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  
+
   const mutation = useHumanizeText();
 
   const form = useForm<FormValues>({
@@ -84,9 +84,9 @@ export function HumanizerTool() {
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
             {mutation.isPending ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="me-2 h-4 w-4 animate-spin" />
             ) : (
-              <Sparkles className="mr-2 h-4 w-4" />
+              <Sparkles className="me-2 h-4 w-4" />
             )}
             {t('writingTools.humanizer.buttonText')}
           </Button>

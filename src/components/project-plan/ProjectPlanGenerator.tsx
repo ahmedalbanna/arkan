@@ -117,11 +117,11 @@ export default function ProjectPlanGenerator() {
               <CardTitle>{t('builder.projectPlan.title')}</CardTitle>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={() => suggestionMutation.mutate()} disabled={!proposal || isProcessing}>
-                    <BrainCircuit className="mr-2 h-4 w-4" />
+                    <BrainCircuit className="me-2 h-4 w-4" />
                     {t('builder.projectPlan.aiSuggest')}
                 </Button>
                  <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={() => setIsPanelCollapsed(true)}>
-                    <PanelLeftOpen className="h-4 w-4" />
+                  <PanelLeftOpen className="me-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -151,7 +151,7 @@ export default function ProjectPlanGenerator() {
                 />
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">
-              {planGenerationMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {planGenerationMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
               {t('builder.projectPlan.generateButton', { creditCost })}
             </Button>
           </CardContent>

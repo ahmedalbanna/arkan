@@ -14,7 +14,7 @@ import { TemplateKey } from '@/lib/types';
 
 export function DesignStudio() {
     const { templates, activeTemplateKey, setActiveTemplateKey, saveChanges, isSaving } = useDocxStyles();
-    
+
     const handleSave = () => {
         if(activeTemplateKey) {
             saveChanges(activeTemplateKey);
@@ -57,7 +57,7 @@ export function DesignStudio() {
             </CardContent>
              <CardFooter className="border-t pt-6">
                 <Button onClick={handleSave} disabled={isSaving} className="w-full">
-                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Save className="mr-2 h-4 w-4" />}
+                    {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin"/> : <Save className="me-2 h-4 w-4" />}
                     Save Template
                 </Button>
             </CardFooter>

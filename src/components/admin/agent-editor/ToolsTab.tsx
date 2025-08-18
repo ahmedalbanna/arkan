@@ -26,7 +26,7 @@ export default function ToolsTab() {
       )
     );
   };
-  
+
   const activeCount = tools.filter(t => t.isActive).length;
 
   return (
@@ -56,7 +56,7 @@ export default function ToolsTab() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder={t('agentEditor.filterToolsPlaceholder')} className="pl-10" />
         </div>
-        <Button variant="outline"><Plus className="mr-2 h-4 w-4" />{t('agentEditor.newToolButton')}</Button>
+        <Button variant="outline"><Plus className="me-2 h-4 w-4" />{t('agentEditor.newToolButton')}</Button>
       </div>
 
       <div className="space-y-4">

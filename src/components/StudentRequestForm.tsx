@@ -162,8 +162,8 @@ export default function StudentRequestForm() {
                       <FormItem>
                       <FormLabel>Upload File (Optional)</FormLabel>
                       <FormControl>
-                          <Input 
-                              type="file" 
+                          <Input
+                              type="file"
                               onChange={(e) => field.onChange(e.target.files)}
                               disabled={mutation.isPending}
                           />
@@ -175,7 +175,7 @@ export default function StudentRequestForm() {
             </CardContent>
             <CardFooter>
               <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Send className="me-2 h-4 w-4" />}
                 Submit Request
               </Button>
             </CardFooter>

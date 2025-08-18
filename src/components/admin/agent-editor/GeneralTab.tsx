@@ -34,7 +34,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
     const introductionValue = watch('introduction');
     const [promptLength, setPromptLength] = useState(0);
     const introLength = introductionValue?.length || 0;
-    
+
     useEffect(() => {
       if (isComplexPrompt) {
         setPromptLength(((promptValue || { base: ''}) as AgentPrompt).base.length);
@@ -46,7 +46,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
     return (
         <div className='space-y-6'>
             <CardTitle>{t('agentEditor.generalTitle')}</CardTitle>
-            
+
             <FormField
               control={control}
               name="name"
@@ -113,7 +113,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                 </FormItem>
               )}
             />
-            
+
             <FormItem>
                 <FormLabel>{t('agentEditor.conversationStarters')}</FormLabel>
                 <div className="space-y-2">
@@ -125,7 +125,7 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                         </div>
                     ))}
                 </div>
-                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="mr-2 h-4 w-4"/>{t('agentEditor.addMessage')}</Button>
+                <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}><Plus className="me-2 h-4 w-4"/>{t('agentEditor.addMessage')}</Button>
             </FormItem>
 
             <div className="grid grid-cols-2 gap-4">

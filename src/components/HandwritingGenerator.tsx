@@ -184,11 +184,11 @@ export default function HandwritingGenerator() {
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <Button onClick={handleRedraw} className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
+              <RefreshCw className="me-2 h-4 w-4" />
               {t('writingTools.handwriting.redrawButton')}
             </Button>
             <Button onClick={handleDownload} variant="secondary" className="w-full">
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="me-2 h-4 w-4" />
               {t('writingTools.handwriting.downloadButton')}
             </Button>
           </CardFooter>

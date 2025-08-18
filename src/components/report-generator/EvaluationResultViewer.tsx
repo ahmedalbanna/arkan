@@ -46,7 +46,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
     const { t } = useLocalization();
     const { setEvaluation } = useReportStore();
     const generationMutation = useGenerateReportSection();
-    
+
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
     const { sections } = useReportStore();
@@ -58,7 +58,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
             console.error(`Cannot fix: Section content for '${sectionKey}' not found.`);
             return;
         }
-        
+
         const body = {
             proposal,
             projectPlan,
@@ -103,13 +103,13 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
                                 <div className="pl-6 w-full">
                                     <div className="flex items-center gap-2 p-2 rounded-md bg-background border border-dashed">
                                         <p className="text-xs text-muted-foreground flex-grow italic">"{item.solution}"</p>
-                                        <Button 
-                                            size="sm" 
-                                            variant="secondary" 
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
                                             onClick={() => handleFixWithAi(item.sectionKey!, item.solution!)}
                                             disabled={generationMutation.isPending && generationMutation.variables?.body.sectionToGenerate === item.sectionKey}
                                         >
-                                            <Wand2 className="mr-2 h-4 w-4"/>
+                                            <Wand2 className="me-2 h-4 w-4"/>
                                             {t('builder.reportGenerator.fixWithAi')}
                                         </Button>
                                     </div>
@@ -122,7 +122,7 @@ export function EvaluationResultViewer({ evaluation }: EvaluationResultViewerPro
             </div>
             <div className="pt-4 flex justify-end">
                 <Button variant="outline" onClick={() => setEvaluation(null)}>
-                    <RefreshCw className="mr-2 h-4 w-4" />
+                    <RefreshCw className="me-2 h-4 w-4" />
                     {t('builder.reportGenerator.reevaluate')}
                 </Button>
             </div>

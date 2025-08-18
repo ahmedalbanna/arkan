@@ -41,11 +41,11 @@ export const DiagramGenerationTools = () => {
         addExternalContext,
         removeExternalContext,
     } = useReportStore();
-        
+
     const diagramMutation = useGenerateDiagram((data, variables) => {
         const diagramKey = variables.diagramToGenerate as DiagramType;
         const translatedTitle = t(diagramConfig[diagramKey].title);
-        
+
         setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
         toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
         setActiveMutationKey(null);
@@ -69,7 +69,7 @@ export const DiagramGenerationTools = () => {
                     });
                 };
             });
-           
+
         } catch (error) {
              console.error("Failed to prepare image for explanation:", error);
         }
@@ -78,8 +78,8 @@ export const DiagramGenerationTools = () => {
     const onDiagramExplanationSave = (diagramKey: DiagramType, explanation: string) => {
         setDiagramExplanation(diagramKey, explanation);
     }
-    
-    
+
+
     const isAnythingGenerating = diagramMutation.isPending;
     const isDisabled = isAnythingGenerating || explainMutation.isPending;
     const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
@@ -90,9 +90,9 @@ export const DiagramGenerationTools = () => {
 
         const fullState = getFullState();
         const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        
+
         const agent = agents.find(a => a.id === diagramConfig[diagramType as DiagramType]?.agentId);
-        
+
         const selectedExternalContext = externalContext?.filter((c, i) => selectedContext.externalContext[i]);
 
 
@@ -112,7 +112,7 @@ export const DiagramGenerationTools = () => {
     if (!agentsLoaded) {
         return <Card><CardHeader><CardTitle>{t('builder.diagramGenerator.toolsLoading')}</CardTitle><CardContent><Loader2 className="animate-spin" /></CardContent></CardHeader></Card>;
     }
-    
+
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
@@ -124,7 +124,7 @@ export const DiagramGenerationTools = () => {
                     {orderedDiagrams.map((key) => {
                         const agent = agents.find(a => a.id === diagramConfig[key].agentId);
                         if (!agent) return null;
-                        
+
                         const { title, icon: Icon, agentId } = diagramConfig[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         const currentSelection = useReportStore.getState().contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
@@ -146,7 +146,7 @@ export const DiagramGenerationTools = () => {
                                         <TabsContent value="prompt" className="pt-4 space-y-4">
                                             <GuidelineEditor itemKey={key} agentId={agentId} isAdmin={userProfile?.role === 'admin'} />
                                         </TabsContent>
-                                        
+
                                         <TabsContent value="context" className="pt-4">
                                             <ContextSelector itemKey={key} />
                                         </TabsContent>
@@ -162,7 +162,7 @@ export const DiagramGenerationTools = () => {
                                                             disabled={isAnythingGenerating || !agent?.isEnabled || !hasSelectedContext || !hasCreditsForGeneration}
                                                             className="font-headline w-full"
                                                         >
-                                                            {isGeneratingThis ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                                            {isGeneratingThis ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                                                             {t('builder.diagramGenerator.generateButton')}
                                                         </Button>
                                                     </div>

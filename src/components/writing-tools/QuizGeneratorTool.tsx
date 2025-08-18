@@ -90,7 +90,7 @@ export function QuizGeneratorTool() {
            />
 
           <Button type="submit" disabled={quizMutation.isPending} className="w-full">
-            {quizMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {quizMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.aiQuizGenerator.generateButton')}
           </Button>
         </form>
@@ -108,7 +108,7 @@ export function QuizGeneratorTool() {
                     </Button>
                 )}
             </div>
-            
+
             <ScrollArea className="h-[60vh] rounded-md border p-4 bg-muted/30">
               {quizMutation.isPending ? (
                 <div className="flex items-center justify-center h-full">
@@ -123,7 +123,7 @@ export function QuizGeneratorTool() {
                                 {q.options.map((option: string, i: number) => (
                                     <li key={i} className="flex items-center gap-2 text-sm">
                                         {showAnswers && (
-                                            q.answer === option 
+                                            q.answer === option
                                                 ? <Check className="h-4 w-4 text-green-500" />
                                                 : <X className="h-4 w-4 text-destructive" />
                                         )}

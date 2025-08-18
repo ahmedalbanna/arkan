@@ -109,7 +109,7 @@ export function ParaphraserTool() {
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          
+
            <Tabs defaultValue="paste">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="paste">{t('writingTools.paraphraser.pasteTab')}</TabsTrigger>
@@ -137,7 +137,7 @@ export function ParaphraserTool() {
                 </TabsContent>
             </Tabs>
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
-          
+
 
           <div className="space-y-2">
             <Label htmlFor="paraphrase-mode">{t('writingTools.paraphraser.modeLabel')}</Label>
@@ -162,7 +162,7 @@ export function ParaphraserTool() {
           </div>
 
           <Button type="submit" disabled={paraphraseMutation.isPending || isUploading} className="w-full">
-            {paraphraseMutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {paraphraseMutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.paraphraser.buttonText')}
           </Button>
         </form>

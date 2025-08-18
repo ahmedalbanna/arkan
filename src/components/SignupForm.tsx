@@ -40,7 +40,7 @@ export default function SignupForm() {
       password: '',
     },
   });
-  
+
   useEffect(() => {
     const errorData = signupMutation.error as any;
     if (errorData?.error) {
@@ -48,7 +48,7 @@ export default function SignupForm() {
       if (fieldErrors.name) form.setError('name', { message: fieldErrors.name[0] });
       if (fieldErrors.email) form.setError('email', { message: fieldErrors.email[0] });
       if (fieldErrors.password) form.setError('password', { message: fieldErrors.password[0] });
-      
+
       if (fieldErrors._form) {
         toast({
           title: t('signup.errorToastTitle'),
@@ -116,11 +116,11 @@ export default function SignupForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {signupMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {signupMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           {t('signup.submitButton')}
         </Button>
         <Button variant="outline" className="w-full" type="button" onClick={() => googleSignInMutation.mutate()} disabled={isPending}>
-          {googleSignInMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148-118.2H248v-73.6h236.3c2.4 12.4 3.7 26.5 3.7 41.6z"></path></svg>}
+          {googleSignInMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <svg className="me-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.4 56.2l-62.8 55.7C334.3 88.2 294.2 72 248 72 165.2 72 96 141.2 96 224s69.2 152 152 152c86.4 0 142-51.7 148-118.2H248v-73.6h236.3c2.4 12.4 3.7 26.5 3.7 41.6z"></path></svg>}
           Sign up with Google
         </Button>
         <div className="mt-4 text-center text-sm">

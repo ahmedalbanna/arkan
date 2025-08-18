@@ -118,7 +118,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                  <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
-                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                    {isDeleting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Trash2 className="me-2 h-4 w-4" />}
                                     Delete
                                 </Button>
                             </AlertDialogTrigger>
@@ -135,7 +135,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                         </AlertDialog>
                     )}
                     <Button type="submit" disabled={isSaving || isDeleting}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                         Save Changes
                     </Button>
                 </div>
@@ -148,7 +148,7 @@ function CreatePresentationTemplateDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const { toast } = useToast();
     const createMutation = useCreatePresentationTemplate();
-    
+
     const form = useForm<CreatePresentationFormValues>({
         resolver: zodResolver(createPresentationTemplateSchema),
         defaultValues: {
@@ -181,7 +181,7 @@ function CreatePresentationTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />Create New</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -247,7 +247,7 @@ function CreatePresentationTemplateDialog() {
                          <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
-                                {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                                 Create
                             </Button>
                         </DialogFooter>
@@ -261,7 +261,7 @@ function CreatePresentationTemplateDialog() {
 
 export function PresentationTemplateManager() {
     const { firebaseUser } = useAuth();
-    
+
     const { data: templates, isLoading, isError } = useQuery({
         queryKey: templateKeys.presentations(),
         queryFn: async () => {
@@ -304,8 +304,8 @@ export function PresentationTemplateManager() {
                         <AccordionItem value={template.id} key={template.id}>
                             <AccordionTrigger>{template.name}</AccordionTrigger>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <PresentationTemplateForm 
-                                    template={template} 
+                                <PresentationTemplateForm
+                                    template={template}
                                     onSave={handleSave}
                                     isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
                                     onDelete={() => handleDelete(template.id)}

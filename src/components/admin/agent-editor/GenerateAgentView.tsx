@@ -56,7 +56,7 @@ export function GenerateAgentView() {
     const [generatedData, setGeneratedData] = useState<GeneratedAgentData | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<AgentCategory>(AgentCategory.ContentGeneration);
     const createAgentMutation = useCreateAgent();
-    
+
     const generateMutation = useGenerateAgentConfig();
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -71,7 +71,7 @@ export function GenerateAgentView() {
     }, []);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-    
+
     const removeFile = (index: number) => {
         setContextFiles(prev => prev.filter((_, i) => i !== index));
     };
@@ -96,7 +96,7 @@ export function GenerateAgentView() {
 
     const handleAccept = () => {
         if (!generatedData) return;
-        
+
         const generatedId = generatedData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
         const guidelinesArray = generatedData.guidelines.split('\n').map(line => line.replace(/^- /, '').trim()).filter(line => line);
 
@@ -171,7 +171,7 @@ export function GenerateAgentView() {
                     <div {...getRootProps()} className="cursor-pointer">
                         <input {...getInputProps()} />
                         <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white text-xs h-8">
-                            <BrainCircuit className="mr-2 h-4 w-4" />
+                            <BrainCircuit className="me-2 h-4 w-4" />
                             {t('agentGenerator.addKnowledge')}
                         </Button>
                     </div>
@@ -206,14 +206,14 @@ export function GenerateAgentView() {
                         className="bg-white/10 text-white hover:bg-white/20 rounded-full"
                         onClick={() => setPrompt(prev => prev ? `${prev}\n- ${t(label)}` : t(label))}
                     >
-                        <Icon className="mr-2 h-4 w-4" />
+                        <Icon className="me-2 h-4 w-4" />
                         {t(label)}
                     </Button>
                 ))}
             </div>
         </div>
     );
-    
+
     const renderGeneratingView = () => (
          <div className="w-full max-w-3xl text-center">
             <h1 className="text-4xl font-bold flex items-center justify-center gap-3 mb-2">
@@ -227,7 +227,7 @@ export function GenerateAgentView() {
     const renderReviewView = () => (
         <div className="w-full max-w-3xl">
             <Button variant="ghost" onClick={() => setStep('prompting')} className="absolute top-8 left-8 text-white hover:bg-white/10">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+                <ArrowLeft className="me-2 h-4 w-4" />
                 {t('agentGenerator.backToPrompt')}
             </Button>
             <div className="text-center mb-8">
@@ -243,7 +243,7 @@ export function GenerateAgentView() {
                      <div {...getRootProps()} className="cursor-pointer">
                         <input {...getInputProps()} />
                         <Button variant="outline" className="bg-white/5 border-white/20 hover:bg-white/10 text-white">
-                            <PlusCircle className="mr-2 h-4 w-4" />
+                            <PlusCircle className="me-2 h-4 w-4" />
                             {t('agentGenerator.addKnowledge')}
                         </Button>
                     </div>

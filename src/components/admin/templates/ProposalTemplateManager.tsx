@@ -107,8 +107,8 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <AccordionTrigger>{t('manageTemplates.proposalDialog.jsonStructureLabel')}</AccordionTrigger>
                         <AccordionContent>
                              <div className="p-2 border rounded-md bg-background">
-                                 <ReactJson 
-                                    src={template.jsonStructure || {}} 
+                                 <ReactJson
+                                    src={template.jsonStructure || {}}
                                     theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                                     displayDataTypes={false}
                                     name={false}
@@ -125,7 +125,7 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
-                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                    {isDeleting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Trash2 className="me-2 h-4 w-4" />}
                                     {t('manageTemplates.proposalDialog.deleteButton')}
                                 </Button>
                             </AlertDialogTrigger>
@@ -142,7 +142,7 @@ function ProposalTemplateForm({ template, onSave, isSaving, onDelete, isDeleting
                         </AlertDialog>
                     )}
                     <Button type="submit" disabled={isSaving || isDeleting}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                         {t('manageTemplates.proposalDialog.saveButton')}
                     </Button>
                 </div>
@@ -195,7 +195,7 @@ function CreateProposalTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -252,7 +252,7 @@ function CreateProposalTemplateDialog() {
                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
-                                {createMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                                 {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
@@ -309,8 +309,8 @@ export function ProposalTemplateManager() {
                                 <AccordionTrigger className="flex-1">{t(template.name)}</AccordionTrigger>
                             </div>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <ProposalTemplateForm 
-                                    template={template} 
+                                <ProposalTemplateForm
+                                    template={template}
                                     onSave={handleSave}
                                     isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
                                     onDelete={() => handleDelete(template.id)}

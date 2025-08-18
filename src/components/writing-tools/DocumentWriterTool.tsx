@@ -130,7 +130,7 @@ export function DocumentWriterTool() {
             />
           </div>
           <Button type="submit" disabled={mutation.isPending} className="w-full">
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.documentWriter.generateButton')}
           </Button>
         </form>

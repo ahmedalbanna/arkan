@@ -75,7 +75,7 @@ export default function CodebaseGenerator() {
           </CardHeader>
           <CardContent>
             <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
-              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+              {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
               Generate Codebase
             </Button>
           </CardContent>

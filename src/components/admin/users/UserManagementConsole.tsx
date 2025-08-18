@@ -28,15 +28,15 @@ const USERS_PER_PAGE = 10;
 export default function UserManagementConsole() {
   const { t } = useLocalization();
   const { firebaseUser, isLoading: authIsLoading } = useAuth();
-  
-  const { 
-    data, 
-    error, 
-    fetchNextPage, 
-    hasNextPage, 
-    isFetching, 
-    isFetchingNextPage, 
-    status 
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status
   } = useInfiniteQuery<UserListResponse>({
       queryKey: userKeys.lists(),
       queryFn: async ({ pageParam }) => {
@@ -83,7 +83,7 @@ export default function UserManagementConsole() {
                     >
                         {isFetchingNextPage ? (
                             <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2 className="me-2 h-4 w-4 animate-spin" />
                                 <span>Loading more...</span>
                             </>
                         ) : (

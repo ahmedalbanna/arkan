@@ -39,7 +39,7 @@ async function fetchPublicSettings() {
 
 async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
-    
+
     const response = await fetch('/api/purchase-request', {
         method: 'POST',
         headers: {
@@ -47,7 +47,7 @@ async function submitPaymentProof({ formData, token }: { formData: FormData, tok
         },
         body: formData,
     });
-    
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to submit request.');
@@ -121,7 +121,7 @@ export default function SubmitPaymentForm() {
       });
       return;
     }
-    
+
     const token = await firebaseUser.getIdToken();
 
     const formData = new FormData();
@@ -133,7 +133,7 @@ export default function SubmitPaymentForm() {
     formData.append('price', planPrice);
     formData.append('userName', firebaseUser.displayName || 'N/A');
     formData.append('userEmail', firebaseUser.email || 'N/A');
-    
+
     mutation.mutate({ formData, token });
   };
 
@@ -194,7 +194,7 @@ export default function SubmitPaymentForm() {
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={mutation.isPending || isLoadingSettings} className="w-full">
-              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <UploadCloud className="me-2 h-4 w-4" />}
               {t('submitPayment.submitButton')}
             </Button>
           </CardFooter>

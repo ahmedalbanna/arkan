@@ -135,7 +135,7 @@ export function FactCheckerTool() {
             {form.formState.errors.text && <p className="text-sm text-destructive">{form.formState.errors.text.message}</p>}
 
           <Button type="submit" disabled={mutation.isPending || isUploading} className="w-full">
-            {mutation.isPending || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending || isUploading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.factChecker.checkButton')}
           </Button>
         </form>
@@ -143,7 +143,7 @@ export function FactCheckerTool() {
         {mutation.isPending && (
             <div className="pt-6 border-t">
                 <div className="flex justify-center items-center text-sm text-muted-foreground mb-2">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
                     {t('writingTools.factChecker.analyzing')}
                 </div>
             </div>

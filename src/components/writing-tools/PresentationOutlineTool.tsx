@@ -27,7 +27,7 @@ type FormValues = z.infer<typeof formSchema>;
 const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOutput['outline'][0], level?: number }) => {
     const [isOpen, setIsOpen] = useState(true);
     const hasChildren = item.children && item.children.length > 0;
-    
+
     return (
         <div style={{ paddingLeft: `${level * 1.5}rem`}}>
             <div className="flex items-center gap-2 py-1">
@@ -115,7 +115,7 @@ export function PresentationOutlineTool() {
           </div>
 
           <Button type="submit" disabled={mutation.isPending} className="w-full">
-            {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
+            {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
             {t('writingTools.presentationOutline.generateButton')}
           </Button>
         </form>

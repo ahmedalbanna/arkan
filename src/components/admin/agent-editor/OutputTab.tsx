@@ -25,7 +25,7 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
 
   const promptValue = watch('prompt') as AgentPrompt;
   const jsonStructure = promptValue?.jsonStructure;
-  
+
   const handleCreateStructure = () => {
     // Sets an empty object to start building the structure
     setValue('prompt.jsonStructure', {}, { shouldDirty: true });
@@ -50,9 +50,9 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
 
       <div className="p-4 border rounded-md bg-background min-h-[200px]">
         {jsonStructure ? (
-          <ReactJson 
-            src={jsonStructure} 
-            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+          <ReactJson
+            src={jsonStructure}
+            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
             displayDataTypes={false}
             name={false}
             quotesOnKeys={false}
@@ -65,7 +65,7 @@ export default function OutputTab({ isComplexPrompt }: OutputTabProps) {
             <div className="text-center text-muted-foreground py-8 flex flex-col items-center justify-center">
                 <p className="mb-4">{t('agentEditor.noJsonDefined')}</p>
                 <Button variant="outline" onClick={handleCreateStructure}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <PlusCircle className="me-2 h-4 w-4" />
                     {t('agentEditor.createStructure')}
                 </Button>
             </div>

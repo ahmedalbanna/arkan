@@ -55,7 +55,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
         resolver: zodResolver(reportTemplateSchema),
         defaultValues: template,
     });
-    
+
     const isDefaultTemplate = REPORT_GENERATION_TEMPLATES.some(t => t.id === template.id);
 
     return (
@@ -121,7 +121,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
-                                    {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                                    {isDeleting ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Trash2 className="me-2 h-4 w-4" />}
                                     {t('manageTemplates.proposalDialog.deleteButton')}
                                 </Button>
                             </AlertDialogTrigger>
@@ -138,7 +138,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                         </AlertDialog>
                     )}
                     <Button type="submit" disabled={isSaving || isDeleting}>
-                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                        {isSaving ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                         {t('manageTemplates.proposalDialog.saveButton')}
                     </Button>
                 </div>
@@ -159,21 +159,21 @@ function CreateReportTemplateDialog() {
     const { agents, isLoaded } = useAgents();
     const createMutation = useCreateReportTemplate();
 
-    const reportGenerationAgents = useMemo(() => 
-        (agents || []).filter(agent => 
-            agent.category === AgentCategory.ReportGeneration && 
+    const reportGenerationAgents = useMemo(() =>
+        (agents || []).filter(agent =>
+            agent.category === AgentCategory.ReportGeneration &&
             agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-        ), 
+        ),
     [agents, searchTerm]);
 
     const handleSelectAgent = (agentId: string) => {
-        setSelectedAgentIds(prev => 
-            prev.includes(agentId) 
+        setSelectedAgentIds(prev =>
+            prev.includes(agentId)
                 ? prev.filter(id => id !== agentId)
                 : [...prev, agentId]
         );
     };
-    
+
     const handleCreate = () => {
         const data = {
             id: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
@@ -208,11 +208,11 @@ function CreateReportTemplateDialog() {
 
     const selectedAgents = agents.filter(agent => selectedAgentIds.includes(agent.id));
     const availableAgents = reportGenerationAgents.filter(agent => !selectedAgentIds.includes(agent.id));
-    
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="mr-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
@@ -259,7 +259,7 @@ function CreateReportTemplateDialog() {
                 <DialogFooter>
                     <DialogClose asChild><Button type="button" variant="ghost">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                     <Button onClick={handleCreate} disabled={createMutation.isPending || !name || selectedAgentIds.length === 0}>
-                        {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                         {t('manageTemplates.createButton')}
                     </Button>
                 </DialogFooter>
@@ -271,7 +271,7 @@ function CreateReportTemplateDialog() {
 export function ReportTemplateManager() {
     const { t } = useLocalization();
     const { firebaseUser } = useAuth();
-    
+
     const { data: templates, isLoading, isError } = useQuery({
         queryKey: templateKeys.reports(),
         queryFn: async () => {
@@ -319,8 +319,8 @@ export function ReportTemplateManager() {
                         <AccordionItem value={template.id} key={template.id}>
                             <AccordionTrigger>{t(template.name)}</AccordionTrigger>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <ReportTemplateForm 
-                                    template={template} 
+                                <ReportTemplateForm
+                                    template={template}
                                     onSave={handleSave}
                                     isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
                                     onDelete={() => handleDelete(template.id)}

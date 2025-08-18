@@ -128,7 +128,7 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
                 </div>
             </div>
              <Button onClick={handleTranslate} disabled={translateMutation.isPending}>
-                {translateMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRightLeft className="mr-2 h-4 w-4" />}
+                {translateMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <ArrowRightLeft className="me-2 h-4 w-4" />}
                 {t('builder.Section.translateButton')}
             </Button>
         </div>
@@ -171,7 +171,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             });
         },
     });
-    
+
     const handleRewriteAction = (style: string) => {
         setAiSuggestion(null);
         setDiff(null);
@@ -297,10 +297,10 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </CardContent>
                             <CardFooter className="flex justify-end gap-2 pt-4">
                                 <Button variant="ghost" onClick={handleRejectSuggestion}>
-                                    <ThumbsDown className="mr-2 h-4 w-4" /> {t('builder.Section.reject')}
+                                    <ThumbsDown className="me-2 h-4 w-4" /> {t('builder.Section.reject')}
                                 </Button>
                                 <Button onClick={handleAcceptSuggestion}>
-                                    <Check className="mr-2 h-4 w-4" /> {t('builder.Section.accept')}
+                                    <Check className="me-2 h-4 w-4" /> {t('builder.Section.accept')}
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -330,14 +330,14 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.summarizePrompt'))}><BookText className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.summarize')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.expandPrompt'))}><Maximize className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.expand')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))}><SpellCheck className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.checkGrammar')}</DropdownMenuItem>
-                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
-                                <DropdownMenuItem><GitCommitVertical className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.versionHistory')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.summarizePrompt'))}><BookText className="me-2 h-4 w-4" />{t('builder.Section.aiActions.summarize')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.expandPrompt'))}><Maximize className="me-2 h-4 w-4" />{t('builder.Section.aiActions.expand')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleAiAction(t('builder.Section.aiActions.checkGrammarPrompt'))}><SpellCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.checkGrammar')}</DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleHumanizeAction}><UserCheck className="me-2 h-4 w-4" />{t('builder.Section.aiActions.humanize')}</DropdownMenuItem>
+                                <DropdownMenuItem><GitCommitVertical className="me-2 h-4 w-4" />{t('builder.Section.aiActions.versionHistory')}</DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuSub>
-                                    <DropdownMenuSubTrigger><Brush className="mr-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
+                                    <DropdownMenuSubTrigger><Brush className="me-2 h-4 w-4" />{t('builder.Section.aiActions.rewrite')}</DropdownMenuSubTrigger>
                                      <DropdownMenuSubContent>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Formal')}>{t('builder.Section.aiActions.styles.formal')}</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleRewriteAction('Friendly')}>{t('builder.Section.aiActions.styles.friendly')}</DropdownMenuItem>

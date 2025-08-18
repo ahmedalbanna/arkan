@@ -77,7 +77,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                         onClick={() => handleVerification('rejected')}
                         disabled={isPending}
                     >
-                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="mr-2 h-4 w-4" />}
+                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsDown className="me-2 h-4 w-4" />}
                         {t('managePayments.declineButton')}
                     </Button>
                     <Button
@@ -85,7 +85,7 @@ export function PendingPaymentCard({ transaction }: PendingPaymentCardProps) {
                         onClick={() => handleVerification('verified')}
                         disabled={isPending}
                     >
-                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+                        {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="me-2 h-4 w-4" />}
                         {t('managePayments.approveButton')}
                     </Button>
                 </CardFooter>
