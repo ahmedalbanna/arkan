@@ -170,7 +170,7 @@
       "pasteTab": "لصق النص",
       "uploadTab": "تحميل ملف",
       "placeholder": "الصق النص هنا...",
-      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر لتحديد ملف",
+      "dropzoneHint": "اسحب وأفلت ملفًا هنا، أو انقر للتحديد",
       "supportedFiles": "يدعم: PDF، TXT، MD",
       "processingFile": "جارٍ معالجة الملف...",
       "modeLabel": "الوضع",

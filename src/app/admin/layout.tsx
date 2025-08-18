@@ -52,19 +52,19 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 
 const adminNavLinks = [
     { href: '/admin/dashboard', labelKey: 'adminDashboard.pageTitle', icon: LayoutDashboard },
-    { href: '/admin/chats', labelKey: 'Chats', icon: MessageSquare },
+    { href: '/admin/chats', labelKey: 'header.chats', icon: MessageSquare },
     { href: '/admin/manage-users', labelKey: 'header.manageUsers', icon: Users },
     { href: '/admin/manage-payments', labelKey: 'header.managePayments', icon: CreditCard },
     { href: '/admin/manage-agents', labelKey: 'header.agentManager', icon: Bot },
     { href: '/admin/manage-features', labelKey: 'header.manageFeatures', icon: SlidersHorizontal },
     { href: '/admin/manage-generations', labelKey: 'header.activityHistory', icon: History },
-    { href: '/admin/automations/builder', labelKey: 'Automations', icon: Workflow },
+    { href: '/admin/automations/builder', labelKey: 'header.automations', icon: Workflow },
     { href: '/admin/settings', labelKey: 'header.adminSettings', icon: Settings },
 ];
 
 const templateLinks = [
-    { href: '/admin/manage-generation-templates', labelKey: 'Generation Templates', icon: PencilRuler },
-    { href: '/admin/manage-prompt-templates', labelKey: 'Prompt Templates', icon: Library },
+    { href: '/admin/manage-generation-templates', labelKey: 'header.generationTemplates', icon: PencilRuler },
+    { href: '/admin/manage-prompt-templates', labelKey: 'header.promptTemplates', icon: Library },
     { href: '/admin/manage-templates', labelKey: 'header.exportTemplates', icon: Palette },
     { href: '/admin/manage-pptx-templates', labelKey: 'header.pptxTemplates', icon: FileImage },
 ];
@@ -149,7 +149,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
             <CollapsibleTrigger className="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary [&[data-state=open]>svg]:rotate-180">
                 <div className="flex items-center gap-3">
                     <Palette className="h-4 w-4" />
-                    <span>Templates</span>
+                    <span>{t('header.templates')}</span>
                 </div>
                 <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
             </CollapsibleTrigger>
