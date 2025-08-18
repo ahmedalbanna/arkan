@@ -761,10 +761,12 @@ export const WriteDocumentOutputSchema = z.object({
 export type WriteDocumentOutput = z.infer<typeof WriteDocumentOutputSchema>;
 
 // evaluate-and-select-context.ts
+const ExternalContextTypeSchema = z.enum(['context', 'example', 'question', 'textbook', 'guidelines']);
+
 export const ExternalContextSchema = z.object({
     fileName: z.string(),
     content: z.string(),
-    type: z.enum(['context', 'example'])
+    type: ExternalContextTypeSchema
 });
 export type ExternalContext = z.infer<typeof ExternalContextSchema>;
 
@@ -994,6 +996,12 @@ const SavedProposalStateSchema = z.object({
     updatedAt: z.string().optional(),
 });
 
+const academicSolverContextFileSchema = z.object({
+  fileName: z.string(),
+  content: z.string(),
+  type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
+});
+
 export const ProjectStateSchema = z.object({
     name: z.string().optional(),
     projectIdea: z.string().optional(),
@@ -1030,8 +1038,8 @@ export const ProjectStateSchema = z.object({
         documentType: AcademicDocumentTypeSchema.nullable(),
         analyzedDocument: AnalyzedDocumentSchema.nullable(),
         solvedDocument: SolvedDocumentSchema.nullable(),
-        questionDocuments: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })),
-        externalContext: z.array(z.object({ fileName: z.string(), content: z.string(), type: z.enum(['context', 'example']) })),
+        questionDocuments: z.array(academicSolverContextFileSchema),
+        externalContext: z.array(academicSolverContextFileSchema),
     }).optional(),
 });
 
