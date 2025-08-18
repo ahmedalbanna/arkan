@@ -10,6 +10,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
 import remarkGfm from 'remark-gfm';
 import { useLocalization } from '@/context/LocalizationContext';
+import { cn } from '@/lib/utils';
 
 interface FormattedProposalViewProps {
     proposal: AnyProjectProposal;
@@ -29,7 +30,10 @@ const hasContent = (value: any): boolean => {
 
 // A styled container for each "page"
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-16 mx-auto my-4" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className={cn(
+        "bg-background shadow-lg p-6 md:p-16 mx-auto my-4 w-full md:w-[210mm]",
+        title ? "min-h-[297mm]" : "" // Only apply min-height if it's a content page
+    )}>
         {title && <h2 className="font-semibold text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>}
         <div className="prose dark:prose-invert max-w-none text-sm">{children}</div>
     </div>
@@ -82,6 +86,10 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
 
     const orderedKeys = Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category');
     const currentPageKey = orderedKeys[currentPage];
+    
+    // If the key is not found (e.g., out of bounds), don't render anything
+    if (!currentPageKey) return null;
+
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 
     return (
