@@ -3,7 +3,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -20,6 +20,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { ProjectProposalSchema } from '@/ai/schemas';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -63,6 +64,7 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title?: string
 export function ProposalModeGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     const {
         proposal,
@@ -134,24 +136,29 @@ export function ProposalModeGenerator() {
                     <p className="text-muted-foreground">Generating your proposal, please wait...</p>
                 </div>
             )}
-             <div className="lg:col-span-4 lg:sticky top-24">
+             <div className={cn("lg:col-span-4 lg:sticky top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <ProposalGenerationTools
                     isDisabled={isBusy}
                     isGenerating={generationMutation.isPending}
                 />
             </div>
 
-            <div className="lg:col-span-8 w-full">
+            <div className={cn("lg:col-span-8 w-full", isPanelCollapsed && "lg:col-span-12")}>
                  <div className="h-full flex flex-col">
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                         <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                                <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title as string || "Generated Proposal"}>
-                                    {proposal?.title as string || "Generated Proposal"}
-                                </CardTitle>
-                                <CardDescription>
-                                    {proposal?.category as string || "Review the generated proposal"}
-                                </CardDescription>
+                             <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}>
+                                    {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
+                                </Button>
+                                <div className="flex-1 min-w-0">
+                                    <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title as string || "Generated Proposal"}>
+                                        {proposal?.title as string || "Generated Proposal"}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        {proposal?.category as string || "Review the generated proposal"}
+                                    </CardDescription>
+                                </div>
                             </div>
                              <div className="flex-none">
                                 <ProposalActions
@@ -169,8 +176,6 @@ export function ProposalModeGenerator() {
                                     <Suspense fallback={<ProposalSkeleton/>}>
                                         <FormattedProposalView
                                             proposal={proposal}
-                                            onUpdate={handleProposalUpdate}
-                                            readOnly={isBusy}
                                             currentPage={currentPage}
                                         />
                                     </Suspense>

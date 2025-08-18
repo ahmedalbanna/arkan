@@ -14,8 +14,6 @@ import remarkGfm from 'remark-gfm';
 
 interface FormattedProposalViewProps {
     proposal: AnyProjectProposal;
-    onUpdate: (path: string, value: any) => void;
-    readOnly?: boolean;
     currentPage: number;
 }
 
@@ -31,8 +29,7 @@ const hasContent = (value: any): boolean => {
 // A styled container for each "page"
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
     <div className={cn(
-        "bg-background shadow-lg p-6 md:p-12 mx-auto max-w-full",
-        "md:w-[210mm]",
+        "bg-background shadow-lg p-6 md:p-12 mx-auto my-4 w-full md:w-[210mm]",
         title ? "min-h-[297mm]" : "" // Only apply min-height if it's a content page
     )}>
         {title && <h2 className="font-semibold text-lg md:text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>}
@@ -106,6 +103,11 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
     if (!currentPageKey) return null;
 
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
+
+    // Exclude title and category from regular pages
+    if (currentPageKey === 'title' || currentPageKey === 'category') {
+        return null;
+    }
 
     return (
         <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
