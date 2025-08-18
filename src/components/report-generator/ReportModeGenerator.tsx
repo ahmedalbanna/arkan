@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { GenerationTools } from './ReportGenerationTools';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -12,6 +12,8 @@ import { useState, lazy, Suspense } from 'react';
 import { SectionName } from '@/ai/schemas';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
+import { Button } from '../ui/button';
 
 const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
 
@@ -33,6 +35,7 @@ function ReportResultsSkeleton() {
 
 export default function ReportGenerator() {
     const { t, locale } = useLocalization();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const {
         sections,
         setSection,
@@ -82,14 +85,22 @@ export default function ReportGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+       <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
+            onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
+        >
+            {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
+        </Button>
       {/* Left Column: Generation Tools */}
-      <div className="lg:col-span-4 space-y-6 overflow-y-auto pr-2">
+      <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         <GenerationTools onTranslateAll={handleTranslateAll} isTranslating={isTranslatingAll} />
       </div>
 
       {/* Right Column: Report Results */}
-      <div className="lg:col-span-8 overflow-y-auto pr-2">
+      <div className={cn("lg:col-span-8 overflow-y-auto pr-2", isPanelCollapsed && "lg:col-span-12")}>
         <Suspense fallback={<ReportResultsSkeleton />}>
             <ReportResults onSectionUpdate={handleSectionUpdate} />
         </Suspense>
