@@ -4,7 +4,7 @@
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
 import { saveAs } from 'file-saver';
-
+import { lineBreak } from "html2canvas/dist/types/css/property-descriptors/line-break";
 // Helper function to remove markdown characters for a cleaner text output
 function stripMarkdown(text: string): string {
     return text
@@ -37,7 +37,7 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         console.error(`Template with key "${templateKey}" not found.`);
         return;
     }
-    
+
     // Fallback to pptxgenjs if no template URL or if automizer fails
     const { default: pptxgen } = await import('pptxgenjs');
     let pptx = new pptxgen();
@@ -51,24 +51,30 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
 
     for (const slideData of slides) {
         const slide = pptx.addSlide();
-
+        
         // Add Slide Title
         slide.addText(stripMarkdown(slideData.title), {
             x: 0.5, y: 0.25, w: "90%", h: 1, ...styles.title
         });
 
-        // Add Main Content
+        // Add Main Content as bullet points
         const contentBullets = slideData.content.map(item => ({
             text: stripMarkdown(item),
-            options: {
-                ...styles.body,
+            options: { // Apply body styles to each bullet point
+                ...styles.body, // Apply body styles to each bullet point
                 bullet: styles.bullet.type === 'bullet' ? true : undefined,
                 numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined,
             },
         }));
 
+        // Determine content position and dimensions based on layout
+        let contentX = 0.5;
+        let contentY = 1.5;
+        let contentW = "90%";
+        let contentH = 4;
+        let breakLine = true;
         slide.addText(contentBullets, {
-            x: 0.5, y: 1.5, w: "90%", h: 4, ...styles.body, lineSpacing: 36,
+            x: contentX, y: contentY, w: contentW, h: contentH, ...styles.body, lineSpacing: 36,breakLine
         });
 
         slide.addNotes(stripMarkdown(slideData.speakerNotes));
@@ -78,3 +84,4 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         console.error("Error writing PPTX file with pptxgenjs:", err);
     });
 }
+

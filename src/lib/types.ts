@@ -38,7 +38,7 @@ export type { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 // Re-exporting generated Template types from Zod schemas
 export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
-export type PptxTemplate = z.infer<typeof PptxTemplateSchema>;
+export type PptxTemplate = z.infer<typeof PptxTemplateSchema> & { templateUrl?: string };
 export type ProposalTemplate = z.infer<typeof ProposalTemplateSchema>;
 export type ReportGenerationTemplate = z.infer<typeof ReportGenerationTemplateSchema>;
 export type PresentationGenerationTemplate = z.infer<typeof PresentationGenerationTemplateSchema>;
