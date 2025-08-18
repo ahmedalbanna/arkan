@@ -97,24 +97,32 @@ export default function ProjectPlanGenerator() {
 
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
-         <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
-            onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-        >
-            {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
-        </Button>
-      <div className={cn("lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+        {isPanelCollapsed && (
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10">
+                <Button
+                    variant="secondary"
+                    className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                    onClick={() => setIsPanelCollapsed(false)}
+                >
+                    {t('builder.projectPlan.title')}
+                </Button>
+            </div>
+        )}
+      <div className={cn("lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden", isPanelCollapsed && "ml-6")}>
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>{t('builder.projectPlan.title')}</CardTitle>
-               <Button variant="ghost" size="sm" onClick={() => suggestionMutation.mutate()} disabled={!proposal || isProcessing}>
-                <BrainCircuit className="mr-2 h-4 w-4" />
-                {t('builder.projectPlan.aiSuggest')}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => suggestionMutation.mutate()} disabled={!proposal || isProcessing}>
+                    <BrainCircuit className="mr-2 h-4 w-4" />
+                    {t('builder.projectPlan.aiSuggest')}
+                </Button>
+                 <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={() => setIsPanelCollapsed(true)}>
+                    <PanelLeftOpen className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <CardDescription>{t('builder.projectPlan.description')}</CardDescription>
           </CardHeader>
