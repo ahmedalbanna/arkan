@@ -7,7 +7,7 @@ import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
-import { FileText, Trash2 } from 'lucide-react';
+import { FileText, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useState, useEffect } from 'react';
@@ -26,18 +26,39 @@ interface ReportResultsProps {
 }
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-8" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
         <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
         {children}
     </div>
 );
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
-  const { sections, evaluation, removeSection } = useReportStore();
+  const { sections, evaluation } = useReportStore();
   const { t } = useLocalization();
   
+  const [currentPage, setCurrentPage] = useState(0);
+
   const generatedSections = orderedSections.filter(key => sections[key]);
-  
+  const evaluationPageExists = true; // The evaluation page is always potentially available
+  const totalPages = generatedSections.length + (evaluationPageExists ? 1 : 0);
+
+  // Reset to first page if the content changes
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [generatedSections.length]);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   const hasContent = generatedSections.length > 0;
 
   if (!hasContent) {
@@ -49,32 +70,46 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                 <p>{t('builder.reportGenerator.emptyStateDesc')}</p>
             </div>
         </Card>
-    )
+    );
   }
+  
+  const isEvaluationPage = currentPage === generatedSections.length;
+  const currentSectionKey = generatedSections[currentPage];
 
   return (
-     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg">
-        <ScrollArea className="h-full">
-            {generatedSections.map(key => (
-                <A4Page key={key} title={t(sectionConfig[key].title)}>
-                    <Section
-                        sectionKey={key}
-                        title={t(sectionConfig[key].title)}
-                        icon={sectionConfig[key].icon}
-                        content={sections[key]!}
-                        onUpdate={onSectionUpdate}
-                    />
+     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg flex flex-col">
+        <ScrollArea className="flex-grow">
+            {isEvaluationPage ? (
+                <A4Page title={t('builder.Section.evaluationTab')}>
+                    {evaluation ? <EvaluationResultViewer evaluation={evaluation} /> : <EvaluationTools />}
                 </A4Page>
-            ))}
-             {/* Evaluation Section */}
-             <A4Page title={t('builder.Section.evaluationTab')}>
-                {evaluation ? (
-                    <EvaluationResultViewer evaluation={evaluation} />
-                ) : (
-                    <EvaluationTools />
-                )}
-             </A4Page>
+            ) : (
+                currentSectionKey && (
+                     <A4Page key={currentSectionKey} title={t(sectionConfig[currentSectionKey].title)}>
+                        <Section
+                            sectionKey={currentSectionKey}
+                            title={t(sectionConfig[currentSectionKey].title)}
+                            icon={sectionConfig[currentSectionKey].icon}
+                            content={sections[currentSectionKey]!}
+                            onUpdate={onSectionUpdate}
+                        />
+                    </A4Page>
+                )
+            )}
         </ScrollArea>
+        <div className="flex justify-center items-center p-4 border-t bg-background rounded-b-lg">
+            <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                {t('builder.presentationGenerator.prev')}
+            </Button>
+            <span className="text-sm font-medium text-muted-foreground">
+                Page {currentPage + 1} of {totalPages}
+            </span>
+            <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
+                 {t('builder.presentationGenerator.next')}
+                <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+        </div>
     </div>
   );
 };
