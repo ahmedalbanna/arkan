@@ -228,8 +228,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             <CardContent>
                 <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="generate">{t('builder.reportGenerator.GenerateButton')}</TabsTrigger>
-                        <TabsTrigger value="history">{t('builder.presentationGenerator.historyTitle')}</TabsTrigger>
+                        <TabsTrigger value="generate">{t('builder.presentationGenerator.generateTab')}</TabsTrigger>
+                        <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
                         

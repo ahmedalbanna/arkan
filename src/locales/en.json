@@ -1428,7 +1428,16 @@
       "uploadNewContext": "Upload New Context",
       "generationSettings": "Generation Settings",
       "advancedSettings": "Advanced Settings",
-      "promptAndGuidelines": "Prompt & Guidelines"
+      "promptAndGuidelines": "Prompt & Guidelines",
+      "complexity": "Complexity",
+      "complexitySummary": "High-level Summary",
+      "complexityDetailed": "Detailed",
+      "complexityTechnical": "Technical",
+      "complexityDefault": "Standard Summary",
+      "toneEnthusiastic": "Enthusiastic",
+      "generateTab": "Generate",
+      "historyTab": "History",
+      "actionsTab": "Actions"
     },
     "Section": {
       "aiSuggestion": "AI Suggestion",

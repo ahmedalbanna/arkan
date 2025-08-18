@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -49,6 +50,7 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
   const slides = activePresentation.slides;
 
   useEffect(() => {
+    // When a new presentation is passed, reset to the first slide.
     setCurrentSlide(0);
   }, [activePresentation.id]);
   

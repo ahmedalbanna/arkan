@@ -1428,7 +1428,16 @@
       "uploadNewContext": "Upload New Context",
       "generationSettings": "Generation Settings",
       "advancedSettings": "Advanced Settings",
-      "promptAndGuidelines": "Prompt & Guidelines"
+      "promptAndGuidelines": "Prompt & Guidelines",
+      "complexity": "التعقيد",
+      "complexitySummary": "ملخص عالي المستوى",
+      "complexityDetailed": "مفصل",
+      "complexityTechnical": "تقني",
+      "complexityDefault": "ملخص قياسي",
+      "toneEnthusiastic": "حماسي",
+      "generateTab": "إنشاء",
+      "historyTab": "السجل",
+      "actionsTab": "الإجراءات"
     },
     "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",
