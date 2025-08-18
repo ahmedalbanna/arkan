@@ -305,6 +305,17 @@
       "toastContextAddedDesc": "تمت إضافة البحث حول \"{researchTitle}\" إلى المشروع.",
       "toastContextFailedTitle": "فشل إضافة السياق"
     },
+    "topicExplainer": {
+      "pageTitle": "شرح المواضيع",
+      "pageSubtitle": "بسط أي موضوع معقد إلى شرح بسيط وسهل الفهم.",
+      "cardTitle": "شرح المواضيع",
+      "cardDescription": "أدخل موضوعًا، وسيقوم الذكاء الاصطناعي بتقديم شرح بسيط وواضح.",
+      "topicLabel": "الموضوع المراد شرحه",
+      "topicPlaceholder": "على سبيل المثال، التشابك الكمي",
+      "generateButton": "اشرح الموضوع",
+      "resultTitle": "الشرح",
+      "analyzing": "جارٍ تبسيط الموضوع..."
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",

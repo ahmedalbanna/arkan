@@ -305,6 +305,17 @@
       "toastContextAddedDesc": "Research on \"{researchTitle}\" has been added to the project.",
       "toastContextFailedTitle": "Failed to Add Context"
     },
+    "topicExplainer": {
+      "pageTitle": "Topic Explainer",
+      "pageSubtitle": "Break down any complex topic into a simple, easy-to-understand explanation.",
+      "cardTitle": "Topic Explainer",
+      "cardDescription": "Enter a topic, and the AI will provide a simple and clear explanation.",
+      "topicLabel": "Topic to Explain",
+      "topicPlaceholder": "e.g., Quantum Entanglement",
+      "generateButton": "Explain Topic",
+      "resultTitle": "Explanation",
+      "analyzing": "Breaking down the topic..."
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",
