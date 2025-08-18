@@ -11,7 +11,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig } from '@/lib/report-config';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Settings, Eye } from 'lucide-react';
+import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { toast, useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -48,6 +48,7 @@ interface PresentationGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
     onGenerate: (variables: any) => void;
+    onCollapseToggle: () => void;
 }
 
 function ToolsSkeleton() {
@@ -120,7 +121,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
-    const { isDisabled, isGenerating, onGenerate } = props;
+    const { isDisabled, isGenerating, onGenerate, onCollapseToggle } = props;
 
     const { proposal } = useBuilderStore();
     const {
@@ -219,13 +220,20 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     }
 
     return (
-        <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
-                <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
-                <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
+                 <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">{t('builder.presentationGenerator.toolsTitle')}</CardTitle>
+                        <CardDescription>{t('builder.presentationGenerator.toolsDesc')}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
+                        <PanelLeftClose className="h-5 w-5" />
+                    </Button>
+                </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow overflow-y-auto pr-2">
                 <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="generate">{t('builder.presentationGenerator.generateTab')}</TabsTrigger>

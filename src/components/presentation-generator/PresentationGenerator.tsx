@@ -91,24 +91,28 @@ export default function PresentationGenerator() {
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full">
-            <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
-                onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-            >
-                {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
-            </Button>
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+            {isPanelCollapsed && (
+                <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10">
+                    <Button
+                        variant="secondary"
+                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180 ml-6"
+                        onClick={() => setIsPanelCollapsed(false)}
+                    >
+                       {t('builder.presentationGenerator.toolsTitle')}
+                    </Button>
+                </div>
+            )}
             <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <PresentationGenerationTools
                     isDisabled={generationMutation.isPending || translateMutation.isPending}
                     isGenerating={generationMutation.isPending}
                     onGenerate={onGenerate}
+                    onCollapseToggle={() => setIsPanelCollapsed(true)}
                 />
             </div>
 
-            <div className={cn("lg:col-span-8 lg:overflow-y-auto lg:pr-2", isPanelCollapsed && "lg:col-span-12")}>
+            <div className={cn("lg:col-span-8 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:col-span-12")}>
                 <Suspense fallback={<ViewerSkeleton />}>
                     {activePresentation ? (
                         <DynamicPresentationViewer
