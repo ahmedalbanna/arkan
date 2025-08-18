@@ -80,7 +80,7 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
         return <p>{String(value)}</p>;
     }
 
-    const orderedKeys = Object.keys(ProjectProposalSchema.shape);
+    const orderedKeys = Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category');
     const currentPageKey = orderedKeys[currentPage];
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 

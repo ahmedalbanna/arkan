@@ -18,6 +18,7 @@ import { translateProposalApi } from '@/services/translation-service';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
+import { ProjectProposalSchema } from '@/ai/schemas';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -100,7 +101,7 @@ export function ProposalModeGenerator() {
         translateMutation.mutate({ proposal: proposal as AnyProjectProposal, targetLang, token });
     };
 
-    const orderedKeys = proposal ? Object.keys(proposal) : [];
+    const orderedKeys = proposal ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [];
     const totalPages = orderedKeys.length > 0 ? orderedKeys.length + 1 : 0; // +1 for the title page
     const [currentPage, setCurrentPage] = useState(0);
 
