@@ -9,7 +9,7 @@ type Locale = 'en' | 'ar';
 interface LocalizationContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, variables?: Record<string, any>) => string;
 }
 
 const translations: Record<Locale, Record<string, any>> = { en, ar };
@@ -31,7 +31,7 @@ export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('locale', newLocale);
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, variables?: Record<string, any>): string => {
     const keys = key.split('.');
 
     const findTranslation = (localeToTry: Locale): string | undefined => {
@@ -43,11 +43,17 @@ export const LocalizationProvider = ({ children }: { children: ReactNode }) => {
       return typeof result === 'string' ? result : undefined;
     };
 
-    const translated = findTranslation(locale);
-    if (translated !== undefined) return translated;
+    // Attempt to find translation, then fallback, finally default to key
+    let translated: string = findTranslation(locale) || findTranslation('en') || key;
 
-    const fallback = findTranslation('en');
-    return fallback || key;
+    // Interpolate variables if provided
+    if (variables) {
+      Object.keys(variables).forEach((varName) => {
+        translated = translated.replace(`{${varName}}`, variables[varName]);
+      });
+    }
+
+    return translated;
   };
 
   return (
