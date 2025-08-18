@@ -182,7 +182,7 @@ export default function AcademicSolver() {
 
 
   const controlPanel = (
-    <Card>
+    <Card className="h-full flex flex-col">
         <CardHeader>
             <div className="flex justify-between items-center">
                 <CardTitle>{t('builder.academicSolver.uploadCardTitle')}</CardTitle>
@@ -191,7 +191,7 @@ export default function AcademicSolver() {
                 </Button>
             </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 flex-grow overflow-y-auto pr-2">
              <RadioGroup
                 value={documentType || undefined}
                 onValueChange={(value) => setDocumentType(value as 'exam' | 'homework')}
@@ -293,22 +293,23 @@ export default function AcademicSolver() {
 
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {isPanelCollapsed && (
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10 ml-6">
-                <Button
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
+        {isPanelCollapsed && (
+            <div className="hidden lg:block lg:col-span-1 sticky top-24">
+                 <Button
                     variant="secondary"
                     className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
                     onClick={() => setIsPanelCollapsed(false)}
                 >
+                    <PanelRightOpen className="h-5 w-5 mb-2" />
                     {t('builder.academicSolver.uploadCardTitle')}
                 </Button>
             </div>
         )}
-      <div className={cn("lg:col-span-3 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+      <div className={cn("lg:col-span-4 h-full transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         {controlPanel}
       </div>
-      <div className={cn("transition-all duration-300", isPanelCollapsed ? "lg:col-span-12" : "lg:col-span-9")}>
+      <div className={cn("transition-all duration-300", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
         {contentPanel}
       </div>
     </div>
