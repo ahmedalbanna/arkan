@@ -1319,33 +1319,58 @@
       }
     },
     "codeGenerator": {
-      "generatedCode": "الكود الذي تم إنشاؤه",
-      "downloadZip": "تنزيل ZIP",
-      "noJs": "// لم يتم إنشاء JavaScript",
-      "livePreview": "معاينة مباشرة",
-      "emptyPreview": "ستظهر معاينة الكود الذي تم إنشاؤه هنا.",
-      "tooltips": {
-        "screenshot": "التقاط لقطة شاشة",
-        "expand": "توسيع المعاينة"
+      "tabs": {
+        "component": "المكون",
+        "codebase": "قاعدة الكود الكاملة"
       },
-      "expandedTitle": "معاينة موسعة",
-      "toolsTitle": "Generation Tools",
-      "toolsDesc": "Describe the UI component you want to create.",
-      "promptPlaceholder": "A simple button that says \"Click me!\" and changes color when hovered.",
-      "generateButton": "Generate Code",
-      "generateButtonLoading": "Generating...",
-      "toasts": {
-        "success": "Code Generated Successfully!",
-        "failed": "Code Generation Failed",
-        "screenshotFailed": "Screenshot Failed",
-        "screenshotFailedDesc": "There was an error capturing the preview.",
-        "zipFailed": "Download Failed",
-        "zipFailedDesc": "There was an error creating the ZIP file."
+      "componentGenerator": {
+        "toolsTitle": "أدوات الإنشاء",
+        "toolsDesc": "صف مكون واجهة المستخدم الذي تريد إنشاءه.",
+        "promptPlaceholder": "زر بسيط مكتوب عليه \"انقر هنا!\" ويتغير لونه عند المرور فوقه.",
+        "generateButton": "إنشاء الكود",
+        "generateButtonLoading": "جارٍ الإنشاء...",
+        "livePreview": "معاينة مباشرة",
+        "generatedCode": "الكود الذي تم إنشاؤه",
+        "downloadZip": "تنزيل ZIP",
+        "noJs": "// لم يتم إنشاء JavaScript",
+        "emptyPreview": "ستظهر معاينة الكود الذي تم إنشاؤه هنا.",
+        "tooltips": {
+          "screenshot": "التقاط لقطة شاشة",
+          "expand": "توسيع المعاينة"
+        },
+        "expandedTitle": "معاينة موسعة",
+        "toasts": {
+          "success": "تم إنشاء الكود بنجاح!",
+          "failed": "فشل إنشاء الكود",
+          "screenshotFailed": "فشل التقاط لقطة الشاشة",
+          "screenshotFailedDesc": "حدث خطأ أثناء التقاط المعاينة.",
+          "zipFailed": "فشل التنزيل",
+          "zipFailedDesc": "حدث خطأ أثناء إنشاء ملف ZIP.",
+          "authError": "يجب عليك تسجيل الدخول لإنشاء الكود."
+        }
+      },
+      "codebaseGenerator": {
+        "cardTitle": "بناء قاعدة الكود",
+        "cardDescription": "أنشئ قالبًا كاملاً لمشروعك بناءً على الاقتراح الذي تم إنشاؤه.",
+        "generateButton": "إنشاء قاعدة الكود",
+        "generatingStateTitle": "جارٍ إنشاء قاعدة الكود...",
+        "generatingStateDesc": "يقوم الذكاء الاصطناعي ببناء هيكل مشروعك. قد يستغرق هذا بعض الوقت.",
+        "emptyStateTitle": "ستظهر قاعدة الكود هنا",
+        "emptyStateDesc": "انقر فوق \"إنشاء قاعدة الكود\" لبناء ملفات مشروعك.",
+        "fileTreeView": {
+          "title": "قاعدة الكود التي تم إنشاؤها",
+          "description": "راجع الملفات التي تم إنشاؤها وقم بتنزيل أرشيف ZIP.",
+          "downloadButton": "تنزيل .ZIP"
+        },
+        "toasts": {
+          "noProposal": "لا يمكن إنشاء قاعدة الكود",
+          "noProposalDesc": "يجب إنشاء اقتراح مشروع أولاً."
+        }
       }
     },
     "presentationGenerator": {
-      "noProposal": "No Proposal Loaded",
-      "noProposalDesc": "Please generate a proposal in \"Proposal Mode\" first, or upload a project file.",
+      "noProposal": "لم يتم تحميل أي عرض",
+      "noProposalDesc": "يرجى إنشاء عرض في \"وضع العرض\" أولاً، أو تحميل ملف مشروع.",
       "historyTitle": "السجل",
       "historyDesc": "حدد عرضًا تقديميًا تم إنشاؤه مسبقًا.",
       "historyItem": "{slideCount} شرائح",

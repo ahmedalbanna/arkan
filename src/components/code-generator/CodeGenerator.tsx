@@ -79,6 +79,7 @@ const Tree = ({ data, level = 0 }: { data: any; level?: number }) => {
 
 function FileTreeView({ codebase }: { codebase: Codebase }) {
   const [isZipping, setIsZipping] = useState(false);
+  const { t } = useLocalization();
   const { toast } = useToast();
   const fileTree = buildFileTree(codebase.files);
 
@@ -94,8 +95,8 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
     } catch (error) {
       console.error('Error creating ZIP file:', error);
       toast({
-        title: 'Download Failed',
-        description: 'An error occurred while creating the ZIP file.',
+        title: t('builder.codeGenerator.toasts.zipFailed'),
+        description: t('builder.codeGenerator.toasts.zipFailedDesc'),
         variant: 'destructive',
       });
     } finally {
@@ -108,12 +109,12 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                <CardTitle className="font-headline text-2xl text-primary">Generated Codebase</CardTitle>
-                <CardDescription>Review the generated files and download the ZIP archive.</CardDescription>
+                <CardTitle className="font-headline text-2xl text-primary">{t('builder.codeGenerator.codebaseGenerator.fileTreeView.title')}</CardTitle>
+                <CardDescription>{t('builder.codeGenerator.codebaseGenerator.fileTreeView.description')}</CardDescription>
             </div>
             <Button onClick={handleDownload} disabled={isZipping}>
                 {isZipping ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                Download .ZIP
+                {t('builder.codeGenerator.codebaseGenerator.fileTreeView.downloadButton')}
             </Button>
         </div>
       </CardHeader>
@@ -214,10 +215,10 @@ function ComponentGenerator() {
         onSuccess: (data) => {
             setGeneratedCode(data);
             refetchUser(); // Invalidate user query to update credits
-            toast({ title: t('builder.codeGenerator.toasts.success') });
+            toast({ title: t('builder.codeGenerator.componentGenerator.toasts.success') });
         },
         onError: (error: Error) => {
-            toast({ title: t('builder.codeGenerator.toasts.failed'), description: error.message, variant: "destructive" });
+            toast({ title: t('builder.codeGenerator.componentGenerator.toasts.failed'), description: error.message, variant: "destructive" });
         }
     });
 
@@ -255,8 +256,8 @@ function ComponentGenerator() {
         } catch (error) {
             console.error("Screenshot failed:", error);
             toast({
-                title: t('builder.codeGenerator.toasts.screenshotFailed'),
-                description: t('builder.codeGenerator.toasts.screenshotFailedDesc'),
+                title: t('builder.codeGenerator.componentGenerator.toasts.screenshotFailed'),
+                description: t('builder.codeGenerator.componentGenerator.toasts.screenshotFailedDesc'),
                 variant: "destructive"
             })
         } finally {
@@ -288,8 +289,8 @@ function ComponentGenerator() {
         } catch (error) {
             console.error("ZIP download failed:", error);
             toast({
-                title: t('builder.codeGenerator.toasts.zipFailed'),
-                description: t('builder.codeGenerator.toasts.zipFailedDesc'),
+                title: t('builder.codeGenerator.componentGenerator.toasts.zipFailed'),
+                description: t('builder.codeGenerator.componentGenerator.toasts.zipFailedDesc'),
                 variant: "destructive"
             })
         } finally {
@@ -315,7 +316,7 @@ function ComponentGenerator() {
                 />
             ) : (
                 <div className="text-center text-muted-foreground p-8">
-                    <p>{t('builder.codeGenerator.emptyPreview')}</p>
+                    <p>{t('builder.codeGenerator.componentGenerator.emptyPreview')}</p>
                 </div>
             )}
         </div>
@@ -324,7 +325,7 @@ function ComponentGenerator() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), description: "You must be logged in to generate code.", variant: "destructive" });
+            toast({ title: t('builder.toasts.authError'), description: t('builder.codeGenerator.componentGenerator.toasts.authError'), variant: "destructive" });
             return;
         }
         const token = await firebaseUser.getIdToken();
@@ -338,13 +339,13 @@ function ComponentGenerator() {
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <Card>
                         <CardHeader>
-                            <CardTitle className="font-headline">{t('builder.codeGenerator.toolsTitle')}</CardTitle>
-                            <CardDescription>{t('builder.codeGenerator.toolsDesc')}</CardDescription>
+                            <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.toolsTitle')}</CardTitle>
+                            <CardDescription>{t('builder.codeGenerator.componentGenerator.toolsDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Textarea
                                 name="prompt"
-                                placeholder={t('builder.codeGenerator.promptPlaceholder')}
+                                placeholder={t('builder.codeGenerator.componentGenerator.promptPlaceholder')}
                                 rows={8}
                                 required
                                 value={prompt}
@@ -360,12 +361,12 @@ function ComponentGenerator() {
                                 {mutation.isPending ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        {t('builder.codeGenerator.generateButtonLoading')}
+                                        {t('builder.codeGenerator.componentGenerator.generateButtonLoading')}
                                     </>
                                 ) : (
                                     <>
                                         <Sparkles className="mr-2 h-4 w-4" />
-                                        {t('builder.codeGenerator.generateButton')}
+                                        {t('builder.codeGenerator.componentGenerator.generateButton')}
                                     </>
                                 )}
                             </Button>
@@ -380,14 +381,14 @@ function ComponentGenerator() {
                             <div className="flex justify-between items-center">
                                 <CardTitle className="font-headline flex items-center gap-2">
                                     <Tv className="w-6 h-6" />
-                                    {t('builder.codeGenerator.livePreview')}
+                                    {t('builder.codeGenerator.componentGenerator.livePreview')}
                                 </CardTitle>
                                 {srcDoc && (
                                     <div className="flex items-center gap-1">
-                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.tooltips.screenshot')}>
+                                        <Button variant="ghost" size="icon" onClick={takeScreenshot} disabled={isCapturing} title={t('builder.codeGenerator.componentGenerator.tooltips.screenshot')}>
                                             {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.tooltips.expand')}>
+                                        <Button variant="ghost" size="icon" onClick={() => setIsExpanded(true)} title={t('builder.codeGenerator.componentGenerator.tooltips.expand')}>
                                             <Expand className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -405,10 +406,10 @@ function ComponentGenerator() {
                     {(html || css || javascript) && (
                         <Card>
                             <CardHeader className="flex-row items-center justify-between">
-                                <CardTitle className="font-headline">{t('builder.codeGenerator.generatedCode')}</CardTitle>
+                                <CardTitle className="font-headline">{t('builder.codeGenerator.componentGenerator.generatedCode')}</CardTitle>
                                 <Button variant="outline" size="sm" onClick={downloadZip} disabled={isDownloading}>
                                     {isDownloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-                                    {t('builder.codeGenerator.downloadZip')}
+                                    {t('builder.codeGenerator.componentGenerator.downloadZip')}
                                 </Button>
                             </CardHeader>
                             <CardContent>
@@ -425,7 +426,7 @@ function ComponentGenerator() {
                                         <CodeDisplay code={css || ''} language="css" />
                                     </TabsContent>
                                     <TabsContent value="javascript" className="mt-4">
-                                        <CodeDisplay code={javascript || t('builder.codeGenerator.noJs')} language="javascript" />
+                                        <CodeDisplay code={javascript || t('builder.codeGenerator.componentGenerator.noJs')} language="javascript" />
                                     </TabsContent>
                                 </Tabs>
                             </CardContent>
@@ -436,7 +437,7 @@ function ComponentGenerator() {
                 <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
                     <DialogContent className="max-w-full w-full h-full flex flex-col p-4">
                         <DialogHeader className="flex-row items-center justify-between border-b pb-2">
-                            <DialogTitle>{t('builder.codeGenerator.expandedTitle')}</DialogTitle>
+                            <DialogTitle>{t('builder.codeGenerator.componentGenerator.expandedTitle')}</DialogTitle>
                         </DialogHeader>
                         <div className="flex-grow min-h-0">
                             {renderPreview(true)}
@@ -450,6 +451,7 @@ function ComponentGenerator() {
 
 
 function FullCodebaseGenerator() {
+  const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
   const { proposal } = useBuilderStore();
@@ -461,20 +463,20 @@ function FullCodebaseGenerator() {
       setCodebase(data);
       refetchUser(); // To update credits
       toast({
-        title: 'Codebase Generated',
-        description: 'Your project structure has been scaffolded.',
+        title: t('builder.codeGenerator.codebaseGenerator.toasts.successTitle'),
+        description: t('builder.codeGenerator.codebaseGenerator.toasts.successDesc'),
       });
     },
     onError: (error: Error) => {
-      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+      toast({ title: t('builder.codeGenerator.toasts.failed'), description: error.message, variant: 'destructive' });
     },
   });
 
   const handleGenerate = () => {
     if (!proposal || !firebaseUser) {
       toast({
-        title: 'Cannot Generate Codebase',
-        description: 'A project proposal must be generated first.',
+        title: t('builder.codeGenerator.codebaseGenerator.toasts.noProposal'),
+        description: t('builder.codeGenerator.codebaseGenerator.toasts.noProposalDesc'),
         variant: 'destructive',
       });
       return;
@@ -488,13 +490,13 @@ function FullCodebaseGenerator() {
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
         <Card>
           <CardHeader>
-            <CardTitle>Codebase Scaffolding</CardTitle>
-            <CardDescription>Generate a complete boilerplate for your project based on the generated proposal.</CardDescription>
+            <CardTitle>{t('builder.codeGenerator.codebaseGenerator.cardTitle')}</CardTitle>
+            <CardDescription>{t('builder.codeGenerator.codebaseGenerator.cardDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={handleGenerate} disabled={!proposal || mutation.isPending} className="w-full">
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
-              Generate Codebase
+              {t('builder.codeGenerator.codebaseGenerator.generateButton')}
             </Button>
           </CardContent>
         </Card>
@@ -504,8 +506,8 @@ function FullCodebaseGenerator() {
           <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
               <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" />
-              <h3 className="text-lg font-semibold">Generating Codebase...</h3>
-              <p>The AI is building your project structure. This may take a moment.</p>
+              <h3 className="text-lg font-semibold">{t('builder.codeGenerator.codebaseGenerator.generatingStateTitle')}</h3>
+              <p>{t('builder.codeGenerator.codebaseGenerator.generatingStateDesc')}</p>
             </div>
           </Card>
         )}
@@ -516,8 +518,8 @@ function FullCodebaseGenerator() {
             <Card className="flex items-center justify-center h-full min-h-[400px]">
               <div className="text-center text-muted-foreground p-8">
                 <Package className="w-16 h-16 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold">Your Codebase Will Appear Here</h3>
-                <p>Click "Generate Codebase" to scaffold your project files.</p>
+                <h3 className="text-lg font-semibold">{t('builder.codeGenerator.codebaseGenerator.emptyStateTitle')}</h3>
+                <p>{t('builder.codeGenerator.codebaseGenerator.emptyStateDesc')}</p>
               </div>
             </Card>
           )
@@ -529,11 +531,12 @@ function FullCodebaseGenerator() {
 
 
 export default function CodeGenerator() {
+    const { t } = useLocalization();
     return (
         <Tabs defaultValue="component" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="component" className="gap-2"><Code className="h-4 w-4" /> Component</TabsTrigger>
-                <TabsTrigger value="codebase" className="gap-2"><Package className="h-4 w-4" /> Full Codebase</TabsTrigger>
+                <TabsTrigger value="component" className="gap-2"><Code className="h-4 w-4" /> {t('builder.codeGenerator.tabs.component')}</TabsTrigger>
+                <TabsTrigger value="codebase" className="gap-2"><Package className="h-4 w-4" /> {t('builder.codeGenerator.tabs.codebase')}</TabsTrigger>
             </TabsList>
             <TabsContent value="component" className="mt-4">
                 <ComponentGenerator />

@@ -1319,28 +1319,53 @@
       }
     },
     "codeGenerator": {
-      "generatedCode": "Generated Code",
-      "downloadZip": "Download ZIP",
-      "noJs": "// No JavaScript generated",
-      "livePreview": "Live Preview",
-      "emptyPreview": "Your generated code preview will appear here.",
-      "tooltips": {
-        "screenshot": "Take Screenshot",
-        "expand": "Expand Preview"
+      "tabs": {
+        "component": "Component",
+        "codebase": "Full Codebase"
       },
-      "expandedTitle": "Expanded Preview",
-      "toolsTitle": "Generation Tools",
-      "toolsDesc": "Describe the UI component you want to create.",
-      "promptPlaceholder": "A simple button that says \"Click me!\" and changes color when hovered.",
-      "generateButton": "Generate Code",
-      "generateButtonLoading": "Generating...",
-      "toasts": {
-        "success": "Code Generated Successfully!",
-        "failed": "Code Generation Failed",
-        "screenshotFailed": "Screenshot Failed",
-        "screenshotFailedDesc": "There was an error capturing the preview.",
-        "zipFailed": "Download Failed",
-        "zipFailedDesc": "There was an error creating the ZIP file."
+      "componentGenerator": {
+        "toolsTitle": "Generation Tools",
+        "toolsDesc": "Describe the UI component you want to create.",
+        "promptPlaceholder": "A simple button that says \"Click me!\" and changes color when hovered.",
+        "generateButton": "Generate Code",
+        "generateButtonLoading": "Generating...",
+        "livePreview": "Live Preview",
+        "generatedCode": "Generated Code",
+        "downloadZip": "Download ZIP",
+        "noJs": "// No JavaScript generated",
+        "emptyPreview": "Your generated code preview will appear here.",
+        "tooltips": {
+          "screenshot": "Take Screenshot",
+          "expand": "Expand Preview"
+        },
+        "expandedTitle": "Expanded Preview",
+        "toasts": {
+          "success": "Code Generated Successfully!",
+          "failed": "Code Generation Failed",
+          "screenshotFailed": "Screenshot Failed",
+          "screenshotFailedDesc": "There was an error capturing the preview.",
+          "zipFailed": "Download Failed",
+          "zipFailedDesc": "There was an error creating the ZIP file.",
+          "authError": "You must be logged in to generate code."
+        }
+      },
+      "codebaseGenerator": {
+        "cardTitle": "Codebase Scaffolding",
+        "cardDescription": "Generate a complete boilerplate for your project based on the generated proposal.",
+        "generateButton": "Generate Codebase",
+        "generatingStateTitle": "Generating Codebase...",
+        "generatingStateDesc": "The AI is building your project structure. This may take a moment.",
+        "emptyStateTitle": "Your Codebase Will Appear Here",
+        "emptyStateDesc": "Click \"Generate Codebase\" to scaffold your project files.",
+        "fileTreeView": {
+          "title": "Generated Codebase",
+          "description": "Review the generated files and download the ZIP archive.",
+          "downloadButton": "Download .ZIP"
+        },
+        "toasts": {
+          "noProposal": "Cannot Generate Codebase",
+          "noProposalDesc": "A project proposal must be generated first."
+        }
       }
     },
     "presentationGenerator": {
