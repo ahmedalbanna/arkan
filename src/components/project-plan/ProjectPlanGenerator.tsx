@@ -137,6 +137,7 @@ export default function ProjectPlanGenerator() {
                     onChange={(e) => setDescription(e.target.value)}
                     rows={6}
                     disabled={isProcessing}
+                    className='h-fit rounded'
                 />
             </div>
              <div className="space-y-2">
@@ -148,6 +149,7 @@ export default function ProjectPlanGenerator() {
                     onChange={(e) => setDeliverables(e.target.value)}
                     rows={4}
                     disabled={isProcessing}
+                    className='h-fit rounded'
                 />
             </div>
             <Button onClick={handleGeneratePlan} disabled={!canGenerate} className="w-full">

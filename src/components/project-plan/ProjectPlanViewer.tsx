@@ -12,7 +12,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 function TaskCard({ task }: { task: ProjectTask }) {
   const { t } = useLocalization();
   return (
-    <Card className="bg-background/50">
+    // card into content project plan
+    <Card className="bg-background/50 h-full rounded-lg shadow-lg hover:shadow-xl">
       <CardHeader className="p-4">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <ListTodo className="h-4 w-4 text-primary" />
