@@ -122,7 +122,7 @@ export function ProposalModeGenerator() {
 
     const handlePrevPage = () => {
         if (currentPage > 0) {
-            setCurrentPage(currentPage - 1);
+            setCurrentPage(currentPage + 1);
         }
     };
 
@@ -140,17 +140,26 @@ export function ProposalModeGenerator() {
                 <ProposalGenerationTools
                     isDisabled={isBusy}
                     isGenerating={generationMutation.isPending}
+                    onCollapseToggle={() => setIsPanelCollapsed(true)}
                 />
             </div>
+             {isPanelCollapsed && (
+                 <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10">
+                    <Button
+                        variant="secondary"
+                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                        onClick={() => setIsPanelCollapsed(false)}
+                    >
+                       Generation Tools
+                    </Button>
+                </div>
+            )}
 
-            <div className={cn("lg:col-span-8 w-full", isPanelCollapsed && "lg:col-span-12")}>
+            <div className={cn("w-full", isPanelCollapsed ? "lg:col-span-12" : "lg:col-span-8")}>
                  <div className="h-full flex flex-col">
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                         <div className="flex justify-between items-start gap-4">
                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}>
-                                    {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
-                                </Button>
                                 <div className="flex-1 min-w-0">
                                     <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title as string || "Generated Proposal"}>
                                         {proposal?.title as string || "Generated Proposal"}

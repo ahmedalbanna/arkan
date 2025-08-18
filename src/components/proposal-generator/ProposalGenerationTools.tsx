@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, BookOpen } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, PanelLeftClose } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useProposalGenerationStore } from '@/hooks/useProposalGenerationStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -69,11 +69,13 @@ function GenerateButton({ isGenerating }: GenerateButtonProps) {
 interface ProposalGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
+    onCollapseToggle: () => void;
 }
 
 export const ProposalGenerationTools = ({ 
     isDisabled, 
     isGenerating,
+    onCollapseToggle
 }: ProposalGenerationToolsProps) => {
     
     const { t } = useLocalization();
@@ -113,8 +115,15 @@ export const ProposalGenerationTools = ({
     return (
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
-                <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
+                        <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
+                        <PanelLeftClose className="h-5 w-5" />
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
                  <Accordion type="multiple" className="w-full space-y-4" defaultValue={['item-1']}>
