@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,7 +90,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </CardContent>
             <CardFooter>
                 <Button className="w-full" onClick={handleLoadProject}>
-                    <FileText className="mr-2 h-4 w-4" />
+                    <FileText className="me-2 h-4 w-4" />
                     {t('projects.loadProjectButton')}
                 </Button>
             </CardFooter>

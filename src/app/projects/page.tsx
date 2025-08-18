@@ -1,6 +1,5 @@
 
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -69,7 +68,7 @@ function CreateProjectDialog() {
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                  <Button onClick={handleCreateNewProject} className="animate-fade-in-up"  style={{ animationDelay: '0.3s' }}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
+                    <PlusCircle className="me-2 h-4 w-4" />
                     {t('projects.createButton')}
                 </Button>
             </DialogTrigger>
@@ -127,7 +126,7 @@ export default function MyProjectsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <Button variant="outline" onClick={() => refetch()} disabled={isRefetching} className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-                        <RefreshCw className={cn("mr-2 h-4 w-4", isRefetching && "animate-spin")} />
+                        <RefreshCw className={cn("me-2 h-4 w-4", isRefetching && "animate-spin")} />
                         {t('projects.refreshButton')}
                     </Button>
                     <CreateProjectDialog />
