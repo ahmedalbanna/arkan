@@ -184,7 +184,12 @@ export default function AcademicSolver() {
   const controlPanel = (
     <Card>
         <CardHeader>
-            <CardTitle>{t('builder.academicSolver.uploadCardTitle')}</CardTitle>
+            <div className="flex justify-between items-center">
+                <CardTitle>{t('builder.academicSolver.uploadCardTitle')}</CardTitle>
+                <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={() => setIsPanelCollapsed(true)}>
+                    <PanelLeftOpen className="h-5 w-5" />
+                </Button>
+            </div>
         </CardHeader>
         <CardContent className="space-y-4">
              <RadioGroup
@@ -289,18 +294,21 @@ export default function AcademicSolver() {
 
   return (
     <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
-        onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
-      >
-        {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
-      </Button>
+      {isPanelCollapsed && (
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10 ml-6">
+                <Button
+                    variant="secondary"
+                    className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                    onClick={() => setIsPanelCollapsed(false)}
+                >
+                    {t('builder.academicSolver.uploadCardTitle')}
+                </Button>
+            </div>
+        )}
       <div className={cn("lg:col-span-3 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         {controlPanel}
       </div>
-      <div className={cn("lg:col-span-9 transition-all duration-300", isPanelCollapsed && "lg:col-span-12")}>
+      <div className={cn("transition-all duration-300", isPanelCollapsed ? "lg:col-span-12" : "lg:col-span-9")}>
         {contentPanel}
       </div>
     </div>
