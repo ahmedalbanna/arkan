@@ -109,48 +109,47 @@ export function ProposalModeGenerator() {
             </div>
             
             <div className="lg:col-span-8">
-                {proposal ? (
-                     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg">
-                         <CardHeader className="bg-background rounded-t-lg p-4 border-b">
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="flex-1">
-                                    <CardTitle className="font-headline text-2xl text-primary">
-                                        {(proposal as any).title || "Generated Proposal"}
-                                    </CardTitle>
-                                    <CardDescription>
-                                        {(proposal as any).category || "Review the generated proposal"}
-                                    </CardDescription>
-                                </div>
-                                 <div className="flex-none">
-                                    <ProposalActions 
-                                        isGenerating={generationMutation.isPending}
-                                        isTranslating={translateMutation.isPending}
-                                        onTranslate={handleTranslateProposal}
-                                    />
-                                </div>
+                 <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg">
+                     <CardHeader className="bg-background rounded-t-lg p-4 border-b">
+                        <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1">
+                                <CardTitle className="font-headline text-2xl text-primary">
+                                    {(proposal as any)?.title || "Generated Proposal"}
+                                </CardTitle>
+                                <CardDescription>
+                                    {(proposal as any)?.category || "Review the generated proposal"}
+                                </CardDescription>
                             </div>
-                        </CardHeader>
-                        <ScrollArea className="h-[calc(100vh-280px)]">
-                             <div className="bg-background shadow-lg p-8 md:p-12" style={{ minHeight: '11in', width: '8.5in' }}>
-                                <Suspense fallback={<ProposalSkeleton/>}>
-                                    <FormattedProposalView
-                                        proposal={proposal}
-                                        onUpdate={handleProposalUpdate}
-                                        readOnly={generationMutation.isPending || translateMutation.isPending}
-                                    />
-                                </Suspense>
+                             <div className="flex-none">
+                                <ProposalActions 
+                                    isGenerating={generationMutation.isPending}
+                                    isTranslating={translateMutation.isPending}
+                                    onTranslate={handleTranslateProposal}
+                                />
                             </div>
-                        </ScrollArea>
-                    </div>
-                ) : (
-                    <Card className="flex items-center justify-center h-full min-h-[400px]">
-                        <div className="text-center text-muted-foreground p-8">
-                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                            <p>{t('builder.proposalGenerator.emptyState')}</p>
                         </div>
-                    </Card>
-                )}
+                    </CardHeader>
+                    <ScrollArea className="h-[calc(100vh-280px)]">
+                        {proposal ? (
+                            <Suspense fallback={<ProposalSkeleton/>}>
+                                <FormattedProposalView
+                                    proposal={proposal}
+                                    onUpdate={handleProposalUpdate}
+                                    readOnly={generationMutation.isPending || translateMutation.isPending}
+                                />
+                            </Suspense>
+                        ) : (
+                             <div className="flex items-center justify-center h-full min-h-[400px]">
+                                <div className="text-center text-muted-foreground p-8">
+                                    <FileText className="w-16 h-16 mx-auto mb-4" />
+                                    <p>{t('builder.proposalGenerator.emptyState')}</p>
+                                </div>
+                             </div>
+                        )}
+                    </ScrollArea>
+                </div>
             </div>
         </div>
     );
 }
+
