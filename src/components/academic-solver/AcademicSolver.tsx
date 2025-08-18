@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, Download, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, BrainCircuit, CheckSquare, Download, FileText, ChevronLeft, ChevronRight, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -18,6 +18,7 @@ import { AcademicUploaders } from './AcademicUploaders';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks/use-academic-solver';
 import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
 
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
@@ -32,6 +33,7 @@ export default function AcademicSolver() {
   const { t } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, userProfile } = useAuth();
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const {
     stage,
@@ -286,11 +288,19 @@ export default function AcademicSolver() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <div className="lg:col-span-3">
+    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
+        onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
+      >
+        {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
+      </Button>
+      <div className={cn("lg:col-span-3 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         {controlPanel}
       </div>
-      <div className="lg:col-span-9">
+      <div className={cn("lg:col-span-9 transition-all duration-300", isPanelCollapsed && "lg:col-span-12")}>
         {contentPanel}
       </div>
     </div>
