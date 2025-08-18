@@ -3,7 +3,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, FileText, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -52,7 +52,7 @@ function ProposalSkeleton() {
     )
 }
 
-const A4Page = ({ children }: { children: React.ReactNode }) => (
+const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
     <div className="bg-background shadow-lg p-8 md:p-16 mx-auto my-4" style={{ width: '210mm', minHeight: '297mm' }}>
         {children}
     </div>
@@ -104,6 +104,7 @@ export function ProposalModeGenerator() {
     const orderedKeys = proposal ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [];
     const totalPages = orderedKeys.length > 0 ? orderedKeys.length + 1 : 0; // +1 for the title page
     const [currentPage, setCurrentPage] = useState(0);
+    const [zoom, setZoom] = useState(1);
 
     useEffect(() => {
         setCurrentPage(0);
@@ -143,7 +144,7 @@ export function ProposalModeGenerator() {
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                         <div className="flex justify-between items-start gap-4">
                             <div className="flex-1">
-                                <CardTitle className="font-headline text-2xl text-primary">
+                                <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title || "Generated Proposal"}>
                                     {proposal?.title || "Generated Proposal"}
                                 </CardTitle>
                                 <CardDescription>
@@ -161,47 +162,55 @@ export function ProposalModeGenerator() {
                     </CardHeader>
                     <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
                          <ScrollArea className="h-[calc(100vh-280px)]">
-                            {proposal ? (
-                                <Suspense fallback={<ProposalSkeleton/>}>
-                                    {currentPage === 0 ? (
-                                        <A4Page>
-                                            <div className="flex flex-col items-center justify-center h-full text-center">
-                                                <h1 className="text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
-                                                <p className="text-xl text-muted-foreground">{proposal.category}</p>
-                                            </div>
-                                        </A4Page>
-                                    ) : (
-                                        <FormattedProposalView
-                                            proposal={proposal}
-                                            onUpdate={handleProposalUpdate}
-                                            readOnly={isBusy}
-                                            currentPage={currentPage - 1} // Adjust index for content pages
-                                        />
-                                    )}
-                                </Suspense>
-                            ) : (
-                                 <div className="flex items-center justify-center h-full min-h-[400px]">
-                                    <div className="text-center text-muted-foreground p-8">
-                                        <FileText className="w-16 h-16 mx-auto mb-4" />
-                                        <p>{t('builder.proposalGenerator.emptyState')}</p>
+                            <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
+                                {proposal ? (
+                                    <Suspense fallback={<ProposalSkeleton/>}>
+                                        {currentPage === 0 ? (
+                                            <A4Page>
+                                                <div className="flex flex-col items-center justify-center h-full text-center">
+                                                    <h1 className="text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
+                                                    <p className="text-xl text-muted-foreground">{proposal.category}</p>
+                                                </div>
+                                            </A4Page>
+                                        ) : (
+                                            <FormattedProposalView
+                                                proposal={proposal}
+                                                onUpdate={handleProposalUpdate}
+                                                readOnly={isBusy}
+                                                currentPage={currentPage - 1}
+                                            />
+                                        )}
+                                    </Suspense>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full min-h-[400px]">
+                                        <div className="text-center text-muted-foreground p-8">
+                                            <FileText className="w-16 h-16 mx-auto mb-4" />
+                                            <p>{t('builder.proposalGenerator.emptyState')}</p>
+                                        </div>
                                     </div>
-                                 </div>
-                            )}
+                                )}
+                            </div>
                         </ScrollArea>
                     </div>
                      {proposal && totalPages > 1 && (
-                        <div className="flex justify-center items-center p-4 border-t bg-background rounded-b-lg">
+                        <div className="flex justify-center items-center p-2 border-t bg-background rounded-b-lg">
                             <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
                                 <ChevronLeft className="h-4 w-4 mr-2" />
                                 {t('builder.presentationGenerator.prev')}
                             </Button>
-                            <span className="text-sm font-medium text-muted-foreground">
+                            <span className="text-sm font-medium text-muted-foreground mx-4">
                                 Page {currentPage + 1} of {totalPages}
                             </span>
                             <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
                                 {t('builder.presentationGenerator.next')}
                                 <ChevronRight className="h-4 w-4 ml-2" />
                             </Button>
+                            <div className="flex-grow" />
+                            <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(0.5, z - 0.1))}><ZoomOut className="h-4 w-4" /></Button>
+                                <span className="text-sm font-semibold w-12 text-center">{Math.round(zoom * 100)}%</span>
+                                <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.min(1.5, z + 0.1))}><ZoomIn className="h-4 w-4" /></Button>
+                            </div>
                         </div>
                     )}
                 </div>
