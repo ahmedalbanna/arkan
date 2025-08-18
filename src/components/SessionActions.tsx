@@ -186,7 +186,7 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Upload className="h-4 w-4" />
-                            <span className="hidden md:inline ml-2">{t('builder.buttons.uploadProject')}</span>
+                            <span className="hidden md:inline ms-2">{t('builder.buttons.uploadProject')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
@@ -202,7 +202,7 @@ export const SessionActions = () => {
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                     <span className="hidden md:inline ml-2">{t('projects.saveButton')}</span>
+                     <span className="hidden md:inline ms-2">{t('projects.saveButton')}</span>
                 </Button>
 
                 <AlertDialog open={isSavePromptOpen} onOpenChange={setIsSavePromptOpen}>
@@ -220,7 +220,7 @@ export const SessionActions = () => {
                         <AlertDialogFooter>
                             <AlertDialogCancel onClick={() => setProjectName('')}>{t('projects.cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={handleSaveFromPrompt} disabled={isSaving}>
-                                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                                {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
                                 {t('projects.saveButton')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
@@ -236,7 +236,7 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Save className="h-4 w-4" />
-                            <span className="hidden md:inline ml-2">{t('projects.saveAsButton')}</span>
+                            <span className="hidden md:inline ms-2">{t('projects.saveAsButton')}</span>
                         </Button>
                     </DialogTrigger>
                     <DialogContent>
@@ -252,12 +252,12 @@ export const SessionActions = () => {
                         </div>
                         <DialogFooter>
                             <Button type="button" variant="secondary" onClick={handleDownloadAs}>
-                                <FileJson className="mr-2 h-4 w-4" />
+                                <FileJson className="me-2 h-4 w-4" />
                                 {t('projects.downloadButton')}
                             </Button>
                             <Button onClick={handleSaveAsCloud} disabled={isSaving}>
-                                {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                                <Cloud className="mr-2 h-4 w-4" />
+                                {isSaving && <Loader2 className="h-4 w-4 animate-spin me-2" />}
+                                <Cloud className="me-2 h-4 w-4" />
                                 {t('projects.saveToCloudButton')}
                             </Button>
                         </DialogFooter>
@@ -274,7 +274,7 @@ export const SessionActions = () => {
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />
-                             <span className="hidden md:inline ml-2">{t('builder.buttons.newSession')}</span>
+                             <span className="hidden md:inline ms-2">{t('builder.buttons.newSession')}</span>
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent className="md:hidden">
@@ -285,5 +285,3 @@ export const SessionActions = () => {
         </TooltipProvider>
     );
 };
-
-    
