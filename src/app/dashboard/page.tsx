@@ -102,7 +102,7 @@ export default function UserDashboardPage() {
                     </p>
                 </div>
                 <Button onClick={handleStartChatWithAdmins} disabled={isCreatingChat}>
-                    {isCreatingChat ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
+                    {isCreatingChat ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <MessageSquare className="me-2 h-4 w-4" />}
                     {t('userDashboard.contactAdmin')}
                 </Button>
             </div>
