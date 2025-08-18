@@ -10,7 +10,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { diagramConfig } from '@/lib/report-config';
 import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
-import { Loader2, Sparkles, GitGraph } from 'lucide-react';
+import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -27,7 +27,11 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 
 const orderedDiagrams = DiagramTypeSchema.options;
 
-export const DiagramGenerationTools = () => {
+interface DiagramGenerationToolsProps {
+    onCollapseToggle: () => void;
+}
+
+export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationToolsProps) => {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { toast } = useToast();
@@ -36,11 +40,6 @@ export const DiagramGenerationTools = () => {
     const explainMutation = useExplainDiagram();
 
     const { setDiagram, setDiagramExplanation } = useDiagramStore();
-
-    const {
-        addExternalContext,
-        removeExternalContext,
-    } = useReportStore();
 
     const diagramMutation = useGenerateDiagram((data, variables) => {
         const diagramKey = variables.diagramToGenerate as DiagramType;
@@ -52,7 +51,7 @@ export const DiagramGenerationTools = () => {
 
         // Now, automatically trigger the explanation
         try {
-            const response = fetch(data.imageUrl).then(res => res.blob()).then(blob => {
+            fetch(data.imageUrl).then(res => res.blob()).then(blob => {
                  const reader = new FileReader();
                 reader.readAsDataURL(blob);
                 reader.onloadend = async () => {
@@ -116,8 +115,15 @@ export const DiagramGenerationTools = () => {
     return (
         <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
             <CardHeader>
-                <CardTitle className="font-headline">{t('builder.diagramGenerator.toolsTitle')}</CardTitle>
-                <CardDescription>{t('builder.diagramGenerator.toolsDesc')}</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">{t('builder.diagramGenerator.toolsTitle')}</CardTitle>
+                        <CardDescription>{t('builder.diagramGenerator.toolsDesc')}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                        <PanelLeftClose className="h-5 w-5" />
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
