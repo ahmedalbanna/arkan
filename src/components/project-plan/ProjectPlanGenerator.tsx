@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { Loader2, Sparkles, GanttChartSquare, BrainCircuit } from 'lucide-react';
+import { Loader2, Sparkles, GanttChartSquare, BrainCircuit, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { useMutation } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { useLocalization } from '@/context/LocalizationContext';
+import { cn } from '@/lib/utils';
 
 async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {
     const response = await fetch('/api/summarize-project', {
@@ -43,6 +44,7 @@ export default function ProjectPlanGenerator() {
   const { projectPlan } = useProjectPlanStore();
   const [description, setDescription] = useState('');
   const [deliverables, setDeliverables] = useState('');
+  const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
   
   const planGenerationMutation = useGenerateProjectPlan();
 
@@ -95,8 +97,16 @@ export default function ProjectPlanGenerator() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-      <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
+    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+         <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
+            onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
+        >
+            {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
+        </Button>
+      <div className={cn("lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -138,7 +148,7 @@ export default function ProjectPlanGenerator() {
           </CardContent>
         </Card>
       </div>
-      <div className="lg:col-span-9 lg:overflow-y-auto lg:pr-2">
+       <div className={cn("lg:col-span-9 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:col-span-12")}>
         {planGenerationMutation.isPending && (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
