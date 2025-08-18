@@ -3,10 +3,10 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, Presentation } from 'lucide-react';
+import { Loader2, Presentation, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { PresentationGenerationTools } from './PresentationGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -17,6 +17,7 @@ import { translatePresentationApi } from '@/services/translation-service';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
 import type { PresentationHistoryEntry } from '@/ai/schemas';
+import { Button } from '../ui/button';
 
 
 function ViewerSkeleton() {
@@ -38,6 +39,7 @@ const DynamicPresentationViewer = lazy(() => import('./PresentationViewer'));
 export default function PresentationGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
+    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const {
         presentation,
         activePresentationId,
@@ -89,8 +91,16 @@ export default function PresentationGenerator() {
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full">
-            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 lg:h-full">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-0 -left-2 z-10 hidden lg:inline-flex"
+                onClick={() => setIsPanelCollapsed(!isPanelCollapsed)}
+            >
+                {isPanelCollapsed ? <PanelRightOpen /> : <PanelLeftOpen />}
+            </Button>
+            <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <PresentationGenerationTools
                     isDisabled={generationMutation.isPending || translateMutation.isPending}
                     isGenerating={generationMutation.isPending}
@@ -98,7 +108,7 @@ export default function PresentationGenerator() {
                 />
             </div>
 
-            <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">
+            <div className={cn("lg:col-span-8 lg:overflow-y-auto lg:pr-2", isPanelCollapsed && "lg:col-span-12")}>
                 <Suspense fallback={<ViewerSkeleton />}>
                     {activePresentation ? (
                         <DynamicPresentationViewer
