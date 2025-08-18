@@ -122,7 +122,7 @@ export function ProposalModeGenerator() {
 
     const handlePrevPage = () => {
         if (currentPage > 0) {
-            setCurrentPage(currentPage + 1);
+            setCurrentPage(currentPage - 1);
         }
     };
 
@@ -130,33 +130,33 @@ export function ProposalModeGenerator() {
 
     return (
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
-
-                {generationMutation.isPending && (
-                    <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg p-4">
-                        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                        <p className="text-muted-foreground">Generating your proposal, please wait...</p>
-                    </div>
-                )}
-                <div className={cn("lg:col-span-4 lg:sticky lg:top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
-                    <ProposalGenerationTools
-                        isDisabled={isBusy}
-                        isGenerating={generationMutation.isPending}
-                        onCollapseToggle={() => setIsPanelCollapsed(true)}
-                    />
+            {generationMutation.isPending && (
+                <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg p-4">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    <p className="text-muted-foreground">{t('builder.proposalGenerator.toasts.generatingDesc')}</p>
                 </div>
-                {isPanelCollapsed && (
-                    <div className="lg:col-span-1 lg:sticky lg:top-24 transition-all duration-300">
-                        <Button
-                            variant="secondary"
-                            className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
-                            onClick={() => setIsPanelCollapsed(false)}
-                        >
-                            Generation Tools
-                        </Button>
-                    </div>
-                )}
-
-
+            )}
+            
+            {isPanelCollapsed && (
+                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24 ml-6">
+                     <Button
+                        variant="secondary"
+                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                        onClick={() => setIsPanelCollapsed(false)}
+                    >
+                        <PanelRightOpen className="h-5 w-5 mb-2" />
+                        {t('builder.proposalGenerator.toolsTitle')}
+                    </Button>
+                </div>
+            )}
+            <div className={cn("lg:col-span-4 lg:sticky lg:top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+                <ProposalGenerationTools
+                    isDisabled={isBusy}
+                    isGenerating={generationMutation.isPending}
+                    onCollapseToggle={() => setIsPanelCollapsed(true)}
+                />
+            </div>
+            
             <div className={cn("w-full", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                  <div className="h-full flex flex-col">
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
