@@ -1,10 +1,12 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { ProjectPlan, ProjectTask } from '@/ai/schemas';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { CheckSquare, ListTodo } from 'lucide-react';
+import { Button } from '../ui/button';
+import { ScrollArea } from '../ui/scroll-area';
+import { CheckSquare, ListTodo, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 function TaskCard({ task }: { task: ProjectTask }) {
@@ -35,40 +37,78 @@ function TaskCard({ task }: { task: ProjectTask }) {
   );
 }
 
+const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
+        <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
+        {children}
+    </div>
+);
+
+
 export default function ProjectPlanViewer({ projectPlan }: { projectPlan: ProjectPlan }) {
   const { t } = useLocalization();
+  const [currentPage, setCurrentPage] = useState(0);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [projectPlan]);
+
   if (!projectPlan || !projectPlan.phases) {
     return null;
   }
+  
+  const totalPages = projectPlan.phases.length;
+  const currentPhase = projectPlan.phases[currentPage];
 
-  const defaultOpen = projectPlan.phases.length > 0 ? [projectPlan.phases[0].phaseName] : [];
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
 
   return (
-    <Card>
-      <CardHeader>
+    <div className="h-full flex flex-col">
+       <CardHeader>
         <CardTitle className="font-headline text-2xl text-primary">{t('builder.projectPlan.viewerTitle')}</CardTitle>
         <CardDescription>
           {t('builder.projectPlan.viewerDescription')}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Accordion type="multiple" className="w-full space-y-4" defaultValue={defaultOpen}>
-          {projectPlan.phases.map((phase) => (
-            <AccordionItem value={phase.phaseName} key={phase.phaseName} className="border rounded-lg bg-card">
-              <AccordionTrigger className="font-headline text-lg p-4 hover:no-underline">
-                {phase.phaseName}
-              </AccordionTrigger>
-              <AccordionContent className="p-4 pt-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {phase.tasks.map((task, index) => (
-                    <TaskCard key={index} task={task} />
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </CardContent>
-    </Card>
+      <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
+        <ScrollArea className="h-full">
+            {currentPhase ? (
+                 <A4Page key={currentPhase.phaseName} title={currentPhase.phaseName}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {currentPhase.tasks.map((task, index) => (
+                            <TaskCard key={index} task={task} />
+                        ))}
+                    </div>
+                </A4Page>
+            ) : <p>No phases available.</p>}
+        </ScrollArea>
+      </div>
+       {totalPages > 1 && (
+            <div className="flex justify-center items-center p-4 border-t bg-background rounded-b-lg">
+                <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
+                    <ChevronLeft className="h-4 w-4 mr-2" />
+                    {t('builder.presentationGenerator.prev')}
+                </Button>
+                <span className="text-sm font-medium text-muted-foreground">
+                    Page {currentPage + 1} of {totalPages}
+                </span>
+                <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
+                    {t('builder.presentationGenerator.next')}
+                    <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+            </div>
+        )}
+    </div>
   );
 }
