@@ -146,11 +146,11 @@ export function ProposalModeGenerator() {
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                         <div className="flex justify-between items-start gap-4">
                             <div className="flex-1 min-w-0">
-                                <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title || "Generated Proposal"}>
-                                    {proposal?.title || "Generated Proposal"}
+                                <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title as string || "Generated Proposal"}>
+                                    {proposal?.title as string || "Generated Proposal"}
                                 </CardTitle>
                                 <CardDescription>
-                                    {proposal?.category || "Review the generated proposal"}
+                                    {proposal?.category as string || "Review the generated proposal"}
                                 </CardDescription>
                             </div>
                              <div className="flex-none">

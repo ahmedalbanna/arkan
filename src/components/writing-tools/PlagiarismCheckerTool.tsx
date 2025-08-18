@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
-import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const plagiarismSchema = z.object({
@@ -34,7 +34,7 @@ export function PlagiarismCheckerTool() {
   const mutation = usePlagiarismCheck();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const form = useForm<PlagiarismFormValues>({
     resolver: zodResolver(plagiarismSchema),
     defaultValues: { text: '' },
@@ -83,7 +83,7 @@ export function PlagiarismCheckerTool() {
       }
     });
   };
-  
+
   const results = mutation.data;
 
   return (

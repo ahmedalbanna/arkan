@@ -188,7 +188,7 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: ISty
 
 export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, templateKey: TemplateKey = 'modern') {
     const { saveAs } = await import('file-saver');
-    
+
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
@@ -200,7 +200,7 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
             children: docxContent
         }]
     });
-    
+
     const blob = await Packer.toBlob(doc);
     saveAs(blob, `${fileName}.docx`);
 }
@@ -208,7 +208,7 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
 
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
     const { saveAs } = await import('file-saver');
-    
+
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
@@ -223,7 +223,7 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
             ]
         }]
     });
-    
+
     const blob = await Packer.toBlob(doc);
     saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
 }
@@ -271,11 +271,11 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
             .use(remarkParse)
             .use(remarkGfm)
             .use(remarkRehype)
-            .use(rehypeStringify)
+            .use(rehypeStringify as any)
             .process(md);
         return String(file);
     }
-    
+
     let htmlContent = `<div id="pdf-content">`;
     // Apply default document styles to the container
     applyStylesToElement(container, styles.default?.document?.run);
@@ -291,7 +291,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
         { title: "Success Criteria", content: `<ul>${(proposal.success_criteria || []).map(c => `<li>${c}</li>`).join('')}</ul>` },
         { title: "Evaluation", content: await markdownToHtml(proposal.evaluation) },
     ];
-    
+
     for (const section of sections) {
         htmlContent += `<h2>${section.title}</h2>${section.content}`;
     }
@@ -302,15 +302,15 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     // Apply specific styles to headings
     const h1 = container.querySelector('h1');
     if (h1) applyStylesToElement(h1, styles.default?.heading1?.run);
-    
+
     container.querySelectorAll('h2').forEach(h2 => {
         applyStylesToElement(h2, styles.default?.heading2?.run);
     });
 
     document.body.appendChild(container);
-    
+
     await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
-    
+
     document.body.removeChild(container);
 }
 
@@ -320,9 +320,9 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
-    
+
     const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
-    
+
     const doc = new Document({
         styles,
         numbering,
@@ -414,7 +414,7 @@ export async function exportReportAsDocx(
         return [];
     });
     const resolvedReportBody = (await Promise.all(reportBodyPromises)).flat();
-    
+
     const reportBody: (InstanceType<typeof Paragraph> | InstanceType<typeof TableOfContents>)[] = [
         new TableOfContents("Table of Contents", {
             hyperlink: true,
@@ -438,7 +438,7 @@ export async function exportReportAsDocx(
                 buffer
             }));
         });
-        
+
         const imageResults = await Promise.all(imagePromises);
 
         for (const result of imageResults) {

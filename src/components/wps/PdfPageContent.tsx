@@ -23,8 +23,8 @@ export function PdfPageContent({addTab}: {addTab: (type: DocumentTab['type'], ti
                 <Button size="sm"><Folder className="w-4 h-4 mr-2" />Open</Button>
                 <Button variant="outline" size="sm"><FileUp className="w-4 h-4 mr-2" />From File</Button>
                 <Button variant="outline" size="sm" onClick={() => addTab('pdf', 'Blank PDF')}><FilePlus className="w-4 h-4 mr-2" />Blank</Button>
-                <Button variant="outline" size="sm"><FilePen className="w-4 h-4 mr-2" />PDF Edit</Button>
-                <Button variant="outline" size="sm"><File className="w-4 h-4 mr-2" />PDF to Word</Button>
+                <Button variant="outline" size="sm"><FilePen className="w-4 h-4 mr-2" />PDF Edit</Button> {/* The 'File' component does not accept a 'className' prop directly. */}
+                <Button variant="outline" size="sm"><FileIcon className="w-4 h-4 mr-2" />PDF to Word</Button>
                 <Button variant="outline" size="sm"><PenSquare className="w-4 h-4 mr-2" />Request E-signatures</Button>
                 <Button variant="outline" size="sm"><FileText className="w-4 h-4 mr-2" />Extract Text</Button>
                 <Button variant="outline" size="sm">More <ChevronDown className="w-4 h-4 ml-2" /></Button>

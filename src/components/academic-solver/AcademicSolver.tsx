@@ -21,7 +21,7 @@ import { Skeleton } from '../ui/skeleton';
 
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-4" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-4 max-w-[210mm] w-full overflow-hidden" style={{ minHeight: '297mm' }}>
         {title && <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>}
         <div className="prose dark:prose-invert max-w-none text-sm">{children}</div>
     </div>
@@ -71,7 +71,7 @@ export default function AcademicSolver() {
       return;
     }
     setStage('analyzing');
-    
+
     const combinedQuestionContent = questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
 
     analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType }, {
@@ -93,12 +93,12 @@ export default function AcademicSolver() {
         return;
     }
     setStage('solving');
-    
+
     let contextMarkdown: string | undefined = undefined;
     if (externalContext && externalContext.length > 0) {
       contextMarkdown = externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
     }
-    
+
     solveMutation.mutate({ analyzedDocument, contextMarkdown }, {
         onSuccess: (data) => {
             setSolvedDocument(data);
@@ -141,23 +141,24 @@ export default function AcademicSolver() {
       // Analysis Page
       return (
         <A4Page title="Analysis">
-          {stage === 'analyzing' || analyzeMutation.isPending ? (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-              <Loader2 className="h-12 w-12 animate-spin mb-4" />
-              <p>{t('builder.academicSolver.toasts.analyzingInProgress', {type: documentType})}</p>
-            </div>
-          ) : analyzedDocument ? (
-            <ReactMarkdown components={markdownComponents}>{analyzedDocument.structuredContent}</ReactMarkdown>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
-              <BrainCircuit className="h-12 w-12 mb-4" />
-              <p>{t('builder.academicSolver.analysisPlaceholder')}</p>
-            </div>
-          )}
+            {stage === 'analyzing' || analyzeMutation.isPending ? (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                <Loader2 className="h-12 w-12 animate-spin mb-4" />
+                <p>{t('builder.academicSolver.toasts.analyzingInProgress', { type: documentType })}</p>
+              </div>
+            ) : analyzedDocument ? (
+              <ReactMarkdown components={markdownComponents}>{analyzedDocument.structuredContent}</ReactMarkdown>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground p-8">
+                <BrainCircuit className="h-12 w-12 mb-4" />
+                <p>{t('builder.academicSolver.analysisPlaceholder')}</p>
+              </div>
+            )}
+
         </A4Page>
       );
     }
-    
+
     // Solution Pages
     const solutionIndex = currentPage - 1;
     const solution = solvedDocument?.solutions?.[solutionIndex];
@@ -212,7 +213,7 @@ export default function AcademicSolver() {
                 uploadedContent={questionDocuments}
                 isContext={false}
              />
-             
+
              <AcademicUploaders
                 title={t('builder.academicSolver.contextSyllabus')}
                 onContentAdded={addExternalContext}
@@ -228,7 +229,7 @@ export default function AcademicSolver() {
                 ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                {t('builder.academicSolver.analyzeButton')} ({creditCostAnalyze} {t('builder.academicSolver.creditLabel')})
+                {t('builder.academicSolver.analyzeButton')}
             </Button>
         </CardContent>
         <CardFooter>
@@ -240,16 +241,16 @@ export default function AcademicSolver() {
   const contentPanel = (
      <Card className="min-h-[calc(100vh-250px)] flex flex-col">
        <CardHeader>
-         <div className="flex justify-between items-start">
-              <div>
+         <div className="flex justify-between items-start flex-col lg:flex-row">
+              <div >
                   <CardTitle>{analyzedDocument ? analyzedDocument.subject : t('builder.academicSolver.documentTitle')}</CardTitle>
                   <CardDescription>{analyzedDocument ? analyzedDocument.title : t('builder.academicSolver.begin')}</CardDescription>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-col sm:flex-row">
                  {(stage === 'readyToSolve' || stage === 'solving' || stage === 'solved') && (
                       <Button onClick={handleSolve} disabled={!canSolve}>
                           {solveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                          {t('builder.academicSolver.solveButton')} ({creditCostSolve} {t('builder.academicSolver.creditLabelPlural')})
+                          {t('builder.academicSolver.solveButton')}
                       </Button>
                   )}
                  {stage === 'solved' && (
@@ -261,7 +262,7 @@ export default function AcademicSolver() {
          </div>
        </CardHeader>
        <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-           <ScrollArea className="h-[calc(100vh-350px)]">
+           <ScrollArea className="h-[calc(100vh-350px)]" >
              {renderContentPage()}
            </ScrollArea>
        </div>

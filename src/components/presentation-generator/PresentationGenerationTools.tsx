@@ -13,7 +13,7 @@ import { diagramConfig } from '@/lib/report-config';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -140,7 +140,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         selectedPresentationTemplateId,
         setSelectedPresentationTemplateId,
      } = useReportStore();
-     
+
     const { sections } = useReportStore();
     const { diagrams } = useDiagramStore();
 
@@ -153,9 +153,9 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const [generationPlan, setGenerationPlan] = React.useState<EvaluateContextOutput | null>(null);
 
     const agent = agents.find(a => a.id === 'generate-presentation');
-    
+
     const presentations = presentation?.history || [];
-    
+
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
     const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
 
@@ -175,7 +175,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 content: JSON.stringify(proposal, null, 2)
             });
         }
-        
+
         for (const key in selectedContext.sections) {
             if (selectedContext.sections[key] && sections[key as SectionNameType]) {
                 const sectionKey = key as SectionNameType;
@@ -185,7 +185,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                 });
             }
         }
-        
+
          for (const key in selectedContext.diagrams) {
             if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
                 const diagramKey = key as DiagramType;
@@ -232,7 +232,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-                        
+
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.sourceDocuments')}</h4>
                              <Accordion type="multiple" className="w-full space-y-1">
@@ -261,7 +261,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                 </AccordionItem>
                              </Accordion>
                         </div>
-                        
+
                         <Separator />
 
                         <div>
@@ -310,7 +310,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                 </AccordionItem>
                             </Accordion>
                         </div>
-                       
+
                         <div className="pt-2">
                             <TooltipProvider>
                                 <Tooltip>

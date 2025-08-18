@@ -261,9 +261,9 @@ export const useReportStore = create<ReportState & ReportActions>()(
                 newSelection.sections[sectionKey] = true;
             }
         });
-        
+
         return {
-          contextSelection: {
+          contextSelection: { // @ts-ignore
             ...state.contextSelection,
             [itemKey]: newSelection,
           },
@@ -273,7 +273,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
     toggleContextSelection: (itemKey, type, contextKey, isSelected) => {
       set(state => {
           const newSelection = JSON.parse(JSON.stringify(state.contextSelection[itemKey] || { ...emptySelection, proposal: true, projectPlan: true }));
-          
+
           if (type === 'proposal' || type === 'projectPlan') {
                newSelection[type] = isSelected;
           } else if (type === 'externalContext') {

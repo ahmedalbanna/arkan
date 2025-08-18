@@ -38,7 +38,7 @@ function TaskCard({ task }: { task: ProjectTask }) {
 }
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
         <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
         {children}
     </div>
@@ -56,7 +56,7 @@ export default function ProjectPlanViewer({ projectPlan }: { projectPlan: Projec
   if (!projectPlan || !projectPlan.phases) {
     return null;
   }
-  
+
   const totalPages = projectPlan.phases.length;
   const currentPhase = projectPlan.phases[currentPage];
 

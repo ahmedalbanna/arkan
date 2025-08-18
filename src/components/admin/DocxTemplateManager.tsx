@@ -140,7 +140,7 @@ function TemplatePreview({ styles }: { styles: any }) {
         color: `#${h1Styles.color || '2E74B5'}`,
         fontWeight: h1Styles.bold ? 'bold' : 'normal',
     };
-    
+
     const inlineH2Styles = {
         fontFamily: h2Styles.font?.name || 'Calibri Light',
         fontSize: `${h2Styles.size / 2 || 13}pt`,
@@ -179,7 +179,7 @@ export default function DocxTemplateManager() {
   const handleSave = (key: TemplateKey) => {
     saveChanges(key);
   };
-  
+
   const handleDelete = (key: TemplateKey) => {
     deleteMutation.mutate(key);
   }

@@ -22,7 +22,7 @@ import {
 import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
 import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 
-
+export { Agent };
 export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
 
 
@@ -194,3 +194,5 @@ export function useGenerateAgentConfig() {
         }
     })
 }
+
+

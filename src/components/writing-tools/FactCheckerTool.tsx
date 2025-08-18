@@ -19,7 +19,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
-import { PlagiarismCheckOutput } from '@/ai/flows/plagiarism-checker';
+import { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const factCheckerSchema = z.object({
@@ -34,7 +34,7 @@ export function FactCheckerTool() {
   const mutation = useFactCheck();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
-  
+
   const form = useForm<FactCheckerFormValues>({
     resolver: zodResolver(factCheckerSchema),
     defaultValues: { text: '' },
@@ -83,7 +83,7 @@ export function FactCheckerTool() {
       }
     });
   };
-  
+
   const getStatusInfo = (status: ClaimStatus) => {
     switch (status) {
       case 'Verified':
@@ -94,7 +94,7 @@ export function FactCheckerTool() {
         return { icon: XCircle, color: 'text-destructive', badgeVariant: 'destructive' as const };
     }
   };
-  
+
   const results = mutation.data;
 
   return (
@@ -182,7 +182,7 @@ export function FactCheckerTool() {
                                     </Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground">{claim.explanation}</p>
-                                <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.sourceLabel')} 
+                                <p className="text-xs text-muted-foreground">{t('writingTools.factChecker.sourceLabel')}
                                     <Link href={`https://${claim.source}`} target="_blank" className="hover:underline text-primary">
                                         {claim.source} <ExternalLink className="inline h-3 w-3" />
                                     </Link>

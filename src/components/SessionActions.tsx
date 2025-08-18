@@ -63,7 +63,7 @@ export const SessionActions = () => {
     const store = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
-    
+
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
     const handleUploadClick = () => {
@@ -93,7 +93,7 @@ export const SessionActions = () => {
             fileInputRef.current.value = '';
         }
     };
-    
+
     const handleSaveProjectFile = (name?: string) => {
         if (!hasAnyContent()) return;
         const finalName = name?.trim() || store.name || store.proposal?.title || 'arkan_project';
@@ -113,7 +113,7 @@ export const SessionActions = () => {
         const projectData = store.getFullState();
         const finalName = String(name || store.name || store.proposal?.title || '' || 'Untitled Project');
         const saveData = { ...projectData, name: finalName };
-        
+
         if (store.currentProjectId) {
             updateProjectMutation.mutate({ projectId: store.currentProjectId, data: saveData });
         } else {
@@ -132,7 +132,7 @@ export const SessionActions = () => {
             toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
         }
     }
-    
+
     const handleSaveFromPrompt = () => {
         if (projectName.trim()) {
             performSave(projectName);
@@ -161,7 +161,7 @@ export const SessionActions = () => {
 
     const handleDownloadAs = () => {
          const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
-         handleSaveProjectFile(finalSaveAsName);
+         handleSaveProjectFile(finalSaveAsName as string);
          setIsSaveAsOpen(false);
          setSaveAsName('');
     }
@@ -193,7 +193,7 @@ export const SessionActions = () => {
                         <p>{t('builder.tooltips.uploadProject')}</p>
                     </TooltipContent>
                 </Tooltip>
-                
+
                  <Button
                     variant="default"
                     size="icon"
