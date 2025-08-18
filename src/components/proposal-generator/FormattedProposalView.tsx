@@ -8,9 +8,9 @@ import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
-import remarkGfm from 'remark-gfm';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
+import remarkGfm from 'remark-gfm';
 
 interface FormattedProposalViewProps {
     proposal: AnyProjectProposal;
@@ -31,24 +31,26 @@ const hasContent = (value: any): boolean => {
 // A styled container for each "page"
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
     <div className={cn(
-        "bg-background shadow-lg p-6 md:p-16 mx-auto my-4 w-full md:w-[210mm]",
+        "bg-background shadow-lg p-6 md:p-12 mx-auto max-w-full",
+        "md:w-[210mm]",
         title ? "min-h-[297mm]" : "" // Only apply min-height if it's a content page
     )}>
-        {title && <h2 className="font-semibold text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>}
-        <div className="prose dark:prose-invert max-w-none text-sm">{children}</div>
+        {title && <h2 className="font-semibold text-lg md:text-xl text-primary/90 border-b-2 border-primary/20 pb-2 mb-4 font-headline">{title}</h2>}
+        <div className="prose dark:prose-invert max-w-none text-sm md:text-base">{children}</div>
     </div>
 );
 
 
 // Helper to format keys into readable titles
 const formatKeyToTitle = (key: string): string => {
-  return key
-    .replace(/([A-Z])/g, ' $1')
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, char => char.toUpperCase());
+    return key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
 }
 
 export default function FormattedProposalView({ proposal, currentPage }: FormattedProposalViewProps) {
+    const { locale } = useLocalization();
     if (!proposal) return null;
 
     const renderValue = (value: any, key: string) => {
@@ -57,7 +59,7 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
         if (typeof value === 'string') {
             if (key === 'startDate' || key === 'endDate') {
                 try {
-                    return <p><strong>{formatKeyToTitle(key)}:</strong> {format(new Date(value), 'PPP')}</p>;
+                    return <p><strong>{formatKeyToTitle(key)}:</strong> {format(new Date(value), 'PPP', { locale: locale === 'ar' ? require('date-fns/locale/ar') : require('date-fns/locale/en-US') })}</p>;
                 } catch {
                     return <p><strong>{formatKeyToTitle(key)}:</strong> {value}</p>;
                 }
@@ -74,7 +76,7 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
             return <div className="space-y-4">{value.map((item, index) => <div key={index} className="p-2 border-l-2 ml-2">{Object.entries(item).map(([k, v]) => <p key={k}><strong>{formatKeyToTitle(k)}:</strong> {String(v)}</p>)}</div>)}</div>;
         }
         if (typeof value === 'object' && value !== null) {
-             const content = Object.entries(value).map(([k, v]) => <div key={k} className="mb-2"><strong>{formatKeyToTitle(k)}:</strong> {renderValue(v, k)}</div>);
+            const content = Object.entries(value).map(([k, v]) => <div key={k} className="mb-2"><strong>{formatKeyToTitle(k)}:</strong> {renderValue(v, k)}</div>);
             // Filter out empty children before wrapping
             return content.some(child => child !== null) ? <div>{content}</div> : null;
         }
@@ -85,8 +87,21 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
     }
 
     const orderedKeys = Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category');
-    const currentPageKey = orderedKeys[currentPage];
-    
+
+    // For the title page (currentPage === 0)
+    if (currentPage === 0) {
+        return (
+            <A4Page>
+                <div className="flex flex-col items-center justify-start h-full text-center min-h-[297mm]">
+                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
+                    <p className="text-lg md:text-xl text-muted-foreground">{proposal.category}</p>
+                </div>
+            </A4Page>
+        )
+    }
+
+    const currentPageKey = orderedKeys[currentPage - 1]; // -1 to account for title page
+
     // If the key is not found (e.g., out of bounds), don't render anything
     if (!currentPageKey) return null;
 

@@ -26,7 +26,7 @@ interface ReportResultsProps {
 }
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
         <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
         {children}
     </div>
@@ -35,7 +35,7 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title: string 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const { sections, evaluation } = useReportStore();
   const { t } = useLocalization();
-  
+
   const [currentPage, setCurrentPage] = useState(0);
 
   const generatedSections = orderedSections.filter(key => sections[key]);
@@ -72,7 +72,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
         </Card>
     );
   }
-  
+
   const isEvaluationPage = currentPage === generatedSections.length;
   const currentSectionKey = generatedSections[currentPage];
 

@@ -19,6 +19,7 @@ import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { ProjectProposalSchema } from '@/ai/schemas';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
 
@@ -62,7 +63,7 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title?: string
 export function ProposalModeGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    
+
     const {
         proposal,
         handleProposalUpdate,
@@ -96,7 +97,7 @@ export function ProposalModeGenerator() {
             title: t('builder.proposalGenerator.toasts.translateAllStarted'),
             description: t('builder.proposalGenerator.toasts.translateAllStartedDesc'),
         });
-    
+
         const token = await firebaseUser.getIdToken();
         translateMutation.mutate({ proposal: proposal as AnyProjectProposal, targetLang, token });
     };
@@ -105,6 +106,7 @@ export function ProposalModeGenerator() {
     const totalPages = orderedKeys.length > 0 ? orderedKeys.length + 1 : 0; // +1 for the title page
     const [currentPage, setCurrentPage] = useState(0);
     const [zoom, setZoom] = useState(1);
+    const isMobile = useIsMobile();
 
     useEffect(() => {
         setCurrentPage(0);
@@ -127,7 +129,7 @@ export function ProposalModeGenerator() {
     return (
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
              {generationMutation.isPending && (
-                <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg">
+                <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg p-4">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     <p className="text-muted-foreground">Generating your proposal, please wait...</p>
                 </div>
@@ -138,12 +140,12 @@ export function ProposalModeGenerator() {
                     isGenerating={generationMutation.isPending}
                 />
             </div>
-            
-            <div className="lg:col-span-8">
+
+            <div className="lg:col-span-8 w-full">
                  <div className="h-full flex flex-col">
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">
                         <div className="flex justify-between items-start gap-4">
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                                 <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title || "Generated Proposal"}>
                                     {proposal?.title || "Generated Proposal"}
                                 </CardTitle>
@@ -152,7 +154,7 @@ export function ProposalModeGenerator() {
                                 </CardDescription>
                             </div>
                              <div className="flex-none">
-                                <ProposalActions 
+                                <ProposalActions
                                     isGenerating={generationMutation.isPending}
                                     isTranslating={translateMutation.isPending}
                                     onTranslate={handleTranslateProposal}
@@ -161,25 +163,16 @@ export function ProposalModeGenerator() {
                         </div>
                     </CardHeader>
                     <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-                         <ScrollArea className="h-[calc(100vh-280px)]">
-                            <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
+                         <ScrollArea className={isMobile ? "h-[calc(100vh-350px)]" : "h-[calc(100vh-280px)]"}>
+                            <div className={isMobile ? "" : "scale-animation"} style={{ transform: isMobile ? 'none' : `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
                                 {proposal ? (
                                     <Suspense fallback={<ProposalSkeleton/>}>
-                                        {currentPage === 0 ? (
-                                            <A4Page>
-                                                <div className="flex flex-col items-center justify-center h-full text-center">
-                                                    <h1 className="text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
-                                                    <p className="text-xl text-muted-foreground">{proposal.category}</p>
-                                                </div>
-                                            </A4Page>
-                                        ) : (
-                                            <FormattedProposalView
-                                                proposal={proposal}
-                                                onUpdate={handleProposalUpdate}
-                                                readOnly={isBusy}
-                                                currentPage={currentPage - 1}
-                                            />
-                                        )}
+                                        <FormattedProposalView
+                                            proposal={proposal}
+                                            onUpdate={handleProposalUpdate}
+                                            readOnly={isBusy}
+                                            currentPage={currentPage}
+                                        />
                                     </Suspense>
                                 ) : (
                                     <div className="flex items-center justify-center h-full min-h-[400px]">
