@@ -138,7 +138,7 @@ export function ProposalModeGenerator() {
             )}
 
             {isPanelCollapsed && (
-                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24 ml-6">
+                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
                      <Button
                         variant="secondary"
                         className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"

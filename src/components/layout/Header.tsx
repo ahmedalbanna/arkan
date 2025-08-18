@@ -24,6 +24,8 @@ import { useChatStore } from '@/hooks/useChatStore';
 import { toast } from '@/hooks/use-toast';
 import { initiateSupportChat } from '@/services/chat-service';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Label } from '../ui/label';
 
 
 function NotificationIcon({ icon }: { icon: Notification['icon']}) {
@@ -53,6 +55,7 @@ export function Header() {
   const markAsReadMutation = useMarkNotificationsAsRead();
   const clearAllMutation = useClearAllNotifications();
   const { createConversation, openChat } = useChatStore();
+  const isMobile = useIsMobile();
 
 
   useEffect(() => {
@@ -147,7 +150,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-4 justify-between">
+      <div className="container flex h-16 items-center px-4 justify-between">
         <div className="flex items-center gap-2">
             <div className="md:hidden">
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -266,6 +269,26 @@ export function Header() {
                         </Link>
                     </DropdownMenuItem>
                    )}
+                   {isMobile && (
+                     <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="flex justify-between">
+                          <Label htmlFor="theme-toggle-mobile" className="flex items-center gap-2"><Palette className="h-4 w-4" /> Theme</Label>
+                          <ThemeToggle />
+                      </DropdownMenuItem>
+                       <DropdownMenuItem className="flex justify-between">
+                          <Label htmlFor="lang-toggle-mobile" className="flex items-center gap-2"><Languages className="h-4 w-4" /> Language</Label>
+                           <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={toggleLocale}
+                              aria-label="Change language"
+                            >
+                              <span className="text-xs font-bold">{locale.toUpperCase()}</span>
+                          </Button>
+                      </DropdownMenuItem>
+                     </>
+                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} disabled={logoutMutation.isPending}>
                     <LogOut className="me-2 h-4 w-4" />
@@ -325,10 +348,10 @@ export function Header() {
           ) : (
             <Button asChild><Link href="/login">{t('login.pageTitle')}</Link></Button>
           )}
-          {isClient && <ThemeToggle />}
-          <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
+          {!isMobile && isClient && <ThemeToggle />}
+          {!isMobile && <Button variant="ghost" size="icon" onClick={toggleLocale} aria-label="Change language">
             <Languages className="h-5 w-5" />
-          </Button>
+          </Button>}
         </div>
       </div>
     </header>
