@@ -2,6 +2,7 @@
 'use client';
 
 import type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/lib/types';
+import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 
 export type { DocxTemplate, PptxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate };
 
@@ -247,7 +248,7 @@ export async function createPptxTemplate(data: {id: string, name: string, descri
 
 
 export async function updatePptxTemplate(
-  variables: {key: string, styles: any},
+  variables: {key: string, styles?: any, templateUrl?: string},
   token: string
 ) {
   const response = await fetch(`/api/admin/templates/pptx/${variables.key}`, {
@@ -256,7 +257,7 @@ export async function updatePptxTemplate(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ styles: variables.styles }),
+    body: JSON.stringify({ styles: variables.styles, templateUrl: variables.templateUrl }),
   });
   if (!response.ok) {
     const error = await response.json();
@@ -291,6 +292,24 @@ export async function refreshTemplateImage(variables: { templateType: 'docx' | '
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to refresh image');
+    }
+    return response.json();
+}
+
+export async function uploadPptxTemplateFile(variables: { templateId: string; file: File; token: string }) {
+    const formData = new FormData();
+    formData.append('file', variables.file);
+
+    const response = await fetch(`/api/admin/templates/pptx/${variables.templateId}/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${variables.token}`,
+        },
+        body: formData,
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to upload template file');
     }
     return response.json();
 }

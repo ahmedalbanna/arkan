@@ -12,6 +12,7 @@ import {
   updatePptxTemplate,
   createPptxTemplate,
   deletePptxTemplate,
+  uploadPptxTemplateFile as uploadPptxTemplateFileApi,
   type PptxTemplate,
 } from "@/services/template-service";
 import { PptxStyleOptions } from '@/lib/types';
@@ -55,6 +56,20 @@ export function usePptxStyles() {
         }
     });
 
+    const uploadTemplateFile = useMutation({
+        mutationFn: async (variables: { templateId: string; file: File }) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return uploadPptxTemplateFileApi({ ...variables, token });
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: pptxTemplateKeys.lists() });
+            toast({ title: "Template Uploaded", description: "The PPTX template file has been updated." });
+        },
+        onError: (error: Error) => {
+            handleErrorUtility(error, "Failed to upload template file");
+        }
+    });
+
     const updateStyle = (templateKey: string, path: string, value: any) => {
         setLocalChanges(prev => {
             const newStyles = JSON.parse(JSON.stringify(prev[templateKey] || templates?.[templateKey]?.styles || {}));
@@ -93,6 +108,7 @@ export function usePptxStyles() {
         templates: combinedTemplates, 
         isLoaded: !isLoading, 
         isSaving: updateMutation.isPending,
+        uploadTemplateFile,
         updateStyle,
         saveChanges
     };

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2, RefreshCw, Upload } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '../ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -157,10 +157,11 @@ function PptxTemplatePreview({ styles }: { styles: PptxStyleOptions }) {
 
 
 export default function PptxTemplateManager() {
-  const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
+  const { templates, updateStyle, saveChanges, isSaving, isLoaded, uploadTemplateFile } = usePptxStyles();
   const deleteMutation = useDeletePptxTemplate();
   const refreshImageMutation = useRefreshTemplateImage('pptx');
   const { t } = useLocalization();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(templateKey, path, value);
@@ -177,6 +178,14 @@ export default function PptxTemplateManager() {
   const handleRefreshImage = (templateId: string, prompt: string) => {
     refreshImageMutation.mutate({ templateId, prompt });
   };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, templateId: string) => {
+      const file = e.target.files?.[0];
+      if (file) {
+          uploadTemplateFile.mutate({ templateId, file });
+      }
+  };
+
 
   if (!isLoaded) {
     return (
@@ -247,6 +256,14 @@ export default function PptxTemplateManager() {
                             <RefreshCw className="h-4 w-4" />
                           )}
                     </Button>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor={`template-file-upload-${template.id}`}>Template File (.pptx)</Label>
+                    <div className="flex items-center gap-2">
+                        <Input id={`template-file-upload-${template.id}`} type="file" accept=".pptx" onChange={(e) => handleFileChange(e, template.id)} className="text-xs" />
+                        {uploadTemplateFile.isPending && uploadTemplateFile.variables?.templateId === template.id && <Loader2 className="h-4 w-4 animate-spin"/>}
+                    </div>
+                    {template.templateUrl && <a href={template.templateUrl} target="_blank" rel="noreferrer noopener" className="text-xs text-blue-500 hover:underline">Current Template</a>}
                 </div>
                 <Accordion type="multiple" className="w-full" defaultValue={['general']}>
                     <AccordionItem value="general">

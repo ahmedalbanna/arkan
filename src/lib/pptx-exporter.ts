@@ -3,6 +3,7 @@
 
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
+import { saveAs } from 'file-saver';
 
 // Helper function to remove markdown characters for a cleaner text output
 function stripMarkdown(text: string): string {
@@ -13,60 +14,50 @@ function stripMarkdown(text: string): string {
         .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1'); // Links
 }
 
-function getStylesFromStorage() {
-    if (typeof window === 'undefined') {
-        return templates;
-    }
-    const stored = localStorage.getItem('arkan-pptx-styles');
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
+async function getTemplatesFromStorage(): Promise<Record<PptxTemplateKey, any>> {
+    try {
+        const response = await fetch('/api/admin/templates/pptx');
+        if (!response.ok) {
+            console.error("Failed to fetch templates, using defaults.");
             return templates;
         }
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching templates, using defaults:", error);
+        return templates;
     }
-    return templates;
 }
 
-export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
-    const { default: pptxgen } = await import('pptxgenjs');
 
-    if (!slides || slides.length === 0) {
-        console.error("No slides provided for PPTX export.");
+export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
+    const allTemplates = await getTemplatesFromStorage();
+    const template = allTemplates[templateKey];
+
+    if (!template) {
+        console.error(`Template with key "${templateKey}" not found.`);
         return;
     }
-    const allTemplates = getStylesFromStorage();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
-
+    
+    // Fallback to pptxgenjs if no template URL or if automizer fails
+    const { default: pptxgen } = await import('pptxgenjs');
     let pptx = new pptxgen();
-
-    // Set presentation properties
     pptx.layout = "LAYOUT_16x9";
     pptx.author = "Arkan AI";
     pptx.company = "Firebase Studio";
     pptx.subject = "Project Presentation";
     pptx.title = slides[0]?.title || "Presentation";
 
-    // Define a master slide for consistent layout
-    pptx.defineSlideMaster({
-        title: "MASTER_SLIDE",
-        
-        
-    });
+    const styles = template.styles || templates.modern.styles;
 
     for (const slideData of slides) {
-        const slide = pptx.addSlide({ masterName: "MASTER_SLIDE" });
+        const slide = pptx.addSlide();
 
         // Add Slide Title
         slide.addText(stripMarkdown(slideData.title), {
-            x: 0.5,
-            y: 0.25,
-            w: "90%",
-            h: 1,
-            ...styles.title
+            x: 0.5, y: 0.25, w: "90%", h: 1, ...styles.title
         });
 
-        // Add Main Content (Bullet Points)
+        // Add Main Content
         const contentBullets = slideData.content.map(item => ({
             text: stripMarkdown(item),
             options: {
@@ -77,19 +68,13 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         }));
 
         slide.addText(contentBullets, {
-            x: 0.5,
-            y: 1.5,
-            w: "90%",
-            h: 4,
-            ...styles.body,
-            lineSpacing: 36,
+            x: 0.5, y: 1.5, w: "90%", h: 4, ...styles.body, lineSpacing: 36,
         });
 
-        // Add Speaker Notes
         slide.addNotes(stripMarkdown(slideData.speakerNotes));
     }
 
     pptx.writeFile({ fileName: `presentation.pptx` }).catch(err => {
-        console.error("Error writing PPTX file:", err);
+        console.error("Error writing PPTX file with pptxgenjs:", err);
     });
 }
