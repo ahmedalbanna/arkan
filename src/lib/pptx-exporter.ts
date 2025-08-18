@@ -4,7 +4,6 @@
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
 import { saveAs } from 'file-saver';
-import { lineBreak } from "html2canvas/dist/types/css/property-descriptors/line-break";
 // Helper function to remove markdown characters for a cleaner text output
 function stripMarkdown(text: string): string {
     return text
@@ -51,30 +50,25 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
 
     for (const slideData of slides) {
         const slide = pptx.addSlide();
-        
+
         // Add Slide Title
         slide.addText(stripMarkdown(slideData.title), {
             x: 0.5, y: 0.25, w: "90%", h: 1, ...styles.title
         });
 
-        // Add Main Content as bullet points
-        const contentBullets = slideData.content.map(item => ({
-            text: stripMarkdown(item),
-            options: { // Apply body styles to each bullet point
-                ...styles.body, // Apply body styles to each bullet point
-                bullet: styles.bullet.type === 'bullet' ? true : undefined,
-                numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined,
-            },
-        }));
+        // Combine all content items into a single string with newlines for bullet points
+        const combinedContent = slideData.content.map(item => stripMarkdown(item)).join('\n');
 
         // Determine content position and dimensions based on layout
         let contentX = 0.5;
         let contentY = 1.5;
         let contentW = "90%";
         let contentH = 4;
-        let breakLine = true;
-        slide.addText(contentBullets, {
-            x: contentX, y: contentY, w: contentW, h: contentH, ...styles.body, lineSpacing: 36,breakLine
+        slide.addText(combinedContent, {
+            x: contentX, y: contentY, w: contentW, h: contentH, ...styles.body,
+            lineSpacing: 36,
+            bullet: styles.bullet.type === 'bullet' ? true : undefined, // Apply bullet to the whole text block
+            numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined, // Apply numbering to the whole text block
         });
 
         slide.addNotes(stripMarkdown(slideData.speakerNotes));
@@ -84,4 +78,3 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         console.error("Error writing PPTX file with pptxgenjs:", err);
     });
 }
-
