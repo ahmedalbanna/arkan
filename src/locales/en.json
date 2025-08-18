@@ -117,7 +117,7 @@
       "checkButton": "Check for Plagiarism",
       "analyzing": "Analyzing claims and searching for sources...",
       "reportTitle": "Plagiarism Report",
-      "originalityScore": "Originality Score",
+      "originalityScore": "Originality & Accuracy Score",
       "originalityScoreDesc": "This score represents the percentage of your text that is unique.",
       "matchesTitle": "Potential Matches Found",
       "matchesDescription": "We found potential matches from the following sources. Review them to ensure proper citation.",
