@@ -79,7 +79,7 @@ const Tree = ({ data, level = 0 }: { data: any; level?: number }) => {
 
 function FileTreeView({ codebase }: { codebase: Codebase }) {
   const [isZipping, setIsZipping] = useState(false);
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const { toast } = useToast();
   const fileTree = buildFileTree(codebase.files);
 
@@ -107,7 +107,7 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             <div>
                 <CardTitle className="font-headline text-2xl text-primary">{t('builder.codeGenerator.codebaseGenerator.fileTreeView.title')}</CardTitle>
                 <CardDescription>{t('builder.codeGenerator.codebaseGenerator.fileTreeView.description')}</CardDescription>
@@ -133,7 +133,7 @@ function FileTreeView({ codebase }: { codebase: Codebase }) {
 async function generateCodeApi(variables: { prompt: string; token: string }): Promise<GenerateCodeOutput> {
     const response = await fetch('/api/generate/code', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${variables.token}`,
         },
@@ -164,7 +164,7 @@ async function generateCodebaseApi(variables: { proposal: any; token: string }):
 
 function CodeDisplay({ code, language }: { code: string; language: string; }) {
     const [isCopied, setIsCopied] = useState(false);
-
+    const { t, locale } = useLocalization();
     const handleCopy = () => {
         navigator.clipboard.writeText(code).then(() => {
             setIsCopied(true);
@@ -173,7 +173,8 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
     };
 
     return (
-        <div className="relative">
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+
              <ScrollArea className="h-full max-h-96 w-full rounded-md border">
                 <pre className="p-4 text-sm">
                     <code>{code}</code>
@@ -192,8 +193,8 @@ function CodeDisplay({ code, language }: { code: string; language: string; }) {
 }
 
 function ComponentGenerator() {
-    const { t } = useLocalization();
-    const { 
+    const { t, locale } = useLocalization();
+    const {
         prompt,
         html,
         css,
@@ -201,7 +202,7 @@ function ComponentGenerator() {
         setCodePrompt,
         setGeneratedCode,
     } = useCodeGeneratorStore();
-    
+
     const { firebaseUser, refetchUser } = useAuth();
     const [srcDoc, setSrcDoc] = useState('');
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -209,7 +210,6 @@ function ComponentGenerator() {
     const [isDownloading, setIsDownloading] = useState(false);
     const { toast } = useToast();
     const [isExpanded, setIsExpanded] = useState(false);
-
     const mutation = useMutation({
         mutationFn: generateCodeApi,
         onSuccess: (data) => {
@@ -334,7 +334,7 @@ function ComponentGenerator() {
 
     return (
         <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
                 {/* Left Column */}
                 <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
                      <Card>
@@ -451,12 +451,11 @@ function ComponentGenerator() {
 
 
 function FullCodebaseGenerator() {
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, refetchUser } = useAuth();
   const { proposal } = useBuilderStore();
   const { codebase, setCodebase } = useCodeGeneratorStore();
-
   const mutation = useMutation({
     mutationFn: generateCodebaseApi,
     onSuccess: (data) => {
@@ -486,7 +485,7 @@ function FullCodebaseGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
         <Card>
           <CardHeader>

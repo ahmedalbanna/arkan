@@ -11,6 +11,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useCodebaseStore } from '@/hooks/useCodebaseStore';
 import type { Codebase } from '@/ai/schemas';
 import FileTreeView from './FileTreeView';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function generateCodebaseApi(variables: { proposal: any; token: string }): Promise<Codebase> {
   const response = await fetch('/api/generate-codebase', {
@@ -34,7 +35,7 @@ export default function CodebaseGenerator() {
   const queryClient = useQueryClient();
   const { proposal } = useBuilderStore();
   const { codebase, setCodebase } = useCodebaseStore();
-
+  const { t, locale } = useLocalization();
   const mutation = useMutation({
     mutationFn: generateCodebaseApi,
     onSuccess: (data) => {
@@ -64,7 +65,8 @@ export default function CodebaseGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)]" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+
       <div className="lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2">
         <Card>
           <CardHeader>

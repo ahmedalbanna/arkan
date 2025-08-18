@@ -78,12 +78,12 @@ export default function PresentationGenerator() {
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
         const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
         if (!activePresentation || !firebaseUser) return;
-    
+
         toast({
             title: t('builder.presentationGenerator.toasts.translateAllStarted'),
             description: t('builder.presentationGenerator.toasts.translateAllStartedDesc'),
         });
-    
+
         const token = await firebaseUser.getIdToken();
         translateMutation.mutate({ presentation: activePresentation, targetLang, token });
     };
@@ -91,7 +91,7 @@ export default function PresentationGenerator() {
     const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {isPanelCollapsed && (
                 <div className="hidden lg:block lg:col-span-1 sticky top-24">
                     <Button

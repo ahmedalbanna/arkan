@@ -129,14 +129,14 @@ export function ProposalModeGenerator() {
     const isBusy = generationMutation.isPending || translateMutation.isPending;
 
     return (
-        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {generationMutation.isPending && (
                 <div className="absolute inset-0 bg-background/80 z-20 flex flex-col items-center justify-center gap-4 rounded-lg p-4">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     <p className="text-muted-foreground">{t('builder.proposalGenerator.toasts.generatingDesc')}</p>
                 </div>
             )}
-            
+
             {isPanelCollapsed && (
                 <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24 ml-6">
                      <Button
@@ -156,7 +156,7 @@ export function ProposalModeGenerator() {
                     onCollapseToggle={() => setIsPanelCollapsed(true)}
                 />
             </div>
-            
+
             <div className={cn("w-full", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
                  <div className="h-full flex flex-col">
                      <CardHeader className="bg-background rounded-t-lg p-4 border-b">

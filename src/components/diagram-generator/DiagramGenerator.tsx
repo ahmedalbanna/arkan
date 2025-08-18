@@ -30,14 +30,14 @@ function DiagramSkeleton() {
 }
 
 export default function DiagramGenerator() {
-    const { t } = useLocalization();
+    const { t, locale } = useLocalization();
     const {
         diagrams,
         handleDiagramCodeUpdate,
         setDiagram,
         setDiagramExplanation,
     } = useDiagramStore();
-    
+
     const mutation = useUpdateDiagram((data, plantUmlCode) => {
         // Find which diagram this mutation was for to update the correct one
         const diagramKey = (Object.keys(diagrams) as DiagramType[]).find(key => diagrams[key]?.plantUmlCode === plantUmlCode);
@@ -49,11 +49,16 @@ export default function DiagramGenerator() {
     const handleUpdateDiagram = (plantUmlCode: string) => {
         mutation.mutate(plantUmlCode);
     };
-    
+
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams?.[key]);
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+        <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+
+            {/* Right Column */}
+            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
+                <DiagramGenerationTools />
+            </div>
 
             {/* Center Column */}
             <div className="lg:col-span-8 lg:overflow-y-auto lg:pr-2">
@@ -105,10 +110,6 @@ export default function DiagramGenerator() {
                 </Card>
             </div>
 
-            {/* Right Column */}
-            <div className="lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2">
-                <DiagramGenerationTools />
-            </div>
         </div>
     );
 }

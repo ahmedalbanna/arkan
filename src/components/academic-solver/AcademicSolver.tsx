@@ -30,7 +30,7 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title?: string
 
 
 export default function AcademicSolver() {
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, userProfile } = useAuth();
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
@@ -293,7 +293,7 @@ export default function AcademicSolver() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
         {isPanelCollapsed && (
             <div className="hidden lg:block lg:col-span-1 sticky top-24">
                  <Button

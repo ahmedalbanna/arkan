@@ -37,7 +37,7 @@ async function summarizeProposalForPlanApi(proposal: any, token: string): Promis
 
 
 export default function ProjectPlanGenerator() {
-  const { t } = useLocalization();
+  const { t, locale } = useLocalization();
   const { toast } = useToast();
   const { firebaseUser, userProfile } = useAuth();
   const { proposal, projectIdea } = useBuilderStore();
@@ -45,7 +45,7 @@ export default function ProjectPlanGenerator() {
   const [description, setDescription] = useState('');
   const [deliverables, setDeliverables] = useState('');
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-  
+
   const planGenerationMutation = useGenerateProjectPlan();
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export default function ProjectPlanGenerator() {
 
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
          {isPanelCollapsed && (
             <div className="hidden lg:block lg:col-span-1 sticky top-24">
                 <Button
@@ -130,7 +130,7 @@ export default function ProjectPlanGenerator() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
                 <Label htmlFor="plan-description">{t('builder.projectPlan.projectDescriptionLabel')}</Label>
-                <Textarea 
+                <Textarea
                     id="plan-description"
                     placeholder={t('builder.projectPlan.projectDescriptionPlaceholder')}
                     value={description}
@@ -141,7 +141,7 @@ export default function ProjectPlanGenerator() {
             </div>
              <div className="space-y-2">
                 <Label htmlFor="plan-deliverables">{t('builder.projectPlan.keyDeliverablesLabel')}</Label>
-                <Textarea 
+                <Textarea
                     id="plan-deliverables"
                     placeholder={t('builder.projectPlan.keyDeliverablesPlaceholder')}
                     value={deliverables}
