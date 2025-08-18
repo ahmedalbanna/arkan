@@ -97,19 +97,20 @@ export default function ProjectPlanGenerator() {
 
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
-        {isPanelCollapsed && (
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start">
+         {isPanelCollapsed && (
+            <div className="hidden lg:block lg:col-span-1 sticky top-24">
                 <Button
                     variant="secondary"
                     className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
                     onClick={() => setIsPanelCollapsed(false)}
                 >
+                    <PanelRightOpen className="h-5 w-5 mb-2" />
                     {t('builder.projectPlan.title')}
                 </Button>
             </div>
         )}
-      <div className={cn("lg:col-span-3 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden", isPanelCollapsed && "ml-6")}>
+      <div className={cn("lg:col-span-4 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -156,7 +157,7 @@ export default function ProjectPlanGenerator() {
           </CardContent>
         </Card>
       </div>
-       <div className={cn("lg:col-span-9 lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed && "lg:col-span-12")}>
+       <div className={cn("lg:overflow-y-auto lg:pr-2 transition-all duration-300", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
         {planGenerationMutation.isPending && (
           <Card className="flex items-center justify-center h-full min-h-[400px]">
             <div className="text-center text-muted-foreground p-8">
