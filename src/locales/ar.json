@@ -351,6 +351,32 @@
       "textToHandwriting": "تحويل النص إلى خط يد"
     }
   },
+  "markdownDisplay": {
+    "pageTitle": "محرر ومنسق الماركداون",
+    "pageSubtitle": "الصق محتوى الماركداون الخاص بك لرؤية معاينة مباشرة، أو استخدم مساعد الذكاء الاصطناعي لتنسيقه وتحسينه.",
+    "inputTab": "إدخال الماركداون",
+    "assistantTab": "مساعد الذكاء الاصطناعي",
+    "placeholder": "الصق الماركداون الخاص بك هنا...",
+    "aiInstructionsLabel": "تعليماتك",
+    "aiInstructionsPlaceholder": "على سبيل المثال، 'يرجى تنسيق هذا كتقرير رسمي. أضف فقرة ختامية وتأكد من أن جميع العناوين متسقة.'",
+    "improveButton": "تحسين بالذكاء الاصطناعي",
+    "previewTitle": "معاينة مباشرة",
+    "renderedOutputDesc": "الإخراج المعروض للماركداون الخاص بك.",
+    "aiSuggestionReadyDesc": "اقتراح الذكاء الاصطناعي جاهز لمراجعتك.",
+    "rejectButton": "رفض",
+    "acceptButton": "قبول الاقتراح",
+    "exportButton": "تصدير بصيغة DOCX",
+    "aiAssistantDesc": "قدم تعليمات للذكاء الاصطناعي لتنسيق تقريرك أو تنظيمه أو تحسينه.",
+    "toasts": {
+      "suggestionReadyTitle": "اقتراح الذكاء الاصطناعي جاهز",
+      "suggestionReadyDesc": "لقد انتهى الذكاء الاصطناعي من تحسين المستند الخاص بك.",
+      "missingInputTitle": "إدخال ناقص",
+      "missingInputDesc": "يرجى تقديم محتوى الماركداون والتعليمات للذكاء الاصطناعي.",
+      "assistantFailedTitle": "فشل مساعد الذكاء الاصطناعي",
+      "suggestionAcceptedTitle": "تم قبول الاقتراح",
+      "suggestionAcceptedDesc": "تم تحديث المستند بتحسينات الذكاء الاصطناعي."
+    }
+  },
   "userDashboard": {
     "pageTitle": "لوحة التحكم الخاصة بي",
     "pageSubtitle": "ها هو ملخص نشاطك، {name}.",
@@ -1377,13 +1403,7 @@
       "uploadNewContext": "Upload New Context",
       "generationSettings": "Generation Settings",
       "advancedSettings": "Advanced Settings",
-      "promptAndGuidelines": "Prompt & Guidelines",
-      "toneEnthusiastic": "Enthusiastic",
-      "complexity": "Complexity",
-      "complexityDefault": "Default",
-      "complexitySummary": "High-level Summary",
-      "complexityDetailed": "Detailed",
-      "complexityTechnical": "Technical"
+      "promptAndGuidelines": "Prompt & Guidelines"
     },
     "Section": {
       "aiSuggestion": "اقتراح الذكاء الاصطناعي",

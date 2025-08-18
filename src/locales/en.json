@@ -351,6 +351,32 @@
       "textToHandwriting": "Text to Handwriting"
     }
   },
+  "markdownDisplay": {
+    "pageTitle": "Markdown Editor & Formatter",
+    "pageSubtitle": "Paste your Markdown content to see a live preview, or use the AI Assistant to format and improve it.",
+    "inputTab": "Markdown Input",
+    "assistantTab": "AI Assistant",
+    "placeholder": "Paste your Markdown here...",
+    "aiInstructionsLabel": "Your Instructions",
+    "aiInstructionsPlaceholder": "e.g., 'Please format this as a formal report. Add a concluding paragraph and ensure all headings are consistent.'",
+    "improveButton": "Improve with AI",
+    "previewTitle": "Live Preview",
+    "renderedOutputDesc": "The rendered output of your Markdown.",
+    "aiSuggestionReadyDesc": "An AI suggestion is ready for your review.",
+    "rejectButton": "Reject",
+    "acceptButton": "Accept Suggestion",
+    "exportButton": "Export as DOCX",
+    "aiAssistantDesc": "Provide instructions for the AI to format, organize, or improve your report.",
+    "toasts": {
+      "suggestionReadyTitle": "AI Suggestion Ready",
+      "suggestionReadyDesc": "The AI has finished improving your document.",
+      "missingInputTitle": "Missing Input",
+      "missingInputDesc": "Please provide both the Markdown content and instructions for the AI.",
+      "assistantFailedTitle": "AI Assistant Failed",
+      "suggestionAcceptedTitle": "Suggestion Accepted",
+      "suggestionAcceptedDesc": "The document has been updated with the AI's improvements."
+    }
+  },
   "userDashboard": {
     "pageTitle": "My Dashboard",
     "pageSubtitle": "Here's a summary of your activity, {name}.",
@@ -1377,13 +1403,7 @@
       "uploadNewContext": "Upload New Context",
       "generationSettings": "Generation Settings",
       "advancedSettings": "Advanced Settings",
-      "promptAndGuidelines": "Prompt & Guidelines",
-      "toneEnthusiastic": "Enthusiastic",
-      "complexity": "Complexity",
-      "complexityDefault": "Default",
-      "complexitySummary": "High-level Summary",
-      "complexityDetailed": "Detailed",
-      "complexityTechnical": "Technical"
+      "promptAndGuidelines": "Prompt & Guidelines"
     },
     "Section": {
       "aiSuggestion": "AI Suggestion",

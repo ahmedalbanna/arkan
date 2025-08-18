@@ -17,6 +17,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useLocalization } from '@/context/LocalizationContext';
 
 async function improveMarkdownApi(variables: { markdownContent: string, userPrompt: string, token: string }): Promise<{ improvedMarkdown: string }> {
     const response = await fetch('/api/improve-markdown', {
@@ -36,6 +37,7 @@ async function improveMarkdownApi(variables: { markdownContent: string, userProm
 
 
 export function MarkdownDisplay() {
+  const { t } = useLocalization();
   const [markdown, setMarkdown] = useState(`# Sample Markdown
 
 ## This is a heading
@@ -71,17 +73,17 @@ function helloWorld() {
       mutationFn: improveMarkdownApi,
       onSuccess: (data) => {
           setAiSuggestion(data.improvedMarkdown);
-          toast({ title: "AI Suggestion Ready", description: "The AI has finished improving your document."});
+          toast({ title: t('markdownDisplay.toasts.suggestionReadyTitle'), description: t('markdownDisplay.toasts.suggestionReadyDesc')});
           refetchUser();
       },
       onError: (error: Error) => {
-          toast({ title: "AI Assistant Failed", description: error.message, variant: "destructive" });
+          toast({ title: t('markdownDisplay.toasts.assistantFailedTitle'), description: error.message, variant: "destructive" });
       }
   });
 
   const handleImproveMarkdown = async () => {
     if (!markdown.trim() || !userPrompt.trim()) {
-        toast({ title: "Missing Input", description: "Please provide both the Markdown content and instructions for the AI.", variant: "destructive"});
+        toast({ title: t('markdownDisplay.toasts.missingInputTitle'), description: t('markdownDisplay.toasts.missingInputDesc'), variant: "destructive"});
         return;
     }
     const token = await getAuthenticatedToken(firebaseUser);
@@ -92,7 +94,7 @@ function helloWorld() {
     if (aiSuggestion !== null) {
         setMarkdown(aiSuggestion);
         setAiSuggestion(null);
-        toast({ title: "Suggestion Accepted", description: "The document has been updated with the AI's improvements."});
+        toast({ title: t('markdownDisplay.toasts.suggestionAcceptedTitle'), description: t('markdownDisplay.toasts.suggestionAcceptedDesc')});
     }
   };
 
@@ -102,8 +104,8 @@ function helloWorld() {
         <div>
             <Tabs defaultValue="input">
                 <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="input">Markdown Input</TabsTrigger>
-                    <TabsTrigger value="assistant">AI Assistant</TabsTrigger>
+                    <TabsTrigger value="input">{t('markdownDisplay.inputTab')}</TabsTrigger>
+                    <TabsTrigger value="assistant">{t('markdownDisplay.assistantTab')}</TabsTrigger>
                 </TabsList>
                 <TabsContent value="input">
                     <Card>
@@ -111,7 +113,7 @@ function helloWorld() {
                             <Textarea
                             value={markdown}
                             onChange={(e) => setMarkdown(e.target.value)}
-                            placeholder="Paste your Markdown here..."
+                            placeholder={t('markdownDisplay.placeholder')}
                             className="h-[60vh] resize-none"
                             />
                         </CardContent>
@@ -120,15 +122,15 @@ function helloWorld() {
                 <TabsContent value="assistant">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Wand2 className="h-5 w-5"/> AI Assistant</CardTitle>
-                             <CardDescription>Provide instructions for the AI to format, organize, or improve your report.</CardDescription>
+                            <CardTitle className="flex items-center gap-2"><Wand2 className="h-5 w-5"/> {t('markdownDisplay.assistantTab')}</CardTitle>
+                             <CardDescription>{t('markdownDisplay.aiAssistantDesc')}</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="ai-prompt">Your Instructions</Label>
+                                <Label htmlFor="ai-prompt">{t('markdownDisplay.aiInstructionsLabel')}</Label>
                                 <Textarea
                                     id="ai-prompt"
-                                    placeholder="e.g., 'Please format this as a formal report. Add a concluding paragraph and ensure all headings are consistent.'"
+                                    placeholder={t('markdownDisplay.aiInstructionsPlaceholder')}
                                     value={userPrompt}
                                     onChange={(e) => setUserPrompt(e.target.value)}
                                     rows={5}
@@ -137,7 +139,7 @@ function helloWorld() {
                             </div>
                             <Button onClick={handleImproveMarkdown} disabled={improveMutation.isPending}>
                                 {improveMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4"/>}
-                                Improve with AI
+                                {t('markdownDisplay.improveButton')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -147,9 +149,9 @@ function helloWorld() {
         <div>
            <Card className="h-full flex flex-col">
               <CardHeader>
-                <CardTitle>Live Preview</CardTitle>
+                <CardTitle>{t('markdownDisplay.previewTitle')}</CardTitle>
                 <CardDescription>
-                    {aiSuggestion ? 'An AI suggestion is ready for your review.' : 'The rendered output of your Markdown.'}
+                    {aiSuggestion ? t('markdownDisplay.aiSuggestionReadyDesc') : t('markdownDisplay.renderedOutputDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
@@ -163,8 +165,8 @@ function helloWorld() {
                             </div>
                         </ScrollArea>
                         <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={() => setAiSuggestion(null)}><ThumbsDown className="mr-2 h-4 w-4"/> Reject</Button>
-                            <Button onClick={handleAcceptSuggestion}><Check className="mr-2 h-4 w-4"/> Accept Suggestion</Button>
+                            <Button variant="ghost" onClick={() => setAiSuggestion(null)}><ThumbsDown className="mr-2 h-4 w-4"/> {t('markdownDisplay.rejectButton')}</Button>
+                            <Button onClick={handleAcceptSuggestion}><Check className="mr-2 h-4 w-4"/> {t('markdownDisplay.acceptButton')}</Button>
                         </div>
                     </div>
                  ) : (
@@ -180,7 +182,7 @@ function helloWorld() {
               <CardFooter>
                  <Button onClick={handleExport} disabled={isExporting || !markdown}>
                   {isExporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileDown className="mr-2 h-4 w-4" />}
-                  Export as DOCX
+                  {t('markdownDisplay.exportButton')}
                 </Button>
               </CardFooter>
             </Card>
