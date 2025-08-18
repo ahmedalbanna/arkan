@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
@@ -11,7 +11,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { sectionConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Settings, Eye } from 'lucide-react';
+import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -59,6 +59,7 @@ const generateInstructionText = (controls: any): string => {
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
+    onCollapseToggle: () => void;
 }
 
 function ToolsSkeleton() {
@@ -141,7 +142,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 }
 
 
-export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToolsProps) => {
+export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
     const { userProfile, firebaseUser } = useAuth();
@@ -161,6 +162,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         initializeContextSelection,
+        handleControlChange,
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
@@ -288,13 +290,20 @@ export const GenerationTools = ({ onTranslateAll, isTranslating }: GenerationToo
     }
 
     return (
-        <Card className={cn(isDisabled && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
-                <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
-                <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
+                        <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
+                        <PanelLeftClose className="h-5 w-5" />
+                    </Button>
+                </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-grow overflow-y-auto pr-2">
                 <Tabs defaultValue="generate" className="w-full">
                     <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="generate">Generate</TabsTrigger>
