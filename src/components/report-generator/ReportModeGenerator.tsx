@@ -86,12 +86,12 @@ export default function ReportGenerator() {
   };
 
   return (
-    <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
        {isPanelCollapsed && (
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 z-10">
+            <div className="hidden lg:block lg:col-span-1 sticky top-24">
                 <Button
                     variant="secondary"
-                    className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180 ml-6"
+                    className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
                     onClick={() => setIsPanelCollapsed(false)}
                 >
                    {t('builder.reportGenerator.toolsTitle')}
@@ -104,7 +104,7 @@ export default function ReportGenerator() {
       </div>
 
       {/* Right Column: Report Results */}
-      <div className={cn("lg:col-span-8 overflow-y-auto pr-2", isPanelCollapsed && "lg:col-span-12")}>
+       <div className={cn("lg:overflow-y-auto pr-2", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
         <Suspense fallback={<ReportResultsSkeleton />}>
             <ReportResults onSectionUpdate={handleSectionUpdate} />
         </Suspense>
