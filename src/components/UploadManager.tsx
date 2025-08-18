@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UploadCloud, FileText, X, ImageIcon } from 'lucide-react';
+import { UploadCloud, FileText, X, ImageIcon, PanelLeftClose } from 'lucide-react';
 import { PasteTextUploader } from './PasteTextUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
@@ -24,6 +24,10 @@ import { Loader2 } from 'lucide-react';
 import { PdfPreview } from './PdfPreview';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
+
+interface UploadManagerProps {
+    onCollapseToggle: () => void;
+}
 
 function ViewContextDialog({ item }: { item: { fileName: string, content: string, type: ContextFileType }}) {
     const isDataUri = item.content.startsWith('data:');
@@ -133,7 +137,7 @@ function FileDropzone() {
     );
 }
 
-export function UploadManager() {
+export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
     const { externalContext, removeExternalContext, updateExternalContextType } = useReportStore();
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
@@ -141,7 +145,12 @@ export function UploadManager() {
     return (
         <Card className="h-full flex flex-col">
           <CardHeader>
-            <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
+            <div className="flex justify-between items-center">
+                <CardTitle>{t('builder.files.fileManagerTitle')}</CardTitle>
+                 <Button variant="ghost" size="icon" className="hidden lg:inline-flex" onClick={onCollapseToggle}>
+                    <PanelLeftClose className="h-5 w-5" />
+                </Button>
+            </div>
             <CardDescription>
               {t('builder.files.fileManagerDesc')}
             </CardDescription>
@@ -202,4 +211,3 @@ export function UploadManager() {
     );
 }
 
-    
