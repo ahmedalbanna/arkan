@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, RefreshCw } from 'lucide-react';
 import { Handwriting } from '@/lib/handwriting.js';
+import { useLocalization } from '@/context/LocalizationContext';
 
 const HANDWRITING_FONTS = [
   { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
@@ -22,6 +23,7 @@ const HANDWRITING_FONTS = [
 
 export default function HandwritingGenerator() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useLocalization();
   const [text, setText] = useState('This is a sample text to get you started.');
   const [fontSize, setFontSize] = useState(30);
   const [fontFamily, setFontFamily] = useState(HANDWRITING_FONTS[0].value);
@@ -88,9 +90,9 @@ export default function HandwritingGenerator() {
       <div className="lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Handwriting Output</CardTitle>
+            <CardTitle className="font-headline">{t('writingTools.handwriting.outputTitle')}</CardTitle>
             <CardDescription>
-              The generated handwriting will appear here. Click Redraw for a new variation.
+              {t('writingTools.handwriting.outputDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -103,12 +105,12 @@ export default function HandwritingGenerator() {
       <div>
         <Card>
           <CardHeader>
-            <CardTitle>Controls</CardTitle>
-            <CardDescription>Adjust the settings for your text.</CardDescription>
+            <CardTitle>{t('writingTools.handwriting.controlsTitle')}</CardTitle>
+            <CardDescription>{t('writingTools.handwriting.controlsDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="text-input">Text</Label>
+              <Label htmlFor="text-input">{t('writingTools.handwriting.textLabel')}</Label>
               <Textarea
                 id="text-input"
                 value={text}
@@ -117,7 +119,7 @@ export default function HandwritingGenerator() {
               />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="font-family">Font</Label>
+                <Label htmlFor="font-family">{t('writingTools.handwriting.fontLabel')}</Label>
                 <Select value={fontFamily} onValueChange={setFontFamily}>
                     <SelectTrigger id="font-family">
                         <SelectValue placeholder="Select a font" />
@@ -132,7 +134,7 @@ export default function HandwritingGenerator() {
                 </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="font-size">Font Size</Label>
+              <Label htmlFor="font-size">{t('writingTools.handwriting.fontSizeLabel')}</Label>
               <Input
                 id="font-size"
                 type="number"
@@ -142,7 +144,7 @@ export default function HandwritingGenerator() {
             </div>
             {/* Added Font Weight Input */}
             <div className="space-y-2">
-              <Label htmlFor="font-weight">Font Weight</Label>
+              <Label htmlFor="font-weight">{t('writingTools.handwriting.fontWeightLabel')}</Label>
               <Input
                 id="font-weight"
                 type="number"
@@ -152,7 +154,7 @@ export default function HandwritingGenerator() {
             </div>
             {/* Added Line Height Input */}
             <div className="space-y-2">
-              <Label htmlFor="line-height">Line Height</Label>
+              <Label htmlFor="line-height">{t('writingTools.handwriting.lineHeightLabel')}</Label>
               <Input
                 id="line-height"
                 type="number"
@@ -162,7 +164,7 @@ export default function HandwritingGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="font-color">Font Color</Label>
+              <Label htmlFor="font-color">{t('writingTools.handwriting.fontColorLabel')}</Label>
               <Input
                 id="font-color"
                 type="color"
@@ -171,7 +173,7 @@ export default function HandwritingGenerator() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bg-color">Background Color</Label>
+              <Label htmlFor="bg-color">{t('writingTools.handwriting.bgColorLabel')}</Label>
               <Input
                 id="bg-color"
                 type="color"
@@ -183,11 +185,11 @@ export default function HandwritingGenerator() {
           <CardFooter className="flex flex-col gap-2">
             <Button onClick={handleRedraw} className="w-full">
               <RefreshCw className="mr-2 h-4 w-4" />
-              Redraw
+              {t('writingTools.handwriting.redrawButton')}
             </Button>
             <Button onClick={handleDownload} variant="secondary" className="w-full">
               <Download className="mr-2 h-4 w-4" />
-              Download Image
+              {t('writingTools.handwriting.downloadButton')}
             </Button>
           </CardFooter>
         </Card>

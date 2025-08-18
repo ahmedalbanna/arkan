@@ -316,6 +316,23 @@
       "resultTitle": "Explanation",
       "analyzing": "Breaking down the topic..."
     },
+    "handwriting": {
+      "pageTitle": "Text to Handwriting",
+      "pageSubtitle": "Convert your typed text into a realistic handwriting style.",
+      "outputTitle": "Handwriting Output",
+      "outputDescription": "The generated handwriting will appear here. Click Redraw for a new variation.",
+      "controlsTitle": "Controls",
+      "controlsDescription": "Adjust the settings for your text.",
+      "textLabel": "Text",
+      "fontLabel": "Font",
+      "fontSizeLabel": "Font Size",
+      "fontWeightLabel": "Font Weight",
+      "lineHeightLabel": "Line Height",
+      "fontColorLabel": "Font Color",
+      "bgColorLabel": "Background Color",
+      "redrawButton": "Redraw",
+      "downloadButton": "Download Image"
+    },
     "cards": {
       "textStylist": "Text Stylist & Summarizer",
       "documentWriter": "AI Document Writer",

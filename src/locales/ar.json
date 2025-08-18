@@ -316,6 +316,23 @@
       "resultTitle": "الشرح",
       "analyzing": "جارٍ تبسيط الموضوع..."
     },
+    "handwriting": {
+      "pageTitle": "تحويل النص إلى خط يد",
+      "pageSubtitle": "حوّل نصك المكتوب إلى أسلوب خط يد واقعي.",
+      "outputTitle": "مخرجات خط اليد",
+      "outputDescription": "سيظهر خط اليد الذي تم إنشاؤه هنا. انقر فوق 'إعادة الرسم' للحصول على تنويع جديد.",
+      "controlsTitle": "عناصر التحكم",
+      "controlsDescription": "اضبط إعدادات النص الخاص بك.",
+      "textLabel": "النص",
+      "fontLabel": "الخط",
+      "fontSizeLabel": "حجم الخط",
+      "fontWeightLabel": "وزن الخط",
+      "lineHeightLabel": "ارتفاع السطر",
+      "fontColorLabel": "لون الخط",
+      "bgColorLabel": "لون الخلفية",
+      "redrawButton": "إعادة الرسم",
+      "downloadButton": "تنزيل الصورة"
+    },
     "cards": {
       "textStylist": "منسق النصوص والملخصات",
       "documentWriter": "كاتب المستندات بالذكاء الاصطناعي",
