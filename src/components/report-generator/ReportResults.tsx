@@ -2,7 +2,7 @@
 'use client';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
 import { sectionConfig } from '@/lib/report-config';
@@ -25,23 +25,19 @@ interface ReportResultsProps {
   onSectionUpdate: (key: SectionName, value: string) => void;
 }
 
+const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
+    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto my-8" style={{ width: '210mm', minHeight: '297mm' }}>
+        <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
+        {children}
+    </div>
+);
+
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const { sections, evaluation, removeSection } = useReportStore();
   const { t } = useLocalization();
   
   const generatedSections = orderedSections.filter(key => sections[key]);
-  const [activeSection, setActiveSection] = useState<SectionName | undefined>(generatedSections[0]);
-
-  // Effect to update activeSection if it gets deleted
-  useEffect(() => {
-    if (activeSection && !generatedSections.includes(activeSection)) {
-      setActiveSection(generatedSections[0] || undefined);
-    } else if (!activeSection && generatedSections.length > 0) {
-      setActiveSection(generatedSections[0]);
-    }
-  }, [generatedSections, activeSection]);
-
-
+  
   const hasContent = generatedSections.length > 0;
 
   if (!hasContent) {
@@ -56,86 +52,29 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
     )
   }
 
-  const currentSectionContent = activeSection ? sections[activeSection] : null;
-
   return (
-    <Card className="h-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 h-full items-start">
-            <div className="lg:col-span-3 border-r h-full">
-                 <CardHeader className="p-4 border-b">
-                    <CardTitle className="font-headline text-lg">{t('builder.reportGenerator.resultsTitle')}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-2">
-                    <ScrollArea className="h-[calc(80vh-100px)]">
-                        <div className="space-y-1 pr-2">
-                            {generatedSections.map(key => (
-                                <div key={key} className="group flex items-center">
-                                    <Button
-                                        variant={activeSection === key ? 'secondary' : 'ghost'}
-                                        onClick={() => setActiveSection(key)}
-                                        className="w-full justify-start gap-2 flex-grow"
-                                    >
-                                        {React.createElement(sectionConfig[key].icon, { className: "h-4 w-4" })}
-                                        <span className="truncate">{t(sectionConfig[key].title)}</span>
-                                    </Button>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Trash2 className="h-4 w-4 text-destructive"/>
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>{t('projects.deleteDialogTitle')}</AlertDialogTitle>
-                                                <AlertDialogDescription>
-                                                    {t('builder.reportGenerator.toasts.deleteSectionConfirmation').replace('{sectionName}', t(sectionConfig[key].title))}
-                                                </AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>{t('projects.cancelButton')}</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => removeSection(key)}>{t('projects.deleteButton')}</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                                </div>
-                            ))}
-                        </div>
-                    </ScrollArea>
-                </CardContent>
-            </div>
-            <div className="lg:col-span-9 h-full">
-                 {activeSection && currentSectionContent ? (
-                    <div className="p-4">
-                        <Tabs defaultValue="view" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="view">{t('builder.Section.viewEditTab')}</TabsTrigger>
-                                <TabsTrigger value="evaluation">{t('builder.Section.evaluationTab')}</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="view" className="mt-4">
-                                <Section
-                                    sectionKey={activeSection}
-                                    title={t(sectionConfig[activeSection].title)}
-                                    icon={sectionConfig[activeSection].icon}
-                                    content={currentSectionContent}
-                                    onUpdate={onSectionUpdate}
-                                />
-                            </TabsContent>
-                            <TabsContent value="evaluation" className="mt-4">
-                                {evaluation ? (
-                                <EvaluationResultViewer evaluation={evaluation} />
-                                ) : (
-                                <EvaluationTools />
-                                )}
-                            </TabsContent>
-                        </Tabs>
-                    </div>
-                 ) : (
-                    <div className="flex h-full items-center justify-center text-muted-foreground min-h-[400px]">
-                        <p>{t('builder.reportGenerator.selectSectionPrompt')}</p>
-                    </div>
-                 )}
-            </div>
-        </div>
-    </Card>
+     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg">
+        <ScrollArea className="h-full">
+            {generatedSections.map(key => (
+                <A4Page key={key} title={t(sectionConfig[key].title)}>
+                    <Section
+                        sectionKey={key}
+                        title={t(sectionConfig[key].title)}
+                        icon={sectionConfig[key].icon}
+                        content={sections[key]!}
+                        onUpdate={onSectionUpdate}
+                    />
+                </A4Page>
+            ))}
+             {/* Evaluation Section */}
+             <A4Page title={t('builder.Section.evaluationTab')}>
+                {evaluation ? (
+                    <EvaluationResultViewer evaluation={evaluation} />
+                ) : (
+                    <EvaluationTools />
+                )}
+             </A4Page>
+        </ScrollArea>
+    </div>
   );
 };
