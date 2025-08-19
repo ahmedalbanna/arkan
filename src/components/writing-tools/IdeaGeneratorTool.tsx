@@ -2,8 +2,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useGenerateIdeas } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import type { IdeaGenerationInput, IdeaGenerationOutput } from '@/ai/schemas';
+import { IdeaGenerationInputSchema, type IdeaGenerationInput, type IdeaGenerationOutput } from '@/ai/schemas';
 import { Textarea } from '../ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 
