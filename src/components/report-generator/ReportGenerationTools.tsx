@@ -13,7 +13,7 @@ import { sectionConfig } from '@/lib/report-config';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -40,6 +40,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-components';
+import { Separator } from '../ui/separator';
 
 
 const orderedSections = SectionNameSchema.options;
@@ -293,7 +294,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
-                <div className="flex justify-between items-center">
+                 <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="font-headline">{t('builder.reportGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.reportGenerator.toolsDesc')}</CardDescription>
