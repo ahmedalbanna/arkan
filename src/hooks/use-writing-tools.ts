@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
@@ -13,7 +14,8 @@ import {
     generateCitationApi,
     rewriteTextApi,
     summarizeTextWithRatioApi,
-    writeDocumentApi
+    writeDocumentApi,
+    generateIdeasApi
 } from '@/services/writing-tools-service';
 import { detectAiContentApi } from '@/services/ai-detector-service';
 import { factCheckApi } from '@/services/fact-checker-service';
@@ -46,6 +48,8 @@ import type {
     SummarizeTextWithRatioOutput,
     WriteDocumentVariables,
     WriteDocumentOutput,
+    GenerateIdeasVariables,
+    IdeaGenerationOutput
 } from '@/services/writing-tools-service';
 
 /**
@@ -231,6 +235,19 @@ export function useWriteDocument() {
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return writeDocumentApi({ ...variables, token });
+        }
+    });
+}
+
+/**
+ * Custom mutation hook for generating ideas based on context.
+ */
+export function useGenerateIdeas() {
+    const { firebaseUser } = useAuth();
+    return useMutation<IdeaGenerationOutput, Error, GenerateIdeasVariables>({
+        mutationFn: async (variables) => {
+            const token = await getAuthenticatedToken(firebaseUser);
+            return generateIdeasApi({ ...variables, token });
         }
     });
 }

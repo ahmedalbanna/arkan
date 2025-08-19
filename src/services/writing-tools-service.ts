@@ -2,7 +2,7 @@
 'use client';
 import { ReactNode, SetStateAction } from "react";
 import type { ParaphraseMode } from "@/ai/schemas";
-import { SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput } from "@/ai/schemas";
+import { SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput, IdeaGenerationOutput, IdeaGenerationInput } from "@/ai/schemas";
 
 
 // Base types
@@ -57,6 +57,7 @@ export interface WriteDocumentVariables {
     knowledge?: string;
     tableOfContents?: string[];
 }
+export type GenerateIdeasVariables = IdeaGenerationInput;
 
 
 
@@ -88,6 +89,9 @@ export interface SummarizeTextWithRatioApiVariables extends SummarizeTextWithRat
 export interface WriteDocumentApiVariables extends WriteDocumentVariables {
     token: string;
 }
+export interface GenerateIdeasApiVariables extends GenerateIdeasVariables {
+    token: string;
+}
 
 
 
@@ -99,7 +103,7 @@ export interface SummarizeTextOutput {
   summary: string;
 }
 
-export type { ParaphraseMode, SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput };
+export type { ParaphraseMode, SummarizeLength, CitationStyle, GenerateCitationOutput, AIResearcherOutput, TopicExplainerOutput, GrammarCheckOutput, GenerateQuizOutput, DetectAIOutput, FactCheckOutput, HumanizeTextOutput, PlagiarismCheckOutput, RewriteTextOutput, SummarizeTextWithRatioOutput, WriteDocumentOutput, IdeaGenerationOutput };
 
 
 /**
@@ -282,5 +286,21 @@ export async function writeDocumentApi(variables: WriteDocumentApiVariables): Pr
     body: JSON.stringify(body),
   });
   if (!response.ok) throw new Error((await response.json()).message || 'Document generation failed.');
+  return response.json();
+}
+
+/**
+ * Calls the API to generate new ideas based on context.
+ * @param variables - An object containing the context for idea generation and auth token.
+ * @returns A promise that resolves to a list of generated ideas.
+ */
+export async function generateIdeasApi(variables: GenerateIdeasApiVariables): Promise<IdeaGenerationOutput> {
+  const { token, ...body } = variables;
+  const response = await fetch('/api/writing-tools/generate-ideas', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error((await response.json()).message || 'Idea generation failed.');
   return response.json();
 }

@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
-  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation
+  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -27,6 +28,7 @@ export default function WritingToolsPage() {
     { name: t('writingTools.cards.aiResearcher'), icon: Search, href: '/writing-tools/ai-researcher' },
     { name: t('writingTools.cards.topicExplainer'), icon: Lightbulb, href: '/writing-tools/topic-explainer' },
     { name: t('writingTools.cards.textToHandwriting'), icon: PencilLine, href: '/handwriting' },
+    { name: t('writingTools.cards.ideaGenerator'), icon: Brain, href: '/writing-tools/idea-generator' },
   ];
 
   return (

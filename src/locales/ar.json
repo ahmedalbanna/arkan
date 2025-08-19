@@ -1,4 +1,5 @@
 
+
 {
   "header": {
     "title": "أركان",
@@ -43,6 +44,24 @@
   "writingTools": {
     "pageTitle": "أدوات الكتابة بالذكاء الاصطناعي",
     "pageSubtitle": "مجموعة من أدوات الذكاء الاصطناعي القوية لتعزيز كتابتك وبحثك.",
+    "ideaGenerator": {
+      "pageSubtitle": "تبادل الأفكار الفريدة بناءً على تخصصك وسياقك.",
+      "cardTitle": "مولد الأفكار بالذكاء الاصطناعي",
+      "cardDescription": "قدم سياقك ودع الذكاء الاصطناعي يبتكر لك أفكارًا مبتكرة.",
+      "specializationLabel": "تخصصك",
+      "specializationPlaceholder": "على سبيل المثال، تطوير الويب الكامل، التسويق الرقمي",
+      "advancedOptions": "خيارات متقدمة (اختياري)",
+      "domainLabel": "المجال / الصناعة",
+      "domainPlaceholder": "على سبيل المثال، التجارة الإلكترونية، الرعاية الصحية",
+      "regionLabel": "المنطقة / البلد المستهدف",
+      "regionPlaceholder": "على سبيل المثال، جنوب شرق آسيا، ألمانيا",
+      "circumstancesLabel": "الظروف / الاتجاهات",
+      "circumstancesPlaceholder": "على سبيل المثال، الانتعاش بعد الجائحة، العمل عن بعد",
+      "additionalContextLabel": "سياق إضافي",
+      "additionalContextPlaceholder": "قدم أي تفاصيل أخرى ذات صلة...",
+      "generateButton": "إنشاء أفكار",
+      "resultsTitle": "الأفكار التي تم إنشاؤها"
+    },
     "textStylist": {
       "pageTitle": "TextStylist.ai",
       "pageSubtitle": "صقل كتابتك عن طريق إعادة صياغة النص بأنماط مختلفة أو تلخيصه إلى طول معين.",
@@ -348,7 +367,8 @@
       "citationGenerator": "مولد الاقتباسات",
       "aiResearcher": "الباحث بالذكاء الاصطناعي",
       "topicExplainer": "شرح المواضيع",
-      "textToHandwriting": "تحويل النص إلى خط يد"
+      "textToHandwriting": "تحويل النص إلى خط يد",
+      "ideaGenerator": "مولد الأفكار بالذكاء الاصطناعي"
     }
   },
   "markdownDisplay": {

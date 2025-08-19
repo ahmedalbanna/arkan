@@ -1,4 +1,5 @@
 
+
 {
   "header": {
     "title": "Arkan",
@@ -43,6 +44,24 @@
   "writingTools": {
     "pageTitle": "AI Writing Tools",
     "pageSubtitle": "A suite of powerful AI tools to enhance your writing and research.",
+    "ideaGenerator": {
+      "pageSubtitle": "Brainstorm unique ideas based on your specialization and context.",
+      "cardTitle": "AI Idea Generator",
+      "cardDescription": "Provide your context and let our AI brainstorm innovative ideas for you.",
+      "specializationLabel": "Your Specialization",
+      "specializationPlaceholder": "e.g., Full-Stack Web Development, Digital Marketing",
+      "advancedOptions": "Advanced Options (Optional)",
+      "domainLabel": "Domain / Industry",
+      "domainPlaceholder": "e.g., E-commerce, Healthcare",
+      "regionLabel": "Target Region / Country",
+      "regionPlaceholder": "e.g., Southeast Asia, Germany",
+      "circumstancesLabel": "Circumstances / Trends",
+      "circumstancesPlaceholder": "e.g., post-pandemic recovery, remote work",
+      "additionalContextLabel": "Additional Context",
+      "additionalContextPlaceholder": "Provide any other details, like target audience, budget constraints, etc.",
+      "generateButton": "Generate Ideas",
+      "resultsTitle": "Generated Ideas"
+    },
     "textStylist": {
       "pageTitle": "TextStylist.ai",
       "pageSubtitle": "Refine your writing by rewriting text in various styles or summarizing it to a specific length.",
@@ -348,7 +367,8 @@
       "citationGenerator": "Citation Generator",
       "aiResearcher": "AI Researcher",
       "topicExplainer": "Topic Explainer",
-      "textToHandwriting": "Text to Handwriting"
+      "textToHandwriting": "Text to Handwriting",
+      "ideaGenerator": "AI Idea Generator"
     }
   },
   "markdownDisplay": {
