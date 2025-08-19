@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "seed:firestore": "tsx src/lib/db/seed.ts",
-    "seed:templates": "tsx src/lib/db/seed-templates.ts"
+    "seed:templates": "tsx src/lib/db/seed-templates.ts",
+    "seed:categories": "tsx src/lib/db/seed-agent-categories.ts"
   },
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
