@@ -1,3 +1,4 @@
+
 // src/app/api/features/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { defaultFeatures } from '@/lib/features';
