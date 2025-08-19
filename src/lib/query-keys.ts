@@ -25,6 +25,11 @@ export const agentKeys = {
   detail: (agentId: string) => [...agentKeys.details(), agentId] as const,
 };
 
+export const categoryKeys = {
+  all: ['agent-categories'] as const,
+  lists: () => [...categoryKeys.all, 'list'] as const,
+}
+
 export const featureKeys = {
   all: ['features'] as const,
   lists: () => [...featureKeys.all, 'list'] as const,

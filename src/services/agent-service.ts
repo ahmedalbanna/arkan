@@ -1,8 +1,46 @@
 
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, Agent } from '@/hooks/use-agents';
+import type { UpdateAgentVariables, CreateAgentVariables, Agent, AgentCategory } from '@/hooks/use-agents';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+
+/**
+ * Fetches the full list of agent categories from the API.
+ * Requires admin authentication.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to an array of AgentCategory objects.
+ */
+export async function fetchAgentCategories(token: string): Promise<AgentCategory[]> {
+    const response = await fetch('/api/admin/agent-categories', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch agent categories');
+    }
+    return response.json();
+}
+
+/**
+ * Creates a new agent category via the API.
+ * Requires admin authentication.
+ * @param data An object containing the new category's id and name.
+ * @param token The admin user's authentication token.
+ * @returns A promise that resolves to the newly created AgentCategory object.
+ */
+export async function createAgentCategory(data: { id: string; name: string }, token: string): Promise<AgentCategory> {
+    const response = await fetch('/api/admin/agent-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw error;
+    }
+    return response.json();
+}
+
 
 /**
  * Fetches the full list of agents from the API.

@@ -1,11 +1,10 @@
-
 // code explantion in docs/hooks/use-agents.md
 
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/hooks/use-toast";
-import { agentKeys } from "@/lib/query-keys";
+import { agentKeys, categoryKeys } from "@/lib/query-keys";
 import { AGENTS as defaultAgents, type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/agents';
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
@@ -17,7 +16,9 @@ import {
   updateAgent as updateAgentApi,
   createAgent as createAgentApi,
   deleteAgent as deleteAgentApi,
-  generateAgentConfigApi
+  generateAgentConfigApi,
+  fetchAgentCategories as fetchAgentCategoriesApi,
+  createAgentCategory as createAgentCategoryApi
 } from "@/services/agent-service";
 import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
 import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
@@ -31,7 +32,56 @@ export interface UpdateAgentVariables {
     payload: UpdateAgentPayload;
 }
 
-export type CreateAgentVariables = Omit<AgentData, 'isEnabled'> & { knowledge?: AgentKnowledgeSource[] };
+export type CreateAgentVariables = Omit<AgentData, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
+
+export interface AgentCategory {
+    id: string;
+    name: string;
+}
+
+
+/**
+ * Custom hook to fetch the list of all AI agent categories.
+ */
+export function useAgentCategories() {
+  const { firebaseUser } = useAuth();
+
+  return useQuery<AgentCategory[]>({
+    queryKey: categoryKeys.lists(),
+    queryFn: async () => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return fetchAgentCategoriesApi(token);
+    },
+    enabled: !!firebaseUser,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    meta: {
+      onError: (error: Error) => handleErrorUtility(error, "Failed to fetch agent categories"),
+    },
+  });
+}
+
+/**
+ * Custom mutation hook to create a new agent category.
+ */
+export function useCreateAgentCategory() {
+  const queryClient = useQueryClient();
+  const { firebaseUser } = useAuth();
+
+  return useMutation<AgentCategory, Error, { id: string; name: string }>({
+    mutationFn: async (variables) => {
+      const token = await getAuthenticatedToken(firebaseUser);
+      return createAgentCategoryApi(variables, token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryKeys.lists() });
+      toast({ title: "Category Created", description: "The new agent category has been saved." });
+    },
+    onError: (error) => {
+      handleErrorUtility(error, "Failed to create category");
+      throw error; // Re-throw for form handling
+    },
+  });
+}
 
 
 /**
@@ -194,5 +244,6 @@ export function useGenerateAgentConfig() {
         }
     })
 }
+
 
 
