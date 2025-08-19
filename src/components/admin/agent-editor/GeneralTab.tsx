@@ -15,6 +15,7 @@ import { AgentCategory, type AgentPrompt } from '@/lib/agents';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAgentCategories } from '@/hooks/use-agents';
 
 interface GeneralTabProps {
     isComplexPrompt: boolean;
@@ -24,6 +25,7 @@ interface GeneralTabProps {
 export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabProps) {
     const { control, watch } = useFormContext<AgentEditorFormValues>();
     const { t } = useLocalization();
+    const { data: categories } = useAgentCategories();
 
     const { fields, append, remove } = useFieldArray({
         control,
@@ -65,11 +67,11 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>{t('agentEditor.categoryLabel')}</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                        <Select onValueChange={field.onChange} defaultValue={field.value as string} disabled={isPending}>
                             <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                             <SelectContent>
-                                {Object.values(AgentCategory).map(cat => (
-                                    <SelectItem key={cat} value={cat}>{t(`agentManager.categories.${cat}`)}</SelectItem>
+                                {categories?.map(cat => (
+                                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>

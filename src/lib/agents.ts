@@ -39,7 +39,7 @@ export interface AgentData {
   id: string;
   name: string;
   description: string;
-  category: AgentCategory;
+  category: AgentCategory | string; // Allow for dynamic categories
   pageUrl: string;
   isEnabled: boolean;
   prompt: AgentPrompt | string; // Can be simple string or complex object
@@ -728,6 +728,7 @@ You will be provided with the full project proposal in JSON format, and may also
 ];
 
     
+
 
 
 

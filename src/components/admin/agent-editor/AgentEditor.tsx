@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
 import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
-import { AgentCategory } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
@@ -24,6 +23,8 @@ import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
 import Link from 'next/link';
+import { AgentCategory } from '@/lib/agents';
+
 
 interface AgentEditorProps {
   agentId: string;
@@ -50,7 +51,7 @@ const agentPromptSchema = z.object({
 
 const agentEditorSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  category: z.nativeEnum(AgentCategory),
+  category: z.string(), // Changed to string for dynamic categories
   prompt: z.union([
     z.string().min(10, "Prompt must be at least 10 characters"),
     agentPromptSchema

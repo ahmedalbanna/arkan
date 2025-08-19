@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useAgents, useUpdateAgent, useCreateAgent } from '@/hooks/use-agents';
-import {AgentCategory} from '@/lib/agents';
+import { useAgents, useUpdateAgent, useCreateAgent, useCreateAgentCategory, useAgentCategories } from '@/hooks/use-agents';
+import { AgentCategory } from '@/lib/agents';
 import { AGENTS, type Agent, type AgentData } from '@/lib/agents';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -35,12 +35,86 @@ const createAgentSchema = z.object({
 
 type CreateAgentFormValues = z.infer<typeof createAgentSchema>;
 
-const agentCategories = Object.values(AgentCategory);
+const createCategorySchema = z.object({
+  id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase, and can only contain letters, numbers, and hyphens."),
+  name: z.string().min(1, "Name is required"),
+});
+type CreateCategoryFormValues = z.infer<typeof createCategorySchema>;
+
+
+function CreateCategoryDialog() {
+    const { t } = useLocalization();
+    const [isOpen, setIsOpen] = useState(false);
+    const createCategoryMutation = useCreateAgentCategory();
+
+    const form = useForm<CreateCategoryFormValues>({
+        resolver: zodResolver(createCategorySchema),
+        defaultValues: { id: '', name: '' },
+    });
+
+    const onSubmit = (data: CreateCategoryFormValues) => {
+        createCategoryMutation.mutate(data, {
+            onSuccess: () => {
+                setIsOpen(false);
+                form.reset();
+            },
+            onError: (error: any) => {
+                if(error.errors) {
+                    for(const key in error.errors) {
+                        form.setError(key as any, { message: error.errors[key][0] });
+                    }
+                }
+            }
+        });
+    }
+
+    return (
+         <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                 <Button size="sm" variant="outline"><PlusCircle className="me-2 h-4 w-4" />New Category</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>Create New Category</DialogTitle>
+                    <DialogDescription>
+                        Create a new category to organize your AI agents.
+                    </DialogDescription>
+                </DialogHeader>
+                 <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField control={form.control} name="id" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Category ID</FormLabel>
+                                <FormControl><Input {...field} placeholder="e.g., custom-tools" disabled={createCategoryMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Category Name</FormLabel>
+                                <FormControl><Input {...field} placeholder="e.g., Custom Tools" disabled={createCategoryMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <DialogFooter>
+                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <Button type="submit" disabled={createCategoryMutation.isPending}>
+                                {createCategoryMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                                Create Category
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 function CreateAgentDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const createAgentMutation = useCreateAgent();
+    const { data: categories } = useAgentCategories();
 
     const form = useForm<CreateAgentFormValues>({
         resolver: zodResolver(createAgentSchema),
@@ -105,7 +179,7 @@ function CreateAgentDialog() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value} disabled={createAgentMutation.isPending}>
                                         <FormControl><SelectTrigger><SelectValue placeholder={t('agentManager.createDialog.selectCategoryPlaceholder')} /></SelectTrigger></FormControl>
                                         <SelectContent>
-                                            {agentCategories.map(cat => <SelectItem key={cat} value={cat}>{t(`agentManager.categories.${cat}`)}</SelectItem>)}
+                                            {categories?.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -192,44 +266,35 @@ function AgentCard({ agent }: { agent: Agent }) {
 
 export default function AgentManager() {
   const { agents, isLoaded, isError } = useAgents();
+  const { data: categories, isLoading: categoriesLoading } = useAgentCategories();
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLocalization();
 
   const groupedAgents = useMemo(() => {
-    const groupedAgents: Record<AgentCategory, Agent[]> = {
-        [AgentCategory.ContentGeneration]: [],
-        [AgentCategory.ProposalGeneration]: [],
-        [AgentCategory.ReportGeneration]: [],
-        [AgentCategory.DiagramGeneration]: [],
-        [AgentCategory.PresentationGeneration]: [],
-        [AgentCategory.CodeGeneration]: [],
-        [AgentCategory.Marketing]: [],
-        [AgentCategory.Legal]: [],
-        [AgentCategory.AdminTools]: []
-    };
-
+    const categoryMap = categories?.reduce((acc, cat) => ({ ...acc, [cat.id]: cat.name }), {} as Record<string, string>) || {};
+    
     const filtered = agents.filter(agent => {
         const lowercasedTerm = searchTerm.toLowerCase();
+        const categoryName = categoryMap[agent.category] || agent.category;
         return agent.name.toLowerCase().includes(lowercasedTerm) ||
                agent.description.toLowerCase().includes(lowercasedTerm) ||
-               agent.category.toLowerCase().includes(lowercasedTerm);
-    }).filter((agent): agent is Agent => agent !== undefined && agent !== null); // Ensure agents are not undefined or null after filtering
+               categoryName.toLowerCase().includes(lowercasedTerm);
+    });
 
-    return filtered.reduce((acc, agent: Agent) => {
- const category = agent.category || AgentCategory.ContentGeneration;
- if (!acc[category]) {
- acc[category] = [];
+    return filtered.reduce((acc, agent) => {
+      const categoryName = categoryMap[agent.category] || 'Uncategorized';
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
       }
-      acc[category].push(agent as Agent);
- return acc;
-    }, Object.values(AgentCategory).reduce((acc, category) => ({ ...acc, [category]: [] }), {} as Record<AgentCategory, Agent[]>));
+      acc[categoryName].push(agent);
+      return acc;
+    }, {} as Record<string, Agent[]>);
+  }, [agents, searchTerm, categories]);
 
-  }, [agents, searchTerm]);
-
-  const sortedCategories = Object.keys(groupedAgents).sort() as AgentCategory[];
+  const sortedCategories = Object.keys(groupedAgents).sort();
 
 
-  if (!isLoaded) {
+  if (!isLoaded || categoriesLoading) {
     return (
       <div className="space-y-4">
         <AgentSkeleton />
@@ -265,6 +330,7 @@ export default function AgentManager() {
                     {t('agentManager.newAgentAiButton')}
                 </Link>
             </Button>
+            <CreateCategoryDialog />
             <CreateAgentDialog />
         </div>
       </div>
@@ -274,7 +340,7 @@ export default function AgentManager() {
                     <AccordionItem value={category} key={category} className="border rounded-lg bg-card">
                         <AccordionTrigger className="font-headline text-lg p-4 hover:no-underline">
                             <div className="flex items-center gap-2">
-                               {t(`agentManager.categories.${category}`)} <Badge variant="secondary">{groupedAgents[category].length}</Badge>
+                               {category} <Badge variant="secondary">{groupedAgents[category].length}</Badge>
                             </div>
                         </AccordionTrigger>
                         <AccordionContent className="p-4 pt-0 space-y-2">
