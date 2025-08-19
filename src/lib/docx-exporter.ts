@@ -160,7 +160,7 @@ const numbering: INumberingOptions = {
 async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | null> {
     try {
         const response = await fetch(imageUrl);
-        if (!response.ok) {
+ if (response.status !== 200) {
             console.warn(`Failed to fetch proxied image from ${'\'\'\''}${imageUrl}'\'\'\''}. Status: ${'\'\'\''}${response.status}'\'\'\''}`);
             return null;
         }
@@ -174,7 +174,7 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
 async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: IStylesOptions }>> {
     try {
         const response = await fetch('/api/admin/templates/docx');
-        if (!response.ok) {
+ if (response.status !== 200) {
             console.error('Failed to fetch DOCX templates from server, falling back to defaults.');
             return templates;
         }
@@ -201,7 +201,7 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${'\'\'\''}${fileName}.docx'\'\'\''}`);
+ saveAs(blob, `${fileName}.docx`);
 }
 
 
@@ -224,7 +224,7 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${'\'\'\''}${title.replace(/\s+/g, '_')}.docx'\'\'\''}`);
+ saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
 }
 
 function applyStylesToElement(element: HTMLElement, styles: any) {
@@ -235,10 +235,10 @@ function applyStylesToElement(element: HTMLElement, styles: any) {
  
     }
     if (styles?.size) {
-        element.style.fontSize = `${'\'\'\''}${Number(styles.size ?? 22) / 2}pt'\'\'\''}`;
+ element.style.fontSize = `${Number(styles.size ?? 22) / 2}pt`;
     }
     if (styles?.color) {
-        element.style.color = `#${'\'\'\''}${styles.color || '333333'}'\'\'\''}`;
+ element.style.color = `#${styles.color || '333333'}`;
     }
     if (styles?.bold) {
         element.style.fontWeight = 'bold';
@@ -283,19 +283,19 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     applyStylesToElement(container, styles.default?.document?.run);
 
     // Title and Category
-    htmlContent += `<h1 style="text-align: center;">${'\'\'\''}${proposal.title}'\'\'\''}`</h1>`;
-    htmlContent += `<p style="text-align: center; font-style: italic;">${'\'\'\''}${proposal.category}'\'\'\''}</p>`;
+ htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
+ htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
 
     const sections = [
         { title: "Objective", content: await markdownToHtml(proposal.objective) },
         { title: "Methodology", content: await markdownToHtml(proposal.methodology) },
-        { title: "Expected Outcomes", content: `<ul>${'\'\'\''}${(proposal.expected_outcome || []).map(o => `<li>${'\'\'\''}${o}'\'\'\''}`</li>`).join('')}'\'\'\''}`</ul>` },
-        { title: "Success Criteria", content: `<ul>${'\'\'\''}${(proposal.success_criteria || []).map(c => `<li>${'\'\'\''}${c}'\'\'\''}`</li>`).join('')}'\'\'\''}`</ul>` },
+        { title: "Expected Outcomes", content: `<ul>${(proposal.expected_outcome || []).map(o => `<li>${o}</li>`).join('')}</ul>` },
+        { title: "Success Criteria", content: `<ul>${(proposal.success_criteria || []).map(c => `<li>${c}</li>`).join('')}</ul>` },
         { title: "Evaluation", content: await markdownToHtml(proposal.evaluation) },
     ];
 
     for (const section of sections) {
-        htmlContent += `<h2>${'\'\'\''}${section.title}'\'\'\''}`</h2>${'\'\'\''}${section.content}'\'\'\''}`;
+ htmlContent += `<h2>${section.title}</h2>${section.content}`;
     }
 
     htmlContent += `</div>`;
@@ -311,7 +311,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
 
     document.body.appendChild(container);
 
-    await exportComponentAsPDF(container, `${'\'\'\''}${proposal.title.replace(/\s+/g, '_')}_proposal.pdf'\'\'\''}`);
+ await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
 
     document.body.removeChild(container);
 }
@@ -363,10 +363,10 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
                     new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
                     new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
-                    ...timeline.phases.map(p => new Paragraph({ text: `${'\'\'\''}${p.name} (${p.durationWeeks} weeks)'\'\'\''}`, bullet: { level: 0 } })),
+ ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
                     new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
-                    new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${'\'\'\''}${budget.totalAmount.toLocaleString()} ${budget.currency}'\'\'\''}`)] }),
-                    new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${'\'\'\''}${b.cost.toLocaleString()} ${budget.currency}'\'\'\''}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
+ new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
+ new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
                     new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
                     ...(Array.isArray(expected_outcome) ? expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })) : []),
                     new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
@@ -374,7 +374,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
                     ...await createDocxParagraphs(evaluation),
                     new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                    ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${'\'\'\''}${s.name} (${s.role})'\'\'\''}`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
+ ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
                     new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
                     ...(await Promise.all((risks || []).flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
                 ],
@@ -463,7 +463,7 @@ export async function exportReportAsDocx(
                 }));
             } else if (result) {
                  const diagramTitle = result.key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${'\'\'\''}${diagramTitle}'\'\'\''}]` }));
+ reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramTitle}]` }));
             }
         }
     }

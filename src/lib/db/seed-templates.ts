@@ -1,3 +1,4 @@
+
 // src/lib/db/seed-templates.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
@@ -69,4 +70,7 @@ async function seed() {
     }
 }
 
-seed();
+seed().then(() => {
+  console.log("Template seeding finished.");
+  process.exit(0);
+});
