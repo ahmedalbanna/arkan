@@ -51,8 +51,6 @@ const reportAgents = AGENTS.filter(a => a.category === 'report-generation');
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const {t} = useLocalization();
-    const [categoryFilter, setCategoryFilter] = useState('all');
-    const { data: categories } = useAgentCategories();
 
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(reportTemplateSchema),
@@ -60,13 +58,6 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     });
 
     const isDefaultTemplate = REPORT_GENERATION_TEMPLATES.some(t => t.id === template.id);
-
-    const filteredAgents = useMemo(() => {
-        return AGENTS.filter(agent =>
-            agent.category === 'report-generation' &&
-            (categoryFilter === 'all' || agent.category === categoryFilter)
-        );
-    }, [categoryFilter]);
 
     return (
         <Form {...form}>
@@ -92,23 +83,9 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                         <FormItem>
                             <div className="mb-4">
                                 <FormLabel className="text-base">{t('manageTemplates.reportDialog.includedAgentsLabel')}</FormLabel>
-                                 <div className="mt-2">
-                                    <Label htmlFor="category-filter">Filter by Category</Label>
-                                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                        <SelectTrigger id="category-filter">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">All Report Agents</SelectItem>
-                                            {categories?.filter(c => c.id.includes('report')).map(cat => (
-                                                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                {filteredAgents.map((agent) => (
+                                {reportAgents.map((agent) => (
                                     <FormField
                                         key={agent.id}
                                         control={form.control}
@@ -178,20 +155,16 @@ function CreateTeamDialog() {
     const [description, setDescription] = useState('');
     const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('all');
 
     const { toast } = useToast();
     const { agents, isLoaded } = useAgents();
-    const { data: categories } = useAgentCategories();
     const createMutation = useCreateReportTemplate();
 
     const reportGenerationAgents = useMemo(() =>
         (agents || []).filter(agent =>
-            agent.category === 'report-generation' &&
-            (categoryFilter === 'all' || agent.category === categoryFilter) &&
             agent.name.toLowerCase().includes(searchTerm.toLowerCase())
         ),
-    [agents, searchTerm, categoryFilter]);
+    [agents, searchTerm]);
 
     const handleSelectAgent = (agentId: string) => {
         setSelectedAgentIds(prev =>
@@ -270,21 +243,8 @@ function CreateTeamDialog() {
                         </div>
                          <div className="space-y-2">
                             <Label>{t('manageTemplates.reportDialog.availableAgentsLabel')}</Label>
-                            <div className="p-1">
-                                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                                    <SelectTrigger className="h-8">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Report Agents</SelectItem>
-                                        {categories?.filter(c => c.id.includes('report')).map(cat => (
-                                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <Input placeholder={t('manageTemplates.reportDialog.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8 mt-1"/>
-                            </div>
-                            <ScrollArea className="h-40 border rounded-md p-2">
+                            <ScrollArea className="h-48 border rounded-md p-2">
+                                <div className="p-1"><Input placeholder={t('manageTemplates.reportDialog.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
                                 {isLoaded && availableAgents.map(agent => (
                                      <div key={agent.id} className="flex items-center justify-between p-1">
                                        <span>{agent.name}</span>
@@ -317,7 +277,7 @@ export function ReportTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchReportTemplates } = await import('@/services/template-service');
-            return fetchReportTemplates();
+            return fetchReportTemplates(await firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
         meta: {
