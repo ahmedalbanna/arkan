@@ -318,7 +318,25 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                 </SelectTrigger>
                                 <SelectContent>
                                     {reportTemplates?.map((template) => (
-                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                        <TooltipProvider key={template.id}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <SelectItem value={template.id}>{template.name}</SelectItem>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="right" align="start">
+                                                    <p className="font-bold">{template.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{template.description}</p>
+                                                    <Separator className="my-2" />
+                                                    <p className="text-xs font-semibold mb-1">Included Agents:</p>
+                                                    <ul className="list-disc pl-4 text-xs text-muted-foreground">
+                                                        {template.agentIds.map(agentId => {
+                                                            const agent = agents.find(a => a.id === agentId);
+                                                            return <li key={agentId}>{agent?.name || agentId}</li>;
+                                                        })}
+                                                    </ul>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     ))}
                                 </SelectContent>
                             </Select>
