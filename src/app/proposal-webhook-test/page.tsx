@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -7,41 +8,64 @@ import { useTaskadeGeneration } from '@/hooks/use-taskade';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+
+const initialInputs = {
+    projectCategory: "Software Development",
+    projectTitle: "AI-Powered Document Collaboration Platform",
+    projectObjective: "To develop a platform that uses AI to assist in writing, editing, and managing technical documents, improving efficiency and quality.",
+    projectMethodology: "Agile (Scrum)",
+    projectExpectedOutcome: "A fully functional web application with real-time collaboration, AI writing suggestions, and version control.",
+    projectTimeline: "6 months",
+    projectBudget: "$150,000",
+    projectStakeholders: "Project Manager, Lead Developer, UI/UX Designer, Client",
+    projectRisks: "AI model integration complexity, potential for scope creep.",
+    projectSuccessCriteria: "User adoption rate of 80% within the first year, reduction in document creation time by 30%.",
+    projectEvaluation: "Bi-weekly sprint reviews and user feedback sessions."
+};
 
 export default function ProposalWebhookTestPage() {
-  const [projectIdea, setProjectIdea] = useState('An e-commerce platform for selling custom-designed t-shirts.');
+  const [inputs, setInputs] = useState(initialInputs);
   const { startGeneration, status, result, error, jobId } = useTaskadeGeneration();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setInputs(prev => ({ ...prev, [name]: value }));
+  };
 
   const handleStart = () => {
     startGeneration({
-        featureId: 'generate-proposal',
-        inputContent: projectIdea
+        featureId: 'generate-proposal-webhook',
+        inputContent: inputs
     });
   };
 
   return (
-    <div className="container mx-auto max-w-2xl px-4 py-12">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
       <Card>
         <CardHeader>
-          <CardTitle>Proposal Generation Webhook Test</CardTitle>
+          <CardTitle>Taskade Proposal Generation Test</CardTitle>
           <CardDescription>
-            This page tests the asynchronous proposal generation workflow via Taskade webhooks. Enter a project idea and start the generation. The generated proposal will appear below when ready.
+            This page tests the asynchronous proposal generation workflow via the specified Taskade webhook. Fill in the details and start the generation. The generated proposal will appear below when ready.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="prompt-input">Your Project Idea</Label>
-            <Textarea
-              id="prompt-input"
-              value={projectIdea}
-              onChange={(e) => setProjectIdea(e.target.value)}
-              rows={5}
-              placeholder='e.g., A mobile app for tracking personal fitness goals...'
-              disabled={status === 'pending'}
-              className="font-mono text-sm"
-            />
-          </div>
-          <Button onClick={handleStart} disabled={status === 'pending' || !projectIdea.trim()}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.keys(initialInputs).map(key => (
+                    <div key={key} className="space-y-2">
+                        <Label htmlFor={key}>{key.replace(/([A-Z])/g, ' $1').replace('Project ', '')}</Label>
+                        <Input
+                            id={key}
+                            name={key}
+                            value={inputs[key as keyof typeof inputs]}
+                            onChange={handleInputChange}
+                            disabled={status === 'pending'}
+                        />
+                    </div>
+                ))}
+            </div>
+
+          <Button onClick={handleStart} disabled={status === 'pending'} className="w-full">
             {status === 'pending' ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -52,7 +76,7 @@ export default function ProposalWebhookTestPage() {
 
           <div className="p-4 border rounded-lg bg-muted min-h-[150px]">
             <h3 className="font-semibold mb-2">Status</h3>
-            {status === 'idle' && <p className="text-sm text-muted-foreground">Click the button to start a task.</p>}
+            {status === 'idle' && <p className="text-sm text-muted-foreground">Click the button to start the task.</p>}
             {status === 'pending' && (
               <div className="flex items-center gap-2 text-blue-500">
                 <Clock className="h-5 w-5" />
