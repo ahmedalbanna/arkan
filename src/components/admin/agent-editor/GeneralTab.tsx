@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Bot, MessageSquare, Plus, X } from 'lucide-react';
-import type { AgentPrompt } from '@/lib/agents';
+import { AgentCategory, type AgentPrompt } from '@/lib/agents';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -57,6 +57,25 @@ export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabPro
                   <FormMessage />
                 </FormItem>
               )}
+            />
+
+             <FormField
+                control={control}
+                name="category"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>{t('agentEditor.categoryLabel')}</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isPending}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                {Object.values(AgentCategory).map(cat => (
+                                    <SelectItem key={cat} value={cat}>{t(`agentManager.categories.${cat}`)}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
             />
 
             {isComplexPrompt ? (

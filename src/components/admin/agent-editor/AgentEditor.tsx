@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
+import type { Agent, AgentPrompt, AgentKnowledgeSource, AgentCategory } from '@/lib/agents';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
@@ -49,6 +49,7 @@ const agentPromptSchema = z.object({
 
 const agentEditorSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  category: z.nativeEnum(AgentCategory),
   prompt: z.union([
     z.string().min(10, "Prompt must be at least 10 characters"),
     agentPromptSchema
@@ -92,6 +93,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       resolver: zodResolver(agentEditorSchema),
       defaultValues: {
           name: initialData.name,
+          category: initialData.category,
           prompt: initialData.prompt,
           toolIds: initialData.toolIds || [],
           knowledge: initialData.knowledge || [],
@@ -123,6 +125,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
 
     form.reset({
       name: initialData.name,
+      category: initialData.category,
       prompt: getInitialPrompt(),
       toolIds: initialData.toolIds || [],
       knowledge: initialData.knowledge || [],
@@ -136,7 +139,6 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   }, [initialData, searchParams, form]);
 
   const handleSubmit = (data: AgentEditorFormValues) => {
-    // We only update name and prompt for now
     updateAgentMutation.mutate({ agentId, payload: data });
   };
 

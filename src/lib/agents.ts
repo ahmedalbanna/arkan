@@ -1,6 +1,6 @@
 
 
-import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid, Scale, Megaphone, FileJson, PencilRuler } from 'lucide-react';
+import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid, Scale, Megaphone, FileJson, PencilRuler, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export interface AgentGuideline {
@@ -32,6 +32,7 @@ export interface AgentPrompt {
   Marketing = 'Marketing',
   Legal = 'Legal',
   AdminTools = 'Admin Tools',
+  AgentManagement = 'Agent Management',
 }
 
 export interface AgentData {
@@ -727,6 +728,7 @@ You will be provided with the full project proposal in JSON format, and may also
 ];
 
     
+
 
 
 

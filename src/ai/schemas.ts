@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { DocxStyleOptionsSchema, PptxStyleOptionsSchema, AgentPromptSchema } from './schemas/template-schemas';
+import { AgentCategory } from '@/lib/agents';
 
 
 // Generic Schemas
@@ -861,6 +862,7 @@ export const ApiUpdateAgentSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
   isEnabled: z.boolean().optional(),
+  category: z.nativeEnum(AgentCategory).optional(),
 });
 
 export const ApiTranslatePresentationSchema = z.object({
@@ -1026,11 +1028,7 @@ export const ProjectStateSchema = z.object({
     })).optional(),
     presentation: z.object({ history: z.array(z.object({ id: z.string(), name: z.string(), slides: z.array(PresentationSlideSchema) })) }).optional(),
     codeGenerator: z.object({ prompt: z.string(), html: z.string(), css: z.string(), javascript: z.string(), codebase: z.object({ files: z.array(z.object({ path: z.string(), content: z.string() })) }).nullable() }).optional(),
-    externalContext: z.array(z.object({
-        fileName: z.string(),
-        content: z.string(),
-        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
-    })).nullable().optional(),
+    externalContext: z.array(academicSolverContextFileSchema).nullable().optional(),
     teamId: z.string().nullable().optional(), // Add teamId to associate project with a team
     projectPlan: z.lazy(() => ProjectPlanSchema).nullable().optional(),
     academicSolver: z.object({
