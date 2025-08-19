@@ -1,7 +1,7 @@
 // src/app/api/agents/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { AGENTS as defaultAgents, AgentCategory, type AgentKnowledgeSource } from '@/lib/agents';
+import { AGENTS as defaultAgents, type AgentKnowledgeSource } from '@/lib/agents';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { AgentPromptSchema } from '@/ai/schemas/template-schemas';
 
@@ -53,7 +53,7 @@ const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),
   name: z.string().min(1, "Name is required"),
   description: z.string().min(1, "Description is required"),
-  category: z.nativeEnum(AgentCategory),
+  category: z.string().min(1, "Category is required."),
   pageUrl: z.string().min(1, "Page URL is required"),
   prompt: z.union([z.string().min(10), AgentPromptSchema]),
   knowledge: z.array(agentKnowledgeSourceSchema).optional(),
