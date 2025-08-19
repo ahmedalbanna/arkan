@@ -5,29 +5,29 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
+import { Button } from '../ui/button';
 import { Loader2, Save, PlusCircle, Trash2, Check, X, Search, Plus } from 'lucide-react';
 import { useForm, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AGENTS, AgentCategory } from '@/lib/agents';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Skeleton } from '@/components/ui/skeleton';
+import { AGENTS } from '@/lib/agents';
+import { Checkbox } from '../ui/checkbox';
+import { Skeleton } from '../ui/skeleton';
 import { useState, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useAgents } from '@/hooks/use-agents';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '../ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Label } from '@/components/ui/label';
+import { Label } from '../ui/label';
 import React from 'react';
 
 
@@ -46,7 +46,7 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
 
-const reportAgents = AGENTS.filter(a => a.category === AgentCategory.ReportGeneration);
+const reportAgents = AGENTS.filter(a => a.category === 'report-generation');
 
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
@@ -161,7 +161,7 @@ function CreateReportTemplateDialog() {
 
     const reportGenerationAgents = useMemo(() =>
         (agents || []).filter(agent =>
-            agent.category === AgentCategory.ReportGeneration &&
+            agent.category === 'report-generation' &&
             agent.name.toLowerCase().includes(searchTerm.toLowerCase())
         ),
     [agents, searchTerm]);
@@ -277,7 +277,7 @@ export function ReportTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchReportTemplates } = await import('@/services/template-service');
-            return fetchReportTemplates(firebaseUser.getIdToken());
+            return fetchReportTemplates();
         },
         enabled: !!firebaseUser,
         meta: {

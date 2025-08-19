@@ -23,7 +23,6 @@ import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
 import Link from 'next/link';
-import { AgentCategory } from '@/lib/agents';
 
 
 interface AgentEditorProps {
