@@ -93,15 +93,16 @@ function ToolsSkeleton() {
 }
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
+    const { t } = useLocalization();
     if (!plan) return null;
 
     return (
         <Dialog open={!!plan} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-4xl h-[90vh]">
                 <DialogHeader>
-                    <DialogTitle>Full Report Generation Plan</DialogTitle>
+                    <DialogTitle>{t('builder.presentationGenerator.planViewer.title')}</DialogTitle>
                     <DialogDescription>
-                        The AI has created the following plan to generate the report sections. It has selected the most relevant context and guidelines for each step.
+                        {t('builder.presentationGenerator.planViewer.description')}
                     </DialogDescription>
                 </DialogHeader>
                 <ScrollArea className="h-full">
@@ -113,21 +114,21 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm">
                                     <div>
-                                        <h4 className="font-semibold">Context Items:</h4>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
                                             {config.context.sections?.map(s => <li key={s}>{sectionConfig[s]?.title || s}</li>)}
                                             {config.context.diagrams?.map(d => <li key={d}>{sectionConfig[d as SectionNameType]?.title || d}</li>)}
-                                            {!config.context.sections?.length && !config.context.diagrams?.length && <li>Project Proposal &amp; Plan</li>}
+                                            {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold">Instructions:</h4>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.instructions')}</h4>
                                         <div className="text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                             <ReactMarkdown components={markdownComponents}>{`- Tone: ${config.instructions.tone}\n- Formality: ${config.instructions.formality}`}</ReactMarkdown>
                                         </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold">Guidelines:</h4>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.guidelines')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
                                             {config.guidelines.map((g, i) => <li key={i}>{g}</li>)}
                                         </ul>
@@ -175,7 +176,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     const isAnythingGenerating = reportGenerationMutation.isPending  || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
 
-    // Initialize context selections based on agent defaults when agents are loaded
     useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
             agents.forEach(agent => {
@@ -282,7 +282,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         return sectionKey && !sections[sectionKey];
     }).length || 0;
 
-    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0; // +1 for the context evaluation step
+    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 1 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 

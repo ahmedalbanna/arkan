@@ -64,6 +64,18 @@ function ToolsSkeleton() {
                     <Skeleton className="h-10 w-full" />
                 </CardContent>
             </Card>
+            <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/2" />
+                    <Skeleton className="h-4 w-full" />
+                </CardHeader>
+                <CardContent>
+                    <Skeleton className="h-10 w-full" />
+                </CardContent>
+                <CardFooter>
+                    <Skeleton className="h-10 w-full" />
+                </CardFooter>
+            </Card>
         </div>
     )
 }
@@ -240,7 +252,20 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                         <TabsTrigger value="history">{t('builder.presentationGenerator.historyTab')}</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6 space-y-4">
-
+                         <div className="space-y-2">
+                            <Label htmlFor="presentation-template-select">{t('builder.presentationGenerator.templateLabel')}</Label>
+                            <Select value={selectedPresentationTemplateId} onValueChange={setSelectedPresentationTemplateId}>
+                                <SelectTrigger id="presentation-template-select">
+                                    <SelectValue placeholder="Select a presentation template"/>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {presentationTemplates?.map(template => (
+                                        <SelectItem key={template.id} value={template.id}>{template.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Separator />
                         <div>
                             <h4 className="text-sm font-semibold mb-2">{t('builder.presentationGenerator.sourceDocuments')}</h4>
                              <Accordion type="multiple" className="w-full space-y-1">

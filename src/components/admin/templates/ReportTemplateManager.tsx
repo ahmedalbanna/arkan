@@ -2,7 +2,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate } from '@/hooks/use-templates';
+import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,6 +45,10 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
 });
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
+
+const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
+
+
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const {t} = useLocalization();
     const { agents, isLoaded } = useAgents();
@@ -73,6 +77,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
 
     const availableAgents = useMemo(() =>
         (agents || []).filter(agent =>
+            agent.category === 'Report Generation' &&
             !selectedAgentIds.includes(agent.id) &&
             agent.name.toLowerCase().includes(searchTerm.toLowerCase())
         ),
@@ -161,148 +166,129 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     );
 }
 
-function CreateTemplateDialog() {
+function CreateReportTemplateDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
-    const [searchTerm, setSearchTerm] = useState('');
-
     const { toast } = useToast();
-    const { agents, isLoaded } = useAgents();
     const createMutation = useCreateReportTemplate();
+    
+    const form = useForm<CreateReportFormValues>({
+        resolver: zodResolver(createReportTemplateSchema),
+        defaultValues: {
+            id: '',
+            name: '',
+            description: '',
+            agentIds: [],
+        },
+    });
 
-    const allReportAgents = useMemo(() =>
-        (agents || []).filter(agent =>
-            agent.category === 'report-generation'
-        ),
-    [agents]);
-
-    const handleSelectAgent = (agentId: string) => {
-        setSelectedAgentIds(prev =>
-            prev.includes(agentId)
-                ? prev.filter(id => id !== agentId)
-                : [...prev, agentId]
-        );
-    };
-
-    const handleCreate = () => {
-        const data = {
-            id: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            name,
-            description,
-            agentIds: selectedAgentIds,
-        };
-
-        const validation = createReportTemplateSchema.safeParse(data);
-        if (!validation.success) {
-            toast({
-                title: 'Validation Error',
-                description: validation.error.errors.map(e => e.message).join('\n'),
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        createMutation.mutate(validation.data, {
+    const handleSave = (data: CreateReportFormValues) => {
+        createMutation.mutate(data, {
             onSuccess: () => {
-                toast({ title: 'Success', description: 'New report template created.' });
+                toast({ title: t('manageTemplates.createSuccessToast.title'), description: t('manageTemplates.createSuccessToast.reportDesc') });
                 setIsOpen(false);
-                setName('');
-                setDescription('');
-                setSelectedAgentIds([]);
+                form.reset();
             },
             onError: (error: any) => {
-                handleErrorUtility(error, "Failed to create template.");
+                if (error.errors) {
+                    for (const key in error.errors) {
+                        form.setError(key as keyof CreateReportFormValues, { message: error.errors[key][0] });
+                    }
+                } else {
+                    handleErrorUtility(error, "Failed to create template.");
+                }
             }
         });
-    }
-
-    const selectedAgents = allReportAgents.filter(agent => selectedAgentIds.includes(agent.id));
-    const availableAgents = allReportAgents.filter(agent =>
-        !selectedAgentIds.includes(agent.id) &&
-        agent.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-3xl">
+            <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{t('manageTemplates.reportDialog.title')}</DialogTitle>
                     <DialogDescription>{t('manageTemplates.reportDialog.description')}</DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="team-name">{t('manageTemplates.createDialog.nameLabel')}</Label>
-                        <Input id="team-name" placeholder={t('manageTemplates.reportDialog.namePlaceholder')} value={name} onChange={e => setName(e.target.value)} />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="team-description">{t('manageTemplates.createDialog.descriptionLabel')}</Label>
-                        <Textarea id="team-description" placeholder={t('manageTemplates.reportDialog.descriptionPlaceholder')} value={description} onChange={e => setDescription(e.target.value)} rows={2} />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>{t('manageTemplates.reportDialog.includedAgentsLabel')} ({selectedAgents.length})</Label>
-                            <ScrollArea className="h-48 border rounded-md p-2">
-                               {selectedAgents.map(agent => (
-                                   <div key={agent.id} className="flex items-center justify-between p-1">
-                                       <span>{agent.name}</span>
-                                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><X className="h-4 w-4"/></Button>
-                                   </div>
-                               ))}
-                            </ScrollArea>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>{t('manageTemplates.reportDialog.availableAgentsLabel')}</Label>
-                            <ScrollArea className="h-48 border rounded-md p-2">
-                                <div className="p-1"><Input placeholder={t('manageTemplates.reportDialog.searchPlaceholder')} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
-                                {isLoaded && availableAgents.map(agent => (
-                                     <div key={agent.id} className="flex items-center justify-between p-1">
-                                       <span>{agent.name}</span>
-                                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><Plus className="h-4 w-4"/></Button>
-                                   </div>
-                                ))}
-                                {!isLoaded && <Loader2 className="mx-auto animate-spin" />}
-                            </ScrollArea>
-                        </div>
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="ghost">{t('manageTemplates.cancelButton')}</Button></DialogClose>
-                    <Button onClick={handleCreate} disabled={createMutation.isPending || !name || selectedAgentIds.length === 0}>
-                        {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                        {t('manageTemplates.createButton')}
-                    </Button>
-                </DialogFooter>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
+                        <FormField control={form.control} name="id" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.reportDialog.idPlaceholder')} disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel>
+                                <FormControl><Input {...field} placeholder={t('manageTemplates.reportDialog.namePlaceholder')} disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="description" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel>
+                                <FormControl><Textarea {...field} placeholder={t('manageTemplates.reportDialog.descriptionPlaceholder')} rows={2} disabled={createMutation.isPending} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField
+                            control={form.control}
+                            name="agentIds"
+                            render={() => (
+                                <FormItem>
+                                    <FormLabel className="text-base">{t('manageTemplates.reportDialog.includedAgentsLabel')}</FormLabel>
+                                    <ScrollArea className="h-48 w-full rounded-md border p-4">
+                                        {reportAgents.map((agent) => (
+                                            <FormField
+                                                key={agent.id}
+                                                control={form.control}
+                                                name="agentIds"
+                                                render={({ field }) => {
+                                                    return (
+                                                        <FormItem key={agent.id} className="flex flex-row items-center space-x-3 space-y-0 mb-2">
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value?.includes(agent.id)}
+                                                                    onCheckedChange={(checked) => {
+                                                                        return checked
+                                                                            ? field.onChange([...(field.value || []), agent.id])
+                                                                            : field.onChange(field.value?.filter((value) => value !== agent.id));
+                                                                    }}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="font-normal">{agent.name}</FormLabel>
+                                                        </FormItem>
+                                                    );
+                                                }}
+                                            />
+                                        ))}
+                                    </ScrollArea>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                         <DialogFooter>
+                            <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
+                            <Button type="submit" disabled={createMutation.isPending}>
+                                {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
+                                {t('manageTemplates.createButton')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
 }
 
+
 export function ReportTemplateManager() {
     const { t } = useLocalization();
     const { firebaseUser } = useAuth();
-
-    const { data: templates, isLoading, isError } = useQuery({
-        queryKey: templateKeys.reports(),
-        queryFn: async () => {
-            if (!firebaseUser) return [];
-            const { fetchReportTemplates } = await import('@/services/template-service');
-            return fetchReportTemplates(await firebaseUser.getIdToken());
-        },
-        enabled: !!firebaseUser,
-        meta: {
-            onError: (error: Error) => {
-                handleErrorUtility(error, "Failed to load report templates");
-            },
-        },
-    });
-
+    const { data: templates, isLoading, isError } = useReportTemplates();
     const updateMutation = useUpdateReportTemplate();
     const deleteMutation = useDeleteReportTemplate();
 
@@ -315,7 +301,7 @@ export function ReportTemplateManager() {
     };
 
     if (isLoading) return <Skeleton className="h-48 w-full" />
-    if (isError) return <div>Error loading templates.</div>;
+    if (isError) return <div>{t('team.errorLoading')}</div>;
 
     return (
         <Card>
@@ -326,7 +312,7 @@ export function ReportTemplateManager() {
                         {t('manageTemplates.reportDescription')}
                     </CardDescription>
                 </div>
-                 <CreateTemplateDialog />
+                 <CreateReportTemplateDialog />
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">

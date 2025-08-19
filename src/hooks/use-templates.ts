@@ -27,7 +27,7 @@ import { getAuthenticatedToken } from "@/lib/authUtils";
 import { docxTemplateKeys } from "./use-docx-styles";
 import { pptxTemplateKeys } from "./use-pptx-styles";
 import { templateKeys } from "@/lib/query-keys";
-
+export { templateKeys };
 // Define generic type for update template variables
 interface UpdateTemplateVariables<T> {
   templateId: string;
@@ -324,3 +324,5 @@ export function useRefreshTemplateImage(templateType: 'docx' | 'pptx') {
         },
     });
 }
+
+
