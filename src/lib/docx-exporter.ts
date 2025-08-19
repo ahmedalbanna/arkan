@@ -5,7 +5,6 @@ import type { IStylesOptions, IRunOptions, INumberingOptions } from 'docx';
 import {SectionType} from 'docx'
 import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
 import type { Root, PhrasingContent, List } from 'mdast';
-import { sectionConfig, diagramConfig } from './report-config';
 import { templates, type TemplateKey } from './docx-styles';
 import { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun, Document, Packer, HeadingLevel, Header, Footer, PageNumber, TableOfContents } from 'docx';
 import { exportComponentAsPDF } from './pdf-exporter';
@@ -39,7 +38,7 @@ export async function createDocxParagraphs(markdown: string) {
                     break;
                 case 'image':
                     try {
-                        const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(node.url)}`;
+                        const proxiedUrl = `/api/proxy-image?url=${'\'\'\''}${encodeURIComponent(node.url)}'\'\'\''}`;
                         const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
                         if (imageBuffer) {
                             runs.push(new ImageRun({
@@ -85,13 +84,13 @@ export async function createDocxParagraphs(markdown: string) {
             case 'heading':
                 docxObjects.push(new Paragraph({
                     children: await transformInlines(node.children),
-                    heading: `Heading${node.depth}` as any,
+                    heading: `Heading${'\'\'\''}${node.depth}'\'\'\''}` as any,
                 }));
                 break;
             case 'paragraph':
                 const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
                 if (imageNode) {
-                    const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
+                    const proxiedUrl = `/api/proxy-image?url=${'\'\'\''}${encodeURIComponent(imageNode.url)}'\'\'\''}`;
                     const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
                     if (imageBuffer) {
                         docxObjects.push(new Paragraph({
@@ -99,7 +98,7 @@ export async function createDocxParagraphs(markdown: string) {
                             alignment: AlignmentType.CENTER,
                         }));
                     } else {
-                        docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
+                        docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${'\'\'\''}${imageNode.alt}'\'\'\''}]`)] }));
                     }
                 } else {
                     docxObjects.push(new Paragraph({
@@ -162,12 +161,12 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     try {
         const response = await fetch(imageUrl);
         if (!response.ok) {
-            console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.status}`);
+            console.warn(`Failed to fetch proxied image from ${'\'\'\''}${imageUrl}'\'\'\''}. Status: ${'\'\'\''}${response.status}'\'\'\''}`);
             return null;
         }
         return response.arrayBuffer();
     } catch (error) {
-        console.error(`Error fetching image from ${imageUrl}:`, error);
+        console.error(`Error fetching image from ${'\'\'\''}${imageUrl}'\'\'\''}:`, error);
         return null;
     }
 }
@@ -202,7 +201,7 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${fileName}.docx`);
+    saveAs(blob, `${'\'\'\''}${fileName}.docx'\'\'\''}`);
 }
 
 
@@ -225,18 +224,21 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
     });
 
     const blob = await Packer.toBlob(doc);
-    saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
+    saveAs(blob, `${'\'\'\''}${title.replace(/\s+/g, '_')}.docx'\'\'\''}`);
 }
 
 function applyStylesToElement(element: HTMLElement, styles: any) {
     if (styles?.font) {
-        element.style.fontFamily = typeof styles.font === 'string' ? styles.font : styles.font.name;
+        element.style.fontFamily = typeof styles.font === 'string' 
+ ? styles.font 
+ : (styles.font as any)?.name ?? 'Calibri';
+ 
     }
     if (styles?.size) {
-        element.style.fontSize = `${Number(styles.size) / 2}pt`;
+        element.style.fontSize = `${'\'\'\''}${Number(styles.size ?? 22) / 2}pt'\'\'\''}`;
     }
     if (styles?.color) {
-        element.style.color = `#${styles.color}`;
+        element.style.color = `#${'\'\'\''}${styles.color || '333333'}'\'\'\''}`;
     }
     if (styles?.bold) {
         element.style.fontWeight = 'bold';
@@ -281,19 +283,19 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     applyStylesToElement(container, styles.default?.document?.run);
 
     // Title and Category
-    htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
-    htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
+    htmlContent += `<h1 style="text-align: center;">${'\'\'\''}${proposal.title}'\'\'\''}`</h1>`;
+    htmlContent += `<p style="text-align: center; font-style: italic;">${'\'\'\''}${proposal.category}'\'\'\''}</p>`;
 
     const sections = [
         { title: "Objective", content: await markdownToHtml(proposal.objective) },
         { title: "Methodology", content: await markdownToHtml(proposal.methodology) },
-        { title: "Expected Outcomes", content: `<ul>${(proposal.expected_outcome || []).map(o => `<li>${o}</li>`).join('')}</ul>` },
-        { title: "Success Criteria", content: `<ul>${(proposal.success_criteria || []).map(c => `<li>${c}</li>`).join('')}</ul>` },
+        { title: "Expected Outcomes", content: `<ul>${'\'\'\''}${(proposal.expected_outcome || []).map(o => `<li>${'\'\'\''}${o}'\'\'\''}`</li>`).join('')}'\'\'\''}`</ul>` },
+        { title: "Success Criteria", content: `<ul>${'\'\'\''}${(proposal.success_criteria || []).map(c => `<li>${'\'\'\''}${c}'\'\'\''}`</li>`).join('')}'\'\'\''}`</ul>` },
         { title: "Evaluation", content: await markdownToHtml(proposal.evaluation) },
     ];
 
     for (const section of sections) {
-        htmlContent += `<h2>${section.title}</h2>${section.content}`;
+        htmlContent += `<h2>${'\'\'\''}${section.title}'\'\'\''}`</h2>${'\'\'\''}${section.content}'\'\'\''}`;
     }
 
     htmlContent += `</div>`;
@@ -309,7 +311,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
 
     document.body.appendChild(container);
 
-    await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
+    await exportComponentAsPDF(container, `${'\'\'\''}${proposal.title.replace(/\s+/g, '_')}_proposal.pdf'\'\'\''}`);
 
     document.body.removeChild(container);
 }
@@ -337,7 +339,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
             },
             {
                 properties: { type: SectionType.NEXT_PAGE },
-                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${'\'\'\''}${title}'\'\'\''}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
                         children: [
@@ -361,10 +363,10 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
                     new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
                     new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
-                    ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
+                    ...timeline.phases.map(p => new Paragraph({ text: `${'\'\'\''}${p.name} (${p.durationWeeks} weeks)'\'\'\''}`, bullet: { level: 0 } })),
                     new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
-                    new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
-                    new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
+                    new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${'\'\'\''}${budget.totalAmount.toLocaleString()} ${budget.currency}'\'\'\''}`)] }),
+                    new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${'\'\'\''}${b.cost.toLocaleString()} ${budget.currency}'\'\'\''}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
                     new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
                     ...(Array.isArray(expected_outcome) ? expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })) : []),
                     new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
@@ -372,7 +374,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                     new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
                     ...await createDocxParagraphs(evaluation),
                     new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
-                    ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
+                    ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${'\'\'\''}${s.name} (${s.role})'\'\'\''}`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
                     new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
                     ...(await Promise.all((risks || []).flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
                 ],
@@ -381,7 +383,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
 
     try {
         const blob = await Packer.toBlob(doc);
-        saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
+        saveAs(blob, `${'\'\'\''}${title.replace(/ /g, '_')}_proposal.docx'\'\'\''}`);
     } catch (error) {
         console.error("Error generating DOCX file:", error);
     }
@@ -400,14 +402,14 @@ export async function exportReportAsDocx(
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
-    const orderedSections = sectionsToInclude || Object.keys(sectionConfig) as SectionName[];
-    const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
+    const orderedSections = sectionsToInclude || Object.keys(sections) as SectionName[];
+    const orderedDiagrams = Object.keys(diagrams) as DiagramType[];
 
     const reportBodyPromises = orderedSections.map(async (key) => {
         const content = sections[key];
         if (content) {
             return [
-                new Paragraph({ text: translatedTitles[key] || sectionConfig[key].title, heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: translatedTitles[key] || key, heading: HeadingLevel.HEADING_1 }),
                 ...(await createDocxParagraphs(content)),
             ];
         }
@@ -444,8 +446,12 @@ export async function exportReportAsDocx(
         for (const result of imageResults) {
             if (result && result.buffer) {
                 const { key, buffer } = result;
+                // Since diagramConfig is gone, we'll just use the key as the title.
+                // A better approach would be to get the title from a dynamic source if available.
+                const diagramTitle = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
                 reportBody.push(new Paragraph({
-                    text: diagramConfig[key as DiagramType].title,
+                    text: diagramTitle,
                     heading: HeadingLevel.HEADING_2,
                 }));
                 reportBody.push(new Paragraph({
@@ -456,7 +462,8 @@ export async function exportReportAsDocx(
                     alignment: AlignmentType.CENTER,
                 }));
             } else if (result) {
-                reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${diagramConfig[result.key as DiagramType].title}]` }));
+                 const diagramTitle = result.key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                reportBody.push(new Paragraph({ text: `[Failed to load image for diagram: ${'\'\'\''}${diagramTitle}'\'\'\''}]` }));
             }
         }
     }
@@ -475,7 +482,7 @@ export async function exportReportAsDocx(
             },
             {
                 properties: { type: SectionType.NEXT_PAGE },
-                headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${'\'\'\''}${proposalTitle}'\'\'\''}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
                         children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] })] })],

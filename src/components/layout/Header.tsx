@@ -108,6 +108,7 @@ export function Header() {
     { href: '/admin/manage-users', label: t('header.manageUsers'), icon: Users },
     { href: '/admin/manage-payments', label: t('header.managePayments'), icon: CreditCard },
     { href: '/admin/manage-agents', label: t('header.agentManager'), icon: Bot },
+    { href: '/admin/manage-features', label: t('header.manageFeatures'), icon: SlidersHorizontal },
     { href: '/admin/manage-generations', label: t('header.activityHistory'), icon: History },
     { href: '/admin/manage-generation-templates', label: 'Generation Templates', icon: PencilRuler },
     { href: '/admin/manage-templates', label: t('header.exportTemplates'), icon: Palette },

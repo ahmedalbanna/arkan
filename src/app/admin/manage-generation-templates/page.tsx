@@ -1,3 +1,4 @@
+
 'use client';
 
 import GenerationTemplateManager from '@/components/admin/GenerationTemplateManager';

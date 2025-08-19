@@ -1,34 +1,48 @@
-import { BookMarked, Library, Waypoints, BookText, Code, TestTube2, Flag, GitGraph, Presentation, DatabaseZap, FileHeart, Hand, DraftingCompass, Pencil, Files, FileText } from 'lucide-react';
-import type { DiagramType, SectionName } from '@/ai/schemas';
 
-export const sectionConfig: { [key in SectionName]: { title: string; icon: React.ElementType, agentId: string } } = {
-    introduction: { title: "builder.reportGenerator.sections.introduction", icon: BookMarked, agentId: "generate-introduction-section" },
-    abstract: { title: "builder.reportGenerator.sections.abstract", icon: FileText, agentId: "generate-abstract-section" },
-    acknowledgment: { title: "builder.reportGenerator.sections.acknowledgment", icon: FileHeart, agentId: "generate-acknowledgment-section" },
-    trainingProgram: { title: "builder.reportGenerator.sections.trainingProgram", icon: Library, agentId: "generate-trainingProgram-section" },
-    technicalExperience: { title: "builder.reportGenerator.sections.technicalExperience", icon: TestTube2, agentId: "generate-technicalExperience-section" },
-    recommendations: { title: "builder.reportGenerator.sections.recommendations", icon: Hand, agentId: "generate-recommendations-section" },
-    references: { title: "builder.reportGenerator.sections.references", icon: DraftingCompass, agentId: "generate-references-section" },
-    appendices: { title: "builder.reportGenerator.sections.appendices", icon: Files, agentId: "generate-appendices-section" },
-    literatureReview: { title: "builder.reportGenerator.sections.literatureReview", icon: Library, agentId: "generate-literatureReview-section" },
-    systemAnalysis: { title: "builder.reportGenerator.sections.systemAnalysis", icon: Waypoints, agentId: "generate-systemAnalysis-section" },
-    designStrategy: { title: "builder.reportGenerator.sections.designStrategy", icon: BookText, agentId: "generate-designStrategy-section" },
-    systemDesign: { title: "builder.reportGenerator.sections.systemDesign", icon: Code, agentId: "generate-systemDesign-section" },
-    systemProgramming: { title: "builder.reportGenerator.sections.systemProgramming", icon: Code, agentId: "generate-systemProgramming-section" },
-    systemTesting: { title: "builder.reportGenerator.sections.systemTesting", icon: TestTube2, agentId: "generate-systemTesting-section" },
-    conclusion: { title: "builder.reportGenerator.sections.conclusion", icon: Flag, agentId: "generate-conclusion-section" },
+// This file is deprecated and will be removed.
+// All configuration is now fetched dynamically from the database.
+// The content is kept here temporarily only to prevent build errors in other files
+// that have not yet been refactored.
+
+import { FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, Hand, DraftingCompass, Files, Presentation, DatabaseZap } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
+interface Config {
+    title: string;
+    icon: LucideIcon;
+    agentId: string;
+}
+
+export const sectionConfig: Record<string, Config> = {
+    introduction: { title: 'Introduction', icon: BookMarked, agentId: 'generate-introduction-section' },
+    literatureReview: { title: 'Literature Review', icon: Library, agentId: 'generate-literatureReview-section' },
+    systemAnalysis: { title: 'System Analysis', icon: Waypoints, agentId: 'generate-systemAnalysis-section' },
+    designStrategy: { title: 'Design Strategy', icon: BrainCircuit, agentId: 'generate-designStrategy-section' },
+    systemDesign: { title: 'System Design', icon: Code, agentId: 'generate-systemDesign-section' },
+    systemProgramming: { title: 'System Programming', icon: Code, agentId: 'generate-systemProgramming-section' },
+    systemTesting: { title: 'System Testing', icon: TestTube2, agentId: 'generate-systemTesting-section' },
+    conclusion: { title: 'Conclusion', icon: Flag, agentId: 'generate-conclusion-section' },
+    abstract: { title: 'Abstract', icon: FileText, agentId: 'generate-abstract-section' },
+    acknowledgment: { title: 'Acknowledgment', icon: Hand, agentId: 'generate-acknowledgment-section' },
+    trainingProgram: { title: 'Training Program', icon: Library, agentId: 'generate-trainingProgram-section' },
+    technicalExperience: { title: 'Technical Experience', icon: TestTube2, agentId: 'generate-technicalExperience-section' },
+    recommendations: { title: 'Recommendations', icon: Hand, agentId: 'generate-recommendations-section' },
+    references: { title: 'References', icon: DraftingCompass, agentId: 'generate-references-section' },
+    appendices: { title: 'Appendices', icon: Files, agentId: 'generate-appendices-section' },
 };
 
-export const diagramConfig: { [key in DiagramType]: { title: string; icon: React.ElementType, agentId: string; } } = {
-    'use-case': { title: "builder.diagramGenerator.diagrams.useCase", icon: GitGraph, agentId: "generate-use-case-diagram" },
-    class: { title: "builder.diagramGenerator.diagrams.class", icon: GitGraph, agentId: "generate-class-diagram" },
-    sequence: { title: "builder.diagramGenerator.diagrams.sequence", icon: GitGraph, agentId: "generate-sequence-diagram" },
-    activity: { title: "builder.diagramGenerator.diagrams.activity", icon: GitGraph, agentId: "generate-activity-diagram" },
-    component: { title: "builder.diagramGenerator.diagrams.component", icon: GitGraph, agentId: "generate-component-diagram" },
-    archimate: { title: "builder.diagramGenerator.diagrams.archimate", icon: GitGraph, agentId: "generate-archimate-diagram" },
-    er: { title: "builder.diagramGenerator.diagrams.er", icon: DatabaseZap, agentId: "generate-er-diagram" },
-};
+export const diagramConfig: Record<string, Config> = {
+    "use-case": { title: 'Use Case Diagram', icon: GitGraph, agentId: 'generate-use-case-diagram' },
+    "class": { title: 'Class Diagram', icon: GitGraph, agentId: 'generate-class-diagram' },
+    "sequence": { title: 'Sequence Diagram', icon: GitGraph, agentId: 'generate-sequence-diagram' },
+    "activity": { title: 'Activity Diagram', icon: GitGraph, agentId: 'generate-activity-diagram' },
+    "component": { title: 'Component Diagram', icon: GitGraph, agentId: 'generate-component-diagram' },
+    "archimate": { title: 'ArchiMate Diagram', icon: DatabaseZap, agentId: 'generate-archimate-diagram' },
+    "er": { title: 'ER Diagram', icon: GitGraph, agentId: 'generate-er-diagram' },
+}
 
-export const presentationConfig = {
-    presentation: { title: "Presentation", icon: Presentation, agentId: "generate-presentation" }
-};
+export const presentationConfig: Config = {
+    title: 'Presentation',
+    icon: Presentation,
+    agentId: 'generate-presentation'
+}

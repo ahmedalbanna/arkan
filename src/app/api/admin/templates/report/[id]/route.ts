@@ -1,5 +1,4 @@
 
-
 // src/app/api/templates/report/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';

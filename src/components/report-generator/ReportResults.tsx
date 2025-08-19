@@ -1,11 +1,10 @@
 
 'use client';
 
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Accordion } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Section } from './Section';
 import { useLocalization } from '../../context/LocalizationContext';
-import { sectionConfig } from '@/lib/report-config';
 import type { SectionName } from '@/ai/schemas';
 import { FileText, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useReportStore } from '@/hooks/useReportStore';
@@ -18,8 +17,7 @@ import { cn } from '@/lib/utils';
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { EvaluationTools } from '../EvaluationTools';
-
-const orderedSections = Object.keys(sectionConfig) as SectionName[];
+import { useAgents } from '@/hooks/use-agents';
 
 interface ReportResultsProps {
   onSectionUpdate: (key: SectionName, value: string) => void;
@@ -35,10 +33,11 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title: string 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const { sections, evaluation } = useReportStore();
   const { t } = useLocalization();
+  const { agents } = useAgents();
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const generatedSections = orderedSections.filter(key => sections[key]);
+  const generatedSections = (Object.keys(sections) as SectionName[]).filter(key => sections[key]);
   const evaluationPageExists = true; // The evaluation page is always potentially available
   const totalPages = generatedSections.length + (evaluationPageExists ? 1 : 0);
 
@@ -76,6 +75,16 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
   const isEvaluationPage = currentPage === generatedSections.length;
   const currentSectionKey = generatedSections[currentPage];
 
+  const getSectionTitle = (key: SectionName): string => {
+    const agent = agents.find(a => a.id.includes(key));
+    return agent ? agent.name : key;
+  };
+  
+  const getSectionIcon = (key: SectionName) => {
+    const agent = agents.find(a => a.id.includes(key));
+    return agent ? agent.icon : FileText;
+  }
+
   return (
      <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg flex flex-col">
         <ScrollArea className="flex-grow">
@@ -85,11 +94,11 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                 </A4Page>
             ) : (
                 currentSectionKey && (
-                     <A4Page key={currentSectionKey} title={t(sectionConfig[currentSectionKey].title)}>
+                     <A4Page key={currentSectionKey} title={getSectionTitle(currentSectionKey)}>
                         <Section
                             sectionKey={currentSectionKey}
-                            title={t(sectionConfig[currentSectionKey].title)}
-                            icon={sectionConfig[currentSectionKey].icon}
+                            title={getSectionTitle(currentSectionKey)}
+                            icon={getSectionIcon(currentSectionKey)}
                             content={sections[currentSectionKey]!}
                             onUpdate={onSectionUpdate}
                         />

@@ -1,3 +1,4 @@
+
 // src/app/api/templates/report/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
 import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-generation-templates';

@@ -24,7 +24,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useAgents, useAgentCategories } from '@/hooks/use-agents';
+import { useAgents } from '@/hooks/use-agents';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '@/components/ui/label';
@@ -44,10 +44,6 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
     id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
 });
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
-
-
-const reportAgents = AGENTS.filter(a => a.category === 'report-generation');
-
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const {t} = useLocalization();
@@ -337,7 +333,7 @@ export function ReportTemplateManager() {
                     {templates?.map(template => {
                         return (
                         <AccordionItem value={template.id} key={template.id}>
-                            <AccordionTrigger>{t(template.name)}</AccordionTrigger>
+                            <AccordionTrigger>{template.name}</AccordionTrigger>
                             <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
                                 <ReportTemplateForm
                                     template={template}

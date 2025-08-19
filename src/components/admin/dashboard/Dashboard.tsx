@@ -4,7 +4,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { adminKeys } from '@/lib/query-keys';
-import { fetchDashboardStats, type DashboardStats } from '@/services/admin-service';
+import { fetchDashboardStats } from '@/services/admin-service';
+import type { DashboardStats } from '@/services/admin-service';
 import { AlertCircle, Bot, CreditCard, Users } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { AgentUsageChart } from './AgentUsageChart';
