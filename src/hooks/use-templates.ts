@@ -26,13 +26,7 @@ import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { docxTemplateKeys } from "./use-docx-styles";
 import { pptxTemplateKeys } from "./use-pptx-styles";
-
-export const templateKeys = {
-  all: ["templates"] as const,
-  proposals: () => [...templateKeys.all, "proposal"] as const,
-  reports: () => [...templateKeys.all, "report"] as const,
-  presentations: () => [...templateKeys.all, "presentation"] as const,
-};
+import { templateKeys } from "@/lib/query-keys";
 
 // Define generic type for update template variables
 interface UpdateTemplateVariables<T> {
