@@ -5,6 +5,7 @@
 import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS as defaultAgents } from '@/lib/agents';
 import { defaultFeatures } from '@/lib/features';
+import { defaultAgentCategories } from '@/lib/agent-categories';
 import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
@@ -16,6 +17,15 @@ async function seed() {
     const batch = adminDb.batch();
 
     try {
+        // --- Agent Categories ---
+        console.log("Preparing to seed Agent Categories...");
+        const categoriesCollection = adminDb.collection('agent_categories');
+        defaultAgentCategories.forEach(category => {
+            const docRef = categoriesCollection.doc(category.id);
+            batch.set(docRef, { name: category.name });
+        });
+        console.log(`${defaultAgentCategories.length} Agent Categories added to batch.`);
+
         // --- Agents ---
         console.log("Preparing to seed Agents...");
         const agentsCollection = adminDb.collection('agents');

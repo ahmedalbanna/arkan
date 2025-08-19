@@ -2,8 +2,10 @@
 
 import { z } from 'zod';
 import { DocxStyleOptionsSchema, PptxStyleOptionsSchema, AgentPromptSchema } from './schemas/template-schemas';
-import { AgentCategory } from '@/lib/agents';
+import { defaultAgentCategories } from '@/lib/agent-categories';
 
+// Extract category IDs for use in Zod enum
+const categoryIds = defaultAgentCategories.map(cat => cat.id) as [string, ...string[]];
 
 // Generic Schemas
 export const DiagramTypeSchema = z.enum([
@@ -862,7 +864,7 @@ export const ApiUpdateAgentSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
   prompt: z.union([z.string().min(10), AgentPromptSchema]).optional(),
   isEnabled: z.boolean().optional(),
-  category: z.nativeEnum(AgentCategory).optional(),
+  category: z.string().optional(),
 });
 
 export const ApiTranslatePresentationSchema = z.object({
