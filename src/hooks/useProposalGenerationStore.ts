@@ -5,10 +5,24 @@ import { create } from "zustand";
 import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
 import { useBuilderStore } from "./useBuilderStore";
 
+export interface AdvancedProposalFields {
+    projectTitle: string;
+    projectObjective: string;
+    projectMethodology: string;
+    projectExpectedOutcome: string;
+    projectTimeline: string;
+    projectBudget: string;
+    projectStakeholders: string;
+    projectRisks: string;
+    projectSuccessCriteria: string;
+    projectEvaluation: string;
+}
+
 interface ProposalGenerationState {
   selectedTemplateId: string;
   customGuidelines: string[];
   customGuidelineInput: string;
+  advancedFields: AdvancedProposalFields;
 }
 
 interface ProposalGenerationActions {
@@ -16,12 +30,28 @@ interface ProposalGenerationActions {
   addCustomGuideline: () => void;
   removeCustomGuideline: (index: number) => void;
   setCustomGuidelineInput: (value: string) => void;
+  setAdvancedField: (field: keyof AdvancedProposalFields, value: string) => void;
+  resetAdvancedFields: () => void;
 }
+
+const initialAdvancedFields: AdvancedProposalFields = {
+    projectTitle: '',
+    projectObjective: '',
+    projectMethodology: 'Agile (Scrum)',
+    projectExpectedOutcome: '',
+    projectTimeline: '6 months',
+    projectBudget: '$50,000',
+    projectStakeholders: 'End-users, Project Sponsor, Development Team',
+    projectRisks: '',
+    projectSuccessCriteria: '',
+    projectEvaluation: ''
+};
 
 const initialState: ProposalGenerationState = {
   selectedTemplateId: PROPOSAL_TEMPLATES[0].id,
   customGuidelines: [],
   customGuidelineInput: "",
+  advancedFields: initialAdvancedFields,
 };
 
 export const useProposalGenerationStore = create<ProposalGenerationState & ProposalGenerationActions>()(
@@ -46,5 +76,15 @@ export const useProposalGenerationStore = create<ProposalGenerationState & Propo
         ),
       })),
     setCustomGuidelineInput: (value) => set({ customGuidelineInput: value }),
+    setAdvancedField: (field, value) => {
+        set(state => ({
+            advancedFields: {
+                ...state.advancedFields,
+                [field]: value
+            }
+        }));
+         useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    resetAdvancedFields: () => set({ advancedFields: initialAdvancedFields }),
   })
 );

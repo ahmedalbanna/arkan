@@ -10,21 +10,17 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { ProjectProposalSchema, type ProjectProposal, GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
+import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
 
-export async function generateProposal(input: GenerateProposalInput): Promise<ProjectProposal> {
+export async function generateProposal(input: GenerateProposalInput): Promise<string> {
   const { projectIdea, prompt, guidelines, externalContext } = input;
 
   const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
   const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
+
+  const systemPrompt = `${'\'\'\''}${prompt}'\'\'\''}\n\nYour entire response must be a single, well-formatted markdown document. Do not include any conversational text or explanations.`;
   
-  const generateProposalPrompt = ai.definePrompt({
-    name: 'generateProposalPrompt',
-    input: { schema: z.any() }, // Use any since we construct it manually
-    output: { schema: ProjectProposalSchema },
-    model: 'googleai/gemini-1.5-flash',
-    system: prompt,
-    prompt: `
+  let userPrompt = `
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}
@@ -54,13 +50,25 @@ File: {{this.fileName}}
 
 --- Main Input: Project Idea ---
 {{{projectIdea}}}
-`,
+`;
+  
+  const llmResponse = await ai.generate({
+    model: 'googleai/gemini-1.5-flash',
+    system: systemPrompt,
+    prompt: userPrompt,
+    context: { guidelines, textContext, mediaContext, projectIdea },
     config: {
-        temperature: 0.8, // Higher temperature for more creative/detailed proposals
-        maxOutputTokens: 8192, // Allow for very detailed proposals
+      temperature: 0.8,
+      maxOutputTokens: 8192,
     }
   });
 
-  const { output } = await generateProposalPrompt({ projectIdea, guidelines, textContext, mediaContext });
-  return output!;
+  const output = llmResponse.text;
+
+  if (!output) {
+      throw new Error("Proposal generation failed to produce an output. The AI may not have had enough context. Please try adding more detail.");
+  }
+
+  // Clean up the output to remove any potential markdown code fences
+  return output.replace(/```markdown/g, '').replace(/```/g, '').trim();
 }

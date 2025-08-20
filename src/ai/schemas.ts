@@ -1030,7 +1030,7 @@ const academicSolverContextFileSchema = z.object({
 export const ProjectStateSchema = z.object({
     name: z.string().optional(),
     projectIdea: z.string().optional(),
-    proposal: z.lazy(() => ProjectProposalSchema).nullable(),
+    proposal: z.any().nullable(),
     reportConfig: FullReportModeConfigSchema.nullable().optional(),
     generatedProposalState: SavedProposalStateSchema.nullable().optional(),
     sections: z.record(SectionNameSchema, z.string()).optional(),
@@ -1078,4 +1078,5 @@ export const ApiGeneratePresentationSchema = z.object({
 });
 
     
+
 

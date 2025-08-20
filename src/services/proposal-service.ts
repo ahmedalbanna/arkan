@@ -16,7 +16,7 @@ interface GenerateProposalVariables {
  * @param variables - An object containing the request body and the user's auth token.
  * @returns A promise that resolves to the generated proposal data.
  */
-export async function generateProposalApi(variables: GenerateProposalVariables): Promise<AnyProjectProposal> {
+export async function generateProposalApi(variables: GenerateProposalVariables): Promise<string> {
     const response = await fetch('/api/generate/proposal', {
         method: 'POST',
         headers: {

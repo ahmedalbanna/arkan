@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -10,10 +11,11 @@ import type { ProposalTemplate } from '@/services/template-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { ExternalContext } from '@/lib/types';
+import type { AdvancedProposalFields } from '@/hooks/useProposalGenerationStore';
 
 
 const generateProposalSchema = z.object({
-  projectIdea: z.string().min(10, { message: 'Project idea must be at least 10 characters long.' }),
+  projectIdea: z.string().min(1, { message: 'Project idea is required.' }),
   templateId: z.string(),
   customGuidelines: z.array(z.string()).optional(),
   externalContext: z.array(z.object({
@@ -21,7 +23,38 @@ const generateProposalSchema = z.object({
       content: z.string(),
       type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
   })).optional(),
+  advancedFields: z.object({
+      projectTitle: z.string(),
+      projectObjective: z.string(),
+      projectMethodology: z.string(),
+      projectExpectedOutcome: z.string(),
+      projectTimeline: z.string(),
+      projectBudget: z.string(),
+      projectStakeholders: z.string(),
+      projectRisks: z.string(),
+      projectSuccessCriteria: z.string(),
+      projectEvaluation: z.string(),
+  }).optional(),
 });
+
+function formatAdvancedPrompt(fields: AdvancedProposalFields): string {
+    return `
+Here are the specific details for the project:
+- **Title**: ${'\'\'\''}${fields.projectTitle}'\'\'\''}
+- **Objective**: ${'\'\'\''}${fields.projectObjective}'\'\'\''}
+- **Methodology**: ${'\'\'\''}${fields.projectMethodology}'\'\'\''}
+- **Expected Outcomes**: ${'\'\'\''}${fields.projectExpectedOutcome}'\'\'\''}
+- **Timeline**: ${'\'\'\''}${fields.projectTimeline}'\'\'\''}
+- **Budget**: ${'\'\'\''}${fields.projectBudget}'\'\'\''}
+- **Stakeholders**: ${'\'\'\''}${fields.projectStakeholders}'\'\'\''}
+- **Risks**: ${'\'\'\''}${fields.projectRisks}'\'\'\''}
+- **Success Criteria**: ${'\'\'\''}${fields.projectSuccessCriteria}'\'\'\''}
+- **Evaluation**: ${'\'\'\''}${fields.projectEvaluation}'\'\'\''}
+
+Based on these details, please generate a comprehensive and professional project proposal in a well-structured markdown format.
+`;
+}
+
 
 export const POST = withAuth(async ({ request, user }) => {
   try {
@@ -32,7 +65,11 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
     
-    let { projectIdea, templateId, customGuidelines, externalContext } = validation.data;
+    let { projectIdea, templateId, customGuidelines, externalContext, advancedFields } = validation.data;
+    
+    if (advancedFields) {
+        projectIdea = formatAdvancedPrompt(advancedFields);
+    }
     
     // If the user selects the "automatic" template, first call the AI to select the best template.
     if (templateId === 'automatic-ai') {
@@ -77,7 +114,7 @@ export const POST = withAuth(async ({ request, user }) => {
             customGuidelines,
             externalContextFileCount: externalContext?.length || 0,
         },
-        output: { title: result.title, category: result.category },
+        output: { resultLength: result.length },
     });
     
     return createApiResponse(result, 200);

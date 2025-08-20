@@ -11,12 +11,14 @@ import { toast } from './use-toast';
 import type { AnyProjectProposal, ExternalContext } from '@/lib/types';
 import { generateProposalApi } from '@/services/proposal-service';
 import { useBuilderStore } from './useBuilderStore';
+import type { AdvancedProposalFields } from './useProposalGenerationStore';
 
 export interface GenerateProposalBody {
     projectIdea: string;
     templateId: string;
     customGuidelines: string[];
     externalContext: ExternalContext[];
+    advancedFields?: AdvancedProposalFields;
 }
 
 export function useGenerateProposal() {
@@ -24,7 +26,7 @@ export function useGenerateProposal() {
     const { setProposal } = useBuilderStore();
     const queryClient = useQueryClient();
 
-    return useMutation<AnyProjectProposal, Error, GenerateProposalBody>({
+    return useMutation<string, Error, GenerateProposalBody>({
         mutationFn: async (body) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return generateProposalApi({ body, token });

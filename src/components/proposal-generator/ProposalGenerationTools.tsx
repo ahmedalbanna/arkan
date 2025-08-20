@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, PanelLeftClose } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useProposalGenerationStore } from '@/hooks/useProposalGenerationStore';
+import { useProposalGenerationStore, type AdvancedProposalFields } from '@/hooks/useProposalGenerationStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useProposalTemplates } from '@/hooks/use-templates';
@@ -20,34 +20,38 @@ import { useAuth } from '@/context/AuthContext';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useReportStore } from '@/hooks/useReportStore';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
+    generationMode: 'simple' | 'advanced';
 }
 
-function GenerateButton({ isGenerating }: GenerateButtonProps) {
+function GenerateButton({ isGenerating, generationMode }: GenerateButtonProps) {
     const { t } = useLocalization();
     const { projectIdea } = useBuilderStore();
-    const { selectedTemplateId, customGuidelines } = useProposalGenerationStore();
+    const { selectedTemplateId, customGuidelines, advancedFields } = useProposalGenerationStore();
     const { externalContext } = useReportStore();
     const generationMutation = useGenerateProposal();
     const { userProfile } = useAuth();
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
 
     const handleClick = () => {
-        generationMutation.mutate({
-            projectIdea,
-            templateId: selectedTemplateId,
-            customGuidelines,
-            externalContext: externalContext,
-        });
+        const payload = generationMode === 'simple'
+            ? { projectIdea, templateId: selectedTemplateId, customGuidelines, externalContext }
+            : { projectIdea: advancedFields.projectTitle, templateId: selectedTemplateId, customGuidelines, externalContext, advancedFields };
+
+        generationMutation.mutate(payload);
     }
+
+    const canGenerate = (generationMode === 'simple' && projectIdea) || 
+                      (generationMode === 'advanced' && advancedFields.projectTitle && advancedFields.projectObjective);
 
     return (
         <Button
             type="button"
             onClick={handleClick}
-            disabled={isGenerating || !projectIdea || !hasCredits}
+            disabled={isGenerating || !canGenerate || !hasCredits}
             className="font-headline w-full"
             title={!hasCredits ? t('builder.toasts.insufficientCredits') : t('builder.proposalGenerator.generateButton')}
         >
@@ -72,6 +76,44 @@ interface ProposalGenerationToolsProps {
     onCollapseToggle: () => void;
 }
 
+const AdvancedFieldsForm = () => {
+    const { advancedFields, setAdvancedField } = useProposalGenerationStore();
+    const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        setAdvancedField(e.target.name as keyof AdvancedProposalFields, e.target.value);
+    }
+    
+    return (
+        <div className="space-y-4">
+            <div className="space-y-1">
+                <Label htmlFor="projectTitle">Project Title</Label>
+                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="e.g., AI-Powered Document Collaboration Platform"/>
+            </div>
+            <div className="space-y-1">
+                <Label htmlFor="projectObjective">Project Objective</Label>
+                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={4} placeholder="e.g., To develop a platform that uses AI to assist in writing, editing, and managing technical documents..."/>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                    <Label htmlFor="projectMethodology">Methodology</Label>
+                    <Input id="projectMethodology" name="projectMethodology" value={advancedFields.projectMethodology} onChange={handleFieldChange}/>
+                </div>
+                 <div className="space-y-1">
+                    <Label htmlFor="projectTimeline">Timeline</Label>
+                    <Input id="projectTimeline" name="projectTimeline" value={advancedFields.projectTimeline} onChange={handleFieldChange}/>
+                </div>
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="projectBudget">Budget</Label>
+                <Input id="projectBudget" name="projectBudget" value={advancedFields.projectBudget} onChange={handleFieldChange}/>
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="projectStakeholders">Stakeholders</Label>
+                <Input id="projectStakeholders" name="projectStakeholders" value={advancedFields.projectStakeholders} onChange={handleFieldChange}/>
+            </div>
+        </div>
+    )
+}
+
 export const ProposalGenerationTools = ({
     isDisabled,
     isGenerating,
@@ -80,6 +122,7 @@ export const ProposalGenerationTools = ({
 
     const { t } = useLocalization();
     const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
+    const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
     const { projectIdea, setProjectIdea } = useBuilderStore();
     const {
@@ -126,24 +169,36 @@ export const ProposalGenerationTools = ({
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
-                 <Accordion type="multiple" className="w-full space-y-4" defaultValue={['item-1']}>
+                <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="simple">Simple</TabsTrigger>
+                        <TabsTrigger value="advanced">Advanced</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="simple" className="pt-4">
+                         <div>
+                            <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
+                            <Textarea
+                                id="project-idea"
+                                name="projectIdea"
+                                placeholder={t('builder.proposalGenerator.placeholder')}
+                                rows={5}
+                                required
+                                value={projectIdea || ''}
+                                onChange={(e) => setProjectIdea(e.target.value)}
+                                disabled={isGenerating}
+                                className="mt-1"
+                            />
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="advanced" className="pt-4">
+                        <AdvancedFieldsForm />
+                    </TabsContent>
+                </Tabs>
+               
+                 <Accordion type="multiple" className="w-full space-y-4">
                     <AccordionItem value="item-1">
                         <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>
                         <AccordionContent className="pt-4 space-y-4">
-                             <div>
-                                <Label htmlFor="project-idea">{t('builder.proposalGenerator.mainSubjectLabel')}</Label>
-                                <Textarea
-                                    id="project-idea"
-                                    name="projectIdea"
-                                    placeholder={t('builder.proposalGenerator.placeholder')}
-                                    rows={5}
-                                    required
-                                    value={projectIdea || ''}
-                                    onChange={(e) => setProjectIdea(e.target.value)}
-                                    disabled={isGenerating}
-                                    className="mt-1"
-                                />
-                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="proposal-template">{t('builder.proposalGenerator.templateLabel')}</Label>
                                 <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId} disabled={isGenerating}>
@@ -186,7 +241,7 @@ export const ProposalGenerationTools = ({
                  </Accordion>
             </CardContent>
             <CardFooter>
-                <GenerateButton isGenerating={isGenerating} />
+                <GenerateButton isGenerating={isGenerating} generationMode={activeTab} />
             </CardFooter>
         </Card>
     );
