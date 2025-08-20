@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { IStylesOptions, IRunOptions, INumberingOptions } from 'docx';
@@ -8,6 +9,7 @@ import type { Root, PhrasingContent, List } from 'mdast';
 import { templates, type TemplateKey } from './docx-styles';
 import { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun, Document, Packer, HeadingLevel, Header, Footer, PageNumber, TableOfContents } from 'docx';
 import { exportComponentAsPDF } from './pdf-exporter';
+import { processPlantUml } from './utils';
 
 export async function createDocxParagraphs(markdown: string) {
     const { unified } = await import('unified');
@@ -16,7 +18,8 @@ export async function createDocxParagraphs(markdown: string) {
 
     if (!markdown) return [];
 
-    const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
+    const processedMarkdown = processPlantUml(markdown);
+    const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
     const docxObjects: (InstanceType<typeof Paragraph> | InstanceType<typeof Table>)[] = [];
 
     // Make transformInlines async to handle image fetching
@@ -38,12 +41,16 @@ export async function createDocxParagraphs(markdown: string) {
                     break;
                 case 'image':
                     try {
-                        const proxiedUrl = `/api/proxy-image?url=${'\'\'\''}${encodeURIComponent(node.url)}'\'\'\''}`;
+                        const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(node.url)}`;
                         const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
                         if (imageBuffer) {
+                             // Regular inline images can be smaller
+                            const isPlantUML = node.url.includes('plantuml.com');
+                            const width = isPlantUML ? 550 : 200;
+                            const height = isPlantUML ? 400 : 150;
                             runs.push(new ImageRun({
                                 data: imageBuffer,
-                                transformation: { width: 100, height: 100 } // Smaller size for inline images
+                                transformation: { width, height }
                             }));
                         }
                     } catch (e) {
@@ -84,24 +91,24 @@ export async function createDocxParagraphs(markdown: string) {
             case 'heading':
                 docxObjects.push(new Paragraph({
                     children: await transformInlines(node.children),
-                    heading: `Heading${'\'\'\''}${node.depth}'\'\'\''}` as any,
+                    heading: `Heading${node.depth}` as any,
                 }));
                 break;
             case 'paragraph':
-                const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
-                if (imageNode) {
-                    const proxiedUrl = `/api/proxy-image?url=${'\'\'\''}${encodeURIComponent(imageNode.url)}'\'\'\''}`;
-                    const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
-                    if (imageBuffer) {
-                        docxObjects.push(new Paragraph({
-                            children: [new ImageRun({ data: imageBuffer, transformation: { width: 450, height: 300 } })],
-                            alignment: AlignmentType.CENTER,
-                        }));
-                    } else {
-                        docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${'\'\'\''}${imageNode.alt}'\'\'\''}]`)] }));
-                    }
+                const imageNode = node.children.find(child => child.type === 'image');
+                if (imageNode && imageNode.type === 'image') {
+                     const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
+                     const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
+                     if (imageBuffer) {
+                         docxObjects.push(new Paragraph({
+                             children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 400 } })],
+                             alignment: AlignmentType.CENTER,
+                         }));
+                     } else {
+                         docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
+                     }
                 } else {
-                    docxObjects.push(new Paragraph({
+                     docxObjects.push(new Paragraph({
                         children: await transformInlines(node.children),
                         spacing: { after: 120 },
                     }));
@@ -161,12 +168,12 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     try {
         const response = await fetch(imageUrl);
  if (response.status !== 200) {
-            console.warn(`Failed to fetch proxied image from ${'\'\'\''}${imageUrl}'\'\'\''}. Status: ${'\'\'\''}${response.status}'\'\'\''}`);
+            console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.status}`);
             return null;
         }
         return response.arrayBuffer();
     } catch (error) {
-        console.error(`Error fetching image from ${'\'\'\''}${imageUrl}'\'\'\''}:`, error);
+        console.error(`Error fetching image from ${imageUrl}:`, error);
         return null;
     }
 }
@@ -334,12 +341,12 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
                     new Paragraph({ text: title, style: 'Title' }),
-                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 400 } }),
+                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 800 } }),
                 ]
             },
             {
                 properties: { type: SectionType.NEXT_PAGE },
-                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${'\'\'\''}${title}'\'\'\''}`, alignment: AlignmentType.RIGHT })] }) },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
                         children: [
@@ -383,7 +390,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
 
     try {
         const blob = await Packer.toBlob(doc);
-        saveAs(blob, `${'\'\'\''}${title.replace(/ /g, '_')}_proposal.docx'\'\'\''}`);
+        saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
     } catch (error) {
         console.error("Error generating DOCX file:", error);
     }
@@ -482,7 +489,7 @@ export async function exportReportAsDocx(
             },
             {
                 properties: { type: SectionType.NEXT_PAGE },
-                headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${'\'\'\''}${proposalTitle}'\'\'\''}`, alignment: AlignmentType.RIGHT })] }) },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Report: ${proposalTitle}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
                         children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] })] })],
@@ -500,3 +507,5 @@ export async function exportReportAsDocx(
         console.error("Error generating DOCX file:", error);
     }
 }
+
+    
