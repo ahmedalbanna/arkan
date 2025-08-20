@@ -224,7 +224,6 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
         numbering,
         sections: [{
             children: [
-                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
                 ...docxContent,
             ]
         }]
@@ -236,10 +235,10 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
 
 function applyStylesToElement(element: HTMLElement, styles: any) {
     if (styles?.font) {
-        element.style.fontFamily = typeof styles.font === 'string' 
- ? styles.font 
+        element.style.fontFamily = typeof styles.font === 'string'
+ ? styles.font
  : (styles.font as any)?.name ?? 'Calibri';
- 
+
     }
     if (styles?.size) {
  element.style.fontSize = `${Number(styles.size ?? 22) / 2}pt`;
@@ -416,7 +415,6 @@ export async function exportReportAsDocx(
         const content = sections[key];
         if (content) {
             return [
-                new Paragraph({ text: translatedTitles[key] || key, heading: HeadingLevel.HEADING_1 }),
                 ...(await createDocxParagraphs(content)),
             ];
         }
@@ -508,4 +506,3 @@ export async function exportReportAsDocx(
     }
 }
 
-    
