@@ -216,12 +216,17 @@ Generate the NDA text. IMPORTANT: Include a disclaimer that this is not legal ad
 Synthesize the information from the entire proposal and the provided context to create this introduction. Infer the problem from the objective and risks. Infer the limitations of existing systems from the project's goals.
 Generate the entire introduction as a single, coherent text. Use markdown newlines for paragraph breaks.
 
-The introduction should be well-structured, engaging, and must include:`,
+The introduction should be well-structured, engaging, and must heading include:`,
       guidelines: [
-        { text: "**Purpose of the Project**: A clear statement of why the project is being undertaken.", isDefault: true },
-        { text: "**Problem Definition**: A detailed identification and explanation of the problem the project addresses.", isDefault: true },
-        { text: "**Overview of the Document**: An outline of the report structure, mentioning the main sections.", isDefault: true },
-        { text: "**Existing Systems or Technologies**: A description of current solutions and their limitations, justifying the need for this new project.", isDefault: true },
+        { text: "**Purpose of the Project**: Provide a clear statement of why the project is being undertaken. Include the main reasons for its inception and what it aims to achieve.", isDefault: true },
+        { text: "**Problem Definition**: Identify and explain the problem the project addresses. Provide a comprehensive description and the context in which this problem exists.", isDefault: true },
+        { text: "**Overview of the Document**: Create an outline of the report structure, highlighting the main sections and what each section will cover in relation to the project.", isDefault: true },
+        { text: "**Limitations of Existing Systems**: Describe the current solutions or technologies addressing the problem and their limitations, justifying the need for this new project.", isDefault: true },
+        { text: "**Goals and Objectives**: Define the project's goals and objectives, including how they will be achieved and the expected contributions of the project..", isDefault: true },
+        { text: "**Solution Overview**: Give a brief overview of how the project will solve the stated problem, outlining the solution's main components.", isDefault: true },
+        { text: "**Research Scope**: Specify the project boundaries, detailing what is included and what is not within the scope of the research.", isDefault: true },
+
+
       ],
       defaultContext: ['proposal']
     },
@@ -348,12 +353,17 @@ The introduction should be well-structured, engaging, and must include:`,
         base: `You are an academic and technical writer. Based on the provided project proposal and any additional context, write a comprehensive 'Literature Review' section for the final report.
 Synthesize information from the entire proposal and the provided context to create a coherent and well-supported literature review. Use markdown for formatting.
 
-Your review should:`,
+The literature review should be well-structured, engaging, and must heading include:`,
         guidelines: [
-            { text: "Discuss existing research, established theories, and relevant studies in the project's domain.", isDefault: true },
-            { text: "Analyze current technologies, frameworks, and methodologies that are pertinent to the project's objective.", isDefault: true },
-            { text: "Identify the gaps in the existing literature or technology that this project aims to address.", isDefault: true },
-            { text: "Provide a strong justification for the project by positioning it within the context of current knowledge and practices.", isDefault: true },
+          { text: "**Introduction**: Begin by explaining the purpose and role of literature reviews in academic and technical reports. Highlight their importance in establishing a foundation for research and providing context in technical fields.", isDefault: true },
+          { text: "**Review and Analysis of Academic Literature**: Review current academic literature to summarize key findings and established theories. Provide a concise analysis that highlights significant insights from existing research.", isDefault: true },
+          { text: "**Technological Advancements**: Describe the most recent technological advancements relevant to the field. Discuss their implementation and relevance, ensuring the summary is accurate and informative.", isDefault: true },
+          { text: "**Key Findings**: Identify and discuss trends, common themes, and significant contributions from the reviewed literature. Analyze these findings to provide a comprehensive overview.", isDefault: true },
+          { text: "**Contextualizing the Current Project**: Align the current project with the existing body of research and the latest technological landscape. Explain how this project fits within the broader academic and technical context.", isDefault: true },
+          { text: "**Identification of Research Gaps**: Identify areas where current knowledge is lacking. Point out opportunities for future research by highlighting these gaps in the existing literature.", isDefault: true },
+          { text: "**Alignment with Ongoing Research**: Discuss how the project fits into the broader context of ongoing research and development within the field. Show its relevance and potential impact on future studies.", isDefault: true },
+          { text: "**Conclusion**: Summarize the insights gained from the literature review and discuss their implications for the project. Provide a clear and concise conclusion that ties all findings together.", isDefault: true },
+          { text: "**References**: Generate a comprehensive list of all cited sources used within the literature review. Ensure the references are formatted correctly and are complete.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -373,12 +383,19 @@ Your review should:`,
         base: `You are an expert systems analyst. Based on the provided project proposal and any additional context, write a thorough 'System Analysis' section.
 Synthesize information from the entire proposal and the provided context to create a comprehensive analysis. Use markdown for formatting, including bullet points for requirements.
 
-Your analysis must cover:`,
+The analysis should be well-structured, engaging, and must heading include:`,
         guidelines: [
             { text: "**Functional Requirements**: Detail the specific functions the system must perform. Infer these from the project objective, expected outcomes, and stakeholders' interests.", isDefault: true },
+            { text: "**Data Requirements**: Describe the data entities, their attributes, and relationships.", isDefault: true },
             { text: "**Non-Functional Requirements**: Describe the system's quality attributes, such as performance, security, usability, and scalability. Infer these from the project's context and risks.", isDefault: true },
             { text: "**Stakeholder Analysis**: Elaborate on the needs and expectations of each stakeholder group identified in the proposal.", isDefault: true },
             { text: "**Problem Analysis**: Expand on the limitations of current systems (as suggested by the project's rationale) and clearly define the scope of the problem being solved.", isDefault: true },
+            { text: "**Clients, Customers, and Users**: Identify and describe the different types of clients, customers, and end-users of the system.", isDefault: true },
+            { text: "**Look and Feel Requirementss**: Describe the aesthetic and design requirements for the user interface.", isDefault: true },
+            { text: "**Usability Requirements**: Define how easy the system should be to learn and use.", isDefault: true },
+            { text: "**Security Requirements**: Outline the necessary security measures to protect the system and its data.", isDefault: true },
+            { text: "**Performance Requirements**: Specify the system's expected response times, throughput, and resource utilization.", isDefault: true },
+            { text: "**Portability Requirements**: Describe the system's ability to run on different platforms or environments.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -398,12 +415,17 @@ Your analysis must cover:`,
         base: `You are a senior design strategist and UI/UX expert. Based on the provided project proposal and any additional context, write a detailed 'Design Strategy' section.
 Synthesize information from the entire proposal and the provided context to create a coherent design strategy. Use markdown for formatting.
 
-This section should articulate:`,
+The strategist should be well-structured, engaging, and must heading include:`,
         guidelines: [
-            { text: "**Design Methodology**: Justify the choice of design approach (e.g., User-Centered Design, Double Diamond, etc.) based on the project's methodology and objectives.", isDefault: true },
-            { text: "**Core Design Principles**: Define 3-5 key principles that will guide the design process (e.g., 'Clarity and Simplicity', 'Efficiency', 'Consistency').", isDefault: true },
-            { text: "**User Experience (UX) Goals**: Describe the intended user experience, focusing on how the design will address stakeholder needs and solve the core problem.", isDefault: true },
-            { text: "**User Interface (UI) Direction**: Outline the visual direction, including thoughts on layout, color palette, and typography that would align with the project's category and goals.", isDefault: true },
+          { text: "**Design Methodology**: Explain the selected design approach, such as User-Centered Design or Double Diamond, and provide reasons for its choice based on the project's methodology and objectives. Your explanation should align with the project's goals and help guide the design process effectively.", isDefault: true },
+          { text: "**Core Design Principles**: Identify and describe 3 to 5 core design principles that will guide the design process, such as 'Clarity and Simplicity', 'Efficiency', or 'Consistency'. Explain how these principles will be applied to achieve project objectives and improve user experience.", isDefault: true },
+          { text: "**Proposed Solution**: Outline the primary solution proposed to address the identified problems and requirements in the project. Include relevant details that illustrate how this solution meets the project's objectives and overcomes the identified challenges.", isDefault: true },
+          { text: "**Alternative Solutions**: Discuss other potential solutions that were considered during the design process and explain why the proposed solution was chosen over these alternatives. Provide a thorough comparison that highlights the key differentiators.", isDefault: true },
+          { text: "**Design Constraints**: Outline the project's hardware and software needs and describe the characteristics of the target end-users. Explain how these constraints might impact the design process and the final solution.", isDefault: true },
+          { text: "**Architectural Strategies**: Specify the architectural strategies including utilized algorithms, reuse of existing software components, management strategies, task descriptions, resources and risks, development method, future enhancement plans, and system architecture diagram. Provide a comprehensive overview that will guide development.", isDefault: true },
+          { text: "**Costs and Benefits**: Conduct a cost analysis and benefit analysis for the project, including a detailed cost-benefit comparison. Explain how these analyses support the project's viability and decision-making process.", isDefault: true },
+          { text: "**User Experience (UX) Goals**: Describe the intended user experience goals, focusing on how the design will address stakeholder needs and solve the core problem. Highlight strategies for achieving a positive and effective user experience.", isDefault: true },
+          { text: "**User Interface (UI) Direction**: Outline the visual direction for the user interface, including layout, color palette, and typography choices. Ensure these align with the project's category and goals, enhancing the overall design strategy.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -423,12 +445,14 @@ This section should articulate:`,
         base: `You are a principal software architect. From the provided project proposal and any additional context, create a comprehensive 'System Design' section.
 Synthesize information from the entire proposal and the provided context to produce a logical and robust system design. Use markdown for formatting.
 
-This section must detail:`,
+The architect should be well-structured, engaging, and must heading include:`,
         guidelines: [
-            { text: "**High-Level Architecture**: Describe and justify the chosen architectural pattern (e.g., Monolithic, Microservices, Serverless). Base the choice on the project's scale, objectives, and risks.", isDefault: true },
-            { text: "**Data Model / Schema**: Outline the key data entities, their attributes, and relationships. Think about users, primary objects, and configurations.", isDefault: true },
-            { text: "**Component Breakdown**: Describe the major components of the system (e.g., Authentication Service, API Gateway, Frontend Application, Database) and their responsibilities.", isDefault: true },
-            { text: "**Technology Stack**: Propose a specific and justified technology stack for the backend, frontend, database, and deployment based on the project's requirements.", isDefault: true },
+          { text: "**High-Level Architecture**: Provide a detailed description and justification for selecting a particular architectural pattern such as Monolithic, Microservices, or Serverless. Consider the project's scale, objectives, and potential risks when making your recommendation. Explain why this architecture is the most suitable choice for the project.", isDefault: true },
+          { text: "**Data Model / Schema**: Outline the key data entities that will be used in the project, including their attributes and relationships. This should include primary objects like users and any configurations necessary for the system. Provide a detailed explanation of how these entities will interact.", isDefault: true },
+          { text: "**Component Breakdown**: Detail the major components of the system, such as the Authentication Service, API Gateway, Frontend Application, and Database. Explain the specific responsibilities and functionalities of each component within the system architecture.", isDefault: true },
+          { text: "**Technology Stack**: Propose and justify a technology stack for the project's backend, frontend, database, and deployment. Ensure the proposed technologies align with the project's specific requirements and justify why each technology is the best fit for its purpose.", isDefault: true },
+          { text: "**Assess Project Scale and Objectives**: Evaluate the scale and objectives of the project to ensure the chosen architectural pattern aligns with them. Provide insights into how the objectives and scale of the project impact architectural decisions.", isDefault: true },
+
         ],
         defaultContext: ['proposal']
     },
@@ -446,15 +470,15 @@ This section must detail:`,
     isEnabled: true,
     prompt: {
         base: `You are a lead software engineer. Based on the provided project proposal and any additional context, write a 'System Programming and Implementation' section for the technical report.
-Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.
-
-This section should outline:`,
+Synthesize information from the entire proposal and the provided context to create a practical implementation plan. Use markdown for formatting.`,
         guidelines: [
-            { text: "**Development Workflow**: Describe the development process, aligning with the project's stated methodology (e.g., Git flow for Agile).", isDefault: true },
-            { text: "**Coding Standards & Practices**: Mention key standards to be followed (e.g., code style guides, linting rules, commenting conventions).", isDefault: true },
-            { text: "**Key Libraries & Frameworks**: Based on the project type, list the essential libraries and frameworks that will be used for implementation and justify their selection.", isDefault: true },
-            { text: "**Environment Setup**: Briefly describe the development, staging, and production environments.", isDefault: true },
-            { text: "**Version Control**: Specify the version control system (e.g., Git) and hosting platform (e.g., GitHub, GitLab).", isDefault: true },
+            { text: "Describe Development Workflow  Detail the development process of the project ensuring to align with the specified methodology, such as utilizing Git flow within an Agile framework. Include all phases from planning to deployment.", isDefault: true },
+            { text: "List Coding Standards  Outline the key coding standards and practices that must be adhered to throughout the project. Include standards like code style guides, linting rules, and commenting conventions.", isDefault: true },
+            { text: "Identify Key Libraries & Frameworks  List and justify the selection of essential libraries and frameworks that will be utilized in the implementation phase, based on the project type, ensuring they align with project needs.", isDefault: true },
+            { text: "Describe Environment Setup  Provide a detailed description of the development, staging, and production environments. Include necessary configurations and software requirements for each environment.", isDefault: true },
+            { text: "Outline System Architecture  Create a Deployment diagram illustrating nodes and their connections, along with a Program Flow Diagram to show object interactions and life cycles within the system.", isDefault: true },
+            { text: "Detail System Design  Include a Detailed Component Description using a component diagram, along with Data Flow Diagrams using an activity diagram to explain the flow of data within the system.", isDefault: true },
+            { text: "Specify Version Control  Provide details on the version control system and hosting platform to be used, such as Git and GitHub, to ensure proper code management and collaboration.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -474,12 +498,17 @@ This section should outline:`,
         base: `You are a senior QA engineer. Using the provided project proposal and any additional context, write a comprehensive 'System Testing' section.
 Synthesize information from the entire proposal, especially the risks and success criteria, to create a robust testing plan. Use markdown for formatting.
 
-This section must define the testing strategy, including:`,
+The system testing should be well-structured, engaging, and must heading include:`,
         guidelines: [
-            { text: "**Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).", isDefault: true },
-            { text: "**Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.", isDefault: true },
-            { text: "**Tools and Automation**: Recommend specific tools for test automation (e.g., Selenium, Cypress, Jest), performance testing (e.g., JMeter), and bug tracking (e.g., Jira).", isDefault: true },
-            { text: "**Test Metrics**: Identify key metrics for success, such as test coverage, bug detection rate, and UAT pass rate, linking them to the project's success criteria.", isDefault: true },
+          { text: "**Introduction**: Explain the testing strategy.", isDefault: true },
+          { text: "**Testing Levels**: Describe the plan for Unit Testing, Integration Testing, System Testing, and User Acceptance Testing (UAT).", isDefault: true },
+          { text: "**Testing Types**: Detail the approach for functional testing, usability testing, performance testing, and security testing.", isDefault: true },
+          { text: "**Testing Strategy**: Explain the overall testing strategy, including objectives, scope, and the process that will be followed at each level of testing. Cover how this strategy aligns with project goals and ensures quality.", isDefault: true },
+          { text: "**Test Plan**: Detail features that will be tested and those that will not, along with the environments used for testing. Explain how the test plan supports the overall testing strategy.", isDefault: true },
+          { text: "**Test Cases**: Develop comprehensive test cases, including inputs, expected outputs, test procedures, and criteria for passing and failing. Ensure these test cases align with the project's quality standards.", isDefault: true },
+          { text: "**Test Results**: Provide an analysis of the results from testing phases, identifying any issues and the corrective actions implemented. Discuss the impact of these results on the project timeline and success.", isDefault: true },
+          { text: "**Testing Tools**: Recommend specific tools for test automation, performance testing, and bug tracking. Justify your choices based on the project requirements and the capabilities of the tools.", isDefault: true },
+          { text: "**Test Metrics**: Identify and explain key metrics for testing success, such as test coverage and bug detection rate. Link these metrics directly to project success criteria to demonstrate their importance.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -501,10 +530,10 @@ Synthesize information from the entire proposal and the provided context to crea
 
 The conclusion should:`,
         guidelines: [
-            { text: "**Summarize Key Points**: Briefly reiterate the problem, the proposed solution, and the project's main objective.", isDefault: true },
-            { text: "**Reiterate Expected Outcomes**: Restate the most important expected outcomes and the value the project will deliver.", isDefault: true },
-            { text: "**Future Outlook**: Provide a forward-looking statement about the project's potential long-term impact or next steps after completion.", isDefault: true },
-            { text: "**Final Statement**: End with a strong, conclusive statement that reinforces the project's importance and viability.", isDefault: true },
+            { text: "Summarize Key Points  Summarize the key points of a project by briefly reiterating the problem, the proposed solution, and the main objective of the project. Ensure the summary is concise yet comprehensive, capturing the essence of the project in at least 30 words.", isDefault: true },
+            { text: "Reiterate Expected Outcomes  Reiterate the expected outcomes of a project by restating the most important results and the value that the project is expected to deliver upon its completion. Provide insight into the benefits and impact.", isDefault: true },
+            { text: "Provide Future Outlook  Provide a future outlook for a project by offering a forward-looking statement. Discuss potential long-term impacts or next steps that might occur after the project's completion. Make it at least 30 words.", isDefault: true },
+            { text: "Make Final Statement  Craft a final statement that concludes a project discussion. Ensure the statement is strong and conclusive, reinforcing the project's importance and viability. The statement should be compelling and persuasive.", isDefault: true },
         ],
         defaultContext: ['proposal']
     },
@@ -712,11 +741,3 @@ You will be provided with the full project proposal in JSON format, and may also
     model: 'googleai/gemini-2.0-flash',
   },
 ];
-
-    
-
-
-
-
-
-

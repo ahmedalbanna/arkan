@@ -1253,6 +1253,8 @@
       "disabledTooltip": "This agent is disabled",
       "updateSection": "Update Section",
       "Select_template": "Select a template",
+      "generateButton": "Generate",
+
       "sections": {
         "introduction": "Introduction",
         "literatureReview": "Literature Review",

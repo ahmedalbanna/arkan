@@ -1253,6 +1253,7 @@
       "disabledTooltip": "هذا الوكيل معطل",
       "updateSection": "تحديث القسم",
       "Select_template": "حدد قالبًا",
+      "generateButton": "إنشاء",
       "sections": {
         "introduction": "المقدمة",
         "literatureReview": "مراجعة الأدبيات",
