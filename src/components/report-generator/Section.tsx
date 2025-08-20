@@ -275,11 +275,11 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                    <ScrollArea className="h-full max-h-[60vh] rounded-md border">
+                    <div className="bg-background shadow-lg p-16">
                         <div className="prose dark:prose-invert max-w-none p-4">
                             <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
                         </div>
-                    </ScrollArea>
+                    </div>
 
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
