@@ -28,6 +28,7 @@ import { useRewriteText, useHumanizeText } from '@/hooks/use-writing-tools';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { processPlantUml } from '@/lib/utils';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -248,6 +249,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     };
 
     const { words, chars } = calculateCounts(content);
+    const processedContent = processPlantUml(content);
 
     return (
         <Tabs defaultValue="view">
@@ -273,11 +275,11 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                    <div className="bg-background shadow-lg p-16">
-                        <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                    <ScrollArea className="h-full max-h-[60vh] rounded-md border">
+                        <div className="prose dark:prose-invert max-w-none p-4">
+                            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
                         </div>
-                    </div>
+                    </ScrollArea>
 
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
