@@ -2,7 +2,8 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,7 +19,6 @@ import { Skeleton } from '../ui/skeleton';
 import { Textarea } from '../ui/textarea';
 import { useAuth } from '@/context/AuthContext';
 import { useGenerateProposal } from '@/hooks/use-proposal-generation';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 
