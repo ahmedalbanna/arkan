@@ -299,7 +299,7 @@ export const GenerateCodebaseInputSchema = z.object({
 
 // generate-diagrams.ts
 export const GenerateDiagramInputSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
+  proposal: ProjectProposalSchema.optional().nullable(),
   projectPlan: ProjectPlanSchema.optional().nullable().describe("The detailed project plan with phases and tasks."),
   diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
   otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),

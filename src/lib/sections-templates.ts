@@ -32,13 +32,13 @@ export const reportSections: Record<string, Section> = {
 };
 
 export const diagramSections: Record<string, Section> = {
-    "useCase": { title: 'Use Case Diagram', icon: GitGraph, agentId: 'generate-useCase-diagram' },
-    "class": { title: 'Class Diagram', icon: GitGraph, agentId: 'generate-class-diagram' },
-    "sequence": { title: 'Sequence Diagram', icon: GitGraph, agentId: 'generate-sequence-diagram' },
-    "activity": { title: 'Activity Diagram', icon: GitGraph, agentId: 'generate-activity-diagram' },
-    "component": { title: 'Component Diagram', icon: GitGraph, agentId: 'generate-component-diagram' },
-    "archimate": { title: 'ArchiMate Diagram', icon: DatabaseZap, agentId: 'generate-archimate-diagram' },
-    "er": { title: 'ER Diagram', icon: GitGraph, agentId: 'generate-er-diagram' },
+    useCase: { title: 'Use Case Diagram', icon: GitGraph, agentId: 'generate-useCase-diagram' },
+    class: { title: 'Class Diagram', icon: GitGraph, agentId: 'generate-class-diagram' },
+    sequence: { title: 'Sequence Diagram', icon: GitGraph, agentId: 'generate-sequence-diagram' },
+    activity: { title: 'Activity Diagram', icon: GitGraph, agentId: 'generate-activity-diagram' },
+    component: { title: 'Component Diagram', icon: GitGraph, agentId: 'generate-component-diagram' },
+    archimate: { title: 'ArchiMate Diagram', icon: DatabaseZap, agentId: 'generate-archimate-diagram' },
+    er: { title: 'ER Diagram', icon: GitGraph, agentId: 'generate-er-diagram' },
 }
 
 export const presentationSections: Section = {

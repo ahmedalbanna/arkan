@@ -10,7 +10,7 @@ import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { getAgent } from '@/lib/db/queries';
 import type { AgentPrompt } from '@/lib/agents';
-import { GenerateDiagramInputSchema, type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput } from '@/ai/schemas';
+import { type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput } from '@/ai/schemas';
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {
     const agentId = `generate-${input.diagramToGenerate}-diagram`;
@@ -23,7 +23,7 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
 
     const stringifiedProposal = input.proposal ? JSON.stringify(input.proposal, null, 2) : '';
     const stringifiedPlan = input.projectPlan ? JSON.stringify(input.projectPlan, null, 2) : '';
-    
+
     // Separate media from text files for the prompt
     const textContext = input.externalContext?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.externalContext?.filter(f => f.content.startsWith('data:')) || [];
@@ -102,7 +102,7 @@ ${stringifiedPlan}
         maxOutputTokens: 2048,
     }
     });
-    
+
     const { output } = await diagramPrompt({ ...input, textContext, mediaContext }, { model: agent.model || 'googleai/gemini-1.5-flash' });
     return output!;
 }

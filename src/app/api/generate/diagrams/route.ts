@@ -11,12 +11,12 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 // Schema for a new diagram generation request
 const generateDiagramSchema = z.object({
-  proposal: ProjectProposalSchema.optional(),
+  proposal: ProjectProposalSchema.optional().nullable(),
   projectPlan: ProjectPlanSchema.optional().nullable(),
   diagramToGenerate: DiagramTypeSchema,
   otherSections: z.record(SectionNameSchema, z.string()).optional(),
   otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(), 
+  guidelines: z.array(z.string()).optional(),
   externalContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
   instructionText: z.string().optional(),
 });
@@ -57,7 +57,7 @@ async function getPlantUmlImageUrl(plantUmlCode: string): Promise<string> {
 export const POST = withAuth(async ({ request, user }) => {
   try {
     const body = await request.json();
-    
+
     if (body.intent === 'update_diagram') {
       if (!body.plantUmlCode) {
           return handleApiError({ message: 'PlantUML code is required for an update.' }, 400);
@@ -70,14 +70,14 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-        
+
     const agentInput = validation.data;
     const result = await generateDiagram(agentInput);
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
-    
+
     // Deduct credit only after a successful generation
     await deductCredit(user.id, 1);
-    
+
     const finalOutput = {
       plantUmlCode: result.plantUmlCode,
       imageUrl: imageUrl,
