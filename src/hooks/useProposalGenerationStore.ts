@@ -14,6 +14,9 @@ export interface AdvancedProposalFields {
     risksAndChallenges: string;
     projectRationale: string;
     additionalContext: string;
+    methodology: string;
+    timeline: string;
+    budget: string;
 }
 
 interface ProposalGenerationState {
@@ -40,7 +43,10 @@ const initialAdvancedFields: AdvancedProposalFields = {
     projectContext: '',
     risksAndChallenges: '',
     projectRationale: '',
-    additionalContext: ''
+    additionalContext: '',
+    methodology: '',
+    timeline: '',
+    budget: '',
 };
 
 const initialState: ProposalGenerationState = {

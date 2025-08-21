@@ -99,6 +99,21 @@ const AdvancedFieldsForm = () => {
                 <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..."/>
                  <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
             </div>
+            <div className="space-y-1">
+                <Label htmlFor="methodology">Methodology</Label>
+                <Textarea id="methodology" name="methodology" value={advancedFields.methodology} onChange={handleFieldChange} rows={3} placeholder="Describe the methodology (e.g., Agile, Waterfall)..."/>
+                <p className="text-xs text-muted-foreground">What approach or process will be followed for this project?</p>
+            </div>
+            <div className="space-y-1">
+                <Label htmlFor="timeline">Timeline</Label>
+                <Textarea id="timeline" name="timeline" value={advancedFields.timeline} onChange={handleFieldChange} rows={3} placeholder="Outline the project timeline, phases, and key milestones..."/>
+                <p className="text-xs text-muted-foreground">What is the estimated duration and what are the key phases?</p>
+            </div>
+            <div className="space-y-1">
+                <Label htmlFor="budget">Budget</Label>
+                <Textarea id="budget" name="budget" value={advancedFields.budget} onChange={handleFieldChange} rows={3} placeholder="Provide a budget estimate and breakdown..."/>
+                <p className="text-xs text-muted-foreground">What are the estimated costs for the project?</p>
+            </div>
              <div className="space-y-1">
                 <Label htmlFor="stakeholders">Stakeholders</Label>
                 <Input id="stakeholders" name="stakeholders" value={advancedFields.stakeholders} onChange={handleFieldChange} placeholder="Identify key stakeholders and their roles..."/>

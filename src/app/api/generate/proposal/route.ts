@@ -32,6 +32,9 @@ const generateProposalSchema = z.object({
     risksAndChallenges: z.string(),
     projectRationale: z.string(),
     additionalContext: z.string(),
+    methodology: z.string(),
+    timeline: z.string(),
+    budget: z.string(),
   }).optional(),
 });
 
@@ -41,6 +44,9 @@ Here are the specific details for the project:
 - **Project Title**: ${'\'\'\''}${fields.projectTitle}'\'\'\''}
 - **Project Objective**: ${'\'\'\''}${fields.projectObjective}'\'\'\''}
 - **Expected Outcomes**: ${'\'\'\''}${fields.expectedOutcomes}'\'\'\''}
+- **Methodology**: ${'\'\'\''}${fields.methodology}'\'\'\''}
+- **Timeline**: ${'\'\'\''}${fields.timeline}'\'\'\''}
+- **Budget**: ${'\'\'\''}${fields.budget}'\'\'\''}
 - **Stakeholders**: ${'\'\'\''}${fields.stakeholders}'\'\'\''}
 - **Project Rationale**: ${'\'\'\''}${fields.projectRationale}'\'\'\''}
 - **Project Context**: ${'\'\'\''}${fields.projectContext}'\'\'\''}
