@@ -14,7 +14,7 @@ import { toast } from '@/hooks/use-toast';
 import { useTopicExplainer } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const explainerSchema = z.object({

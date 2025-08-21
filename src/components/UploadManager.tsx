@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useReportStore } from '@/hooks/useReportStore';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { ContextFileType } from '@/lib/types';
 import { cn } from '@/lib/utils';

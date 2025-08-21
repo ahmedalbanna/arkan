@@ -15,7 +15,7 @@ import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';

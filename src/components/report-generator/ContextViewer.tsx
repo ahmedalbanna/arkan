@@ -11,7 +11,7 @@ import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 
 interface ContextViewerProps {

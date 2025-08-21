@@ -6,7 +6,7 @@ import type { PresentationHistoryEntry } from '@/ai/schemas';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface PresentationViewerProps {

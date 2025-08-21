@@ -17,7 +17,7 @@ import { useRewriteText, useSummarizeTextWithRatio } from '@/hooks/use-writing-t
 import { Slider } from '../ui/slider';
 import { Badge } from '../ui/badge';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { Separator } from '../ui/separator';
 import { cn } from '@/lib/utils';
 import type { RewriteTextOutput, DiffPart } from '@/lib/types';

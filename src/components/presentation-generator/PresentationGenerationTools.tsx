@@ -39,7 +39,7 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import { evaluateContextApi } from '@/services/report-service';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 
 
 const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];

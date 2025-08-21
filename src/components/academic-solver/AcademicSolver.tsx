@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';

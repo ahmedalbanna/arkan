@@ -7,7 +7,7 @@ import { type AnyProjectProposal, type ProjectProposal, ProjectProposalSchema } 
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
 import remarkGfm from 'remark-gfm';

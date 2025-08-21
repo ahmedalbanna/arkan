@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck } from 'lucide-react';
 import { toast, useToast } from '@/hooks/use-toast';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
 import { Button } from '@/components/ui/button';
 import { exportComponentAsPDF } from '@/lib/pdf-exporter';

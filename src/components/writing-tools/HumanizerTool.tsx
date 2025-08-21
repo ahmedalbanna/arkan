@@ -13,7 +13,7 @@ import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { useHumanizeText } from '@/hooks/use-writing-tools';
 import { useLocalization } from '@/context/LocalizationContext';
 

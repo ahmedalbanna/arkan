@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast';
 import { useAiResearcher } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import type { AIResearcherOutput } from '@/ai/schemas';
 import Link from 'next/link';
 import { useReportStore } from '@/hooks/useReportStore';

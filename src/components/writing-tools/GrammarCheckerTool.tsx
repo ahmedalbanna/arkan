@@ -13,7 +13,7 @@ import { Loader2, Sparkles, Copy, Check, ArrowRight, UploadCloud } from 'lucide-
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
-import { markdownComponents } from '@/lib/markdown-components';
+import { markdownComponents } from '@/lib/markdown-styles';
 import { useGrammarCheck } from '@/hooks/use-writing-tools';
 import { Tabs, TabsTrigger, TabsList, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
