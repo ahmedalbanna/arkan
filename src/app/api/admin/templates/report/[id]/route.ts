@@ -2,7 +2,7 @@
 // src/app/api/templates/report/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { UpdateReportTemplateSchema } from '@/ai/schemas/template-schemas';
 

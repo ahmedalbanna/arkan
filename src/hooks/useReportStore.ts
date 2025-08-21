@@ -7,7 +7,7 @@ import { type SectionName } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/schemas';
 import { sectionConfig } from '@/lib/sections-config';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
 import { useBuilderStore } from './useBuilderStore';
 import type { ProjectState } from '@/lib/types';
 import { agentKeys } from '@/lib/query-keys';

@@ -22,7 +22,7 @@ import { Skeleton } from '../ui/skeleton';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
+import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useAgents } from '@/hooks/use-agents';
 import { ScrollArea } from '../ui/scroll-area';
