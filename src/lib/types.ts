@@ -246,7 +246,7 @@ export interface ProjectState {
     } | undefined;
     evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
     diagrams?: {
-        "use-case"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        "useCase"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
         class?: import("@/hooks/useDiagramStore").DiagramData | undefined;
         sequence?: import("@/hooks/useDiagramStore").DiagramData | undefined;
         activity?: import("@/hooks/useDiagramStore").DiagramData | undefined;

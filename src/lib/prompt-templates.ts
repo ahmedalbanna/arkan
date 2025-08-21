@@ -64,7 +64,7 @@ export const PROMPT_TEMPLATES: PromptTemplate[] = [
         category: 'Diagram Generation',
         title: 'Create a Use Case Diagram',
         prompt: `Based on the project's stakeholders and objectives, create a PlantUML use case diagram that shows the primary actors and their interactions with the system. Use rectangles to group related use cases within a system boundary.`,
-        targetAgentIds: ['generate-use-case-diagram']
+        targetAgentIds: ['generate-useCase-diagram']
     },
     {
         category: 'Taskade AI',

@@ -578,7 +578,7 @@ You will be provided with the full project proposal in JSON format, and may also
   },
   // Diagram Agents
   {
-    id: 'generate-use-case-diagram',
+    id: 'generate-useCase-diagram',
     name: 'Use Case Diagram Agent',
     description: 'Produces a PlantUML Use Case diagram to identify actors and use cases.',
     category: 'diagram-generation',
@@ -638,7 +638,7 @@ You will be provided with the full project proposal in JSON format, and may also
             { text: "Use activation boxes to represent processing time for each participant.", isDefault: true },
             { text: "Include at least one 'alt/else' block to show a conditional flow.", isDefault: false },
         ],
-        defaultContext: ['generate-use-case-diagram', 'generate-class-diagram']
+        defaultContext: ['generate-useCase-diagram', 'generate-class-diagram']
     },
     tone: 'Default',
     language: 'English (US)',

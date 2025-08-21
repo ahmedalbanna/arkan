@@ -9,7 +9,7 @@ const categoryIds = defaultAgentCategories.map(cat => cat.id) as [string, ...str
 
 // Generic Schemas
 export const DiagramTypeSchema = z.enum([
-  'use-case',
+  'useCase',
   'class',
   'sequence',
   'activity',
@@ -1077,6 +1077,6 @@ export const ApiGeneratePresentationSchema = z.object({
   complexity: z.string().optional(),
 });
 
-    
+
 
 

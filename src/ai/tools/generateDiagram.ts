@@ -12,7 +12,7 @@ import { z } from 'zod';
 export const generateDiagramTool = ai.defineTool(
   {
     name: 'generateDiagram',
-    description: 'Generates a system diagram (e.g., use-case, class, sequence) based on the project proposal and other available context. Use this when the user asks to "create", "draw", or "generate" a diagram.',
+    description: 'Generates a system diagram (e.g., useCase, class, sequence) based on the project proposal and other available context. Use this when the user asks to "create", "draw", or "generate" a diagram.',
     inputSchema: z.object({
       diagramType: DiagramTypeSchema.describe("The specific type of diagram to generate (e.g., 'class', 'sequence')."),
     }),

@@ -38,7 +38,7 @@ export const AVAILABLE_TOOLS: AgentTool[] = [
     id: 'generateDiagram',
     name: 'Generate Diagram',
     icon: GitBranch,
-    description: 'Generates a system diagram (e.g., use-case, class, sequence) based on the project proposal.',
+    description: 'Generates a system diagram (e.g., useCase, class, sequence) based on the project proposal.',
     isActive: true,
   },
   {

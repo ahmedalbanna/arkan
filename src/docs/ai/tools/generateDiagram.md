@@ -14,7 +14,7 @@ The tool then invokes the main `generateDiagram` AI flow. The calling flow (`pro
 ## Parameters
 
 -   **`diagramType` (enum)**: The specific type of diagram to generate. Must be one of the following:
-    -   `'use-case'`
+    -   `'useCase'`
     -   `'class'`
     -   `'sequence'`
     -   `'activity'`
