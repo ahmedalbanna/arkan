@@ -5,7 +5,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import DiagramViewer from './DiagramViewer';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { diagramConfig } from '@/lib/sections-config';
+import { diagramConfig } from '@/lib/sections-templates';
 import { GitGraph, AlertCircle, Loader2, PanelRightOpen, PanelLeftClose } from 'lucide-react';
 import { DiagramGenerationTools } from './DiagramGenerationTools';
 import { Skeleton } from '@/components/ui/skeleton';

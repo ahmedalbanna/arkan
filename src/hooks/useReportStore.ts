@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { type SectionName } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/schemas';
-import { sectionConfig } from '@/lib/sections-config';
+import { sectionConfig } from '@/lib/sections-templates';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
 import { useBuilderStore } from './useBuilderStore';

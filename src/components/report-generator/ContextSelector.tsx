@@ -10,7 +10,7 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { sectionConfig, diagramConfig } from '@/lib/sections-config';
+import { sectionConfig, diagramConfig } from '@/lib/sections-templates';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -34,7 +34,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const { diagrams } = useDiagramStore();
 
     const currentSelection = contextSelection[itemKey] || emptySelection;
-    
+
     const generatedSections = orderedSections.filter(key => sections[key]);
     const generatedDiagrams = orderedDiagrams.filter(key => diagrams[key]);
 
@@ -43,7 +43,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
             <div className="space-y-4 pr-4">
                 <div className="space-y-2">
                     <Label className="font-semibold">{t('builder.reportGenerator.ContextualSections')}</Label>
-                    
+
                     {/* Project Proposal */}
                     <div className="flex items-center space-x-2">
                         <Checkbox id={`context-proposal-${itemKey}`} checked={!!currentSelection.proposal} onCheckedChange={(checked) => toggleContextSelection(itemKey, 'proposal', null, !!checked)} disabled={!proposal} />
@@ -97,7 +97,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                         ))}
                     </div>
                 )}
-                
+
                 {externalContext && externalContext.length > 0 && (
                     <div className="space-y-2 pt-2 border-t">
                         <Label className="font-semibold">{t('builder.reportGenerator.externalContext')}</Label>

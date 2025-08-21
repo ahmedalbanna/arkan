@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useReportStore } from '@/hooks/useReportStore';
-import { diagramConfig, sectionConfig } from '@/lib/sections-config';
+import { diagramConfig, sectionConfig } from '@/lib/sections-templates';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -45,7 +45,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
         <ScrollArea className="h-full max-h-[calc(75vh-100px)]">
             <div className="p-1 pr-4">
                 <h3 className="font-semibold mb-4">Context used for: {t(sectionConfig[itemKey as SectionName]?.title || itemKey)}</h3>
-                
+
                 {!hasContext && <p className="text-sm text-muted-foreground">No context selected for this section.</p>}
 
                 <Accordion type="multiple" className="w-full space-y-2">
