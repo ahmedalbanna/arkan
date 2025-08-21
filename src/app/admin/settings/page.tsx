@@ -1,15 +1,16 @@
 
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import type { AppSettings, BankAccount } from '@/lib/types';
 
-import { Settings, Loader2, Save, Banknote } from 'lucide-react';
+import { Settings, Loader2, Save, Banknote, PlusCircle, Trash2, Globe, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -18,29 +19,30 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
-
-// --- Type Definition ---
-interface AppSettings {
-  newUserCredits: number;
-  bankName?: string;
-  accountHolder?: string;
-  iban?: string;
-}
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
 
 // --- Zod Schema for Validation ---
-const settingsSchema = z.object({
-  newUserCredits: z.coerce.number().int().min(0, "Credits cannot be negative."),
+const bankAccountSchema = z.object({
   bankName: z.string().min(1, 'Bank name is required.'),
   accountHolder: z.string().min(1, 'Account holder name is required.'),
-  iban: z.string().min(1, 'IBAN is required.'),
+  currencies: z.object({
+    YER: z.object({ iban: z.string().optional() }).optional(),
+    SAR: z.object({ iban: z.string().optional() }).optional(),
+    USD: z.object({ iban: z.string().optional() }).optional(),
+  }),
 });
+
+const settingsSchema = z.object({
+  newUserCredits: z.coerce.number().int().min(0, "Credits cannot be negative."),
+  bankAccounts: z.array(bankAccountSchema),
+});
+
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 // --- API Service Functions ---
-async function fetchSettings(token: string): Promise<AppSettings> {
-    const response = await fetch('/api/admin/settings', {
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
+async function fetchSettings(): Promise<AppSettings> {
+    const response = await fetch('/api/admin/settings');
     if (!response.ok) throw new Error('Failed to fetch settings');
     return response.json();
 }
@@ -70,30 +72,27 @@ export default function AdminSettingsPage() {
 
   const { data: settings, isLoading } = useQuery<AppSettings>({
     queryKey: ['settings'],
-    queryFn: async () => {
-        const token = await getAuthenticatedToken(firebaseUser);
-        return fetchSettings(token);
-    },
-    enabled: !!firebaseUser,
+    queryFn: fetchSettings,
   });
   
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
         newUserCredits: 10,
-        bankName: '',
-        accountHolder: '',
-        iban: '',
+        bankAccounts: [],
     }
   });
 
-  // Use useEffect to reset the form when the data is fetched
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "bankAccounts"
+  });
+
   React.useEffect(() => {
     if (settings) {
       form.reset(settings);
     }
   }, [settings, form]);
-
 
   const mutation = useMutation({
     mutationFn: updateSettings,
@@ -106,11 +105,18 @@ export default function AdminSettingsPage() {
     }
   });
 
-
   const onSubmit = async (data: SettingsFormValues) => {
     const token = await getAuthenticatedToken(firebaseUser);
     mutation.mutate({ data, token });
   };
+  
+  const addNewAccount = () => {
+    append({
+        bankName: '',
+        accountHolder: '',
+        currencies: { SAR: { iban: '' }, USD: { iban: '' }, YER: { iban: '' } }
+    });
+  }
 
   if (isLoading) {
     return (
@@ -152,8 +158,18 @@ export default function AdminSettingsPage() {
           {t('adminSettings.pageSubtitle')}
         </p>
       </div>
+
+       {!settings || settings.bankAccounts.length === 0 ? (
+            <Alert variant="destructive" className="mb-6">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                    No settings found in the database. Please run the seed script to populate default settings, or configure and save them below.
+                </AlertDescription>
+            </Alert>
+        ) : null}
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <Card>
                 <CardHeader>
                     <CardTitle>{t('adminSettings.defaultSettingsTitle')}</CardTitle>
@@ -176,55 +192,61 @@ export default function AdminSettingsPage() {
                         )}
                     />
                 </CardContent>
-                <Separator className="my-6" />
+            </Card>
+            
+            <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> {t('adminSettings.bankPaymentTitle')}</CardTitle>
                     <CardDescription>
                         {t('adminSettings.bankPaymentDesc')}
                     </CardDescription>
                 </CardHeader>
-                 <CardContent className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="bankName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('adminSettings.bankNameLabel')}</FormLabel>
-                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="accountHolder"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('adminSettings.accountHolderLabel')}</FormLabel>
-                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                     <FormField
-                        control={form.control}
-                        name="iban"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{t('adminSettings.ibanLabel')}</FormLabel>
-                                <FormControl><Input {...field} disabled={mutation.isPending} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-                <CardFooter>
-                    <Button type="submit" disabled={mutation.isPending}>
-                        {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                        {t('adminSettings.saveButton')}
+                 <CardContent className="space-y-6">
+                    {fields.map((field, index) => (
+                        <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                             <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => remove(index)}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <FormField
+                                control={form.control}
+                                name={`bankAccounts.${index}.bankName`}
+                                render={({ field }) => (
+                                    <FormItem><FormLabel>Bank Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Al-Amal Microfinance Bank" /></FormControl><FormMessage /></FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name={`bankAccounts.${index}.accountHolder`}
+                                render={({ field }) => (
+                                    <FormItem><FormLabel>Account Holder Name</FormLabel><FormControl><Input {...field} placeholder="e.g., Arkan Platform LLC" /></FormControl><FormMessage /></FormItem>
+                                )}
+                            />
+                            <div className="space-y-3 pt-2">
+                                <Label>IBANs per Currency</Label>
+                                 <FormField control={form.control} name={`bankAccounts.${index}.currencies.SAR.iban`} render={({ field }) => (
+                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">SAR</FormLabel><FormControl><Input {...field} placeholder="Saudi Riyal IBAN" /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                <FormField control={form.control} name={`bankAccounts.${index}.currencies.USD.iban`} render={({ field }) => (
+                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">USD</FormLabel><FormControl><Input {...field} placeholder="US Dollar IBAN" /></FormControl><FormMessage /></FormItem>
+                                )} />
+                                 <FormField control={form.control} name={`bankAccounts.${index}.currencies.YER.iban`} render={({ field }) => (
+                                    <FormItem className="flex items-center gap-2"><FormLabel className="w-12">YER</FormLabel><FormControl><Input {...field} placeholder="Yemeni Rial IBAN/Account No." /></FormControl><FormMessage /></FormItem>
+                                )} />
+                            </div>
+                        </div>
+                    ))}
+                    <Button type="button" variant="outline" onClick={addNewAccount}>
+                        <PlusCircle className="me-2 h-4 w-4" /> Add Another Bank Account
                     </Button>
-                </CardFooter>
+                 </CardContent>
             </Card>
+
+            <div className="flex justify-end">
+                <Button type="submit" disabled={mutation.isPending}>
+                    {mutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                    {t('adminSettings.saveButton')}
+                </Button>
+            </div>
         </form>
       </Form>
     </div>

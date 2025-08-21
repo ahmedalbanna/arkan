@@ -1,26 +1,41 @@
 
+'use server';
+
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+
+const bankAccountSchema = z.object({
+  bankName: z.string().min(1, 'Bank name is required.'),
+  accountHolder: z.string().min(1, 'Account holder name is required.'),
+  currencies: z.object({
+    YER: z.object({ iban: z.string().optional() }).optional(),
+    SAR: z.object({ iban: z.string().optional() }).optional(),
+    USD: z.object({ iban: z.string().optional() }).optional(),
+  }),
+});
+
+const settingsSchema = z.object({
+  newUserCredits: z.coerce.number().int().min(0),
+  bankAccounts: z.array(bankAccountSchema).optional(),
+});
+
 
 async function getSettings() {
     const settingsRef = adminDb.collection('settings').doc('defaults');
     const doc = await settingsRef.get();
     if (!doc.exists) {
-        // If settings don't exist, create them with default values
-        const defaultSettings = { 
+        // If settings don't exist, return an empty structure.
+        // The admin UI should guide the user to seed the database.
+        return {
             newUserCredits: 10,
-            bankName: 'Arkan National Bank',
-            accountHolder: 'Arkan Professional Platform',
-            iban: 'SA03 8000 0000 6080 1016 7519',
+            bankAccounts: []
         };
-        await settingsRef.set(defaultSettings);
-        return defaultSettings;
     }
     return doc.data();
 }
 
-// GET /api/settings - This endpoint is now public to allow fetching bank details
+// GET /api/settings - This endpoint is public to allow fetching bank details
 export async function GET() {
     try {
         const settings = await getSettings();
@@ -30,15 +45,7 @@ export async function GET() {
     }
 }
 
-
 // PUT /api/settings - This endpoint remains admin-only
-const settingsSchema = z.object({
-  newUserCredits: z.coerce.number().int().min(0),
-  bankName: z.string().optional(),
-  accountHolder: z.string().optional(),
-  iban: z.string().optional(),
-});
-
 export const PUT = withAuth(async ({ request }) => {
     try {
         const body = await request.json();

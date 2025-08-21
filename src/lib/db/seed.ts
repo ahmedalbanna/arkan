@@ -1,5 +1,4 @@
 
-
 // src/lib/db/seed.ts
 //require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
 import { adminDb } from '@/lib/firebase/admin';
@@ -11,12 +10,22 @@ import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/p
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-generation-templates';
 import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/presentation-generation-templates';
+import { defaultBankAccounts } from '@/lib/bank-accounts';
 
 async function seed() {
     console.log("Starting Firestore seeding process...");
     const batch = adminDb.batch();
 
     try {
+        // --- Settings ---
+        console.log("Preparing to seed default settings...");
+        const settingsRef = adminDb.collection('settings').doc('defaults');
+        batch.set(settingsRef, {
+            newUserCredits: 10,
+            bankAccounts: defaultBankAccounts
+        });
+        console.log("Default settings added to batch.");
+
         // --- Agent Categories ---
         console.log("Preparing to seed Agent Categories...");
         const categoriesCollection = adminDb.collection('agent_categories');

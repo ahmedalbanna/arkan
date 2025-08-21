@@ -1,4 +1,5 @@
 
+
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
@@ -276,3 +277,19 @@ export interface StartGenerationPayload {
 }
 
 export type TaskadeJobStatus = 'idle' | 'pending' | 'completed' | 'failed';
+
+// App Settings Types
+export interface BankAccount {
+    bankName: string;
+    accountHolder: string;
+    currencies: {
+        YER?: { iban?: string };
+        SAR?: { iban?: string };
+        USD?: { iban?: string };
+    }
+}
+
+export interface AppSettings {
+  newUserCredits: number;
+  bankAccounts: BankAccount[];
+}
