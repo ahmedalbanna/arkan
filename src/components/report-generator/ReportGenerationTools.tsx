@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { sectionConfig } from '@/lib/sections-templates';
+import { reportSections } from '@/lib/sections-templates';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
@@ -110,14 +110,14 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                         {plan.configs.map(config => (
                             <Card key={config.section} className="bg-muted/50">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{sectionConfig[config.section].title}</CardTitle>
+                                    <CardTitle className="text-lg font-headline">{reportSections[config.section].title}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm">
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{sectionConfig[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{sectionConfig[d as SectionNameType]?.title || d}</li>)}
+                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{reportSections[d as SectionNameType]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
@@ -179,7 +179,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
             agents.forEach(agent => {
-                const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionNameType].agentId === agent.id);
+                const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionNameType].agentId === agent.id);
                 if (sectionKey) {
                     const prompt = agent.prompt as AgentPrompt;
                     const defaultContext = prompt.defaultContext || [];
@@ -196,7 +196,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
         const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-        const agent = agents?.find(a => a.id === sectionConfig[section]?.agentId);
+        const agent = agents?.find(a => a.id === reportSections[section]?.agentId);
 
         const body = {
             proposal: currentSelection.proposal ? fullState.proposal : undefined,
@@ -222,7 +222,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         }
 
         const sectionsToGenerate = template.agentIds
-            .map(agentId => (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId))
+            .map(agentId => (Object.keys(reportSections) as SectionNameType[]).find(key => reportSections[key].agentId === agentId))
             .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
 
         if (sectionsToGenerate.length === 0) {
@@ -276,9 +276,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     };
 
     const selectedTemplate = reportTemplates?.find(t => t.id === selectedReportTemplateId);
-    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(sectionConfig[key].agentId));
+    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(reportSections[key].agentId));
     const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
-        const sectionKey = (Object.keys(sectionConfig) as SectionNameType[]).find(key => sectionConfig[key].agentId === agentId);
+        const sectionKey = (Object.keys(reportSections) as SectionNameType[]).find(key => reportSections[key].agentId === agentId);
         return sectionKey && !sections[sectionKey];
     }).length || 0;
 
@@ -367,7 +367,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
 
                         <Accordion type="multiple" className="w-full space-y-1">
                             {availableSections.map((key) => {
-                                const { title, icon: Icon, agentId } = sectionConfig[key];
+                                const { title, icon: Icon, agentId } = reportSections[key];
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key];
                                 const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));

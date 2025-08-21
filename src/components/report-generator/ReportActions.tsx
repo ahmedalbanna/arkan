@@ -14,7 +14,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
-import { sectionConfig } from '@/lib/sections-templates';
+import { reportSections } from '@/lib/sections-templates';
 import { SectionName } from '@/ai/schemas';
 import { useExport } from '@/hooks/use-export';
 
@@ -63,8 +63,8 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
     proposalTitle = String(proposal.title);
     }
 
-    const translatedTitles = Object.keys(sectionConfig).reduce((acc, key) => {
-      acc[key as SectionName] = t(sectionConfig[key as SectionName].title);
+    const translatedTitles = Object.keys(reportSections).reduce((acc, key) => {
+      acc[key as SectionName] = t(reportSections[key as SectionName].title);
       return acc;
     }, {} as { [key in SectionName]?: string });
 
@@ -145,7 +145,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
                                         );
                                     }}
                                 >
-                                    {t(sectionConfig[key]?.title) || key}
+                                    {t(reportSections[key]?.title) || key}
                                 </DropdownMenuCheckboxItem>
                             ))}
                             <DropdownMenuSeparator />

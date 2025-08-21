@@ -30,7 +30,7 @@ import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
-import { sectionConfig } from '@/lib/sections-templates';
+import { reportSections } from '@/lib/sections-templates';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
@@ -98,14 +98,14 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                         {plan.configs.map(config => (
                             <Card key={config.section} className="bg-muted/50">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{sectionConfig[config.section].title}</CardTitle>
+                                    <CardTitle className="text-lg font-headline">{reportSections[config.section].title}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm">
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{sectionConfig[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{sectionConfig[d as SectionNameType]?.title || d}</li>)}
+                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{reportSections[d as SectionNameType]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
@@ -193,7 +193,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.sections[key] && sections[key as SectionNameType]) {
                 const sectionKey = key as SectionNameType;
                 sourceDocuments.push({
-                    fileName: t(sectionConfig[sectionKey].title),
+                    fileName: t(reportSections[sectionKey].title),
                     content: sections[sectionKey]!
                 });
             }

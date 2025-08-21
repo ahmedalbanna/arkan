@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useReportStore } from '@/hooks/useReportStore';
-import { diagramConfig, sectionConfig } from '@/lib/sections-templates';
+import { diagramConfig, reportSections } from '@/lib/sections-templates';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -44,7 +44,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
     return (
         <ScrollArea className="h-full max-h-[calc(75vh-100px)]">
             <div className="p-1 pr-4">
-                <h3 className="font-semibold mb-4">Context used for: {t(sectionConfig[itemKey as SectionName]?.title || itemKey)}</h3>
+                <h3 className="font-semibold mb-4">Context used for: {t(reportSections[itemKey as SectionName]?.title || itemKey)}</h3>
 
                 {!hasContext && <p className="text-sm text-muted-foreground">No context selected for this section.</p>}
 
@@ -67,7 +67,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
                     )}
                     {selectedSections.map(({ key, content }) => (
                          <AccordionItem value={`section-${key}`} key={`section-${key}`} className="bg-muted/50 rounded-lg border">
-                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(sectionConfig[key].title)}</AccordionTrigger>
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(reportSections[key].title)}</AccordionTrigger>
                             <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <ReactMarkdown components={markdownComponents}>{content}</ReactMarkdown>
                             </AccordionContent>

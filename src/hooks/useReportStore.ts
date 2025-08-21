@@ -5,7 +5,7 @@
 import { create } from 'zustand';
 import { type SectionName } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/schemas';
-import { sectionConfig } from '@/lib/sections-templates';
+import { reportSections } from '@/lib/sections-templates';
 import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
 import { useBuilderStore } from './useBuilderStore';
@@ -102,7 +102,7 @@ const initialState: ReportState = {
   evaluation: null,
   externalContext: [],
   guidelineState: getDefaultGuidelineState(),
-  controlState: Object.keys(sectionConfig).reduce((acc, key) => ({ ...acc, [key]: defaultControlState }), {} as Record<SectionName, ControlState>),
+  controlState: Object.keys(reportSections).reduce((acc, key) => ({ ...acc, [key]: defaultControlState }), {} as Record<SectionName, ControlState>),
   customGuidelineInput: {},
   contextSelection: {},
   selectedReportTemplateId: REPORT_GENERATION_TEMPLATES[0].id,
@@ -258,7 +258,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
         };
 
         defaultContextIds.forEach(id => {
-            const sectionKey = Object.keys(sectionConfig).find(key => sectionConfig[key as SectionName].agentId === id) as SectionName | undefined;
+            const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionName].agentId === id) as SectionName | undefined;
             if(sectionKey) {
                 newSelection.sections[sectionKey] = true;
             }

@@ -7,13 +7,13 @@
 import { FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, Hand, DraftingCompass, Files, Presentation, DatabaseZap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
-interface Config {
+interface Section {
     title: string;
     icon: LucideIcon;
     agentId: string;
 }
 
-export const sectionConfig: Record<string, Config> = {
+export const reportSections: Record<string, Section> = {
     introduction: { title: 'Introduction', icon: BookMarked, agentId: 'generate-introduction-section' },
     literatureReview: { title: 'Literature Review', icon: Library, agentId: 'generate-literatureReview-section' },
     systemAnalysis: { title: 'System Analysis', icon: Waypoints, agentId: 'generate-systemAnalysis-section' },
@@ -31,7 +31,7 @@ export const sectionConfig: Record<string, Config> = {
     appendices: { title: 'Appendices', icon: Files, agentId: 'generate-appendices-section' },
 };
 
-export const diagramConfig: Record<string, Config> = {
+export const diagramConfig: Record<string, Section> = {
     "use-case": { title: 'Use Case Diagram', icon: GitGraph, agentId: 'generate-use-case-diagram' },
     "class": { title: 'Class Diagram', icon: GitGraph, agentId: 'generate-class-diagram' },
     "sequence": { title: 'Sequence Diagram', icon: GitGraph, agentId: 'generate-sequence-diagram' },
@@ -41,7 +41,7 @@ export const diagramConfig: Record<string, Config> = {
     "er": { title: 'ER Diagram', icon: GitGraph, agentId: 'generate-er-diagram' },
 }
 
-export const presentationConfig: Config = {
+export const presentationConfig: Section = {
     title: 'Presentation',
     icon: Presentation,
     agentId: 'generate-presentation'

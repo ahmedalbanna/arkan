@@ -34,7 +34,7 @@ This code defines a Zustand store called `useReportStore` for managing the sta
 
 **3. Initial State and Store Creation:**
 
-- `initialState`: Defines the initial values for the `ReportState`. It also initializes the guideline and control states based on predefined configurations (`AGENTS`, `sectionConfig`, `REPORT_GENERATION_TEMPLATES`).
+- `initialState`: Defines the initial values for the `ReportState`. It also initializes the guideline and control states based on predefined configurations (`AGENTS`, `reportSections`, `REPORT_GENERATION_TEMPLATES`).
 - `useReportStore`: Creates the Zustand store using the `create` function. It combines the `ReportState` and `ReportActions` into a single store. It also uses `persist` middleware to save the store's state to `localStorage`.
 
 **4. Actions Implementation:**

@@ -9,14 +9,14 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { sectionConfig, diagramConfig } from '@/lib/sections-templates';
+import { reportSections, diagramConfig } from '@/lib/sections-templates';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 
-const orderedSections = Object.keys(sectionConfig) as SectionName[];
+const orderedSections = Object.keys(reportSections) as SectionName[];
 const orderedDiagrams = DiagramTypeSchema.options;
 
 interface ContextSelectorProps {
@@ -57,7 +57,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                             <Label htmlFor={`context-section-${itemKey}-${contextKey}`} className="text-sm font-normal">
                                 <div className="flex items-center gap-2">
                                     <BookCheck className="h-4 w-4" />
-                                    {t(sectionConfig[contextKey].title)}
+                                    {t(reportSections[contextKey].title)}
                                 </div>
                             </Label>
                         </div>
