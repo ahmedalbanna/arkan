@@ -56,7 +56,7 @@ function TransactionList({ status }: { status: TransactionStatus }) {
     } = useInfiniteQuery({
         queryKey: transactionKeys.list(status),
         queryFn: ({ pageParam }) => getTransactions({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
-        initialPageParam: undefined,
+        initialPageParam: undefined as string | undefined,
         getNextPageParam: (lastPage) => {
             if (!lastPage.hasNextPage) return undefined;
             const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];

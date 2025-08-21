@@ -79,14 +79,27 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
     const agent = agents.find(a => a.id.includes(key));
     return agent ? agent.name : key;
   };
-  
+
   const getSectionIcon = (key: SectionName) => {
     const agent = agents.find(a => a.id.includes(key));
     return agent ? agent.icon : FileText;
   }
 
   return (
-     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 rounded-lg flex flex-col">
+     <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 gap-4 rounded-lg flex flex-col">
+      <div className="flex w-full gap-1 rtl:flex-row-reverse justify-center items-center p-4 border-t bg-background rounded-b-lg mx-auto" style={{ maxWidth: '210mm'}}>
+        <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          {t('builder.presentationGenerator.prev')}
+        </Button>
+        <span className="text-sm font-medium text-muted-foreground">
+          Page {currentPage + 1} of {totalPages}
+        </span>
+        <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
+          {t('builder.presentationGenerator.next')}
+          <ChevronRight className="h-4 w-4 ml-2" />
+        </Button>
+      </div>
         <ScrollArea className="flex-grow">
             {isEvaluationPage ? (
                 <A4Page title={t('builder.Section.evaluationTab')}>
@@ -106,19 +119,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
                 )
             )}
         </ScrollArea>
-        <div className="flex justify-center items-center p-4 border-t bg-background rounded-b-lg">
-            <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
-                <ChevronLeft className="h-4 w-4 mr-2" />
-                {t('builder.presentationGenerator.prev')}
-            </Button>
-            <span className="text-sm font-medium text-muted-foreground">
-                Page {currentPage + 1} of {totalPages}
-            </span>
-            <Button onClick={handleNextPage} disabled={currentPage === totalPages - 1} variant="ghost">
-                 {t('builder.presentationGenerator.next')}
-                <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-        </div>
+
     </div>
   );
 };

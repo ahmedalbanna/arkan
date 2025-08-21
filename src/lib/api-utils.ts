@@ -1,7 +1,7 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { getUserProfile } from './db/queries';
 
 interface ApiHandlerOptions {
@@ -30,7 +30,6 @@ type ApiHandler = (context: AuthContext) => Promise<NextResponse | Response>;
 export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) => {
   return async (request: NextRequest, { params }: { params: { [key: string]: string } }) => {
     try {
-      const adminAuth = await getAdminAuth();
       const authorization = request.headers.get('Authorization');
       if (!authorization?.startsWith('Bearer ')) {
         return handleApiError({ message: 'Unauthorized: Missing token' }, 401);
@@ -41,7 +40,7 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
       if (!decodedToken || !decodedToken.uid) {
         return handleApiError({ message: 'Unauthorized: Invalid token' }, 401);
       }
-      
+
       const user = await getUserProfile(decodedToken.uid);
       if (!user) {
          return handleApiError({ message: 'Forbidden: User profile not found' }, 403);
@@ -76,9 +75,9 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
   if (error instanceof ZodError) {
     return NextResponse.json({ message: 'Validation failed', errors: error.flatten().fieldErrors }, { status: 400 });
   }
-  
+
   const status = error.status || defaultStatus;
-  
+
   // Provide more specific default messages for common Firebase auth errors
   let message = error.message || 'An unexpected server error occurred.';
   if (error.code) {
@@ -97,7 +96,7 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
   }
 
   const errors = error.errors || undefined;
-  
+
   return NextResponse.json({ message, errors }, { status });
 };
 

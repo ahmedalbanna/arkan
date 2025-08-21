@@ -2,7 +2,7 @@
 
 // src/lib/db/seed.ts
 //require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/admin';
 import { AGENTS as defaultAgents } from '@/lib/agents';
 import { defaultFeatures } from '@/lib/features';
 import { defaultAgentCategories } from '@/lib/agent-categories';
@@ -64,7 +64,7 @@ async function seed() {
             batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
         });
         console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
-        
+
         // --- Proposal Templates ---
         console.log("Preparing to seed Proposal templates...");
         const proposalCollection = adminDb.collection('templates').doc('proposal').collection('items');

@@ -1,6 +1,6 @@
 
 // src/lib/db/seed-templates.ts
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/admin';
 import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
@@ -31,7 +31,7 @@ async function seed() {
             batch.set(docRef, { ...template, id: key, createdAt: new Date().toISOString() });
         });
         console.log(`${Object.keys(defaultPptxTemplates).length} PPTX templates added to batch.`);
-        
+
         // --- Proposal Templates ---
         console.log("Preparing to seed Proposal templates...");
         const proposalCollection = adminDb.collection('templates').doc('proposal').collection('items');

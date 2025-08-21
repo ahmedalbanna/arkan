@@ -1,11 +1,11 @@
 
 import { NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { handleApiError } from '@/lib/api-utils';
 
 export async function POST(request: Request) {
   try {
-    const adminAuth = await getAdminAuth();
+
     const { idToken } = await request.json();
     if (!idToken) {
       return handleApiError({ message: 'ID token is required.' }, 400);
@@ -22,10 +22,10 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       path: '/',
     };
-    
+
     const response = NextResponse.json({ status: 'success' }, { status: 200 });
     response.cookies.set(options);
-    
+
     return response;
   } catch (error) {
     return handleApiError(error);

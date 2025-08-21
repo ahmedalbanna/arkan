@@ -2,9 +2,9 @@
 'use client';
 
 import { create } from 'zustand';
-import type { User as FirebaseUser } from 'firebase/auth';
-import { getDatabase, ref, onValue, off, push, serverTimestamp, query, orderByChild, limitToLast, update } from 'firebase/database';
-import { app } from '@/lib/firebaseConfig';
+import type { User as FirebaseUser } from "firebase/auth";
+import { ref, onValue, off, query, update } from 'firebase/database';
+import { db } from '@/lib/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
 import { Agent } from '@/lib/agents';
@@ -74,17 +74,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
     initialize: (firebaseUser) => {
         if (get().isInitialized || !firebaseUser) return;
         set({ isInitialized: true });
-    
-        const db = getDatabase(app);
         const userConversationsRef = query(ref(db, `userConversations/${firebaseUser.uid}`));
-        
+
         onValue(userConversationsRef, async (snapshot) => {
             if (!snapshot.exists()) {
                 set({ chats: [], selectedChat: null });
                 return;
             }
             const conversationIds = Object.keys(snapshot.val());
-            const conversationPromises = conversationIds.map(id => 
+            const conversationPromises = conversationIds.map(id =>
                 new Promise<ChatSession | null>((resolve) => {
                     const convoRef = ref(db, `conversations/${id}`);
                     onValue(convoRef, (convoSnapshot) => {
@@ -96,7 +94,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
                     }, { onlyOnce: true }); // Fetch details once per convo ID
                 })
             );
-            
+
             const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as ChatSession[];
             conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
 
@@ -132,10 +130,8 @@ export const useChatStore = create<ChatState & ChatActions>()(
       }
       set({ selectedChat: chat });
     },
-    
+
     addMessage: (chatId, message) => {
-      // Update the last message and timestamp in the specific chat session
-      const db = getDatabase(app);
       const chatRef = ref(db, `conversations/${chatId}`);
       update(chatRef, {
         lastMessage: message.content,
@@ -145,14 +141,14 @@ export const useChatStore = create<ChatState & ChatActions>()(
       // Also update the local state for immediate UI feedback
       set((state) => {
         const isChatSelected = state.selectedChat?.id === chatId;
-        const newChats = state.chats.map(chat => 
-          chat.id === chatId 
-            ? { ...chat, lastMessage: message.content, lastMessageTimestamp: new Date().toISOString() } 
+        const newChats = state.chats.map(chat =>
+          chat.id === chatId
+            ? { ...chat, lastMessage: message.content, lastMessageTimestamp: new Date().toISOString() }
             : chat
         );
         // Sort to bring the updated chat to the top
         newChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-        return { 
+        return {
           chats: newChats,
           unreadCounts: isChatSelected ? state.unreadCounts : {
               ...state.unreadCounts,
@@ -161,9 +157,9 @@ export const useChatStore = create<ChatState & ChatActions>()(
         };
       });
     },
-    
+
     setInput: (input) => set({ input }),
-    
+
     openChat: () => {
       const { selectedChat, resetUnreadCount } = get();
       if(selectedChat) {
@@ -171,7 +167,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
       }
       set({ isChatOpen: true });
     },
-    closeChat: () => set({ isChatOpen: false }), 
+    closeChat: () => set({ isChatOpen: false }),
     toggleChat: () => {
         set(state => {
             const nextIsOpen = !state.isChatOpen;

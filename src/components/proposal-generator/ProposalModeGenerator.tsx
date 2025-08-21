@@ -10,7 +10,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMutation } from '@tanstack/react-query';
-import type { AnyProjectProposal, ProjectProposal } from '@/ai/schemas';
+import type { ProjectProposal } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 import { ProposalActions } from './ProposalActions';
 import { lazy, Suspense, useState, useEffect } from 'react';
@@ -101,7 +101,7 @@ export function ProposalModeGenerator() {
         });
 
         const token = await firebaseUser.getIdToken();
-        translateMutation.mutate({ proposal: proposal as AnyProjectProposal, targetLang, token });
+        translateMutation.mutate({ proposal: proposal as ProjectProposal, targetLang, token });
     };
 
     const orderedKeys = proposal ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [];
@@ -181,12 +181,13 @@ export function ProposalModeGenerator() {
                         </div>
                     </CardHeader>
                     <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-                         <ScrollArea className={isMobile ? "h-[calc(100vh-350px)]" : "h-[calc(100vh-280px)]"}>
+                         <ScrollArea className={isMobile ? "h-[calc(100vh)]" : "h-[calc(100vh)]"}>
                             <div className={isMobile ? "" : "scale-animation"} style={{ transform: isMobile ? 'none' : `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
                                 {proposal ? (
                                     <Suspense fallback={<ProposalSkeleton/>}>
                                         <FormattedProposalView
-                                            proposal={proposal}
+                                            proposal={ProjectProposalSchema.parse(proposal)}
+                                            //onUpdate={handleProposalUpdate}
                                             currentPage={currentPage}
                                         />
                                     </Suspense>

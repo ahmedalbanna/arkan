@@ -5,7 +5,7 @@ import { initializeApp, getApps, getApp, cert } from 'firebase-admin/app';
 const serviceAccount = require('../../../docudec-firebase-adminsdk-2maa7-d07a19d3fc.json');
 const firebaseConfig = {
   credential: cert(serviceAccount),
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "YOUR_DEFAULT_DATABASE_URL", // Use the environment variable or a default
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || "https://docudec-default-rtdb.asia-southeast1.firebasedatabase.app", // Use the environment variable or a default
 
   // You might have other config options here
 };

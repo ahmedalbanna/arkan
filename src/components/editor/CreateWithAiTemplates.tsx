@@ -79,10 +79,10 @@ export function CreateWithAiTemplates({
             <div className="grid grid-cols-1 gap-4">
                 {templates.map(template => (
                     <button key={template.id} onClick={() => handleSelectTemplate(template.id)} className="border-2 border-transparent hover:border-primary rounded-lg transition-all">
-                        <Image 
-                            src={template.imgSrc} 
-                            alt={template.name} 
-                            width={300} 
+                        <Image
+                            src={template.imgSrc}
+                            alt={template.name}
+                            width={300}
                             height={200}
                             data-ai-hint={template.dataAiHint}
                             className="rounded-md"

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group" // This line is correct, the error is likely from a missing package installation.
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"

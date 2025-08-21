@@ -1,12 +1,12 @@
 
 import { NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS } from '@/lib/agents';
 import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyUser(request: Request) {
-    const adminAuth = await getAdminAuth();
+
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized', userId: null };
@@ -50,9 +50,9 @@ export async function GET(request: Request) {
             .where('userId', '==', userCheck.userId)
             .orderBy('createdAt', 'desc')
             .get();
-        
+
         const totalGenerations = generationsSnapshot.size;
-        
+
         const agentUsage: Record<string, number> = {};
         generationsSnapshot.forEach(doc => {
             const agentId = doc.data().agentId;
@@ -71,16 +71,16 @@ export async function GET(request: Request) {
             id: doc.id,
             ...doc.data()
         }));
-        
+
         // --- Correct Credits Used Calculation ---
         const defaultCredits = await getNewUserCredits();
-        
+
         // Fetch all verified transactions for the user
         const verifiedTransactionsSnapshot = await adminDb.collection('transactions')
             .where('userId', '==', userCheck.userId)
             .where('status', '==', 'verified')
             .get();
-            
+
         const purchasedCredits = verifiedTransactionsSnapshot.docs.reduce((sum, doc) => {
             return sum + (doc.data().credits || 0);
         }, 0);

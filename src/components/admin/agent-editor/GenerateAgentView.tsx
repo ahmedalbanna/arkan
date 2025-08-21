@@ -257,7 +257,7 @@ export function GenerateAgentView() {
                         <div>
                             <Label htmlFor="agent-category" className="text-xs uppercase text-muted-foreground">{t('agentGenerator.review.category')}</Label>
                              <Select value={selectedCategory} onValueChange={(val) => setSelectedCategory(val as AgentCategory)}>
-                                <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue /></SelectTrigger>
+                                <SelectTrigger id="agent-category" className="bg-white/5 border-white/20 h-12"><SelectValue placeholder={selectedCategory as string} /></SelectTrigger>
                                 <SelectContent>
                                     {Object.values(AgentCategory).map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
                                 </SelectContent>

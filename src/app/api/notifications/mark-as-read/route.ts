@@ -2,7 +2,7 @@
 // src/app/api/notifications/mark-as-read/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { getDatabase } from 'firebase-admin/database';
 
 const markAsReadSchema = z.object({
@@ -10,26 +10,26 @@ const markAsReadSchema = z.object({
 });
 
 export async function POST(request: Request) {
-    const adminAuth = await getAdminAuth();
+
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
-    
+
     const token = authorization.substring(7);
     try {
         const decodedToken = await adminAuth.verifyIdToken(token, true);
         const userId = decodedToken.uid;
-        
+
         const body = await request.json();
         const validation = markAsReadSchema.safeParse(body);
-        
+
         if (!validation.success) {
             return NextResponse.json({ errors: validation.error.flatten().fieldErrors }, { status: 400 });
         }
-        
+
         const { notificationIds } = validation.data;
-        
+
         // Use the Admin SDK to interact with the Realtime Database
         const db = getDatabase();
         const updates: { [key: string]: any } = {};

@@ -3,21 +3,29 @@
   "rules": {
     "jobs": {
       "$jobId": {
-        ".read": "auth != null",
+        // This is a more secure rule. It requires that you add a `userId`
+        // property to your job object when creating it on the server.
+        // This ensures only the user who created the job can read its status.
+        ".read": "auth != null && root.child('jobs/' + $jobId + '/userId').val() === auth.uid",
+        // Writes are only allowed from the server (Admin SDK).
         ".write": false
       }
     },
     "notifications": {
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        // Add validation for the notification structure
+        "$notificationId": {
+          ".validate": "newData.hasChildren(['title', 'message', 'createdAt', 'isRead']) && newData.child('createdAt').isString() && newData.child('isRead').isBoolean()"
+        }
       },
       ".indexOn": ["createdAt"]
     },
     "messages": {
       "$conversationId": {
-        ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
-        ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
+        ".read": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+        ".write": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
         "$messageId": {
           ".validate": "newData.hasChildren(['senderId', 'content', 'timestamp', 'role']) && newData.child('senderId').val() === auth.uid"
         }
@@ -25,24 +33,35 @@
     },
     "userConversations": {
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        // A user can only add/remove conversation IDs.
+        // The value should be a boolean (e.g., true).
+        "$conversationId": {
+          ".validate": "newData.isBoolean()"
+        }
       }
     },
     "conversations": {
         "$conversationId": {
-            ".read": "root.child('userConversations').child(auth.uid).child($conversationId).exists()",
-            ".write": "root.child('userConversations').child(auth.uid).child($conversationId).exists()"
+            ".read": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+            ".write": "auth != null && root.child('userConversations/' + auth.uid + '/' + $conversationId).exists()",
+            // Add basic validation for the conversation structure
+            ".validate": "newData.hasChildren(['id', 'title', 'lastMessage', 'lastMessageTimestamp', 'participantIds']) && newData.child('id').val() === $conversationId"
         },
         ".indexOn": ["lastMessageTimestamp"]
     },
     "deviceTokens": {
       "$uid": {
-        
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid",
+        // A user can only write string tokens for themselves.
+        "$token": {
+          ".validate": "newData.isString()"
+        }
       }
     },
+    // Default deny all other reads/writes for security.
     ".read": false,
     ".write": false
   }

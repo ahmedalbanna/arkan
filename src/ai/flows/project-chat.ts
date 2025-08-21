@@ -4,13 +4,11 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { runFlow, type FlowResponse } from '@genkit-ai/next/client';
 import { ProjectStateSchema } from '@/ai/schemas';
 import { generateSectionTool } from '@/ai/tools/generateReportSection';
 import { updateProposalFieldTool } from '@/ai/tools/updateProposalField';
 import { generateDiagramTool } from '@/ai/tools/generateDiagram';
 import { addTaskToPhaseTool } from '@/ai/tools/addTaskToPhase';
-import { generateCodebaseTool } from '@/ai/tools/generateCodebase';
 import { generateProjectPlanTool } from '@/ai/tools/generateProjectPlan'; // Import the new tool
 
 const ChatInputSchema = z.object({
@@ -57,17 +55,16 @@ ${stringifiedProjectState}
             updateProposalFieldTool,
             generateDiagramTool,
             addTaskToPhaseTool,
-            generateCodebaseTool,
             generateProjectPlanTool, // Add the new tool here
         ]
     });
-    
+
     // Clean up the response text before returning
     const cleanedResponse = llmResponse.output();
     if (typeof cleanedResponse === 'object' && cleanedResponse !== null && 'text' in cleanedResponse && typeof cleanedResponse.text === 'string') {
         cleanedResponse.text = cleanedResponse.text.replace(/---/g, '').trim();
     }
-    
+
     return cleanedResponse;
   }
 );

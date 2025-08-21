@@ -22,7 +22,7 @@ export default function TaskadeTestPage() {
       // If it fails, treat it as a plain string
       content = inputContent;
     }
-    startGeneration(content);
+    startGeneration(content as any);
   };
 
   return (

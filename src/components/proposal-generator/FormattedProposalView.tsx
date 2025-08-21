@@ -3,7 +3,7 @@
 'use client';
 
 import React from 'react';
-import { type AnyProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
+import { type AnyProjectProposal, type ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
 import { Badge } from '../ui/badge';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
@@ -13,7 +13,7 @@ import { cn } from '@/lib/utils';
 import remarkGfm from 'remark-gfm';
 
 interface FormattedProposalViewProps {
-    proposal: AnyProjectProposal;
+    proposal: ProjectProposal;
     currentPage: number;
 }
 
@@ -78,7 +78,11 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
             return content.some(child => child !== null) ? <div>{content}</div> : null;
         }
         if (typeof value === 'number') {
-            return <p>{proposal.budget?.currency ? new Intl.NumberFormat('en-US', { style: 'currency', currency: proposal.budget.currency }).format(value) : value.toLocaleString()}</p>;
+            const currency = proposal.budget?.currency;
+            if (currency) {
+                return <p>{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value)}</p>;
+            }
+            return <p>{value.toLocaleString()}</p>;
         }
         return <p>{String(value)}</p>;
     }
@@ -89,9 +93,9 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
     if (currentPage === 0) {
         return (
             <A4Page>
-                <div className="flex flex-col items-center justify-start h-full text-center min-h-[297mm]">
-                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
-                    <p className="text-lg md:text-xl text-muted-foreground">{proposal.category}</p>
+                <div className="flex flex-col items-center justify-center h-full text-center min-h-[297mm]">
+                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{String(proposal.title)}</h1>
+                    <p className="text-lg md:text-xl text-muted-foreground">{String(proposal.category)}</p>
                 </div>
             </A4Page>
         )

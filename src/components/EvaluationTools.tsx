@@ -1,6 +1,7 @@
 
 'use client';
 
+import { z } from 'zod';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +16,26 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useEvaluateReport } from '@/hooks/use-evaluation';
 import { processFileApi } from '@/services/document-processing-service';
+
+const ProposalPayloadSchema = z.object({
+    evaluation: z.string().default(''),
+    title: z.string().default(''),
+    category: z.string().default(''),
+    objective: z.string().default(''),
+    methodology: z.string().default(''),
+    expected_outcome: z.array(z.any()).default([]),
+    timeline: z.object({
+        phases: z.array(z.any()).default([]),
+        startDate: z.string().default(''),
+        endDate: z.string().default(''),
+    }).default({ phases: [], startDate: '', endDate: '' }),
+    budget: z.object({
+        totalAmount: z.number().default(0),
+        currency: z.string().default(''),
+        breakdown: z.array(z.any()).default([]),
+    }).default({ totalAmount: 0, currency: '', breakdown: [] }),
+    risks: z.array(z.any()).default([]),
+});
 
 export const EvaluationTools = () => {
     const { proposal } = useBuilderStore();
@@ -79,31 +100,24 @@ export const EvaluationTools = () => {
             return;
         }
 
-        const body = {
-            proposal: {
-                evaluation: proposal?.evaluation as string || '',
-                title: proposal?.title as string || '',
-                category: proposal?.category as string || '',
-                objective: proposal?.objective as string || '',
-                methodology: proposal?.methodology as string || '',
-                expected_outcome: Array.isArray(proposal?.expected_outcome) ? proposal.expected_outcome : [],
-                timeline: {
-                    phases: Array.isArray(proposal?.timeline?.phases ) ? proposal.timeline.phases : [],
-                    startDate: proposal?.timeline?.startDate || '',
-                    endDate: proposal?.timeline?.endDate || '', // Keep this property
-                } as any, // Cast timeline to any if its type is uncertain
-                budget: {
-                    totalAmount: proposal?.budget?.totalAmount || 0,
-                    currency: proposal?.budget?.currency || '',
-                    breakdown: Array.isArray(proposal?.budget?.breakdown) ? proposal.budget.breakdown : [],
-                },
-                risks: Array.isArray(proposal?.risks) ? proposal.risks : [],
- },
-            reportSections: sections,
-            diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
-            acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
-        };
-        mutation.mutate({...body, proposal: body.proposal as any});
+        try {
+            // Safely parse and structure the proposal data using the schema.
+            // This handles null/undefined values and ensures a consistent shape.
+            const safeProposal = ProposalPayloadSchema.parse(proposal || {});
+
+            const body = {
+                proposal: safeProposal,
+                reportSections: sections,
+                diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
+                acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
+            };
+            mutation.mutate(body);
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                console.error("Proposal data validation failed:", error.flatten());
+                toast({ title: "Invalid Data", description: "The proposal data is not in the correct format.", variant: 'destructive' });
+            }
+        }
     }
 
   return (

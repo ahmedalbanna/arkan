@@ -1,14 +1,13 @@
 
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
+import { useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2, Check, X, Search, Plus } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2, X, Search, Plus } from 'lucide-react';
 import { useForm, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,10 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AGENTS, AgentCategory } from '@/lib/agents';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
@@ -29,7 +26,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '@/components/ui/label';
 import React from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const reportTemplateSchema = z.object({
   id: z.string(),

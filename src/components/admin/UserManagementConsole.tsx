@@ -42,7 +42,7 @@ export default function UserManagementConsole() {
       queryFn: async ({ pageParam }) => {
           if (!firebaseUser) throw new Error("User not authenticated");
           const token = await firebaseUser.getIdToken();
-          return fetchUsers(USERS_PER_PAGE, pageParam, token);
+          return fetchUsers(USERS_PER_PAGE, pageParam as string, token);
       },
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,

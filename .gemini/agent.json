@@ -1,0 +1,44 @@
+{
+    "name": "Gemini SDLC Agent",
+    "description": "An agent that generates code based on natural language instructions and streams file outputs.",
+    "url": "http://localhost:41242/",
+    "provider": {
+        "organization": "Google",
+        "url": "https://google.com"
+    },
+    "version": "0.0.2",
+    "capabilities": {
+        "streaming": true,
+        "pushNotifications": false,
+        "stateTransitionHistory": true
+    },
+    "defaultInputModes": [
+        "text"
+    ],
+    "defaultOutputModes": [
+        "text"
+    ],
+    "skills": [
+        {
+            "id": "code_generation",
+            "name": "Code Generation",
+            "description": "Generates code snippets or complete files based on user requests, streaming the results.",
+            "tags": [
+                "code",
+                "development",
+                "programming"
+            ],
+            "examples": [
+                "Write a python function to calculate fibonacci numbers.",
+                "Create an HTML file with a basic button that alerts \"Hello!\" when clicked."
+            ],
+            "inputModes": [
+                "text"
+            ],
+            "outputModes": [
+                "text"
+            ]
+        }
+    ],
+    "supportsAuthenticatedExtendedCard": false
+}

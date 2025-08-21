@@ -1,13 +1,13 @@
 
 import { NextResponse } from 'next/server';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile } from '@/lib/db/queries';
 import { z } from 'zod';
 
 // Helper to verify admin role
 async function verifyAdmin(request: Request) {
-    const adminAuth = await getAdminAuth();
+
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
         const doc = await settingsRef.get();
         if (!doc.exists) {
             // If settings don't exist, create them with default values
-            const defaultSettings = { 
+            const defaultSettings = {
                 newUserCredits: 10,
                 bankName: 'Arkan National Bank',
                 accountHolder: 'Arkan Professional Platform',
@@ -72,7 +72,7 @@ export async function PUT(request: Request) {
 
         const settingsRef = adminDb.collection('settings').doc('defaults');
         await settingsRef.set(validation.data, { merge: true });
-        
+
         return NextResponse.json(validation.data, { status: 200 });
     } catch (error) {
         console.error('Error updating settings:', error);

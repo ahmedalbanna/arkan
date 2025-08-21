@@ -1,8 +1,7 @@
 
 
 'use server';
-import { getAdminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { Agent, AgentData } from '@/lib/agents';
 import { AGENTS as defaultAgents } from '@/lib/agents';
@@ -82,21 +81,20 @@ export async function getPaginatedUsers({ limit, lastVisibleId }: { limit: numbe
           query = query.startAfter(lastDoc);
       }
     }
-    
+
     const snapshot = await query.get();
     const users = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() })) as UserProfile[];
     const hasNextPage = snapshot.docs.length > limit;
     const newLastVisibleId = hasNextPage ? snapshot.docs[snapshot.docs.length - 2].id : null;
-    
+
     return { users, hasNextPage, lastVisibleId: newLastVisibleId };
 }
 
 export async function createUser(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }): Promise<{ user: { uid: string, email?: string | undefined } }> {
-    const adminAuth = await getAdminAuth();
     const { email, password, name, role, credits } = data;
-    
+
     const userRecord = await adminAuth.createUser({ email, password, displayName: name });
-    
+
     const newUserProfile: Omit<UserProfile, 'id'> = {
         name,
         email,
@@ -108,9 +106,9 @@ export async function createUser(data: Omit<UserProfile, 'id' | 'createdAt' | 'u
         profilePictureUrl: '',
         hasCompletedOnboarding: false,
     };
-    
+
     await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
-    
+
     return { user: { uid: userRecord.uid, email: userRecord.email } };
 }
 
@@ -126,13 +124,11 @@ export async function updateUser(userId: string, data: Partial<UserProfile>): Pr
 }
 
 export async function deleteUser(userId: string) {
-    const adminAuth = await getAdminAuth();
     await adminAuth.deleteUser(userId);
     await adminDb.collection('users').doc(userId).delete();
 }
 
 export async function resetUserPassword(userId: string, newPassword: string): Promise<void> {
- const adminAuth = await getAdminAuth();
  await adminAuth.updateUser(userId, { password: newPassword });
 }
 
@@ -141,12 +137,12 @@ export async function resetUserPassword(userId: string, newPassword: string): Pr
 
 export async function updateUserCredits(userId: string, creditsToAdd: number): Promise<number> {
     const userRef = adminDb.collection('users').doc(userId);
-    
+
     await userRef.update({
         credits: FieldValue.increment(creditsToAdd),
         updatedAt: new Date().toISOString(),
     });
-    
+
     const updatedUser = await userRef.get();
     return updatedUser.data()?.credits ?? 0;
 }
@@ -159,19 +155,19 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
         if (!userDoc.exists) {
             throw new Error("User not found");
         }
-        
+
         const currentCredits = userDoc.data()?.credits ?? 0;
-        
+
         if (currentCredits < creditsToDeduct) {
             throw new Error("Insufficient credits. Please purchase more credits to continue.");
         }
-        
+
         const newBalance = currentCredits - creditsToDeduct;
-        transaction.update(userRef, { 
+        transaction.update(userRef, {
             credits: newBalance,
-            updatedAt: new Date().toISOString() 
+            updatedAt: new Date().toISOString()
         });
-        
+
         return newBalance;
     });
 }
@@ -199,9 +195,9 @@ export async function getTransactionsByStatus({ status, limit, lastVisibleId }: 
           query = query.startAfter(lastDoc);
         }
     }
-    
+
     const snapshot = await query.get();
-    
+
     const transactions = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() } as TransactionData));
     const hasNextPage = snapshot.docs.length > limit;
     const newLastVisibleId = hasNextPage ? transactions[transactions.length - 1].id : null;
@@ -240,7 +236,7 @@ export async function getUserTeams(userId: string) {
     const teamPromises = userProfile.teams.map(async (teamId) => {
         const teamDoc = await adminDb.collection('teams').doc(teamId).get();
         if (!teamDoc.exists) return null;
-        
+
         const teamData = { id: teamDoc.id, ...teamDoc.data() } as Team;
 
         const membersSnapshot = await adminDb.collection('teams').doc(teamId).collection('members').get();
@@ -259,7 +255,7 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
   const userRef = adminDb.collection('users').doc(userId);
   const userProfile = await getUserProfile(userId);
   if (!userProfile) throw new Error("User not found.");
-  
+
   const newTeam: Omit<Team, 'id'> = {
       name: teamName,
       ownerId: userId,
@@ -290,11 +286,11 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
 export async function getAgent(agentId: string): Promise<AgentData | null> {
     try {
         const agentDoc = await adminDb.collection('agents').doc(agentId).get();
-        
+
         if (agentDoc.exists) {
             return agentDoc.data() as AgentData;
         }
-        
+
         // Fallback to default if not in DB, which is useful during development
         // or if seeding hasn't occurred.
         const defaultAgent = defaultAgents.find(a => a.id === agentId);
@@ -321,7 +317,7 @@ export async function createGenerativeTemplate(templateType: TemplateType, id: s
     if(doc.exists) {
         throw { status: 409, message: 'A template with this ID already exists.' };
     }
-    
+
     const newTemplate = {
         id,
         ...data,
@@ -330,5 +326,6 @@ export async function createGenerativeTemplate(templateType: TemplateType, id: s
 
     await docRef.set(newTemplate);
 
-    return newTemplate as TemplateData;
+    const createdDoc = await docRef.get();
+    return createdDoc.data() as TemplateData;
 }

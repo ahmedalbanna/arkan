@@ -46,7 +46,7 @@ function NewChatDialog() {
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await firebaseUser!.getIdToken();
-            return fetchUsers(50, pageParam, token); // Fetch more users for the command list
+            return fetchUsers(50, pageParam as string, token); // Fetch more users for the command list
         },
         initialPageParam: undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,

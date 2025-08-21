@@ -4,7 +4,6 @@ import { getUserProfile, deleteUser } from "@/lib/db/queries";
 import { adminDb } from '@/lib/firebase/server-init';
 import { revalidatePath } from "next/cache";
 import { withAuth, handleApiError, createApiResponse } from "@/lib/api-utils";
-import { getAdminAuth } from "@/lib/firebase/admin";
 
 
 // GET a single user profile.
@@ -65,7 +64,7 @@ export const PUT = withAuth(async ({ request, params, user: requester }) => {
             // Admins use the full schema
             validation = adminUpdateUserSchema.safeParse(body);
         }
-        
+
         if (!validation.success) {
             return handleApiError(validation.error);
         }

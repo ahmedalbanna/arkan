@@ -3,6 +3,13 @@
 import { FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Pencil, Files, LayoutGrid, Scale, Megaphone, FileJson, PencilRuler, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+export interface AgentCategory{
+  name: string;
+  icon: LucideIcon;
+  description: string;
+  pageUrl: string;
+}
+
 export interface AgentGuideline {
   text: string;
   isDefault: boolean;
@@ -454,7 +461,7 @@ The architect should be well-structured, engaging, and must heading include:`,
           { text: "**Assess Project Scale and Objectives**: Evaluate the scale and objectives of the project to ensure the chosen architectural pattern aligns with them. Provide insights into how the objectives and scale of the project impact architectural decisions.", isDefault: true },
 
         ],
-        defaultContext: ['proposal']
+        defaultContext: ['proposal', 'systemAnalysis', 'designStrategy']
     },
     tone: 'Default',
     language: 'English (US)',

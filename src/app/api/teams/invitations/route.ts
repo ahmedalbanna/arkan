@@ -2,7 +2,7 @@
 // src/app/api/teams/[id]/invitations/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
@@ -13,7 +13,7 @@ const inviteMemberSchema = z.object({
 
 // Helper to verify if the requester is the owner of the team
 async function verifyTeamOwner(request: Request, teamId: string) {
-    const adminAuth = await getAdminAuth();
+
     const authorization = request.headers.get('Authorization');
     if (!authorization?.startsWith('Bearer ')) {
         return { authorized: false, message: 'Unauthorized' };
@@ -27,7 +27,7 @@ async function verifyTeamOwner(request: Request, teamId: string) {
         return { authorized: false, message: 'Team not found' };
     }
     const team = teamDoc.data() as Team;
-    
+
     if (team.ownerId !== requesterId) {
         return { authorized: false, message: 'Forbidden: Only the team owner can invite members' };
     }
@@ -82,14 +82,14 @@ export async function POST(request: Request, { params }: { params: { id: string 
             profilePictureUrl: userProfile.profilePictureUrl || '', // Denormalized field
         };
         await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).set(newMember);
-        
+
         // Add team to user's profile
         await adminDb.collection('users').doc(userId).update({
             teams: FieldValue.arrayUnion(teamId)
         });
-        
+
         return NextResponse.json(newMember, { status: 201 });
-        
+
     } catch (error) {
         console.error(`Error inviting member to team ${teamId}:`, error);
         if (error instanceof Error && error.message.includes('token')) {

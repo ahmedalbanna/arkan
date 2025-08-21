@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import type { Notification } from '@/lib/types';
-import { getDatabase, ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
-import { app } from "@/lib/firebaseConfig";
+import { ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
+import { db } from "@/lib/firebaseConfig";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
@@ -62,7 +62,6 @@ export function useNotifications() {
     setIsLoading(true);
     setError(null);
 
-    const db = getDatabase(app);
     const notificationsRef = query(
         ref(db, 'notifications/' + firebaseUser.uid),
         orderByChild('createdAt'),
@@ -102,7 +101,7 @@ export function useNotifications() {
  */
 export function useMarkNotificationsAsRead() {
     const { firebaseUser } = useAuth();
-    
+
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;
@@ -121,7 +120,7 @@ export function useMarkNotificationsAsRead() {
  */
 export function useClearAllNotifications() {
     const { firebaseUser } = useAuth();
-    
+
     return useMutation<any, Error, string[]>({
         mutationFn: async (notificationIds) => {
             if (notificationIds.length === 0) return;

@@ -36,13 +36,13 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
         <div className="flex flex-col">
             <section className="py-20 md:py-32 bg-background overflow-hidden">
                 <div className="container mx-auto px-4 text-center">
-                    <div className="inline-block mb-4">
+
                         <div className="text-6xl font-headline font-bold text-primary animate-fade-in-up">
                             {t('header.title')}
                         </div>
-                    </div>
-                    <div className="inline-block">
-                         <h1 
+
+
+                         <h1
                           className={cn(
                             "text-2xl sm:text-3xl md:text-4xl font-headline font-semibold text-muted-foreground mb-4 overflow-hidden border-r-4 border-r-primary whitespace-nowrap mx-auto animate-typing",
                             locale === 'ar' && "border-r-0 border-l-4 border-l-primary"
@@ -50,14 +50,14 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                          >
                             {t('home.heroTitle.animated')}
                         </h1>
-                    </div>
-                    <p 
+
+                    <p
                       className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 animate-fade-in-up"
                       style={{ animationDelay: '2.6s' }}
                     >
                         {t('home.heroSubtitle')}
                     </p>
-                    <div 
+                    <div
                       className="flex flex-col sm:flex-row justify-center items-center gap-4 animate-fade-in-up"
                       style={{ animationDelay: '2.7s' }}
                     >
@@ -77,8 +77,8 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
                 <div className="container mx-auto px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                         {features.map((feature, index) => (
-                           <Card 
-                            key={index} 
+                           <Card
+                            key={index}
                             className="p-8 flex flex-col items-center group hover:shadow-xl hover:-translate-y-2 transition-all duration-300 animate-fade-in-up bg-card"
                             style={{ animationDelay: `${2.8 + index * 0.1}s` }}
                            >

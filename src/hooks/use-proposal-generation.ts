@@ -8,7 +8,7 @@ import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
-import type { AnyProjectProposal, ExternalContext } from '@/lib/types';
+import type { ExternalContext } from '@/lib/types';
 import { generateProposalApi } from '@/services/proposal-service';
 import { useBuilderStore } from './useBuilderStore';
 import type { AdvancedProposalFields } from './useProposalGenerationStore';
@@ -26,10 +26,10 @@ export function useGenerateProposal() {
     const { setProposal } = useBuilderStore();
     const queryClient = useQueryClient();
 
-    return useMutation<string, Error, GenerateProposalBody>({
+    return useMutation<any, Error, GenerateProposalBody>({
         mutationFn: async (body) => {
-            const token = await getAuthenticatedToken(firebaseUser);
-            return generateProposalApi({ body, token });
+            const token = await getAuthenticatedToken(firebaseUser); // Assuming generateProposalApi expects a token
+            return generateProposalApi({ body, token }) as Promise<string>; // Cast to string as per mutation's return type
         },
         onSuccess: (data) => {
             setProposal(data);

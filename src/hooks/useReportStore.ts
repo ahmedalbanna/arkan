@@ -10,6 +10,7 @@ import { AGENTS, type AgentPrompt } from '@/lib/agents';
 import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-generation-templates';
 import { useBuilderStore } from './useBuilderStore';
 import type { ProjectState } from '@/lib/types';
+import { agentKeys } from '@/lib/query-keys';
 
 // Type definitions
 export interface GuidelineState {
@@ -252,6 +253,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
             ...emptySelection,
             proposal: defaultContextIds.includes('proposal'),
             projectPlan: defaultContextIds.includes('projectPlan'),
+            section: defaultContextIds.includes('sections'),
             externalContext: Array(state.externalContext.length).fill(true),
         };
 

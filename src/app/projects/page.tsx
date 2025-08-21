@@ -45,7 +45,7 @@ function CreateProjectDialog() {
     const newSession = useBuilderStore(state => state.newSession);
     const setProjectName = useBuilderStore(state => state.setProjectName);
     const setProjectIdea = useBuilderStore(state => state.setProjectIdea);
-    
+
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
@@ -55,7 +55,7 @@ function CreateProjectDialog() {
         router.push('/generate');
         setIsOpen(false);
     }
-    
+
     // This is a proxy for the main button's action
     const handleCreateNewProject = () => {
         newSession();
@@ -90,7 +90,7 @@ function CreateProjectDialog() {
                     </div>
                 </div>
                 <div className="py-4 max-h-[40vh] overflow-y-auto">
-                   <UploadManager />
+                   <UploadManager onCollapseToggle={() => {}} />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>
@@ -108,7 +108,7 @@ function CreateProjectDialog() {
 export default function MyProjectsPage() {
     const { t } = useLocalization();
     const { isLoading: authLoading } = useAuth();
-    
+
     const { projects, isLoading, isError, error, refetch, isRefetching } = useProjects();
 
 
@@ -132,7 +132,7 @@ export default function MyProjectsPage() {
                     <CreateProjectDialog />
                 </div>
             </div>
-            
+
             {isLoading || authLoading ? (
                 <ProjectsPageSkeleton />
             ) : isError ? (

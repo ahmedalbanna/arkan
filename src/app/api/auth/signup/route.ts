@@ -3,7 +3,7 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { UserRole } from '@/lib/db/queries';
 import { getUserProfile } from '@/lib/db/queries';
@@ -61,10 +61,10 @@ async function notifyAdminsOfNewUser(user: { name?: string | null, email?: strin
 
 export async function POST(req: Request) {
   try {
-    const adminAuth = await getAdminAuth();
+
     const body = await req.json();
     const defaultCredits = await getNewUserCredits();
-    
+
     if (body.uid) {
         const validation = providerSignupSchema.safeParse(body);
         if (!validation.success) {
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
             role: 'user' as UserRole,
             hasCompletedOnboarding: false,
         };
-        
+
         await adminDb.collection('users').doc(uid).set(newUserProfile);
         await notifyAdminsOfNewUser(newUserProfile);
         return createApiResponse({ user: { uid, ...newUserProfile } }, 201);
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
 
         await adminDb.collection('users').doc(userRecord.uid).set(newUserProfile);
         await notifyAdminsOfNewUser(newUserProfile);
-        
+
         return createApiResponse({ user: { uid: userRecord.uid, email: userRecord.email } }, 201);
     }
   } catch (error: any) {

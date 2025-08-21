@@ -13,8 +13,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { Footer } from '@/components/layout/Footer';
 import QueryProvider from '@/components/QueryProvider';
 import { cookies, headers } from 'next/headers';
-import { redirect } from 'next/navigation';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { redirect } from 'next/dist/client/components/navigation';
+import { adminAuth } from '@/lib/firebase/admin';
 import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
 
@@ -58,7 +58,6 @@ async function handleAuthRedirects(pathname: string) {
   let isAuthenticated = false;
   if(sessionCookie) {
     try {
-        const adminAuth = await getAdminAuth();
         await adminAuth.verifySessionCookie(sessionCookie, true);
         isAuthenticated = true;
     } catch (error) {

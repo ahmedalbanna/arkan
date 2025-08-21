@@ -6,11 +6,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { updateUser, deleteUser, getUserProfile } from '@/lib/db/queries';
 import { cookies } from 'next/headers';
-import { getAdminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/admin';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {
-  const adminAuth = await getAdminAuth();
+
   const sessionCookie = (await cookies()).get('__session')?.value;
   if (!sessionCookie) {
     return { authorized: false, message: 'Unauthorized' };
@@ -42,7 +42,7 @@ export async function handleUpdateUser(prevState: any, formData: FormData) {
   if (!adminCheck.authorized) {
       return { errors: { _form: 'Forbidden' } };
   }
-  
+
   const validatedFields = updateUserSchema.safeParse(Object.fromEntries(formData.entries()));
 
   if (!validatedFields.success) {

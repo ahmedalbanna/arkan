@@ -1,5 +1,5 @@
 // A file-based store for tracking job statuses using Firebase Realtime Database.
-import { adminRealtimeDb } from '@/lib/firebase/server-init';
+import { adminRealtimeDb } from '@/lib/firebase/admin';
 import { randomBytes } from 'crypto';
 
 interface Job {
