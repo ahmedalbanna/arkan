@@ -322,7 +322,7 @@ export default function DocxTemplateManager() {
                           </div>
                           <div className="space-y-2">
                             <Label>{t('manageTemplates.bold')}</Label>
-                            <input
+                            <Input
                               type="checkbox"
                               className="w-5 h-5 block"
                               checked={!!(styles as any)?.[`heading${level}`]?.run?.bold}
