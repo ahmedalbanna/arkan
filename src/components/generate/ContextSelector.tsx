@@ -9,7 +9,7 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { reportSections, diagramConfig } from '@/lib/sections-templates';
+import { reportSections, diagramSections } from '@/lib/sections-templates';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -80,7 +80,7 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
                                 <Label htmlFor={`context-diagram-${itemKey}-${contextKey}`} className="text-sm font-normal">
                                     <div className="flex items-center gap-2">
                                         <GitGraph className="h-4 w-4" />
-                                        {t(diagramConfig[contextKey].title)}
+                                        {t(diagramSections[contextKey].title)}
                                     </div>
                                 </Label>
                             </div>

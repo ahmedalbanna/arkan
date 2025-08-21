@@ -31,7 +31,7 @@ export const reportSections: Record<string, Section> = {
     appendices: { title: 'Appendices', icon: Files, agentId: 'generate-appendices-section' },
 };
 
-export const diagramConfig: Record<string, Section> = {
+export const diagramSections: Record<string, Section> = {
     "use-case": { title: 'Use Case Diagram', icon: GitGraph, agentId: 'generate-use-case-diagram' },
     "class": { title: 'Class Diagram', icon: GitGraph, agentId: 'generate-class-diagram' },
     "sequence": { title: 'Sequence Diagram', icon: GitGraph, agentId: 'generate-sequence-diagram' },

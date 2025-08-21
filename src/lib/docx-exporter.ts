@@ -451,7 +451,7 @@ export async function exportReportAsDocx(
         for (const result of imageResults) {
             if (result && result.buffer) {
                 const { key, buffer } = result;
-                // Since diagramConfig is gone, we'll just use the key as the title.
+                // Since diagramSections is gone, we'll just use the key as the title.
                 // A better approach would be to get the title from a dynamic source if available.
                 const diagramTitle = key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 

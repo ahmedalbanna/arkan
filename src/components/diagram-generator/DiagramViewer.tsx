@@ -18,7 +18,7 @@ import { Card, CardContent } from '../ui/card';
 import type { DiagramData } from '@/hooks/useDiagramStore';
 import type { DiagramType } from '@/ai/schemas';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
-import { diagramConfig } from '@/lib/sections-templates';
+import { diagramSections } from '@/lib/sections-templates';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;
@@ -39,7 +39,7 @@ export default function DiagramViewer({
     onUpdate,
     onExplanationSave,
 }: DiagramViewerProps) {
-    const { title: diagramTitleKey } = diagramConfig[diagramKey];
+    const { title: diagramTitleKey } = diagramSections[diagramKey];
     const { t } = useLocalization();
     const diagramTitle = t(diagramTitleKey);
     const [isCopied, setIsCopied] = useState(false);

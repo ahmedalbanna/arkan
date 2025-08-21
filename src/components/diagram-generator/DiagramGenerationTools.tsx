@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig } from '@/lib/sections-templates';
+import { diagramSections } from '@/lib/sections-templates';
 import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
@@ -43,7 +43,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
 
     const diagramMutation = useGenerateDiagram((data, variables) => {
         const diagramKey = variables.diagramToGenerate as DiagramType;
-        const translatedTitle = t(diagramConfig[diagramKey].title);
+        const translatedTitle = t(diagramSections[diagramKey].title);
 
         setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
         toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
@@ -90,7 +90,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
         const fullState = getFullState();
         const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
-        const agent = agents.find(a => a.id === diagramConfig[diagramType as DiagramType]?.agentId);
+        const agent = agents.find(a => a.id === diagramSections[diagramType as DiagramType]?.agentId);
 
         const selectedExternalContext = externalContext?.filter((c, i) => selectedContext.externalContext[i]);
 
@@ -128,10 +128,10 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
                     {orderedDiagrams.map((key) => {
-                        const agent = agents.find(a => a.id === diagramConfig[key].agentId);
+                        const agent = agents.find(a => a.id === diagramSections[key].agentId);
                         if (!agent) return null;
 
-                        const { title, icon: Icon, agentId } = diagramConfig[key];
+                        const { title, icon: Icon, agentId } = diagramSections[key];
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         const currentSelection = useReportStore.getState().contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
                         const hasSelectedContext = !!useBuilderStore.getState().proposal || !!useProjectPlanStore.getState().projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (useReportStore.getState().externalContext.length > 0 && currentSelection.externalContext.some(v => v));

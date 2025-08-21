@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useReportStore } from '@/hooks/useReportStore';
-import { diagramConfig, reportSections } from '@/lib/sections-templates';
+import { diagramSections, reportSections } from '@/lib/sections-templates';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -75,7 +75,7 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
                     ))}
                      {selectedDiagrams.map(({ key, content }) => (
                          <AccordionItem value={`diagram-${key}`} key={`diagram-${key}`} className="bg-muted/50 rounded-lg border">
-                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(diagramConfig[key].title)}</AccordionTrigger>
+                            <AccordionTrigger className="px-4 py-2 text-sm font-medium">{t(diagramSections[key].title)}</AccordionTrigger>
                             <AccordionContent className="p-4 pt-0 text-xs text-muted-foreground prose dark:prose-invert max-w-none">
                                 <pre><code>{content}</code></pre>
                             </AccordionContent>

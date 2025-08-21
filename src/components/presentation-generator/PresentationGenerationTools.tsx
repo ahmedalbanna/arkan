@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig } from '@/lib/sections-templates';
+import { diagramSections } from '@/lib/sections-templates';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
@@ -42,7 +42,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 
 
-const orderedDiagrams = Object.keys(diagramConfig) as DiagramType[];
+const orderedDiagrams = Object.keys(diagramSections) as DiagramType[];
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -203,7 +203,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
                 const diagramKey = key as DiagramType;
                 sourceDocuments.push({
-                    fileName: `Diagram: ${t(diagramConfig[diagramKey].title)}`,
+                    fileName: `Diagram: ${t(diagramSections[diagramKey].title)}`,
                     content: diagrams[diagramKey]!.plantUmlCode
                 });
             }
