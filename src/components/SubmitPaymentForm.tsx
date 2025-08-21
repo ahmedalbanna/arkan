@@ -40,7 +40,7 @@ async function fetchPublicSettings() {
 async function submitPaymentProof({ formData, token }: { formData: FormData, token: string }) {
     if (!token) throw new Error("User not authenticated");
 
-    const response = await fetch('/api/purchase-request', {
+    const response = await fetch('/api/admin/purchase-request', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`

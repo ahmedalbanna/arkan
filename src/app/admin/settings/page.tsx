@@ -38,7 +38,7 @@ type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 // --- API Service Functions ---
 async function fetchSettings(token: string): Promise<AppSettings> {
-    const response = await fetch('/api/settings', {
+    const response = await fetch('/api/admin/settings', {
         headers: { 'Authorization': `Bearer ${token}` },
     });
     if (!response.ok) throw new Error('Failed to fetch settings');
@@ -46,7 +46,7 @@ async function fetchSettings(token: string): Promise<AppSettings> {
 }
 
 async function updateSettings(variables: { data: AppSettings, token: string }): Promise<AppSettings> {
-    const response = await fetch('/api/settings', {
+    const response = await fetch('/api/admin/settings', {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
