@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import { sectionConfig } from '@/lib/report-config';
+import { sectionConfig } from '@/lib/sections-config';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 

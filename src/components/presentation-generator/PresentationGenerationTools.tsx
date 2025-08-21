@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig } from '@/lib/report-config';
+import { diagramConfig } from '@/lib/sections-config';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
@@ -30,7 +30,7 @@ import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
-import { sectionConfig } from '@/lib/report-config';
+import { sectionConfig } from '@/lib/sections-config';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';

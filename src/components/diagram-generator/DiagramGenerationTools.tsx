@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramConfig } from '@/lib/report-config';
+import { diagramConfig } from '@/lib/sections-config';
 import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
 import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';

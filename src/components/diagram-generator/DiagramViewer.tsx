@@ -18,7 +18,7 @@ import { Card, CardContent } from '../ui/card';
 import type { DiagramData } from '@/hooks/useDiagramStore';
 import type { DiagramType } from '@/ai/schemas';
 import { useExplainDiagram } from '@/hooks/use-diagrams';
-import { diagramConfig } from '@/lib/report-config';
+import { diagramConfig } from '@/lib/sections-config';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;

@@ -10,7 +10,7 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { sectionConfig, diagramConfig } from '@/lib/report-config';
+import { sectionConfig, diagramConfig } from '@/lib/sections-config';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';

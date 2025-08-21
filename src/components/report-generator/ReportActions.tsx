@@ -14,7 +14,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
-import { sectionConfig } from '@/lib/report-config';
+import { sectionConfig } from '@/lib/sections-config';
 import { SectionName } from '@/ai/schemas';
 import { useExport } from '@/hooks/use-export';
 

@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useReportStore } from '@/hooks/useReportStore';
-import { diagramConfig, sectionConfig } from '@/lib/report-config';
+import { diagramConfig, sectionConfig } from '@/lib/sections-config';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
