@@ -41,7 +41,7 @@ export const diagramSections: Record<string, Section> = {
     "er": { title: 'ER Diagram', icon: GitGraph, agentId: 'generate-er-diagram' },
 }
 
-export const presentationConfig: Section = {
+export const presentationSections: Section = {
     title: 'Presentation',
     icon: Presentation,
     agentId: 'generate-presentation'
