@@ -9,7 +9,7 @@ import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey 
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-generation-templates';
-import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/presentation-generation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/presentation-templates';
 import { defaultBankAccounts } from '@/lib/bank-accounts';
 
 async function seed() {

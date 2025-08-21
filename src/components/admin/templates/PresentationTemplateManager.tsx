@@ -22,7 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 const presentationTemplateSchema = z.object({

@@ -15,7 +15,7 @@ import {
   GeneratePresentationOutputSchema,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-generation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
 
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
