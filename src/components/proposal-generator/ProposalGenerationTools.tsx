@@ -86,29 +86,43 @@ const AdvancedFieldsForm = () => {
         <div className="space-y-4">
             <div className="space-y-1">
                 <Label htmlFor="projectTitle">Project Title</Label>
-                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="e.g., AI-Powered Document Collaboration Platform"/>
+                <Input id="projectTitle" name="projectTitle" value={advancedFields.projectTitle} onChange={handleFieldChange} placeholder="Enter the project title..."/>
+                <p className="text-xs text-muted-foreground">A clear, concise title that captures the essence of your project.</p>
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="projectObjective">Project Objective</Label>
+                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={3} placeholder="Describe the main objective of the project..."/>
+                <p className="text-xs text-muted-foreground">What is the primary goal this project aims to achieve?</p>
             </div>
             <div className="space-y-1">
-                <Label htmlFor="projectObjective">Project Objective</Label>
-                <Textarea id="projectObjective" name="projectObjective" value={advancedFields.projectObjective} onChange={handleFieldChange} rows={4} placeholder="e.g., To develop a platform that uses AI to assist in writing, editing, and managing technical documents..."/>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                    <Label htmlFor="projectMethodology">Methodology</Label>
-                    <Input id="projectMethodology" name="projectMethodology" value={advancedFields.projectMethodology} onChange={handleFieldChange}/>
-                </div>
-                 <div className="space-y-1">
-                    <Label htmlFor="projectTimeline">Timeline</Label>
-                    <Input id="projectTimeline" name="projectTimeline" value={advancedFields.projectTimeline} onChange={handleFieldChange}/>
-                </div>
+                <Label htmlFor="expectedOutcomes">Expected Outcomes</Label>
+                <Textarea id="expectedOutcomes" name="expectedOutcomes" value={advancedFields.expectedOutcomes} onChange={handleFieldChange} rows={3} placeholder="List the expected outcomes and deliverables..."/>
+                 <p className="text-xs text-muted-foreground">What specific results and deliverables do you expect from this project?</p>
             </div>
              <div className="space-y-1">
-                <Label htmlFor="projectBudget">Budget</Label>
-                <Input id="projectBudget" name="projectBudget" value={advancedFields.projectBudget} onChange={handleFieldChange}/>
+                <Label htmlFor="stakeholders">Stakeholders</Label>
+                <Input id="stakeholders" name="stakeholders" value={advancedFields.stakeholders} onChange={handleFieldChange} placeholder="Identify key stakeholders and their roles..."/>
+                 <p className="text-xs text-muted-foreground">Who are the key people or groups involved in or affected by this project?</p>
             </div>
              <div className="space-y-1">
-                <Label htmlFor="projectStakeholders">Stakeholders</Label>
-                <Input id="projectStakeholders" name="projectStakeholders" value={advancedFields.projectStakeholders} onChange={handleFieldChange}/>
+                <Label htmlFor="projectContext">Project Context</Label>
+                <Textarea id="projectContext" name="projectContext" value={advancedFields.projectContext} onChange={handleFieldChange} rows={4} placeholder="Provide background information and context..."/>
+                 <p className="text-xs text-muted-foreground">What is the background and environment in which this project exists?</p>
+            </div>
+              <div className="space-y-1">
+                <Label htmlFor="risksAndChallenges">Risks & Challenges</Label>
+                <Textarea id="risksAndChallenges" name="risksAndChallenges" value={advancedFields.risksAndChallenges} onChange={handleFieldChange} rows={3} placeholder="Identify potential risks and challenges..."/>
+                 <p className="text-xs text-muted-foreground">What potential risks, challenges, or obstacles might this project face?</p>
+            </div>
+              <div className="space-y-1">
+                <Label htmlFor="projectRationale">Project Rationale</Label>
+                <Textarea id="projectRationale" name="projectRationale" value={advancedFields.projectRationale} onChange={handleFieldChange} rows={3} placeholder="Explain why this project is necessary..."/>
+                 <p className="text-xs text-muted-foreground">Why is this project important? What problems does it solve?</p>
+            </div>
+             <div className="space-y-1">
+                <Label htmlFor="additionalContext">Additional Context</Label>
+                <Textarea id="additionalContext" name="additionalContext" value={advancedFields.additionalContext} onChange={handleFieldChange} rows={3} placeholder="Any additional information that might be relevant..."/>
+                 <p className="text-xs text-muted-foreground">Any other relevant information that could help in the analysis.</p>
             </div>
         </div>
     )

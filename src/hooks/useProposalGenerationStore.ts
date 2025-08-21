@@ -8,14 +8,12 @@ import { useBuilderStore } from "./useBuilderStore";
 export interface AdvancedProposalFields {
     projectTitle: string;
     projectObjective: string;
-    projectMethodology: string;
-    projectExpectedOutcome: string;
-    projectTimeline: string;
-    projectBudget: string;
-    projectStakeholders: string;
-    projectRisks: string;
-    projectSuccessCriteria: string;
-    projectEvaluation: string;
+    expectedOutcomes: string;
+    stakeholders: string;
+    projectContext: string;
+    risksAndChallenges: string;
+    projectRationale: string;
+    additionalContext: string;
 }
 
 interface ProposalGenerationState {
@@ -37,14 +35,12 @@ interface ProposalGenerationActions {
 const initialAdvancedFields: AdvancedProposalFields = {
     projectTitle: '',
     projectObjective: '',
-    projectMethodology: 'Agile (Scrum)',
-    projectExpectedOutcome: '',
-    projectTimeline: '6 months',
-    projectBudget: '$50,000',
-    projectStakeholders: 'End-users, Project Sponsor, Development Team',
-    projectRisks: '',
-    projectSuccessCriteria: '',
-    projectEvaluation: ''
+    expectedOutcomes: '',
+    stakeholders: '',
+    projectContext: '',
+    risksAndChallenges: '',
+    projectRationale: '',
+    additionalContext: ''
 };
 
 const initialState: ProposalGenerationState = {

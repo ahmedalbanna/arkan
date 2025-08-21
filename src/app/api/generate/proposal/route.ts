@@ -24,32 +24,28 @@ const generateProposalSchema = z.object({
       type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines']),
   })).optional(),
   advancedFields: z.object({
-      projectTitle: z.string(),
-      projectObjective: z.string(),
-      projectMethodology: z.string(),
-      projectExpectedOutcome: z.string(),
-      projectTimeline: z.string(),
-      projectBudget: z.string(),
-      projectStakeholders: z.string(),
-      projectRisks: z.string(),
-      projectSuccessCriteria: z.string(),
-      projectEvaluation: z.string(),
+    projectTitle: z.string(),
+    projectObjective: z.string(),
+    expectedOutcomes: z.string(),
+    stakeholders: z.string(),
+    projectContext: z.string(),
+    risksAndChallenges: z.string(),
+    projectRationale: z.string(),
+    additionalContext: z.string(),
   }).optional(),
 });
 
 function formatAdvancedPrompt(fields: AdvancedProposalFields): string {
     return `
 Here are the specific details for the project:
-- **Title**: ${'\'\'\''}${fields.projectTitle}'\'\'\''}
-- **Objective**: ${'\'\'\''}${fields.projectObjective}'\'\'\''}
-- **Methodology**: ${'\'\'\''}${fields.projectMethodology}'\'\'\''}
-- **Expected Outcomes**: ${'\'\'\''}${fields.projectExpectedOutcome}'\'\'\''}
-- **Timeline**: ${'\'\'\''}${fields.projectTimeline}'\'\'\''}
-- **Budget**: ${'\'\'\''}${fields.projectBudget}'\'\'\''}
-- **Stakeholders**: ${'\'\'\''}${fields.projectStakeholders}'\'\'\''}
-- **Risks**: ${'\'\'\''}${fields.projectRisks}'\'\'\''}
-- **Success Criteria**: ${'\'\'\''}${fields.projectSuccessCriteria}'\'\'\''}
-- **Evaluation**: ${'\'\'\''}${fields.projectEvaluation}'\'\'\''}
+- **Project Title**: ${'\'\'\''}${fields.projectTitle}'\'\'\''}
+- **Project Objective**: ${'\'\'\''}${fields.projectObjective}'\'\'\''}
+- **Expected Outcomes**: ${'\'\'\''}${fields.expectedOutcomes}'\'\'\''}
+- **Stakeholders**: ${'\'\'\''}${fields.stakeholders}'\'\'\''}
+- **Project Rationale**: ${'\'\'\''}${fields.projectRationale}'\'\'\''}
+- **Project Context**: ${'\'\'\''}${fields.projectContext}'\'\'\''}
+- **Risks & Challenges**: ${'\'\'\''}${fields.risksAndChallenges}'\'\'\''}
+- **Additional Context**: ${'\'\'\''}${fields.additionalContext}'\'\'\''}
 
 Based on these details, please generate a comprehensive and professional project proposal in a well-structured markdown format.
 `;
