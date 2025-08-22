@@ -5,7 +5,7 @@ import { getStorage } from 'firebase-admin/storage';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
-export const POST = withAuth(async ({ request, params }) => {
+export const POST = withAuth(async ({ request, params, user }) => {
     const templateId = params.key;
     if (!templateId) {
         return handleApiError({ message: 'Template ID is required.' }, 400);

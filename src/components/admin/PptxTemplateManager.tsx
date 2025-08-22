@@ -4,8 +4,6 @@
 import { usePptxStyles, useCreatePptxTemplate, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
 import { useRefreshTemplateImage } from '@/hooks/use-templates';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw, Upload } from 'lucide-react';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
@@ -20,6 +18,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import type { PptxStyleOptions, PptxTemplate } from '@/lib/types';
@@ -97,7 +96,7 @@ function CreateTemplateDialog() {
                         <DialogFooter>
                             <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
-                                {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                                {createMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Save className="me-2 h-4 w-4" />}
                                 {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>

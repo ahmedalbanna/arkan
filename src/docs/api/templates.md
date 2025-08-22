@@ -51,3 +51,12 @@ The application uses a hierarchical structure in Firestore to store templates:
     4.  Updates the `imageUrl` field in the corresponding template document in Firestore with the new public URL.
 -   **Usage**: Called by the `useRefreshTemplateImage` hooks when an admin clicks the refresh button on a template card.
 
+### POST `/api/admin/templates/pptx/[key]/upload`
+
+-   **Purpose**: Uploads a `.pptx` file to be used as a base template for a specific PPTX style.
+-   **Access**: Admin-only.
+-   **Logic**:
+    1.  Receives a `.pptx` file in a multipart/form-data request.
+    2.  Saves the file to Firebase Storage.
+    3.  Updates the `templateUrl` field in the corresponding PPTX style document in Firestore.
+-   **Usage**: Called by the `usePptxStyles` hook when an admin uploads a new base template file.
