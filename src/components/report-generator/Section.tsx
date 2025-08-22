@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck } from 'lucide-react';
+import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck, ShieldCheck } from 'lucide-react';
 import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { exportSectionAsDocx } from '@/lib/docx-exporter';
@@ -29,6 +29,7 @@ import { computeDiff, DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { processPlantUml } from '@/lib/utils';
+import { EvaluationTools } from '../EvaluationTools';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -255,9 +256,9 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         <Tabs defaultValue="view">
             <div className="flex justify-between items-center mb-2">
                 <TabsList>
-                    <TabsTrigger value="view">{t('builder.Section.viewTab')}</TabsTrigger>
-                    <TabsTrigger value="edit">{t('builder.Section.editTab')}</TabsTrigger>
+                    <TabsTrigger value="view">{t('builder.Section.viewEditTab')}</TabsTrigger>
                     <TabsTrigger value="translate">{t('builder.Section.translateTab')}</TabsTrigger>
+                    <TabsTrigger value="evaluation">{t('builder.Section.evaluationTab')}</TabsTrigger>
                 </TabsList>
                  <div className="flex items-center text-xs text-muted-foreground">
                     <span>{words} {t('builder.Section.words')}</span>
@@ -275,11 +276,11 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                             </Button>
                         </div>
                     )}
-                    <div className="bg-background shadow-lg p-16">
-                        <div className="prose dark:prose-invert max-w-none p-4">
+                    <ScrollArea className="h-[calc(70vh)] rounded-md border p-4">
+                        <div className="prose dark:prose-invert max-w-none">
                             <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
                         </div>
-                    </div>
+                    </ScrollArea>
 
                     {aiSuggestion && (
                          <Card className="mt-4 border-accent">
@@ -364,6 +365,9 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
             </TabsContent>
             <TabsContent value="translate">
                 <TranslationView sectionKey={sectionKey} originalContent={content} />
+            </TabsContent>
+            <TabsContent value="evaluation">
+                <EvaluationTools />
             </TabsContent>
         </Tabs>
     );

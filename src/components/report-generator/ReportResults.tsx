@@ -16,7 +16,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import React from 'react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { EvaluationTools } from '../EvaluationTools';
 import { useAgents } from '@/hooks/use-agents';
 
 interface ReportResultsProps {
@@ -31,15 +30,14 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title: string 
 );
 
 export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
-  const { sections, evaluation } = useReportStore();
+  const { sections } = useReportStore();
   const { t } = useLocalization();
   const { agents } = useAgents();
 
   const [currentPage, setCurrentPage] = useState(0);
 
   const generatedSections = (Object.keys(sections) as SectionName[]).filter(key => sections[key]);
-  const evaluationPageExists = true; // The evaluation page is always potentially available
-  const totalPages = generatedSections.length + (evaluationPageExists ? 1 : 0);
+  const totalPages = generatedSections.length;
 
   // Reset to first page if the content changes
   useEffect(() => {
@@ -72,7 +70,6 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
     );
   }
 
-  const isEvaluationPage = currentPage === generatedSections.length;
   const currentSectionKey = generatedSections[currentPage];
 
   const getSectionTitle = (key: SectionName): string => {
@@ -101,22 +98,16 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
         </Button>
       </div>
         <ScrollArea className="flex-grow">
-            {isEvaluationPage ? (
-                <A4Page title={t('builder.Section.evaluationTab')}>
-                    {evaluation ? <EvaluationResultViewer evaluation={evaluation} /> : <EvaluationTools />}
+            {currentSectionKey && (
+                 <A4Page key={currentSectionKey} title={getSectionTitle(currentSectionKey)}>
+                    <Section
+                        sectionKey={currentSectionKey}
+                        title={getSectionTitle(currentSectionKey)}
+                        icon={getSectionIcon(currentSectionKey)}
+                        content={sections[currentSectionKey]!}
+                        onUpdate={onSectionUpdate}
+                    />
                 </A4Page>
-            ) : (
-                currentSectionKey && (
-                     <A4Page key={currentSectionKey} title={getSectionTitle(currentSectionKey)}>
-                        <Section
-                            sectionKey={currentSectionKey}
-                            title={getSectionTitle(currentSectionKey)}
-                            icon={getSectionIcon(currentSectionKey)}
-                            content={sections[currentSectionKey]!}
-                            onUpdate={onSectionUpdate}
-                        />
-                    </A4Page>
-                )
             )}
         </ScrollArea>
 
