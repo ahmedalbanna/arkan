@@ -4,13 +4,10 @@
 import { useDocxStyles, useCreateDocxTemplate, useDeleteDocxTemplate } from '@/hooks/use-docx-styles';
 import { useRefreshTemplateImage } from '@/hooks/use-templates';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
 import type { DocxTemplate, TemplateKey } from '@/lib/types';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Accordion } from '../ui/accordion';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '../ui/dialog';
@@ -20,9 +17,10 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
+import { StyleEditor } from '../design/StyleEditor';
 
-const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
 
 const createDocxTemplateSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
@@ -209,7 +207,6 @@ export default function DocxTemplateManager() {
       {(Object.keys(templates || {}) as TemplateKey[]).map((key) => {
         const template = templates?.[key];
         if (!template) return null;
-        const styles = template.styles.default;
         const isDefaultTemplate = ['modern', 'classic', 'academic'].includes(key);
 
         return (
@@ -258,101 +255,11 @@ export default function DocxTemplateManager() {
                           )}
                     </Button>
                 </div>
-              <Accordion type="multiple" className="w-full">
-                <AccordionItem value="general">
-                  <AccordionTrigger>{t('manageTemplates.generalStyles')}</AccordionTrigger>
-                  <AccordionContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>{t('manageTemplates.fontFamily')}</Label>
-                        <Select
-                          value={(styles?.document?.run?.font as any)?.name || ''}
-                          onValueChange={(value) => handleStyleChange(key, 'document.run.font.name', value)}
-                        >
-                            <SelectTrigger><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                {FONT_FACES.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-
-                      </div>
-                      <div className="space-y-2">
-                        <Label>{t('manageTemplates.fontSize')}</Label>
-                        <Input
-                          type="number"
-                          value={Number(styles?.document?.run?.size || 0) / 2}
-                          onChange={(e) => handleStyleChange(key, 'document.run.size', Number(e.target.value) * 2)}
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>{t('manageTemplates.fontColor')}</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="color"
-                          value={`#${styles?.document?.run?.color || '000000'}`}
-                          onChange={(e) => handleStyleChange(key, 'document.run.color', e.target.value.substring(1))}
-                          className="w-10 h-10 p-1"
-                        />
-                        <Input
-                          type="text"
-                          value={styles?.document?.run?.color || ''}
-                          onChange={(e) => handleStyleChange(key, 'document.run.color', e.target.value)}
-                          placeholder="e.g., 333333"
-                        />
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-                <AccordionItem value="headings">
-                  <AccordionTrigger>{t('manageTemplates.headingStyles')}</AccordionTrigger>
-                  <AccordionContent className="space-y-6">
-                    {[1, 2, 3].map(level => (
-                      <div key={level} className="space-y-3 p-2 border-l-2">
-                        <h4 className="font-semibold">{t('manageTemplates.headingLevel').replace('{level}', level.toString())}</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>{t('manageTemplates.fontSize')}</Label>
-                            <Input
-                              type="number"
-                              value={Number((styles as any)?.[`heading${level}`]?.run?.size || 0) / 2}
-                              onChange={(e) => handleStyleChange(key, `heading${level}.run.size`, Number(e.target.value) * 2)}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>{t('manageTemplates.bold')}</Label>
-                            <Input
-                              type="checkbox"
-                              className="w-5 h-5 block"
-                              checked={!!(styles as any)?.[`heading${level}`]?.run?.bold}
-                              onChange={(e) => handleStyleChange(key, `heading${level}.run.bold`, e.target.checked)}
-                            />
-
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>{t('manageTemplates.fontColor')}</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="color"
-                              value={`#${(styles as any)?.[`heading${level}`]?.run?.color || '000000'}`}
-                              onChange={(e) => handleStyleChange(key, `heading${level}.run.color`, e.target.value.substring(1))}
-                              className="w-10 h-10 p-1"
-                            />
-
-                            <Input
-                              type="text"
-                              value={(styles as any)?.[`heading${level}`]?.run?.color || ''}
-                              onChange={(e) => handleStyleChange(key, `heading${level}.run.color`, e.target.value)}
-                              placeholder="e.g., 2E74B5"
-                            />
-
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </AccordionContent>
-                </AccordionItem>
+              <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
+                  <StyleEditor heading="General Document Styles" styleKey="document" templateKey={key} />
+                  <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={key} />
+                  <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={key} />
+                  <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={key} />
               </Accordion>
             </CardContent>
             <CardFooter>

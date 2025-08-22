@@ -2,15 +2,15 @@
 'use client';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
+import { CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Accordion } from '@/components/ui/accordion';
-import { StyleEditor } from './StyleEditor';
 import { Button } from '../ui/button';
 import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { Loader2, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
 import { TemplateKey } from '@/lib/types';
+import { StyleEditor } from './StyleEditor'; // Import the new reusable component
 
 export function DesignStudio() {
     const { templates, activeTemplateKey, setActiveTemplateKey, saveChanges, isSaving } = useDocxStyles();
@@ -48,10 +48,10 @@ export function DesignStudio() {
                     </div>
 
                     <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
-                        <StyleEditor heading="General Document Styles" styleKey="document" />
-                        <StyleEditor heading="Heading 1" styleKey="heading1" />
-                        <StyleEditor heading="Heading 2" styleKey="heading2" />
-                        <StyleEditor heading="Heading 3" styleKey="heading3" />
+                        <StyleEditor heading="General Document Styles" styleKey="document" templateKey={activeTemplateKey} />
+                        <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={activeTemplateKey} />
+                        <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={activeTemplateKey} />
+                        <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={activeTemplateKey} />
                     </Accordion>
                  </div>
             </CardContent>
