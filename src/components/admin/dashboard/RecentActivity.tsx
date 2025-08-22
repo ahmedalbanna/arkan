@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,9 +12,9 @@ import dynamic from 'next/dynamic';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
-
-export interface Activity {
+interface Activity {
     userId: string;
+    userName: string;
     agentId: string;
     createdAt: string;
     id: string;
@@ -35,7 +34,7 @@ function LogDetailView({ log }: { log: Activity }) {
             <DialogHeader>
                 <DialogTitle>Generation Details</DialogTitle>
                 <DialogDescription>
-                    Agent: {log.agentId} | User: {log.userId}
+                    Agent: {log.agentId} | User: {log.userName} ({log.userId})
                 </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh]">
@@ -82,10 +81,10 @@ export function RecentActivity({ data }: RecentActivityProps) {
                         <DialogTrigger asChild>
                             <div className="flex items-center gap-4 cursor-pointer hover:bg-muted p-2 rounded-md">
                                 <Avatar className="h-9 w-9">
-                                    <AvatarFallback>{activity.userId.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback>{activity.userName.charAt(0)}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid gap-1 text-sm">
-                                    <p className="font-semibold">{t('adminDashboard.generationBy')} <span className="font-mono text-muted-foreground">{activity.userId.substring(0, 8)}...</span></p>
+                                    <p className="font-semibold">{t('adminDashboard.generationBy')} <span className="text-muted-foreground">{activity.userName}</span></p>
                                     <p className="text-muted-foreground">{t('adminDashboard.usedAgent')} <span className="font-semibold">{activity.agentId}</span></p>
                                 </div>
                                 <p className="ml-auto text-xs text-muted-foreground">
