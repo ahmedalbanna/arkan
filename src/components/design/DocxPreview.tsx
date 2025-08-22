@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useDocxStyles } from "@/hooks/use-docx-styles";
@@ -23,10 +24,9 @@ export function DocxPreview() {
 
   const inlineDocStyles = {
     fontFamily: 
- typeof docStyles.font === 'string' 
- ? docStyles.font 
- : (docStyles.font as any)?.name ?? 'Calibri',
- 
+      typeof docStyles.font === 'string' 
+        ? docStyles.font 
+        : (docStyles.font as { name: string })?.name ?? 'Calibri',
     fontSize: `${Number(docStyles.size ?? 22) / 2}pt`,
     color: `#${docStyles.color || '333333'}`,
     lineHeight: 1.5,

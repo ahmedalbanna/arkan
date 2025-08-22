@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
@@ -25,7 +26,7 @@ export function StyleEditor({ heading, styleKey }: StyleEditorProps) {
 
     const handleStyleChange = (path: string, value: any) => {
         if (activeTemplateKey) {
-            updateStyle(`${styleKey}.run.${path}`, value);
+            updateStyle(activeTemplateKey, `${styleKey}.run.${path}`, value);
         }
     }
     

@@ -38,6 +38,7 @@ export type { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 // Re-exporting generated Template types from Zod schemas
 export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
+export type DocxTemplatesRecord = Record<string, DocxTemplate>;
 export type PptxTemplate = z.infer<typeof PptxTemplateSchema> & { templateUrl?: string };
 export type ProposalTemplate = z.infer<typeof ProposalTemplateSchema>;
 export type ReportGenerationTemplate = z.infer<typeof ReportGenerationTemplateSchema>;
@@ -77,9 +78,9 @@ export interface LoginCredentials {
 }
 
 // --- PPTX Template Types ---
-export type PptxTemplateKey = 'modern' | 'dark' | 'professional';
+export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
 
-export type TemplateKey = 'modern' | 'classic' | 'academic';
+export type TemplateKey = 'modern' | 'classic' | 'academic' | string;
 
 
 // --- Full Report Mode Configuration Interfaces ---
