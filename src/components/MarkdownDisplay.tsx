@@ -13,28 +13,8 @@ import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
 import { FileDown, Loader2, Wand2, Check, ThumbsDown, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Label } from './ui/label';
-import { useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { getAuthenticatedToken } from '@/lib/authUtils';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { useLocalization } from '@/context/LocalizationContext';
-
-async function improveMarkdownApi(variables: { markdownContent: string, userPrompt: string, token: string }): Promise<{ improvedMarkdown: string }> {
-    const response = await fetch('/api/improve-markdown', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify({ markdownContent: variables.markdownContent, userPrompt: variables.userPrompt }),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to improve markdown');
-    }
-    return response.json();
-}
-
 
 export function MarkdownDisplay() {
   const { t } = useLocalization();
@@ -61,7 +41,12 @@ function helloWorld() {
   const [isExporting, setIsExporting] = useState(false);
   const [userPrompt, setUserPrompt] = useState('');
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
-  const { firebaseUser, refetchUser } = useAuth();
+
+  const improveMutation = useWritingTool('/api/improve-markdown', {
+    onSuccess: (data: any) => {
+        setAiSuggestion(data.improvedMarkdown);
+    },
+  });
 
   const handleExport = async () => {
     setIsExporting(true);
@@ -69,25 +54,13 @@ function helloWorld() {
     setIsExporting(false);
   };
 
-  const improveMutation = useMutation({
-      mutationFn: improveMarkdownApi,
-      onSuccess: (data) => {
-          setAiSuggestion(data.improvedMarkdown);
-          toast({ title: t('markdownDisplay.toasts.suggestionReadyTitle'), description: t('markdownDisplay.toasts.suggestionReadyDesc')});
-          refetchUser();
-      },
-      onError: (error: Error) => {
-          toast({ title: t('markdownDisplay.toasts.assistantFailedTitle'), description: error.message, variant: "destructive" });
-      }
-  });
 
   const handleImproveMarkdown = async () => {
     if (!markdown.trim() || !userPrompt.trim()) {
         toast({ title: t('markdownDisplay.toasts.missingInputTitle'), description: t('markdownDisplay.toasts.missingInputDesc'), variant: "destructive"});
         return;
     }
-    const token = await getAuthenticatedToken(firebaseUser);
-    improveMutation.mutate({ markdownContent: markdown, userPrompt, token });
+    improveMutation.mutate({ markdownContent: markdown, userPrompt });
   };
 
   const handleAcceptSuggestion = () => {
@@ -158,14 +131,14 @@ function helloWorld() {
                  {aiSuggestion ? (
                     <div className="space-y-4">
                         <ScrollArea className="h-[50vh] rounded-md border p-4 bg-muted/50">
-                            <div className="prose dark:prose-invert max-w-none">
+                            <div className="prose dark:prose-invert max-w-none text-sm">
                                 <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {aiSuggestion}
                                 </ReactMarkdown>
                             </div>
                         </ScrollArea>
                         <div className="flex justify-end gap-2">
-                            <Button variant="ghost" onClick={() => setAiSuggestion(null)}><ThumbsDown className="me-2 h-4 w-4"/> {t('markdownDisplay.rejectButton')}</Button>
+                            <Button variant="ghost" onClick={handleRejectSuggestion}><ThumbsDown className="me-2 h-4 w-4"/> {t('markdownDisplay.rejectButton')}</Button>
                             <Button onClick={handleAcceptSuggestion}><Check className="me-2 h-4 w-4"/> {t('markdownDisplay.acceptButton')}</Button>
                         </div>
                     </div>
