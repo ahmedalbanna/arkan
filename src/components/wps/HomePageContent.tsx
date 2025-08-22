@@ -36,21 +36,23 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
         <div className="flex flex-col">
             <section className="py-20 md:py-32 bg-background overflow-hidden">
                 <div className="container mx-auto px-4 text-center">
-                    <div className="inline-block mb-4">
-                        <div className="text-6xl font-headline font-bold text-primary animate-fade-in-up">
-                            {t('header.title')}
-                        </div>
-                    </div>
-                    <div className="inline-block">
-                         <h1 
-                          className={cn(
-                            "text-2xl sm:text-3xl md:text-4xl font-headline font-semibold text-muted-foreground mb-4 overflow-hidden border-r-4 border-r-primary whitespace-nowrap mx-auto animate-typing",
-                            locale === 'ar' && "border-r-0 border-l-4 border-l-primary"
-                          )}
-                         >
-                            {t('home.heroTitle.animated')}
-                        </h1>
-                    </div>
+                    <h1
+                      className={cn(
+                        "text-6xl font-headline font-bold text-primary animate-fade-in-up"
+                      )}
+                    >
+                        {t('header.title')}
+                    </h1>
+
+                    <h2
+                        className={cn(
+                        "text-2xl sm:text-3xl md:text-4xl font-headline font-semibold text-muted-foreground mb-4 overflow-hidden border-r-4 border-r-primary whitespace-nowrap mx-auto animate-typing",
+                        locale === 'ar' && "border-r-0 border-l-4 border-l-primary"
+                        )}
+                    >
+                        {t('home.heroTitle.animated')}
+                    </h2>
+                    
                     <p 
                       className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 animate-fade-in-up"
                       style={{ animationDelay: '2.6s' }}

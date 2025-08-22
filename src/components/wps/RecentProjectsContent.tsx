@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { useProjects } from '@/hooks/use-projects';
 import { SavedProject } from '@/lib/types';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import {
   RefreshCw,
   Eye,

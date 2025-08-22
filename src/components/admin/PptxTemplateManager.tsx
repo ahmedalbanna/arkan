@@ -22,6 +22,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
 import type { PptxStyleOptions, PptxTemplate } from '@/lib/types';
+import { Label } from '../ui/label';
 
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
