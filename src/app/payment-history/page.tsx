@@ -11,16 +11,8 @@ import type { TransactionData } from '@/lib/db/queries';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-
-async function fetchPaymentHistory(token: string): Promise<TransactionData[]> {
-    const response = await fetch('/api/user-transactions', {
-        headers: { 'Authorization': `Bearer ${token}` },
-    });
-    if (!response.ok) {
-        throw new Error('Failed to fetch payment history');
-    }
-    return response.json();
-}
+import { fetchUserTransactions } from '@/services/transaction-service';
+import { transactionKeys } from '@/lib/query-keys';
 
 function PaymentHistorySkeleton() {
     return (
@@ -60,11 +52,11 @@ function PaymentHistorySkeleton() {
 export default function PaymentHistoryPage() {
     const { firebaseUser, isLoading: authLoading } = useAuth();
 
-    const { data: transactions, isLoading, isError, error } = useQuery({
-        queryKey: ['paymentHistory', firebaseUser?.uid],
+    const { data: transactions, isLoading, isError, error } = useQuery<TransactionData[]>({
+        queryKey: transactionKeys.list(firebaseUser?.uid || 'user'),
         queryFn: async () => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return fetchPaymentHistory(token);
+            return fetchUserTransactions(token);
         },
         enabled: !authLoading && !!firebaseUser,
     });

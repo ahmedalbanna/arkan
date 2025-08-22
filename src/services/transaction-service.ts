@@ -81,3 +81,21 @@ export async function fetchTransactionsForReport(params: FetchReportParams): Pro
     }
     return await response.json();
 }
+
+
+/**
+ * Fetches the payment history for the currently authenticated user.
+ * @param token The authentication token of the user.
+ * @returns A promise that resolves to an array of TransactionData objects.
+ */
+export async function fetchUserTransactions(token: string): Promise<TransactionData[]> {
+    if (!token) throw new Error("Authentication token is required.");
+    const response = await fetch('/api/user-transactions', {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch payment history');
+    }
+    return await response.json();
+}
