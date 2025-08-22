@@ -2,7 +2,7 @@
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
@@ -13,12 +13,12 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 const generateDiagramSchema = z.object({
   proposal: ProjectProposalSchema.optional().nullable(),
   projectPlan: ProjectPlanSchema.optional().nullable(),
-  diagramToGenerate: DiagramTypeSchema,
-  otherSections: z.record(SectionNameSchema, z.string()).optional(),
-  otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  guidelines: z.array(z.string()).optional(),
-  externalContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
-  instructionText: z.string().optional(),
+  diagramToGenerate: DiagramTypeSchema.describe("The type of diagram to generate."),
+  otherSections: z.record(SectionNameSchema, z.string()).optional().describe("A map of previously generated text sections to provide context."),
+  otherDiagrams: z.record(DiagramTypeSchema, z.string()).optional().describe("A map of previously generated PlantUML diagrams to provide context."),
+  guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
+  externalContext: z.array(ExternalContextSchema).optional().describe("An array of external documents (text or data URIs) provided by the user."),
+  instructionText: z.string().optional().describe("Additional instructions for generation (e.g., tone, formality)."),
 });
 
 // Helper function to encode PlantUML for URL
@@ -75,8 +75,8 @@ export const POST = withAuth(async ({ request, user }) => {
     const result = await generateDiagram(agentInput);
     const imageUrl = await getPlantUmlImageUrl(result.plantUmlCode);
 
-    // Deduct credit only after a successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     const finalOutput = {
       plantUmlCode: result.plantUmlCode,
@@ -88,6 +88,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: agentInput,
         output: finalOutput,
+        creditCost: creditCost,
     });
 
     return createApiResponse(finalOutput, 200);

@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { adminDb } from '@/lib/firebase/server-init';
@@ -9,6 +10,7 @@ interface GenerationLog {
     userId: string;
     input: any;
     output: any;
+    creditCost: number; // Add creditCost field
     createdAt: string; // ISO string
 }
 

@@ -16,7 +16,8 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     const agentInput = validation.data;
     const result = await manipulateText(agentInput);
@@ -26,6 +27,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: agentInput,
         output: result,
+        creditCost: creditCost,
     });
     
     return createApiResponse(result, 200);

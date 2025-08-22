@@ -6,7 +6,7 @@ import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema } from '@/ai/schemas';
 
 const SectionGenerationConfigSchema = z.object({
   section: SectionNameSchema,
@@ -26,11 +26,7 @@ const generateFullReportSchema = z.object({
   projectPlan: ProjectPlanSchema.optional().nullable(),
   existingSections: z.record(SectionNameSchema, z.string()).optional(),
   existingDiagrams: z.record(DiagramTypeSchema, z.string()).optional(),
-  externalContext: z.array(z.object({
-    fileName: z.string(),
-    content: z.string(),
-    type: z.enum(['context', 'example'])
-  })).optional(),
+  externalContext: z.array(ExternalContextSchema).optional(),
   generationPlan: z.array(SectionGenerationConfigSchema),
 });
 
@@ -46,9 +42,11 @@ export const POST = withAuth(async ({ request, user }) => {
     const { proposal, projectPlan, existingSections, existingDiagrams, externalContext, generationPlan } = validation.data;
     const creditCost = generationPlan.length;
 
-    await deductCredit(user.id, creditCost);
+    if (creditCost > 0) {
+      await deductCredit(user.id, creditCost);
+    }
 
- const generatedSections: { [key in z.infer<typeof SectionNameSchema>]?: string } = {};
+    const generatedSections: { [key in z.infer<typeof SectionNameSchema>]?: string } = {};
 
     for (const config of generationPlan) {
       const sectionKey = config.section;
@@ -86,6 +84,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: { summary: `Generated as part of full report for project: ${proposal?.title}` },
         output: { summary: `Content length: ${result.content.length}` },
+        creditCost: 1, // Log cost per section
       });
     }
 

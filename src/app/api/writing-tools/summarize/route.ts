@@ -19,14 +19,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await summarizeText(agentInput);
 
-    // Deduct credit only after successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
     
     await logGeneration({
         agentId: 'summarize-text',
         userId: user.id,
         input: agentInput,
         output: result,
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

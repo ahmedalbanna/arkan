@@ -19,14 +19,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await translateText(agentInput);
 
-    // Deduct credit only after successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'translate-text',
         userId: user.id,
         input: agentInput,
         output: result,
+        creditCost: creditCost,
     });
 
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');

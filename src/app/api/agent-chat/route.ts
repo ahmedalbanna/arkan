@@ -39,10 +39,12 @@ export const POST = withAuth(async ({ request, user }) => {
     await push(messagesRef, userMessage);
     
     let result = { response: '' };
+    let creditCost = 0;
 
     if (isAgentChat) {
       // If it's an agent chat, deduct credit and invoke the AI flow
-      await deductCredit(user.id, 1);
+      creditCost = 1;
+      await deductCredit(user.id, creditCost);
       const agentInput = { agentId, message };
       result = await agentChat(agentInput);
 
@@ -60,6 +62,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: { message: message },
         output: result,
+        creditCost: creditCost,
       });
     }
 

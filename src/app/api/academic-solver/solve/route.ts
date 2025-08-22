@@ -32,6 +32,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: { analyzedDocument, contextMarkdown: !!contextMarkdown },
         output: result,
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

@@ -19,14 +19,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await generateIdeas(agentInput);
 
-    // This is a creative task, deduct 1 credit.
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'generate-ideas',
         userId: user.id,
         input: agentInput,
         output: { ideaCount: result.ideas.length },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

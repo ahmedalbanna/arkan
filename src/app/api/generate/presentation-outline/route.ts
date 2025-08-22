@@ -22,14 +22,15 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const result = await generatePresentationOutline(validation.data);
     
-    // Deduct credit only after successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
       agentId: 'generate-presentation-outline',
       userId: user.id,
       input: validation.data,
       output: { outlineLength: result.outline.length },
+      creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

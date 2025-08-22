@@ -83,6 +83,7 @@ export const POST = withAuth(async ({ request, user }) => {
             userId: user.id,
             input: { projectIdea },
             output: { selectedTemplateId: templateId },
+            creditCost: 0, // Template selection is a free action
         });
     }
 
@@ -103,8 +104,8 @@ export const POST = withAuth(async ({ request, user }) => {
 
     let result = await generateProposal(agentInput);
 
-    // Deduct credit only after a successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'generate-proposal', 
@@ -117,6 +118,7 @@ export const POST = withAuth(async ({ request, user }) => {
             externalContextFileCount: externalContext?.length || 0,
         },
         output: { resultLength: result.length },
+        creditCost: creditCost,
     });
     
     return createApiResponse(result, 200);

@@ -22,14 +22,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await factCheckText(agentInput);
 
-    // This is a complex task, deduct after success
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'fact-checker',
         userId: user.id,
         input: { textLength: agentInput.text.length },
         output: { claimCount: result.claims.length, score: result.originalityScore },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

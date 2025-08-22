@@ -25,8 +25,8 @@ export const POST = withAuth(async ({ request, user }) => {
     
     const result = await grammarCheck(agentInput);
     
-    // Deduct credit only after a successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'grammar-checker',
@@ -36,6 +36,7 @@ export const POST = withAuth(async ({ request, user }) => {
             correctedLength: result.correctedText.length,
             correctionsCount: result.corrections.length,
         },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

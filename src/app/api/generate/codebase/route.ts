@@ -23,14 +23,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = { proposal: validation.data.proposal };
     const result = await generateCodebase(agentInput);
 
-    // This is a very complex task, so we deduct 5 credits after success.
-    await deductCredit(user.id, 5);
+    const creditCost = 5;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
       agentId: 'generate-codebase',
       userId: user.id,
       input: { proposalTitle: validation.data.proposal.title },
       output: { fileCount: result.files.length },
+      creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

@@ -22,14 +22,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await plagiarismCheck(agentInput);
     
-    // This is a complex task, deduct after success
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'plagiarism-checker',
         userId: user.id,
         input: { textLength: agentInput.text.length },
         output: { score: result.originalityScore, matches: result.matches.length },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

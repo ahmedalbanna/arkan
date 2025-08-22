@@ -24,14 +24,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await generateProjectPlan(agentInput);
 
-    // This is a more complex task, so we deduct 2 credits after success.
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: `generate-project-plan`,
         userId: user.id,
         input: agentInput,
         output: { phaseCount: result.phases.length }, // Log minimal output
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

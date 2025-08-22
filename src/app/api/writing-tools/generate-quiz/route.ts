@@ -23,14 +23,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await generateQuiz(agentInput);
     
-    // Deduct credit only after a successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'generate-quiz',
         userId: user.id,
         input: agentInput,
         output: { questionCount: result.questions.length },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

@@ -17,7 +17,7 @@ const evaluateContextSchema = z.object({
     externalContext: z.array(z.object({
         fileName: z.string(),
         content: z.string(),
-        type: z.enum(['context', 'example'])
+        type: z.enum(['context', 'example', 'question', 'textbook', 'guidelines'])
     })).optional(),
 });
 
@@ -29,8 +29,8 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    // Context evaluation is a complex step, deduct 1 credit.
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
     
     const agentInput = validation.data;
     const result = await evaluateAndSelectContext(agentInput);
@@ -40,6 +40,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: agentInput,
         output: result,
+        creditCost: creditCost
     });
     
     return createApiResponse(result, 200);

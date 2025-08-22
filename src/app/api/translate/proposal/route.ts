@@ -19,14 +19,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await translateProposal(agentInput);
     
-    // Deduct credit only after successful generation
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'translate-proposal',
         userId: user.id,
         input: { targetLang: agentInput.targetLang, proposalTitle: agentInput.proposal.title },
         output: { proposalTitle: result.title },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

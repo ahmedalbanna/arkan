@@ -25,14 +25,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await writeDocument(agentInput);
 
-    // This can be a credit-intensive task, deduct after success
-    await deductCredit(user.id, 3);
+    const creditCost = 3;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'write-document',
         userId: user.id,
         input: agentInput,
         output: { contentLength: result.documentContent.length },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

@@ -20,7 +20,8 @@ export const POST = withAuth(async ({ request, user }) => {
       return handleApiError(validation.error);
     }
 
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
     
     const { markdownContent, userPrompt } = validation.data;
     const result = await improveReportMarkdown({ markdownContent, userPrompt });
@@ -30,6 +31,7 @@ export const POST = withAuth(async ({ request, user }) => {
         userId: user.id,
         input: { markdownLength: markdownContent.length, prompt: userPrompt },
         output: { improvedMarkdownLength: result.improvedMarkdown.length },
+        creditCost: creditCost
     });
 
     return createApiResponse(result, 200);

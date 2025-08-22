@@ -29,7 +29,8 @@ export const POST = withAuth(async ({ request, user }) => {
     const result = await analyzeContext(agentInput);
     
     // This is a complex task, so we deduct 2 credits.
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'analyze-context',
@@ -42,6 +43,7 @@ export const POST = withAuth(async ({ request, user }) => {
             schema: "[...Zod Schema...]",
             data: "[...JSON Data...]"
         },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

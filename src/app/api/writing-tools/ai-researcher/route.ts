@@ -22,14 +22,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await aiResearcher(agentInput);
     
-    // This is a complex task involving search, deduct after success
-    await deductCredit(user.id, 2);
+    const creditCost = 2;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
         agentId: 'ai-researcher',
         userId: user.id,
         input: agentInput,
         output: { summaryLength: result.summary.length, sources: result.sources.length },
+        creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);

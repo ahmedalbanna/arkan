@@ -1,4 +1,5 @@
 
+
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
@@ -20,20 +21,6 @@ async function verifyUser(request: Request) {
     }
 }
 
-async function getNewUserCredits(): Promise<number> {
-    try {
-        const settingsDoc = await adminDb.collection('settings').doc('defaults').get();
-        if (settingsDoc.exists) {
-            return settingsDoc.data()?.newUserCredits || 10;
-        }
-        return 10; // Fallback default
-    } catch (error) {
-        console.error("Could not fetch default settings, falling back to 10 credits.", error);
-        return 10;
-    }
-}
-
-
 export async function GET(request: Request) {
     const userCheck = await verifyUser(request);
     if (!userCheck.authorized || !userCheck.userId) {
@@ -54,9 +41,12 @@ export async function GET(request: Request) {
         const totalGenerations = generationsSnapshot.size;
 
         const agentUsage: Record<string, number> = {};
+        let creditsUsed = 0;
         generationsSnapshot.forEach(doc => {
-            const agentId = doc.data().agentId;
+            const data = doc.data();
+            const agentId = data.agentId;
             agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
+            creditsUsed += data.creditCost || 0; // Sum the credit cost from each log
         });
 
         const agentUsageChartData = Object.entries(agentUsage)
@@ -71,22 +61,6 @@ export async function GET(request: Request) {
             id: doc.id,
             ...doc.data()
         }));
-
-        // --- Correct Credits Used Calculation ---
-        const defaultCredits = await getNewUserCredits();
-
-        // Fetch all verified transactions for the user
-        const verifiedTransactionsSnapshot = await adminDb.collection('transactions')
-            .where('userId', '==', userCheck.userId)
-            .where('status', '==', 'verified')
-            .get();
-
-        const purchasedCredits = verifiedTransactionsSnapshot.docs.reduce((sum, doc) => {
-            return sum + (doc.data().credits || 0);
-        }, 0);
-
-        const totalCreditsGranted = defaultCredits + purchasedCredits;
-        const creditsUsed = totalCreditsGranted - userProfile.credits;
 
 
         return NextResponse.json({

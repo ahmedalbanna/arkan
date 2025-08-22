@@ -32,12 +32,14 @@ export const POST = withAuth(async ({ request, user }) => {
         let result: { markdown: string } | { text: string };
         let agentId: string;
         let markdownContent: string;
+        let creditCost = 0;
 
         if (file.type === 'application/pdf') {
             const fileArrayBuffer = await file.arrayBuffer();
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'pdf-to-markdown';
+            creditCost = 2;
             result = await rewriteDocumentToMarkdown({ pdfDataUri: dataUri });
             markdownContent = 'markdown' in result ? result.markdown : '';
         } else if (file.type.startsWith('image/')) {
@@ -45,6 +47,7 @@ export const POST = withAuth(async ({ request, user }) => {
             const base64 = Buffer.from(fileArrayBuffer).toString('base64');
             const dataUri = `data:${file.type};base64,${base64}`;
             agentId = 'image-to-text';
+            creditCost = 2;
             result = await imageToText({ imageDataUri: dataUri });
             markdownContent = 'text' in result ? result.text : '';
         } else {
@@ -56,8 +59,8 @@ export const POST = withAuth(async ({ request, user }) => {
         }
         
         // Deduct credit only after a successful AI generation
-        if (agentId === 'pdf-to-markdown' || agentId === 'image-to-text') {
-            await deductCredit(user.id, 2);
+        if (creditCost > 0) {
+            await deductCredit(user.id, creditCost);
         }
         
         await logGeneration({
@@ -65,6 +68,7 @@ export const POST = withAuth(async ({ request, user }) => {
             userId: user.id,
             input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
             output: { markdownLength: markdownContent.length },
+            creditCost: creditCost,
         });
 
         return createApiResponse({ markdown: markdownContent }, 200);

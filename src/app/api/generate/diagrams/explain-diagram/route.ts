@@ -22,14 +22,15 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = validation.data;
     const result = await explainDiagram(agentInput);
     
-    // Deduct credit only after a successful generation
-    await deductCredit(user.id, 1);
+    const creditCost = 1;
+    await deductCredit(user.id, creditCost);
 
     await logGeneration({
       agentId: 'explain-diagram',
       userId: user.id,
       input: { summary: "Diagram Image" }, // Don't log the full data URI
       output: result,
+      creditCost: creditCost,
     });
 
     return createApiResponse(result, 200);
