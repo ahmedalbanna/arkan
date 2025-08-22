@@ -3,7 +3,7 @@
 
 import { create } from 'zustand';
 import type { User as FirebaseUser } from "firebase/auth";
-import { ref, onValue, off, query, update } from 'firebase/database';
+import { ref, onValue, off, query, update, get } from 'firebase/database';
 import { db } from '@/lib/firebaseConfig';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
@@ -76,43 +76,37 @@ export const useChatStore = create<ChatState & ChatActions>()(
         set({ isInitialized: true });
         const userConversationsRef = query(ref(db, `userConversations/${firebaseUser.uid}`));
 
-        onValue(userConversationsRef, async (snapshot) => {
+        const listener = onValue(userConversationsRef, async (snapshot) => {
             if (!snapshot.exists()) {
                 set({ chats: [], selectedChat: null });
                 return;
             }
             const conversationIds = Object.keys(snapshot.val());
             const conversationPromises = conversationIds.map(id =>
-                new Promise<ChatSession | null>((resolve) => {
-                    const convoRef = ref(db, `conversations/${id}`);
-                    onValue(convoRef, (convoSnapshot) => {
-                        if (convoSnapshot.exists()) {
-                            resolve({ id, ...convoSnapshot.val() });
-                        } else {
-                            resolve(null);
-                        }
-                    }, { onlyOnce: true }); // Fetch details once per convo ID
-                })
+                get(ref(db, `conversations/${id}`)).then(convoSnapshot => 
+                    convoSnapshot.exists() ? { id, ...convoSnapshot.val() } : null
+                )
             );
 
             const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as ChatSession[];
             conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
 
             set(state => {
-                 // If there's a selected chat, find its updated version and keep it selected.
                  const currentSelectedId = state.selectedChat?.id;
                  const newSelectedChat = currentSelectedId ? conversations.find(c => c.id === currentSelectedId) : conversations[0];
-                 return { chats: conversations, selectedChat: newSelectedChat || null };
+                 return { chats: conversations, selectedChat: newSelectedChat || state.selectedChat || null };
             });
         });
+        
+        // This is a simplified return. In a real app, you'd manage this unsubscribe call
+        // more carefully, e.g., when the user logs out.
+        return () => off(userConversationsRef, 'value', listener);
     },
 
     createConversation: (conversation) => {
         set((state) => {
             const existingChatIndex = state.chats.findIndex((c) => c.id === conversation.id);
             if (existingChatIndex !== -1) {
-                // If a chat with the same ID exists, do nothing.
-                // This prevents duplicates if the API and a local action both trigger creation.
                 return { chats: state.chats };
             }
             const updatedChats = [conversation, ...state.chats];
@@ -146,7 +140,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
             ? { ...chat, lastMessage: message.content, lastMessageTimestamp: new Date().toISOString() }
             : chat
         );
-        // Sort to bring the updated chat to the top
         newChats.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
         return {
           chats: newChats,

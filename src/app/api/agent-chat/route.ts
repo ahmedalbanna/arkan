@@ -8,7 +8,7 @@ import { agentChat } from '@/ai/flows/agent-chat';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminRealtimeDb } from '@/lib/firebase/server-init';
 import { push, serverTimestamp, update } from 'firebase/database';
-import { onValue } from '@firebase/database'; // Import onValue
+
 const chatSchema = z.object({
   agentId: z.string(),
   message: z.string(),
@@ -27,7 +27,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const isAgentChat = agentId !== 'user-chat';
 
     const db = adminRealtimeDb;
-    const messagesRef: any = db.ref(`messages/${conversationId}`); // Cast to any
+    const messagesRef = db.ref(`messages/${conversationId}`);
     
     // Always save the user's message first
     const userMessage = {
@@ -71,7 +71,7 @@ export const POST = withAuth(async ({ request, user }) => {
     const lastMessage = isAgentChat ? result.response : message;
     
     if (lastMessage) {
-        await update(conversationRef as any, {
+        await update(conversationRef, {
             lastMessage: lastMessage,
             lastMessageTimestamp: new Date().toISOString()
         });
@@ -83,3 +83,4 @@ export const POST = withAuth(async ({ request, user }) => {
     return handleApiError(error);
   }
 });
+

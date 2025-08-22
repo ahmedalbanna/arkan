@@ -55,7 +55,7 @@ export function useUsers() {
 
 export function useAdmins() {
   return useQuery<UserProfile[]>({
-    queryKey: userKeys.lists(), // Re-using userKeys.lists() might be fine if admins are just users with a role
+    queryKey: userKeys.admins(),
     queryFn: fetchAdminsApi,
     staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {

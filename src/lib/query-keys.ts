@@ -15,6 +15,7 @@ export const userKeys = {
   list: (page: number) => [...userKeys.lists(), { page }] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   profile: (userId: string) => [...userKeys.details(), userId] as const,
+  admins: () => [...userKeys.all, 'admins'] as const,
 };
 
 export const agentKeys = {
@@ -88,4 +89,3 @@ export const notificationKeys = {
   all: ['notifications'] as const,
   lists: () => [...notificationKeys.all, 'list'] as const,
 };
-
