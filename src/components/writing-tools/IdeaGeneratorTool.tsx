@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useGenerateIdeas } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,11 @@ type FormValues = IdeaGenerationInput;
 
 export function IdeaGeneratorTool() {
   const { t } = useLocalization();
-  const mutation = useGenerateIdeas();
+  const mutation = useWritingTool('/api/writing-tools/generate-ideas', {
+    onError: (error) => {
+        toast({ title: "Idea Generation Failed", description: error.message, variant: 'destructive' });
+    }
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -37,14 +41,10 @@ export function IdeaGeneratorTool() {
   });
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(data, {
-      onError: (error) => {
-        toast({ title: "Idea Generation Failed", description: error.message, variant: 'destructive' });
-      }
-    });
+    mutation.mutate(data);
   };
 
-  const results = mutation.data;
+  const results = mutation.data as IdeaGenerationOutput | undefined;
 
   return (
     <Card>

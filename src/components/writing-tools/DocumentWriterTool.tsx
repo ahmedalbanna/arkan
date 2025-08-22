@@ -5,8 +5,8 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWriteDocument } from '@/hooks/use-writing-tools';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { useWritingTool } from '@/hooks/use-writing-tools';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -30,9 +30,18 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function DocumentWriterTool() {
   const { t } = useLocalization();
-  const mutation = useWriteDocument();
   const [isCopied, setIsCopied] = useState(false);
   const [generatedContent, setGeneratedContent] = useState('');
+
+  const mutation = useWritingTool('/api/writing-tools/write-document', {
+    onSuccess: (data: any) => {
+        setGeneratedContent(data.documentContent);
+        toast({ title: 'Document generated successfully!' });
+    },
+    onError: (error) => {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -44,15 +53,7 @@ export function DocumentWriterTool() {
         ...data,
         tableOfContents: data.tableOfContents ? data.tableOfContents.split('\n').filter(line => line.trim() !== '') : undefined,
     };
-    mutation.mutate(submissionData, {
-      onSuccess: (result) => {
-        setGeneratedContent(result.documentContent);
-        toast({ title: 'Document generated successfully!' });
-      },
-      onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      },
-    });
+    mutation.mutate(submissionData);
   };
 
   const handleCopy = () => {

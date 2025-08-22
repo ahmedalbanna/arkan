@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
@@ -10,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, ExternalLink, FileText, Download, Copy, CheckCircle, PlusCircle, FileDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAiResearcher } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
@@ -125,7 +126,7 @@ function AddToProjectDialog({ researchMarkdown, researchTitle, onOpenChange }: {
 
 export function AIResearcherTool() {
   const { t } = useLocalization();
-  const mutation = useAiResearcher();
+  const mutation = useWritingTool('/api/writing-tools/ai-researcher');
   const reportRef = useRef<HTMLDivElement>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isAddToProjectOpen, setIsAddToProjectOpen] = useState(false);
@@ -143,7 +144,7 @@ export function AIResearcherTool() {
     });
   };
 
-  const results = mutation.data;
+  const results = mutation.data as AIResearcherOutput | undefined;
   const markdownResult = results ? formatResearchToMarkdown(results, form.getValues('topic')) : '';
 
   const handleCopyToClipboard = () => {

@@ -14,11 +14,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useGrammarCheck } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Tabs, TabsTrigger, TabsList, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
+import { GrammarCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const grammarSchema = z.object({
@@ -30,7 +31,7 @@ type GrammarFormValues = z.infer<typeof grammarSchema>;
 export function GrammarCheckerTool() {
   const { t } = useLocalization();
   const [isCopied, setIsCopied] = useState(false);
-  const mutation = useGrammarCheck();
+  const mutation = useWritingTool('/api/writing-tools/grammar-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -86,7 +87,7 @@ export function GrammarCheckerTool() {
     });
   };
 
-  const results = mutation.data;
+  const results = mutation.data as GrammarCheckOutput | undefined;
 
   const handleCopy = () => {
     if (!results?.correctedText) return;

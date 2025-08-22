@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, Wand2, BookOpenText } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { useRewriteText, useSummarizeTextWithRatio } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Slider } from '../ui/slider';
 import { Badge } from '../ui/badge';
 import ReactMarkdown from 'react-markdown';
@@ -63,8 +63,8 @@ export function AITextTune() {
   const [compressionRatio, setCompressionRatio] = useState(50);
   const [activeView, setActiveView] = useState<'side-by-side' | 'diff'>('side-by-side');
 
-  const rewriteMutation = useRewriteText();
-  const summarizeMutation = useSummarizeTextWithRatio();
+  const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
+  const summarizeMutation = useWritingTool('/api/writing-tools/summarize-with-ratio');
   const isProcessing = rewriteMutation.isPending || summarizeMutation.isPending;
 
   const form = useForm<FormValues>({
@@ -82,10 +82,11 @@ export function AITextTune() {
     setDiff(null);
     setActiveView('side-by-side');
     rewriteMutation.mutate({ text: data.text, style: data.style }, {
-      onSuccess: (result) => {
+      onSuccess: (result: any) => {
           setProcessedText(result.rewrittenText);
           setDiff(computeDiff(data.text, result.rewrittenText));
       },
+      onError: (error) => toast({ title: t('writingTools.textStylist.toastStyleRequired'), description: error.message, variant: 'destructive'})
     });
   };
 
@@ -95,7 +96,7 @@ export function AITextTune() {
     setDiff(null);
     setActiveView('side-by-side');
     summarizeMutation.mutate({ text: data.text, ratio: compressionRatio }, {
-        onSuccess: (result) => setProcessedText(result.summarizedText)
+        onSuccess: (result: any) => setProcessedText(result.summarizedText)
     });
   };
 

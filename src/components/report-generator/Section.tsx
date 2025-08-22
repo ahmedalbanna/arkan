@@ -24,7 +24,7 @@ import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import { useRewriteText, useHumanizeText } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
@@ -148,8 +148,9 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
     const { firebaseUser, refetchUser } = useAuth();
     const { t } = useLocalization();
     const ttsMutation = useTextToSpeech();
-    const rewriteMutation = useRewriteText();
-    const humanizeMutation = useHumanizeText();
+    
+    const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
+    const humanizeMutation = useWritingTool('/api/writing-tools/humanize');
 
     useEffect(() => {
         setLocalContent(content);
@@ -178,10 +179,9 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         setAiSuggestion(null);
         setDiff(null);
         rewriteMutation.mutate({ text: content, style }, {
-            onSuccess: (data) => {
+            onSuccess: (data: any) => {
                 setAiSuggestion(data.rewrittenText);
                 setDiff(computeDiff(content, data.rewrittenText));
-                refetchUser();
             },
             onError: (error) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive"})
         });
@@ -191,10 +191,9 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
         setAiSuggestion(null);
         setDiff(null);
         humanizeMutation.mutate({ text: content }, {
-            onSuccess: (data) => {
+            onSuccess: (data: any) => {
                 setAiSuggestion(data.humanizedText);
                 setDiff(computeDiff(content, data.humanizedText));
-                refetchUser();
             },
             onError: (error) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive"})
         });

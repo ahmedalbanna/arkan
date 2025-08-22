@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useTopicExplainer } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { ScrollArea } from '../ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
@@ -24,7 +24,7 @@ const explainerSchema = z.object({
 type ExplainerFormValues = z.infer<typeof explainerSchema>;
 
 export function TopicExplainerTool() {
-  const mutation = useTopicExplainer();
+  const mutation = useWritingTool('/api/writing-tools/topic-explainer');
   const { t } = useLocalization();
 
   const form = useForm<ExplainerFormValues>({
@@ -33,14 +33,14 @@ export function TopicExplainerTool() {
   });
 
   const onSubmit = async (data: ExplainerFormValues) => {
-    mutation.mutate({ topic: data.topic }, {
+    mutation.mutate(data, {
         onError: (error) => {
             toast({ title: "Explanation Failed", description: error.message, variant: 'destructive' });
         }
     });
   };
 
-  const results = mutation.data;
+  const results = mutation.data as { explanation: string } | undefined;
 
   return (
     <Card>

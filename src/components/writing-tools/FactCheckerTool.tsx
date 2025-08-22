@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
-import { useFactCheck } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
@@ -31,7 +31,7 @@ type FactCheckerFormValues = z.infer<typeof factCheckerSchema>;
 
 export function FactCheckerTool() {
   const { t } = useLocalization();
-  const mutation = useFactCheck();
+  const mutation = useWritingTool('/api/writing-tools/fact-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -57,7 +57,7 @@ export function FactCheckerTool() {
         const token = await firebaseUser.getIdToken();
         const result = await processFileApi(formData, token);
         form.setValue('text', result.markdown, { shouldValidate: true });
-        toast({ title: "File Processed", description: `Text extracted from ${file.name}.` });
+        toast({ title: "File Processed", description: `Text extracted from ${file.name}. You can now start the analysis.` });
         refetchUser();
     } catch (error: any) {
         toast({ title: "File Processing Failed", description: error.message, variant: "destructive" });
@@ -95,7 +95,7 @@ export function FactCheckerTool() {
     }
   };
 
-  const results = mutation.data;
+  const results = mutation.data as FactCheckOutput | undefined;
 
   return (
     <Card>

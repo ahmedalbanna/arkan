@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useGeneratePresentationOutline } from '@/hooks/use-presentation-generation';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,9 +50,18 @@ const OutlineItem = ({ item, level = 0 }: { item: GeneratePresentationOutlineOut
 
 export function PresentationOutlineTool() {
   const { t } = useLocalization();
-  const mutation = useGeneratePresentationOutline();
   const [isCopied, setIsCopied] = useState(false);
   const [generatedOutline, setGeneratedOutline] = useState<GeneratePresentationOutlineOutput | null>(null);
+
+  const mutation = useWritingTool('/api/generate/presentation-outline', {
+    onSuccess: (data: any) => {
+        setGeneratedOutline(data);
+        toast({ title: "Outline Generated!", description: "Review the outline and choose a template to proceed."});
+    },
+    onError: (error) => {
+        toast({ title: "Outline Generation Failed", description: error.message, variant: "destructive" });
+    }
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -60,18 +69,7 @@ export function PresentationOutlineTool() {
   });
 
   const onSubmit = (data: FormValues) => {
-    mutation.mutate(
-      { prompt: data.prompt, documentation: data.documentation },
-      {
-        onSuccess: (result) => {
-          setGeneratedOutline(result);
-          toast({ title: 'Outline generated successfully!' });
-        },
-        onError: (error) => {
-          toast({ title: 'Error', description: error.message, variant: 'destructive' });
-        },
-      }
-    );
+    mutation.mutate(data);
   };
 
   const handleCopy = () => {

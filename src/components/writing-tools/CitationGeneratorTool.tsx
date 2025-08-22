@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useGenerateCitation } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -25,7 +26,16 @@ export function CitationGeneratorTool() {
   const { t } = useLocalization();
   const [generatedCitation, setGeneratedCitation] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const citationMutation = useGenerateCitation();
+  
+  const citationMutation = useWritingTool('/api/writing-tools/citation-generator', {
+    onSuccess: (data: any) => {
+        setGeneratedCitation(data.citation);
+        toast({ title: t('writingTools.citationGenerator.toastSuccess') });
+    },
+    onError: (error) => {
+        toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    }
+  });
 
   const form = useForm<CitationFormValues>({
     resolver: zodResolver(citationGeneratorSchema),
@@ -34,15 +44,7 @@ export function CitationGeneratorTool() {
 
   const onSubmit = (data: CitationFormValues) => {
     setGeneratedCitation('');
-    citationMutation.mutate(data, {
-      onSuccess: (result) => {
-        setGeneratedCitation(result.citation);
-        toast({ title: t('writingTools.citationGenerator.toastSuccess') });
-      },
-      onError: (error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-      },
-    });
+    citationMutation.mutate(data);
   };
 
   const handleCopy = () => {

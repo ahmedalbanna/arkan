@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useGenerateQuiz } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,7 +28,7 @@ export function QuizGeneratorTool() {
   const { t } = useLocalization();
   const [generatedQuiz, setGeneratedQuiz] = useState<any[]>([]);
   const [showAnswers, setShowAnswers] = useState(false);
-  const quizMutation = useGenerateQuiz();
+  const quizMutation = useWritingTool('/api/writing-tools/generate-quiz');
 
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizGeneratorSchema),
@@ -39,7 +39,7 @@ export function QuizGeneratorTool() {
     setGeneratedQuiz([]);
     setShowAnswers(false);
     quizMutation.mutate(data, {
-      onSuccess: (result) => {
+      onSuccess: (result: any) => {
         setGeneratedQuiz(result.questions);
         toast({ title: 'Quiz generated successfully!' });
       },

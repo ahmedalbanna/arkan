@@ -14,7 +14,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useHumanizeText } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
+import type { HumanizeTextOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({
@@ -30,7 +31,7 @@ export function HumanizerTool() {
   const [processedText, setProcessedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
 
-  const mutation = useHumanizeText();
+  const mutation = useWritingTool('/api/writing-tools/humanize');
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -41,7 +42,7 @@ export function HumanizerTool() {
   const onSubmit = async (data: FormValues) => {
     setOriginalText(data.text);
     mutation.mutate({ text: data.text }, {
-      onSuccess: (result) => {
+      onSuccess: (result: any) => {
         setProcessedText(result.humanizedText);
         toast({ title: t('writingTools.humanizer.toastSuccess') });
       },
@@ -97,9 +98,7 @@ export function HumanizerTool() {
             <div className="space-y-2">
               <h3 className="font-semibold text-muted-foreground">{t('writingTools.humanizer.originalLabel')}</h3>
               <ScrollArea className="h-64 rounded-md border p-4">
-                <div className="prose dark:prose-invert max-w-none text-sm">
-                  <ReactMarkdown components={markdownComponents}>{originalText}</ReactMarkdown>
-                </div>
+                 <div className="prose dark:prose-invert max-w-none text-sm"><ReactMarkdown components={markdownComponents}>{originalText}</ReactMarkdown></div>
               </ScrollArea>
             </div>
             <div className="space-y-2">
@@ -115,9 +114,7 @@ export function HumanizerTool() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
-                  <div className="prose dark:prose-invert max-w-none text-sm">
-                    <ReactMarkdown components={markdownComponents}>{processedText}</ReactMarkdown>
-                  </div>
+                  <div className="prose dark:prose-invert max-w-none text-sm"><ReactMarkdown components={markdownComponents}>{processedText}</ReactMarkdown></div>
                 )}
               </ScrollArea>
             </div>

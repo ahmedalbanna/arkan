@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
-import { usePlagiarismCheck } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
@@ -31,7 +31,7 @@ type PlagiarismFormValues = z.infer<typeof plagiarismSchema>;
 
 export function PlagiarismCheckerTool() {
   const { t } = useLocalization();
-  const mutation = usePlagiarismCheck();
+  const mutation = useWritingTool('/api/writing-tools/plagiarism-checker');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -84,7 +84,7 @@ export function PlagiarismCheckerTool() {
     });
   };
 
-  const results = mutation.data;
+  const results = mutation.data as PlagiarismCheckOutput | undefined;
 
   return (
     <Card>

@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useParaphraseText } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,9 +34,18 @@ export function ParaphraserTool() {
   const [originalText, setOriginalText] = useState('');
   const [paraphrasedText, setParaphrasedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const paraphraseMutation = useParaphraseText();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+
+  const paraphraseMutation = useWritingTool('/api/writing-tools/paraphrase', {
+    onSuccess: (data: any) => {
+        setParaphrasedText(data.paraphrasedText);
+        toast({ title: t('writingTools.paraphraser.toastSuccess') });
+    },
+    onError: (error) => {
+        toast({ title: t('writingTools.paraphraser.toastError'), description: error.message, variant: 'destructive' });
+    }
+  });
 
   const form = useForm<ParaphraserFormValues>({
     resolver: zodResolver(paraphraserSchema),
@@ -81,15 +90,7 @@ export function ParaphraserTool() {
 
   const onSubmit = (data: ParaphraserFormValues) => {
     setOriginalText(data.text);
-    paraphraseMutation.mutate(data, {
-      onSuccess: (result) => {
-        setParaphrasedText(result.paraphrasedText);
-        toast({ title: t('writingTools.paraphraser.toastSuccess') });
-      },
-      onError: (error) => {
-        toast({ title: t('writingTools.paraphraser.toastError'), description: error.message, variant: 'destructive' });
-      },
-    });
+    paraphraseMutation.mutate(data);
   };
 
   const handleCopy = () => {

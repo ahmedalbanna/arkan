@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, BrainCircuit, UploadCloud } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { useDetectAiContent } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { useDropzone } from 'react-dropzone';
@@ -32,7 +32,7 @@ interface AIAnalysisResult {
 
 export function AIDetectorTool() {
   const { t } = useLocalization();
-  const mutation = useDetectAiContent();
+  const mutation = useWritingTool('/api/writing-tools/ai-detector');
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -91,7 +91,7 @@ export function AIDetectorTool() {
     return 'text-green-500';
   };
 
-  const result = mutation.data;
+  const result = mutation.data as AIAnalysisResult | undefined;
 
   return (
     <Card>

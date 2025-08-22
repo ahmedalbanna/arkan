@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useSummarizeText } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks/use-writing-tools';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,9 +33,18 @@ export function SummarizerTool() {
   const { t } = useLocalization();
   const [summarizedText, setSummarizedText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  const summarizeMutation = useSummarizeText();
   const { firebaseUser, refetchUser } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
+
+  const summarizeMutation = useWritingTool('/api/writing-tools/summarize', {
+    onSuccess: (data: any) => {
+        setSummarizedText(data.summary);
+        toast({ title: t('writingTools.summarizer.successToast') });
+    },
+    onError: (error) => {
+         toast({ title: t('writingTools.summarizer.errorToast'), description: error.message, variant: 'destructive' });
+    }
+  });
 
   const form = useForm<SummarizerFormValues>({
     resolver: zodResolver(summarizerSchema),
@@ -79,15 +88,7 @@ export function SummarizerTool() {
   });
 
   const onSubmit = (data: SummarizerFormValues) => {
-    summarizeMutation.mutate(data, {
-      onSuccess: (result) => {
-        setSummarizedText(result.summary);
-        toast({ title: t('writingTools.summarizer.successToast') });
-      },
-      onError: (error) => {
-        toast({ title: t('writingTools.summarizer.errorToast'), description: error.message, variant: 'destructive' });
-      },
-    });
+    summarizeMutation.mutate(data);
   };
 
   const handleCopy = () => {
