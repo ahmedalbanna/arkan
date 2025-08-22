@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -8,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { AddStepDialog } from './AddStepDialog';
 import { AddTriggerDialog } from './AddTriggerDialog';
+import { ActionStep } from './ActionStep';
 
 export function WorkflowCanvas() {
   return (
     <div className="h-full w-full p-8 bg-dot-pattern flex flex-col items-center">
-      <div className="flex flex-col items-center gap-12 w-full max-w-md">
+      <div className="flex flex-col items-center gap-4 w-full max-w-md">
         {/* Trigger Section */}
         <div className="flex flex-col items-center gap-4 w-full">
           <Badge variant="secondary">When this happens...</Badge>
@@ -30,7 +30,7 @@ export function WorkflowCanvas() {
 
         {/* Action Section */}
         <div className="flex flex-col items-center gap-4 w-full">
-            <Badge variant="secondary">Do this...</Badge>
+            <ActionStep />
             <Dialog>
                 <DialogTrigger asChild>
                     <Button variant="outline" className="w-full h-14 border-dashed text-muted-foreground">
@@ -45,19 +45,4 @@ export function WorkflowCanvas() {
       </div>
     </div>
   );
-}
-
-const bgDotPattern = `
-.bg-dot-pattern {
-    background-image: radial-gradient(circle at 1px 1px, hsl(var(--border)) 1px, transparent 0);
-    background-size: 20px 20px;
-}
-`
-
-// Inject styles for the dot pattern
-if (typeof document !== 'undefined') {
-    const styleSheet = document.createElement("style")
-    styleSheet.type = "text/css"
-    styleSheet.innerText = bgDotPattern
-    document.head.appendChild(styleSheet)
 }
