@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { templateKeys, useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
 import { type ReportGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { Loader2, Save, PlusCircle, Trash2, X, Search, Plus } from 'lucide-react';
+import { Loader2, Save, PlusCircle, Trash2, Check, X, Search, Plus } from 'lucide-react';
 import { useForm, ControllerRenderProps } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -15,6 +16,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { AGENTS } from '@/lib/agents';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
@@ -40,6 +43,10 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
     id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID can only contain lowercase letters, numbers, and hyphens."),
 });
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
+
+
+const reportAgents = AGENTS.filter(a => a.category === 'report-generation');
+
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
     const {t} = useLocalization();
@@ -281,7 +288,6 @@ function CreateTeamDialog() {
 
 export function ReportTemplateManager() {
     const { t } = useLocalization();
-    const { firebaseUser } = useAuth();
     const { data: templates, isLoading, isError } = useReportTemplates();
     const updateMutation = useUpdateReportTemplate();
     const deleteMutation = useDeleteReportTemplate();

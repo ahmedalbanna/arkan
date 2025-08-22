@@ -19,6 +19,8 @@ import {
   type ProposalTemplate,
   type ReportGenerationTemplate,
   type PresentationGenerationTemplate,
+  type DocxTemplate,
+  type PptxTemplate,
 } from "@/services/template-service";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "./use-toast";
