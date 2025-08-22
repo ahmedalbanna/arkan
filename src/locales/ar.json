@@ -926,6 +926,11 @@
     "presentationDescription": "تكوين بنية المحتوى لأنواع مختلفة من العروض التقديمية.",
     "createButton": "إنشاء جديد",
     "cancelButton": "إلغاء",
+    "deleteDialog": {
+      "title": "هل أنت متأكد؟",
+      "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف قالب '{templateName}' نهائيًا.",
+      "deleteButton": "حذف"
+    },
     "createDialog": {
       "title": "إنشاء قالب",
       "nameLabel": "اسم القالب",
@@ -972,11 +977,6 @@
     "docxDialog": {
       "title": "إنشاء قالب DOCX جديد",
       "description": "تحديد قالب نمط جديد لصادرات DOCX. سيتم تهيئته بنمط \"حديث\" كأساس."
-    },
-    "deleteDialog": {
-      "title": "هل أنت متأكد؟",
-      "description": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف قالب '{templateName}' نهائيًا.",
-      "deleteButton": "حذف"
     },
     "generalStyles": "الأنماط العامة",
     "headingStyles": "أنماط العناوين",

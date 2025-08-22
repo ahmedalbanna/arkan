@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, FileText, ShieldCheck, Users, Workflow, Bell } from 'lucide-react';
+import { BrainCircuit, FileSpreadsheet, GitGraph, Laptop, Presentation, FileQuestion, BookCheck, FileText, ShieldCheck, Users, Workflow, Bell, Palette } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const features = [
@@ -75,32 +75,33 @@ const features = [
   },
   {
       id: 'team-management',
-      title: 'Team Management',
+      title: 'docs.teamManagement.title',
       icon: Users,
-      description: 'Collaborate with others by creating teams, inviting members, and sharing projects.',
+      description: 'docs.teamManagement.description',
       steps: [
-          "Navigate to 'Manage Team' from your user profile dropdown.",
-          "Create a new team by giving it a name.",
-          "Invite members to your team using their email address.",
-          "Team projects will appear alongside your personal projects on the 'My Projects' page.",
+          'docs.teamManagement.step1',
+          'docs.teamManagement.step2',
+          'docs.teamManagement.step3',
+          'docs.teamManagement.step4',
       ],
   },
   {
       id: 'design-studio',
-      title: 'Design Studio',
-      icon: Laptop,
-      description: 'Customize the visual appearance of your exported documents using a live template editor.',
+      title: 'docs.designStudio.title',
+      icon: Palette,
+      description: 'docs.designStudio.description',
       steps: [
-          "Click on the 'Design' link in the main header.",
-          "Use the controls in the left panel to change fonts, colors, and other styles.",
-          "The live preview on the right will instantly update to show your changes.",
+          'docs.designStudio.step1',
+          'docs.designStudio.step2',
+          'docs.designStudio.step3',
+          'docs.designStudio.step4',
       ],
   },
   {
     id: 'push-notifications',
-    title: 'Push Notifications',
+    title: 'docs.pushNotifications.title',
     icon: Bell,
-    description: 'Implement push notifications for task reminders, feedback requests, or marketing updates.',
+    description: 'docs.pushNotifications.description',
     steps: [],
   },
   {

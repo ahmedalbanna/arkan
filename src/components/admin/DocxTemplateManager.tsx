@@ -33,6 +33,7 @@ type CreateDocxTemplateValues = z.infer<typeof createDocxTemplateSchema>;
 
 
 function CreateTemplateDialog() {
+    const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
     const createMutation = useCreateDocxTemplate();
 
@@ -60,41 +61,41 @@ function CreateTemplateDialog() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent>
                  <DialogHeader>
-                    <DialogTitle>Create New DOCX Template</DialogTitle>
-                    <DialogDescription>Define a new style template for DOCX exports. It will be initialized with the "Modern" style as a base.</DialogDescription>
+                    <DialogTitle>{t('manageTemplates.docxDialog.title')}</DialogTitle>
+                    <DialogDescription>{t('manageTemplates.docxDialog.description')}</DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                      <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
                         <FormField control={form.control} name="id" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template ID</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel>
                                 <FormControl><Input {...field} placeholder="e.g., my-company-style" disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Template Name</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel>
                                 <FormControl><Input {...field} placeholder="e.g., My Company Style" disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="description" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel>
                                 <FormControl><Textarea {...field} rows={2} disabled={createMutation.isPending} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <DialogFooter>
-                            <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <DialogClose asChild><Button type="button" variant="secondary">{t('manageTemplates.cancelButton')}</Button></DialogClose>
                             <Button type="submit" disabled={createMutation.isPending}>
                                 {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                                Create Template
+                                {t('manageTemplates.createButton')}
                             </Button>
                         </DialogFooter>
                      </form>
@@ -129,21 +130,21 @@ function TemplatePreview({ styles }: { styles: any }) {
     const h2Styles = styles?.default?.heading2?.run || {};
 
     const inlineDocStyles = {
-        fontFamily: docStyles.font?.name || 'Calibri',
-        fontSize: `${docStyles.size / 2 || 11}pt`,
+        fontFamily: typeof docStyles.font === 'string' ? docStyles.font : docStyles.font?.name || 'Calibri',
+        fontSize: `${Number(docStyles.size || 22) / 2}pt`,
         color: `#${docStyles.color || '333333'}`,
     };
 
-    const inlineH1Styles = {
-        fontFamily: h1Styles.font?.name || 'Calibri Light',
-        fontSize: `${h1Styles.size / 2 || 16}pt`,
+    const inlineH1Styles: React.CSSProperties = {
+        fontFamily: typeof h1Styles.font === 'string' ? h1Styles.font : h1Styles.font?.name || 'Calibri Light',
+        fontSize: `${Number(h1Styles.size || 32) / 2}pt`,
         color: `#${h1Styles.color || '2E74B5'}`,
         fontWeight: h1Styles.bold ? 'bold' : 'normal',
     };
 
-    const inlineH2Styles = {
-        fontFamily: h2Styles.font?.name || 'Calibri Light',
-        fontSize: `${h2Styles.size / 2 || 13}pt`,
+    const inlineH2Styles: React.CSSProperties = {
+        fontFamily: typeof h2Styles.font === 'string' ? h2Styles.font : h2Styles.font?.name || 'Calibri Light',
+        fontSize: `${Number(h2Styles.size || 26) / 2}pt`,
         color: `#${h2Styles.color || '2E74B5'}`,
         fontWeight: h2Styles.bold ? 'bold' : 'normal',
     };
@@ -228,14 +229,12 @@ export default function DocxTemplateManager() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure you want to delete this template?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. The template "{t(template.name)}" will be permanently deleted.
-                                </AlertDialogDescription>
+                                <AlertDialogTitle>{t('manageTemplates.deleteDialog.title')}</AlertDialogTitle>
+                                <AlertDialogDescription>{t('manageTemplates.deleteDialog.description').replace('{templateName}', t(template.name))}</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(key)}>Delete</AlertDialogAction>
+                                <AlertDialogCancel>{t('manageTemplates.cancelButton')}</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(key)}>{t('manageTemplates.deleteDialog.deleteButton')}</AlertDialogAction>
                               </AlertDialogFooter>
                           </AlertDialogContent>
                       </AlertDialog>
@@ -248,8 +247,8 @@ export default function DocxTemplateManager() {
                      <Button
                         size="icon"
                         variant="secondary"
- className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
- onClick={() => handleRefreshImage(template.id, template.dataAiHint || '')}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => handleRefreshImage(template.id, template.dataAiHint || '')}
                         disabled={refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id}
                       >
                          {refreshImageMutation.isPending && refreshImageMutation.variables?.templateId === template.id ? (

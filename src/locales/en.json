@@ -926,6 +926,11 @@
     "presentationDescription": "Configure the content structure for different types of presentations.",
     "createButton": "Create New",
     "cancelButton": "Cancel",
+    "deleteDialog": {
+      "title": "Are you sure?",
+      "description": "This action cannot be undone. This will permanently delete the \"{templateName}\" template.",
+      "deleteButton": "Delete"
+    },
     "createDialog": {
       "title": "Create Template",
       "nameLabel": "Template Name",
@@ -972,11 +977,6 @@
     "docxDialog": {
       "title": "Create New DOCX Template",
       "description": "Define a new style template for DOCX exports. It will be initialized with the \"Modern\" style as a base."
-    },
-    "deleteDialog": {
-      "title": "Are you sure?",
-      "description": "This action cannot be undone. This will permanently delete the \"{templateName}\" template.",
-      "deleteButton": "Delete"
     },
     "generalStyles": "General Styles",
     "headingStyles": "Heading Styles",
