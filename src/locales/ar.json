@@ -1036,7 +1036,7 @@
     "pageSubtitle": "مراجعة ومعالجة طلبات الدفع المعلقة من المستخدمين.",
     "errorLoading": "فشل تحميل طلبات الدفع",
     "noPending": "لا توجد طلبات دفع معلقة.",
-    "noTransactionsFound": "No {status} transactions found.",
+    "noTransactionsFound": "لم يتم العثور على معاملات {status}.",
     "historyTitle": "سجل المعاملات",
     "historyDescription": "عرض وإدارة جميع معاملات المستخدمين.",
     "tabs": {
