@@ -1,6 +1,5 @@
 
 
-
       
 'use client';
 
@@ -198,6 +197,11 @@ export async function sendPasswordResetEmailApi(userId: string, token: string) {
   }
   return response.json();
 }
+
+export async function forgotPasswordService(email: string) {
+  return sendPasswordResetEmail(auth, email);
+}
+
 
 export async function purchaseCreditsApi(
   plan: PricingPlan,

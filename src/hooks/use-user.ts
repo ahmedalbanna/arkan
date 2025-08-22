@@ -1,6 +1,7 @@
 
 
 
+
       
 // code explantion in docs/hooks/use-user.md
 
@@ -15,7 +16,6 @@ import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseConfig";
 import {
-  sendPasswordResetEmail,
   RecaptchaVerifier,
   signInWithPhoneNumber,
   ConfirmationResult,
@@ -30,6 +30,7 @@ import {
   serviceSignupUser,
   fetchUserProfileApi,
   sendPasswordResetEmailApi,
+  forgotPasswordService,
   purchaseCreditsApi,
   type UserListResponse,
   fetchAdmins as fetchAdminsApi,
@@ -221,13 +222,11 @@ export function useSendPasswordReset() {
 
 export function useForgotPassword() {
   return useMutation({
-    mutationFn: async (email: string) => {
-        return sendPasswordResetEmail(auth, email);
-    },
-    onSuccess: () => {
+    mutationFn: forgotPasswordService,
+    onSuccess: (data, email) => {
       toast({
         title: "Password Reset Email Sent",
-        description: "Please check your inbox to reset your password.",
+        description: `If an account exists for ${email}, a password reset link has been sent. Please check your inbox.`,
       });
     },
     onError: (error: Error) => {
