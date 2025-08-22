@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Download, RefreshCw } from 'lucide-react';
-import { Handwriting } from '@/lib/handwriting.js';
+import { Handwriting } from '@/lib/handwriting';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const HANDWRITING_FONTS = [
@@ -31,7 +31,7 @@ export default function HandwritingGenerator() {
   const [lineHeight, setLineHeight] = useState(45.2);
   const [fontColor, setFontColor] = useState('#000000');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
-  const [handwriting, setHandwriting] = useState<any>(null);
+  const [handwriting, setHandwriting] = useState<Handwriting | null>(null);
 
 
   useEffect(() => {
@@ -40,14 +40,18 @@ export default function HandwritingGenerator() {
       setHandwriting(hw);
 
       const resizeObserver = new ResizeObserver(() => {
-        hw.updateCanvasSize();  // Update on container resize
-        hw.draw(); // Redraw after resizing.
+        hw.updateCanvasSize();
       });
-      if (canvasRef.current?.parentNode instanceof Element) {
-        resizeObserver.observe(canvasRef.current.parentNode);
+      const parentElement = canvasRef.current?.parentNode;
+      if (parentElement instanceof Element) {
+          resizeObserver.observe(parentElement);
       }
 
-      return () => resizeObserver.disconnect(); // Cleanup observer
+      return () => {
+        if (parentElement instanceof Element) {
+          resizeObserver.unobserve(parentElement);
+        }
+      };
     }
   }, []);
 
@@ -66,6 +70,7 @@ export default function HandwritingGenerator() {
   useEffect(() => {
     if (handwriting) {
         handwriting.setBackground(backgroundColor);
+        handwriting.draw();
     }
   }, [handwriting, backgroundColor]);
 
@@ -97,7 +102,7 @@ export default function HandwritingGenerator() {
           </CardHeader>
           <CardContent>
             <div className="w-full border rounded-md">
-              <canvas ref={canvasRef} width="800" height="1000"></canvas>
+              <canvas ref={canvasRef}></canvas>
             </div>
           </CardContent>
         </Card>
@@ -197,3 +202,4 @@ export default function HandwritingGenerator() {
     </div>
   );
 }
+

@@ -1,161 +1,203 @@
-
 'use client';
-// Adapted from https://github.com/saurabhdaware/text-to-handwriting
 
-class Point {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
+import { useState, useRef, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Download, RefreshCw } from 'lucide-react';
+import { Handwriting } from '@/lib/handwriting';
+import { useLocalization } from '@/context/LocalizationContext';
 
-class Handwriting {
-    constructor(canvas, options = {}) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-        this.options = {
-            font: {
-                family: "Indie Flower, cursive",
-                size: 20,
-                color: "#1f1f1f",
-                weight: "normal"
-            },
-            line: {
-                height: 30,
-                color: "#d1d1d1"
-            },
-            paddingTop: 20,      // قيمة افتراضية لـ paddingTop
-            paddingLeft: 20,     // قيمة افتراضية لـ paddingLeft
-            paddingBottom: 20,   // قيمة افتراضية لـ paddingBottom
-            paddingRight: 20,    // قيمة افتراضية لـ paddingRight
+const HANDWRITING_FONTS = [
+  { name: 'Homemade Apple', value: "'Homemade Apple', cursive" },
+  { name: 'Caveat', value: "'Caveat', cursive" },
+  { name: 'Liu Jian Mao Cao', value: "'Liu Jian Mao Cao', cursive" },
+  { name: 'Indie Flower', value: "'Indie Flower', cursive" },
+  { name: 'Rabiohead', value: "'rabiohead', cursive" },
+  { name: "Saurabh's Hand", value: "'Saurabh-Hand', cursive" },
+];
 
-            ...options
-        };
-        this.text = "";
-        this.lines = [];
-        this.handwritingX = 0;
-        this.handwritingY = 0;
-        this.setBackground(options.background || "#ffffff");
-        this.updateCanvasSize();
-    }
+export default function HandwritingGenerator() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { t } = useLocalization();
+  const [text, setText] = useState('This is a sample text to get you started.');
+  const [fontSize, setFontSize] = useState(30);
+  const [fontFamily, setFontFamily] = useState(HANDWRITING_FONTS[0].value);
+  const [fontWeight, setFontWeight] = useState(400);
+  const [lineHeight, setLineHeight] = useState(45.2);
+  const [fontColor, setFontColor] = useState('#000000');
+  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
+  const [handwriting, setHandwriting] = useState<Handwriting | null>(null);
 
-    setText(text) {
-        this.text = text;
-        this.lines = text.split("\n");
-    }
 
-    setFontFamily(family) {
-        this.options.font.family = family;
-    }
+  useEffect(() => {
+    if (canvasRef.current) {
+      const hw = new Handwriting(canvasRef.current);
+      setHandwriting(hw);
 
-    setFontSize(size) {
-        this.options.font.size = size;
-    }
+      const resizeObserver = new ResizeObserver(() => {
+        hw.updateCanvasSize();
+      });
+      const parentElement = canvasRef.current?.parentNode;
+      if (parentElement instanceof Element) {
+          resizeObserver.observe(parentElement);
+      }
 
-    setFontWeight(weight) {
-        this.options.font.weight = weight;
-    }
-
-    setFontColor(color) {
-        this.options.font.color = color;
-    }
-
-    setLineHeight(height) {
-        this.options.line.height = height;
-    }
-
-    setLineColor(color) {
-        this.options.line.color = color;
-    }
-
-    setBackground(background) {
-        this.canvas.style.background = background;
-    }
-
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        // تحديد قيم padding
-        const paddingTop = this.options.paddingTop || this.options.font.size; // يمكنك تعديل هذه القيم
-        const paddingLeft = this.options.paddingLeft || this.options.font.size;
-        const paddingBottom = this.options.paddingBottom || this.options.font.size;
-        const paddingRight = this.options.paddingRight || this.options.font.size;
-
-        this.handwritingX = paddingLeft; // إضافة padding من اليسار
-        this.handwritingY = paddingTop + this.options.font.size; // إضافة padding من الأعلى
-        // إضافة padding من الأعلى
-
-        this.lines.forEach(line => {
-            this.draw_line(line, paddingRight, paddingBottom); // تمرير padding للتحقق من الخروج عن الشاشة
-        });
-    }
-
-    updateCanvasSize() {
-        const container = this.canvas.parentNode;
-        if (!container) {
-            console.error("Canvas has no parent element!");
-            return; // Or handle differently
+      return () => {
+        if (parentElement instanceof Element) {
+          resizeObserver.unobserve(parentElement);
         }
-        this.canvas.width = container.clientWidth;
-        this.canvas.height = 1000; // Or calculate dynamically, e.g., this.canvas.width * (someRatio);
-        // No need to clear and fill, draw already does this
+      };
     }
+  }, []);
 
-    draw_line(line, paddingRight, paddingBottom) {
-        this.handwritingX = this.options.font.size + this.rand(0, 10);
-        const words = line.split(" ");
-        words.forEach(word => {
-            const wordWidth = this.ctx.measureText(word).width + this.options.font.size / 2; // قياس عرض الكلمة
-            const availableWidth = this.canvas.width - this.handwritingX - paddingRight - this.options.font.size; // المساحة المتاحة
-            if (wordWidth > availableWidth) {
-                // إذا كانت الكلمة ستخرج عن الشاشة، انتقل إلى السطر التالي
-                this.handwritingY += this.options.line.height;
-                this.handwritingX = this.options.font.size + this.rand(0, 10);
-
-                // تحقق من أن النص لن يخرج عن الشاشة من الأسفل
-                if (this.handwritingY + this.options.line.height + paddingBottom > this.canvas.height) {
-                    return; // أو يمكنك تنفيذ سلوك آخر مثل البدء من جديد أو اقتطاع النص
-                }
-            }
-
-            this.draw_word(word);
-        });
-        this.handwritingY += this.options.line.height;
-
-        // تحقق من أن النص لن يخرج عن الشاشة من الأسفل بعد الانتقال إلى السطر التالي
-        if (this.handwritingY + paddingBottom > this.canvas.height) {
-            return; // أو يمكنك تنفيذ سلوك آخر مثل البدء من جديد أو اقتطاع النص
-        }
+  useEffect(() => {
+    if (handwriting) {
+      handwriting.setText(text);
+      handwriting.setFontFamily(fontFamily);
+      handwriting.setFontSize(fontSize);
+      handwriting.setFontWeight(fontWeight);
+      handwriting.setLineHeight(lineHeight);
+      handwriting.setFontColor(fontColor);
+      handwriting.draw();
     }
+  }, [handwriting, text, fontSize, fontWeight, lineHeight, fontColor, fontFamily]);
 
-    draw_word(word) {
-        const letters = word.split("");
-        letters.forEach(letter => {
-            this.draw_letter(letter);
-        });
-        this.handwritingX += this.options.font.size / 2;
+  useEffect(() => {
+    if (handwriting) {
+        handwriting.setBackground(backgroundColor);
+        handwriting.draw();
     }
+  }, [handwriting, backgroundColor]);
 
-    draw_letter(letter) {
-        this.ctx.save();
-        this.ctx.font = `${'\'\'\''}${this.options.font.weight}${'\'\'\''} ${'\'\'\''}${this.options.font.size}${'\'\'\''}px ${'\'\'\''}${this.options.font.family}${'\'\'\''}`;
-        this.ctx.fillStyle = this.options.font.color;
 
-        let curve = this.rand(0, 1) === 0 ? this.rand(0, 5) : -this.rand(0, 5);
-        this.ctx.translate(this.handwritingX, this.handwritingY + curve);
-
-        let rotate = this.rand(0, 1) === 0 ? this.rand(0, 0.01) : -this.rand(0, 0.01);
-        this.ctx.rotate(rotate);
-
-        this.ctx.fillText(letter, 0, 0);
-        this.handwritingX += this.ctx.measureText(letter).width + this.rand(-1, 2);
-
-        this.ctx.restore();
+  const handleDownload = () => {
+    if (canvasRef.current) {
+      const link = document.createElement('a');
+      link.download = 'handwriting.png';
+      link.href = canvasRef.current.toDataURL();
+      link.click();
     }
+  };
 
-    rand(min, max) {
-        return Math.random() * (max - min) + min;
+  const handleRedraw = () => {
+    if(handwriting) {
+        handwriting.draw();
     }
+  }
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="lg:col-span-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">{t('writingTools.handwriting.outputTitle')}</CardTitle>
+            <CardDescription>
+              {t('writingTools.handwriting.outputDescription')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="w-full border rounded-md">
+              <canvas ref={canvasRef}></canvas>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      <div>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('writingTools.handwriting.controlsTitle')}</CardTitle>
+            <CardDescription>{t('writingTools.handwriting.controlsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="text-input">{t('writingTools.handwriting.textLabel')}</Label>
+              <Textarea
+                id="text-input"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                rows={8}
+              />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="font-family">{t('writingTools.handwriting.fontLabel')}</Label>
+                <Select value={fontFamily} onValueChange={setFontFamily}>
+                    <SelectTrigger id="font-family">
+                        <SelectValue placeholder="Select a font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {HANDWRITING_FONTS.map((font) => (
+                            <SelectItem key={font.value} value={font.value} style={{ fontFamily: font.value }}>
+                                {font.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="font-size">{t('writingTools.handwriting.fontSizeLabel')}</Label>
+              <Input
+                id="font-size"
+                type="number"
+                value={fontSize}
+                onChange={(e) => setFontSize(Number(e.target.value))}
+              />
+            </div>
+            {/* Added Font Weight Input */}
+            <div className="space-y-2">
+              <Label htmlFor="font-weight">{t('writingTools.handwriting.fontWeightLabel')}</Label>
+              <Input
+                id="font-weight"
+                type="number"
+                value={fontWeight}
+                onChange={(e) => setFontWeight(Number(e.target.value))}
+              />
+            </div>
+            {/* Added Line Height Input */}
+            <div className="space-y-2">
+              <Label htmlFor="line-height">{t('writingTools.handwriting.lineHeightLabel')}</Label>
+              <Input
+                id="line-height"
+                type="number"
+                step="0.1"
+                value={lineHeight}
+                onChange={(e) => setLineHeight(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="font-color">{t('writingTools.handwriting.fontColorLabel')}</Label>
+              <Input
+                id="font-color"
+                type="color"
+                value={fontColor}
+                onChange={(e) => setFontColor(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bg-color">{t('writingTools.handwriting.bgColorLabel')}</Label>
+              <Input
+                id="bg-color"
+                type="color"
+                value={backgroundColor}
+                onChange={(e) => setBackgroundColor(e.target.value)}
+              />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2">
+            <Button onClick={handleRedraw} className="w-full">
+              <RefreshCw className="me-2 h-4 w-4" />
+              {t('writingTools.handwriting.redrawButton')}
+            </Button>
+            <Button onClick={handleDownload} variant="secondary" className="w-full">
+              <Download className="me-2 h-4 w-4" />
+              {t('writingTools.handwriting.downloadButton')}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
+  );
 }
-
-export { Handwriting, Point };
