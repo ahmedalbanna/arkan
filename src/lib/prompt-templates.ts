@@ -8,7 +8,7 @@ import type { LucideIcon } from 'lucide-react';
 
 export interface PromptCategory {
   id: string;
-  name: string;
+  name: string; // The translated name will be fetched using `t(promptLibrary.categories.${id})`
   icon: LucideIcon;
   count: number;
 }
