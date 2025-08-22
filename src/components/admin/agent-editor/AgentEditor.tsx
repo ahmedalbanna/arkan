@@ -104,7 +104,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           conversationStarters: initialData.conversationStarters || [],
           tone: initialData.tone || 'Default',
           language: initialData.language || 'English (US)',
-          model: initialData.model || 'googleai/gemini-2.0-flash',
+          model: initialData.model || 'googleai/gemini-1.5-flash',
 
       }
   });
@@ -136,7 +136,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       conversationStarters: initialData.conversationStarters || [],
       tone: initialData.tone || 'Default',
       language: initialData.language || 'English (US)',
-      model: initialData.model || 'googleai/gemini-2.0-flash',
+      model: initialData.model || 'googleai/gemini-1.5-flash',
     });
   }, [initialData, searchParams, form]);
 
