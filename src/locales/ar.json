@@ -1,5 +1,4 @@
 
-
 {
   "header": {
     "title": "أركان",
@@ -676,6 +675,7 @@
     "pageTitle": "مشاريعي",
     "pageSubtitle": "قم بتحميل مشاريعك المحفوظة وإدارتها ومواصلة العمل عليها.",
     "refreshButton": "تحديث",
+    "uploadButton": "تحميل مشروع",
     "createButton": "إنشاء مشروع جديد",
     "errorLoading": "فشل تحميل المشاريع",
     "noProjectsTitle": "لم يتم العثور على مشاريع",
@@ -1036,7 +1036,7 @@
     "pageSubtitle": "مراجعة ومعالجة طلبات الدفع المعلقة من المستخدمين.",
     "errorLoading": "فشل تحميل طلبات الدفع",
     "noPending": "لا توجد طلبات دفع معلقة.",
-    "noTransactionsFound": "لم يتم العثور على معاملات {status}.",
+    "noTransactionsFound": "No {status} transactions found.",
     "historyTitle": "سجل المعاملات",
     "historyDescription": "عرض وإدارة جميع معاملات المستخدمين.",
     "tabs": {
@@ -1435,7 +1435,7 @@
         "selectTemplate": "يرجى تحديد قالب عرض تقديمي."
       },
       "planViewer": {
-        "title": "خطة إنشاء التقرير الكامل",
+        "title": "Full Report Generation Plan",
         "description": "لقد أنشأ الذكاء الاصطناعي الخطة التالية لإنشاء أقسام التقرير. لقد حدد السياق والإرشادات الأكثر صلة بكل خطوة.",
         "contextItems": "عناصر السياق:",
         "instructions": "التعليمات:",

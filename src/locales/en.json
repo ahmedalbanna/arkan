@@ -1,5 +1,4 @@
 
-
 {
   "header": {
     "title": "Arkan",
@@ -676,6 +675,7 @@
     "pageTitle": "My Projects",
     "pageSubtitle": "Load, manage, and continue working on your saved projects.",
     "refreshButton": "Refresh",
+    "uploadButton": "Upload Project",
     "createButton": "Create New Project",
     "errorLoading": "Failed to load projects",
     "noProjectsTitle": "No Projects Found",
@@ -1254,7 +1254,6 @@
       "updateSection": "Update Section",
       "Select_template": "Select a template",
       "generateButton": "Generate",
-
       "sections": {
         "introduction": "Introduction",
         "literatureReview": "Literature Review",
@@ -1379,7 +1378,7 @@
         "generatingStateTitle": "Generating Codebase...",
         "generatingStateDesc": "The AI is building your project structure. This may take a moment.",
         "emptyStateTitle": "Your Codebase Will Appear Here",
-        "emptyStateDesc": "Click \"Generate Codebase\" to scaffold your project files.",
+        "emptyStateDesc": "Click \"Generate Codebase\" to scaffold your project files based on your proposal.",
         "fileTreeView": {
           "title": "Generated Codebase",
           "description": "Review the generated files and download the ZIP archive.",
