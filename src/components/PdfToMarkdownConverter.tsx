@@ -11,6 +11,7 @@ import { markdownComponents } from '@/lib/markdown-styles';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/context/AuthContext';
+import { processFileApi } from '@/services/document-processing-service';
 
 export default function PdfToMarkdownConverter() {
   const [file, setFile] = useState<File | null>(null);
@@ -25,6 +26,7 @@ export default function PdfToMarkdownConverter() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
+      // The API now supports more types, but for this component, we'll keep it focused.
       if (selectedFile.type !== "application/pdf") {
         setError("Please select a valid PDF file.");
         setFile(null);
@@ -55,20 +57,12 @@ export default function PdfToMarkdownConverter() {
 
     try {
       const token = await firebaseUser.getIdToken();
-      const response = await fetch('/api/pdf-to-markdown', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'An unknown error occurred');
-      }
+      // Use the new centralized API service
+      const result = await processFileApi(formData, token);
 
       setMarkdown(result.markdown);
       refetchUser(); // Refresh user credits in the header
+      toast({ title: "Conversion Successful", description: "Your PDF has been converted to Markdown." });
 
     } catch (err: any) {
       setError(err.message || 'Failed to process the PDF. Please try again.');
@@ -115,7 +109,7 @@ export default function PdfToMarkdownConverter() {
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoading || !file}>
-              {isLoading ? <Loader2 className="m2-2 h-4 w-4 animate-spin" /> : <UploadCloud className="m2-2 h-4 w-4" />}
+              {isLoading ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <UploadCloud className="me-2 h-4 w-4" />}
               {isLoading ? 'Processing...' : 'Convert to Markdown'}
             </Button>
           </CardFooter>
