@@ -1,4 +1,3 @@
-
 'use client';
 
 import { notFound } from 'next/navigation';
@@ -74,7 +73,7 @@ function ProfilePageContent({ userId }: { userId: string }) {
                <Calendar className="h-5 w-5 mt-1 text-muted-foreground" />
                <div>
                  <h4 className="font-semibold">{t('profile.joinedLabel')}</h4>
-                 <p className="text-muted-foreground">{format(new Date(user.createdAt), 'MMMM d, yyyy')}</p>
+                 <p className="text-muted-foreground">{format(new Date(user.createdAt), 'PPP')}</p>
                </div>
              </div>
              

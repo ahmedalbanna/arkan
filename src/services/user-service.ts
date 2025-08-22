@@ -1,6 +1,4 @@
 
-
-      
 'use client';
 
 import type { UserProfile, PricingPlan } from '@/lib/types';

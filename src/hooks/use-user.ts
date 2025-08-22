@@ -1,8 +1,3 @@
-
-
-
-
-      
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -60,7 +55,7 @@ export function useUsers() {
 
 export function useAdmins() {
   return useQuery<UserProfile[]>({
-    queryKey: userKeys.lists(),
+    queryKey: userKeys.lists(), // Re-using userKeys.lists() might be fine if admins are just users with a role
     queryFn: fetchAdminsApi,
     staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {
@@ -90,13 +85,14 @@ export function useUserProfile(userId: string) {
   // by the real-time listener.
   return useQuery<UserProfile | null>({
     queryKey: userKeys.profile(userId),
-    // Fallback fetch function for initial load or if the listener fails for some reason
+    // The queryFn will run on initial load or if the listener fails for some reason
     queryFn: async () => {
+        if (!firebaseUser) return null; // Or handle this case as needed
         const token = await getAuthenticatedToken(firebaseUser);
         return fetchUserProfileApi(userId, token);
     },
-    staleTime: Infinity,
-    enabled: !!userId && !!firebaseUser,
+    staleTime: Infinity, // Data is live, so it's always "fresh"
+    enabled: !!userId && !!firebaseUser, // Only run if we have IDs
   });
 }
 
