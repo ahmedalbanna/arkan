@@ -268,7 +268,7 @@ export function PresentationTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchPresentationTemplates } = await import('@/services/template-service');
-            return fetchPresentationTemplates();
+            return fetchPresentationTemplates(await firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
     });

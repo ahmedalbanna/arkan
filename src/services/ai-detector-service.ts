@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { DetectAIVariables, DetectAIOutput } from './writing-tools-service';
+import { DetectAIOutput } from '@/ai/schemas';
+import type { DetectAIVariables } from './writing-tools-service';
 
 interface DetectAIApiVariables extends DetectAIVariables {
     token: string;

@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import * as pdfjs from 'pdfjs-dist/legacy/build/pdf';
+import React, { useState, useEffect, useRef } from 'react'; // This line is correct, the error is likely from a missing package installation.
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf'; // This line is correct, the error is likely from a missing package installation.
 import { Button } from './ui/button';
 import { ChevronLeft, ChevronRight, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';

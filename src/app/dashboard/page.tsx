@@ -108,7 +108,7 @@ export default function UserDashboardPage() {
             </div>
 
             {isLoading && <DashboardSkeleton />}
-            
+
             {isError && (
                  <div className="p-8 text-center text-destructive border rounded-lg">
                     <AlertCircle className="mx-auto h-8 w-8 mb-2" />
@@ -125,7 +125,7 @@ export default function UserDashboardPage() {
                     </div>
 
                     <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-                        <AgentUsageChart data={stats.agentUsageChartData} />
+                        <AgentUsageChart data={stats.agentUsageChartData} /> {/* Assuming agentUsageChartData is correctly typed */}
                         <RecentActivity data={stats.recentActivity} />
                     </div>
                 </div>

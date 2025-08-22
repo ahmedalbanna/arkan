@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { PlagiarismCheckVariables, PlagiarismCheckOutput } from './writing-tools-service';
+import { PlagiarismCheckOutput } from '@/ai/schemas';
+import type { PlagiarismCheckVariables } from './writing-tools-service';
 
 interface PlagiarismCheckApiVariables extends PlagiarismCheckVariables {
     token: string;

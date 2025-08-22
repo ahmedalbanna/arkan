@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { TopicExplainerOutput, TopicExplainerVariables } from './writing-tools-service';
+import { TopicExplainerOutput } from '@/ai/schemas';
+import type { TopicExplainerVariables } from './writing-tools-service';
 
 interface TopicExplainerApiVariables extends TopicExplainerVariables {
     token: string;

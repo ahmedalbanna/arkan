@@ -22,6 +22,25 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+// Define types for better type safety
+interface CurrencyDetails {
+    iban: string;
+}
+
+interface BankAccount {
+    bankName: string;
+    accountHolder: string;
+    currencies: {
+        SAR?: CurrencyDetails;
+        USD?: CurrencyDetails;
+        YER?: CurrencyDetails;
+    };
+}
+
+interface PublicSettings {
+    bankAccounts: BankAccount[];
+}
+
 const formSchema = z.object({
   file: z
     .instanceof(File, { message: 'A file is required.' })
@@ -80,7 +99,7 @@ function AccountDetail({ label, value }: { label: string, value?: string }) {
     const [isCopied, setIsCopied] = useState(false);
 
     if (!value) return null;
-    
+
     const handleCopy = () => {
         navigator.clipboard.writeText(value);
         setIsCopied(true);
@@ -106,7 +125,7 @@ export default function SubmitPaymentForm() {
   const { toast } = useToast();
   const { t } = useLocalization();
 
-  const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = useQuery({
+  const { data: settings, isLoading: isLoadingSettings, isError: isSettingsError } = useQuery<PublicSettings>({
       queryKey: ['publicSettings'],
       queryFn: fetchPublicSettings,
       staleTime: 1000 * 60 * 60, // 1 hour

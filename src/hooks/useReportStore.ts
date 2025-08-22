@@ -32,6 +32,14 @@ export interface ExternalContext {
     type: ContextFileType;
 }
 
+interface ContextSelectionValue {
+  sections: Record<string, boolean>;
+  diagrams: Record<string, boolean>;
+  externalContext: boolean[];
+  proposal: boolean;
+  projectPlan: boolean;
+}
+
 export interface ReportState {
   sections: { [key in SectionName]?: string };
   translatedSections: { [key in SectionName]?: string }; // To store translations
@@ -41,7 +49,7 @@ export interface ReportState {
   guidelineState: Record<string, GuidelineState>;
   controlState: Record<SectionName, ControlState>;
   customGuidelineInput: Record<string, string>;
-  contextSelection: Record<string, { sections: Record<string, boolean>; diagrams: Record<string, boolean>; externalContext: boolean[]; proposal: boolean; projectPlan: boolean }>;
+  contextSelection: Record<string, ContextSelectionValue>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
 }
@@ -249,11 +257,10 @@ export const useReportStore = create<ReportState & ReportActions>()(
     },
     initializeContextSelection: (itemKey, defaultContextIds) => {
       set(state => {
-        const newSelection = {
+        const newSelection: ContextSelectionValue = {
             ...emptySelection,
             proposal: defaultContextIds.includes('proposal'),
             projectPlan: defaultContextIds.includes('projectPlan'),
-            section: defaultContextIds.includes('sections'),
             externalContext: Array(state.externalContext.length).fill(true),
         };
 
@@ -265,7 +272,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
         });
 
         return {
-          contextSelection: { // @ts-ignore
+          contextSelection: {
             ...state.contextSelection,
             [itemKey]: newSelection,
           },

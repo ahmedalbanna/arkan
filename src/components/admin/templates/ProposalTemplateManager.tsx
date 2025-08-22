@@ -271,7 +271,10 @@ export function ProposalTemplateManager() {
 
     const { data: templates, isLoading, isError } = useQuery({
         queryKey: templateKeys.proposals(),
-        queryFn: fetchProposalTemplates,
+        queryFn: async () => {
+            if (!firebaseUser) return []; // Fix: Expected 1 arguments, but got 0.
+            return fetchProposalTemplates(await firebaseUser.getIdToken());
+        },
         enabled: !!firebaseUser,
     });
 

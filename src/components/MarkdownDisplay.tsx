@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Label } from './ui/label';
 import { useWritingTool } from '@/hooks/use-writing-tools';
 import { useLocalization } from '@/context/LocalizationContext';
+import { toast } from '@/hooks/use-toast';
 
 export function MarkdownDisplay() {
   const { t } = useLocalization();
@@ -69,6 +70,11 @@ function helloWorld() {
         setAiSuggestion(null);
         toast({ title: t('markdownDisplay.toasts.suggestionAcceptedTitle'), description: t('markdownDisplay.toasts.suggestionAcceptedDesc')});
     }
+  };
+
+  const handleRejectSuggestion = () => {
+    setAiSuggestion(null);
+    toast({ title: t('markdownDisplay.toasts.suggestionRejectedTitle'), description: t('markdownDisplay.toasts.suggestionRejectedDesc')});
   };
 
 

@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { AIResearcherOutput, AIResearcherVariables } from './writing-tools-service';
+import { AIResearcherOutput } from '@/ai/schemas';
+import type { AIResearcherVariables } from './writing-tools-service';
 
 interface AIResearcherApiVariables extends AIResearcherVariables {
     token: string;

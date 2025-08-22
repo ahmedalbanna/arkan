@@ -30,10 +30,10 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '../ui/label';
 
 const reportTemplateSchema = z.object({
-  id: z.string(),
-  name: z.string().min(1, "Name is required"),
-  description: z.string().min(1, "Description is required"),
-  agentIds: z.array(z.string()).min(1, "At least one agent must be selected."),
+    id: z.string(),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
+    agentIds: z.array(z.string()).min(1, "At least one agent must be selected."),
 });
 
 type ReportFormValues = z.infer<typeof reportTemplateSchema>;
@@ -58,21 +58,21 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-                 <FormField control={form.control} name="name" render={({ field }) => (
+                <FormField control={form.control} name="name" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Template Name</FormLabel>
                         <FormControl><Input {...field} disabled={isSaving || isDeleting} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField control={form.control} name="description" render={({ field }) => (
+                <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Description</FormLabel>
                         <FormControl><Textarea {...field} disabled={isSaving || isDeleting} rows={2} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />
-                 <FormField
+                <FormField
                     control={form.control}
                     name="agentIds"
                     render={() => (
@@ -114,7 +114,7 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                     )}
                 />
                 <div className="flex justify-end gap-2">
-                     {!isDefaultTemplate && (
+                    {!isDefaultTemplate && (
                         <AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" type="button" disabled={isSaving || isDeleting}>
@@ -124,12 +124,12 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete the "{template.name}" template.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
                                 </AlertDialogFooter>
                             </AlertDialogContent>
                         </AlertDialog>
@@ -144,122 +144,111 @@ function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }
     );
 }
 
-function CreateTeamDialog() {
+function CreateReportTemplateDialog() {
     const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
-    const [name, setName] = useState('');
-    const [description, setDescription] = useState('');
-    const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
 
     const { toast } = useToast();
     const { agents, isLoaded } = useAgents();
     const createMutation = useCreateReportTemplate();
 
+    const form = useForm<CreateReportFormValues>({
+        resolver: zodResolver(createReportTemplateSchema),
+        defaultValues: {
+            id: '',
+            name: '',
+            description: '',
+            agentIds: [],
+        }
+    });
+
+    const selectedAgentIds = form.watch('agentIds');
+
     const reportGenerationAgents = useMemo(() =>
         (agents || []).filter(agent =>
             agent.category === AgentCategory.ReportGeneration &&
             agent.name.toLowerCase().includes(searchTerm.toLowerCase())
         ),
-    [agents, searchTerm]);
+        [agents, searchTerm]);
 
-    const handleSelectAgent = (agentId: string) => {
-        setSelectedAgentIds(prev =>
-            prev.includes(agentId)
-                ? prev.filter(id => id !== agentId)
-                : [...prev, agentId]
-        );
-    };
-
-    const handleCreate = () => {
-        const data = {
-            id: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-            name,
-            description,
-            agentIds: selectedAgentIds,
-        };
-
-        const validation = createReportTemplateSchema.safeParse(data);
-        if (!validation.success) {
-            toast({
-                title: 'Validation Error',
-                description: validation.error.errors.map(e => e.message).join('\n'),
-                variant: 'destructive',
-            });
-            return;
-        }
-
-        createMutation.mutate(validation.data, {
+    const handleCreate = (data: CreateReportFormValues) => {
+        createMutation.mutate(data, {
             onSuccess: () => {
-                toast({ title: 'Success', description: 'New agent team created.' });
+                toast({ title: 'Success', description: 'New report template created.' });
                 setIsOpen(false);
-                setName('');
-                setDescription('');
-                setSelectedAgentIds([]);
+                form.reset();
             },
             onError: (error: any) => {
-                handleErrorUtility(error, "Failed to create team.");
+                handleErrorUtility(error, "Failed to create template.");
             }
         });
     }
 
-    const selectedAgents = agents.filter(agent => selectedAgentIds.includes(agent.id));
-    const availableAgents = reportGenerationAgents.filter(agent => !selectedAgentIds.includes(agent.id));
+    const selectedAgents = agents.filter(agent => selectedAgentIds?.includes(agent.id));
+    const availableAgents = reportGenerationAgents.filter(agent => !selectedAgentIds?.includes(agent.id));
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />Create New</Button>
+                <Button size="sm"><PlusCircle className="me-2 h-4 w-4" />{t('manageTemplates.createButton')}</Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>{t('team.createTeamTitle')}</DialogTitle>
-                    <DialogDescription>Choose agents you want to include in this team for group interactions.</DialogDescription>
+                    <DialogTitle>{t('manageTemplates.reportDialog.title')}</DialogTitle>
+                    <DialogDescription>{t('manageTemplates.reportDialog.description')}</DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="team-name">NAME</Label>
-                        <Input id="team-name" placeholder="e.g., Generate Report" value={name} onChange={e => setName(e.target.value)} />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="team-description">DESCRIPTION</Label>
-                        <Textarea id="team-description" placeholder="A short description of what this team does." value={description} onChange={e => setDescription(e.target.value)} rows={2} />
-                    </div>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+                        <FormField control={form.control} name="id" render={({ field }) => (
+                            <FormItem><FormLabel>{t('manageTemplates.createDialog.idLabel')}</FormLabel><FormControl><Input {...field} placeholder={t('manageTemplates.reportDialog.idPlaceholder')} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="name" render={({ field }) => (
+                            <FormItem><FormLabel>{t('manageTemplates.createDialog.nameLabel')}</FormLabel><FormControl><Input {...field} placeholder={t('manageTemplates.reportDialog.namePlaceholder')} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="description" render={({ field }) => (
+                            <FormItem><FormLabel>{t('manageTemplates.createDialog.descriptionLabel')}</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                        )} />
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>MANAGE TEAM ({selectedAgents.length})</Label>
-                            <ScrollArea className="h-48 border rounded-md p-2">
-                               {selectedAgents.map(agent => (
-                                   <div key={agent.id} className="flex items-center justify-between p-1">
-                                       <span>{agent.name}</span>
-                                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><X className="h-4 w-4"/></Button>
-                                   </div>
-                               ))}
-                            </ScrollArea>
-                        </div>
-                         <div className="space-y-2">
-                            <Label>ADD TO TEAM</Label>
-                            <ScrollArea className="h-48 border rounded-md p-2">
-                                <div className="p-1"><Input placeholder="Search agents..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8"/></div>
-                                {isLoaded && availableAgents.map(agent => (
-                                     <div key={agent.id} className="flex items-center justify-between p-1">
-                                       <span>{agent.name}</span>
-                                       <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleSelectAgent(agent.id)}><Plus className="h-4 w-4"/></Button>
-                                   </div>
-                                ))}
-                                {!isLoaded && <Loader2 className="mx-auto animate-spin" />}
-                            </ScrollArea>
-                        </div>
-                    </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
-                    <Button onClick={handleCreate} disabled={createMutation.isPending || !name || selectedAgentIds.length === 0}>
-                        {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                        Create
-                    </Button>
-                </DialogFooter>
+                        <FormField control={form.control} name="agentIds" render={({ field }) => (
+                            <div className="grid grid-cols-2 gap-4 pt-4">
+                                <div className="space-y-2">
+                                    <Label>{t('manageTemplates.reportDialog.selectedAgents')} ({selectedAgents.length})</Label>
+                                    <ScrollArea className="h-48 border rounded-md p-2">
+                                        {selectedAgents.map(agent => (
+                                            <div key={agent.id} className="flex items-center justify-between p-1">
+                                                <span>{agent.name}</span>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => field.onChange(field.value?.filter(id => id !== agent.id))}><X className="h-4 w-4" /></Button>
+                                            </div>
+                                        ))}
+                                    </ScrollArea>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>{t('manageTemplates.reportDialog.availableAgents')}</Label>
+                                    <ScrollArea className="h-48 border rounded-md p-2">
+                                        <div className="p-1"><Input placeholder="Search agents..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="h-8" /></div>
+                                        {isLoaded && availableAgents.map(agent => (
+                                            <div key={agent.id} className="flex items-center justify-between p-1">
+                                                <span>{agent.name}</span>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => field.onChange([...(field.value || []), agent.id])}><Plus className="h-4 w-4" /></Button>
+                                            </div>
+                                        ))}
+                                        {!isLoaded && <Loader2 className="mx-auto animate-spin" />}
+                                    </ScrollArea>
+                                </div>
+                                <FormMessage className="col-span-2">{form.formState.errors.agentIds?.message}</FormMessage>
+                            </div>
+                        )} />
+
+                        <DialogFooter>
+                            <DialogClose asChild><Button type="button" variant="ghost">{t('manageTemplates.cancelButton')}</Button></DialogClose>
+                            <Button type="submit" disabled={createMutation.isPending}>
+                                {createMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+                                {t('manageTemplates.createButton')}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </Form>
             </DialogContent>
         </Dialog>
     )
@@ -273,7 +262,7 @@ export function ReportTemplateManager() {
         queryFn: async () => {
             if (!firebaseUser) return [];
             const { fetchReportTemplates } = await import('@/services/template-service');
-            return fetchReportTemplates();
+            return fetchReportTemplates(await firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
         meta: {
@@ -303,28 +292,29 @@ export function ReportTemplateManager() {
                 <div>
                     <CardTitle>Report Generation Templates</CardTitle>
                     <CardDescription>
-                    Configure which report sections are included in the "Generate Full Report" option.
+                        Configure which report sections are included in the "Generate Full Report" option.
                     </CardDescription>
                 </div>
-                 <CreateTeamDialog />
+                <CreateReportTemplateDialog />
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
                     {templates?.map(template => {
                         return (
-                        <AccordionItem value={template.id} key={template.id}>
-                            <AccordionTrigger>{template.name}</AccordionTrigger>
-                            <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
-                                <ReportTemplateForm
-                                    template={template}
-                                    onSave={handleSave}
-                                    isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
-                                    onDelete={() => handleDelete(template.id)}
-                                    isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
-                                />
-                            </AccordionContent>
-                        </AccordionItem>
-                    )})}
+                            <AccordionItem value={template.id} key={template.id}>
+                                <AccordionTrigger>{template.name}</AccordionTrigger>
+                                <AccordionContent className="p-4 bg-muted/50 rounded-b-md">
+                                    <ReportTemplateForm
+                                        template={template}
+                                        onSave={handleSave}
+                                        isSaving={updateMutation.isPending && updateMutation.variables?.templateId === template.id}
+                                        onDelete={() => handleDelete(template.id)}
+                                        isDeleting={deleteMutation.isPending && deleteMutation.variables === template.id}
+                                    />
+                                </AccordionContent>
+                            </AccordionItem>
+                        )
+                    })}
                 </Accordion>
             </CardContent>
         </Card>

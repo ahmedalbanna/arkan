@@ -11,8 +11,7 @@ import { Accordion } from '../ui/accordion';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '../ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogFooter } from '../ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
-import { useState } from 'react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -166,13 +165,30 @@ function TemplatePreview({ styles }: { styles: any }) {
 }
 
 export default function DocxTemplateManager() {
-  const { templates, updateStyle, saveChanges, isSaving, isLoaded } = useDocxStyles();
+  const { templates, updateStyle, saveChanges, isSaving, isLoaded, activeTemplateKey, setActiveTemplateKey } = useDocxStyles();
   const deleteMutation = useDeleteDocxTemplate();
   const refreshImageMutation = useRefreshTemplateImage('docx');
   const { t } = useLocalization();
+  const [changeQueue, setChangeQueue] = useState<{ key: TemplateKey, path: string, value: any } | null>(null);
+
+  // When a change is queued, set the active template key.
+  // This will trigger a re-render.
+  useEffect(() => {
+    if (changeQueue) {
+      setActiveTemplateKey(changeQueue.key as any);
+    }
+  }, [changeQueue, setActiveTemplateKey]);
+
+  // After the re-render, if the active key matches the queued change, apply the update.
+  useEffect(() => {
+    if (changeQueue && activeTemplateKey === changeQueue.key) {
+      updateStyle(changeQueue.path, changeQueue.value);
+      setChangeQueue(null); // Clear the queue
+    }
+  }, [activeTemplateKey, changeQueue, updateStyle]);
 
   const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
-    updateStyle(templateKey, path, value);
+    setChangeQueue({ key: templateKey, path, value });
   };
 
   const handleSave = (key: TemplateKey) => {
@@ -256,10 +272,10 @@ export default function DocxTemplateManager() {
                     </Button>
                 </div>
               <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
-                  <StyleEditor heading="General Document Styles" styleKey="document" templateKey={key} />
-                  <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={key} />
-                  <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={key} />
-                  <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={key} />
+                  <StyleEditor heading="General Document Styles" styleKey="document" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
               </Accordion>
             </CardContent>
             <CardFooter>

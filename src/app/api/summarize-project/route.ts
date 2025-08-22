@@ -30,12 +30,13 @@ export const POST = withAuth(async ({ request, user }) => {
     const result = await summarizeFullProject(agentInput);
 
     await logGeneration({
-        agentId: 'summarize-full-project',
-        userId: user.id,
-        input: { proposalTitle: agentInput.proposal.title, reportLength: agentInput.reportMarkdown.length },
-        output: result,
+      agentId: 'summarize-full-project',
+      userId: user.id,
+      input: { proposalTitle: agentInput.proposal.title, reportLength: agentInput.reportMarkdown.length },
+      output: result,
+      creditCost: 1
     });
-    
+
     return createApiResponse(result, 200);
   } catch (error) {
     return handleApiError(error);

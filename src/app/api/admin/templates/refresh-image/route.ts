@@ -21,48 +21,49 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const { templateType, templateId, prompt } = validation.data;
-    
+
     const agentInput = { prompt };
     const { imageUrl: base64DataUri } = await generateImage(agentInput);
-    
+
     if (!base64DataUri.startsWith('data:image/')) {
         throw new Error('Invalid image data received from generation service.');
     }
 
     await logGeneration({
-        agentId: 'generate-template-image',
-        userId: user.id,
-        input: agentInput,
-        output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
+      agentId: 'generate-template-image',
+      userId: user.id,
+      input: agentInput,
+      output: { imageUrl: `data:image/...;base64,...[TRUNCATED]` },
+      creditCost: 1
     });
-    
+
     const storage = getStorage();
     const bucket = storage.bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'arkan-docudec.appspot.com');
-    
+
     const base64Data = base64DataUri.split(',')[1];
     const imageBuffer = Buffer.from(base64Data, 'base64');
     const mimeType = base64DataUri.match(/data:(image\/[^;]+);base64,/)?.[1] || 'image/png';
-    
+
     const fileName = `template_previews/${templateType}/${templateId}-${Date.now()}.png`;
     const file = bucket.file(fileName);
-    
+
     await file.save(imageBuffer, {
         metadata: { contentType: mimeType },
     });
-    
+
     await file.makePublic();
     const publicUrl = file.publicUrl();
 
     const collectionPath = templateType === 'docx' || templateType === 'pptx' ? 'styles' : 'items';
     const templateRef = adminDb.collection('templates').doc(templateType).collection(collectionPath).doc(templateId);
-    
+
     await templateRef.update({
         imageUrl: publicUrl,
         updatedAt: new Date().toISOString(),
     });
-    
+
     const updatedDoc = await templateRef.get();
 
     return createApiResponse({ ...updatedDoc.data() }, 200);

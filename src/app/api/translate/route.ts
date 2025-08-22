@@ -26,10 +26,11 @@ export const POST = withAuth(async ({ request, user }) => {
     const result = await translateText(agentInput);
 
     await logGeneration({
-        agentId: 'translate-text',
-        userId: user.id,
-        input: agentInput,
-        output: result,
+      agentId: 'translate-text',
+      userId: user.id,
+      input: agentInput,
+      output: result,
+      creditCost: 1
     });
 
     const cleanedTranslatedText = result.translatedText.replace(/---.*?---/g, '');

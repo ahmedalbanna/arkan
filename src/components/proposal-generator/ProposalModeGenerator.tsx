@@ -137,19 +137,25 @@ export function ProposalModeGenerator() {
                 </div>
             )}
 
-            {isPanelCollapsed && (
-                <div className="hidden lg:block lg:col-span-1 lg:sticky lg:top-24">
-                     <Button
-                        variant="secondary"
-                        className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
-                        onClick={() => setIsPanelCollapsed(false)}
-                    >
-                        <PanelRightOpen className="h-5 w-5 mb-2" />
-                        {t('builder.proposalGenerator.toolsTitle')}
-                    </Button>
+
+
+                <div className="hidden lg:block lg:col-auto lg:sticky lg:top-24 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300 max-w-min">
+
+                    <div className='flex flex-col h-full justify-between items-start'>
+                        <Button
+                            variant="secondary"
+                            className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
+                            onClick={() => setIsPanelCollapsed(false)}
+                        >
+                            <PanelRightOpen className="h-5 w-5 mb-2" />
+                            {t('builder.proposalGenerator.toolsTitle')}
+                        </Button>
+                    </div>
+
                 </div>
-            )}
-            <div className={cn("lg:col-span-4 lg:sticky lg:top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
+
+
+            <div className={cn("lg:col-span-3 lg:sticky lg:top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
                 <ProposalGenerationTools
                     isDisabled={isBusy}
                     isGenerating={generationMutation.isPending}
@@ -180,29 +186,7 @@ export function ProposalModeGenerator() {
                             </div>
                         </div>
                     </CardHeader>
-                    <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-                         <ScrollArea className={isMobile ? "h-[calc(100vh)]" : "h-[calc(100vh)]"}>
-                            <div className={isMobile ? "" : "scale-animation"} style={{ transform: isMobile ? 'none' : `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
-                                {proposal ? (
-                                    <Suspense fallback={<ProposalSkeleton/>}>
-                                        <FormattedProposalView
-                                            proposal={ProjectProposalSchema.parse(proposal)}
-                                            //onUpdate={handleProposalUpdate}
-                                            currentPage={currentPage}
-                                        />
-                                    </Suspense>
-                                ) : (
-                                    <div className="flex items-center justify-center h-full min-h-[400px]">
-                                        <div className="text-center text-muted-foreground p-8">
-                                            <FileText className="w-16 h-16 mx-auto mb-4" />
-                                            <p>{t('builder.proposalGenerator.emptyState')}</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </ScrollArea>
-                    </div>
-                     {proposal && totalPages > 1 && (
+                    {proposal && totalPages > 1 && (
                         <div className="flex justify-center items-center p-2 border-t bg-background rounded-b-lg" dir={locale === 'ar' ? 'ltr' : 'rtl'}>
                             <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
                                 <ChevronLeft className="h-4 w-4 mr-2" />
@@ -223,6 +207,29 @@ export function ProposalModeGenerator() {
                             </div>
                         </div>
                     )}
+                    <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
+                        <ScrollArea className={isMobile ? "h-[calc(100vh)]" : "h-[calc(100vh)]"}>
+                            <div className={isMobile ? "" : "scale-animation"} style={{ transform: isMobile ? 'none' : `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
+                                {proposal ? (
+                                    <Suspense fallback={<ProposalSkeleton />}>
+                                        <FormattedProposalView
+                                            proposal={ProjectProposalSchema.parse(proposal)}
+                                            //onUpdate={handleProposalUpdate}
+                                            currentPage={currentPage}
+                                        />
+                                    </Suspense>
+                                ) : (
+                                    <div className="flex items-center justify-center h-full min-h-[400px]">
+                                        <div className="text-center text-muted-foreground p-8">
+                                            <FileText className="w-16 h-16 mx-auto mb-4" />
+                                            <p>{t('builder.proposalGenerator.emptyState')}</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </ScrollArea>
+                    </div>
+
                 </div>
             </div>
         </div>

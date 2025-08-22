@@ -266,8 +266,8 @@ export function PresentationTemplateManager() {
         queryKey: templateKeys.presentations(),
         queryFn: async () => {
             if (!firebaseUser) return [];
-            const { fetchPresentationTemplates } = await import('@/services/template-service');
-            return fetchPresentationTemplates();
+            const { fetchPresentationTemplates } = await import('@/services/template-service'); // Fix: Expected 1 arguments, but got 0.
+            return fetchPresentationTemplates(await firebaseUser.getIdToken());
         },
         enabled: !!firebaseUser,
     });

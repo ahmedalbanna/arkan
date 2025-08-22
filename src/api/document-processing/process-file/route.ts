@@ -54,12 +54,13 @@ export const POST = withAuth(async ({ request, user }) => {
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
         }
-        
+
         await logGeneration({
             agentId,
             userId: user.id,
             input: { fileName: file.name, fileType: file.type }, // Don't log the full data URI
             output: { markdownLength: markdownContent.length },
+            creditCost: 1
         });
 
         return createApiResponse({ markdown: markdownContent }, 200);

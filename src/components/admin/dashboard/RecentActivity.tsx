@@ -15,7 +15,7 @@ const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: fal
 
 interface Activity {
     userId: string;
-    userName: string;
+    userName?: string;
     agentId: string;
     createdAt: string;
     id: string;
@@ -35,16 +35,17 @@ function LogDetailView({ log }: { log: Activity }) {
             <DialogHeader>
                 <DialogTitle>Generation Details</DialogTitle>
                 <DialogDescription>
-                    Agent: {log.agentId} | User: {log.userName} ({log.userId})
+                    Agent: {log.agentId}
+                    {log.userName && ` | User: ${log.userName} (${log.userId})`}
                 </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh]">
                 <div className="space-y-2">
                     <h4 className="font-semibold">Input</h4>
                     <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.input} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                        <ReactJson
+                            src={log.input}
+                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                             collapsed={2}
                             displayDataTypes={false}
                             name={false}
@@ -54,9 +55,9 @@ function LogDetailView({ log }: { log: Activity }) {
                 <div className="space-y-2">
                     <h4 className="font-semibold">Output</h4>
                      <ScrollArea className="h-full max-h-[60vh] border rounded-md">
-                        <ReactJson 
-                            src={log.output} 
-                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'} 
+                        <ReactJson
+                            src={log.output}
+                            theme={resolvedTheme === 'dark' ? 'monokai' : 'rjv-default'}
                             collapsed={2}
                             displayDataTypes={false}
                             name={false}
@@ -81,11 +82,13 @@ export function RecentActivity({ data }: RecentActivityProps) {
                     <Dialog key={activity.id}>
                         <DialogTrigger asChild>
                             <div className="flex items-center gap-4 cursor-pointer hover:bg-muted p-2 rounded-md">
-                                <Avatar className="h-9 w-9">
-                                    <AvatarFallback>{activity.userName.charAt(0)}</AvatarFallback>
+                                <Avatar className="h-9 w-9 hidden sm:flex">
+                                    <AvatarFallback>{activity.userName ? activity.userName.charAt(0) : 'Y'}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid gap-1 text-sm">
-                                    <p className="font-semibold">{t('adminDashboard.generationBy')} <span className="text-muted-foreground">{activity.userName}</span></p>
+                                    {activity.userName && (
+                                        <p className="font-semibold">{t('adminDashboard.generationBy')} <span className="text-muted-foreground">{activity.userName}</span></p>
+                                    )}
                                     <p className="text-muted-foreground">{t('adminDashboard.usedAgent')} <span className="font-semibold">{activity.agentId}</span></p>
                                 </div>
                                 <p className="ml-auto text-xs text-muted-foreground">

@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { FactCheckVariables, FactCheckOutput } from './writing-tools-service';
+import { FactCheckOutput } from '@/ai/schemas';
+import type { FactCheckVariables } from './writing-tools-service';
 
 interface FactCheckApiVariables extends FactCheckVariables {
     token: string;

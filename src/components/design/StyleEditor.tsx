@@ -5,9 +5,8 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { useDocxStyles } from '@/hooks/use-docx-styles';
 import { Switch } from '../ui/switch';
-import { TemplateKey } from '@/lib/types';
+import type { TemplateKey } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
@@ -16,20 +15,19 @@ interface StyleEditorProps {
     heading: string;
     styleKey: 'document' | 'heading1' | 'heading2' | 'heading3';
     templateKey: TemplateKey;
+    styles: any;
+    onChange: (templateKey: TemplateKey, path: string, value: any) => void;
 }
 
-export function StyleEditor({ heading, styleKey, templateKey }: StyleEditorProps) {
-    const { templates, updateStyle } = useDocxStyles();
+export function StyleEditor({ heading, styleKey, templateKey, styles: templateStyles, onChange }: StyleEditorProps) {
     const { t } = useLocalization();
 
-    const styles = templates?.[templateKey]?.styles?.default?.[styleKey]?.run;
+    const styles = templateStyles?.default?.[styleKey]?.run;
 
     if (!styles) return null;
 
     const handleStyleChange = (path: string, value: any) => {
-        if (templateKey) {
-            updateStyle(templateKey, `${styleKey}.run.${path}`, value);
-        }
+        onChange(templateKey, `${styleKey}.run.${path}`, value);
     }
 
     return (

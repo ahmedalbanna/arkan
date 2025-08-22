@@ -5,9 +5,8 @@
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
-import type { UserProfile, LoginCredentials } from '@/lib/types';
+import type { UserProfile } from '@/lib/types';
 import type { PricingPlan } from '@/components/PricingCard';
-import type { SignupCredentials } from "@/components/SignupForm";
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseConfig";
@@ -16,8 +15,8 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult,
 } from "firebase/auth";
-import { 
-  fetchUsers as fetchUsersApi, 
+import {
+  fetchUsers as fetchUsersApi,
   subscribeToUserProfile,
   createUserService,
   loginWithEmail,
@@ -45,7 +44,7 @@ export function useUsers() {
     return useInfiniteQuery<UserListResponse>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
-            const token = await getAuthenticatedToken(firebaseUser); 
+            const token = await getAuthenticatedToken(firebaseUser);
             return fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
         },
         initialPageParam: undefined,
