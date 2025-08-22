@@ -1,3 +1,4 @@
+
 This document outlines the API endpoints responsible for managing AI agent configurations. These endpoints are protected and can only be accessed by admin users.
 
 ### GET `/api/admin/agents`
@@ -17,3 +18,4 @@ This document outlines the API endpoints responsible for managing AI agent confi
 -   **Payload**: Accepts a JSON body with the fields to be updated, such as `name`, `prompt`, and `isEnabled`. The Zod schema ensures the payload is valid.
 -   **Logic**: It intelligently handles prompt updates. If the agent has a complex prompt object (with a `base` and `guidelines`), it only updates the `base` property. If it's a simple string prompt, it updates the whole string.
 -   **Usage**: This is the endpoint called by the `useUpdateAgent` mutation hook when an admin saves changes in the `AgentEditor`.
+

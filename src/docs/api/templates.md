@@ -50,3 +50,4 @@ The application uses a hierarchical structure in Firestore to store templates:
     3.  Uploads the resulting image to Firebase Storage.
     4.  Updates the `imageUrl` field in the corresponding template document in Firestore with the new public URL.
 -   **Usage**: Called by the `useRefreshTemplateImage` hooks when an admin clicks the refresh button on a template card.
+

@@ -21,3 +21,4 @@ This document outlines the API endpoint responsible for fetching statistics for 
 4.  It executes multiple Firestore queries in parallel.
 5.  It formats the results into a `DashboardStats` object and returns it as JSON.
 6.  The `Dashboard` component renders the statistics in various stat cards and charts.
+
