@@ -13,10 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
-import { fetchUsers, type UserListResponse } from '@/services/user-service';
+import { ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
+import { useUsers } from '@/hooks/use-user';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 import { CreateUserDialog } from './users/CreateUserDialog';
@@ -37,17 +35,7 @@ export default function UserManagementConsole() {
     isFetching,
     isFetchingNextPage,
     status
-  } = useInfiniteQuery<UserListResponse>({
-      queryKey: userKeys.lists(),
-      queryFn: async ({ pageParam }) => {
-          if (!firebaseUser) throw new Error("User not authenticated");
-          const token = await firebaseUser.getIdToken();
-          return fetchUsers(USERS_PER_PAGE, pageParam as string, token);
-      },
-      initialPageParam: undefined as string | undefined,
-      getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-      enabled: !!firebaseUser
-  });
+  } = useUsers();
 
   const allUsers = data?.pages.flatMap(page => page.users) ?? [];
 
