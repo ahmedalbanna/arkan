@@ -8,9 +8,25 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import {
     createTeam as createTeamApi,
-    inviteMember as inviteMemberApi
+    inviteMember as inviteMemberApi,
+    fetchUserTeams,
 } from '@/services/team-service';
 import type { Team, TeamWithMembers } from '@/lib/types';
+
+
+export function useTeams() {
+    const { firebaseUser } = useAuth();
+    return useQuery<TeamWithMembers[]>({
+        queryKey: teamKeys.lists(),
+        queryFn: async () => {
+            if (!firebaseUser) throw new Error("User not authenticated");
+            const token = await firebaseUser.getIdToken();
+            return fetchUserTeams(token);
+        },
+        enabled: !!firebaseUser,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+}
 
 
 export function useCreateTeam() {

@@ -159,7 +159,7 @@ export async function deductUserCredits(userId: string, creditsToDeduct: number)
         const currentCredits = userDoc.data()?.credits ?? 0;
 
         if (currentCredits < creditsToDeduct) {
-            throw new Error("Insufficient credits. Please purchase more credits to continue.");
+            throw { status: 402, message: "Insufficient credits. Please purchase more credits to continue." };
         }
 
         const newBalance = currentCredits - creditsToDeduct;
@@ -245,8 +245,12 @@ export async function getUserTeams(userId: string) {
         return { ...teamData, members };
     });
 
-    const teams = await Promise.all(teamPromises);
-    return teams.filter(team => team !== null);
+    const teams = (await Promise.all(teamPromises)).filter(Boolean);
+    
+    // Sort teams by most recent activity (if a field for that exists) or creation date
+    teams.sort((a, b) => new Date(b!.createdAt).getTime() - new Date(a!.createdAt).getTime());
+
+    return teams as (Team & { members: TeamMember[] })[];
 }
 
 

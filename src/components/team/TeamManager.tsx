@@ -1,11 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { teamKeys } from '@/lib/query-keys';
-import { fetchUserTeams, type TeamWithMembers } from '@/services/team-service';
+import { useTeams } from '@/hooks/use-teams';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Accordion } from '@/components/ui/accordion';
 import { TeamCard } from './TeamCard';
@@ -23,20 +20,10 @@ function TeamManagerSkeleton() {
 }
 
 export default function TeamManager() {
-    const { firebaseUser, isLoading: isAuthLoading } = useAuth();
     const { t } = useLocalization();
+    const { data: teams, isLoading, isError, error } = useTeams();
 
-    const { data: teams, isLoading, isError, error } = useQuery<TeamWithMembers[]>({
-        queryKey: teamKeys.lists(),
-        queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchUserTeams(token);
-        },
-        enabled: !!firebaseUser,
-    });
-    
-    if (isAuthLoading || isLoading) {
+    if (isLoading) {
         return <TeamManagerSkeleton />;
     }
 
