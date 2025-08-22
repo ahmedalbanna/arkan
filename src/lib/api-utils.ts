@@ -53,7 +53,7 @@ export const withAuth = (handler: ApiHandler, options: ApiHandlerOptions = {}) =
       return handler({ request, user, token, params });
     } catch (error: any) {
       if(error.code === 'auth/id-token-expired') {
-        return handleApiError({ message: 'Token expired, please log in again.' }, 401);
+        return handleApiError({ message: 'Your session has expired. Please log in again.' }, 401);
       }
        if (error.status && error.message) {
          return handleApiError({ message: error.message }, error.status);
@@ -86,12 +86,17 @@ export const handleApiError = (error: any, defaultStatus = 500) => {
               message = 'Your session has expired. Please log in again.';
               break;
           case 'auth/user-not-found':
-              message = 'User account not found.';
-              break;
+          case 'auth/wrong-password':
           case 'auth/invalid-credential':
-              message = 'The credentials provided are invalid.';
+          case 'auth/invalid-email':
+              message = 'Invalid email or password.';
               break;
-          // Add other common error codes as needed
+          case 'auth/email-already-exists':
+              message = 'An account with this email address already exists.';
+              break;
+          case 'auth/weak-password':
+              message = 'The password is too weak. It must be at least 6 characters long.';
+              break;
       }
   }
 

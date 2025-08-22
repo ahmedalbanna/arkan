@@ -1,4 +1,5 @@
 
+
       
 'use client';
 
@@ -144,7 +145,7 @@ export async function serviceLogoutUser() {
   return response.json();
 }
 
-export async function serviceSignupUser(credentials: SignupCredentials) {
+export async function signupUser(credentials: SignupCredentials) {
   const response = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -216,5 +217,3 @@ export async function purchaseCreditsApi(
   }
   return response.json();
 }
-
-    

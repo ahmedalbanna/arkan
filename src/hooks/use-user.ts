@@ -1,4 +1,5 @@
 
+
       
 // code explantion in docs/hooks/use-user.md
 
@@ -25,7 +26,7 @@ import {
   loginWithEmail,
   loginWithGoogle,
   serviceLogoutUser,
-  serviceSignupUser,
+  signupUser as serviceSignupUser,
   fetchUserProfileApi,
   sendPasswordResetEmailApi,
   purchaseCreditsApi,
@@ -118,11 +119,9 @@ export function useLogin() {
       }
     },
     onError: (error: Error) => {
-      // General toast for unexpected errors
-      if (!error.message.includes("Invalid email or password")) {
-        handleErrorUtility(error, "Login Error");
-      }
-      // The component handles displaying the specific error message
+      // The component will handle displaying the specific error message
+      // No general toast here, as the form handles the error display.
+      console.error("Login mutation error:", error);
     },
   });
 }
@@ -345,5 +344,3 @@ export function usePurchaseCredits() {
     },
   });
 }
-
-    
