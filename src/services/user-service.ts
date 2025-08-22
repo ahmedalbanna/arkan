@@ -1,5 +1,6 @@
 
 
+
       
 'use client';
 
@@ -145,7 +146,7 @@ export async function serviceLogoutUser() {
   return response.json();
 }
 
-export async function signupUser(credentials: SignupCredentials) {
+export async function serviceSignupUser(credentials: SignupCredentials) {
   const response = await fetch("/api/auth/signup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -154,7 +155,7 @@ export async function signupUser(credentials: SignupCredentials) {
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw errorData;
+    throw errorData; // Throw the structured error from the API
   }
   return response.json();
 }

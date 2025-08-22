@@ -1,5 +1,6 @@
 
 
+
       
 // code explantion in docs/hooks/use-user.md
 
@@ -26,7 +27,7 @@ import {
   loginWithEmail,
   loginWithGoogle,
   serviceLogoutUser,
-  signupUser as serviceSignupUser,
+  serviceSignupUser,
   fetchUserProfileApi,
   sendPasswordResetEmailApi,
   purchaseCreditsApi,
@@ -119,8 +120,7 @@ export function useLogin() {
       }
     },
     onError: (error: Error) => {
-      // The component will handle displaying the specific error message
-      // No general toast here, as the form handles the error display.
+      // Let the component handle setting form errors
       console.error("Login mutation error:", error);
     },
   });
@@ -173,7 +173,7 @@ export function useLogout() {
   });
 }
 
-export function useSignup() {
+export function useSignup(options?: { onError?: (error: any) => void }) {
   const router = useRouter();
 
   return useMutation({
@@ -188,9 +188,11 @@ export function useSignup() {
     },
     onError: (error: any) => {
       console.error("Signup mutation error:", error);
-      // Let the form handle field-specific errors.
-      // Show a toast only for general form-level errors.
-      if (error?.message) {
+      // The component's onError callback will handle form-specific errors.
+      if (options?.onError) {
+        options.onError(error);
+      } else {
+        // Fallback for general errors if no specific handler is provided
         handleErrorUtility(error, "Signup Failed");
       }
     },

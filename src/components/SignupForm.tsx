@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useSignup, useGoogleSignIn } from '@/hooks/use-user';
+import type { SignupCredentials } from "@/lib/types";
 import { useToast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
 
@@ -23,15 +24,12 @@ const formSchema = z.object({
   password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
 });
 
-export type SignupCredentials = z.infer<typeof formSchema>;
 
 export default function SignupForm() {
   const router = useRouter();
   const { t } = useLocalization();
   const { toast } = useToast();
-  const signupMutation = useSignup();
-  const googleSignInMutation = useGoogleSignIn();
-
+  
   const form = useForm<SignupCredentials>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -41,41 +39,32 @@ export default function SignupForm() {
     },
   });
 
-  useEffect(() => {
-    const errorData = signupMutation.error as any;
-    if (errorData?.error) {
-      const fieldErrors = errorData.error;
-      if (fieldErrors.name) form.setError('name', { message: fieldErrors.name[0] });
-      if (fieldErrors.email) form.setError('email', { message: fieldErrors.email[0] });
-      if (fieldErrors.password) form.setError('password', { message: fieldErrors.password[0] });
-
-      if (fieldErrors._form) {
-        toast({
-          title: t('signup.errorToastTitle'),
-          description: fieldErrors._form[0],
-          variant: 'destructive',
+  const signupMutation = useSignup({
+    onError: (error: any) => {
+      // The useSignup hook now handles toast for general errors.
+      // We only need to set form-specific errors here.
+      if (error?.errors) {
+        Object.keys(error.errors).forEach((key) => {
+          form.setError(key as keyof SignupCredentials, {
+            type: 'server',
+            message: error.errors[key][0],
+          });
         });
       }
     }
-  }, [signupMutation.error, form, toast, t]);
+  });
+  
+  const googleSignInMutation = useGoogleSignIn();
 
   function onSubmit(values: SignupCredentials) {
     signupMutation.mutate(values);
   }
 
   const isPending = signupMutation.isPending || googleSignInMutation.isPending;
-  const formLevelError = (signupMutation.error as any)?.error?._form?.[0];
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-        {formLevelError && (
-            <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>{t('signup.errorToastTitle')}</AlertTitle>
-                <AlertDescription>{formLevelError}</AlertDescription>
-            </Alert>
-        )}
         <FormField
           control={form.control}
           name="name"
