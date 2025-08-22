@@ -58,7 +58,7 @@ function LogDetailView({ log }: { log: GenerationLog }) {
             <DialogHeader>
                 <DialogTitle>Generation Details</DialogTitle>
                 <DialogDescription>
-                    Agent: {log.agentId} | User: {log.userId}
+                    Agent: {log.agentId} | User: {log.userName} ({log.userId})
                 </DialogDescription>
             </DialogHeader>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh]">
@@ -187,7 +187,7 @@ export default function GenerationLogViewer() {
                                 allLogs.map((log) => (
                                     <TableRow key={log.id}>
                                         <TableCell className="font-medium">{log.agentId}</TableCell>
-                                        <TableCell className="truncate max-w-[200px]">{log.userId}</TableCell>
+                                        <TableCell className="truncate max-w-[200px]">{log.userName}</TableCell>
                                         <TableCell>
                                             <span title={new Date(log.createdAt).toLocaleString()}>
                                                 {formatDistanceToNow(new Date(log.createdAt), { addSuffix: true })}
@@ -218,9 +218,7 @@ export default function GenerationLogViewer() {
                         onClick={() => fetchNextPage()}
                         disabled={!hasNextPage || isFetchingNextPage}
                     >
-                        {isFetchingNextPage ? (
-                            <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                        ) : null}
+                        {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
                         {isFetchingNextPage ? t('manageGenerations.loadingMore') : t('manageGenerations.loadMore')}
                     </Button>
                 </div>

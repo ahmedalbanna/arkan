@@ -5,6 +5,7 @@ export interface GenerationLog {
     id: string;
     agentId: string;
     userId: string;
+    userName: string; // Add userName
     input: any;
     output: any;
     createdAt: string;

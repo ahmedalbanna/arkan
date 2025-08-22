@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 
+
 interface Activity {
     userId: string;
     userName: string;

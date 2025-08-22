@@ -1,7 +1,10 @@
 
+'use server';
+
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
+import { getUserProfile } from '@/lib/db/queries';
 
 const getLogsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(15),
@@ -41,7 +44,17 @@ export const GET = withAuth(async ({ request }) => {
         
         const snapshot = await query.limit(limit + 1).get(); // Fetch one extra to check for next page
         
-        const logs = snapshot.docs.slice(0, limit).map(doc => ({ id: doc.id, ...doc.data() }));
+        const logsPromises = snapshot.docs.slice(0, limit).map(async (doc) => {
+            const data = doc.data();
+            const userProfile = await getUserProfile(data.userId);
+            return {
+                id: doc.id,
+                userName: userProfile?.name || 'Unknown User', // Add user's name
+                ...data
+            };
+        });
+
+        const logs = await Promise.all(logsPromises);
         const hasNextPage = snapshot.docs.length > limit;
 
         return createApiResponse({
