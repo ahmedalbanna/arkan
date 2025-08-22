@@ -1,4 +1,5 @@
 
+      
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -29,6 +30,7 @@ import {
   sendPasswordResetEmailApi,
   purchaseCreditsApi,
   type UserListResponse,
+  fetchAdmins as fetchAdminsApi,
 } from "@/services/user-service";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
@@ -45,17 +47,23 @@ export function useUsers() {
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser); 
-            // Ensure pageParam is treated as string | undefined
-            if (typeof pageParam !== 'string') return fetchUsersApi(USERS_PER_PAGE, undefined, token);
-            return fetchUsersApi(USERS_PER_PAGE, pageParam, token);
+            return fetchUsersApi(USERS_PER_PAGE, pageParam as string | undefined, token);
         },
         initialPageParam: undefined,
-        getNextPageParam: (lastPage) => {
-            if (!lastPage.hasNextPage) return undefined;
-            return lastPage.lastVisibleId;
-        },
+        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
         enabled: !!firebaseUser
     });
+}
+
+export function useAdmins() {
+  return useQuery<UserProfile[]>({
+    queryKey: userKeys.lists(),
+    queryFn: fetchAdminsApi,
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    meta: {
+      onError: (error: Error) => handleErrorUtility(error, "Failed to fetch administrators"),
+    },
+  });
 }
 
 export function useUserProfile(userId: string) {
@@ -337,3 +345,5 @@ export function usePurchaseCredits() {
     },
   });
 }
+
+    

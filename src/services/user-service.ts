@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import type { UserProfile, PricingPlan } from '@/lib/types';
@@ -20,6 +21,19 @@ export interface UserListResponse {
     users: UserProfile[];
     hasNextPage: boolean;
     lastVisibleId: string | null;
+}
+
+/**
+ * Fetches a list of all administrators.
+ * This is a public endpoint used to initiate support chats.
+ * @returns A promise that resolves to an array of admin UserProfile objects.
+ */
+export async function fetchAdmins(): Promise<UserProfile[]> {
+    const response = await fetch('/api/admins');
+    if (!response.ok) {
+        throw new Error('Failed to fetch admins');
+    }
+    return response.json();
 }
 
 /**
@@ -202,3 +216,5 @@ export async function purchaseCreditsApi(
   }
   return response.json();
 }
+
+    

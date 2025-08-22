@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { Activity } from "@/components/admin/dashboard/RecentActivity";
@@ -23,3 +24,5 @@ export async function fetchDashboardStats(token: string): Promise<DashboardStats
     }
     return await response.json();
 }
+
+    

@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { useState } from 'react';
@@ -14,9 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { userKeys } from '@/lib/query-keys';
-import { fetchUsers, type UserListResponse } from '@/services/user-service';
+import { useUsers } from '@/hooks/use-user';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAuth } from '@/context/AuthContext';
 import { CreateUserDialog } from '@/components/admin/users/CreateUserDialog';
@@ -37,17 +36,7 @@ export default function UserManagementConsole() {
     isFetching,
     isFetchingNextPage,
     status
-  } = useInfiniteQuery<UserListResponse>({
-      queryKey: userKeys.lists(),
-      queryFn: async ({ pageParam }) => {
-          if (!firebaseUser) throw new Error("User not authenticated");
-          const token = await firebaseUser.getIdToken();
-          return fetchUsers(USERS_PER_PAGE, pageParam, token);
-      },
-      initialPageParam: undefined,
-      getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-      enabled: !!firebaseUser
-  });
+  } = useUsers();
 
   const allUsers = data?.pages.flatMap(page => page.users) ?? [];
 
@@ -81,14 +70,8 @@ export default function UserManagementConsole() {
                         onClick={() => fetchNextPage()}
                         disabled={!hasNextPage || isFetchingNextPage}
                     >
-                        {isFetchingNextPage ? (
-                            <>
-                                <Loader2 className="me-2 h-4 w-4 animate-spin" />
-                                <span>Loading more...</span>
-                            </>
-                        ) : (
-                            <span>Load More</span>
-                        )}
+                        {isFetchingNextPage ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
+                        {isFetchingNextPage ? 'Loading more...' : 'Load More'}
                     </Button>
                 </div>
             </>
@@ -97,3 +80,5 @@ export default function UserManagementConsole() {
     </Card>
   );
 }
+
+    

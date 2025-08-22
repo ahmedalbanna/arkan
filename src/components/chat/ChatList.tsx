@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { useState } from 'react';
@@ -18,7 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useRouter } from 'next/navigation';
 import type { ChatSession, ChatMessage, AgentChatSession, UserProfile } from '@/lib/types';
-import { fetchUsers, type UserListResponse } from '@/services/user-service';
+import { useUsers } from '@/hooks/use-user';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 
@@ -42,16 +43,7 @@ function NewChatDialog() {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage
-    } = useInfiniteQuery<UserListResponse>({
-        queryKey: userKeys.lists(),
-        queryFn: async ({ pageParam }) => {
-            const token = await firebaseUser!.getIdToken();
-            return fetchUsers(50, pageParam as string, token); // Fetch more users for the command list
-        },
-        initialPageParam: undefined,
-        getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-        enabled: !!firebaseUser && open // Only fetch when the dialog is open
-    });
+    } = useUsers();
 
     const allUsers = data?.pages.flatMap(page => page.users) ?? [];
 
@@ -67,7 +59,7 @@ function NewChatDialog() {
                 participantIds: [firebaseUser.uid, user.id],
                 participantNames: {
                     [firebaseUser.uid]: adminProfile.name || 'Admin',
-                    [user.id]: user.name,
+                    [user.id]: user.name
                 },
                 title: `Chat with ${user.name}`
             }, token);
@@ -218,3 +210,5 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
     </div>
   );
 }
+
+    

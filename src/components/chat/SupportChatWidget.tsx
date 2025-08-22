@@ -1,4 +1,5 @@
 
+      
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -26,6 +27,7 @@ import {
 import type { UserProfile } from '@/lib/types';
 import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
 import { Badge } from '../ui/badge';
+import { useAdmins } from '@/hooks/use-user';
 
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {
@@ -54,25 +56,7 @@ function Message({ role, content }: { role: 'user' | 'assistant', content: strin
 }
 
 function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProfile) => void }) {
-    const [admins, setAdmins] = useState<UserProfile[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchAdmins() {
-            try {
-                const response = await fetch('/api/admins');
-                if (!response.ok) throw new Error('Failed to fetch admins.');
-                const data = await response.json();
-                setAdmins(data);
-            } catch (error) {
-                console.error(error);
-                toast({ title: 'Error', description: 'Could not load available admins.', variant: 'destructive' });
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchAdmins();
-    }, []);
+    const { data: admins, isLoading } = useAdmins();
 
     return (
          <div className="p-4">
@@ -82,7 +66,7 @@ function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProf
             ) : (
                 <ScrollArea className="h-[450px]">
                     <div className="space-y-2">
-                        {admins.map(admin => (
+                        {admins?.map(admin => (
                             <Button key={admin.id} variant="ghost" className="w-full justify-start h-auto" onClick={() => onSelectAdmin(admin)}>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
@@ -351,3 +335,5 @@ export default function SupportChatWidget() {
       </>
     );
 }
+
+    
