@@ -12,7 +12,7 @@ import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
-  fetchAgents,
+  fetchAgents as fetchAgentsApi,
   fetchAgent as fetchAgentApi,
   updateAgent as updateAgentApi,
   createAgent as createAgentApi,
@@ -107,7 +107,7 @@ export function useAgents() {
       // Admins fetch from the API to get the latest editable data
       if (isAdmin) {
           const token = await getAuthenticatedToken(firebaseUser);
-          return fetchAgents(token);
+          return fetchAgentsApi(token);
       }
       // Regular users get the static default agent configurations
       return Promise.resolve(defaultAgents);

@@ -63,6 +63,7 @@ const agentEditorSchema = z.object({
   model: z.string().optional(),
   toolIds: z.array(z.string()).optional(),
   knowledge: z.array(agentKnowledgeSourceSchema).optional(),
+  isEnabled: z.boolean().optional(),
 });
 
 export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
