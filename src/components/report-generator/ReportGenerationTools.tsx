@@ -21,6 +21,7 @@ import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
 import { EvaluationTools } from '../EvaluationTools';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { GuidelineEditor } from '../generate/GuidelineEditor';
 import { ContextSelector } from '../generate/ContextSelector';
@@ -154,6 +155,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
+    const { diagrams } = useDiagramStore();
 
     const {
         sections,
@@ -236,7 +238,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                 proposal,
                 projectPlan,
                 existingSections: sections,
-                existingDiagrams: useBuilderStore.getState().diagrams,
+                existingDiagrams: diagrams,
                 sectionsToGenerate,
                 externalContext,
             };
@@ -267,7 +269,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                 proposal,
                 projectPlan,
                 existingSections: sections,
-                existingDiagrams: useBuilderStore.getState().diagrams,
+                existingDiagrams: diagrams,
                 externalContext,
                 generationPlan: plan.configs,
             };

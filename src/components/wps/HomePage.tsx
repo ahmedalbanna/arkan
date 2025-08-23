@@ -59,7 +59,7 @@ export default function HomePage() {
             return;
         }
     }
-    
+
     if(projectId) {
         const existingTab = tabs.find(tab => tab.projectId === projectId);
         if(existingTab) {
@@ -96,7 +96,7 @@ export default function HomePage() {
     setActiveTab(newTab.id);
     setNextId(nextId + 1);
   };
-  
+
   const handleNavClick = (itemName: string) => {
       setActiveNavItem(itemName);
 
@@ -119,7 +119,7 @@ export default function HomePage() {
     if (tabIndex === -1) return;
 
     let newTabs = tabs.filter(tab => tab.id !== id);
-    
+
     if (newTabs.length === 0) {
         const homeTab = { id: 1, title: 'Home', type: 'home' as const };
         newTabs = [homeTab];
@@ -138,18 +138,18 @@ export default function HomePage() {
   };
 
   const handleOpenProjectInNewTab = (project: any) => {
-    newSession(); 
+    newSession();
     loadState(project);
     addTab('word', project.name || 'Untitled Project', project.id);
   }
 
   const currentTab = tabs.find(t => t.id === activeTab);
-  
+
   const renderMainContent = () => {
     if (!currentTab) return null;
 
     if (['word', 'powerpoint', 'excel', 'pdf'].includes(currentTab.type)) {
-      return <EditorPage fileType={currentTab.type as 'word' | 'powerpoint' | 'excel' | 'pdf'} />;
+ return <EditorPage />;
     }
 
     if (currentTab.type === 'new') {
@@ -181,7 +181,7 @@ export default function HomePage() {
           return <PdfPageContent addTab={addTab}/>;
         }
     }
-    
+
     return null;
   }
 

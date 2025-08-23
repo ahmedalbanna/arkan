@@ -10,7 +10,10 @@ const MOCK_PROJECT = {
   userId: 'user-abc',
   name: 'Test Project',
   projectIdea: 'A test project idea.',
-  proposal: { title: 'Test Proposal', objective: 'To test.' },
+  proposal: { title: 'Test Proposal', objective: 'To test.', category: 'Software', methodology: 'Agile', timeline: { startDate: '2023-01-01', endDate: '2023-01-31', phases: [] }, budget: { totalAmount: 0, currency: 'USD', breakdown: [] }, expected_outcome: [], success_criteria: [], evaluation: '', stakeholders: [], risks: [] },
+  projectPlan: { phases: [] },
+  sections: {},
+  diagrams: {},
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
 };
@@ -40,7 +43,7 @@ describe('Project Service API Calls', () => {
   describe('createProject', () => {
     it('should create a project successfully', async () => {
       fetchMock.mockResponseOnce(JSON.stringify(MOCK_PROJECT));
-      const newProject = await createProject(MOCK_PROJECT, MOCK_TOKEN);
+      const newProject = await createProject(MOCK_PROJECT as any, MOCK_TOKEN);
       expect(newProject).toEqual(MOCK_PROJECT);
       expect(fetchMock.mock.calls[0][0]).toBe('/api/projects');
       expect(fetchMock.mock.calls[0][1]?.method).toBe('POST');

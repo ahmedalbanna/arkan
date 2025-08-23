@@ -23,7 +23,7 @@ interface ReportResultsProps {
 }
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-12 mx-auto" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+    <div className="a4-page-max bg-background shadow-lg p-8 md:p-12">
         <h2 className="text-2xl font-bold font-headline text-primary border-b pb-2 mb-6">{title}</h2>
         {children}
     </div>
@@ -84,7 +84,7 @@ export const ReportResults = ({ onSectionUpdate }: ReportResultsProps) => {
 
   return (
      <div className="h-full bg-slate-200 dark:bg-slate-900/50 p-4 gap-4 rounded-lg flex flex-col">
-      <div className="flex w-full gap-1 rtl:flex-row-reverse justify-center items-center p-4 border-t bg-background rounded-b-lg mx-auto" style={{ maxWidth: '210mm'}}>
+      <div className="flex w-full gap-1 rtl:flex-row-reverse justify-center items-center p-4 border-t bg-background rounded-b-lg mx-auto max-w-a4">
         <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
           <ChevronLeft className="h-4 w-4 mr-2" />
           {t('builder.presentationGenerator.prev')}

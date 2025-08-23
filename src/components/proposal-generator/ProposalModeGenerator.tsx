@@ -55,7 +55,7 @@ function ProposalSkeleton() {
 }
 
 const A4Page = ({ children, title }: { children: React.ReactNode, title?: string }) => (
-    <div className="bg-background shadow-lg p-8 md:p-16 mx-auto my-4" style={{ width: '210mm', minHeight: '297mm' }}>
+    <div className="a4-page bg-background shadow-lg p-8 md:p-16 my-4">
         {children}
     </div>
 );
@@ -209,7 +209,7 @@ export function ProposalModeGenerator() {
                     )}
                     <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
                         <ScrollArea className={isMobile ? "h-[calc(100vh)]" : "h-[calc(100vh)]"}>
-                            <div className={isMobile ? "" : "scale-animation"} style={{ transform: isMobile ? 'none' : `scale(${zoom})`, transformOrigin: 'top center', transition: 'transform 0.2s ease-out' }}>
+                            <div className={isMobile ? "" : "zoomable-content"} style={{ '--zoom-scale': isMobile ? 1 : zoom } as React.CSSProperties}>
                                 {proposal ? (
                                     <Suspense fallback={<ProposalSkeleton />}>
                                         <FormattedProposalView

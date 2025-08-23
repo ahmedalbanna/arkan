@@ -53,13 +53,13 @@ export default function HomePageContent({ featuredProjects }: { featuredProjects
 
                     <p
                       className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8 animate-fade-in-up"
-                      style={{ animationDelay: '2.6s' }}
+                        style={{ '--animation-delay': '2.6s' } as React.CSSProperties}
                     >
                         {t('home.heroSubtitle')}
                     </p>
                     <div
                       className="flex flex-col sm:flex-row justify-center items-center gap-4 animate-fade-in-up"
-                      style={{ animationDelay: '2.7s' }}
+                        style={{ '--animation-delay': '2.7s' } as React.CSSProperties}
                     >
                         <Button asChild size="lg" className="font-headline w-full sm:w-auto">
                             <Link href={firebaseUser ? "/generate" : "/login"}>

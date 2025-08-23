@@ -25,7 +25,25 @@ interface HandwritingOptions {
     background?: string;
 }
 
-const defaultOptions: Required<HandwritingOptions> = {
+interface FullHandwritingOptions {
+    font: {
+        family: string;
+        size: number;
+        color: string;
+        weight: number | string;
+    };
+    line: {
+        height: number;
+        color: string;
+    };
+    paddingTop: number;
+    paddingLeft: number;
+    paddingBottom: number;
+    paddingRight: number;
+    background: string;
+}
+
+const defaultOptions: FullHandwritingOptions = {
     font: {
         family: "'Homemade Apple', cursive",
         size: 30,
@@ -47,7 +65,7 @@ const defaultOptions: Required<HandwritingOptions> = {
 class Handwriting {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
-    private options: Required<HandwritingOptions>;
+    private options: FullHandwritingOptions;
     private text: string = "";
     private lines: string[] = [];
     private handwritingX: number = 0;
@@ -65,8 +83,8 @@ class Handwriting {
             ...options,
             font: { ...defaultOptions.font, ...options.font },
             line: { ...defaultOptions.line, ...options.line },
-        };
-        
+        } as FullHandwritingOptions;
+
         this.setBackground(this.options.background);
         this.updateCanvasSize();
     }
@@ -106,7 +124,7 @@ class Handwriting {
 
     draw(): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         this.handwritingX = this.options.paddingLeft;
         this.handwritingY = this.options.paddingTop + this.options.font.size;
 
@@ -118,22 +136,22 @@ class Handwriting {
     updateCanvasSize(): void {
         const container = this.canvas.parentNode as HTMLElement;
         if (!container) return;
-        
+
         this.canvas.width = container.clientWidth;
         // Adjust height dynamically based on content if needed, for now a fixed large value
         // A more sophisticated approach would calculate needed height beforehand.
-        this.canvas.height = 1000; 
-        
+        this.canvas.height = 1000;
+
         this.draw(); // Redraw with new dimensions
     }
-    
+
     private draw_line(line: string): void {
         this.handwritingX = this.options.paddingLeft + this.rand(0, 10);
         const words = line.split(" ");
         words.forEach(word => {
             const wordWidth = this.measureWordWidth(word);
             const availableWidth = this.canvas.width - this.handwritingX - this.options.paddingRight;
-            
+
             if (wordWidth > availableWidth) {
                 this.handwritingY += this.options.line.height;
                 this.handwritingX = this.options.paddingLeft + this.rand(0, 10);
@@ -149,7 +167,7 @@ class Handwriting {
             return;
         }
     }
-    
+
     private measureWordWidth(word: string): number {
         this.ctx.font = `${this.options.font.weight} ${this.options.font.size}px ${this.options.font.family}`;
         return this.ctx.measureText(word).width + (this.options.font.size / 2);
@@ -187,4 +205,3 @@ class Handwriting {
 
 export { Handwriting };
 export type { HandwritingOptions };
-

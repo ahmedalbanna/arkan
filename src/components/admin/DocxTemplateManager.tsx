@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
+import componentStyles from './DocxTemplateManager.module.css';
 import { StyleEditor } from '../design/StyleEditor';
 
 
@@ -122,38 +123,33 @@ function DocxTemplateSkeleton() {
 }
 
 function TemplatePreview({ styles }: { styles: any }) {
-    const docStyles = styles?.default?.document?.run || {};
-    const h1Styles = styles?.default?.heading1?.run || {};
-    const h2Styles = styles?.default?.heading2?.run || {};
+    const templateStyles = styles?.default || {};
+    const docStyles = templateStyles.document?.run || {};
+    const h1Styles = templateStyles.heading1?.run || {};
+    const h2Styles = templateStyles.heading2?.run || {};
 
-    const inlineDocStyles = {
-        fontFamily: typeof docStyles.font === 'string' ? docStyles.font : docStyles.font?.name || 'Calibri',
-        fontSize: `${Number(docStyles.size || 22) / 2}pt`,
-        color: `#${docStyles.color || '333333'}`,
-    };
-
-    const inlineH1Styles: React.CSSProperties = {
-        fontFamily: typeof h1Styles.font === 'string' ? h1Styles.font : h1Styles.font?.name || 'Calibri Light',
-        fontSize: `${Number(h1Styles.size || 32) / 2}pt`,
-        color: `#${h1Styles.color || '2E74B5'}`,
-        fontWeight: h1Styles.bold ? 'bold' : 'normal',
-    };
-
-    const inlineH2Styles: React.CSSProperties = {
-        fontFamily: typeof h2Styles.font === 'string' ? h2Styles.font : h2Styles.font?.name || 'Calibri Light',
-        fontSize: `${Number(h2Styles.size || 26) / 2}pt`,
-        color: `#${h2Styles.color || '2E74B5'}`,
-        fontWeight: h2Styles.bold ? 'bold' : 'normal',
-    };
+    const cssVariables = {
+        '--doc-font-family': typeof docStyles.font === 'string' ? docStyles.font : docStyles.font?.name || 'Calibri',
+        '--doc-font-size': `${Number(docStyles.size || 22) / 2}pt`,
+        '--doc-color': `#${docStyles.color || '333333'}`,
+        '--h1-font-family': typeof h1Styles.font === 'string' ? h1Styles.font : h1Styles.font?.name || 'Calibri Light',
+        '--h1-font-size': `${Number(h1Styles.size || 32) / 2}pt`,
+        '--h1-color': `#${h1Styles.color || '2E74B5'}`,
+        '--h1-font-weight': h1Styles.bold ? 'bold' : 'normal',
+        '--h2-font-family': typeof h2Styles.font === 'string' ? h2Styles.font : h2Styles.font?.name || 'Calibri Light',
+        '--h2-font-size': `${Number(h2Styles.size || 26) / 2}pt`,
+        '--h2-color': `#${h2Styles.color || '2E74B5'}`,
+        '--h2-font-weight': h2Styles.bold ? 'bold' : 'normal',
+    } as React.CSSProperties;
 
     return (
-        <div className="w-full aspect-[400/565] rounded-md border bg-white p-6 overflow-hidden">
-            <div style={inlineDocStyles}>
-                <h1 style={inlineH1Styles} className="mb-4 pb-2 border-b">Sample Document Title</h1>
+        <div className="w-full aspect-[400/565] rounded-md border bg-white p-6 overflow-hidden" style={cssVariables}>
+            <div className={componentStyles.previewBody}>
+                <h1 className={`${componentStyles.previewH1} mb-4 pb-2 border-b`}>Sample Document Title</h1>
                 <p className="mb-4">
                     This is a sample paragraph to demonstrate the default body text style for this template. You can adjust the font family, size, and color to match your branding.
                 </p>
-                <h2 style={inlineH2Styles} className="mb-2">A Secondary Heading</h2>
+                <h2 className={`${componentStyles.previewH2} mb-2`}>A Secondary Heading</h2>
                 <ul className="list-disc pl-5 space-y-1">
                     <li>This is a list item.</li>
                     <li>Another list item for styling.</li>

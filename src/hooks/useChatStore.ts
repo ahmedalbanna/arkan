@@ -3,8 +3,8 @@
 
 import { create } from 'zustand';
 import type { User as FirebaseUser } from "firebase/auth";
-import { ref, onValue, off, query, update, get } from 'firebase/database';
-import { db } from '@/lib/firebaseConfig';
+import { ref, onValue, off, query, update, get as getDbData, type DataSnapshot } from 'firebase/database';
+import { db } from '@/lib/firebaseConfig'; // Assuming db is your initialized database instance
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
 import { Agent } from '@/lib/agents';
@@ -76,28 +76,30 @@ export const useChatStore = create<ChatState & ChatActions>()(
         set({ isInitialized: true });
         const userConversationsRef = query(ref(db, `userConversations/${firebaseUser.uid}`));
 
-        const listener = onValue(userConversationsRef, async (snapshot) => {
+        const listener = onValue(userConversationsRef, async (snapshot: DataSnapshot) => {
             if (!snapshot.exists()) {
                 set({ chats: [], selectedChat: null });
                 return;
             }
             const conversationIds = Object.keys(snapshot.val());
             const conversationPromises = conversationIds.map(id =>
-                get(ref(db, `conversations/${id}`)).then(convoSnapshot => 
+                getDbData(ref(db, `conversations/${id}`)).then((convoSnapshot: DataSnapshot) =>
                     convoSnapshot.exists() ? { id, ...convoSnapshot.val() } : null
                 )
             );
 
             const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as ChatSession[];
             conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
-
             set(state => {
                  const currentSelectedId = state.selectedChat?.id;
                  const newSelectedChat = currentSelectedId ? conversations.find(c => c.id === currentSelectedId) : conversations[0];
                  return { chats: conversations, selectedChat: newSelectedChat || state.selectedChat || null };
             });
+        }, (error) => {
+            console.error("Error listening to user conversations:", error);
+            set({ chats: [], selectedChat: null, isInitialized: false });
         });
-        
+
         // This is a simplified return. In a real app, you'd manage this unsubscribe call
         // more carefully, e.g., when the user logs out.
         return () => off(userConversationsRef, 'value', listener);

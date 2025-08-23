@@ -21,9 +21,6 @@
     },
     "ui": {
       "enabled": true
-    },
-    "dataconnect": {
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
     }
   },
   "firestore": {
@@ -45,8 +42,6 @@
   },
   "storage": {
     "rules": "storage.rules"
-  },
-  "dataconnect": {
-    "source": "dataconnect"
   }
+
 }
