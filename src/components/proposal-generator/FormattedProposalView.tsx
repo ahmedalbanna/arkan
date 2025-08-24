@@ -2,15 +2,22 @@
 
 'use client';
 
-import React from 'react';
-import { type AnyProjectProposal, type ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
-import { Badge } from '../ui/badge';
-import { format } from 'date-fns';
+import React, { useMemo } from 'react';
+import { type ProjectProposal, ProjectProposalSchema } from '@/ai/schemas';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
 import remarkGfm from 'remark-gfm';
+
+/**
+ * This file contains a set of components designed to render a structured
+ * ProjectProposal object into a paginated, A4-style view.
+ *
+ * - FormattedProposalView: The main component that handles pagination.
+ * - ValueRenderer: A recursive component that dispatches rendering to the appropriate sub-component based on data type.
+ * - ObjectRenderer & ArrayRenderer: Specialized components for rendering complex data structures.
+ */
 
 interface FormattedProposalViewProps {
     proposal: ProjectProposal;
@@ -46,78 +53,86 @@ const formatKeyToTitle = (key: string): string => {
         .replace(/\b\w/g, char => char.toUpperCase());
 }
 
-export default function FormattedProposalView({ proposal, currentPage }: FormattedProposalViewProps) {
-    const { locale } = useLocalization();
-    if (!proposal) return null;
-
-    const renderValue = (value: any, key: string) => {
+const ObjectRenderer = React.memo(({ data }: { data: Record<string, any> }) => {
+    const content = Object.entries(data).map(([key, value]) => {
         if (!hasContent(value)) return null;
 
-        if (typeof value === 'string') {
-            if (key === 'startDate' || key === 'endDate') {
-                try {
-                    return <p><strong>{formatKeyToTitle(key)}:</strong> {format(new Date(value), 'PPP', { locale: locale === 'ar' ? require('date-fns/locale/ar') : require('date-fns/locale/en-US') })}</p>;
-                } catch {
-                    return <p><strong>{formatKeyToTitle(key)}:</strong> {value}</p>;
-                }
-            }
-            return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>;
-        }
-        if (Array.isArray(value)) {
-            if (value.every(item => typeof item === 'string')) {
-                if (key === 'tags') {
-                    return <div className="flex flex-wrap gap-2">{value.map((tag: string) => <Badge key={tag} variant="outline">{tag}</Badge>)}</div>
-                }
-                return <ul className="list-disc pl-5 space-y-1">{value.map((item, index) => <li key={index}>{item}</li>)}</ul>
-            }
-            return <div className="space-y-4">{value.map((item, index) => <div key={index} className="p-2 border-l-2 ml-2">{Object.entries(item).map(([k, v]) => <p key={k}><strong>{formatKeyToTitle(k)}:</strong> {String(v)}</p>)}</div>)}</div>;
-        }
-        if (typeof value === 'object' && value !== null) {
-            const content = Object.entries(value).map(([k, v]) => <div key={k} className="mb-2"><strong>{formatKeyToTitle(k)}:</strong> {renderValue(v, k)}</div>);
-            // Filter out empty children before wrapping
-            return content.some(child => child !== null) ? <div>{content}</div> : null;
-        }
-        if (typeof value === 'number') {
-            const currency = proposal.budget?.currency;
-            if (currency) {
-                return <p>{new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value)}</p>;
-            }
-            return <p>{value.toLocaleString()}</p>;
-        }
-        return <p>{String(value)}</p>;
+        return (
+            <div key={key} className="mb-4">
+                <strong className="block font-semibold text-foreground/80">{formatKeyToTitle(key)}:</strong>
+                <div className="pl-2 mt-1">
+                    <ValueRenderer value={value} />
+                </div>
+            </div>
+        );
+    }).filter(Boolean);
+
+    return content.length > 0 ? <>{content}</> : null;
+});
+ObjectRenderer.displayName = 'ObjectRenderer';
+
+
+const ArrayRenderer = React.memo(({ items }: { items: any[] }) => {
+    if (items.every(item => typeof item === 'string')) {
+        return (
+            <ul className="list-disc pl-5 space-y-1">
+                {items.map((item, index) => <li key={index}>{item}</li>)}
+            </ul>
+        );
     }
 
-    const orderedKeys = Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category');
+    return (
+        <div className="space-y-4">
+            {items.map((item, index) => (
+                <div key={index} className="p-3 my-2 border-l-4 border-muted-foreground/20 rounded-r-md bg-muted/20">
+                    <ValueRenderer value={item} />
+                </div>
+            ))}
+        </div>
+    );
+});
+ArrayRenderer.displayName = 'ArrayRenderer';
 
-    // For the title page (currentPage === 0)
+
+const ValueRenderer = React.memo(({ value }: { value: any }) => {
+    if (!hasContent(value)) return null;
+    if (Array.isArray(value)) return <ArrayRenderer items={value} />;
+    if (typeof value === 'object' && value !== null) return <ObjectRenderer data={value} />;
+    if (typeof value === 'string') return <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{value}</ReactMarkdown>;
+    return <>{String(value)}</>;
+});
+ValueRenderer.displayName = 'ValueRenderer';
+
+export default function FormattedProposalView({ proposal, currentPage }: FormattedProposalViewProps) {
+    const { locale } = useLocalization();
+
+    const orderedKeys = useMemo(() =>
+        Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category'),
+        []
+    );
     if (currentPage === 0) {
         return (
             <A4Page>
                 <div className="flex flex-col items-center justify-center h-full text-center min-h-[297mm]">
-                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{String(proposal.title)}</h1>
-                    <p className="text-lg md:text-xl text-muted-foreground">{String(proposal.category)}</p>
-                </div>
+                    <h1 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">{proposal.title}</h1>
+                    <p className="text-lg md:text-xl text-muted-foreground">{proposal.category}</p>
+                 </div>
             </A4Page>
         )
     }
 
-    const currentPageKey = orderedKeys[currentPage - 1]; // -1 to account for title page
-
-    // If the key is not found (e.g., out of bounds), don't render anything
+    const currentPageKey = orderedKeys[currentPage - 1];
     if (!currentPageKey) return null;
 
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 
-    // Exclude title and category from regular pages
-    if (currentPageKey === 'title' || currentPageKey === 'category') {
-        return null;
-    }
+
 
     return (
         <div className="relative" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
 
             <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
-                {renderValue(currentPageValue, currentPageKey)}
+                <ValueRenderer value={currentPageValue} />
             </A4Page>
         </div>
     );

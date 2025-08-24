@@ -1,4 +1,4 @@
-
+// f:\arkan\src\ai\flows\generate-proposal.ts
 
 'use server';
 
@@ -10,17 +10,34 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { GenerateProposalInputSchema, type GenerateProposalInput } from '@/ai/schemas';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { GenerateProposalInputSchema, ProjectProposalSchema, type GenerateProposalInput, type ProjectProposal } from '@/ai/schemas';
 
-export async function generateProposal(input: GenerateProposalInput): Promise<string> {
-  const { projectIdea, prompt, guidelines, externalContext } = input;
+const PromptInputSchema = z.object({
+  projectIdea: z.string(),
+  guidelines: z.array(z.string()).optional(),
+  textContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+  mediaContext: z.array(z.object({ fileName: z.string(), content: z.string() })).optional(),
+});
 
-  const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
-  const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
+const jsonSchema = zodToJsonSchema(ProjectProposalSchema, "ProjectProposal");
+const schemaString = JSON.stringify(jsonSchema, null, 2);
 
-  const systemPrompt = `${'\'\'\''}${prompt}'\'\'\''}\n\nYour entire response must be a single, well-formatted markdown document. Do not include any conversational text or explanations.`;
-  
-  let userPrompt = `
+  export const generateProposalPrompt = ai.definePrompt(
+    {
+      name: 'generateProposalPrompt',
+      input: { schema: PromptInputSchema },
+      output: { schema: ProjectProposalSchema },
+      model: 'googleai/gemini-1.5-flash',
+      system: `You are an expert project manager and technical writer. Your task is to generate a comprehensive and professional project proposal based on the provided idea and context.
+Your entire response must be a valid JSON object that adheres to the provided output schema.
+For all string fields in the schema, you MUST use well-formed markdown syntax. This includes properly formatted lists, bold text, etc., where appropriate.
+The 'description' fields in the JSON schema below are your primary instructions for what to generate for each property.
+
+--- OUTPUT SCHEMA ---
+${schemaString}
+---`,
+      prompt: `
 {{#if guidelines}}
 --- Guidelines ---
 {{#each guidelines}}
@@ -50,25 +67,38 @@ File: {{this.fileName}}
 
 --- Main Input: Project Idea ---
 {{{projectIdea}}}
-`;
-  
-  const llmResponse = await ai.generate({
-    model: 'googleai/gemini-1.5-flash',
-    system: systemPrompt,
-    prompt: userPrompt,
-    context: { guidelines, textContext, mediaContext, projectIdea },
-    config: {
-      temperature: 0.8,
-      maxOutputTokens: 8192,
-    }
-  });
+`,
+      config: {
+        temperature: 0.7,
+        maxOutputTokens: 8192,
+      },
+    },
+  );
 
-  const output = llmResponse.text;
+// We wrap the prompt in a flow to handle input processing and ensure a clean interface.
+export const generateProposal = ai.defineFlow(
+  {
+    name: 'generateProposalFlow',
+    inputSchema: GenerateProposalInputSchema,
+    outputSchema: ProjectProposalSchema,
+  },
+  async (input): Promise<ProjectProposal> => {
+    const { projectIdea, guidelines, externalContext } = input;
 
-  if (!output) {
+    const textContext = externalContext?.filter(f => !f.content.startsWith('data:')) || [];
+    const mediaContext = externalContext?.filter(f => f.content.startsWith('data:')) || [];
+
+    const { output } = await generateProposalPrompt({
+      projectIdea,
+      guidelines,
+      textContext,
+      mediaContext,
+    });
+
+    if (!output) {
       throw new Error("Proposal generation failed to produce an output. The AI may not have had enough context. Please try adding more detail.");
-  }
+    }
 
-  // Clean up the output to remove any potential markdown code fences
-  return output.replace(/```markdown/g, '').replace(/```/g, '').trim();
-}
+    return output;
+  }
+);

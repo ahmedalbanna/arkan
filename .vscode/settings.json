@@ -81,6 +81,16 @@
         "tw-external-config": {},
         "source-folders": null,
         "preview-url": "http://localhost:9002",
-        "ai-project-brief": null
+        "ai-project-brief": null,
+        "urls": {
+            "pinyfakepage.html": {
+                "open-page-views": [
+                    {
+                        "w": 1485,
+                        "h": 1920
+                    }
+                ]
+            }
+        }
     }
 }

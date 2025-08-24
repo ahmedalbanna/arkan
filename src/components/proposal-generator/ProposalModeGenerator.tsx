@@ -3,7 +3,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
+import { Loader2, FileText, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Wand2, Scale } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ProposalGenerationTools } from './ProposalGenerationTools';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
@@ -20,9 +20,11 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { ProjectProposalSchema } from '@/ai/schemas';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { cn } from '@/lib/utils';
+import { EvaluationTools } from '../EvaluationTools';
+import { CollapsibleSidePanel } from '../ui/CollapsibleSidePanel';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));
+const MarkdownProposalView = lazy(() => import('./MarkdownProposalView'));
 
 function ProposalSkeleton() {
     return (
@@ -64,7 +66,6 @@ const A4Page = ({ children, title }: { children: React.ReactNode, title?: string
 export function ProposalModeGenerator() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
     const {
         proposal,
@@ -104,7 +105,11 @@ export function ProposalModeGenerator() {
         translateMutation.mutate({ proposal: proposal as ProjectProposal, targetLang, token });
     };
 
-    const orderedKeys = proposal ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [];
+    // The proposal from the store is now expected to be a valid ProjectProposal object or null.
+    // The complex parsing logic is no longer needed.
+    const parsedProposalObject = proposal as ProjectProposal | null;
+
+    const orderedKeys = parsedProposalObject ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [];
     const totalPages = orderedKeys.length > 0 ? orderedKeys.length + 1 : 0; // +1 for the title page
     const [currentPage, setCurrentPage] = useState(0);
     const [zoom, setZoom] = useState(1);
@@ -128,6 +133,26 @@ export function ProposalModeGenerator() {
 
     const isBusy = generationMutation.isPending || translateMutation.isPending;
 
+    const toolPanels = [
+        {
+            key: 'generator',
+            title: t('builder.proposalGenerator.tools.title'),
+            icon: <Wand2 className="h-5 w-5" />,
+            content: (
+                <ProposalGenerationTools
+                    isDisabled={isBusy}
+                    isGenerating={generationMutation.isPending}
+                />
+            )
+        },
+        {
+            key: 'evaluator',
+            title: t('builder.evaluation.title'),
+            icon: <Scale className="h-5 w-5" />,
+            content: <EvaluationTools />
+        }
+    ];
+
     return (
         <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 h-full items-start" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
             {generationMutation.isPending && (
@@ -137,43 +162,19 @@ export function ProposalModeGenerator() {
                 </div>
             )}
 
+            <CollapsibleSidePanel panels={toolPanels} defaultActiveKey="generator" className="col-span-4" />
 
-
-                <div className="hidden lg:block lg:col-auto lg:sticky lg:top-24 space-y-6 lg:overflow-y-auto lg:pr-2 transition-all duration-300 max-w-min">
-
-                    <div className='flex flex-col h-full justify-between items-start'>
-                        <Button
-                            variant="secondary"
-                            className="h-auto p-2 rounded-l-none [writing-mode:vertical-lr] transform rotate-180"
-                            onClick={() => setIsPanelCollapsed(false)}
-                        >
-                            <PanelRightOpen className="h-5 w-5 mb-2" />
-                            {t('builder.proposalGenerator.toolsTitle')}
-                        </Button>
-                    </div>
-
-                </div>
-
-
-            <div className={cn("lg:col-span-3 lg:sticky lg:top-24 transition-all duration-300", isPanelCollapsed && "lg:hidden")}>
-                <ProposalGenerationTools
-                    isDisabled={isBusy}
-                    isGenerating={generationMutation.isPending}
-                    onCollapseToggle={() => setIsPanelCollapsed(true)}
-                />
-            </div>
-
-            <div className={cn("w-full", isPanelCollapsed ? "lg:col-span-11" : "lg:col-span-8")}>
-                 <div className="h-full flex flex-col">
-                     <CardHeader className="bg-background rounded-t-lg p-4 border-b">
+            <div className="lg:col-span-8">
+                 <Card className="h-full flex flex-col overflow-hidden">
+                     <CardHeader>
                         <div className="flex justify-between items-start gap-4">
                              <div className="flex items-center gap-2">
                                 <div className="flex-1 min-w-0">
-                                    <CardTitle className="font-headline text-2xl text-primary truncate" title={proposal?.title as string || "Generated Proposal"}>
-                                        {proposal?.title as string || "Generated Proposal"}
+                                    <CardTitle className="font-headline text-2xl text-primary truncate" title={parsedProposalObject?.title || "Generated Proposal"}>
+                                        {parsedProposalObject?.title || "Generated Proposal"}
                                     </CardTitle>
                                     <CardDescription>
-                                        {proposal?.category as string || "Review the generated proposal"}
+                                        {parsedProposalObject?.category || "Review the generated proposal"}
                                     </CardDescription>
                                 </div>
                             </div>
@@ -186,8 +187,8 @@ export function ProposalModeGenerator() {
                             </div>
                         </div>
                     </CardHeader>
-                    {proposal && totalPages > 1 && (
-                        <div className="flex justify-center items-center p-2 border-t bg-background rounded-b-lg" dir={locale === 'ar' ? 'ltr' : 'rtl'}>
+                    {totalPages > 1 && (
+                        <div className="flex justify-center items-center p-2 border-y bg-background" dir={locale === 'ar' ? 'rtl' : 'rtl'}>
                             <Button onClick={handlePrevPage} disabled={currentPage === 0} variant="ghost">
                                 <ChevronLeft className="h-4 w-4 mr-2" />
                                 {t('builder.presentationGenerator.prev')}
@@ -207,30 +208,31 @@ export function ProposalModeGenerator() {
                             </div>
                         </div>
                     )}
-                    <div className="flex-grow bg-slate-200 dark:bg-slate-900/50 p-4 rounded-b-lg">
-                        <ScrollArea className={isMobile ? "h-[calc(100vh)]" : "h-[calc(100vh)]"}>
+                    <CardContent className="flex-1 p-0 bg-slate-200 dark:bg-slate-900/50">
+                        <ScrollArea className="h-full p-4">
                             <div className={isMobile ? "" : "zoomable-content"} style={{ '--zoom-scale': isMobile ? 1 : zoom } as React.CSSProperties}>
-                                {proposal ? (
-                                    <Suspense fallback={<ProposalSkeleton />}>
-                                        <FormattedProposalView
-                                            proposal={ProjectProposalSchema.parse(proposal)}
-                                            //onUpdate={handleProposalUpdate}
-                                            currentPage={currentPage}
-                                        />
-                                    </Suspense>
-                                ) : (
+                                {!proposal ? (
                                     <div className="flex items-center justify-center h-full min-h-[400px]">
                                         <div className="text-center text-muted-foreground p-8">
                                             <FileText className="w-16 h-16 mx-auto mb-4" />
                                             <p>{t('builder.proposalGenerator.emptyState')}</p>
                                         </div>
                                     </div>
-                                )}
+                                ) : parsedProposalObject ? (
+                                        <Suspense fallback={<ProposalSkeleton />}>
+                                            <FormattedProposalView proposal={parsedProposalObject} currentPage={currentPage} />
+                                        </Suspense>
+                                ) : (
+                                    // This case should ideally not be reached if the above logic is complete,
+                                    // but it's good practice to have a fallback.
+                                    <ProposalSkeleton />
+                                )
+                                }
                             </div>
                         </ScrollArea>
-                    </div>
+                    </CardContent>
 
-                </div>
+                </Card>
             </div>
         </div>
     );

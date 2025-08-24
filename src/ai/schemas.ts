@@ -256,39 +256,30 @@ export type ProjectPlan = z.infer<typeof ProjectPlanSchema>;
 
 
 export const ProjectProposalSchema = z.object({
-  category: z.string().describe("A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI')."),
-  title: z.string().describe("A clear and descriptive title for the project."),
-  objective: z.string().describe("The main goal or objective of the project. What problem does it solve?"),
-  methodology: z.string().describe("The approach and process to be followed (e.g., Agile, Waterfall). Describe the key phases."),
-  expected_outcome: z.array(z.string()).describe("A list of tangible and measurable results expected from the project."),
-  timeline: z.object({
-    startDate: z.string().describe("The planned start date for the project in YYYY-MM-DD format. Base this on the current date."),
-    endDate: z.string().describe("The planned end date for the project in YYYY-MM-DD format."),
-    phases: z.array(z.object({
-      name: z.string().describe("The name of the project phase (e.g., 'Discovery & Planning')."),
-      durationWeeks: z.number().describe("The duration of the phase in weeks."),
-    })).describe("An array of project phases with their names and durations."),
-  }).describe("The project timeline, including start/end dates and phases."),
-  budget: z.object({
-    totalAmount: z.number().describe("The total estimated budget for the project."),
-    currency: z.string().describe("The currency for the budget (e.g., 'USD')."),
-    breakdown: z.array(z.object({
-      item: z.string().describe("A specific item in the budget breakdown (e.g., 'Labor', 'Software Licensing')."),
-      cost: z.number().describe("The estimated cost for this budget item."),
-    })).describe("A detailed breakdown of the project budget."),
-  }).describe("The estimated budget for the project."),
-  stakeholders: z.array(z.object({
-    name: z.string().describe("The name of the stakeholder or stakeholder group."),
-    role: z.string().describe("The stakeholder's role in the project (e.g., 'Primary User', 'Sponsor')."),
-    interest: z.string().describe("The stakeholder's interest or investment in the project."),
-  })).describe("A list of key stakeholders involved in the project.").optional(),
-  success_criteria: z.array(z.string()).describe("A list of measurable criteria that will define the project's success.").optional(),
-  evaluation: z.string().describe("A description of how the project's success will be measured and assessed."),
-  tags: z.array(z.string()).describe("A list of 3 to 5 relevant keywords or tags for the project (e.g., 'Productivity', 'eCommerce', 'AI').").optional(),
-  risks: z.array(z.object({
-    description: z.string().describe("A description of a potential risk to the project."),
-    mitigation: z.string().describe("The strategy to mitigate this potential risk."),
-  })).describe("A list of potential risks and their mitigation strategies."),
+  title: z.string().describe(
+    "A clear and descriptive title for the project. This should be engaging and summarize the project's core purpose."
+  ),
+  category: z.string().describe(
+    "A relevant category for the project (e.g., 'Software Development', 'UI/UX Design', 'AI', 'Student Training')."
+  ),
+  executiveSummary: z.string().describe(
+    "A brief, high-level overview of the entire proposal, targeting stakeholders who may not read the full document."
+  ),
+  problemStatement: z.string().describe(
+    "Clearly define the problem or opportunity the project addresses. Explain the pain points and why a solution is necessary now."
+  ),
+  proposedSolution: z.object({
+    overview: z.string().describe("Describe the proposed solution in detail. What will be built or implemented?"),
+    technicalApproach: z.string().describe("Explain the technologies, architecture, and methodologies that will be used."),
+    keyFeatures: z.string().describe("List the main features and functionalities of the solution."),
+  }).describe("The core of the proposal, detailing the solution."),
+  projectPlan: z.object({
+    timeline: z.string().describe("A detailed timeline with major phases, milestones, and estimated durations. A week-by-week or bi-weekly breakdown is ideal."),
+    keyDeliverables: z.string().describe("A list of all tangible outputs the client will receive (e.g., design mockups, functional prototype, final report)."),
+  }).describe("How the project will be executed and managed."),
+  budgetBreakdown: z.string().describe(
+    "Provide a detailed breakdown of all costs, including labor, software, and other expenses. Be transparent about the pricing. Display as Table Markdown."
+  ),
 });
 export type ProjectProposal = z.infer<typeof ProjectProposalSchema>;
 
@@ -420,14 +411,12 @@ export type GenerateProjectPlanInput = z.infer<typeof GenerateProjectPlanInputSc
 // generate-proposal.ts
 export const GenerateProposalInputSchema = z.object({
   projectIdea: z.string().describe('A short description of the project idea.'),
-  prompt: z.string().describe('The base prompt to use for generating the proposal.'),
   guidelines: z.array(z.string()).optional().describe("A list of specific guidelines for the agent to follow."),
   externalContext: z.array(z.object({
       fileName: z.string(),
       content: z.string(),
   })).optional().describe("An array of external documents (text or data URIs) provided by the user."),
 });
-
 export type GenerateProposalInput = z.infer<typeof GenerateProposalInputSchema>;
 
 
@@ -1076,7 +1065,3 @@ export const ApiGeneratePresentationSchema = z.object({
   tone: z.string().optional(),
   complexity: z.string().optional(),
 });
-
-
-
-

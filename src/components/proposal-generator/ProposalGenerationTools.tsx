@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import React, { useState } from 'react';
@@ -9,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal, PanelLeftClose } from 'lucide-react';
+import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useProposalGenerationStore, type AdvancedProposalFields } from '@/hooks/useProposalGenerationStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -44,7 +42,7 @@ function GenerateButton({ isGenerating, generationMode }: GenerateButtonProps) {
         generationMutation.mutate(payload);
     }
 
-    const canGenerate = (generationMode === 'simple' && projectIdea) || 
+    const canGenerate = (generationMode === 'simple' && projectIdea) ||
                       (generationMode === 'advanced' && advancedFields.projectTitle && advancedFields.projectObjective);
 
     return (
@@ -73,7 +71,6 @@ function GenerateButton({ isGenerating, generationMode }: GenerateButtonProps) {
 interface ProposalGenerationToolsProps {
     isDisabled: boolean;
     isGenerating: boolean;
-    onCollapseToggle: () => void;
 }
 
 const AdvancedFieldsForm = () => {
@@ -81,7 +78,7 @@ const AdvancedFieldsForm = () => {
     const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setAdvancedField(e.target.name as keyof AdvancedProposalFields, e.target.value);
     }
-    
+
     return (
         <div className="space-y-4">
             <div className="space-y-1">
@@ -143,10 +140,36 @@ const AdvancedFieldsForm = () => {
     )
 }
 
+const ToolsSkeleton = () => (
+    <Card className="flex flex-col h-full">
+        <CardHeader>
+            <div className="flex justify-between items-center">
+                <div>
+                    <Skeleton className="h-6 w-48 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                </div>
+            </div>
+        </CardHeader>
+        <CardContent className="flex-grow space-y-6">
+            {/* Tabs skeleton */}
+            <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+            {/* Accordion skeleton */}
+            <div className="space-y-2">
+                <Skeleton className="h-12 w-full" />
+            </div>
+        </CardContent>
+        <CardFooter>
+            <Skeleton className="h-10 w-full" />
+        </CardFooter>
+    </Card>
+);
+
 export const ProposalGenerationTools = ({
     isDisabled,
     isGenerating,
-    onCollapseToggle
 }: ProposalGenerationToolsProps) => {
 
     const { t } = useLocalization();
@@ -170,18 +193,7 @@ export const ProposalGenerationTools = ({
     }
 
     if (templatesLoading) {
-        return (
-            <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                </CardContent>
-            </Card>
-        );
+        return <ToolsSkeleton />;
     }
 
     return (
@@ -192,9 +204,6 @@ export const ProposalGenerationTools = ({
                         <CardTitle className="font-headline">{t('builder.proposalGenerator.toolsTitle')}</CardTitle>
                         <CardDescription>{t('builder.proposalGenerator.toolsDescription')}</CardDescription>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onCollapseToggle}>
-                        <PanelLeftClose className="h-5 w-5" />
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent className="flex-grow overflow-y-auto pr-2 space-y-4">
@@ -223,7 +232,7 @@ export const ProposalGenerationTools = ({
                         <AdvancedFieldsForm />
                     </TabsContent>
                 </Tabs>
-               
+
                  <Accordion type="multiple" className="w-full space-y-4">
                     <AccordionItem value="item-1">
                         <AccordionTrigger className="font-semibold text-base"><SlidersHorizontal className="me-2 h-4 w-4"/>{t('builder.proposalGenerator.generationSettings')}</AccordionTrigger>

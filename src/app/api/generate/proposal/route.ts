@@ -7,7 +7,7 @@ import { generateProposal } from '@/ai/flows/generate-proposal';
 import { selectProposalTemplate } from '@/ai/flows/select-proposal-template';
 import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
-import type { ProposalTemplate } from '@/services/template-service';
+
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
 import type { ExternalContext } from '@/lib/types';
@@ -66,13 +66,13 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     let { projectIdea, templateId, customGuidelines, externalContext, advancedFields } = validation.data;
-    
+
     if (advancedFields) {
         projectIdea = formatAdvancedPrompt(advancedFields);
     }
-    
+
     // If the user selects the "automatic" template, first call the AI to select the best template.
     if (templateId === 'automatic-ai') {
         const selectionResult = await selectProposalTemplate({ projectIdea });
@@ -91,14 +91,13 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!templateDoc.exists) {
       return handleApiError({ message: 'Proposal template not found.' }, 404);
     }
-    const template = templateDoc.data() as ProposalTemplate;
-
-    const finalGuidelines = [...(template.guidelines || []), ...(customGuidelines || [])];
-    
+    const template = templateDoc.data();
+    if (!template) {
+      return handleApiError({ message: 'Proposal template data is missing.' }, 404);
+    }
     const agentInput = {
       projectIdea,
-      prompt: template.prompt,
-      guidelines: finalGuidelines,
+      guidelines: [...(template.guidelines || []), ...(customGuidelines || [])],
       externalContext: externalContext,
     };
 
@@ -108,19 +107,19 @@ export const POST = withAuth(async ({ request, user }) => {
     await deductCredit(user.id, creditCost);
 
     await logGeneration({
-        agentId: 'generate-proposal', 
+        agentId: 'generate-proposal',
         userId: user.id,
-        input: { 
-            projectIdea, 
-            templateId: validation.data.templateId, 
-            finalTemplateId: templateId, 
+        input: {
+            projectIdea,
+            templateId: validation.data.templateId,
+            finalTemplateId: templateId,
             customGuidelines,
             externalContextFileCount: externalContext?.length || 0,
         },
-        output: { resultLength: result.length },
+      output: { resultLength: JSON.stringify(result).length },
         creditCost: creditCost,
     });
-    
+
     return createApiResponse(result, 200);
   } catch (error) {
     return handleApiError(error);
