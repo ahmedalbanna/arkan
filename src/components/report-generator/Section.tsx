@@ -2,34 +2,26 @@
 
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import React from 'react';
 import { Wand2, BookText, Maximize, PenLine, SpellCheck, Loader2, FileDown, PenSquare, Volume2, X, Check, ThumbsDown, Languages, ArrowRightLeft, MoreVertical, Brush, GitCommitVertical, UserCheck, ShieldCheck } from 'lucide-react';
-import { toast, useToast } from '@/hooks/use-toast';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { exportSectionAsDocx } from '@/lib/docx-exporter';
 import { Button } from '@/components/ui/button';
-import { exportComponentAsPDF } from '@/lib/pdf-exporter';
-import { useAuth } from '@/context/AuthContext';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
+import type { SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTextToSpeech } from '@/hooks/use-text-to-speech';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { ScrollArea } from '../ui/scroll-area';
-import { useTranslate } from '@/hooks/use-translation';
 import { useReportStore } from '@/hooks/useReportStore';
 import { Textarea } from '../ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '../ui/dropdown-menu';
-import { useWritingTool } from '@/hooks/use-writing-tools';
-import { computeDiff, DiffPart } from '@/lib/diff';
+import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { processPlantUml } from '@/lib/utils';
 import { EvaluationTools } from '../EvaluationTools';
+import { useSectionLogic } from '@/hooks/use-section-logic';
+import { useTranslationViewLogic } from '@/hooks/use-translation-view-logic';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -38,14 +30,6 @@ interface SectionProps {
     content: string; // The markdown content of the section
     onUpdate: (key: SectionName, value: string) => void;
 }
-
-// Helper to calculate word and character counts
-const calculateCounts = (text: string) => {
-    if (!text) return { words: 0, chars: 0 };
-    const words = text.split(/\s+/).filter(Boolean).length;
-    const chars = text.length;
-    return { words, chars };
-};
 
 const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     return (
@@ -62,46 +46,8 @@ const DiffView = ({ diff }: { diff: DiffPart[] }) => {
     )
 }
 
-// API call function for text manipulation
-async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
-    const response = await fetch('/api/manipulate-text', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to manipulate text');
-    }
-    return response.json();
-}
-
 const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionName, originalContent: string }) => {
-    const { t, locale } = useLocalization();
-    const { translatedSections, setTranslatedSection } = useReportStore();
-    const translateMutation = useTranslate();
-    const translatedContent = translatedSections[sectionKey];
-
-    const handleTranslate = async () => {
-        const targetLang = locale === 'en' ? 'ar' : 'en';
-        translateMutation.mutate({ text: originalContent, targetLang }, {
-            onSuccess: (data) => {
-                setTranslatedSection(sectionKey, data.translatedText);
-                toast({ title: t('builder.Section.toasts.translateSuccess') });
-            },
-            onError: (error) => {
-                const isCreditError = error.message.toLowerCase().includes('credit');
-                toast({
-                    title: t('builder.Section.toasts.translateFailed'),
-                    description: isCreditError ? t('builder.toasts.insufficientCredits') : error.message,
-                    variant: 'destructive'
-                });
-            }
-        });
-    }
+    const { t, locale, translatedContent, translateMutation, handleTranslate } = useTranslationViewLogic(sectionKey, originalContent);
 
     return (
         <div className="space-y-4">
@@ -138,118 +84,28 @@ const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionN
 }
 
 export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: SectionProps) => {
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const [localContent, setLocalContent] = useState(content);
-    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
-    const [diff, setDiff] = useState<DiffPart[] | null>(null);
-    const [showAudioPlayer, setShowAudioPlayer] = useState(false);
-    const [audioSrc, setAudioSrc] = useState<string | null>(null);
-    const { toast } = useToast();
-    const { firebaseUser, refetchUser } = useAuth();
-    const { t } = useLocalization();
-    const ttsMutation = useTextToSpeech();
-    
-    const rewriteMutation = useWritingTool('/api/writing-tools/rewrite-text');
-    const humanizeMutation = useWritingTool('/api/writing-tools/humanize');
-
-    useEffect(() => {
-        setLocalContent(content);
-    }, [content])
-
-
-    const manipulateMutation = useMutation({
-        mutationFn: manipulateTextApi,
-        onSuccess: (data) => {
-            setAiSuggestion(data.rewrittenText);
-            setDiff(computeDiff(content, data.rewrittenText));
-            refetchUser();
-            toast({ title: t('builder.Section.toasts.suggestionReadyTitle'), description: t('builder.Section.toasts.suggestionReadyDesc') });
-        },
-        onError: (error: Error) => {
-            const isCreditError = error.message.toLowerCase().includes('credit');
-            toast({
-                title: isCreditError ? t('builder.toasts.insufficientCredits') : t('builder.toasts.generationFailed'),
-                description: error.message,
-                variant: "destructive"
-            });
-        },
-    });
-
-    const handleRewriteAction = (style: string) => {
-        setAiSuggestion(null);
-        setDiff(null);
-        rewriteMutation.mutate({ text: content, style }, {
-            onSuccess: (data: any) => {
-                setAiSuggestion(data.rewrittenText);
-                setDiff(computeDiff(content, data.rewrittenText));
-            },
-            onError: (error) => toast({ title: t('builder.Section.toasts.rewriteFailed'), description: error.message, variant: "destructive"})
-        });
-    }
-
-    const handleHumanizeAction = () => {
-        setAiSuggestion(null);
-        setDiff(null);
-        humanizeMutation.mutate({ text: content }, {
-            onSuccess: (data: any) => {
-                setAiSuggestion(data.humanizedText);
-                setDiff(computeDiff(content, data.humanizedText));
-            },
-            onError: (error) => toast({ title: t('builder.Section.toasts.humanizeFailed'), description: error.message, variant: "destructive"})
-        });
-    }
-
-    const isProcessingAi = manipulateMutation.isPending || ttsMutation.isPending || rewriteMutation.isPending || humanizeMutation.isPending;
-
-    // Effect to play audio when src changes
-    useEffect(() => {
-        if (audioSrc && showAudioPlayer && audioRef.current) {
-            audioRef.current.play().catch(e => console.error("Audio playback failed:", e));
-        }
-    }, [audioSrc, showAudioPlayer]);
-
-
-    const handleAiAction = async (command: string) => {
-        if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), variant: "destructive" });
-            return;
-        }
-        setAiSuggestion(null);
-        setDiff(null);
-        const token = await firebaseUser.getIdToken();
-        const data = { textToManipulate: content, command };
-        manipulateMutation.mutate({ data, token });
-    };
-
-    const handleReadAloud = () => {
-        if (audioSrc) {
-            setShowAudioPlayer(true);
-            return;
-        }
-        ttsMutation.mutate({ text: content }, {
-            onSuccess: (data) => {
-                setAudioSrc(data.audioDataUri);
-                setShowAudioPlayer(true);
-                toast({ title: t('builder.Section.toasts.ttsSuccessTitle'), description: t('builder.Section.toasts.ttsSuccessDesc')});
-            },
-        });
-    };
-
-    const handleAcceptSuggestion = () => {
-        if (aiSuggestion !== null) {
-            onUpdate(sectionKey, aiSuggestion);
-            setAiSuggestion(null);
-            setDiff(null);
-        }
-    };
-
-    const handleRejectSuggestion = () => {
-        setAiSuggestion(null);
-        setDiff(null);
-    };
-
-    const { words, chars } = calculateCounts(content);
-    const processedContent = processPlantUml(content);
+    const {
+        audioRef,
+        localContent,
+        setLocalContent,
+        aiSuggestion,
+        diff,
+        showAudioPlayer,
+        setShowAudioPlayer,
+        audioSrc,
+        t,
+        isProcessingAi,
+        ttsMutation,
+        handleRewriteAction,
+        handleHumanizeAction,
+        handleAiAction,
+        handleReadAloud,
+        handleAcceptSuggestion,
+        handleRejectSuggestion,
+        words,
+        chars,
+        processedContent,
+    } = useSectionLogic(sectionKey, content, onUpdate);
 
     return (
         <Tabs defaultValue="view">
