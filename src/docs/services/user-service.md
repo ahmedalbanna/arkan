@@ -1,4 +1,3 @@
-
 This code defines the service layer for fetching user profile data.
 
 **1. Purpose**

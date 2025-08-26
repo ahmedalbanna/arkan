@@ -1,4 +1,3 @@
-
 This code defines custom React hooks using TanStack Query for managing templates (proposal, report, and presentation templates).
 
 **1. Purpose**
@@ -7,7 +6,7 @@ This code defines custom React hooks using TanStack Query for managing templates
 
 **2. Key Concepts**
 
--   **Service Layer (`src/services/template-service.ts`)**: Contains all the `fetch` calls to the `/api/admin/templates/*` endpoints. It handles the raw network communication for fetching and updating proposal, report, and presentation templates.
+-   **Service Layer (`src/services/template-service.ts`)**: Contains all the `fetch` calls to the `/api/templates/*` endpoints. It handles the raw network communication for fetching and updating proposal, report, and presentation templates.
 -   **Hook Layer (`src/hooks/use-templates.ts`)**: This file uses `useQuery` and `useMutation` from TanStack Query to wrap the service functions. It is responsible for caching the template data, handling mutations, and providing UI feedback via toasts.
 -   **Authentication (`src/lib/authUtils.ts`)**: The mutation hooks use the `getAuthenticatedToken` utility to get the admin's auth token for secure API requests.
 -   **Query Keys (`src/lib/query-keys.ts`)**: The `templateKeys` factory provides structured and consistent query keys, making it easy to manage the cache for different template types (e.g., `templateKeys.proposals()`, `templateKeys.reports()`).
@@ -19,7 +18,6 @@ This code defines custom React hooks using TanStack Query for managing templates
     -   Each mutation calls its corresponding `update...` function from the `template-service`.
     -   On success, they invalidate the appropriate query in the cache (e.g., `queryClient.invalidateQueries({ queryKey: templateKeys.proposals() })`) to ensure the UI is refreshed with the latest data.
     -   They also display a success toast to confirm the update.
--   **`useCreate...Template()`** and **`useDelete...Template()`** hooks also exist for creating and deleting custom templates.
 
 **In summary:**
 

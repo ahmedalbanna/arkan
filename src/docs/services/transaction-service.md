@@ -1,9 +1,8 @@
-
 This code defines the service layer for handling payment transaction data, specifically for administrative actions.
 
 **1. Purpose**
 
-- The `transaction-service.ts` file is responsible for the raw `fetch` calls to the payment-related API endpoints, such as `/api/admin/transactions/pending` and `/api/admin/verify-payment`.
+- The `transaction-service.ts` file is responsible for the raw `fetch` calls to the payment-related API endpoints, such as `/api/transactions/pending` and `/api/verify-payment`.
 
 **2. Key Concepts**
 
@@ -15,3 +14,7 @@ This code defines the service layer for handling payment transaction data, speci
 
 -   **`getPendingTransactions(params)`**: Fetches a paginated list of transactions with a 'pending' status.
 -   **`verifyPayment(variables, token)`**: Sends a request to the backend to either approve or reject a specific transaction.
+
+**In summary:**
+
+The `transaction-service.ts` file provides a clean and secure interface for interacting with the transaction API. This separation allows the corresponding hooks to focus on the application state and user feedback, promoting a maintainable and well-structured codebase.
