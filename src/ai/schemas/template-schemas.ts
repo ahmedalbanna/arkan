@@ -63,7 +63,8 @@ export const UpdateProposalTemplateSchema = ProposalTemplateSchema.omit({ id: tr
 
 // Report Generation Template
 export const ReportGenerationTemplateSchema = BaseTemplateSchema.extend({
-  agentIds: z.array(z.string()).min(1, 'At least one agent must be selected.'),
+  sectionIds: z.array(z.string()).min(1, 'At least one agent must be selected.'),
+  isDefault: z.boolean().optional(),
 });
 export const CreateReportTemplateSchema = ReportGenerationTemplateSchema.omit({ id: true }).extend({
     id: z.string().min(3).regex(/^[a-z0-9-]+$/),
@@ -75,6 +76,7 @@ export const UpdateReportTemplateSchema = ReportGenerationTemplateSchema.omit({ 
 export const PresentationGenerationTemplateSchema = BaseTemplateSchema.extend({
   primaryAgentId: z.string(),
   relevantReportSectionIds: z.array(z.string()).optional(),
+  isDefault: z.boolean().optional(),
 });
 export const CreatePresentationTemplateSchema = PresentationGenerationTemplateSchema.omit({ id: true }).extend({
     id: z.string().min(3).regex(/^[a-z0-9-]+$/),

@@ -10,7 +10,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { getAgent } from '@/lib/db/queries';
-import type { AgentPrompt } from '@/lib/agents';
+import type { AgentPrompt } from '@/lib/types';
 import { GenerateSectionInputSchema, type GenerateSectionInput, GenerateSectionOutputSchema, type GenerateSectionOutput } from '@/ai/schemas';
 
 // Define a specific schema for the prompt's input variables for better type safety and clarity.

@@ -1,8 +1,9 @@
 
 'use client';
 
-import type { Agent, AgentPrompt } from '@/lib/agents';
+import { Agent } from '@/hooks/use-agents';
 import type { GuidelineState } from '@/hooks/useReportStore';
+import { AgentPrompt } from './types';
 
 /**
  * Extracts the selected default and custom guidelines for a given agent based on the UI state.

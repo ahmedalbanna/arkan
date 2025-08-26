@@ -7,7 +7,7 @@ import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable';
 import { cn } from '@/lib/utils';
 import { useAgents } from '@/hooks/use-agents';
-import { Agent } from '@/lib/agents';
+import { Agent } from '@/hooks/use-agents';
 import { useAuth } from '@/context/AuthContext';
 import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks/useChatStore';
 import { createConversationApi } from '@/services/chat-service';
@@ -15,8 +15,8 @@ import { toast } from '@/hooks/use-toast';
 
 export default function ChatInterface() {
   const { agents, isLoaded } = useAgents();
-  const { 
-    selectedChat, 
+  const {
+    selectedChat,
     setSelectedChat,
     chats,
     createConversation,
@@ -24,7 +24,7 @@ export default function ChatInterface() {
     isInitialized
   } = useChatStore();
   const { firebaseUser, userProfile } = useAuth();
-  
+
   useEffect(() => {
     if (firebaseUser && !isInitialized) {
         initialize(firebaseUser);
@@ -48,7 +48,7 @@ export default function ChatInterface() {
         toast({ title: "Authentication Error", description: "You must be logged in to chat with an agent.", variant: "destructive" });
         return;
     }
-    
+
     // Check if a chat with this agent already exists
     const existingChat = chats.find(c => c.agent?.id === agent.id);
     if (existingChat) {
@@ -97,7 +97,7 @@ export default function ChatInterface() {
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={75}>
-        <ConversationView 
+        <ConversationView
             chat={selectedChat}
         />
       </ResizablePanel>

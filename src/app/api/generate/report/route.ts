@@ -4,8 +4,9 @@
 import { z } from 'zod';
 import { generateReportSection } from '@/ai/flows/generate-report-section';
 import { deductCredit } from '@/services/credit-service';
-import { logGeneration } from '@/services/generation-service';
-import { reportSections } from '@/lib/sections-templates';
+import { logGeneration } from '@/services/generation-service'; // Assuming this is server-side
+import { adminDb } from '@/lib/firebase/server-init'; // Assuming you have a server-side Firebase Admin SDK init
+import type { SectionName } from '@/ai/schemas';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { GenerateSectionInputSchema } from '@/ai/schemas';
 
@@ -19,7 +20,17 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const agentInput = validation.data;
-    const agentInfo = reportSections[agentInput.sectionToGenerate];
+
+    // Fetch section info dynamically from Firestore
+    const sectionDocRef = adminDb.collection('sections').doc(agentInput.sectionToGenerate);
+    const sectionDoc = await sectionDocRef.get();
+
+    if (!sectionDoc.exists) {
+        return handleApiError({ message: 'Section not found in database.' }, 404);
+    }
+
+    const agentInfo = sectionDoc.data() as { agentId: string; title: string }; // Assuming these fields exist
+    // const agentInfo = reportSections[agentInput.sectionToGenerate]; // Old static reference
 
     if (!agentInfo) {
         return handleApiError({ message: 'Unknown section requested.' }, 400);

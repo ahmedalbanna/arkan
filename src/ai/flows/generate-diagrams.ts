@@ -9,7 +9,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 import { getAgent } from '@/lib/db/queries';
-import type { AgentPrompt } from '@/lib/agents';
+import type { AgentPrompt } from '@/lib/types';
 import { type GenerateDiagramInput, GenerateDiagramOutputSchema, type GenerateDiagramOutput } from '@/ai/schemas';
 
 export async function generateDiagram(input: GenerateDiagramInput): Promise<GenerateDiagramOutput> {

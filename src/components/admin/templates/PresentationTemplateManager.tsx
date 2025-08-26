@@ -3,7 +3,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { templateKeys } from '@/lib/query-keys';
-import { useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate } from '@/hooks/use-templates';
+import { useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks/use-templates';
 import { type PresentationGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,13 +17,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
-import { AGENTS } from '@/lib/agents';
+
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useSections } from '@/hooks/use-sections';
+import { useLocalization } from '@/context/LocalizationContext';
+import { toast } from '@/hooks/use-toast';
+
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -41,10 +43,11 @@ const createPresentationTemplateSchema = presentationTemplateSchema.omit({ id: t
 type CreatePresentationFormValues = z.infer<typeof createPresentationTemplateSchema>;
 
 
-const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
-
 
 function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+    const { t } = useLocalization();
+    const { data: sections } = useSections();
+    const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
     const form = useForm<PresentationFormValues>({
         resolver: zodResolver(presentationTemplateSchema),
         defaultValues: {
@@ -53,7 +56,7 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
         },
     });
 
-    const isDefaultTemplate = PRESENTATION_GENERATION_TEMPLATES.some(t => t.id === template.id);
+    const isDefaultTemplate = template.isDefault;
 
     return (
         <Form {...form}>
@@ -82,28 +85,28 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
                                 <p className="text-sm text-muted-foreground">Select which report sections are most relevant for this presentation type.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                {reportAgents.map((agent) => (
+                                {reportSections.map((section) => (
                                     <FormField
-                                        key={agent.id}
+                                        key={section.id}
                                         control={form.control}
                                         name="relevantReportSectionIds"
                                         render={({ field }) => {
                                             return (
                                                 <FormItem
-                                                    key={agent.id}
+                                                    key={section.id}
                                                     className="flex flex-row items-start space-x-3 space-y-0"
                                                 >
                                                     <FormControl>
                                                         <Checkbox
-                                                            checked={field.value?.includes(agent.id)}
+                                                            checked={field.value?.includes(section.id)}
                                                             onCheckedChange={(checked) => {
                                                                 return checked
-                                                                    ? field.onChange([...(field.value || []), agent.id])
-                                                                    : field.onChange(field.value?.filter((value) => value !== agent.id));
+                                                                    ? field.onChange([...(field.value || []), section.id])
+                                                                    : field.onChange(field.value?.filter((value) => value !== section.id));
                                                             }}
                                                         />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal">{agent.name}</FormLabel>
+                                                    <FormLabel className="font-normal">{section.title}</FormLabel>
                                                 </FormItem>
                                             );
                                         }}
@@ -146,10 +149,11 @@ function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDele
 }
 
 function CreatePresentationTemplateDialog() {
+    const { t } = useLocalization();
     const [isOpen, setIsOpen] = useState(false);
-    const { toast } = useToast();
     const createMutation = useCreatePresentationTemplate();
-
+    const { data: sections } = useSections();
+    const reportSections = useMemo(() => (sections || []).filter(s => s.type === 'report'), [sections]);
     const form = useForm<CreatePresentationFormValues>({
         resolver: zodResolver(createPresentationTemplateSchema),
         defaultValues: {
@@ -160,6 +164,7 @@ function CreatePresentationTemplateDialog() {
         },
     });
 
+
      const handleSave = (data: CreatePresentationFormValues) => {
         createMutation.mutate(data, {
             onSuccess: () => {
@@ -168,13 +173,7 @@ function CreatePresentationTemplateDialog() {
                 form.reset();
             },
             onError: (error: any) => {
-                 if (error.errors) {
-                    for (const key in error.errors) {
-                        form.setError(key as keyof CreatePresentationFormValues, { message: error.errors[key][0] });
-                    }
-                } else {
-                    toast({ title: 'Error', description: error.message, variant: 'destructive' });
-                }
+                // Error handling is now in the hook
             }
         });
     };
@@ -221,21 +220,21 @@ function CreatePresentationTemplateDialog() {
                                 <FormItem>
                                     <FormLabel className="text-base">Relevant Report Sections</FormLabel>
                                     <div className="grid grid-cols-2 gap-4">
-                                        {reportAgents.map((agent) => (
-                                            <FormField key={agent.id} control={form.control} name="relevantReportSectionIds"
+                                        {reportSections.map((section) => (
+                                            <FormField key={section.id} control={form.control} name="relevantReportSectionIds"
                                                 render={({ field }) => (
-                                                    <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
+                                                    <FormItem key={section.id} className="flex flex-row items-start space-x-3 space-y-0">
                                                         <FormControl>
                                                             <Checkbox
-                                                                checked={field.value?.includes(agent.id)}
+                                                                checked={field.value?.includes(section.id)}
                                                                 onCheckedChange={(checked) => (
                                                                     checked
-                                                                        ? field.onChange([...(field.value || []), agent.id])
-                                                                        : field.onChange(field.value?.filter((value) => value !== agent.id))
+                                                                        ? field.onChange([...(field.value || []), section.id])
+                                                                        : field.onChange(field.value?.filter((value) => value !== section.id))
                                                                 )}
                                                             />
                                                         </FormControl>
-                                                        <FormLabel className="font-normal">{agent.name}</FormLabel>
+                                                        <FormLabel className="font-normal">{section.title}</FormLabel>
                                                     </FormItem>
                                                 )}
                                             />
@@ -261,17 +260,8 @@ function CreatePresentationTemplateDialog() {
 
 
 export function PresentationTemplateManager() {
-    const { firebaseUser } = useAuth();
-
-    const { data: templates, isLoading, isError } = useQuery({
-        queryKey: templateKeys.presentations(),
-        queryFn: async () => {
-            if (!firebaseUser) return [];
-            const { fetchPresentationTemplates } = await import('@/services/template-service');
-            return fetchPresentationTemplates(await firebaseUser.getIdToken());
-        },
-        enabled: !!firebaseUser,
-    });
+    const { t } = useLocalization();
+    const { data: templates, isLoading, isError } = usePresentationTemplates();
 
     const updateMutation = useUpdatePresentationTemplate();
     const deleteMutation = useDeletePresentationTemplate();

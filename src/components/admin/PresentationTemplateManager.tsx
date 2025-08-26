@@ -16,13 +16,15 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
-import { AGENTS } from '@/lib/agents';
+
 import { Skeleton } from '../ui/skeleton';
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '../ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
+import { useAgents } from '@/hooks/use-agents';
+const { agents, isLoaded } = useAgents();
 
 const presentationTemplateSchema = z.object({
   id: z.string(),
@@ -40,7 +42,7 @@ const createPresentationTemplateSchema = presentationTemplateSchema.omit({ id: t
 type CreatePresentationFormValues = z.infer<typeof createPresentationTemplateSchema>;
 
 
-const reportAgents = AGENTS.filter(a => a.category === 'Report Generation');
+const reportAgents = agents.filter(a => a.category === 'Report Generation');
 
 
 function PresentationTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: PresentationGenerationTemplate, onSave: (data: PresentationFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {

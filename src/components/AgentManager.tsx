@@ -2,7 +2,7 @@
 'use client';
 
 import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks/use-agents';
-import { AGENTS, type Agent, type AgentData } from '@/lib/agents';
+import { type Agent, type AgentData } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,8 @@ import { useState, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { CreateAgentDialog, CreateCategoryDialog } from './admin/users/CreateAgentDialog';
 import { Input } from './ui/input';
+
+// ...
 
 
 function AgentSkeleton() {
@@ -33,8 +35,9 @@ function AgentCard({ agent }: { agent: Agent }) {
   const { id, name, description, isEnabled } = agent;
   const updateAgentMutation = useUpdateAgent();
   const { t } = useLocalization();
+  const { agents, isLoaded } = useAgents();
 
-  const localAgentConfig = AGENTS.find(a => a.id === id);
+  const localAgentConfig = agents.find(a => a.id === id);
   const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
 
   const handleToggle = (checked: boolean) => {
@@ -81,7 +84,7 @@ export default function AgentManager() {
       acc[cat.id] = cat.name;
       return acc;
     }, {} as Record<string, string>);
-    
+
     const filtered = agents.filter(agent => {
         const lowercasedTerm = searchTerm.toLowerCase();
         const categoryName = categoryMap[agent.category] || agent.category;

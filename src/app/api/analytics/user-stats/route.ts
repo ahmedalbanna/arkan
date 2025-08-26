@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
 import { adminDb } from '@/lib/firebase/server-init';
-import { AGENTS } from '@/lib/agents';
+
 import { getUserProfile } from '@/lib/db/queries';
 
 async function verifyUser(request: Request) {
@@ -46,15 +46,17 @@ export async function GET(request: Request) {
             const data = doc.data();
             const agentId = data.agentId;
             agentUsage[agentId] = (agentUsage[agentId] || 0) + 1;
-            creditsUsed += data.creditCost || 0; // Sum the credit cost from each log
+            creditsUsed += data.creditCost || 0;
         });
 
-        const agentUsageChartData = Object.entries(agentUsage)
-            .map(([agentId, count]) => ({
-                name: AGENTS.find(a => a.id === agentId)?.name || agentId,
+        const agentUsagePromises = Object.entries(agentUsage).map(async ([agentId, count]) => ({
+                name: await adminDb.collection('agents').doc(agentId).get().then(doc => doc.data()?.name || 'Unknown'),
+                agentId,
                 count,
-            }))
-            .sort((a, b) => b.count - a.count)
+            }));
+
+        const agentUsageChartData = (await Promise.all(agentUsagePromises))
+            .sort((a, b) => b.count - a.count) // Sort after all promises are resolved
             .slice(0, 10);
 
         const recentActivity = generationsSnapshot.docs.slice(0, 5).map(doc => ({

@@ -16,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AGENTS, AgentCategory } from '@/lib/agents';
+
 import { Checkbox } from '../ui/checkbox';
 import { Skeleton } from '../ui/skeleton';
 import { useState, useMemo } from 'react';
@@ -28,6 +28,8 @@ import { useAgents } from '@/hooks/use-agents';
 import { ScrollArea } from '../ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '../ui/label';
+import { AgentCategory } from '@/lib/types';
+const { agents, isLoaded } = useAgents();
 
 const reportTemplateSchema = z.object({
     id: z.string(),
@@ -44,7 +46,7 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
 
-const reportAgents = AGENTS.filter(a => a.category === AgentCategory.ReportGeneration);
+const reportAgents = agents.filter(a => a.category === AgentCategory.ReportGeneration);
 
 
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
@@ -173,7 +175,7 @@ function CreateReportTemplateDialog() {
         [agents, searchTerm]);
 
     const handleCreate = (data: CreateReportFormValues) => {
-        createMutation.mutate(data, {
+ createMutation.mutate({ ...data, sectionIds: data.agentIds }, {
             onSuccess: () => {
                 toast({ title: 'Success', description: 'New report template created.' });
                 setIsOpen(false);

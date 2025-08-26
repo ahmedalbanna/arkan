@@ -9,10 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramSections } from '@/lib/sections-templates';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { toast, useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -30,7 +28,7 @@ import { Skeleton } from '../ui/skeleton';
 import { ScrollArea } from '../ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../generate/ContextSelector';
-import { reportSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
@@ -40,9 +38,6 @@ import { evaluateContextApi } from '@/services/report-service';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-
-
-const orderedDiagrams = Object.keys(diagramSections) as DiagramType[];
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -82,6 +77,7 @@ function ToolsSkeleton() {
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
     const { t } = useLocalization();
+    const { reportSections, diagramSections } = useSectionStore();
     if (!plan) return null;
 
     return (
@@ -98,14 +94,14 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                         {plan.configs.map(config => (
                             <Card key={config.section} className="bg-muted/50">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{reportSections[config.section].title}</CardTitle>
+                                    <CardTitle className="text-lg font-headline">{reportSections[config.section]?.title || config.section}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm">
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
                                             {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{reportSections[d as SectionNameType]?.title || d}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as DiagramType]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
@@ -133,6 +129,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
+    const { reportSections, diagramSections } = useSectionStore();
     const { isDisabled, isGenerating, onGenerate, onCollapseToggle } = props;
 
     const { proposal } = useBuilderStore();
@@ -193,7 +190,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.sections[key] && sections[key as SectionNameType]) {
                 const sectionKey = key as SectionNameType;
                 sourceDocuments.push({
-                    fileName: t(reportSections[sectionKey].title),
+                    fileName: t(reportSections[sectionKey]?.title || sectionKey),
                     content: sections[sectionKey]!
                 });
             }
@@ -203,7 +200,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
                 const diagramKey = key as DiagramType;
                 sourceDocuments.push({
-                    fileName: `Diagram: ${t(diagramSections[diagramKey].title)}`,
+                    fileName: `Diagram: ${t(diagramSections[diagramKey]?.title || diagramKey)}`,
                     content: diagrams[diagramKey]!.plantUmlCode
                 });
             }

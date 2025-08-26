@@ -6,7 +6,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { useReportStore } from '@/hooks/useReportStore';
-import { diagramSections, reportSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { DiagramType, SectionName } from '@/ai/schemas';
 import { ScrollArea } from '../ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
@@ -24,6 +24,8 @@ export function ContextViewer({ itemKey }: ContextViewerProps) {
     const { projectPlan } = useProjectPlanStore();
     const { sections, externalContext, contextSelection } = useReportStore();
     const { diagrams } = useDiagramStore();
+    const { reportSections } = useSectionStore();
+    const { diagramSections } = useSectionStore();
 
     const currentSelection = contextSelection[itemKey] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 

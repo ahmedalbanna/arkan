@@ -8,7 +8,7 @@ import { useAgents } from '@/hooks/use-agents';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { AGENTS } from '@/lib/agents';
+
 import { AlertCircle, Search } from 'lucide-react';
 import type { AgentEditorFormValues } from './AgentEditor';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
@@ -57,7 +57,7 @@ export default function ContextTab() {
       <div className="space-y-4 rounded-lg border p-4">
         <div className="relative">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input 
+            <Input
                 placeholder={t('agentEditor.searchAgentsPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -79,7 +79,7 @@ export default function ContextTab() {
                                     control={control}
                                     name="prompt.defaultContext"
                                     render={({ field }) => {
-                                        const Icon = AGENTS.find(a => a.id === agent.id)?.icon || AlertCircle;
+                                        const Icon = agents.find(a => a.id === agent.id)?.icon || AlertCircle;
                                         return (
                                             <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
                                                 <FormControl>

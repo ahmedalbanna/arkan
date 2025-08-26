@@ -5,7 +5,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
+import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';

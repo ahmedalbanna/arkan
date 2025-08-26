@@ -8,10 +8,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { diagramSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { DiagramTypeSchema, SectionName, type DiagramType } from '@/ai/schemas';
 import { Loader2, Sparkles, GitGraph, PanelLeftClose } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
 import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -37,7 +36,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
     const { toast } = useToast();
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
-    const explainMutation = useExplainDiagram();
+    const explainMutation = useExplainDiagram();    const { diagramSections, getIconComponent } = useSectionStore();
 
     const { setDiagram, setDiagramExplanation } = useDiagramStore();
 
@@ -128,10 +127,13 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
             <CardContent>
                 <Accordion type="multiple" className="w-full space-y-1">
                     {orderedDiagrams.map((key) => {
-                        const agent = agents.find(a => a.id === diagramSections[key].agentId);
+                        const diagramConfig = diagramSections[key];
+                        if (!diagramConfig) return null;
+                        const agent = agents.find(a => a.id === diagramConfig.agentId);
                         if (!agent) return null;
 
-                        const { title, icon: Icon, agentId } = diagramSections[key];
+                        const { title, agentId } = diagramConfig;
+                        const Icon = getIconComponent(diagramConfig.icon) || GitGraph;
                         const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                         const currentSelection = useReportStore.getState().contextSelection[key] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
                         const hasSelectedContext = !!useBuilderStore.getState().proposal || !!useProjectPlanStore.getState().projectPlan || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v) || (useReportStore.getState().externalContext.length > 0 && currentSelection.externalContext.some(v => v));
@@ -140,7 +142,7 @@ export const DiagramGenerationTools = ({ onCollapseToggle }: DiagramGenerationTo
                             <AccordionItem value={key} key={key}>
                                 <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                     <div className="flex items-center gap-2">
-                                        <Icon className="h-4 w-4" /> {t(title)}
+                                        <Icon/> {t(title)}
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent className="space-y-4 p-4">

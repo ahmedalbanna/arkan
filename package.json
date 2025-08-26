@@ -14,7 +14,9 @@
     "test:watch": "jest --watch",
     "seed:firestore": "tsx src/lib/db/seed.ts",
     "seed:templates": "tsx src/lib/db/seed-templates.ts",
-    "seed:categories": "tsx src/lib/db/seed-agent-categories.ts"
+    "seed:categories": "tsx src/lib/db/seed-agent-categories.ts",
+    "seed:sections": "tsx src/lib/db/seed-sections.ts",
+    "seed:agents": "tsx scripts/seed-agents.ts"
   },
   "dependencies": {
     "@dataconnect/generated": "file:dataconnect-generated/js/example-connector",

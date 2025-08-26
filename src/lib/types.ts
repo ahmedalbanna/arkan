@@ -5,6 +5,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
 import { z } from 'zod';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { LucideIcon } from 'lucide-react';
 
 
 export type {
@@ -20,7 +21,7 @@ export type {
 
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
-export type { Agent, AgentData, AgentPrompt, AgentKnowledgeSource } from '@/lib/agents';
+
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/schemas';
@@ -45,7 +46,66 @@ export type ReportGenerationTemplate = z.infer<typeof ReportGenerationTemplateSc
 export type PresentationGenerationTemplate = z.infer<typeof PresentationGenerationTemplateSchema>;
 export type PptxStyleOptions = z.infer<typeof PptxTemplateSchema>['styles'];
 
+export enum AgentCategory {
+  ContentGeneration = 'content-generation',
+  ProposalGeneration = 'proposal-generation',
+  ReportGeneration = 'report-generation',
+  DiagramGeneration = 'diagram-generation',
+  PresentationGeneration = 'presentation-generation',
+  CodeGeneration = 'code-generation',
+  Marketing = 'marketing',
+  Legal = 'legal',
+  AdminTools = 'admin-tools',
+  AgentManagement = 'agent-management',
+}
 
+export interface AgentCategoryDetails {
+  name: string;
+  icon: LucideIcon;
+  description: string;
+  pageUrl: string;
+}
+
+export interface AgentGuideline {
+  text: string;
+  isDefault: boolean;
+}
+
+export interface AgentKnowledgeSource {
+  name: string;
+  type: 'file' | 'text' | 'web';
+  content: string; // content, data URI, or URL
+}
+
+export interface AgentPrompt {
+  base: string;
+  guidelines?: AgentGuideline[];
+  jsonStructure?: any;
+  defaultContext?: ('proposal' | 'projectPlan' | string)[]; // Array of agent IDs or keywords
+}
+
+export interface AgentData {
+  id: string;
+  name: string;
+  description: string;
+  category: AgentCategory | string;
+  pageUrl: string;
+  isEnabled: boolean;
+  prompt: AgentPrompt | string; // Can be simple string or complex object
+  toolIds?: string[];
+  knowledge?: AgentKnowledgeSource[];
+  introduction?: string;
+  placeholder?: string;
+  conversationStarters?: { value: string }[];
+  tone?: string;
+  language?: string;
+  model?: string;
+  isDefault?: boolean;
+}
+
+export interface Agent extends AgentData {
+  icon: LucideIcon;
+}
 export interface Notification {
   id: string;
   title: string;

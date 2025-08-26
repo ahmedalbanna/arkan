@@ -1,11 +1,11 @@
 
 /**
  * Query Key Factories for React Query
- * 
+ *
  * This file centralizes the creation of query keys to ensure consistency
  * and prevent typos. Using factories makes it easy to manage complex
  * keys and invalidate queries from anywhere in the application.
- * 
+ *
  * @see https://tkdodo.eu/blog/effective-react-query-keys
  */
 
@@ -88,4 +88,10 @@ export const homeworkKeys = {
 export const notificationKeys = {
   all: ['notifications'] as const,
   lists: () => [...notificationKeys.all, 'list'] as const,
+};
+
+export const sectionKeys = {
+  all: ['sections'] as const,
+  lists: () => [...sectionKeys.all, 'list'] as const,
+  detail: (id: string) => [...sectionKeys.all, 'detail', id] as const,
 };

@@ -3,8 +3,7 @@
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { Agent, AgentData } from '@/lib/agents';
-import { AGENTS as defaultAgents } from '@/lib/agents';
+import type { AgentData } from '@/lib/types';
 import type { ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
 
 export type UserRole = 'user' | 'admin';
@@ -246,7 +245,7 @@ export async function getUserTeams(userId: string) {
     });
 
     const teams = (await Promise.all(teamPromises)).filter(Boolean);
-    
+
     // Sort teams by most recent activity (if a field for that exists) or creation date
     teams.sort((a, b) => new Date(b!.createdAt).getTime() - new Date(a!.createdAt).getTime());
 
@@ -295,16 +294,12 @@ export async function getAgent(agentId: string): Promise<AgentData | null> {
             return agentDoc.data() as AgentData;
         }
 
-        // Fallback to default if not in DB, which is useful during development
-        // or if seeding hasn't occurred.
-        const defaultAgent = defaultAgents.find(a => a.id === agentId);
-        return defaultAgent || null;
+        console.warn(`Agent with ID '${agentId}' not found in Firestore.`);
+        return null;
 
     } catch (error) {
         console.error(`Error fetching agent configuration for '${agentId}':`, error);
-        // Fallback to local config on error to ensure app stability
-        const defaultAgent = defaultAgents.find(a => a.id === agentId);
-        return defaultAgent || null;
+        return null;
     }
 }
 

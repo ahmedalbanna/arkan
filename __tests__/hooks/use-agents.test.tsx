@@ -2,9 +2,9 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAgents, useAgent } from '@/hooks/use-agents';
-import { AGENTS } from '@/lib/agents';
 import * as authUtils from '@/lib/authUtils';
 import * as agentService from '@/services/agent-service';
+const { agents, isLoaded } = useAgents();
 
 // Mock dependencies
 jest.mock('@/lib/authUtils');
@@ -35,32 +35,32 @@ describe('useAgents Hook', () => {
     });
 
     it('fetches agents from the API and returns them', async () => {
-        mockedFetchAgents.mockResolvedValue(AGENTS);
+        mockedFetchAgents.mockResolvedValue(agents);
 
         const { result } = renderHook(() => useAgents(), { wrapper });
-        
+
         await waitFor(() => expect(result.current.isLoaded).toBe(true));
-        
-        expect(result.current.agents).toEqual(AGENTS);
+
+        expect(result.current.agents).toEqual(agents);
         expect(result.current.isError).toBe(false);
         expect(mockedFetchAgents).toHaveBeenCalledWith('fake-token');
     });
-    
+
     it('handles API errors gracefully', async () => {
         mockedFetchAgents.mockRejectedValue(new Error('API is down'));
-        
+
         const { result } = renderHook(() => useAgents(), { wrapper });
 
         await waitFor(() => expect(result.current.isLoaded).toBe(true));
 
         // It should return default agents as a fallback and mark as an error
-        expect(result.current.agents).toEqual(AGENTS);
+        expect(result.current.agents).toEqual(agents);
         expect(result.current.isError).toBe(true);
     });
 });
 
 describe('useAgent Hook', () => {
-    const testAgent = AGENTS[0];
+    const testAgent = agents[0];
     const agentId = testAgent.id;
 
     beforeEach(() => {
@@ -75,7 +75,7 @@ describe('useAgent Hook', () => {
         const { result } = renderHook(() => useAgent(agentId), { wrapper });
 
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
-        
+
         expect(result.current.data).toEqual(testAgent);
         expect(mockedFetchAgent).toHaveBeenCalledWith(agentId, 'fake-token');
     });

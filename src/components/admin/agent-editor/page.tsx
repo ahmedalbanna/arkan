@@ -3,9 +3,10 @@
 
 import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
+import { AgentCategory } from '@/lib/types';
 import { AlertCircle, Bot } from 'lucide-react';
 import React from 'react';
-import { AgentCategory } from '@/lib/agents';
+
 
 export default function EditAgentPage({ params }: { params: { id: string } }) {
   const { t } = useLocalization();

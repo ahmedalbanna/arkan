@@ -1,7 +1,7 @@
 // src/app/api/agents/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { AGENTS as defaultAgents, type AgentKnowledgeSource } from '@/lib/agents';
+
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { AgentPromptSchema } from '@/ai/schemas/template-schemas';
 
@@ -9,31 +9,10 @@ import { AgentPromptSchema } from '@/ai/schemas/template-schemas';
 export const GET = withAuth(async () => {
     try {
         const agentsCollection = adminDb.collection('agents');
-        let snapshot = await agentsCollection.get();
+        let agents = await agentsCollection.get();
 
-        // Lazy seeding: If no agents exist, populate them from the default config.
-        if (snapshot.empty) {
-            const batch = adminDb.batch();
-            defaultAgents.forEach(agent => {
-                const docRef = agentsCollection.doc(agent.id);
-                // We only store data that can be modified, not the icon or other static parts.
-                const { icon, ...agentData } = agent;
-                batch.set(docRef, agentData);
-            });
-            await batch.commit();
-            snapshot = await agentsCollection.get(); // Re-fetch after seeding
-        }
-        
-        const agents = snapshot.docs.map(doc => {
-            const data = doc.data();
-            // Re-hydrate with the icon from the default config
-            const defaultAgent = defaultAgents.find(a => a.id === doc.id);
-            return {
-                ...data,
-                id: doc.id,
-                icon: defaultAgent?.icon,
-            };
-        });
+
+
 
         return createApiResponse(agents, 200);
     } catch (error) {
@@ -89,7 +68,7 @@ export const POST = withAuth(async ({ request }) => {
         };
 
         await agentRef.set(newAgent);
-        
+
         return createApiResponse({ id: agentRef.id, ...newAgent }, 201);
     } catch (error) {
         return handleApiError(error);

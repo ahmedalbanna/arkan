@@ -4,9 +4,10 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { LucideIcon } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
-import { AGENTS as defaultAgents, type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/agents';
+import { type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
 import { useAuth } from "@/context/AuthContext";
 import { UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
@@ -23,6 +24,7 @@ import {
 } from "@/services/agent-service";
 import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
 import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { useAgentStore } from "@/hooks/useAgentStore";
 
 export { Agent };
 export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
@@ -87,44 +89,17 @@ export function useCreateAgentCategory() {
 
 /**
  * Custom hook to fetch the list of all AI agents.
- * Caches the data and provides loading and error states.
- * For regular users, it returns the static default agents.
- * For admin users, it fetches the latest configurations from the database.
+ * This hook now acts as a bridge to the `useAgentStore` for components,
+ * which handles fetching and caching.
  *
  * @returns An object containing the list of agents, loading status, and error status.
  */
 export function useAgents() {
-  const { firebaseUser, userProfile } = useAuth();
-  const isAdmin = userProfile?.role === 'admin';
+  const { agents, isLoaded, error } = useAgentStore();
+  // Convert the store's agent map back to an array and map the icon component
+  const agentList = Object.values(agents).map(a => ({...a, icon: a.iconComponent as LucideIcon}));
 
-  const {
-    data: agents,
-    isLoading,
-    isError,
-  } = useQuery<Agent[]>({
-    queryKey: agentKeys.lists(),
-    queryFn: async () => {
-      // Admins fetch from the API to get the latest editable data
-      if (isAdmin) {
-          const token = await getAuthenticatedToken(firebaseUser);
-          return fetchAgentsApi(token);
-      }
-      // Regular users get the static default agent configurations
-      return Promise.resolve(defaultAgents);
-    },
-    enabled: !!firebaseUser, // Only run when the user is known
-    staleTime: isAdmin ? 1000 * 60 * 5 : Infinity, // Cache forever for regular users, 5 mins for admins
-    meta: {
-      onError: (error: Error) => {
-        if(isAdmin) {
-            handleErrorUtility(error, "Failed to fetch agents");
-        }
-        // Don't show error for regular users, as they have a fallback.
-      }
-    },
-  });
-
-  return { agents: agents || defaultAgents, isLoaded: !isLoading, isError };
+  return { agents: agentList, isLoaded, isError: !!error };
 }
 
 

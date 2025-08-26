@@ -9,10 +9,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
-import { reportSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
-import type { Agent, AgentGuideline, AgentPrompt } from '@/lib/agents';
+import { Loader2, Sparkles, Settings, Eye, PanelLeftClose, FileText } from 'lucide-react';
+import type {AgentPrompt } from '@/lib/types';
 import { toast, useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
@@ -43,9 +43,7 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Separator } from '../ui/separator';
 
-
 const orderedSections = SectionNameSchema.options;
-
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
     let instructions = [];
@@ -95,6 +93,7 @@ function ToolsSkeleton() {
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
     const { t } = useLocalization();
+    const { reportSections, diagramSections } = useSectionStore();
     if (!plan) return null;
 
     return (
@@ -111,14 +110,14 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                         {plan.configs.map(config => (
                             <Card key={config.section} className="bg-muted/50">
                                 <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{reportSections[config.section].title}</CardTitle>
+                                    <CardTitle className="text-lg font-headline">{reportSections[config.section]?.title || config.section}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3 text-sm">
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{reportSections[d as SectionNameType]?.title || d}</li>)}
+                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s as SectionNameType]?.title || s}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as DiagramType]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
@@ -152,6 +151,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const [generationPlan, setGenerationPlan] = React.useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = React.useState(false);
+    const { reportSections, getIconComponent } = useSectionStore();
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
@@ -179,7 +179,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
 
     useEffect(() => {
+        if (!selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
+            setSelectedReportTemplateId(reportTemplates[0].id);
+        }
+    }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
+
+    useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
+            if (Object.keys(reportSections).length === 0) return;
             agents.forEach(agent => {
                 const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionNameType].agentId === agent.id);
                 if (sectionKey) {
@@ -191,7 +198,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                 }
             });
         }
-    }, [agentsLoaded, agents, initializeContextSelection]);
+    }, [agentsLoaded, agents, initializeContextSelection, reportSections]);
 
     const onGenerateSection = async (section: SectionNameType) => {
         const fullState = useBuilderStore.getState().getFullState();
@@ -223,9 +230,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
             return null;
         }
 
-        const sectionsToGenerate = template.agentIds
-            .map(agentId => (Object.keys(reportSections) as SectionNameType[]).find(key => reportSections[key].agentId === agentId))
-            .filter((sectionKey): sectionKey is SectionNameType => !!sectionKey && !sections[sectionKey]);
+        const sectionsToGenerate = template.sectionIds
+            .filter((sectionId): sectionId is SectionNameType =>
+                !!reportSections[sectionId] && !sections[sectionId]);
 
         if (sectionsToGenerate.length === 0) {
             toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
@@ -278,10 +285,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     };
 
     const selectedTemplate = reportTemplates?.find(t => t.id === selectedReportTemplateId);
-    const availableSections = orderedSections.filter(key => selectedTemplate?.agentIds.includes(reportSections[key].agentId));
-    const sectionsToGenerateCount = selectedTemplate?.agentIds.filter(agentId => {
-        const sectionKey = (Object.keys(reportSections) as SectionNameType[]).find(key => reportSections[key].agentId === agentId);
-        return sectionKey && !sections[sectionKey];
+    const availableSections = orderedSections.filter(key => reportSections[key] && selectedTemplate?.sectionIds.includes(key));
+    const sectionsToGenerateCount = (selectedTemplate?.sectionIds || []).filter(sectionId => {
+        if (Object.keys(reportSections).length === 0) return false;
+        return !!reportSections[sectionId] && !sections[sectionId];
     }).length || 0;
 
     const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
@@ -332,9 +339,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                                     <Separator className="my-2" />
                                                     <p className="text-xs font-semibold mb-1">Included Agents:</p>
                                                     <ul className="list-disc pl-4 text-xs text-muted-foreground">
-                                                        {template.agentIds.map(agentId => {
-                                                            const agent = agents.find(a => a.id === agentId);
-                                                            return <li key={agentId}>{agent?.name || agentId}</li>;
+                                                        {template.sectionIds.map(sectionId => {
+                                                            const section = reportSections[sectionId as SectionNameType];
+                                                            return <li key={sectionId}>{section?.title || sectionId}</li>;
                                                         })}
                                                     </ul>
                                                 </TooltipContent>
@@ -369,7 +376,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
 
                         <Accordion type="multiple" className="w-full space-y-1">
                             {availableSections.map((key) => {
-                                const { title, icon: Icon, agentId } = reportSections[key];
+                                const sectionConfig = reportSections[key];
+                                if (!sectionConfig) return null;
+                                const { title, agentId } = sectionConfig;
+                                const Icon = getIconComponent(sectionConfig.icon) || FileText;
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 const currentSelection = contextSelection[key];
                                 const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));
@@ -378,7 +388,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                     <AccordionItem value={key} key={key}>
                                         <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
                                             <div className="flex items-center gap-2">
-                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon className="h-4 w-4" />}
+                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
                                                 {t(`${title}`)}
                                             </div>
                                         </AccordionTrigger>

@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { AgentEditorFormValues } from './AgentEditor';
-import type { AgentKnowledgeSource } from '@/lib/agents';
+import type { AgentKnowledgeSource } from '@/lib/types';
 
 
 const SourceIcon = ({ type }: { type: AgentKnowledgeSource['type'] }) => {

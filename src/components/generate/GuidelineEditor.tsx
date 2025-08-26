@@ -11,8 +11,9 @@ import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { AgentPrompt } from '@/lib/agents';
+
 import { useLocalization } from '@/context/LocalizationContext';
+import { AgentPrompt } from '@/lib/types';
 
 interface GuidelineEditorProps {
     itemKey: string;
@@ -23,7 +24,7 @@ interface GuidelineEditorProps {
 export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorProps) {
     const { t } = useLocalization();
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    
+
     const {
         guidelineState,
         customGuidelineInput,
@@ -45,6 +46,7 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
     const promptConfig = agent.prompt as AgentPrompt;
     const hasGuidelines = promptConfig.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState[itemKey];
+
 
     return (
         <>

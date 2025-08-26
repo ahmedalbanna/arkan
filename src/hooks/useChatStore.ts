@@ -7,7 +7,7 @@ import { ref, onValue, off, query, update, get as getDbData, type DataSnapshot }
 import { db } from '@/lib/firebaseConfig'; // Assuming db is your initialized database instance
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
-import { Agent } from '@/lib/agents';
+import { Agent } from '@/hooks/use-agents';
 
 
 export interface ChatMessage {

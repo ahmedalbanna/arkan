@@ -5,7 +5,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import DiagramViewer from './DiagramViewer';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { diagramSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { GitGraph, AlertCircle, Loader2, PanelRightOpen, PanelLeftClose } from 'lucide-react';
 import { DiagramGenerationTools } from './DiagramGenerationTools';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +21,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 
-const orderedDiagrams = Object.keys(diagramSections) as DiagramType[];
+
 
 function DiagramSkeleton() {
   return (
@@ -33,6 +33,8 @@ function DiagramSkeleton() {
 }
 
 export default function DiagramGenerator() {
+    const { diagramSections, getIconComponent } = useSectionStore();
+    const orderedDiagrams = Object.keys(diagramSections) as DiagramType[];
     const { t, locale } = useLocalization();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
     const {
@@ -90,14 +92,16 @@ export default function DiagramGenerator() {
                          {generatedDiagrams.length > 0 ? (
                             <Accordion type="multiple" className="w-full space-y-4">
                               {generatedDiagrams.map(key => {
-                                const diagramData = diagrams![key]!;
-                                const Icon = diagramSections[key].icon;
+                                const diagramData = diagrams![key];
+                                const diagramConfig = diagramSections[key];
+                                if (!diagramData || !diagramConfig) return null;
+                                const Icon = getIconComponent(diagramConfig.icon) || GitGraph;
                                 return (
                                    <AccordionItem value={key} key={key} className="bg-background rounded-lg border">
                                       <AccordionTrigger className="font-headline text-xl p-4 hover:no-underline">
                                          <div className="flex items-center">
-                                              <Icon className="me-2 h-5 w-5 text-primary" />
-                                              {t(diagramSections[key].title)}
+                                              <Icon />
+                                              {t(diagramConfig.title)}
                                          </div>
                                       </AccordionTrigger>
                                       <AccordionContent className="p-4 border-t">

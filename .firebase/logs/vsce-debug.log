@@ -601,3 +601,5 @@ Generated sources: react\esm\package.json [17B] react\index.cjs.js [0B] react\RE
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0823 01:51:45.544087   46292 installsdk.go:86] Running command: C:\\Program Files\\nodejs\\npm.cmd install file:dataconnect-generated\\js\\example-connector\n"}}
 [debug] [2025-08-22T22:54:03.221Z] I0823 01:54:03.221173   46292 load.go:115] Finished reloading
  {"metadata":{"emulator":{"name":"dataconnect"},"message":"I0823 01:54:03.221173   46292 load.go:115] Finished reloading\n"}}
+[info] [Firebase Plugin] Stopping Data Connect toolkit
+[warn] !  Data Connect Emulator has exited upon receiving signal: SIGINT 

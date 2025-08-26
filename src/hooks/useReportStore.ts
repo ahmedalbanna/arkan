@@ -3,14 +3,13 @@
 'use client';
 
 import { create } from 'zustand';
-import { type SectionName } from '@/ai/schemas';
 import type { EvaluateReportOutput } from '@/ai/schemas';
-import { reportSections } from '@/lib/sections-templates';
-import { AGENTS, type AgentPrompt } from '@/lib/agents';
-import { REPORT_GENERATION_TEMPLATES } from '@/lib/report-templates';
+import { type AgentPrompt } from '@/lib/types';
+import { useAgentStore, type AgentWithComponent } from '@/hooks/useAgentStore';
 import { useBuilderStore } from './useBuilderStore';
 import type { ProjectState } from '@/lib/types';
 import { agentKeys } from '@/lib/query-keys';
+import { useSectionStore } from './useSectionStore';
 
 // Type definitions
 export interface GuidelineState {
@@ -41,13 +40,13 @@ interface ContextSelectionValue {
 }
 
 export interface ReportState {
-  sections: { [key in SectionName]?: string };
-  translatedSections: { [key in SectionName]?: string }; // To store translations
+  sections: Record<string, string | undefined>;
+  translatedSections: Record<string, string | undefined>; // To store translations
   evaluation: EvaluateReportOutput | null;
   // UI States
   externalContext: ExternalContext[];
   guidelineState: Record<string, GuidelineState>;
-  controlState: Record<SectionName, ControlState>;
+  controlState: Record<string, ControlState>;
   customGuidelineInput: Record<string, string>;
   contextSelection: Record<string, ContextSelectionValue>;
   selectedReportTemplateId: string;
@@ -57,17 +56,17 @@ export interface ReportState {
 interface ReportActions {
     newSession: () => void;
     loadState: (state: Partial<ProjectState>) => void;
-    setSection: (key: SectionName, content: string) => void;
-    removeSection: (key: SectionName) => void;
-    setAllSections: (sections: { [key in SectionName]?: string }) => void;
-    setTranslatedSection: (key: SectionName, content: string) => void;
-    setAllTranslatedSections: (sections: { [key in SectionName]?: string }) => void;
+    setSection: (key: string, content: string) => void;
+    removeSection: (key: string) => void;
+    setAllSections: (sections: Record<string, string | undefined>) => void;
+    setTranslatedSection: (key: string, content: string) => void;
+    setAllTranslatedSections: (sections: Record<string, string | undefined>) => void;
     setEvaluation: (evaluation: EvaluateReportOutput | null) => void;
     addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
     removeExternalContext: (index: number) => void;
     updateExternalContext: (index: number, newContent: string) => void;
     updateExternalContextType: (index: number, type: ContextFileType) => void;
-    handleControlChange: (section: SectionName, control: keyof ControlState, value: any) => void;
+    handleControlChange: (section: string, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
@@ -78,26 +77,30 @@ interface ReportActions {
     setSelectedPresentationTemplateId: (id: string) => void;
 }
 
-const getDefaultGuidelineState = () => {
-    const state: Record<string, GuidelineState> = {};
-    AGENTS.forEach(agent => {
-        const prompt = agent.prompt as AgentPrompt;
-        if (prompt && prompt.guidelines) {
-            const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
-            state[itemKey] = {
-                checked: prompt.guidelines.map(g => g.isDefault),
-                custom: [],
-            };
-        }
-    });
-    // Add a default for presentations
-    state['presentation'] = {
-        checked: (AGENTS.find(a => a.id === 'generate-presentation')?.prompt as AgentPrompt)?.guidelines?.map((g: any) => g.isDefault) || [],
-        custom: []
+const getDefaultGuidelineState = (agents: Record<string, AgentWithComponent>): Record<string, GuidelineState> => {
+  const state: Record<string, GuidelineState> = {};
+  Object.values(agents).forEach(agent => {
+    const prompt = agent.prompt as AgentPrompt;
+    if (prompt && prompt.guidelines) {
+      // Extract itemKey from agent.id (e.g., 'generate-introduction-section' -> 'introduction')
+      const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
+      state[itemKey] = {
+        checked: prompt.guidelines.map(g => g.isDefault),
+        custom: [],
+      };
     }
-    return state;
+  });
+  // Add a default for presentations if it exists
+  const presentationAgent = Object.values(agents).find(a => a.id === 'generate-presentation');
+  if (presentationAgent) {
+    const presentationPrompt = presentationAgent.prompt as AgentPrompt;
+    state['presentation'] = {
+      checked: presentationPrompt?.guidelines?.map((g: any) => g.isDefault) || [],
+      custom: [],
+    };
+  }
+  return state;
 };
-
 const defaultControlState = {
     formality: 50,
     tone: 'professional' as const,
@@ -109,15 +112,48 @@ const initialState: ReportState = {
   translatedSections: {},
   evaluation: null,
   externalContext: [],
-  guidelineState: getDefaultGuidelineState(),
-  controlState: Object.keys(reportSections).reduce((acc, key) => ({ ...acc, [key]: defaultControlState }), {} as Record<SectionName, ControlState>),
+  guidelineState: {}, // Initialize as empty, will be populated dynamically
+  // Initialize controlState dynamically based on fetched sections
+  controlState: {}, // This will be populated after sections are fetched
+
   customGuidelineInput: {},
   contextSelection: {},
-  selectedReportTemplateId: REPORT_GENERATION_TEMPLATES[0].id,
+  selectedReportTemplateId: '', // Set dynamically in the component
   selectedPresentationTemplateId: 'software-presentation',
 };
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
+
+// Function to initialize controlState and contextSelection after sections are loaded
+const initializeDynamicStates = (set: any, get: any) => {
+  const { reportSections, loading: sectionsLoading } = useSectionStore.getState();
+  const { agents, isLoaded: agentsLoaded } = useAgentStore.getState();
+
+  // Only proceed if both data sources are loaded
+  if (sectionsLoading || !agentsLoaded) return;
+
+  const { controlState, guidelineState } = get();
+  const updates: Partial<ReportState> = {};
+
+  // Initialize controlState if not already done
+  if (Object.keys(controlState).length === 0 && Object.keys(reportSections).length > 0) {
+    const initialControlState: Record<string, ControlState> = {};
+    Object.keys(reportSections).forEach(key => {
+      initialControlState[key] = { ...defaultControlState };
+    });
+    updates.controlState = initialControlState;
+  }
+
+  // Initialize guidelineState if not already done
+  if (Object.keys(guidelineState).length === 0 && Object.keys(agents).length > 0) {
+    updates.guidelineState = getDefaultGuidelineState(agents);
+  }
+
+  if (Object.keys(updates).length > 0) {
+    set(updates);
+  }
+};
+
 
 export const useReportStore = create<ReportState & ReportActions>()(
   (set, get) => ({
@@ -210,22 +246,6 @@ export const useReportStore = create<ReportState & ReportActions>()(
       }));
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
-    handleGuidelineToggle: (itemKey, index, checked) => {
-      set(state => {
-          const newGuidelineState = { ...state.guidelineState };
-          if (!newGuidelineState[itemKey]) {
-              const agent = AGENTS.find(a => a.id.includes(itemKey));
-              const prompt = agent?.prompt as AgentPrompt;
-              newGuidelineState[itemKey] = {
-                  checked: prompt?.guidelines?.map(g => g.isDefault) || [],
-                  custom: [],
-              };
-          }
-          newGuidelineState[itemKey].checked[index] = checked;
-          return { guidelineState: newGuidelineState };
-      });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
     setCustomGuidelineInputForItem: (itemKey, value) => {
       set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } }));
     },
@@ -257,6 +277,7 @@ export const useReportStore = create<ReportState & ReportActions>()(
     },
     initializeContextSelection: (itemKey, defaultContextIds) => {
       set(state => {
+        const { sections: allSections } = useSectionStore.getState();
         const newSelection: ContextSelectionValue = {
             ...emptySelection,
             proposal: defaultContextIds.includes('proposal'),
@@ -265,8 +286,8 @@ export const useReportStore = create<ReportState & ReportActions>()(
         };
 
         defaultContextIds.forEach(id => {
-            const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionName].agentId === id) as SectionName | undefined;
-            if(sectionKey) {
+            const sectionKey = Object.keys(allSections).find(key => allSections[key]?.agentId === id);
+            if (sectionKey) {
                 newSelection.sections[sectionKey] = true;
             }
         });
@@ -307,5 +328,30 @@ export const useReportStore = create<ReportState & ReportActions>()(
       set({ selectedPresentationTemplateId: id });
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
-  })
+    handleGuidelineToggle: (itemKey, index, checked) => {
+      set(state => {
+        const newGuidelines = { ...state.guidelineState };
+        if (newGuidelines[itemKey]) {
+          const newChecked = [...newGuidelines[itemKey].checked];
+          newChecked[index] = checked;
+          newGuidelines[itemKey] = { ...newGuidelines[itemKey], checked: newChecked };
+        }
+        return { guidelineState: newGuidelines };
+      });
+      useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+  }),
+);
+
+// Subscribe to section store changes to initialize dynamic states
+useSectionStore.subscribe(
+  () => {
+    initializeDynamicStates(useReportStore.setState, useReportStore.getState);
+  }
+);
+
+useAgentStore.subscribe(
+  () => {
+    initializeDynamicStates(useReportStore.setState, useReportStore.getState);
+  }
 );

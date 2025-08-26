@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useCreateAgent, useGenerateAgentConfig } from '@/hooks/use-agents';
 import { toast } from '@/hooks/use-toast';
-import { AgentCategory, type AgentPrompt } from '@/lib/agents';
+import { AgentCategory, type AgentPrompt } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

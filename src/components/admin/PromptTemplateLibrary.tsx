@@ -8,12 +8,17 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/prompt-templates';
-import { AGENTS } from '@/lib/agents';
+
 import { HelpCircle, Search, Copy, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useRouter } from 'next/navigation';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useAgents } from '@/hooks/use-agents';
+// ...
+const { agents, isLoaded } = useAgents();
+const reportAgents = agents.filter(a => a.category === 'report-generation');
+
 
 export function PromptTemplateLibrary() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -67,7 +72,7 @@ export function PromptTemplateLibrary() {
               </SelectTrigger>
               <SelectContent>
                   <SelectItem value="all">{t('promptLibrary.allAgents')}</SelectItem>
-                  {AGENTS.map(agent => (
+                  {agents.map(agent => (
                       <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
                   ))}
               </SelectContent>
@@ -112,7 +117,7 @@ export function PromptTemplateLibrary() {
                                 <CardTitle className="text-base">{template.title}</CardTitle>
                                 <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
                                     <Bot className="h-3 w-3" />
-                                    <span>{AGENTS.find(a => a.id === template.targetAgentIds?.[0])?.name || template.category}</span>
+                                    <span>{agents.find(a => a.id === template.targetAgentIds?.[0])?.name || template.category}</span>
                                 </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

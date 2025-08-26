@@ -11,13 +11,16 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { type SectionName } from '@/ai/schemas';
-import { AGENTS, type AgentPrompt } from '@/lib/agents';
+import { useAgents } from '@/hooks/use-agents';
+// ...
+const { agents, isLoaded } = useAgents();
 import { EvaluateContextInputSchema, type EvaluateContextInput, EvaluateContextOutputSchema, type EvaluateContextOutput } from '@/ai/schemas';
+import { AgentPrompt } from '@/lib/types';
 
 
 // Helper function to get agent details (prompt, guidelines)
 const getAgentDetails = (sectionKey: SectionName) => {
-    const agent = AGENTS.find(a => a.id === `generate-${sectionKey}-section`);
+    const agent = agents.find(a => a.id === `generate-${sectionKey}-section`);
     if (!agent) return null;
     const prompt = agent.prompt as AgentPrompt;
     return {

@@ -1,6 +1,6 @@
 
 
-      
+
 'use client';
 
 import { useState } from 'react';
@@ -8,7 +8,7 @@ import { Button } from '../ui/button';
 import { Bot, Inbox, User, Search, MessageSquare, Loader2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
-import { AGENTS, Agent } from '@/lib/agents';
+
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -19,10 +19,13 @@ import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useRouter } from 'next/navigation';
-import type { ChatSession, ChatMessage, AgentChatSession, UserProfile } from '@/lib/types';
+import type { ChatSession, ChatMessage, AgentChatSession, UserProfile, Agent } from '@/lib/types';
 import { useUsers } from '@/hooks/use-user';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
+import { useAgents } from '@/hooks/use-agents';
+// ...
+
 
 
 interface ChatListProps {
@@ -144,7 +147,8 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: ChatSession, i
 }
 
 function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelected: boolean, onSelect: () => void }) {
-    const Icon = AGENTS.find(a => a.id === agent.id)?.icon || Bot;
+    const { agents, isLoaded } = useAgents();
+    const Icon = agents.find(a => a.id === agent.id)?.icon || Bot;
     return (
         <button
             onClick={onSelect}
@@ -212,4 +216,3 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
   );
 }
 
-    

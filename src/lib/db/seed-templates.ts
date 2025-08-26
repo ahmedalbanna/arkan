@@ -46,7 +46,7 @@ async function seed() {
         const reportCollection = adminDb.collection('templates').doc('report').collection('items');
         defaultReportTemplates.forEach(template => {
             const docRef = reportCollection.doc(template.id);
-            batch.set(docRef, template);
+            batch.set(docRef, { ...template, isDefault: true });
         });
         console.log(`${defaultReportTemplates.length} Report templates added to batch.`);
 
@@ -55,7 +55,7 @@ async function seed() {
         const presentationCollection = adminDb.collection('templates').doc('presentation').collection('items');
         defaultPresentationTemplates.forEach(template => {
             const docRef = presentationCollection.doc(template.id);
-            batch.set(docRef, template);
+            batch.set(docRef, { ...template, isDefault: true });
         });
         console.log(`${defaultPresentationTemplates.length} Presentation templates added to batch.`);
 

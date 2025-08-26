@@ -6,7 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { getAgent } from '@/lib/db/queries';
-import { AgentPrompt } from '@/lib/agents';
+import { AgentPrompt } from '@/lib/types';
 import { AgentChatInputSchema, type AgentChatInput, AgentChatOutputSchema, type AgentChatOutput } from '@/ai/schemas';
 
 const agentChatFlow = ai.defineFlow({

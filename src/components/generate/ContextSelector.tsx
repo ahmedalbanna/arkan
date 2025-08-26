@@ -9,15 +9,14 @@ import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { reportSections, diagramSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 
-const orderedSections = Object.keys(reportSections) as SectionName[];
-const orderedDiagrams = DiagramTypeSchema.options;
+
 
 interface ContextSelectorProps {
     itemKey: string;
@@ -31,6 +30,11 @@ export function ContextSelector({ itemKey }: ContextSelectorProps) {
     const { projectPlan } = useProjectPlanStore();
     const { sections, externalContext, toggleContextSelection, contextSelection } = useReportStore();
     const { diagrams } = useDiagramStore();
+    const { reportSections } = useSectionStore();
+    const { diagramSections } = useSectionStore();
+    const orderedSections = Object.keys(reportSections).sort() as SectionName[]; // Add .sort() if order is important
+
+    const orderedDiagrams = DiagramTypeSchema.options;
 
     const currentSelection = contextSelection[itemKey] || defaultSelection;
 

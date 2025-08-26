@@ -15,7 +15,7 @@ export type {
 
 export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
-export type { Agent, AgentData, AgentPrompt } from '@/lib/agents';
+export type { Agent, AgentData, AgentPrompt } from '@/lib/agents-template';
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/flows/generate-codebase';

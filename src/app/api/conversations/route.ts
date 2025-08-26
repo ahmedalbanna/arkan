@@ -2,9 +2,8 @@
 'use server';
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { adminRealtimeDb } from '@/lib/firebase/server-init';
+import { adminDb,adminRealtimeDb } from '@/lib/firebase/server-init';
 import { z } from 'zod';
-import { AGENTS } from '@/lib/agents';
 
 // GET handler
 export const GET = withAuth(async ({ user }) => {
@@ -17,17 +16,18 @@ export const GET = withAuth(async ({ user }) => {
     }
 
     const conversationIds = Object.keys(snapshot.val());
-    
+
     const conversationPromises = conversationIds.map(async (id) => {
       const convoRef = adminRealtimeDb.ref(`conversations/${id}`);
       const convoSnapshot = await convoRef.get();
       if (!convoSnapshot.exists()) return null;
-      
+
       const convoData = convoSnapshot.val();
       // If it's an agent chat, hydrate the agent data from the static config
-      if (convoData.agent) {
-          const defaultAgent = AGENTS.find(a => a.id === convoData.agent.id);
-          if (defaultAgent) {
+      if (convoData.agent && convoData.agent.id) {
+        const agentDoc = await adminDb.collection('agents').doc(convoData.agent.id).get();
+          if (agentDoc.exists) {
+            const defaultAgent = agentDoc.data() as { icon: string };
               convoData.agent.icon = defaultAgent.icon;
           }
       }
@@ -60,17 +60,17 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const { participantIds, participantNames, title, isSupportChat, agent } = validation.data;
-    
+
     const newConversationRef = adminRealtimeDb.ref('conversations').push();
     const conversationId = newConversationRef.key;
     if (!conversationId) {
       throw new Error("Failed to generate a unique conversation ID.");
     }
-    
+
     const now = new Date().toISOString();
-    
+
     const conversationData = {
       id: conversationId,
       participantIds,

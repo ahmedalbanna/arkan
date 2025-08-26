@@ -3,6 +3,7 @@
 
 import type { UpdateAgentVariables, CreateAgentVariables, Agent, AgentCategory } from '@/hooks/use-agents';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { AgentData } from '@/lib/types';
 
 /**
  * Fetches the full list of agent categories from the API.
@@ -48,8 +49,8 @@ export async function createAgentCategory(data: { id: string; name: string }, to
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of Agent objects.
  */
-export async function fetchAgents(token: string): Promise<Agent[]> {
-    const response = await fetch('/api/admin/agents', {
+export async function fetchAgents(token: string): Promise<AgentData[]> {
+    const response = await fetch('/api/agents', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
     if (!response.ok) {

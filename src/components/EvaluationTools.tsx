@@ -15,26 +15,27 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useEvaluateReport } from '@/hooks/use-evaluation';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services/document-processing-service'; // Keep this import
 
 const ProposalPayloadSchema = z.object({
-    evaluation: z.string().default(''),
-    title: z.string().default(''),
-    category: z.string().default(''),
-    objective: z.string().default(''),
-    methodology: z.string().default(''),
-    expected_outcome: z.array(z.any()).default([]),
-    timeline: z.object({
-        phases: z.array(z.any()).default([]),
-        startDate: z.string().default(''),
-        endDate: z.string().default(''),
-    }).default({ phases: [], startDate: '', endDate: '' }),
-    budget: z.object({
-        totalAmount: z.number().default(0),
-        currency: z.string().default(''),
-        breakdown: z.array(z.any()).default([]),
-    }).default({ totalAmount: 0, currency: '', breakdown: [] }),
-    risks: z.array(z.any()).default([]),
+ projectPlan: z.object({
+ timeline: z.string().default(''),
+ keyDeliverables: z.string().default(''),
+ }).optional(),
+ category: z.string().default(''),
+ title: z.string().default(''),
+ executiveSummary: z.string().default(''),
+ problemStatement: z.string().default(''),
+ proposedSolution: z.object({
+ overview: z.string().default(''),
+ technicalApproach: z.string().default(''),
+ keyFeatures: z.string().default(''),
+ }).default({ overview: '', technicalApproach: '', keyFeatures: '' }),
+ budgetBreakdown: z.string().default(''),
+ // Add other fields that might be present in your actual proposal type
+ // and provide default values or make them optional as needed.
+ // For example:
+ // evaluation: z.string().optional(),
 });
 
 export const EvaluationTools = () => {

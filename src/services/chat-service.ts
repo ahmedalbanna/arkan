@@ -1,7 +1,8 @@
 'use client';
 
 import type { ChatSession } from "@/hooks/useChatStore";
-import type { Agent } from "@/lib/agents";
+import { Agent } from '@/hooks/use-agents';
+
 
 interface CreateConversationData {
     participantIds: string[];

@@ -14,7 +14,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useReportStore } from '@/hooks/useReportStore';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '../ui/dropdown-menu';
-import { reportSections } from '@/lib/sections-templates';
+import { useSectionStore } from '@/hooks/useSectionStore';
 import { SectionName } from '@/ai/schemas';
 import { useExport } from '@/hooks/use-export';
 
@@ -36,7 +36,7 @@ export const ReportActions = ({ onTranslateAll, isTranslating }: ReportActionsPr
 
   const generatedSectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
   const [selectedSectionsForExport, setSelectedSectionsForExport] = useState<SectionName[]>(generatedSectionKeys);
-
+    const { reportSections } = useSectionStore();
   // Update selection when generated sections change
   useEffect(() => {
     setSelectedSectionsForExport(generatedSectionKeys);
