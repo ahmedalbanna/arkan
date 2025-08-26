@@ -29,7 +29,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '../ui/label';
 import { AgentCategory } from '@/lib/types';
-const { agents, isLoaded } = useAgents();
 
 const reportTemplateSchema = z.object({
     id: z.string(),
@@ -45,11 +44,11 @@ const createReportTemplateSchema = reportTemplateSchema.omit({ id: true }).exten
 });
 type CreateReportFormValues = z.infer<typeof createReportTemplateSchema>;
 
-
-const reportAgents = agents.filter(a => a.category === AgentCategory.ReportGeneration);
-
-
 function ReportTemplateForm({ template, onSave, isSaving, onDelete, isDeleting }: { template: ReportGenerationTemplate, onSave: (data: ReportFormValues) => void, isSaving: boolean, onDelete: () => void, isDeleting: boolean }) {
+    const { agents } = useAgents();
+    const reportAgents = useMemo(() =>
+        (agents || []).filter(a => a.category === AgentCategory.ReportGeneration),
+    [agents]);
     const form = useForm<ReportFormValues>({
         resolver: zodResolver(reportTemplateSchema),
         defaultValues: template,

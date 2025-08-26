@@ -5,11 +5,10 @@
 import { create } from 'zustand';
 import type { EvaluateReportOutput } from '@/ai/schemas';
 import { type AgentPrompt } from '@/lib/types';
-import { useAgentStore, type AgentWithComponent } from '@/hooks/useAgentStore';
+import { useAgentStore, type AgentWithComponent } from './useAgentStore';
+import { useSectionStore } from './useSectionStore';
 import { useBuilderStore } from './useBuilderStore';
 import type { ProjectState } from '@/lib/types';
-import { agentKeys } from '@/lib/query-keys';
-import { useSectionStore } from './useSectionStore';
 
 // Type definitions
 export interface GuidelineState {
@@ -54,6 +53,7 @@ export interface ReportState {
 }
 
 interface ReportActions {
+    initializeDependentStates: () => void;
     newSession: () => void;
     loadState: (state: Partial<ProjectState>) => void;
     setSection: (key: string, content: string) => void;
@@ -124,49 +124,39 @@ const initialState: ReportState = {
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
-// Function to initialize controlState and contextSelection after sections are loaded
-const initializeDynamicStates = (set: any, get: any) => {
-  const { reportSections, loading: sectionsLoading } = useSectionStore.getState();
-  const { agents, isLoaded: agentsLoaded } = useAgentStore.getState();
-
-  // Only proceed if both data sources are loaded
-  if (sectionsLoading || !agentsLoaded) return;
-
-  const { controlState, guidelineState } = get();
-  const updates: Partial<ReportState> = {};
-
-  // Initialize controlState if not already done
-  if (Object.keys(controlState).length === 0 && Object.keys(reportSections).length > 0) {
-    const initialControlState: Record<string, ControlState> = {};
-    Object.keys(reportSections).forEach(key => {
-      initialControlState[key] = { ...defaultControlState };
-    });
-    updates.controlState = initialControlState;
-  }
-
-  // Initialize guidelineState if not already done
-  if (Object.keys(guidelineState).length === 0 && Object.keys(agents).length > 0) {
-    updates.guidelineState = getDefaultGuidelineState(agents);
-  }
-
-  if (Object.keys(updates).length > 0) {
-    set(updates);
-  }
-};
-
-
 export const useReportStore = create<ReportState & ReportActions>()(
   (set, get) => ({
     ...initialState,
-    newSession: () => set(initialState),
-    loadState: (newState) => {
-      set({
-          sections: newState.sections || {},
-          evaluation: newState.evaluation || null,
-          externalContext: newState.externalContext || [],
-          translatedSections: newState.translatedSections || {},
-      });
+
+    initializeDependentStates: () => {
+      const { reportSections } = useSectionStore.getState();
+      const { agents } = useAgentStore.getState();
+      const { controlState, guidelineState } = get();
+
+      // Avoid re-initialization if already populated
+      if (Object.keys(controlState).length > 0 && Object.keys(guidelineState).length > 0) {
+        return;
+      }
+
+      const updates: Partial<ReportState> = {};
+
+      if (Object.keys(controlState).length === 0 && Object.keys(reportSections).length > 0) {
+        const initialControlState: Record<string, ControlState> = {};
+        Object.keys(reportSections).forEach(key => {
+          initialControlState[key] = { ...defaultControlState };
+        });
+        updates.controlState = initialControlState;
+      }
+
+      if (Object.keys(guidelineState).length === 0 && Object.keys(agents).length > 0) {
+        updates.guidelineState = getDefaultGuidelineState(agents);
+      }
+
+      if (Object.keys(updates).length > 0) {
+        set(updates);
+      }
     },
+
     setSection: (key, content) => {
       set(state => ({ sections: { ...state.sections, [key]: content } }));
       useBuilderStore.getState().setHasUnsavedChanges(true);
@@ -340,18 +330,15 @@ export const useReportStore = create<ReportState & ReportActions>()(
       });
       useBuilderStore.getState().setHasUnsavedChanges(true);
     },
+
+    newSession: () => set(initialState),
+    loadState: (newState) => {
+      set({
+          sections: newState.sections || {},
+          evaluation: newState.evaluation || null,
+          externalContext: newState.externalContext || [],
+          translatedSections: newState.translatedSections || {},
+      });
+    },
   }),
-);
-
-// Subscribe to section store changes to initialize dynamic states
-useSectionStore.subscribe(
-  () => {
-    initializeDynamicStates(useReportStore.setState, useReportStore.getState);
-  }
-);
-
-useAgentStore.subscribe(
-  () => {
-    initializeDynamicStates(useReportStore.setState, useReportStore.getState);
-  }
 );

@@ -4,12 +4,13 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { LucideIcon } from 'lucide-react';
+import { FileText, type LucideIcon } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
 import { type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
 import { useAuth } from "@/context/AuthContext";
-import { UseQueryOptions } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { type UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
@@ -23,8 +24,8 @@ import {
   createAgentCategory as createAgentCategoryApi
 } from "@/services/agent-service";
 import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
-import { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
-import { useAgentStore } from "@/hooks/useAgentStore";
+import { type UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
+import { AgentWithComponent, useAgentStore } from "@/hooks/useAgentStore";
 
 export { Agent };
 export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
@@ -97,7 +98,7 @@ export function useCreateAgentCategory() {
 export function useAgents() {
   const { agents, isLoaded, error } = useAgentStore();
   // Convert the store's agent map back to an array and map the icon component
-  const agentList = Object.values(agents).map(a => ({...a, icon: a.iconComponent as LucideIcon}));
+  const agentList = useMemo(() => Object.values(agents).map(a => ({...a, icon: a.iconComponent as LucideIcon})), [agents]);
 
   return { agents: agentList, isLoaded, isError: !!error };
 }
@@ -140,25 +141,53 @@ export function useUpdateAgent() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation<Agent, Error, UpdateAgentVariables>({
+  return useMutation<Agent, Error, UpdateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateAgentApi(variables, token);
     },
-    onSuccess: (data, variables) => {
-      // Invalidate queries to refetch data
-      queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
+    onMutate: async (newData) => {
+        await queryClient.cancelQueries({ queryKey: agentKeys.detail(newData.agentId) });
 
+        // Snapshot the previous value
+        const previousAgents = useAgentStore.getState().agents;
 
+        // Optimistically update to the new value
+        useAgentStore.setState(state => {
+            const agentToUpdate = state.agents[newData.agentId];
+            if (!agentToUpdate) return state;
+
+            const { icon: iconName, ...restOfPayload } = newData.payload;
+            const updatedAgent = { ...agentToUpdate, ...restOfPayload };
+
+            if (iconName && iconName !== agentToUpdate.icon) {
+                updatedAgent.icon = iconName;
+                updatedAgent.iconComponent = useAgentStore.getState().getIconComponent(iconName) || FileText;
+            }
+
+            return { agents: { ...state.agents, [newData.agentId]: updatedAgent as AgentWithComponent } };
+        });
+
+        return { previousAgents };
+    },
+    onSuccess: (data) => {
       toast({
         title: "Agent Updated",
         description: `Agent "${data.name}" has been successfully updated.`,
       });
     },
-    onError: (error: Error) => {
+    onError: (error, newAgent, context) => {
+      // Rollback on error
+      if (context?.previousAgents) {
+        useAgentStore.setState({ agents: context.previousAgents });
+      }
       handleErrorUtility(error, "Update Agent Failed");
     },
+    onSettled: (data, error, variables) => {
+        // Always refetch after error or success to ensure data consistency
+        queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+        queryClient.invalidateQueries({ queryKey: agentKeys.detail(variables.agentId) });
+    }
   });
 }
 
@@ -167,22 +196,50 @@ export function useUpdateAgent() {
  * @returns The result of the useMutation hook.
  */
 export function useCreateAgent() {
-    const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation<Agent, Error, CreateAgentVariables>({
+    return useMutation<Agent, Error, CreateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createAgentApi(variables, token);
         },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: agentKeys.lists() });
+        onMutate: async (newAgentData) => {
+            // Snapshot the previous value from the Zustand store
+            const previousAgents = useAgentStore.getState().agents;
+            const { getIconComponent } = useAgentStore.getState();
+
+            // Create a temporary agent object for the optimistic update
+            const tempAgent: AgentWithComponent = {
+                ...newAgentData,
+                isEnabled: true, // Assume enabled on creation
+                iconComponent: getIconComponent(newAgentData.icon) || FileText,
+            };
+
+            // Optimistically update the store
+            useAgentStore.setState(state => ({
+                agents: {
+                    ...state.agents,
+                    [newAgentData.id]: tempAgent,
+                }
+            }));
+
+            return { previousAgents };
+        },
+        onSuccess: (newAgent) => {
             toast({ title: 'Success', description: 'New AI agent created.' });
         },
-        onError: (error: Error) => {
+        onError: (error, newAgentData, context) => {
+             // Rollback on error
+             if (context?.previousAgents) {
+                useAgentStore.setState({ agents: context.previousAgents });
+             }
              handleErrorUtility(error, "Create Agent Failed");
              throw error; // Re-throw to be handled by the form
         },
+        onSettled: () => {
+            // Always refetch after error or success to ensure data consistency
+            useAgentStore.getState().fetchAgents();
+        }
     });
 }
 

@@ -22,18 +22,21 @@ export interface AgentWithComponent extends DynamicAgentData {
 interface AgentState {
   agents: Record<string, AgentWithComponent>;
   isLoaded: boolean;
+  isLoading: boolean;
   error: string | null;
   fetchAgents: () => Promise<void>;
+  getIconComponent: (iconName: string) => LucideIcon | undefined;
 }
 
-export const useAgentStore = create<AgentState>((set) => ({
+export const useAgentStore = create<AgentState>((set, get) => ({
   agents: {},
   isLoaded: false,
+  isLoading: false,
   error: null,
   fetchAgents: async () => {
-    // Prevent re-fetching if already loaded
-    if (useAgentStore.getState().isLoaded && !useAgentStore.getState().error) return;
-    set({ isLoaded: false, error: null });
+    // Prevent re-fetching if already loaded or currently fetching.
+    if (get().isLoading || get().isLoaded) return;
+    set({ isLoading: true, error: null });
     try {
       const agentsCollectionRef = collection(db, 'agents');
       const q = query(agentsCollectionRef, where("isEnabled", "==", true));
@@ -50,11 +53,14 @@ export const useAgentStore = create<AgentState>((set) => ({
         fetchedAgents[doc.id] = agent;
       });
 
-      set({ agents: fetchedAgents, isLoaded: true });
+      set({ agents: fetchedAgents, isLoaded: true, isLoading: false });
     } catch (e: any) {
       console.error("Error fetching agents:", e);
-      set({ isLoaded: true, error: e.message });
+      set({ isLoaded: false, isLoading: false, error: e.message });
     }
+  },
+  getIconComponent: (iconName: string) => {
+      return iconMap[iconName];
   },
 }));
 

@@ -3,19 +3,27 @@
 
 import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
-import { AgentCategory } from '@/lib/types';
-import { AlertCircle, Bot } from 'lucide-react';
+import { useAgent } from '@/hooks/use-agents';
+import { AlertCircle, Bot, Loader2 } from 'lucide-react';
 import React from 'react';
 
 
 export default function EditAgentPage({ params }: { params: { id: string } }) {
   const { t } = useLocalization();
 
-  // In a real app, you would fetch the agent data based on params.id
-  // For this example, we'll assume a structure but it won't have real data
-  const agent = { id: params.id, name: "Loading Agent...", description: "...", prompt: "", isEnabled: true, category: AgentCategory.ContentGeneration, pageUrl: '/', icon: Bot };
+  // Fetch the agent data using the hook
+  const { data: agent, isLoading, isError } = useAgent(params.id);
 
-  if (!agent) {
+  if (isLoading) {
+    return (
+        <div className="p-8 text-center">
+            <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+            <p>Loading agent...</p>
+        </div>
+    );
+  }
+
+  if (isError || !agent) {
     return (
         <div className="p-8 text-center text-destructive">
             <AlertCircle className="mx-auto h-8 w-8 mb-2" />
@@ -32,6 +40,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
             {t('agentEditor.pageTitle')}
         </h1>
       </div>
+      {/* The `agent` object from `useQuery` is stable */}
       <AgentEditor agentId={params.id} initialData={agent} />
     </div>
   );

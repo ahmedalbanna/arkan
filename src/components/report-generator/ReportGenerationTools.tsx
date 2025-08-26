@@ -2,8 +2,8 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import React, { useEffect } from 'react';
+import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,37 +11,33 @@ import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useSectionStore } from '@/hooks/useSectionStore';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Settings, Eye, PanelLeftClose, FileText } from 'lucide-react';
+import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
 import type {AgentPrompt } from '@/lib/types';
-import { toast, useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
-import { EvaluationTools } from '../EvaluationTools';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { useDiagramStore } from '@/hooks/useDiagramStore';
 import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { GuidelineEditor } from '../generate/GuidelineEditor';
-import { ContextSelector } from '../generate/ContextSelector';
-import { Label } from '../ui/label';
-import { Input } from '../ui/input';
-import { Slider } from '../ui/slider';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Skeleton } from '../ui/skeleton';
+
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { useReportTemplates } from '@/hooks/use-templates';
+
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
-import { Textarea } from '../ui/textarea';
+
 import { evaluateContextApi } from '@/services/report-service';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
-import { Badge } from '../ui/badge';
+
 import ReactMarkdown from 'react-markdown';
+
+import { Skeleton } from '../ui/skeleton';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { Separator } from '../ui/separator';
+import { SectionAccordionItem } from './SectionAccordionItem';
 
 const orderedSections = SectionNameSchema.options;
 // Helper function to generate instruction text from control state
@@ -55,7 +51,6 @@ const generateInstructionText = (controls: any): string => {
     if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
     return instructions.join('\n');
 };
-
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
@@ -93,7 +88,7 @@ function ToolsSkeleton() {
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
     const { t } = useLocalization();
-    const { reportSections, diagramSections } = useSectionStore();
+    const { reportSections, diagramSections } = useSectionStore(); // This might be an issue if diagramSections is not in useSectionStore
     if (!plan) return null;
 
     return (
@@ -116,8 +111,8 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
                                     <div>
                                         <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
                                         <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s as SectionNameType]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as DiagramType]?.title || d}</li>)}
+                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d]?.title || d}</li>)}
                                             {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
                                         </ul>
                                     </div>
@@ -144,6 +139,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 }
 
 
+
 export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const { toast } = useToast();
@@ -151,11 +147,10 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const [generationPlan, setGenerationPlan] = React.useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = React.useState(false);
-    const { reportSections, getIconComponent } = useSectionStore();
+    const { reportSections, loading: sectionsLoading } = useSectionStore();
 
     const { proposal } = useBuilderStore();
     const { projectPlan } = useProjectPlanStore();
-    const { diagrams } = useDiagramStore();
 
     const {
         sections,
@@ -163,14 +158,13 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         controlState,
         guidelineState,
         contextSelection,
-        selectedReportTemplateId,
-        setSelectedReportTemplateId,
+        initializeDependentStates,
         initializeContextSelection,
-        handleControlChange,
+
     } = useReportStore();
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
-    const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
+
 
     const reportGenerationMutation = useGenerateReportSection();
     const fullReportMutation = useGenerateFullReport();
@@ -178,11 +172,12 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     const isAnythingGenerating = reportGenerationMutation.isPending  || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
 
+    // Initialize dependent states (guidelines, controls) once agents and sections are loaded.
     useEffect(() => {
-        if (!selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
-            setSelectedReportTemplateId(reportTemplates[0].id);
+        if (agentsLoaded && !sectionsLoading) {
+            initializeDependentStates();
         }
-    }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
+    }, [agentsLoaded, sectionsLoading, initializeDependentStates]);
 
     useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
@@ -224,18 +219,11 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
     };
 
     const getGenerationPlan = async () => {
-        const template = reportTemplates?.find(t => t.id === selectedReportTemplateId);
-        if (!template) {
-            toast({ title: "No Template Selected", variant: "destructive" });
-            return null;
-        }
-
-        const sectionsToGenerate = template.sectionIds
-            .filter((sectionId): sectionId is SectionNameType =>
-                !!reportSections[sectionId] && !sections[sectionId]);
+        const sectionsToGenerate = availableSections
+            .filter((key): key is SectionNameType => !sections[key]);
 
         if (sectionsToGenerate.length === 0) {
-            toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
+            toast({ title: "Report Complete", description: "All sections have already been generated." });
             return null;
         }
 
@@ -245,7 +233,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                 proposal,
                 projectPlan,
                 existingSections: sections,
-                existingDiagrams: diagrams,
+                existingDiagrams: useDiagramStore.getState().diagrams,
                 sectionsToGenerate,
                 externalContext,
             };
@@ -276,7 +264,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                 proposal,
                 projectPlan,
                 existingSections: sections,
-                existingDiagrams: diagrams,
+                existingDiagrams: useDiagramStore.getState().diagrams,
                 externalContext,
                 generationPlan: plan.configs,
             };
@@ -284,18 +272,14 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         }
     };
 
-    const selectedTemplate = reportTemplates?.find(t => t.id === selectedReportTemplateId);
-    const availableSections = orderedSections.filter(key => reportSections[key] && selectedTemplate?.sectionIds.includes(key));
-    const sectionsToGenerateCount = (selectedTemplate?.sectionIds || []).filter(sectionId => {
-        if (Object.keys(reportSections).length === 0) return false;
-        return !!reportSections[sectionId] && !sections[sectionId];
-    }).length || 0;
+    const availableSections = orderedSections.filter(key => reportSections[key]);
+    const sectionsToGenerateCount = availableSections.filter(key => !sections[key]).length;
 
     const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
     const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 1 && !isAnythingGenerating;
     const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
 
-    if (!agentsLoaded || templatesLoading) {
+    if (!agentsLoaded || sectionsLoading) {
         return <ToolsSkeleton />;
     }
 
@@ -320,38 +304,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                         <TabsTrigger value="actions" disabled={!Object.values(sections).some(s => !!s)}>Actions</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6">
-                        <div className="space-y-2 mb-4">
-                            <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
-                            <Select value={selectedReportTemplateId} onValueChange={(value) => setSelectedReportTemplateId(value)}>
-                                <SelectTrigger id="report-template-select">
-                                    <SelectValue placeholder="Select a report template" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {reportTemplates?.map((template) => (
-                                        <TooltipProvider key={template.id}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <SelectItem value={template.id}>{template.name}</SelectItem>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="right" align="start">
-                                                    <p className="font-bold">{template.name}</p>
-                                                    <p className="text-xs text-muted-foreground">{template.description}</p>
-                                                    <Separator className="my-2" />
-                                                    <p className="text-xs font-semibold mb-1">Included Agents:</p>
-                                                    <ul className="list-disc pl-4 text-xs text-muted-foreground">
-                                                        {template.sectionIds.map(sectionId => {
-                                                            const section = reportSections[sectionId as SectionNameType];
-                                                            return <li key={sectionId}>{section?.title || sectionId}</li>;
-                                                        })}
-                                                    </ul>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="pt-4 mt-4 border-t">
+                        <div className="pt-2">
                             <div className="flex gap-2">
                                 <Button
                                     onClick={onGenerateFullReport}
@@ -376,97 +329,16 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
 
                         <Accordion type="multiple" className="w-full space-y-1">
                             {availableSections.map((key) => {
-                                const sectionConfig = reportSections[key];
-                                if (!sectionConfig) return null;
-                                const { title, agentId } = sectionConfig;
-                                const Icon = getIconComponent(sectionConfig.icon) || FileText;
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                const currentSelection = contextSelection[key];
-                                const hasSelectedContext = !!proposal || !!projectPlan || Object.values(currentSelection?.sections || {}).some(v => v) || Object.values(currentSelection?.diagrams || {}).some(v => v) || (externalContext.length > 0 && currentSelection?.externalContext.some(v => v));
-
                                 return (
-                                    <AccordionItem value={key} key={key}>
-                                        <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                                            <div className="flex items-center gap-2">
-                                                {isGeneratingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
-                                                {t(`${title}`)}
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="space-y-4 p-4">
-                                            <Tabs defaultValue="prompt" className="w-full">
-                                                <TabsList className="grid w-full grid-cols-3">
-                                                    <TabsTrigger value="prompt">{t('builder.reportGenerator.tool_tab_prompt')}</TabsTrigger>
-                                                    <TabsTrigger value="controls">{t('builder.reportGenerator.tool_tab_controls')}</TabsTrigger>
-                                                    <TabsTrigger value="context">{t('builder.reportGenerator.tool_tab_context')}</TabsTrigger>
-                                                </TabsList>
-                                                <TabsContent value="prompt" className="pt-4 space-y-4">
-                                                    <GuidelineEditor itemKey={key} agentId={agentId} isAdmin={userProfile?.role === 'admin'} />
-                                                </TabsContent>
-
-                                                <TabsContent value="controls" className="pt-4">
-                                                    <div className="space-y-6">
-                                                        <div className="space-y-3">
-                                                            <Label htmlFor={`formality-${key}`}>{t('builder.reportGenerator.tool_formality_label')}</Label>
-                                                            <Slider id={`formality-${key}`} name={`formality_${key}`} value={[controlState[key as SectionNameType].formality]} onValueChange={(val) => handleControlChange(key as SectionNameType, 'formality', val[0])} max={100} step={1} />
-                                                            <div className="flex justify-between text-xs text-muted-foreground">
-                                                                <span>{t('builder.reportGenerator.tool_formality_informal')}</span>
-                                                                <span>{t('builder.reportGenerator.tool_formality_balanced')}</span>
-                                                                <span>{t('builder.reportGenerator.tool_formality_formal')}</span>
-                                                            </div>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label htmlFor={`tone-${key}`}>{t('builder.reportGenerator.tool_tone_label')}</Label>
-                                                            <Select name={`tone_${key}`} value={controlState[key as SectionNameType].tone} onValueChange={(val) => handleControlChange(key as SectionNameType, 'tone', val)}>
-                                                                <SelectTrigger id={`tone-${key}`}><SelectValue placeholder={t('reportGenerator.tool_tone_placeholder')} /></SelectTrigger>
-                                                                <SelectContent>
-                                                                    <SelectItem value="professional">{t('builder.reportGenerator.tool_tone_professional')}</SelectItem>
-                                                                    <SelectItem value="academic">{t('builder.reportGenerator.tool_tone_academic')}</SelectItem>
-                                                                    <SelectItem value="casual">{t('builder.reportGenerator.tool_tone_casual')}</SelectItem>
-                                                                    <SelectItem value="persuasive">{t('builder.reportGenerator.tool_tone_persuasive')}</SelectItem>
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label htmlFor={`wordCount-${key}`}>{t('builder.reportGenerator.tool_word_count_label')}</Label>
-                                                            <Input id={`wordCount-${key}`} name={`wordCount_${key}`} type="number" placeholder={t('reportGenerator.tool_word_count_placeholder')} value={controlState[key as SectionNameType].wordCount} onChange={(e) => handleControlChange(key as SectionNameType, 'wordCount', e.target.value)} />
-                                                        </div>
-                                                    </div>
-                                                </TabsContent>
-
-                                                <TabsContent value="context" className="pt-4">
-                                                    <ContextSelector itemKey={key} />
-                                                </TabsContent>
-                                            </Tabs>
-                                            <div className="pt-2">
-                                                <TooltipProvider>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <div className="w-full">
-                                                                <Button
-                                                                    type="button"
-                                                                    onClick={() => onGenerateSection(key as SectionNameType)}
-                                                                    disabled={isAnythingGenerating || !hasSelectedContext || !hasCreditsForSingleSection}
-                                                                    className="font-headline w-full"
-                                                                >
-                                                                    {isGeneratingThis ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
-                                                                    {`${t('builder.reportGenerator.generateButton')} ${t(`${title}`)}`}
-                                                                </Button>
-                                                            </div>
-                                                        </TooltipTrigger>
-                                                        {!hasCreditsForSingleSection ? (
-                                                            <TooltipContent>
-                                                                <p>{t('builder.toasts.insufficientCredits')}</p>
-                                                            </TooltipContent>
-                                                        ) : !hasSelectedContext ? (
-                                                            <TooltipContent>
-                                                                <p>Please select a context (like the proposal) to generate this section.</p>
-                                                            </TooltipContent>
-                                                        ) : null}
-                                                    </Tooltip>
-                                                </TooltipProvider>
-                                            </div>
-                                        </AccordionContent>
-                                    </AccordionItem>
+                                    <SectionAccordionItem
+                                        key={key}
+                                        sectionKey={key as SectionNameType}
+                                        onGenerate={onGenerateSection}
+                                        isGenerating={isGeneratingThis}
+                                        isAnythingGenerating={isAnythingGenerating}
+                                        hasCredits={hasCreditsForSingleSection}
+                                    />
                                 );
                             })}
                         </Accordion>

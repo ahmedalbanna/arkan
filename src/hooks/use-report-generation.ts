@@ -1,4 +1,5 @@
 
+// For a detailed explanation of the data flow, see docs/data-flows/report-section-generation.md
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -13,7 +14,7 @@ import { userKeys } from '@/lib/query-keys';
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
   const { setSection } = useReportStore();
-  
+
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
       const token = await getAuthenticatedToken(firebaseUser);
@@ -23,7 +24,7 @@ export function useGenerateReportSection() {
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
       setSection(sectionKey, content);
-      
+
       refetchUser(); // To update credits
     },
     onError: (error: Error, variables) => {
