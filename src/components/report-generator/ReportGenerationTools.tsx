@@ -7,50 +7,25 @@ import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAgents } from '@/hooks/use-agents';
 import { cn } from '@/lib/utils';
 import { useSectionStore } from '@/hooks/useSectionStore';
-import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
+import { type SectionName as SectionNameType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
-import type {AgentPrompt } from '@/lib/types';
-import { useToast } from '@/hooks/use-toast';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks/useReportStore';
 import { ReportActions } from './ReportActions';
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-
-import { getSelectedGuidelines } from '@/lib/guideline-utils';
-
-import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
-
-import { evaluateContextApi } from '@/services/report-service';
-import { getAuthenticatedToken } from '@/lib/authUtils';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { ScrollArea } from '../ui/scroll-area';
-
 import ReactMarkdown from 'react-markdown';
-
 import { Skeleton } from '../ui/skeleton';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { SectionAccordionItem } from './SectionAccordionItem';
+import { useReportGenerationLogic } from '@/hooks/use-report-generation-logic';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Label } from '../ui/label';
+import { Separator } from '../ui/separator';
 
-const orderedSections = SectionNameSchema.options;
-// Helper function to generate instruction text from control state
-const generateInstructionText = (controls: any): string => {
-    let instructions = [];
-    let formalityDesc = "balanced";
-    if (controls.formality < 33) formalityDesc = "informal";
-    else if (controls.formality > 66) formalityDesc = "very formal";
-    instructions.push(`- The writing style should be ${formalityDesc}.`);
-    if (controls.tone && controls.tone !== "none") instructions.push(`- Adopt a ${controls.tone} tone.`);
-    if (controls.wordCount) instructions.push(`- The response should be approximately ${controls.wordCount} words long.`);
-    return instructions.join('\n');
-};
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
@@ -142,149 +117,36 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
-    const { toast } = useToast();
-    const { userProfile, firebaseUser } = useAuth();
-    const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
-    const [generationPlan, setGenerationPlan] = React.useState<EvaluateContextOutput | null>(null);
-    const [isPlanning, setIsPlanning] = React.useState(false);
-    const { reportSections, loading: sectionsLoading } = useSectionStore();
-
-    const { proposal } = useBuilderStore();
-    const { projectPlan } = useProjectPlanStore();
-
     const {
-        sections,
-        externalContext,
-        controlState,
-        guidelineState,
-        contextSelection,
-        initializeDependentStates,
-        initializeContextSelection,
+        isAnythingGenerating,
+        isPlanning,
+        activeMutationKey,
+        generationPlan,
+        setGenerationPlan,
+        onGenerateSection,
+        onGenerateFullReport,
+        handleViewPlan,
+        availableSections,
+        canGenerateFullReport,
+        hasCreditsForSingleSection,
+        agentsLoaded,
+        sectionsLoading,
+        templatesLoading,
+        reportTemplates,
+        selectedReportTemplateId,
+        setSelectedReportTemplateId,
+        fullReportCreditCost,
+    } = useReportGenerationLogic();
+    const { sections } = useReportStore();
 
-    } = useReportStore();
-
-    const { agents, isLoaded: agentsLoaded } = useAgents();
-
-
-    const reportGenerationMutation = useGenerateReportSection();
-    const fullReportMutation = useGenerateFullReport();
-
-    const isAnythingGenerating = reportGenerationMutation.isPending  || fullReportMutation.isPending;
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
 
-    // Initialize dependent states (guidelines, controls) once agents and sections are loaded.
-    useEffect(() => {
-        if (agentsLoaded && !sectionsLoading) {
-            initializeDependentStates();
-        }
-    }, [agentsLoaded, sectionsLoading, initializeDependentStates]);
-
-    useEffect(() => {
-        if (agentsLoaded && agents.length > 0) {
-            if (Object.keys(reportSections).length === 0) return;
-            agents.forEach(agent => {
-                const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionNameType].agentId === agent.id);
-                if (sectionKey) {
-                    const prompt = agent.prompt as AgentPrompt;
-                    const defaultContext = prompt.defaultContext || [];
-                    if (defaultContext.length > 0) {
-                        initializeContextSelection(sectionKey, defaultContext);
-                    }
-                }
-            });
-        }
-    }, [agentsLoaded, agents, initializeContextSelection, reportSections]);
-
-    const onGenerateSection = async (section: SectionNameType) => {
-        const fullState = useBuilderStore.getState().getFullState();
-        const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
-        const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
-        const agent = agents?.find(a => a.id === reportSections[section]?.agentId);
-
-        const body = {
-            proposal: currentSelection.proposal ? fullState.proposal : undefined,
-            projectPlan: currentSelection.projectPlan ? fullState.projectPlan : undefined,
-            sectionToGenerate: section,
-            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.sections?.[k as SectionNameType] }), {}),
-            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
-            guidelines: getSelectedGuidelines(agent, guidelineState[section]),
-            instructionText: generateInstructionText(controlState[section]),
-            exampleFiles,
-            contextFiles,
-        };
-
-        setActiveMutationKey(section);
-        reportGenerationMutation.mutate({ body });
-    };
-
-    const getGenerationPlan = async () => {
-        const sectionsToGenerate = availableSections
-            .filter((key): key is SectionNameType => !sections[key]);
-
-        if (sectionsToGenerate.length === 0) {
-            toast({ title: "Report Complete", description: "All sections have already been generated." });
-            return null;
-        }
-
-        try {
-            const token = await getAuthenticatedToken(firebaseUser);
-            const evaluationBody = {
-                proposal,
-                projectPlan,
-                existingSections: sections,
-                existingDiagrams: useDiagramStore.getState().diagrams,
-                sectionsToGenerate,
-                externalContext,
-            };
-            return await evaluateContextApi(evaluationBody, token);
-        } catch (error: any) {
-            toast({ title: "Error Creating Plan", description: error.message, variant: "destructive" });
-            return null;
-        }
-    }
-
-    const handleViewPlan = async () => {
-        setIsPlanning(true);
-        const plan = await getGenerationPlan();
-        if (plan) {
-            setGenerationPlan(plan);
-        }
-        setIsPlanning(false);
-    };
-
-    const onGenerateFullReport = async () => {
-        setIsPlanning(true);
-        const plan = await getGenerationPlan();
-        setIsPlanning(false);
-
-        if (plan) {
-            setActiveMutationKey('full-report');
-            const fullReportBody = {
-                proposal,
-                projectPlan,
-                existingSections: sections,
-                existingDiagrams: useDiagramStore.getState().diagrams,
-                externalContext,
-                generationPlan: plan.configs,
-            };
-            fullReportMutation.mutate(fullReportBody);
-        }
-    };
-
-    const availableSections = orderedSections.filter(key => reportSections[key]);
-    const sectionsToGenerateCount = availableSections.filter(key => !sections[key]).length;
-
-    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
-    const canGenerateFullReport = (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) && (userProfile ? userProfile.credits >= fullReportCreditCost : false) && fullReportCreditCost > 1 && !isAnythingGenerating;
-    const hasCreditsForSingleSection = userProfile ? userProfile.credits >= 1 : false;
-
-    if (!agentsLoaded || sectionsLoading) {
+    if (!agentsLoaded || sectionsLoading || templatesLoading) {
         return <ToolsSkeleton />;
     }
 
     return (
-        <Card className={cn("flex flex-col h-full", isDisabled && 'opacity-50 pointer-events-none')}>
+        <Card className={cn("flex flex-col h-full", (isDisabled || isTranslating) && 'opacity-50 pointer-events-none')}>
             <PlanViewerDialog plan={generationPlan} onOpenChange={() => setGenerationPlan(null)} />
             <CardHeader>
                  <div className="flex justify-between items-center">
@@ -304,12 +166,43 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                         <TabsTrigger value="actions" disabled={!Object.values(sections).some(s => !!s)}>Actions</TabsTrigger>
                     </TabsList>
                     <TabsContent value="generate" className="pt-6">
+                        <div className="space-y-2 mb-4">
+                            <Label htmlFor="report-template-select">{t('builder.reportGenerator.report_template')}</Label>
+                            <Select value={selectedReportTemplateId || ''} onValueChange={(value) => setSelectedReportTemplateId(value as string)}>
+                                <SelectTrigger id="report-template-select">
+                                    <SelectValue placeholder="Select a report template" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {reportTemplates?.map((template) => (
+                                        <TooltipProvider key={template.id}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <SelectItem value={template.id}>{template.name}</SelectItem>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="right" align="start">
+                                                    <p className="font-bold">{template.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{template.description}</p>
+                                                    <Separator className="my-2" />
+                                                    <p className="text-xs font-semibold mb-1">Included Agents:</p>
+                                                    <ul className="list-disc pl-4 text-xs text-muted-foreground">
+                                                        {template.sectionIds.map(sectionId => {
+                                                            const section = useSectionStore.getState().reportSections[sectionId as SectionNameType];
+                                                            return <li key={sectionId}>{section?.title || sectionId}</li>
+                                                        })}
+                                                    </ul>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <div className="pt-2">
                             <div className="flex gap-2">
                                 <Button
                                     onClick={onGenerateFullReport}
                                     className="w-full mb-4 font-headline flex-grow"
-                                    disabled={!canGenerateFullReport || isAnythingGenerating || isPlanning}
+                                    disabled={!canGenerateFullReport || isDisabled}
                                 >
                                     {activeMutationKey === 'full-report' ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <Sparkles className="me-2 h-4 w-4" />}
                                     {fullReportCreditCost > 1 ? `${t('builder.reportGenerator.GenerateFullReport')} (${fullReportCreditCost} Credits)` : 'Report Complete'}
@@ -317,7 +210,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                 <TooltipProvider>
                                     <Tooltip>
                                         <TooltipTrigger asChild>
-                                             <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isPlanning || fullReportCreditCost <= 1}>
+                                             <Button variant="outline" size="icon" onClick={handleViewPlan} disabled={isDisabled || fullReportCreditCost <= 1}>
                                                 {isPlanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
                                             </Button>
                                         </TooltipTrigger>
@@ -328,7 +221,7 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                         </div>
 
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {availableSections.map((key) => {
+                            {availableSections.map((key: any) => {
                                 const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
                                 return (
                                     <SectionAccordionItem
