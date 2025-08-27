@@ -1,4 +1,6 @@
 
+// code explantion in docs/hooks/use-writing-tools.md
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,7 +24,7 @@ export function useWritingTool<TData = any, TVariables = any>(
   }
 ) {
   const { firebaseUser, refetchUser } = useAuth();
-  
+
   return useMutation<TData, Error, TVariables>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
