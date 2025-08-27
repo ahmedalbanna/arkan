@@ -2,29 +2,50 @@
 
 'use client';
 
-import type { IStylesOptions, IRunOptions, INumberingOptions } from 'docx';
-import {SectionType} from 'docx'
-import type { ProjectProposal, DiagramType, SectionName } from '@/ai/schemas';
-import type { Root, PhrasingContent, List } from 'mdast';
+import { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions, IRunOptions, TableOfContents } from 'docx';
+import { saveAs } from 'file-saver';
+import { type ProjectProposal, type DiagramType, type SectionName } from '@/ai/schemas';
 import { templates, type TemplateKey } from './docx-styles';
-import { Paragraph, Table, TextRun, TableRow, TableCell, WidthType, AlignmentType, ImageRun, Document, Packer, HeadingLevel, Header, Footer, PageNumber, TableOfContents } from 'docx';
-import { exportComponentAsPDF } from './pdf-exporter';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import rehypeStringify from 'rehype-stringify';
+import type { Root, PhrasingContent, List } from 'mdast';
 import { processPlantUml } from './utils';
+import { exportComponentAsPDF } from './pdf-exporter';
 
-export async function createDocxParagraphs(markdown: string) {
-    const { unified } = await import('unified');
-    const { default: remarkParse } = await import('remark-parse');
-    const { default: remarkGfm } = await import('remark-gfm');
+/**
+ * Formats a camelCase or snake_case key into a human-readable title.
+ * @param key The key string to format.
+ * @returns A formatted title string.
+ */
+function formatKeyToTitle(key: string): string {
+    if (!key) return '';
+    return key
+        .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+        .replace(/_/g, ' ')         // Replace underscores with spaces
+        .replace(/\b\w/g, char => char.toUpperCase()); // Capitalize first letter of each word
+}
+
+
+/**
+ * Parses a markdown string into an array of docx Paragraph and Table objects.
+ * Handles headings, paragraphs, lists, tables, blockquotes, and inline formatting.
+ * It also processes PlantUML code blocks into images.
+ * @param markdown - The markdown string to parse.
+ * @returns A promise that resolves to an array of docx objects.
+ */
+export async function createDocxParagraphs(markdown: string): Promise<(Paragraph | Table)[]> {
 
     if (!markdown) return [];
 
     const processedMarkdown = processPlantUml(markdown);
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
-    const docxObjects: (InstanceType<typeof Paragraph> | InstanceType<typeof Table>)[] = [];
+    const docxObjects: (Paragraph | Table)[] = [];
 
     // Make transformInlines async to handle image fetching
-    const transformInlines = async (nodes: PhrasingContent[], options: IRunOptions = {}): Promise<(InstanceType<typeof TextRun> | InstanceType<typeof ImageRun>)[]> => {
-        const runs: (InstanceType<typeof TextRun> | InstanceType<typeof ImageRun>)[] = [];
+    const transformInlines = async (nodes: PhrasingContent[], options: IRunOptions = {}): Promise<(TextRun | ImageRun)[]> => {
+        const runs: (TextRun | ImageRun)[] = [];
         for (const node of nodes) {
             switch (node.type) {
                 case 'strong':
@@ -67,8 +88,8 @@ export async function createDocxParagraphs(markdown: string) {
         return runs;
     }
 
-    const processListItems = async (listNode: List, level: number): Promise<InstanceType<typeof Paragraph>[]> => {
-        let paragraphs: InstanceType<typeof Paragraph>[] = [];
+    const processListItems = async (listNode: List, level: number): Promise<Paragraph[]> => {
+        let paragraphs: Paragraph[] = [];
         for (const listItem of listNode.children) {
             for (const itemContent of listItem.children) {
                 if (itemContent.type === 'paragraph') {
@@ -178,7 +199,7 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     }
 }
 
-async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: IStylesOptions }>> {
+async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
     try {
         const response = await fetch('/api/admin/templates/docx');
  if (response.status !== 200) {
@@ -192,9 +213,14 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: ISty
     }
 }
 
+/**
+ * Converts a markdown string into a downloadable DOCX file.
+ * @param markdownContent - The markdown content to export.
+ * @param fileName - The desired name of the output file (without extension).
+ * @param templateKey - The key of the style template to use.
+ */
 export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, templateKey: TemplateKey = 'modern') {
-    const { saveAs } = await import('file-saver');
-
+    
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
@@ -212,8 +238,13 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
 }
 
 
+/**
+ * Converts a single report section into a downloadable DOCX file.
+ * @param title - The title of the section.
+ * @param markdownContent - The markdown content of the section.
+ * @param templateKey - The key of the style template to use.
+ */
 export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
-    const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
@@ -224,6 +255,7 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
         numbering,
         sections: [{
             children: [
+                new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
                 ...docxContent,
             ]
         }]
@@ -233,39 +265,54 @@ export async function exportSectionAsDocx(title: string, markdownContent: string
  saveAs(blob, `${title.replace(/\s+/g, '_')}.docx`);
 }
 
-function applyStylesToElement(element: HTMLElement, styles: any) {
-    if (styles?.font) {
+/**
+ * Helper function to apply CSS styles to an HTML element for PDF generation.
+ * @param element - The HTMLElement to style.
+ * @param styles - The style object from the DOCX template.
+ */
+function applyStylesToElement(element: HTMLElement, styles: IRunOptions) {
+    if (!styles) return;
+    if (styles.font) {
         element.style.fontFamily = typeof styles.font === 'string'
  ? styles.font
- : (styles.font as any)?.name ?? 'Calibri';
+ : (styles.font as { name: string })?.name ?? 'Calibri';
 
     }
-    if (styles?.size) {
+    if (styles.size) {
  element.style.fontSize = `${Number(styles.size ?? 22) / 2}pt`;
     }
-    if (styles?.color) {
+    if (styles.color) {
  element.style.color = `#${styles.color || '333333'}`;
     }
-    if (styles?.bold) {
+    if (styles.bold) {
         element.style.fontWeight = 'bold';
     }
-    if (styles?.italics) {
+    if (styles.italics) {
         element.style.fontStyle = 'italic';
     }
 }
 
-
+/**
+ * Renders a project proposal into a hidden HTML element, styles it, and exports it as a PDF.
+ * @param proposal - The structured ProjectProposal object.
+ * @param templateKey - The key of the style template to use.
+ */
 export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey: TemplateKey) {
-    const { format } = await import('date-fns');
-    const { unified } = await import('unified');
-    const { default: remarkParse } = await import('remark-parse');
-    const { default: remarkGfm } = await import('remark-gfm');
-    const { default: remarkRehype } = await import('remark-rehype');
-    const { default: rehypeStringify } = await import('rehype-stringify');
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
+    // Helper to convert markdown to HTML string
+    const markdownToHtml = async (md: string) => {
+        if (!md) return '';
+        const file = await unified()
+            .use(remarkParse)
+            .use(remarkGfm)
+            .use(rehypeStringify as any)
+            .process(md);
+        return String(file);
+    };
+    
     // Create a hidden element to render the proposal for PDF generation
     const container = document.createElement('div');
     container.style.position = 'absolute';
@@ -273,63 +320,80 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     container.style.width = '800px';
     container.style.padding = '40px';
     container.style.backgroundColor = 'white';
-
-    const markdownToHtml = async (md: string) => {
-        const file = await unified()
-            .use(remarkParse)
-            .use(remarkGfm)
-            .use(remarkRehype)
-            .use(rehypeStringify as any)
-            .process(md);
-        return String(file);
-    }
-
+    
     let htmlContent = `<div id="pdf-content">`;
     // Apply default document styles to the container
     applyStylesToElement(container, styles.default?.document?.run);
 
     // Title and Category
- htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
- htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
-
-    const sections = [
-        { title: "Objective", content: await markdownToHtml(proposal.objective) },
-        { title: "Methodology", content: await markdownToHtml(proposal.methodology) },
-        { title: "Expected Outcomes", content: `<ul>${(proposal.expected_outcome || []).map(o => `<li>${o}</li>`).join('')}</ul>` },
-        { title: "Success Criteria", content: `<ul>${(proposal.success_criteria || []).map(c => `<li>${c}</li>`).join('')}</ul>` },
-        { title: "Evaluation", content: await markdownToHtml(proposal.evaluation) },
+    htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
+    htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
+    
+    const sections: { title: string, content: string | string[] }[] = [
+        { title: "Executive Summary", content: await markdownToHtml(proposal.executiveSummary) },
+        { title: "Problem Statement", content: await markdownToHtml(proposal.problemStatement) },
+        { title: "Proposed Solution", content: await markdownToHtml(proposal.proposedSolution.overview + "\n\n" + proposal.proposedSolution.technicalApproach + "\n\n" + proposal.proposedSolution.keyFeatures) },
+        { title: "Project Plan", content: await markdownToHtml(proposal.projectPlan.timeline + "\n\n" + proposal.projectPlan.keyDeliverables) },
+        { title: "Budget Breakdown", content: await markdownToHtml(proposal.budgetBreakdown) },
     ];
-
+    
     for (const section of sections) {
- htmlContent += `<h2>${section.title}</h2>${section.content}`;
+        const content = Array.isArray(section.content) ? section.content.join(' ') : section.content;
+        if (content.trim()) {
+            htmlContent += `<h2>${section.title}</h2>${content}`;
+        }
     }
 
     htmlContent += `</div>`;
     container.innerHTML = htmlContent;
 
     // Apply specific styles to headings
-    const h1 = container.querySelector('h1');
-    if (h1) applyStylesToElement(h1, styles.default?.heading1?.run);
-
-    container.querySelectorAll('h2').forEach(h2 => {
-        applyStylesToElement(h2, styles.default?.heading2?.run);
-    });
+    container.querySelectorAll('h1').forEach(h => applyStylesToElement(h, styles.default?.heading1?.run));
+    container.querySelectorAll('h2').forEach(h => applyStylesToElement(h, styles.default?.heading2?.run));
+    container.querySelectorAll('h3').forEach(h => applyStylesToElement(h, styles.default?.heading3?.run));
 
     document.body.appendChild(container);
-
- await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
-
+    await exportComponentAsPDF(container, `${proposal.title.replace(/\s+/g, '_')}_proposal.pdf`);
     document.body.removeChild(container);
 }
 
 
+/**
+ * Assembles a DOCX document from a structured project proposal.
+ * @param proposal - The ProjectProposal object.
+ * @param templateKey - The key of the style template to use.
+ */
 export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
-    const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
 
-    const { title, category, objective, methodology, timeline, budget, expected_outcome, success_criteria, evaluation, stakeholders, risks } = proposal;
+    // A helper function to create a section with a heading and its content
+    const createSection = async (title: string, content: string | string[]) => {
+        if (!content || (Array.isArray(content) && content.length === 0)) return [];
+        const contentString = Array.isArray(content) ? `- ${content.join('\n- ')}` : content;
+        return [
+            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+            ...(await createDocxParagraphs(contentString)),
+        ];
+    };
+    
+    // A helper for nested object sections
+    const createNestedSection = async (title: string, data: Record<string, string | string[]>) => {
+        const children: (Paragraph|Table)[] = [];
+        for (const [key, value] of Object.entries(data)) {
+            if (value && value.length > 0) {
+                 children.push(new Paragraph({ text: formatKeyToTitle(key), heading: HeadingLevel.HEADING_2 }));
+                 children.push(...await createDocxParagraphs(Array.isArray(value) ? value.join('\n- ') : value));
+            }
+        }
+        if (children.length === 0) return [];
+        return [
+            new Paragraph({ text: title, heading: HeadingLevel.HEADING_1 }),
+            ...children
+        ]
+    }
+
 
     const doc = new Document({
         styles,
@@ -339,19 +403,19 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                 properties: { type: SectionType.NEXT_PAGE },
                 children: [
                     new Paragraph({ text: "", spacing: { after: 2000 } }),
-                    new Paragraph({ text: title, style: 'Title' }),
-                    new Paragraph({ text: category, style: 'SubTitle', spacing: { after: 800 } }),
+                    new Paragraph({ text: proposal.title, style: 'Title' }),
+                    new Paragraph({ text: proposal.category, style: 'SubTitle', spacing: { after: 400 } }),
                 ]
             },
             {
                 properties: { type: SectionType.NEXT_PAGE },
-                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${title}`, alignment: AlignmentType.RIGHT })] }) },
+                headers: { default: new Header({ children: [new Paragraph({ text: `Proposal: ${proposal.title}`, alignment: AlignmentType.RIGHT })] }) },
                 footers: {
                     default: new Footer({
                         children: [
                             new Paragraph({
                                 alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ children: [PageNumber.CURRENT] })],
+                                children: [new TextRun({ children: [PageNumber.CURRENT, " | ", PageNumber.TOTAL_PAGES] })],
                             }),
                         ],
                     }),
@@ -361,40 +425,32 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
                         hyperlink: true,
                         headingStyleRange: "1-3",
                     }),
-                    new Paragraph({ text: "Objective", heading: HeadingLevel.HEADING_1 }),
-                    ...await createDocxParagraphs(objective),
-                    new Paragraph({ text: "Methodology", heading: HeadingLevel.HEADING_1 }),
-                    ...await createDocxParagraphs(methodology),
-                    new Paragraph({ text: "Timeline", heading: HeadingLevel.HEADING_1 }),
-                    new Paragraph({ children: [new TextRun({ text: "Start Date: ", bold: true }), new TextRun(timeline.startDate)] }),
-                    new Paragraph({ children: [new TextRun({ text: "End Date: ", bold: true }), new TextRun(timeline.endDate)] }),
-                    new Paragraph({ text: "Phases:", heading: HeadingLevel.HEADING_2 }),
- ...timeline.phases.map(p => new Paragraph({ text: `${p.name} (${p.durationWeeks} weeks)`, bullet: { level: 0 } })),
-                    new Paragraph({ text: "Budget", heading: HeadingLevel.HEADING_1 }),
- new Paragraph({ children: [new TextRun({ text: "Total Amount: ", bold: true }), new TextRun(`${budget.totalAmount.toLocaleString()} ${budget.currency}`)] }),
- new Table({ rows: [new TableRow({ children: [new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Item", bold: true })] })] }), new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: "Cost", bold: true })] })] }),] }), ...budget.breakdown.map(b => new TableRow({ children: [new TableCell({ children: [new Paragraph(b.item)] }), new TableCell({ children: [new Paragraph(`${b.cost.toLocaleString()} ${budget.currency}`)] }),] }))], width: { size: 100, type: WidthType.PERCENTAGE } }),
-                    new Paragraph({ text: "Expected Outcomes", heading: HeadingLevel.HEADING_1 }),
-                    ...(Array.isArray(expected_outcome) ? expected_outcome.map(o => new Paragraph({ text: o, bullet: { level: 0 } })) : []),
-                    new Paragraph({ text: "Success Criteria", heading: HeadingLevel.HEADING_1 }),
-                    ...(Array.isArray(success_criteria) ? success_criteria.map(sc => new Paragraph({ text: sc, bullet: { level: 0 } })) : []),
-                    new Paragraph({ text: "Evaluation", heading: HeadingLevel.HEADING_1 }),
-                    ...await createDocxParagraphs(evaluation),
-                    new Paragraph({ text: "Stakeholders", heading: HeadingLevel.HEADING_1 }),
- ...(await Promise.all((stakeholders || []).flatMap(async s => [new Paragraph({ text: `${s.name} (${s.role})`, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(s.interest)]))).flat(),
-                    new Paragraph({ text: "Risks and Mitigations", heading: HeadingLevel.HEADING_1 }),
-                    ...(await Promise.all((risks || []).flatMap(async r => [new Paragraph({ text: r.description, heading: HeadingLevel.HEADING_2 }), ...await createDocxParagraphs(r.mitigation)]))).flat(),
-                ],
+                    ...(await createSection("Executive Summary", proposal.executiveSummary)),
+                    ...(await createSection("Problem Statement", proposal.problemStatement)),
+                    ...(await createNestedSection("Proposed Solution", proposal.proposedSolution)),
+                    ...(await createNestedSection("Project Plan", proposal.projectPlan)),
+                    ...(await createSection("Budget Breakdown", proposal.budgetBreakdown)),
+                ].filter(p => p !== undefined).flat() as (Paragraph | Table | TableOfContents)[],
             }],
     });
 
     try {
         const blob = await Packer.toBlob(doc);
-        saveAs(blob, `${title.replace(/ /g, '_')}_proposal.docx`);
+        saveAs(blob, `${proposal.title.replace(/ /g, '_')}_proposal.docx`);
     } catch (error) {
         console.error("Error generating DOCX file:", error);
     }
 }
 
+/**
+ * Assembles and exports a full project report as a DOCX file.
+ * @param sections - An object containing the markdown content of each report section.
+ * @param diagrams - An object containing data for generated diagrams.
+ * @param proposalTitle - The title of the project proposal.
+ * @param templateKey - The key of the style template to use.
+ * @param translatedTitles - An object mapping section keys to their display titles.
+ * @param sectionsToInclude - An optional array of section keys to include in the export.
+ */
 export async function exportReportAsDocx(
     sections: { [key in SectionName]?: string; },
     diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
@@ -403,7 +459,6 @@ export async function exportReportAsDocx(
     translatedTitles: { [key in SectionName]?: string; },
     sectionsToInclude?: SectionName[]
 ) {
-    const { saveAs } = await import('file-saver');
 
     const allTemplates = await getStylesFromServer();
     const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
@@ -415,6 +470,7 @@ export async function exportReportAsDocx(
         const content = sections[key];
         if (content) {
             return [
+                new Paragraph({ text: translatedTitles[key] || formatKeyToTitle(key), heading: HeadingLevel.HEADING_1 }),
                 ...(await createDocxParagraphs(content)),
             ];
         }
@@ -422,7 +478,7 @@ export async function exportReportAsDocx(
     });
     const resolvedReportBody = (await Promise.all(reportBodyPromises)).flat();
 
-    const reportBody: (InstanceType<typeof Paragraph> | InstanceType<typeof TableOfContents>)[] = [
+    const reportBody: (Paragraph | TableOfContents | Table)[] = [
         new TableOfContents("Table of Contents", {
             hyperlink: true,
             headingStyleRange: "1-3",
@@ -505,4 +561,3 @@ export async function exportReportAsDocx(
         console.error("Error generating DOCX file:", error);
     }
 }
-
