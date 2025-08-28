@@ -11,7 +11,7 @@ import { Accordion } from '@/components/ui/accordion';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useDiagramGenerator } from '@/hooks/use-diagram-generator';
+import { useDiagramGenerator } from '@/hooks';
 
 
 

@@ -4,7 +4,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, CheckCircle, AlertCircle, PlayCircle, Clock } from 'lucide-react';
-import { useTaskadeGeneration } from '@/hooks/use-taskade';
+import { useTaskadeGeneration } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
 import { Label } from '@/components/ui/label';

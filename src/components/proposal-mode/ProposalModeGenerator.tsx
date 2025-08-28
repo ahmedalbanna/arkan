@@ -9,7 +9,7 @@ import { lazy, Suspense } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { CollapsibleSidePanel } from '@/components/ui/CollapsibleSidePanel';
-import { useProposalModeGeneratorLogic } from '@/hooks/use-proposal-mode-generator-logic';
+import { useProposalModeGeneratorLogic } from '@/hooks';
 import { ProposalActions } from './ProposalActions';
 
 const FormattedProposalView = lazy(() => import('./FormattedProposalView'));

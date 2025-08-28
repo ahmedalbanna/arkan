@@ -21,7 +21,7 @@ import {
   type PresentationGenerationTemplate,
   type DocxTemplate,
   type PptxTemplate,
-} from "@/services/template-service";
+} from "@/services";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "./use-toast";
 import { handleErrorUtility } from "@/lib/errorUtils";

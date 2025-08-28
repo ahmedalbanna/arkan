@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdateProposalTemplate, useCreateProposalTemplate, useDeleteProposalTemplate } from '@/hooks/use-templates';
-import { fetchProposalTemplates, type ProposalTemplate } from '@/services/template-service';
+import { templateKeys, useUpdateProposalTemplate, useCreateProposalTemplate, useDeleteProposalTemplate } from '@/hooks';
+import { fetchProposalTemplates, type ProposalTemplate } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -14,7 +14,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { useState } from 'react';

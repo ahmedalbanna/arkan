@@ -3,7 +3,8 @@
 // src/app/api/teams/[id]/invitations/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
+import { type Team, type TeamMember } from '@/lib/types';
+import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
@@ -18,7 +19,7 @@ async function verifyTeamOwner(requesterId: string, teamId: string) {
         throw { status: 404, message: 'Team not found' };
     }
     const team = teamDoc.data() as Team;
-    
+
     if (team.ownerId !== requesterId) {
         throw { status: 403, message: 'Forbidden: Only the team owner can invite members' };
     }
@@ -68,14 +69,14 @@ export const POST = withAuth(async ({ request, params, user }) => {
             profilePictureUrl: userProfile.profilePictureUrl || '',
         };
         await adminDb.collection('teams').doc(teamId).collection('members').doc(userId).set(newMember);
-        
+
         // Add team to user's profile
         await adminDb.collection('users').doc(userId).update({
             teams: FieldValue.arrayUnion(teamId)
         });
-        
+
         return createApiResponse(newMember, 201);
-        
+
     } catch (error) {
         return handleApiError(error);
     }

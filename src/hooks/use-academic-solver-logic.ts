@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
-import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks/use-academic-solver';
+import { useAcademicSolverStore } from '@/hooks';
+import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
 
 export function useAcademicSolverLogic() {

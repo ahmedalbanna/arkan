@@ -8,6 +8,10 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isTeamMember(teamId) {
+      return exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid));
+    }
+
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
@@ -26,9 +30,11 @@ service cloud.firestore {
       // Only admins can list all users.
       allow list: if isAdmin();
       // A user can create their own profile document.
-      allow create: if isOwner(userId);
+      // On create, a user cannot assign themselves as admin.
+      allow create: if isOwner(userId) && request.resource.data.role == 'user';
       // A user can update their own profile, and admins can update any profile.
-      allow update: if isOwner(userId) || isAdmin();
+      // A user cannot change their own role during an update.
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
       // Only admins can delete users.
       allow delete: if isAdmin();
     }
@@ -36,7 +42,9 @@ service cloud.firestore {
     // --- Transactions Collection ---
     match /transactions/{transactionId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, list, update, delete: if isAdmin();
+      // Admins can manage all transactions. Users can read their own.
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow list, update, delete: if isAdmin();
     }
 
     // --- Features Collection ---
@@ -59,20 +67,23 @@ service cloud.firestore {
 
     // --- Agent Generations (Logs) ---
     match /agent_generations/{generationId} {
-        allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-        allow read, list, delete: if isAdmin(request.auth.uid);
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Admins can manage all logs. Users can read their own.
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow list, delete: if isAdmin();
     }
 
     // --- Teams Collection ---
     match /teams/{teamId} {
       allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
-      allow get: if request.auth != null && exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid));
+      allow get: if request.auth != null && isTeamMember(teamId);
       allow update, delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid;
 
       match /members/{userId} {
           allow create: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid;
-          allow read, list: if request.auth != null && exists(/databases/$(database)/documents/teams/$(teamId)/members/$(request.auth.uid));
-          allow delete: if request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid && request.auth.uid != userId;
+          allow read, list: if request.auth != null && isTeamMember(teamId);
+          // The owner can remove any member (except themselves), or a member can remove themselves (leave team).
+          allow delete: if (request.auth != null && get(/databases/$(database)/documents/teams/$(teamId)).data.ownerId == request.auth.uid && request.auth.uid != userId) || isOwner(userId);
       }
     }
 
@@ -84,8 +95,15 @@ service cloud.firestore {
 
     // --- Projects ---
     match /projects/{projectId} {
-      allow read, update, delete: if isOwner(resource.data.userId);
-      allow create: if isOwner(request.resource.data.userId);
+      function isProjectOwner() {
+        return isOwner(resource.data.userId);
+      }
+      function isProjectTeamMember() {
+        return resource.data.teamId != null && isTeamMember(resource.data.teamId);
+      }
+      // Allow access if the user is the project creator OR a member of the assigned team.
+      allow read, update, delete: if isProjectOwner() || isProjectTeamMember();
+      allow create: if isOwner(request.resource.data.userId); // Only the user can create a project for themselves.
     }
   }
 }

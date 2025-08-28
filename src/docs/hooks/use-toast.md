@@ -50,7 +50,7 @@ This code defines a custom React hook called `useToast` that provides a simple
 To use the `useToast` hook, you would first import it into your React component:
 
 ```typescript
-content_copyaddcompare_arrowsopen_in_fullimport { useToast } from "@/hooks/use-toast";
+content_copyaddcompare_arrowsopen_in_fullimport { useToast } from "@/hooks";
 ```
 
 Then, you would call the hook to get access to the toast state and the `toast` function:

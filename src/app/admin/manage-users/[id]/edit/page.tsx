@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useUserProfile } from '@/hooks/use-user';
+import { useUserProfile } from '@/hooks';
 import { notFound } from 'next/navigation';
 import { UserCog } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';

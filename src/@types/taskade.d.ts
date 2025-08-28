@@ -14,20 +14,20 @@ export type {
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';
-export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
+export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 export type { Agent, AgentData, AgentPrompt } from '@/lib/agents-template';
-export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
+export type { VerifyPaymentVariables } from '@/hooks';
 export type { PricingPlan } from '@/components/PricingCard';
 export type { Codebase } from '@/ai/flows/generate-codebase';
-export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
-export type { TeamWithMembers } from '@/services/team-service';
-export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
-export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services/template-service';
-export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
-export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
+export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks';
+export type { TeamWithMembers } from '@/services';
+export type { Team, TeamMember, UserProfile } from '@/lib/types';
+export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate } from '@/services';
+export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks';
+export type { ExternalContext, ContextFileType } from '@/hooks';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
 export type { SignupCredentials } from '@/components/auth/SignupForm';
-export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+export type { GenerateProposalBody } from '@/hooks';
 export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
 export type { DiffPart } from '@/lib/diff';
 export type { GenerateAgentConfigOutput } from '@/ai/flows/generate-agent-config';
@@ -250,13 +250,13 @@ export interface ProjectState {
     } | undefined;
     evaluation?: import("@/ai/flows/evaluate-report").EvaluateReportOutput | null | undefined;
     diagrams?: {
-        "useCase"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        class?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        sequence?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        activity?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        component?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        archimate?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        er?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        "useCase"?: import("@/hooks").DiagramData | undefined;
+        class?: import("@/hooks").DiagramData | undefined;
+        sequence?: import("@/hooks").DiagramData | undefined;
+        activity?: import("@/hooks").DiagramData | undefined;
+        component?: import("@/hooks").DiagramData | undefined;
+        archimate?: import("@/hooks").DiagramData | undefined;
+        er?: import("@/hooks").DiagramData | undefined;
     } | undefined;
     presentation?: {
         history: PresentationHistoryEntry[];

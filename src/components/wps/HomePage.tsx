@@ -6,7 +6,7 @@ import {
   Home,
   PlusCircle,
 } from 'lucide-react';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
 
 import EditorPage from '@/app/editor/page';

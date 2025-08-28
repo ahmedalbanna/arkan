@@ -8,7 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { translateTextApi } from "@/services/translation-service";
+import { translateTextApi } from "@/services";
 import { type TranslateTextOutput, type TranslateVariables } from "@/lib/types";
 
 /**

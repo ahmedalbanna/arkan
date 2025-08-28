@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useProposalTemplates } from '@/hooks/use-templates';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useProposalGenerationStore, type AdvancedProposalFields } from '@/hooks/useProposalGenerationStore';
+import { useProposalTemplates } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
+import { useProposalGenerationStore, type AdvancedProposalFields } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerateProposal } from '@/hooks/use-proposal-generation';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useGenerateProposal } from '@/hooks';
+import { useReportStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 
 export function useProposalGenerationToolsLogic() {

@@ -10,7 +10,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProposalActionsLogic } from '@/hooks/use-proposal-actions-logic';
 

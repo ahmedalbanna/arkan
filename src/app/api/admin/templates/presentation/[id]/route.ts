@@ -18,10 +18,10 @@ export const PUT = withAuth(async ({ request, params }) => {
         if (!validation.success) {
             return handleApiError(validation.error);
         }
-        
+
         await templateRef.update({ ...validation.data, updatedAt: new Date().toISOString() });
         const updatedDoc = await templateRef.get();
-        
+
         return createApiResponse({ id: updatedDoc.id, ...updatedDoc.data() }, 200);
     } catch (error) {
         return handleApiError(error);
@@ -42,9 +42,9 @@ export const DELETE = withAuth(async ({ params }) => {
         if (!doc.exists) {
             return handleApiError({ message: 'Template not found.' }, 404);
         }
-        
+
         await templateRef.delete();
-        
+
         return createApiResponse({ message: `Template "${id}" deleted successfully.` }, 200);
     } catch (error) {
         return handleApiError(error);

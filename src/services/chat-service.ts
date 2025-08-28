@@ -1,7 +1,7 @@
 'use client';
 
-import type { ChatSession } from "@/hooks/useChatStore";
-import { Agent } from '@/hooks/use-agents';
+import type { ChatSession } from "@/hooks";
+import { Agent } from '@/hooks';
 
 
 interface CreateConversationData {

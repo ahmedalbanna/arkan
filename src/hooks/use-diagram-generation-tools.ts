@@ -2,15 +2,15 @@
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from '@/hooks/use-agents';
-import { useToast } from '@/hooks/use-toast';
+import { useAgents } from '@/hooks';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useSectionStore } from '@/hooks/useSectionStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { useExplainDiagram, useGenerateDiagram } from '@/hooks/use-diagrams';
+import { useSectionStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
+import { useExplainDiagram, useGenerateDiagram } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 

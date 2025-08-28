@@ -67,7 +67,7 @@ export const POST = withAuth(async ({ request }) => {
         createdAt: new Date().toISOString(),
         link: '/admin/manage-payments'
       };
-      
+
       const notificationPromises = adminsSnapshot.docs.map(adminDoc => {
           const adminId = adminDoc.id;
           const notificationRef = rtdb.ref(`notifications/${adminId}`).push();

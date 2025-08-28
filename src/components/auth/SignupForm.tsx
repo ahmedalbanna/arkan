@@ -13,8 +13,8 @@ import { Loader2, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { useSignup, useGoogleSignIn } from '@/hooks/use-user';
-import { useToast } from '@/hooks/use-toast';
+import { useSignup, useGoogleSignIn } from '@/hooks';
+import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const formSchema = z.object({

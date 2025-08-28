@@ -7,10 +7,10 @@ import { MessageSquare, Send, X, Bot, User, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useChatStore } from '@/hooks/useChatStore';
+import { useChatStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { runFlow } from '@genkit-ai/next/client';
 import { projectChat } from '@/ai/flows/project-chat';
 

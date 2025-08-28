@@ -28,17 +28,17 @@ export const GET = withAuth(async ({ user }) => {
             personalProjectsQuery,
             teamProjectsQuery,
         ]);
-        
+
         const projectsMap = new Map();
-        
+
         personalProjectsSnapshot.docs.forEach((doc: any) => {
             projectsMap.set(doc.id, { id: doc.id, ...doc.data() });
         });
-        
+
         teamProjectsSnapshot?.docs.forEach((doc: any) => {
             projectsMap.set(doc.id, { id: doc.id, ...doc.data() });
         });
-        
+
         const projects = Array.from(projectsMap.values())
             .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
@@ -68,7 +68,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
         const projectRef = await adminDb.collection('projects').add(newProject);
         revalidatePath('/projects');
-        
+
         return createApiResponse({ id: projectRef.id, ...newProject }, 201);
     } catch (error) {
         return handleApiError(error);

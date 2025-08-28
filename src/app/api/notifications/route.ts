@@ -4,8 +4,7 @@
 // but it's kept here in case a non-real-time fetch is needed in the future.
 // The primary fetching logic is now in `src/hooks/use-notifications.ts`.
 import { NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 
 async function getUserIdFromRequest(request: Request) {
 

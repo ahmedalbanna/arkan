@@ -5,7 +5,7 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 export const POST = withAuth(async ({ request, params, user }) => {
     const { id: targetUserId } = params;
-    
+
     // Check if the user is an admin or is updating their own profile
     if (user.role !== 'admin' && user.id !== targetUserId) {
         return handleApiError({ message: 'Forbidden' }, 403);
@@ -23,7 +23,7 @@ export const POST = withAuth(async ({ request, params, user }) => {
         if (!allowedTypes.includes(file.type)) {
             return handleApiError({ message: 'Invalid file type. Only JPG, PNG, and WebP are allowed.' }, 400);
         }
-        
+
         const storage = getStorage();
         const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
         if (!bucketName) {
@@ -31,14 +31,14 @@ export const POST = withAuth(async ({ request, params, user }) => {
         }
         const bucket = storage.bucket(bucketName);
         const fileName = `profile_pictures/${targetUserId}/${Date.now()}-${file.name}`;
-        
+
         const fileBuffer = Buffer.from(await file.arrayBuffer());
 
         const fileUpload = bucket.file(fileName);
         await fileUpload.save(fileBuffer, {
             metadata: { contentType: file.type },
         });
-        
+
         await fileUpload.makePublic();
         const publicUrl = fileUpload.publicUrl();
 

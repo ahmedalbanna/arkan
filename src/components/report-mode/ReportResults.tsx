@@ -8,7 +8,7 @@ import { FileText, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import React from 'react';
-import { useReportResults } from '@/hooks/use-report-results';
+import { useReportResults } from '@/hooks';
 
 interface ReportResultsProps {
   onSectionUpdate: (key: SectionName, value: string) => void;

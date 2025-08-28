@@ -23,17 +23,17 @@ export async function POST(request: Request) {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const projectId = uuidv4();
 
     // In a real application, you would save this data to a database,
     // and upload the file to a storage service like Firebase Storage.
     // For now, we just log it to the server console.
     console.log('New Student Request Received:');
-    console.log({ 
+    console.log({
         projectId,
-        requirements: validation.data.requirements, 
-        email: validation.data.email, 
+        requirements: validation.data.requirements,
+        email: validation.data.email,
         phone: validation.data.phone,
         fileName: file?.name,
         fileSize: file?.size,

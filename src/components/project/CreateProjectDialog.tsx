@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { UploadManager } from '@/components/file/UploadManager';
-import { useCreateProjectDialog } from '@/hooks/use-create-project-dialog';
+import { useCreateProjectDialog } from '@/hooks';
 
 export function CreateProjectDialog() {
     const { t } = useLocalization();

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjects } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, FolderOpen, RefreshCw } from 'lucide-react';
 import { ProjectCard } from '@/components/project/ProjectCard';

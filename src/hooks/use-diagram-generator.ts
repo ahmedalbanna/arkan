@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSectionStore } from '@/hooks/useSectionStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useUpdateDiagram } from '@/hooks/use-diagrams';
+import { useSectionStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { useUpdateDiagram } from '@/hooks';
 import { type DiagramType } from '@/ai/schemas';
 
 export const useDiagramGenerator = () => {

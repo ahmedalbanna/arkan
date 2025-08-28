@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Loader2, Sparkles, Plus, Trash2, SlidersHorizontal } from 'lucide-react';
-import type { AdvancedProposalFields } from '@/hooks/useProposalGenerationStore';
+import type { AdvancedProposalFields } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';

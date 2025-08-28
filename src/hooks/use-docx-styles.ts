@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
@@ -12,8 +12,8 @@ import {
   updateDocxTemplate,
   createDocxTemplate,
   deleteDocxTemplate,
-} from "@/services/template-service";
-import type { DocxTemplate, DocxTemplatesRecord } from '@/services/template-service';
+} from "@/services";
+import type { DocxTemplate, DocxTemplatesRecord } from '@/services';
 import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
 

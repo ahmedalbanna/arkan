@@ -1,13 +1,13 @@
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useUserProfile, useLogin } from '@/hooks/use-user';
+import { useUserProfile, useLogin } from '@/hooks';
 import * as authUtils from '@/lib/authUtils';
-import * as userService from '@/services/user-service';
+import * as userService from '@/services';
 
 // Mock dependencies
-jest.mock('@/services/user-service');
-jest.mock('@/lib/authUtils');
+jest.mock('@/services');
+jest.mock('@/lib');
 jest.mock('@/context/AuthContext', () => ({
   useAuth: () => ({
     firebaseUser: { uid: 'user-123', getIdToken: jest.fn().mockResolvedValue('fake-token') },
@@ -83,19 +83,19 @@ describe('useLogin Hook', () => {
       jest.clearAllMocks();
       queryClient.clear();
     });
-  
+
     it('successfully logs in a user', async () => {
         const mockUser = { uid: 'user-123', email: 'test@example.com' };
         mockedLoginWithEmail.mockResolvedValue(mockUser);
-        
+
         const { result } = renderHook(() => useLogin(), { wrapper });
-        
+
         act(() => {
             result.current.mutate({ email: 'test@example.com', password: 'password' });
         });
 
         await waitFor(() => expect(result.current.isSuccess).toBe(true));
-        
+
         expect(result.current.data).toEqual(mockUser);
     });
 

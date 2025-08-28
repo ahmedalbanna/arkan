@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { FileSpreadsheet, GanttChartSquare, BookCheck, GitGraph, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useContextSelector } from '@/hooks/use-context-selector';
+import { useContextSelector } from '@/hooks';
 
 interface ContextSelectorProps {
     itemKey: string;

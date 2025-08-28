@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks/use-agents';
+import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks';
 import { type Agent } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';

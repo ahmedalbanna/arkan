@@ -1,8 +1,7 @@
 
 
 import { NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 
 import { getUserProfile } from '@/lib/db/queries';
 

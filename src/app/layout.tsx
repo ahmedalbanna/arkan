@@ -14,7 +14,7 @@ import { Footer } from '@/components/layout/Footer';
 import QueryProvider from '@/components/QueryProvider';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/dist/client/components/navigation';
-import { adminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/server-init';
 import SupportChatWidget from '@/components/chat/SupportChatWidget';
 import FirebaseMessagingProvider from '@/components/FirebaseMessagingProvider';
 

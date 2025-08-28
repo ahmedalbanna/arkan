@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { toast } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useGenerateProposal } from '@/hooks/use-proposal-generation';
-import { translateProposalApi } from '@/services/translation-service';
+import { useGenerateProposal } from '@/hooks';
+import { translateProposalApi } from '@/services';
 import { ProjectProposalSchema, type ProjectProposal } from '@/ai/schemas';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { EvaluationTools } from '@/components/evaluation/EvaluationTools';

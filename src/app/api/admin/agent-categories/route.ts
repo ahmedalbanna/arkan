@@ -39,7 +39,7 @@ export const POST = withAuth(async ({ request }) => {
         if (doc.exists) {
             return handleApiError({ message: 'A category with this ID already exists.' }, 409);
         }
-        
+
         const newCategory = { name };
         await categoryRef.set(newCategory);
 

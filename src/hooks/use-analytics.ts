@@ -4,7 +4,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { analyticsKeys } from '@/lib/query-keys';
-import { fetchUserStats, type UserDashboardStats } from '@/services/analytics-service';
+import { fetchUserStats, type UserDashboardStats } from '@/services';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 

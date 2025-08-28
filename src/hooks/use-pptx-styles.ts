@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
@@ -14,7 +14,7 @@ import {
   deletePptxTemplate,
   uploadPptxTemplateFile as uploadPptxTemplateFileApi,
   type PptxTemplate,
-} from "@/services/template-service";
+} from "@/services";
 import { PptxStyleOptions } from '@/lib/types';
 
 

@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useUpdateAgent } from '@/hooks/use-agents';
+import { useUpdateAgent } from '@/hooks';
 import type { Agent } from '@/lib/types';
 import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/agent-editor-schema';
 

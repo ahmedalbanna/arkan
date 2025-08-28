@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useFeatures, useUpdateFeature } from '@/hooks/use-features';
+import { useFeatures, useUpdateFeature } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -26,7 +26,7 @@ function FeatureCard({ feature }: { feature: Feature }) {
   const { t } = useLocalization();
   const { id, name, description, isEnabled } = feature;
   const updateFeatureMutation = useUpdateFeature();
-  
+
   const handleToggle = (checked: boolean) => {
     updateFeatureMutation.mutate({ featureId: id, payload: { isEnabled: checked } });
   }

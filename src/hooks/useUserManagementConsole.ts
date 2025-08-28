@@ -1,6 +1,6 @@
 'use client';
 
-import { useUsers } from '@/hooks/use-user';
+import { useUsers } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 
 export function useUserManagementConsole() {

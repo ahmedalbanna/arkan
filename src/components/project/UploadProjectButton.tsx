@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { Input } from '../ui/input';
-import { useUploadProject } from '@/hooks/use-upload-project';
+import { useUploadProject } from '@/hooks';
 
 export function UploadProjectButton() {
     const {

@@ -24,7 +24,7 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSessionActions } from '@/hooks/use-session-actions';
+import { useSessionActions } from '@/hooks';
 
 export const SessionActions = () => {
     const {

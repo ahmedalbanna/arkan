@@ -21,7 +21,7 @@ export const POST = withAuth(async ({ request, user }) => {
     }
 
     const result = await generatePresentationOutline(validation.data);
-    
+
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
 

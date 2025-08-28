@@ -1,17 +1,17 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { saveAs } from 'file-saver';
-import { useToast } from '@/hooks/use-toast';
-import { useSaveProject, useUpdateProject } from '@/hooks/use-projects';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { useCodebaseStore } from '@/hooks/useCodebaseStore';
-import { useAcademicSolverStore } from '@/hooks/useAcademicSolverStore';
+import { useToast } from '@/hooks';
+import { useSaveProject, useUpdateProject } from '@/hooks';
+import { useReportStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { usePresentationStore } from '@/hooks';
+import { useCodeGeneratorStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
+import { useCodebaseStore } from '@/hooks';
+import { useAcademicSolverStore } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 function hasAnyContent(): boolean {

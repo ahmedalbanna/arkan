@@ -2,7 +2,7 @@
 
 'use client';
 
-import { useDocxStyles } from "@/hooks/use-docx-styles";
+import { useDocxStyles } from "@/hooks";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import React from 'react';
 

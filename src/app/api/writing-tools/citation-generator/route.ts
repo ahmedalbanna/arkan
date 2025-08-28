@@ -15,10 +15,10 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const agentInput = validation.data;
     const result = await generateCitation(agentInput);
-    
+
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
 

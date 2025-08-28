@@ -9,12 +9,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks/useChatStore';
+import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
-import { app } from '@/lib/firebaseConfig';
+import { app } from '@/lib';
 
 interface ConversationViewProps {
   chat: ChatSession | AgentChatSession | null;

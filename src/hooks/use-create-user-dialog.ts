@@ -7,8 +7,8 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
-import { useToast } from '@/hooks/use-toast';
-import { createUserService } from '@/services/user-service';
+import { useToast } from '@/hooks';
+import { createUserService } from '@/services';
 
 const createUserSchema = z.object({
   name: z.string().min(1, "Name is required"),

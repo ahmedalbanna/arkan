@@ -1,14 +1,14 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useAgents, useAgent } from '@/hooks/use-agents';
+import { useAgents, useAgent } from '@/hooks';
 import * as authUtils from '@/lib/authUtils';
-import * as agentService from '@/services/agent-service';
+import * as agentService from '@/services';
 const { agents, isLoaded } = useAgents();
 
 // Mock dependencies
-jest.mock('@/lib/authUtils');
-jest.mock('@/services/agent-service');
+jest.mock('@/lib');
+jest.mock('@/services');
 const mockedGetAuthenticatedToken = authUtils.getAuthenticatedToken as jest.Mock;
 const mockedFetchAgents = agentService.fetchAgent as jest.Mock;
 const mockedFetchAgent = agentService.fetchAgent as jest.Mock;

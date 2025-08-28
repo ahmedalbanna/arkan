@@ -20,17 +20,17 @@ export const PUT = withAuth(async ({ request, params }) => {
         if (!templateDoc.exists) {
             return handleApiError({ message: 'DOCX template not found.' }, 404);
         }
-        
+
         const body = await request.json();
         const validation = updateDocxTemplateSchema.safeParse(body);
 
         if (!validation.success) {
             return handleApiError(validation.error);
         }
-        
+
         await templateRef.update({ styles: validation.data.styles, updatedAt: new Date().toISOString() });
         const updatedDoc = await templateRef.get();
-        
+
         return createApiResponse(updatedDoc.data(), 200);
 
     } catch (error) {
@@ -57,9 +57,9 @@ export const DELETE = withAuth(async ({ params }) => {
         if (!templateDoc.exists) {
             return handleApiError({ message: 'DOCX template not found.' }, 404);
         }
-        
+
         await templateRef.delete();
-        
+
         return createApiResponse({ message: `Template "${key}" deleted successfully.` }, 200);
 
     } catch (error) {

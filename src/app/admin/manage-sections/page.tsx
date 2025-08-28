@@ -1,7 +1,7 @@
 // C:\Users\ahmed\source\repos\arkan\src\app\admin\manage-sections\page.tsx
 'use client';
 
-import { useSections } from '@/hooks/use-sections';
+import { useSections } from '@/hooks';
 import { SectionDataTable } from '@/components/admin/sections/SectionDataTable';
 import { columns } from '@/components/admin/sections/columns';
 import { Skeleton } from '@/components/ui/skeleton';

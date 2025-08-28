@@ -5,7 +5,7 @@ import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AlertCircle, Bot, MessageSquare } from 'lucide-react';
 import React, { use } from 'react';
-import { useAgent } from '@/hooks/use-agents';
+import { useAgent } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -87,7 +87,7 @@ export default function EditAgentPage({ params: paramsPromise }: { params: Promi
            <Button variant="outline" size="sm" disabled>Share</Button>
         </div>
       </div>
-      <AgentEditor agentId={params.id} initialData={agent} />
+      <AgentEditor agentId={params.id} initialData={agent} categories={[]} allAgents={[]} />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 
 export function useCreateProjectDialog() {
     const [isOpen, setIsOpen] = useState(false);

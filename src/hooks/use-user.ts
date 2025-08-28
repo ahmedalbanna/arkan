@@ -7,9 +7,9 @@ import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tansta
 import { userKeys } from "@/lib/query-keys";
 import type { UserProfile } from '@/lib/types';
 import type { PricingPlan } from '@/lib/types';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebaseConfig";
+import { auth } from "@/lib/firebase/client-init";
 import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
@@ -29,7 +29,7 @@ import {
   purchaseCreditsApi,
   type UserListResponse,
   fetchAdmins as fetchAdminsApi,
-} from "@/services/user-service";
+} from "@/services";
 import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";

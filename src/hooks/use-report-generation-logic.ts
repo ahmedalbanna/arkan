@@ -4,16 +4,16 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useToast } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { useSectionStore } from '@/hooks/useSectionStore';
+import { useReportStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
+import { useSectionStore } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
-import { useGenerateReportSection, useGenerateFullReport } from '@/hooks/use-report-generation';
-import { evaluateContextApi } from '@/services/report-service';
+import { useGenerateReportSection, useGenerateFullReport } from '@/hooks';
+import { evaluateContextApi } from '@/services';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionNameSchema, type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { useAgents } from './use-agents';

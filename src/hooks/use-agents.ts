@@ -5,7 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileText, type LucideIcon } from 'lucide-react';
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
 import { type Agent, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
 import { useAuth } from "@/context/AuthContext";
@@ -22,10 +22,10 @@ import {
   generateAgentConfigApi,
   fetchAgentCategories as fetchAgentCategoriesApi,
   createAgentCategory as createAgentCategoryApi
-} from "@/services/agent-service";
-import { AgentEditorFormValues } from "@/components/admin/agent-editor/AgentEditor";
+} from "@/services";
+import { AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import { type UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
-import { AgentWithComponent, useAgentStore } from "@/hooks/useAgentStore";
+import { AgentWithComponent, useAgentStore } from "@/hooks";
 
 export { Agent };
 export type UpdateAgentPayload = Partial<AgentEditorFormValues>;

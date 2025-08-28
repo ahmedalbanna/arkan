@@ -15,9 +15,9 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-        
+
     const { analyzedDocument, contextMarkdown } = validation.data;
-    
+
     const result = await solveAcademicDocument({
       analyzedDocument,
       contextMarkdown

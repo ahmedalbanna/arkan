@@ -3,13 +3,13 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import type { ManipulateTextOutput, ManipulateTextInput, SectionName } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTextToSpeech } from '@/hooks/use-text-to-speech';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { useTextToSpeech } from '@/hooks';
+import { useWritingTool } from '@/hooks';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
 

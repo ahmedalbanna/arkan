@@ -18,7 +18,7 @@ export async function GET() {
             await batch.commit();
             snapshot = await collectionRef.get();
         }
-        
+
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         return createApiResponse(templates, 200);
     } catch (error) {

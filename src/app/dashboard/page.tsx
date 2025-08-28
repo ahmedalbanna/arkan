@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useUserStats } from '@/hooks/use-analytics';
+import { useUserStats } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { StatCard } from '@/components/admin/dashboard/StatCard';
 import { AgentUsageChart } from '@/components/admin/dashboard/AgentUsageChart';
@@ -9,10 +9,10 @@ import { RecentActivity } from '@/components/admin/dashboard/RecentActivity';
 import { AlertCircle, Bot, History, AreaChart, TrendingDown, Gem, MessageSquare, Loader2 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { createConversationApi } from '@/services/chat-service';
-import { useChatStore } from '@/hooks/useChatStore';
+import { createConversationApi } from '@/services';
+import { useChatStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { UserProfile } from '@/lib/types';

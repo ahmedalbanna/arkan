@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
-import { teamKeys } from '@/lib/query-keys';
+import { toast } from '@/hooks';
+import { teamKeys,  } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
@@ -10,7 +10,7 @@ import {
     createTeam as createTeamApi,
     inviteMember as inviteMemberApi,
     fetchUserTeams,
-} from '@/services/team-service';
+} from '@/services';
 import type { Team, TeamWithMembers } from '@/lib/types';
 
 

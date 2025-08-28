@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { z } from 'zod';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
+import { useBuilderStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useEvaluateReport } from '@/hooks/use-evaluation';
-import { processFileApi } from '@/services/document-processing-service';
+import { useEvaluateReport } from '@/hooks';
+import { processFileApi } from '@/services';
 
 const ProposalPayloadSchema = z.object({
     projectPlan: z.object({

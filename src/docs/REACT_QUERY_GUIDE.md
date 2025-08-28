@@ -76,7 +76,7 @@ A custom hook for mutations should:
 **Example: `src/hooks/use-user.ts`**
 ```typescript
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 
 async function purchasePlan(plan: PricingPlan): Promise<{ newBalance: number }> {
     // ... fetch logic for purchase
@@ -107,4 +107,4 @@ Our testing strategy focuses on mocking at the API layer (`fetch`) or the custom
 
 1.  **Testing Hooks**: We use `@testing-library/react`'s `renderHook` function. We wrap our hook in the `QueryClientProvider` and mock the global `fetch` function to return expected data or errors. See `__tests__/hooks/use-user.test.tsx` for a complete example.
 
-2.  **Testing Components**: For components, we mock the custom hook itself using `jest.mock('@/hooks/use-user')`. This lets us easily test how the component renders in different states (`isLoading`, `isError`, etc.) by controlling what the mocked hook returns. See `__tests__/components/PricingCard.test.tsx` for a complete example.
+2.  **Testing Components**: For components, we mock the custom hook itself using `jest.mock('@/hooks')`. This lets us easily test how the component renders in different states (`isLoading`, `isError`, etc.) by controlling what the mocked hook returns. See `__tests__/components/PricingCard.test.tsx` for a complete example.

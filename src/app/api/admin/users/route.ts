@@ -12,11 +12,11 @@ export const GET = withAuth(async ({ request }) => {
   try {
     const { searchParams } = new URL(request.url);
     const queryValidation = userListQuerySchema.safeParse(Object.fromEntries(searchParams));
-    
+
     if (!queryValidation.success) {
       return handleApiError(queryValidation.error);
     }
-  
+
     const { limit, lastVisibleId } = queryValidation.data;
     const results = await getPaginatedUsers({ limit, lastVisibleId });
     return createApiResponse(results, 200);

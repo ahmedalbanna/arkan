@@ -12,13 +12,13 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, CheckCircle, HelpCircle, XCircle, ExternalLink, UploadCloud, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { useWritingTool } from '@/hooks/use-writing-tools';
-import { toast } from '@/hooks/use-toast';
+import { useWritingTool } from '@/hooks';
+import { toast } from '@/hooks';
 import type { ClaimStatus, FactCheckOutput } from '@/ai/schemas';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services';
 import { PlagiarismCheckOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 

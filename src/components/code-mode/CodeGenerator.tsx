@@ -14,14 +14,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import html2canvas from 'html2canvas';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation } from '@tanstack/react-query';
 import type { GenerateCodeOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useCodeGeneratorStore } from '@/hooks/useCodeGeneratorStore';
+import { useCodeGeneratorStore } from '@/hooks';
 import type { Codebase } from '@/ai/schemas';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 // --- Start of inlined FileTreeView component logic ---

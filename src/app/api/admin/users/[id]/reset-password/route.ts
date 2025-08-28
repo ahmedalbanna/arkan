@@ -15,7 +15,7 @@ export const POST = withAuth(async ({ params }) => {
         if (!user || !user.email) {
             return handleApiError({ message: 'User not found or has no email.' }, 404);
         }
-        
+
         // This is a placeholder for sending a reset email.
         // A real implementation would use a service like SendGrid and a generated link:
         // const link = await adminAuth.generatePasswordResetLink(user.email);

@@ -3,7 +3,7 @@
 
 import Image from 'next/image';
 import { CreateWithAiPanel } from './CreateWithAiPanel';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { usePresentationStore } from '@/hooks';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PresentationViewer } from './PresentationViewer';
 

@@ -21,13 +21,13 @@ export const POST = withAuth(async ({ request }) => {
     }
 
     const { userId, title, body: notificationBody, link } = validation.data;
-    
+
     // Get the user's device token from Firestore
     const tokenDoc = await adminDb.collection('deviceTokens').doc(userId).get();
     if (!tokenDoc.exists) {
       return handleApiError({ message: 'User device token not found. They may not have granted notification permissions.' }, 404);
     }
-    
+
     const { token } = tokenDoc.data() as { token: string };
 
     const message: admin.messaging.Message = {

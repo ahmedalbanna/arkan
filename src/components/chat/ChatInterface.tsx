@@ -5,7 +5,7 @@ import { ChatList } from './ChatList';
 import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
-import { useChatInterface } from '@/hooks/useChatInterface';
+import { useChatInterface } from '@/hooks';
 
 export default function ChatInterface() {
   const {

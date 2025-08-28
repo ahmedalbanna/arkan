@@ -1,8 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useDeleteProject } from '@/hooks/use-projects';
+import { useBuilderStore } from '@/hooks';
+import { useDeleteProject } from '@/hooks';
 import type { SavedProject } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 

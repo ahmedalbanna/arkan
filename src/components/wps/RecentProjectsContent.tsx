@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useProjects } from '@/hooks/use-projects';
+import { useProjects } from '@/hooks';
 import { SavedProject } from '@/lib/types';
 import { formatDistanceToNow, format } from 'date-fns';
 import {

@@ -23,7 +23,7 @@ export async function GET() {
             await batch.commit();
             snapshot = await stylesCollection.get(); // Re-fetch after seeding
         }
-        
+
         const templates: { [key: string]: any } = {};
         snapshot.docs.forEach((doc) => {
             templates[doc.id] = doc.data();
@@ -51,7 +51,7 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const { id, name, description } = validation.data;
-        
+
         // Create a new template based on the 'modern' default
         const newTemplateData = {
             name,
@@ -62,7 +62,7 @@ export const POST = withAuth(async ({ request }) => {
         };
 
         const newTemplate = await createGenerativeTemplate('pptx', id, newTemplateData);
-        
+
         return createApiResponse(newTemplate, 201);
     } catch (error) {
         return handleApiError(error);

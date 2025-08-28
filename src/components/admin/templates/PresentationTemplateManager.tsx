@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks/use-templates';
-import { type PresentationGenerationTemplate } from '@/services/template-service';
+import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks';
+import { type PresentationGenerationTemplate } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -20,9 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useSections } from '@/hooks/use-sections';
+import { useSections } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 
 
 const presentationTemplateSchema = z.object({

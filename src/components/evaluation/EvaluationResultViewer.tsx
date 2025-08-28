@@ -7,7 +7,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Wand2, RefreshCw } from 'lucide-react';
 import type { EvaluateReportOutput } from '@/ai/schemas';
-import { useEvaluationResultViewer } from '@/hooks/use-evaluation-result-viewer';
+import { useEvaluationResultViewer } from '@/hooks';
 
 interface EvaluationResultViewerProps {
     evaluation: EvaluateReportOutput;

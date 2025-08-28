@@ -56,7 +56,7 @@ export const PUT = withAuth(async ({ request }) => {
 
         const settingsRef = adminDb.collection('settings').doc('defaults');
         await settingsRef.set(validation.data, { merge: true });
-        
+
         return createApiResponse(validation.data, 200);
     } catch (error) {
         return handleApiError(error);

@@ -7,7 +7,7 @@ import { GenerationTools } from './ReportGenerationTools';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useReportModeGenerator } from '@/hooks/use-report-mode-generator';
+import { useReportModeGenerator } from '@/hooks';
 
 const ReportResults = lazy(() => import('./ReportResults').then(mod => ({ default: mod.ReportResults })));
 

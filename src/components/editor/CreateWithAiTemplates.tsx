@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ArrowLeft, Loader2, Sparkles, CheckCircle } from 'lucide-react';
 import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
 import Image from 'next/image';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { toast } from '@/hooks/use-toast';
+import { usePresentationStore } from '@/hooks';
+import { toast } from '@/hooks';
 
 const templates = [
   { name: 'Minimalist', imgSrc: 'https://placehold.co/300x200.png', dataAiHint: 'minimalist presentation', id: 'minimalist' },

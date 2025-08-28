@@ -1,7 +1,7 @@
 
 import { z } from 'zod';
 import { FieldValue } from 'firebase-admin/firestore';
-import { adminDb, adminRealtimeDb } from '@/lib/firebase/server-init';
+import { adminDb } from '@/lib/firebase/server-init';
 import { getDatabase } from 'firebase-admin/database';
 import { handleApiError, withAuth, createApiResponse } from '@/lib/api-utils';
 

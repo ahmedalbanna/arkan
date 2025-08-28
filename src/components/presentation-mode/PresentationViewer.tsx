@@ -8,9 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { usePresentationStore } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useExport } from '@/hooks/use-export';
+import { useExport } from '@/hooks';
 import { PptxTemplateKey } from '@/lib/types';
 import {
   DropdownMenu,

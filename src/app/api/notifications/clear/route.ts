@@ -1,7 +1,7 @@
 
 // src/app/api/notifications/clear/route.ts
 import { NextResponse } from 'next/server';
-import { adminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/server-init';
 import { getDatabase } from 'firebase-admin/database';
 import { z } from 'zod';
 

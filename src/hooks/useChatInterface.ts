@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useAgents } from '@/hooks/use-agents';
+import { useAgents } from '@/hooks';
 import type { Agent } from '@/lib/types';
 import { useAuth } from '@/context/AuthContext';
-import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks/useChatStore';
-import { createConversationApi } from '@/services/chat-service';
-import { toast } from '@/hooks/use-toast';
+import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks';
+import { createConversationApi } from '@/services';
+import { toast } from '@/hooks';
 
 export function useChatInterface() {
   const { agents } = useAgents();

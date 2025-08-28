@@ -1,7 +1,7 @@
 // C:\Users\ahmed\source\repos\arkan\src\services\section-service.ts
 'use client';
 
-import type { DynamicSection } from '@/hooks/useSectionStore';
+import type { DynamicSection } from '@/hooks';
 
 export async function fetchSections(token: string): Promise<DynamicSection[]> {
   const response = await fetch('/api/admin/sections', {

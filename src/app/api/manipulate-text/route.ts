@@ -29,7 +29,7 @@ export const POST = withAuth(async ({ request, user }) => {
         output: result,
         creditCost: creditCost,
     });
-    
+
     return createApiResponse(result, 200);
   } catch (error) {
     return handleApiError(error);

@@ -10,7 +10,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { ContextSelector } from './SectionContextSelector';
 import { SectionGenerationControls } from './SectionGenerationControls';
-import { useSectionAccordionItemLogic } from '@/hooks/use-section-accordion-item-logic';
+import { useSectionAccordionItemLogic } from '@/hooks';
 
 export const SectionAccordionItem = ({
     sectionKey,

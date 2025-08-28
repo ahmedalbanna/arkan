@@ -4,8 +4,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
-import { ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
-import { db } from "@/lib/firebaseConfig";
+import { ref, onValue, off, query, orderByChild, limitToLast } from 'firebase/database';
+import { RealtimeDatabase } from '@/lib/firebase/client-init';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
@@ -72,7 +72,7 @@ export function useNotifications() {
     setError(null);
 
     const notificationsRef = query(
-        ref(db, 'notifications/' + firebaseUser.uid),
+      ref(RealtimeDatabase, 'notifications/' + firebaseUser.uid),
         orderByChild('createdAt'),
         limitToLast(20)
     );

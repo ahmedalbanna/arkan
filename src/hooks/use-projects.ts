@@ -4,7 +4,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { projectKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -14,11 +14,11 @@ import {
   deleteProject,
   updateProject,
   type SavedProject,
-} from "@/services/project-service";
+} from "@/services";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import { type ProjectState } from "@/services/project-service";
+import { type ProjectState } from "@/services";
 import { useEffect } from "react";
 
 
@@ -32,7 +32,7 @@ type SaveProjectVariables = ProjectState & { name: string };
 
 export function useProjects() {
   const { firebaseUser } = useAuth();
-  
+
   const queryInfo = useQuery<SavedProject[]>({
     queryKey: projectKeys.lists(),
     queryFn: async () => {

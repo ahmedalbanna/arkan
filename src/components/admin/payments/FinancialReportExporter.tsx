@@ -11,8 +11,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import { fetchTransactionsForReport } from '@/services/transaction-service';
-import { useToast } from '@/hooks/use-toast';
+import { fetchTransactionsForReport } from '@/services';
+import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { generateFinancialReportPdf } from '@/lib/pdf-utils';
 

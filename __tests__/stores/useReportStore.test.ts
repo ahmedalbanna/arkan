@@ -1,5 +1,5 @@
 
-import { useReportStore } from '@/hooks/useReportStore';
+import { useReportStore } from '@/hooks';
 import { act } from '@testing-library/react';
 import type { SectionName } from '@/lib/types';
 

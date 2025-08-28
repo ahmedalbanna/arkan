@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useBuilderStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useDocxStyles } from '@/hooks/use-docx-styles';
-import { useExport } from '@/hooks/use-export';
-import { toast } from '@/hooks/use-toast';
-import { summarizeProjectApi } from '@/services/proposal-service';
+import { useDocxStyles } from '@/hooks';
+import { useExport } from '@/hooks';
+import { toast } from '@/hooks';
+import { summarizeProjectApi } from '@/services';
 import type { TemplateKey } from '@/lib/docx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 

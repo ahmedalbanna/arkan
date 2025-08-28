@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { deleteConversationApi } from '@/services/chat-service';
+import { deleteConversationApi } from '@/services';
 import { useChatStore } from './useChatStore';
 import { toast } from './use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';

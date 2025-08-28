@@ -7,7 +7,7 @@ import { FileText, Languages, Loader2, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-import { useReportActions } from '@/hooks/use-report-actions';
+import { useReportActions } from '@/hooks';
 
 interface ReportActionsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;

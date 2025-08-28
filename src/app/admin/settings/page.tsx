@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { AppSettings, BankAccount } from '@/lib/types';
 

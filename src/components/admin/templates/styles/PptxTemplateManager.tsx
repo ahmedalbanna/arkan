@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { PptxStyleOptions } from '@/lib/types';
 import { Label } from '@/components/ui/label';
-import { usePresentationTemplateManager } from '@/hooks/usePresentationTemplateManager';
+import { usePresentationTemplateManager } from '@/hooks';
 
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];

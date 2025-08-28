@@ -1,5 +1,5 @@
 
-import { fetchProjects, createProject, updateProject, deleteProject } from '@/services/project-service';
+import { fetchProjects, createProject, updateProject, deleteProject } from '@/services';
 import fetchMock from 'jest-fetch-mock';
 
 fetchMock.enableMocks();

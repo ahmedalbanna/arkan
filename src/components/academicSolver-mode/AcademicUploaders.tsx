@@ -6,17 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { UploadCloud, FileText, X } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ExternalContext } from '@/hooks/useReportStore';
+import type { ExternalContext } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 interface AcademicUploadersProps {

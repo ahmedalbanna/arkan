@@ -13,9 +13,10 @@ import { Loader2, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { useLogin, useGoogleSignIn } from '@/hooks/use-user';
-import type { LoginCredentials } from "@/lib/authUtils";
+import { useLogin, useGoogleSignIn } from '@/hooks';
+
 import { Separator } from '@/components/ui/separator';
+import { LoginCredentials } from '@/lib/types';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),

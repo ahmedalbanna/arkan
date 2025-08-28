@@ -5,7 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
-import { useDocxStyles } from '@/hooks/use-docx-styles';
+import { useDocxStyles } from '@/hooks';
 import { Loader2, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';

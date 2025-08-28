@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useContextSelector } from '@/hooks/use-context-selector';
+import { useContextSelector } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
 
 interface ContextViewerProps {

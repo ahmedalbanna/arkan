@@ -1,5 +1,5 @@
 
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { act } from '@testing-library/react';
 
 const mockProposal = {
@@ -52,7 +52,7 @@ describe('useBuilderStore', () => {
         act(() => {
             useBuilderStore.getState().handleProposalUpdate('title', newTitle);
         });
-        
+
         expect(useBuilderStore.getState().proposal?.title).toBe(newTitle);
         expect(useBuilderStore.getState().hasUnsavedChanges).toBe(true);
     });
@@ -62,7 +62,7 @@ describe('useBuilderStore', () => {
             useBuilderStore.getState().setProjectIdea('some idea');
             useBuilderStore.getState().newSession();
         });
-        
+
         const state = useBuilderStore.getState();
         expect(state.projectIdea).toBe("");
         expect(state.proposal).toBeNull();
@@ -77,7 +77,7 @@ describe('useBuilderStore', () => {
             proposal: mockProposal,
             sections: { introduction: "Test intro" },
         };
-        
+
         act(() => {
             useBuilderStore.getState().loadState(fullState as any);
         });

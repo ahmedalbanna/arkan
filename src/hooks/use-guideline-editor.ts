@@ -1,7 +1,7 @@
 'use client';
 
-import { useReportStore } from '@/hooks/useReportStore';
-import { useAgents } from '@/hooks/use-agents';
+import { useReportStore } from '@/hooks';
+import { useAgents } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import type { AgentPrompt } from '@/lib/types';
 

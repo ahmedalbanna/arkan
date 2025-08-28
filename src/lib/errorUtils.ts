@@ -1,7 +1,7 @@
 
 'use client';
 
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 
 /**
  * A centralized utility for handling and displaying errors.

@@ -32,10 +32,9 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const { name } = validation.data;
     const newTeam = await createTeamForUser(user.id, name);
-    
+
     return createApiResponse(newTeam, 201);
   } catch (error) {
     return handleApiError(error);
   }
 });
-

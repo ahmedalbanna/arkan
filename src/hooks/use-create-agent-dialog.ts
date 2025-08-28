@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCreateAgent, useAgentCategories } from '@/hooks/use-agents';
+import { useCreateAgent, useAgentCategories } from '@/hooks';
 
 const createAgentSchema = z.object({
   id: z.string().min(3, "ID must be at least 3 characters").regex(/^[a-z0-9-]+$/, "ID must be lowercase and contain only letters, numbers, and hyphens."),

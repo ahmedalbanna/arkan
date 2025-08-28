@@ -7,7 +7,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import type { ExternalContext } from '@/hooks/useReportStore';
+import type { ExternalContext } from '@/hooks';
 import { AnalyzeContextInputSchema, type AnalyzeContextInput, AnalyzeContextOutputSchema, type AnalyzeContextOutput } from '@/ai/schemas';
 
 const analysisPrompt = ai.definePrompt({
@@ -72,7 +72,7 @@ const analyzeContextFlow = ai.defineFlow({
     // Separate media from text files
     const textFiles = contextFiles.filter(f => !f.content.startsWith('data:'));
     const mediaFiles = contextFiles.filter(f => f.content.startsWith('data:'));
-    
+
     const { output } = await analysisPrompt({ prompt, textFiles, mediaFiles });
      if (!output) {
       throw new Error('Context analysis failed to produce an output.');

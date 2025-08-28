@@ -20,7 +20,7 @@ export async function GET() {
             await batch.commit();
             snapshot = await collectionRef.get();
         }
-        
+
         const templates = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         return createApiResponse(templates, 200);
     } catch (error) {
@@ -38,7 +38,7 @@ export const POST = withAuth(async ({ request }) => {
         }
 
         const { id, ...templateData } = validation.data;
-        
+
         const newTemplate = await createGenerativeTemplate('proposal', id, templateData);
 
         return createApiResponse(newTemplate, 201);

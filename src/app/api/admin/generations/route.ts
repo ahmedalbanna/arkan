@@ -41,9 +41,9 @@ export const GET = withAuth(async ({ request }) => {
                 query = query.startAfter(lastDoc);
             }
         }
-        
+
         const snapshot = await query.limit(limit + 1).get(); // Fetch one extra to check for next page
-        
+
         const logsPromises = snapshot.docs.slice(0, limit).map(async (doc) => {
             const data = doc.data();
             const userProfile = await getUserProfile(data.userId);

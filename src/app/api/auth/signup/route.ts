@@ -3,9 +3,8 @@
 
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
-import type { UserRole } from '@/lib/db/queries';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import type { UserRole } from '@/lib/types';
 import { getUserProfile } from '@/lib/db/queries';
 import { getDatabase } from 'firebase-admin/database';
 import { handleApiError, createApiResponse } from '@/lib/api-utils';

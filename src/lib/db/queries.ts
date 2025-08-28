@@ -1,61 +1,11 @@
 
 
 'use server';
-import { adminAuth, adminDb } from '@/lib/firebase/admin';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { Agent } from '@/lib/types';
+import type { Agent, Team, TeamMember, TransactionData, UserProfile } from '@/lib/types';
 import type { ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
 
-export type UserRole = 'user' | 'admin';
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  credits: number;
-  role: UserRole;
-  createdAt: string; // Storing as ISO string
-  updatedAt: string; // Storing as ISO string
-  teams?: string[]; // Array of team IDs
-  bio?: string;
-  profilePictureUrl?: string;
-  hasCompletedOnboarding?: boolean;
-}
-
-export interface Team {
-    id: string;
-    name: string;
-    ownerId: string;
-    createdAt: string;
-}
-
-export interface TeamMember {
-    userId: string;
-    teamId: string;
-    role: 'owner' | 'member';
-    joinedAt: string;
-    // Denormalized fields for efficiency
-    name: string;
-    email: string;
-    profilePictureUrl?: string;
-}
-
-export interface TransactionData {
-  id: string; // Firestore document ID
-  userId: string;
-  planId: string;
-  planName: string;
-  credits: number;
-  price: number;
-  userName: string;
-  userEmail: string;
-  status: 'pending' | 'verified' | 'rejected';
-  proofUrl: string;
-  createdAt: string;
-  adminNotes?: string;
-  verifiedAt?: string;
-  verifiedBy?: string;
-}
 
 // === User Queries ===
 

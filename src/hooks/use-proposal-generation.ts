@@ -9,7 +9,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
 import type { ExternalContext } from '@/lib/types';
-import { generateProposalApi } from '@/services/proposal-service';
+import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
 import type { AdvancedProposalFields } from './useProposalGenerationStore';
 

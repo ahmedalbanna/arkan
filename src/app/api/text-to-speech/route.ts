@@ -18,7 +18,7 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const result = await textToSpeech({text: validation.data.text});
 
     const creditCost = 1;

@@ -11,11 +11,11 @@ import Link from 'next/link';
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { userKeys } from "@/lib/query-keys";
-import { fetchUserProfileApi } from "@/services/user-service";
+import { fetchUserProfileApi } from "@/services";
 import { useRouter } from "next/navigation";
-import { useChatStore } from "@/hooks/useChatStore";
-import { createConversationApi } from "@/services/chat-service";
-import { toast } from "@/hooks/use-toast";
+import { useChatStore } from "@/hooks";
+import { createConversationApi } from "@/services";
+import { toast } from "@/hooks";
 import { useLocalization } from "@/context/LocalizationContext";
 
 

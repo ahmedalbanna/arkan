@@ -15,7 +15,7 @@ interface RouteContext {
 export const GET = withAuth(async ({ params }) => {
   try {
     const { jobId } = params;
-    
+
     const job = await getJob(jobId);
 
     if (!job) {

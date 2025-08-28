@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Loader2, UploadCloud, FileText, Copy, Check } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services';
 
 export default function PdfToMarkdownConverter() {
   const [file, setFile] = useState<File | null>(null);

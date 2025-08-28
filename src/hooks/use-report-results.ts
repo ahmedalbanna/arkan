@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useReportStore } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from '@/hooks/use-agents';
+import { useAgents } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { FileText } from 'lucide-react';
 

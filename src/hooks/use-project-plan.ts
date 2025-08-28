@@ -8,7 +8,7 @@ import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
 import type { ProjectPlan } from '@/ai/schemas';
-import { generateProjectPlanApi } from '@/services/project-plan-service';
+import { generateProjectPlanApi } from '@/services';
 import { useProjectPlanStore } from './useProjectPlanStore';
 
 interface GeneratePlanVariables {

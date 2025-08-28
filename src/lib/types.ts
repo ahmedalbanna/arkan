@@ -22,19 +22,19 @@ export type {
 } from '@/ai/schemas';
 
 export type { HistoryEntry } from '@/hooks/use-history';
-export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
+export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks';
 
-export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
+export type { VerifyPaymentVariables } from '@/hooks';
 
 export type { Codebase } from '@/ai/schemas';
-export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
-export type { TeamWithMembers } from '@/services/team-service';
-export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
-export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
-export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
+export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks';
+export type { TeamWithMembers } from '@/services';
+
+export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks';
+export type { ExternalContext, ContextFileType } from '@/hooks';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/schemas';
 export type { SignupCredentials } from '@/components/auth/SignupForm';
-export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+export type { GenerateProposalBody } from '@/hooks';
 export type { RewriteTextOutput } from '@/ai/schemas';
 export type { DiffPart } from '@/lib/diff';
 export type { GenerateAgentConfigOutput } from '@/ai/schemas';
@@ -109,11 +109,60 @@ export interface Agent{
   iconComponent?: LucideIcon;
 }
 export type { Notification } from '@/hooks/use-notifications';
-export type { Feature, UpdateFeatureVariables } from "@/hooks/use-features";
+export type { Feature, UpdateFeatureVariables } from "@/hooks";
 
 
 
+export type UserRole = 'user' | 'admin';
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  credits: number;
+  role: UserRole;
+  createdAt: string; // Storing as ISO string
+  updatedAt: string; // Storing as ISO string
+  teams?: string[]; // Array of team IDs
+  bio?: string;
+  profilePictureUrl?: string;
+  hasCompletedOnboarding?: boolean;
+}
+
+export interface Team {
+  id: string;
+  name: string;
+  ownerId: string;
+  createdAt: string;
+}
+
+export interface TeamMember {
+  userId: string;
+  teamId: string;
+  role: 'owner' | 'member';
+  joinedAt: string;
+  // Denormalized fields for efficiency
+  name: string;
+  email: string;
+  profilePictureUrl?: string;
+}
+
+export interface TransactionData {
+  id: string; // Firestore document ID
+  userId: string;
+  planId: string;
+  planName: string;
+  credits: number;
+  price: number;
+  userName: string;
+  userEmail: string;
+  status: 'pending' | 'verified' | 'rejected';
+  proofUrl: string;
+  createdAt: string;
+  adminNotes?: string;
+  verifiedAt?: string;
+  verifiedBy?: string;
+}
 
 
 export interface LoginCredentials {
@@ -124,7 +173,7 @@ export interface LoginCredentials {
 // --- PPTX Template Types ---
 export type {PptxTemplateKey} from '@/lib/pptx-styles';
 
-export type {TemplateKey} from '@/hooks/use-docx-styles';
+export type {TemplateKey} from '@/hooks';
 
 
 // --- Full Report Mode Configuration Interfaces ---
@@ -291,13 +340,13 @@ export interface ProjectState {
     } | undefined;
     evaluation?: import("@/ai/schemas").EvaluateReportOutput | null | undefined;
     diagrams?: {
-        "useCase"?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        class?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        sequence?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        activity?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        component?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        archimate?: import("@/hooks/useDiagramStore").DiagramData | undefined;
-        er?: import("@/hooks/useDiagramStore").DiagramData | undefined;
+        "useCase"?: import("@/hooks").DiagramData | undefined;
+        class?: import("@/hooks").DiagramData | undefined;
+        sequence?: import("@/hooks").DiagramData | undefined;
+        activity?: import("@/hooks").DiagramData | undefined;
+        component?: import("@/hooks").DiagramData | undefined;
+        archimate?: import("@/hooks").DiagramData | undefined;
+        er?: import("@/hooks").DiagramData | undefined;
     } | undefined;
     presentation?: {
         history: PresentationHistoryEntry[];

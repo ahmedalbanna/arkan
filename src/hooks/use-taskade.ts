@@ -11,7 +11,7 @@ import {
   StartGenerationPayload,
   TaskadeJobStatus,
 } from "@/@types/taskade";
-import { app } from '@/lib/firebaseConfig';
+import { app } from '@/lib';
 
 type JobStatus = 'idle' | 'pending' | 'completed' | 'failed';
 

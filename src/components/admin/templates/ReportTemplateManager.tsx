@@ -1,7 +1,7 @@
 'use client';
 
-import { useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';
-import { type ReportGenerationTemplate } from '@/services/template-service';
+import { useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks';
+import { type ReportGenerationTemplate } from '@/services';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -12,13 +12,13 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useSections } from '@/hooks/use-sections';
+import { useSections } from '@/hooks';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Label } from '@/components/ui/label';

@@ -2,8 +2,8 @@
 'use client';
 
 
-import { useLocalization } from '@/context/LocalizationContext'; // Keep this import
-import { useAgent, useAgentCategories, useAgents } from '@/hooks/use-agents';
+import { useLocalization } from '@/context/LocalizationContext';
+import { useAgent, useAgentCategories, useAgents } from '@/hooks';
 import { AlertCircle, Bot, Loader2 } from 'lucide-react';
 import React, { Suspense, lazy } from 'react';
 
@@ -62,7 +62,7 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
         </h1>
       </div>
       <Suspense fallback={<AgentEditorSkeleton />}>
-        <AgentEditor agentId={params.id} initialData={agent} categories={categories || []} allAgents={allAgents || []} />
+ <AgentEditor agentId={params.id} initialData={agent} categories={categories as any || []} allAgents={allAgents || []} />
       </Suspense>
     </div>
   );

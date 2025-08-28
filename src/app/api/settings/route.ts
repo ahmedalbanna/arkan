@@ -7,7 +7,7 @@ async function getSettings() {
     const doc = await settingsRef.get();
     if (!doc.exists) {
         // If settings don't exist, create them with default values
-        const defaultSettings = { 
+        const defaultSettings = {
             newUserCredits: 10,
             bankName: 'Arkan National Bank',
             accountHolder: 'Arkan Professional Platform',

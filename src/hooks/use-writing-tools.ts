@@ -6,8 +6,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { writingToolApi } from '@/services/writing-tools-service';
-import { toast } from '@/hooks/use-toast';
+import { writingToolApi } from '@/services';
+import { toast } from '@/hooks';
 import { handleErrorUtility } from '@/lib/errorUtils';
 
 /**

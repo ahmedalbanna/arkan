@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, GanttChartSquare, BrainCircuit, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import ProjectPlanViewer from './ProjectPlanViewer';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { useProjectPlanStore } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useLocalization } from '@/context/LocalizationContext';

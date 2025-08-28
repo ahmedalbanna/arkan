@@ -3,7 +3,7 @@
 'use client';
 
 import type { AnyProjectProposal } from '@/ai/schemas';
-import type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
+import type { GenerateProposalBody } from '@/hooks';
 
 
 interface GenerateProposalVariables {

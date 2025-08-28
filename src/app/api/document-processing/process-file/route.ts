@@ -57,12 +57,12 @@ export const POST = withAuth(async ({ request, user }) => {
             markdownContent = Buffer.from(await file.arrayBuffer()).toString('utf-8');
             result = { markdown: markdownContent };
         }
-        
+
         // Deduct credit only after a successful AI generation
         if (creditCost > 0) {
             await deductCredit(user.id, creditCost);
         }
-        
+
         await logGeneration({
             agentId,
             userId: user.id,

@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { UpdateAgentVariables, CreateAgentVariables, AgentCategory } from '@/hooks/use-agents';
+import type { UpdateAgentVariables, CreateAgentVariables, AgentCategory } from '@/hooks';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { Agent } from '@/lib/types';
 

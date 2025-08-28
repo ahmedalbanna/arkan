@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { saveAs } from 'file-saver';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSectionStore } from '@/hooks/useSectionStore';
-import { useExplainDiagram } from '@/hooks/use-diagrams';
-import type { DiagramData } from '@/hooks/useDiagramStore';
+import { useSectionStore } from '@/hooks';
+import { useExplainDiagram } from '@/hooks';
+import type { DiagramData } from '@/hooks';
 import type { DiagramType } from '@/ai/schemas';
 
 interface DiagramViewerProps {

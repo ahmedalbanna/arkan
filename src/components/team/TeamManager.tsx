@@ -1,6 +1,6 @@
 'use client';
 
-import { useTeams } from '@/hooks/use-teams';
+import { useTeams } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -37,17 +37,17 @@ export default function TeamManager() {
             </Card>
         );
     }
-    
+
     return (
         <div className="space-y-8">
             <CreateTeamForm />
-            
+
             <Accordion type="multiple" className="w-full space-y-4">
                 {teams?.map(team => (
                     <TeamCard key={team.id} team={team} />
                 ))}
             </Accordion>
-            
+
             {teams?.length === 0 && (
                 <Card>
                     <CardContent className="p-8 text-center text-muted-foreground">

@@ -2,7 +2,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { DynamicSection, useSectionStore } from '@/hooks/useSectionStore';
+import { DynamicSection, useSectionStore } from '@/hooks';
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
 import { GitGraph } from 'lucide-react';

@@ -6,7 +6,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { CardTitle } from '@/components/ui/card';
 import { AlertCircle, Plus, Trash2 } from 'lucide-react';
-import type { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
+import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import { Textarea } from '@/components/ui/textarea';
 import { useLocalization } from '@/context/LocalizationContext';
 

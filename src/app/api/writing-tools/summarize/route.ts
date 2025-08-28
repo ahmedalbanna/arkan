@@ -21,7 +21,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
-    
+
     await logGeneration({
         agentId: 'summarize-text',
         userId: user.id,

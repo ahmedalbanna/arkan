@@ -1,8 +1,8 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
 import { ZodError } from 'zod';
-import { adminAuth } from '@/lib/firebase/admin';
-import { getUserProfile } from './db/queries';
+import { adminAuth } from '@/lib/firebase/server-init';
+import { getUserProfile } from '@/lib/db/queries';
 
 interface ApiHandlerOptions {
   requireAdmin?: boolean;

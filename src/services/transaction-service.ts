@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { TransactionData } from '@/lib/db/queries';
+import type { TransactionData } from '@/lib/types';
 import type { VerifyPaymentVariables } from '@/lib/types';
 
 interface FetchTransactionsParams {

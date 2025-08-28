@@ -22,7 +22,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
-    
+
     const { markdownContent, userPrompt } = validation.data;
     const result = await improveReportMarkdown({ markdownContent, userPrompt });
 

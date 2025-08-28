@@ -3,10 +3,10 @@
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
+import { usePresentationStore } from '@/hooks';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Loader2, Languages, Download, FileText } from 'lucide-react';
-import { useExport } from '@/hooks/use-export';
+import { useExport } from '@/hooks';
 import { usePptxStyles } from '@/hooks/use-pptx-styles';
 import { useState } from 'react';
 import { PptxTemplateKey } from '@/lib/types';

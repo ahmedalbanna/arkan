@@ -96,7 +96,7 @@ export const PATCH = withAuth(async ({ request, params, user }) => {
             externalContext: FieldValue.arrayUnion(validation.data),
             updatedAt: new Date().toISOString(),
         });
-        
+
         return createApiResponse({ message: 'Context added successfully' }, 200);
 
     } catch (error) {

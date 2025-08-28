@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
+import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { summarizeProposalForPlanApi } from '@/services/project-plan-service';
+import { summarizeProposalForPlanApi } from '@/services';
 
 export function useProjectPlanGenerator() {
     const { toast } = useToast();

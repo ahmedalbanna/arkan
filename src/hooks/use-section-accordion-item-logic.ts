@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSectionStore } from '@/hooks/useSectionStore';
+import { useSectionStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useBuilderStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { FileText } from 'lucide-react';
 

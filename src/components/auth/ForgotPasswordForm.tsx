@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useForgotPassword } from '@/hooks/use-user';
+import { useForgotPassword } from '@/hooks';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),

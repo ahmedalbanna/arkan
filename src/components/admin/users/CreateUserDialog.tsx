@@ -7,7 +7,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, PlusCircle } from 'lucide-react';
-import { useCreateUserDialog } from '@/hooks/useCreateUserDialog';
+import { useCreateUserDialog } from '@/hooks';
 
 
 export function CreateUserDialog() {

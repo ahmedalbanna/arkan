@@ -3,7 +3,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateReportSectionApi, generateFullReportApi } from '@/services/report-service';
+import { generateReportSectionApi, generateFullReportApi } from '@/services';
 import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';

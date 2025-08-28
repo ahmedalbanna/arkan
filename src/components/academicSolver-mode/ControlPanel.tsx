@@ -7,7 +7,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { AcademicUploaders } from './AcademicUploaders';
-import type { ExternalContext } from '@/hooks/useReportStore';
+import type { ExternalContext } from '@/hooks';
 
 interface ControlPanelProps {
     onCollapse: () => void;

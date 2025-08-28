@@ -5,7 +5,7 @@ import { useState, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -13,13 +13,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, UploadCloud } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const summarizerSchema = z.object({

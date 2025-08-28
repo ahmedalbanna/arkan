@@ -5,14 +5,14 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const citationGeneratorSchema = z.object({
@@ -26,7 +26,7 @@ export function CitationGeneratorTool() {
   const { t } = useLocalization();
   const [generatedCitation, setGeneratedCitation] = useState('');
   const [isCopied, setIsCopied] = useState(false);
-  
+
   const citationMutation = useWritingTool('/api/writing-tools/citation-generator', {
     onSuccess: (data: any) => {
         setGeneratedCitation(data.citation);

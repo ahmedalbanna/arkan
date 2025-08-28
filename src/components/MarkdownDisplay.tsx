@@ -13,9 +13,9 @@ import { exportMarkdownAsDocx } from '@/lib/docx-exporter';
 import { FileDown, Loader2, Wand2, Check, ThumbsDown, Sparkles } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 
 export function MarkdownDisplay() {
   const { t } = useLocalization();

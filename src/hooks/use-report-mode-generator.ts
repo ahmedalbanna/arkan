@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useTranslate } from '@/hooks/use-translation';
-import { toast } from '@/hooks/use-toast';
+import { useTranslate } from '@/hooks';
+import { toast } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useReportStore } from '@/hooks';
 
 export const useReportModeGenerator = () => {
     const { t, locale } = useLocalization();

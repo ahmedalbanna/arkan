@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useCreateDocxTemplate } from '@/hooks/use-docx-styles';
+import { useCreateDocxTemplate } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
@@ -19,7 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import componentStyles from './DocxTemplateManager.module.css';
 import { StyleEditor } from '@/components/design/StyleEditor';
-import { useDocxTemplateManager } from '@/hooks/useDocxTemplateManager';
+import { useDocxTemplateManager } from '@/hooks';
 
 
 const createDocxTemplateSchema = z.object({

@@ -9,14 +9,14 @@ import { MessageSquare, Send, X, Bot, User, Loader2, LifeBuoy, ChevronDown, Chev
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useChatStore } from '@/hooks/useChatStore';
+import { useChatStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
-import { app } from '@/lib/firebaseConfig';
-import type { ChatMessage, ChatSession } from '@/hooks/useChatStore';
-import { initiateSupportChat, createConversationApi } from '@/services/chat-service';
-import { toast } from '@/hooks/use-toast';
+import { app } from '@/lib';
+import type { ChatMessage, ChatSession } from '@/hooks';
+import { initiateSupportChat, createConversationApi } from '@/services';
+import { toast } from '@/hooks';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +28,7 @@ import {
 import type { UserProfile } from '@/lib/types';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { useAdmins } from '@/hooks/use-user';
+import { useAdmins } from '@/hooks';
 
 
 function Message({ role, content }: { role: 'user' | 'assistant', content: string }) {

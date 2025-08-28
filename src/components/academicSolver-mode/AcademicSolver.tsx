@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
-import { useAcademicSolverLogic } from '@/hooks/use-academic-solver-logic';
+import { useAcademicSolverLogic } from '@/hooks';
 import { ControlPanel } from './ControlPanel';
 import { ContentPanel } from './ContentPanel';
 

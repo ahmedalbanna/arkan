@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
-import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { useGeneratePresentation } from '@/hooks/use-presentation-generation';
-import { translatePresentationApi } from '@/services/translation-service';
-import { toast } from '@/hooks/use-toast';
+import { usePresentationStore } from '@/hooks';
+import { useGeneratePresentation } from '@/hooks';
+import { translatePresentationApi } from '@/services';
+import { toast } from '@/hooks';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();

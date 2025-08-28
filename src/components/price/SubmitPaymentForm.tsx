@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, UploadCloud, AlertCircle, Copy, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -21,8 +21,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { fetchPublicSettings } from '@/services/settings-service';
-import { submitPaymentProof } from '@/services/payment-service';
+import { fetchPublicSettings } from '@/services';
+import { submitPaymentProof } from '@/services';
 import type { PublicSettings } from '@/lib/settings';
 
 const formSchema = z.object({

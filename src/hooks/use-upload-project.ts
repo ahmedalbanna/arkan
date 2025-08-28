@@ -2,8 +2,8 @@
 
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useToast } from '@/hooks/use-toast';
+import { useBuilderStore } from '@/hooks';
+import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 
 export function useUploadProject() {

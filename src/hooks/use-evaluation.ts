@@ -7,7 +7,7 @@ import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
 import type { EvaluateReportInput, EvaluateReportOutput } from "@/ai/schemas";
-import { evaluateReportApi } from "@/services/evaluation-service";
+import { evaluateReportApi } from "@/services";
 import { useReportStore } from "./useReportStore";
 
 

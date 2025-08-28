@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { transactionKeys } from '@/lib/query-keys';
-import { getTransactions } from '@/services/transaction-service';
+import { getTransactions } from '@/services';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { PendingPaymentCard } from './PendingPaymentCard';
 import { Skeleton } from '@/components/ui/skeleton';

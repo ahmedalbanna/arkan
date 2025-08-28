@@ -3,7 +3,7 @@
 
 'use client';
 import type { AnyProjectProposal, ProjectPlan, ExternalContext } from "@/ai/schemas";
-import { app } from '@/lib/firebaseConfig';
+import { app } from '@/lib';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import type { ProjectState as FullProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
 

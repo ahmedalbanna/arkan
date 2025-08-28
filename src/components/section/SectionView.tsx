@@ -13,15 +13,15 @@ import remarkGfm from 'remark-gfm';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useReportStore } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { DiffPart } from '@/lib/diff';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EvaluationTools } from '../evaluation/EvaluationTools';
-import { useSectionLogic } from '@/hooks/use-section-logic';
-import { useTranslationViewLogic } from '@/hooks/use-translation-view-logic';
+import { useSectionLogic } from '@/hooks';
+import { useTranslationViewLogic } from '@/hooks';
 
 interface SectionProps {
     sectionKey: SectionName;

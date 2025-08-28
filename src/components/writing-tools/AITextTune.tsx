@@ -12,8 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check, Wand2, BookOpenText } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks/use-toast';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { toast } from '@/hooks';
+import { useWritingTool } from '@/hooks';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import ReactMarkdown from 'react-markdown';

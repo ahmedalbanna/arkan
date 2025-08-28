@@ -14,16 +14,16 @@ import { userKeys } from '@/lib/query-keys';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { createConversationApi } from '@/services/chat-service';
-import { toast } from '@/hooks/use-toast';
+import { createConversationApi } from '@/services';
+import { toast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useChatStore } from '@/hooks/useChatStore';
+import { useChatStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
 import type { ChatSession, ChatMessage, AgentChatSession, UserProfile, Agent } from '@/lib/types';
-import { useUsers } from '@/hooks/use-user';
+import { useUsers } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAgents } from '@/hooks/use-agents';
+import { useAgents } from '@/hooks';
 // ...
 
 

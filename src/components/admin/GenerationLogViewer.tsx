@@ -3,8 +3,8 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { generationLogKeys } from '@/lib/query-keys';
-import { fetchGenerationLogs } from '@/services/generation-log-service';
-import type { GenerationLog } from '@/services/generation-log-service';
+import { fetchGenerationLogs } from '@/services';
+import type { GenerationLog } from '@/services';
 import { AlertCircle, Eye, Loader2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -16,7 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useTheme } from 'next-themes';
-import { useDebounce } from '@/hooks/use-debounce';
+import { useDebounce } from '@/hooks';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';

@@ -10,9 +10,9 @@ import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
-import type { DiagramData } from '@/hooks/useDiagramStore';
+import type { DiagramData } from '@/hooks';
 import type { DiagramType } from '@/ai/schemas';
-import { useDiagramViewer } from '@/hooks/use-diagram-viewer';
+import { useDiagramViewer } from '@/hooks';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;

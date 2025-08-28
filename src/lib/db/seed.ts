@@ -1,7 +1,7 @@
 
 // src/lib/db/seed.ts
 //require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS as defaultAgents } from '@/lib/agents-template';
 import { defaultFeatures } from '@/lib/features';
 import { defaultAgentCategories } from '@/lib/agent-categories';

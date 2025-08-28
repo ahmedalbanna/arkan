@@ -1,7 +1,7 @@
 'use client';
 
 import { usePptxStyles, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
-import { useRefreshTemplateImage } from '@/hooks/use-templates';
+import { useRefreshTemplateImage } from '@/hooks';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 
 export function usePresentationTemplateManager() {

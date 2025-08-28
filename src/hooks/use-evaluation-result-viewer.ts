@@ -4,10 +4,10 @@
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useGenerateReportSection } from '@/hooks/use-report-generation';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
+import { useReportStore } from '@/hooks';
+import { useGenerateReportSection } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
 import { SectionName, EvaluateReportOutput } from '@/ai/schemas';
 import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle } from 'lucide-react';
 

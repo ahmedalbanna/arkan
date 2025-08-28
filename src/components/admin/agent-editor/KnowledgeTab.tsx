@@ -22,8 +22,8 @@ import {
   File as FileIcon,
   Trash2
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import type { AgentEditorFormValues } from './AgentEditor';
+import { useToast } from '@/hooks';
+import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import type { AgentKnowledgeSource } from '@/lib/types';
 
 

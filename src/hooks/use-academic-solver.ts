@@ -4,7 +4,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { analyzeApi, solveApi } from '@/services/academic-solver-service';
+import { analyzeApi, solveApi } from '@/services';
 import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
 
 interface AnalyzeVariables {

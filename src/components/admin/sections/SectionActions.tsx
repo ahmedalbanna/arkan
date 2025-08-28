@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { DynamicSection } from '@/hooks/useSectionStore';
+import { DynamicSection } from '@/hooks';
 import { SectionFormDialog } from './SectionFormDialog';
-import { useDeleteSection } from '@/hooks/use-sections';
+import { useDeleteSection } from '@/hooks';
 import {
   AlertDialog,
   AlertDialogAction,

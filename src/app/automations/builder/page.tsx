@@ -43,7 +43,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { useLogout } from '@/hooks/use-user';
+import { useLogout } from '@/hooks';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -125,7 +125,7 @@ function AdminLayoutContent({ children }: { children: ReactNode }) {
     if (isAuthLoading || !userProfile || userProfile.role !== 'admin') {
         return <AdminLayoutSkeleton />;
     }
-    
+
     const renderNavLink = (link: { href: string; labelKey: string; icon: React.ElementType }, isMobile = false) => (
          <Link
             key={link.href}

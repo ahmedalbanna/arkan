@@ -2,7 +2,7 @@ import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { format } from 'date-fns';
 import type { DateRange } from 'react-day-picker';
-import type { TransactionData } from '@/lib/db/queries';
+import type { TransactionData } from '@/lib/types';
 
 export async function generateFinancialReportPdf(data: TransactionData[], dateRange: DateRange) {
     const doc = new jsPDF();

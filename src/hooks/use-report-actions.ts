@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useDocxStyles } from '@/hooks/use-docx-styles';
-import { useExport } from '@/hooks/use-export';
+import { useBuilderStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { useDocxStyles } from '@/hooks';
+import { useExport } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
-import { useSectionStore } from '@/hooks/useSectionStore';
+import { useSectionStore } from '@/hooks';
 import { TemplateKey } from '@/lib/docx-styles';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';

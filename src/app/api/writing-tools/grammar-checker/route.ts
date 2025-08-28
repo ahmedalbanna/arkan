@@ -22,9 +22,9 @@ export const POST = withAuth(async ({ request, user }) => {
     const agentInput = {
         text: validation.data.text,
     };
-    
+
     const result = await grammarCheck(agentInput);
-    
+
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
 
@@ -32,7 +32,7 @@ export const POST = withAuth(async ({ request, user }) => {
         agentId: 'grammar-checker',
         userId: user.id,
         input: { textLength: validation.data.text.length },
-        output: { 
+        output: {
             correctedLength: result.correctedText.length,
             correctionsCount: result.corrections.length,
         },

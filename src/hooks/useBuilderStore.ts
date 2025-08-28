@@ -6,7 +6,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { type AnyProjectProposal, ProjectStateSchema } from "@/ai/schemas";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@/hooks";
 import { useReportStore } from "./useReportStore";
 import { useDiagramStore } from "./useDiagramStore";
 import { usePresentationStore } from "./usePresentationStore";

@@ -7,11 +7,12 @@ import { useTheme } from 'next-themes';
 import dynamic from 'next/dynamic';
 import { CardTitle } from '@/components/ui/card';
 import { AlertCircle, PlusCircle } from 'lucide-react';
-import type { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
+
 
 import { Button } from '@/components/ui/button';
 import { useLocalization } from '@/context/LocalizationContext';
 import { AgentPrompt } from '@/lib/types';
+import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });
 

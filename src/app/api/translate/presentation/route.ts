@@ -17,7 +17,7 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const agentInput = validation.data;
     const result = await translatePresentation(agentInput);
 

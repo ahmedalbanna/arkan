@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { updateUser, deleteUser, getUserProfile } from '@/lib/db/queries';
 import { cookies } from 'next/headers';
-import { adminAuth } from '@/lib/firebase/admin';
+import { adminAuth } from '@/lib/firebase/server-init';
 
 // Helper function to verify the requester is an admin
 async function verifyAdmin() {

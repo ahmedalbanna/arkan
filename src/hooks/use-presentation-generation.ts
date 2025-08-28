@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
-import { generatePresentationApi, generatePresentationOutlineApi } from '@/services/presentation-service';
+import { generatePresentationApi, generatePresentationOutlineApi } from '@/services';
 import type { GeneratePresentationOutput, PresentationHistoryEntry, GeneratePresentationOutlineOutput, GeneratePresentationOutlineInput } from '@/ai/schemas';
 import { usePresentationStore } from './usePresentationStore';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -36,10 +36,10 @@ export function useGeneratePresentation() {
             toast({ title: t('builder.presentationGenerator.toasts.success') });
         },
         onError: (error: Error) => {
-            toast({ 
-                title: t('builder.presentationGenerator.toasts.failed'), 
-                description: error.message, 
-                variant: 'destructive' 
+            toast({
+                title: t('builder.presentationGenerator.toasts.failed'),
+                description: error.message,
+                variant: 'destructive'
             });
         }
     });

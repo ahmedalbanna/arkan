@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks/use-docx-styles';
-import { useRefreshTemplateImage } from '@/hooks/use-templates';
+import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
+import { useRefreshTemplateImage } from '@/hooks';
 import type { TemplateKey } from '@/lib/types';
 
 export function useDocxTemplateManager() {

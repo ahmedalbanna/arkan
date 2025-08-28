@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { CheckCircle, FileText, Loader2 } from 'lucide-react';
-import { useEvaluationTools } from '@/hooks/use-evaluation-tools';
+import { useEvaluationTools } from '@/hooks';
 
 export const EvaluationTools = () => {
     const {

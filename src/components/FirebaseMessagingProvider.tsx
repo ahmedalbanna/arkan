@@ -4,9 +4,9 @@
 import { useEffect, useState } from 'react';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { useAuth } from '@/context/AuthContext';
-import { app } from '@/lib/firebaseConfig';
-import { useToast } from '@/hooks/use-toast';
-import { saveDeviceToken } from '@/services/user-service';
+import { app } from '@/lib/firebase/client-init';
+import { useToast } from '@/hooks';
+import { saveDeviceToken } from '@/services';
 
 export default function FirebaseMessagingProvider({ children }: { children: React.ReactNode }) {
     const { firebaseUser } = useAuth();
@@ -16,7 +16,7 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
     useEffect(() => {
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
             const messaging = getMessaging(app);
-            
+
             const requestPermission = async () => {
                 try {
                     const permission = await Notification.requestPermission();
@@ -35,7 +35,7 @@ export default function FirebaseMessagingProvider({ children }: { children: Reac
                     console.error('An error occurred while retrieving token. ', err);
                 }
             };
-            
+
             requestPermission();
 
             const unsubscribe = onMessage(messaging, (payload) => {

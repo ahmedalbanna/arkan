@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { UserProfile } from '@/lib/db/queries';
+import type { UserProfile } from '@/lib/types';
 import { handleUpdateUser, handleDeleteUser } from '@/app/manage-users/actions';
 
 import { Button } from '@/components/ui/button';
@@ -27,12 +27,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-import { useSendPasswordReset } from '@/hooks/use-user';
+import { useSendPasswordReset } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { userKeys } from '@/lib/query-keys';

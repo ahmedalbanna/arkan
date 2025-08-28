@@ -1,8 +1,8 @@
 
 'use client';
 
-import { Agent } from '@/hooks/use-agents';
-import type { GuidelineState } from '@/hooks/useReportStore';
+import { Agent } from '@/hooks';
+import type { GuidelineState } from '@/hooks';
 import { AgentPrompt } from './types';
 
 /**

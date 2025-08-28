@@ -3,9 +3,9 @@
 'use client';
 
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useTranslate } from '@/hooks/use-translation';
-import { useToast } from '@/hooks/use-toast';
+import { useReportStore } from '@/hooks';
+import { useTranslate } from '@/hooks';
+import { useToast } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
 
 export const useTranslationViewLogic = (sectionKey: SectionName, originalContent: string) => {

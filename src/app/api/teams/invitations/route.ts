@@ -2,9 +2,9 @@
 // src/app/api/teams/[id]/invitations/route.ts
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { adminAuth } from '@/lib/firebase/admin';
-import { adminDb } from '@/lib/firebase/server-init';
-import { getUserProfile, type Team, type TeamMember } from '@/lib/db/queries';
+import { adminAuth, adminDb } from '@/lib/firebase/server-init';
+import { type Team, type TeamMember } from '@/lib/types';
+import { getUserProfile } from '@/lib/db/queries';
 import { FieldValue } from 'firebase-admin/firestore';
 
 const inviteMemberSchema = z.object({

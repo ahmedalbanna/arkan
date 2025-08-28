@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
-import { useProjectPlanStore } from '@/hooks/useProjectPlanStore';
-import { useReportStore } from '@/hooks/useReportStore';
-import { useDiagramStore } from '@/hooks/useDiagramStore';
-import { useSectionStore } from '@/hooks/useSectionStore';
+import { useBuilderStore } from '@/hooks';
+import { useProjectPlanStore } from '@/hooks';
+import { useReportStore } from '@/hooks';
+import { useDiagramStore } from '@/hooks';
+import { useSectionStore } from '@/hooks';
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };

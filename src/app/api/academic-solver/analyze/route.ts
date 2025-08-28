@@ -15,7 +15,7 @@ export const POST = withAuth(async ({ request, user }) => {
     if (!validation.success) {
       return handleApiError(validation.error);
     }
-    
+
     const agentInput = {
       documentType: validation.data.documentType,
       markdownContent: validation.data.markdown,

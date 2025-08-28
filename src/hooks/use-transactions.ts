@@ -6,8 +6,8 @@ import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { toast } from '@/hooks/use-toast';
-import { verifyPayment as verifyPaymentApi } from '@/services/transaction-service';
+import { toast } from '@/hooks';
+import { verifyPayment as verifyPaymentApi } from '@/services';
 
 export interface VerifyPaymentVariables {
     transactionId: string;

@@ -11,10 +11,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/hooks';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { useWritingTool } from '@/hooks/use-writing-tools';
+import { useWritingTool } from '@/hooks';
 import type { HumanizeTextOutput } from '@/ai/schemas';
 import { useLocalization } from '@/context/LocalizationContext';
 

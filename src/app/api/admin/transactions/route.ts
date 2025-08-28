@@ -28,13 +28,13 @@ export const GET = withAuth(async ({ request }) => {
         const transactions = await getTransactionsByDateRange(startDate, endDate);
         return createApiResponse(transactions, 200);
     }
-    
+
     // Handle status-based fetching for the console
     if (status) {
         const { transactions, hasNextPage, lastVisibleId: newLastVisibleId } = await getTransactionsByStatus({ status, limit: limit!, lastVisibleId });
         return createApiResponse({ transactions, hasNextPage, lastVisibleId: newLastVisibleId }, 200);
     }
-    
+
     return handleApiError({ message: 'Missing required parameters. Provide either status or both startDate and endDate.' }, 400);
 
   } catch (error) {

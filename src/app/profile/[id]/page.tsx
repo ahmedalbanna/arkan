@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Mail, Gem, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useUserProfile } from '@/hooks/use-user';
+import { useUserProfile } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { use } from 'react';
 
@@ -67,7 +67,7 @@ function ProfilePageContent({ userId }: { userId: string }) {
                 </div>
                 <Badge variant="secondary" className="text-lg">{user.credits}</Badge>
            </div>
-          
+
            <div className="space-y-4">
              <div className="flex items-start gap-3">
                <Calendar className="h-5 w-5 mt-1 text-muted-foreground" />
@@ -76,7 +76,7 @@ function ProfilePageContent({ userId }: { userId: string }) {
                  <p className="text-muted-foreground">{format(new Date(user.createdAt), 'PPP')}</p>
                </div>
              </div>
-             
+
              {user.bio && (
                  <div className="flex items-start gap-3">
                    <Mail className="h-5 w-5 mt-1 text-muted-foreground" />

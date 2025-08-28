@@ -5,13 +5,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { teamKeys } from '@/lib/query-keys';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Loader2, Send } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { inviteMember } from '@/services/team-service';
+import { inviteMember } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const inviteSchema = z.object({

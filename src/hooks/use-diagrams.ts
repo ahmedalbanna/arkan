@@ -9,11 +9,11 @@ import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
 import type { GenerateDiagramOutput } from "@/ai/schemas";
 import type { ExplainDiagramOutput } from "@/ai/schemas";
-import { 
-    generateDiagramApi, 
-    updateDiagramApi, 
-    explainDiagramApi 
-} from "@/services/diagram-service";
+import {
+    generateDiagramApi,
+    updateDiagramApi,
+    explainDiagramApi
+} from "@/services";
 
 /**
  * Custom mutation hook to generate a new diagram using an AI flow.

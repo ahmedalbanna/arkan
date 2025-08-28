@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { ExternalContext } from '@/hooks/useReportStore';
+import type { ExternalContext } from '@/hooks';
 import type { AnalyzeContextOutput } from '@/ai/schemas';
 
 interface AnalyzeContextVariables {

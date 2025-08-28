@@ -20,7 +20,7 @@ export async function GET() {
             await batch.commit();
             snapshot = await featuresCollection.get(); // Re-fetch after seeding
         }
-        
+
         const features = snapshot.docs.map(doc => doc.data());
 
         return createApiResponse(features, 200);

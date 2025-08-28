@@ -4,6 +4,7 @@
 import { create } from "zustand";
 import type { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from "@/ai/schemas";
 import { useBuilderStore } from "./useBuilderStore";
+import { ExternalContext } from "@/hooks";
 
 export type AcademicSolverStage =
   | "idle"
@@ -13,11 +14,7 @@ export type AcademicSolverStage =
   | "solving"
   | "solved";
 
-export interface ExternalContext {
-    fileName: string;
-    content: string;
-    type: 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
-}
+
 
 export interface AcademicSolverState {
   stage: AcademicSolverStage;
@@ -68,7 +65,7 @@ export const useAcademicSolverStore = create<AcademicSolverState & AcademicSolve
         stage: solution ? "solved" : "readyToSolve",
       }),
     addQuestionDocument: (fileName, content) => {
-        set((state) => ({ 
+        set((state) => ({
             questionDocuments: [...state.questionDocuments, { fileName, content, type: 'question' }],
             analyzedDocument: null,
             solvedDocument: null,

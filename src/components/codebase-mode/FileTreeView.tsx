@@ -9,7 +9,7 @@ import type { Codebase } from '@/ai/schemas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks';
 
 interface FileTreeViewProps {
   codebase: Codebase;

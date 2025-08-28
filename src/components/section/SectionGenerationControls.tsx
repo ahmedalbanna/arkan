@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks/useReportStore';
+import { useReportStore } from '@/hooks';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

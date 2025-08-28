@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
-import type { TeamWithMembers } from '@/services/team-service';
+import type { TeamWithMembers } from '@/services';
 import { useAuth } from '@/context/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';

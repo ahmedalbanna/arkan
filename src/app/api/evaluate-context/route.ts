@@ -31,7 +31,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const creditCost = 1;
     await deductCredit(user.id, creditCost);
-    
+
     const agentInput = validation.data;
     const result = await evaluateAndSelectContext(agentInput);
 
@@ -42,7 +42,7 @@ export const POST = withAuth(async ({ request, user }) => {
         output: result,
         creditCost: creditCost
     });
-    
+
     return createApiResponse(result, 200);
   } catch (error) {
     return handleApiError(error);

@@ -11,12 +11,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, BrainCircuit, UploadCloud } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import { useWritingTool } from '@/hooks/use-writing-tools';
-import { toast } from '@/hooks/use-toast';
+import { useWritingTool } from '@/hooks';
+import { toast } from '@/hooks';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
-import { processFileApi } from '@/services/document-processing-service';
+import { processFileApi } from '@/services';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const aiDetectorSchema = z.object({
