@@ -1,14 +1,14 @@
 
 
-      
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { MessageSquare, Send, X, Bot, User, Loader2, LifeBuoy, ChevronDown, ChevronLeft } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '../ui/card';
-import { Textarea } from '../ui/textarea';
-import { ScrollArea } from '../ui/scroll-area';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -26,8 +26,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import type { UserProfile } from '@/lib/types';
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
-import { Badge } from '../ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { useAdmins } from '@/hooks/use-user';
 
 
@@ -87,15 +87,15 @@ function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProf
 
 
 export default function SupportChatWidget() {
-    const { 
-      isChatOpen, 
-      closeChat, 
-      toggleChat, 
-      selectedChat, 
+    const {
+      isChatOpen,
+      closeChat,
+      toggleChat,
+      selectedChat,
       setSelectedChat,
       chats,
       createConversation,
-      initialize, 
+      initialize,
       isInitialized,
       addMessage,
       unreadCounts,
@@ -123,7 +123,7 @@ export default function SupportChatWidget() {
 
         const db = getDatabase(app);
         const messagesRef = ref(db, `messages/${selectedChat.id}`);
-        
+
         const unsubscribe = onValue(messagesRef, (snapshot) => {
             const data = snapshot.val();
             const messagesList = data ? Object.values(data) : [];
@@ -152,14 +152,14 @@ export default function SupportChatWidget() {
         }
         toggleChat();
     }
-    
+
     const handleNewChatSelection = () => {
         setView('new_chat_selection');
     }
 
     const handleAdminSelected = async (admin: UserProfile) => {
         if (!firebaseUser || !userProfile) return;
-        
+
         try {
             const token = await firebaseUser.getIdToken();
             const newConversation = await createConversationApi({
@@ -179,28 +179,28 @@ export default function SupportChatWidget() {
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || !firebaseUser || !selectedChat) return;
-        
+
         setIsLoading(true);
         const messageToSend = input;
         setInput('');
-        
+
         const messageData = {
             senderId: firebaseUser.uid,
             content: messageToSend,
             timestamp: serverTimestamp(),
             role: 'user' as 'user',
         };
-        
+
         const db = getDatabase(app);
         const messagesRef = ref(db, `messages/${selectedChat.id}`);
-        
+
         try {
             await push(messagesRef, messageData);
             addMessage(selectedChat.id, {
                 ...messageData,
                 timestamp: new Date().toISOString()
             });
-            
+
         } catch (error) {
             console.error("Failed to send message:", error);
             toast({ title: 'Error', description: 'Failed to send message', variant: 'destructive' });
@@ -209,10 +209,10 @@ export default function SupportChatWidget() {
             setIsLoading(false);
         }
     };
-    
+
     const participants = selectedChat?.participantNames ? Object.values(selectedChat.participantNames) : [];
     const totalUnreadCount = Object.values(unreadCounts).reduce((acc, count) => acc + count, 0);
-    
+
     if (!firebaseUser) {
         return null;
     }
@@ -230,7 +230,7 @@ export default function SupportChatWidget() {
                 )}
             </Button>
         )}
-        
+
         {isChatOpen && (
             <Card className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 w-[calc(100vw-2rem)] h-[calc(100vh-8rem)] sm:w-[400px] sm:h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">

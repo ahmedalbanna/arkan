@@ -15,7 +15,7 @@ import { toast } from '@/hooks/use-toast';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { useWritingTool } from '@/hooks/use-writing-tools';
-import { Tabs, TabsTrigger, TabsList, TabsContent } from '../ui/tabs';
+import { Tabs, TabsTrigger, TabsList, TabsContent } from '@/components/ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';

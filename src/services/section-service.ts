@@ -1,4 +1,4 @@
-// f:\arkan\src\services\section-service.ts
+// C:\Users\ahmed\source\repos\arkan\src\services\section-service.ts
 'use client';
 
 import type { DynamicSection } from '@/hooks/useSectionStore';

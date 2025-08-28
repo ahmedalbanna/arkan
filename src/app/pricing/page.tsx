@@ -1,7 +1,7 @@
 
 'use client';
 
-import { PricingCard } from '@/components/PricingCard';
+import { PricingCard } from '@/components/price/PricingCard';
 import type { PricingPlan } from '@/lib/types';
 import { Gem } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -48,7 +48,7 @@ const plans: PricingPlan[] = [
 
 export default function PricingPage() {
   const { t } = useLocalization();
-  
+
   return (
     <div className="container mx-auto max-w-5xl px-4 py-12">
       <div className="text-center mb-12">

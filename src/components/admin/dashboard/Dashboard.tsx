@@ -12,7 +12,7 @@ import { AgentUsageChart } from './AgentUsageChart';
 import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Card, CardHeader, CardContent } from '../../ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 
 function StatCardSkeleton() {
     return (
@@ -99,7 +99,7 @@ export default function Dashboard() {
             </div>
         );
     }
-    
+
     return (
         <div className="space-y-8">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

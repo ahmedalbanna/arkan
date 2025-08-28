@@ -16,8 +16,9 @@ import {
 import type { DocxTemplate, DocxTemplatesRecord } from '@/services/template-service';
 import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
-import { TemplateKey } from '@/lib/types';
 
+
+export type TemplateKey = 'modern' | 'classic' | 'academic' | string;
 
 export const docxTemplateKeys = {
   all: ["docx-templates"] as const,
@@ -70,7 +71,7 @@ export function useDocxStyles() {
         if (activeTemplateKey) {
             setLocalChanges(prev => {
                 const newStyles = JSON.parse(JSON.stringify(prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {}));
-                
+
                 let current = newStyles;
                 const keys = path.split('.');
                 for (let i = 0; i < keys.length - 1; i++) {
@@ -83,7 +84,7 @@ export function useDocxStyles() {
             });
         }
     };
-    
+
     const saveChanges = (key: string) => {
         const changesToSave = localChanges[key];
         if (changesToSave) {
@@ -91,7 +92,7 @@ export function useDocxStyles() {
         }
     };
 
-    return { 
+    return {
         templates,
         isLoaded: !isLoading,
         activeTemplateKey,

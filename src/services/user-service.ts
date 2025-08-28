@@ -13,7 +13,7 @@ import {
   signInWithPhoneNumber,
   type ConfirmationResult,
 } from "firebase/auth";
-import type { SignupCredentials } from "@/components/SignupForm";
+import type { SignupCredentials } from "@/components/auth/SignupForm";
 import { getFirestore, doc, onSnapshot, setDoc } from "firebase/firestore";
 
 export interface UserListResponse {
@@ -66,7 +66,7 @@ export async function fetchUsers(limit: number, lastVisibleId: string | undefine
 export function subscribeToUserProfile(userId: string, callback: (user: UserProfile | null) => void) {
     const db = getFirestore(app);
     const userDocRef = doc(db, "users", userId);
-    
+
     const unsubscribe = onSnapshot(userDocRef, (doc) => {
         if (doc.exists()) {
             callback({ id: doc.id, ...doc.data() } as UserProfile);
@@ -160,7 +160,7 @@ export async function serviceSignupUser(credentials: SignupCredentials) {
 export async function createUserService(data: Omit<UserProfile, 'id' | 'createdAt' | 'updatedAt'> & { password?: string }, token: string) {
     const response = await fetch('/api/admin/users', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },

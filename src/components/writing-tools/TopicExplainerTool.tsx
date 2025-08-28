@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useWritingTool } from '@/hooks/use-writing-tools';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { useLocalization } from '@/context/LocalizationContext';

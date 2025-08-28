@@ -4,18 +4,18 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import {
   LucideIcon, FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText as BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
 } from 'lucide-react';
-import type { AgentData, AgentPrompt } from '@/lib/types';
+import type { Agent, AgentPrompt } from '@/lib/types';
 
 const iconMap: Record<string, LucideIcon> = {
   FileSpreadsheet, FileText, GitGraph, BrainCircuit, Library, TestTube2, Waypoints, Code, Flag, BookMarked, BookText: BookTextIcon, Presentation, DatabaseZap, History, FileHeart, Hand, DraftingCompass, Files, LayoutGrid, Scale, Megaphone, PencilRuler, Users
 };
 
-export interface DynamicAgentData extends Omit<AgentData, 'icon'> {
+export interface DynamicAgent extends Omit<Agent, 'icon'> {
   id: string;
   icon: string;
 }
 
-export interface AgentWithComponent extends DynamicAgentData {
+export interface AgentWithComponent extends DynamicAgent {
     iconComponent: LucideIcon;
 }
 
@@ -44,7 +44,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
 
       const fetchedAgents: Record<string, AgentWithComponent> = {};
       querySnapshot.forEach((doc) => {
-        const data = doc.data() as Omit<DynamicAgentData, 'id'>;
+        const data = doc.data() as Omit<DynamicAgent, 'id'>;
         const agent: AgentWithComponent = {
           id: doc.id,
           ...data,

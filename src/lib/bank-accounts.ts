@@ -1,6 +1,7 @@
 
 import type { BankAccount } from '@/lib/types';
 
+
 export const defaultBankAccounts: BankAccount[] = [
     {
         bankName: 'Default Bank',

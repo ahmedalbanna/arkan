@@ -17,7 +17,7 @@ const HandwritingSkeleton = () => (
     </div>
 );
 
-const HandwritingGenerator = dynamic(() => import('@/components/HandwritingGenerator'), {
+const HandwritingGenerator = dynamic(() => import('@/components/tools/HandwritingGenerator'), {
   ssr: false,
   loading: () => <HandwritingSkeleton />,
 });

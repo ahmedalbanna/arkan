@@ -5,7 +5,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from '@/components/
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Switch } from '../ui/switch';
+import { Switch } from '@/components/ui/switch';
 import type { TemplateKey } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 

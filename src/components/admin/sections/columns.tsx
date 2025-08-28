@@ -1,4 +1,4 @@
-// f:\arkan\src\components\admin\sections\columns.tsx
+// C:\Users\ahmed\source\repos\arkan\src\components\admin\sections\columns.tsx
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';

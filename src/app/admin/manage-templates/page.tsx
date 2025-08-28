@@ -1,7 +1,7 @@
 
 'use client';
 
-import DocxTemplateManager from '@/components/admin/DocxTemplateManager';
+import DocxTemplateManager from '@/components/admin/templates/styles/DocxTemplateManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Palette } from 'lucide-react';
 

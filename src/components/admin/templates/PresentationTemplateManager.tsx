@@ -1,9 +1,7 @@
-
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { templateKeys } from '@/lib/query-keys';
-import { useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks/use-templates';
+import { templateKeys, useUpdatePresentationTemplate, useCreatePresentationTemplate, useDeletePresentationTemplate, usePresentationTemplates } from '@/hooks/use-templates';
 import { type PresentationGenerationTemplate } from '@/services/template-service';
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

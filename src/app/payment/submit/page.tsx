@@ -1,7 +1,7 @@
 
 'use client';
 
-import SubmitPaymentForm from '@/components/SubmitPaymentForm';
+import SubmitPaymentForm from '@/components/price/SubmitPaymentForm';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Banknote } from 'lucide-react';
 

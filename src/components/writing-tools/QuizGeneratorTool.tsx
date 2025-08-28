@@ -13,8 +13,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, FileText, Check, X } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
-import { Slider } from '../ui/slider';
-import { Badge } from '../ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const quizGeneratorSchema = z.object({

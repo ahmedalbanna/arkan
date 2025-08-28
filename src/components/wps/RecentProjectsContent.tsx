@@ -36,7 +36,7 @@ export function RecentProjectsContent({ onProjectClick }: { onProjectClick: (pro
             </div>
         );
     }
-    
+
     if (isError) {
         return (
             <div className="flex items-center justify-center h-full text-red-500">
@@ -55,14 +55,14 @@ export function RecentProjectsContent({ onProjectClick }: { onProjectClick: (pro
             </div>
         )
     }
-    
+
     // Group projects by date
     const groupedProjects = projects.reduce((acc, project) => {
         const date = new Date(project.updatedAt);
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-        
+
         let groupName = formatDistanceToNow(date, { addSuffix: true });
         if (date.toDateString() === today.toDateString()) {
             groupName = 'Today';

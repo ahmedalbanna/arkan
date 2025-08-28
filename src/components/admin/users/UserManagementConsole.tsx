@@ -1,48 +1,28 @@
 
-
-      
 'use client';
 
-import { useState } from 'react';
-import type { UserProfile } from '@/lib/types';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight, Loader2, AlertCircle, PlusCircle, MessageSquare } from 'lucide-react';
-import { useUsers } from '@/hooks/use-user';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAuth } from '@/context/AuthContext';
-import { CreateUserDialog } from '@/components/admin/users/CreateUserDialog';
-import { UserTable } from '@/components/admin/users/UserTable';
-import { UserTableSkeleton } from '@/components/admin/users/UserTableSkeleton';
-
-const USERS_PER_PAGE = 10;
+import { CreateUserDialog } from './CreateUserDialog';
+import { UserTable } from './UserTable';
+import { UserTableSkeleton } from './UserTableSkeleton';
+import { useUserManagementConsole } from '@/hooks/useUserManagementConsole';
 
 export default function UserManagementConsole() {
   const { t } = useLocalization();
-  const { firebaseUser, isLoading: authIsLoading } = useAuth();
 
   const {
-    data,
+    allUsers,
     error,
     fetchNextPage,
     hasNextPage,
     isFetching,
     isFetchingNextPage,
-    status
-  } = useUsers();
-
-  const allUsers = data?.pages.flatMap(page => page.users) ?? [];
-
-  const isLoading = status === 'pending' || authIsLoading;
-  const isError = status === 'error';
+    isLoading,
+    isError,
+  } = useUserManagementConsole();
 
   return (
     <Card>
@@ -81,7 +61,3 @@ export default function UserManagementConsole() {
     </Card>
   );
 }
-
-    
-
-    

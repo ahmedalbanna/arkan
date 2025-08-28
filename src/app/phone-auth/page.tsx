@@ -1,7 +1,7 @@
 
 'use client';
 
-import PhoneAuthForm from '@/components/PhoneAuthForm';
+import PhoneAuthForm from '@/components/auth/PhoneAuthForm';
 import { Phone } from 'lucide-react';
 
 export default function PhoneAuthPage() {

@@ -73,7 +73,7 @@ export function usePptxStyles() {
     const updateStyle = (templateKey: string, path: string, value: any) => {
         setLocalChanges(prev => {
             const newStyles = JSON.parse(JSON.stringify(prev[templateKey] || templates?.[templateKey]?.styles || {}));
-            
+
             let current = newStyles;
             const keys = path.split('.');
             for (let i = 0; i < keys.length - 1; i++) {
@@ -85,13 +85,13 @@ export function usePptxStyles() {
             return { ...prev, [templateKey]: newStyles };
         });
     };
-    
+
     const saveChanges = (key: string) => {
         if (localChanges[key]) {
             updateMutation.mutate({ key, styles: localChanges[key] });
         }
     };
-    
+
     const combinedTemplates = React.useMemo(() => {
         if (!templates) return {};
         const combined = { ...templates };
@@ -104,9 +104,9 @@ export function usePptxStyles() {
     }, [templates, localChanges]);
 
 
-    return { 
-        templates: combinedTemplates, 
-        isLoaded: !isLoading, 
+    return {
+        templates: combinedTemplates,
+        isLoaded: !isLoading,
         isSaving: updateMutation.isPending,
         uploadTemplateFile,
         updateStyle,

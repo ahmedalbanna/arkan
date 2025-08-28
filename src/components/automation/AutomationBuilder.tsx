@@ -4,9 +4,9 @@
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { ActionPanel } from './ActionPanel';
-import { Button } from '../ui/button';
-import { Switch } from '../ui/switch';
-import { Avatar, AvatarImage, AvatarFallback } from '../ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { ChevronRight, Play, Wrench, History, HelpCircle, Bell, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 

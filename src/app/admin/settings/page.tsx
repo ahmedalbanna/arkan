@@ -74,7 +74,7 @@ export default function AdminSettingsPage() {
     queryKey: ['settings'],
     queryFn: fetchSettings,
   });
-  
+
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
@@ -109,7 +109,7 @@ export default function AdminSettingsPage() {
     const token = await getAuthenticatedToken(firebaseUser);
     mutation.mutate({ data, token });
   };
-  
+
   const addNewAccount = () => {
     append({
         bankName: '',
@@ -193,7 +193,7 @@ export default function AdminSettingsPage() {
                     />
                 </CardContent>
             </Card>
-            
+
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Banknote className="w-6 h-6"/> {t('adminSettings.bankPaymentTitle')}</CardTitle>

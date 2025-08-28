@@ -14,14 +14,14 @@ import { Loader2, Sparkles, Copy, Check, Wand2, BookOpenText } from 'lucide-reac
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from '@/hooks/use-toast';
 import { useWritingTool } from '@/hooks/use-writing-tools';
-import { Slider } from '../ui/slider';
-import { Badge } from '../ui/badge';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { RewriteTextOutput, DiffPart } from '@/lib/types';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { computeDiff } from '@/lib/diff';
 import { useLocalization } from '@/context/LocalizationContext';
 

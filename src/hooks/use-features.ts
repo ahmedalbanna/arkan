@@ -12,9 +12,21 @@ import {
   updateFeature as updateFeatureApi,
 } from "@/services/feature-service";
 import { getAuthenticatedToken } from "@/lib/authUtils";
-import type { Feature, UpdateFeatureVariables } from "@/lib/types";
 
 
+export interface Feature {
+  id: string;
+  name: string;
+  description: string;
+  isEnabled: boolean;
+}
+export interface UpdateFeaturePayload {
+  isEnabled: boolean;
+}
+export interface UpdateFeatureVariables {
+  featureId: string;
+  payload: UpdateFeaturePayload;
+}
 /**
  * Custom hook to fetch all feature flags.
  * Caches the data and returns the current state of all features.

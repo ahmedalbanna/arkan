@@ -25,7 +25,7 @@ const ConverterSkeleton = () => (
 );
 
 
-const PdfToMarkdownConverter = dynamic(() => import("@/components/PdfToMarkdownConverter"), {
+const PdfToMarkdownConverter = dynamic(() => import("@/components/tools/PdfToMarkdownConverter"), {
     ssr: false,
     loading: () => <ConverterSkeleton />
 });

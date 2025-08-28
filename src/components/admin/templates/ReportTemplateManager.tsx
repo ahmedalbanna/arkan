@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useUpdateReportTemplate, useCreateReportTemplate, useDeleteReportTemplate, useReportTemplates } from '@/hooks/use-templates';

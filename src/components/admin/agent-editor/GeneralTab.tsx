@@ -3,7 +3,7 @@
 'use client';
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
-import { AgentEditorFormValues } from '@/components/admin/agent-editor/AgentEditor';
+import { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import { CardTitle } from '@/components/ui/card';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -11,21 +11,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Bot, MessageSquare, Plus, X } from 'lucide-react';
-import { type AgentPrompt } from '@/lib/types';
+import { type AgentPrompt, type AgentCategory } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useEffect, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgentCategories } from '@/hooks/use-agents';
 
 interface GeneralTabProps {
     isComplexPrompt: boolean;
     isPending: boolean;
+    categories: AgentCategory[];
 }
 
-export default function GeneralTab({ isComplexPrompt, isPending }: GeneralTabProps) {
+export default function GeneralTab({ isComplexPrompt, isPending, categories }: GeneralTabProps) {
     const { control, watch } = useFormContext<AgentEditorFormValues>();
     const { t } = useLocalization();
-    const { data: categories } = useAgentCategories();
 
     const { fields, append, remove } = useFieldArray({
         control,

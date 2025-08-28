@@ -1,4 +1,4 @@
-// f:\arkan\src\app\admin\manage-sections\page.tsx
+// C:\Users\ahmed\source\repos\arkan\src\app\admin\manage-sections\page.tsx
 'use client';
 
 import { useSections } from '@/hooks/use-sections';

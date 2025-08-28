@@ -7,7 +7,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FileText, type LucideIcon } from 'lucide-react';
 import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
-import { type Agent, type AgentData, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
+import { type Agent, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
 import { useAuth } from "@/context/AuthContext";
 import { useMemo } from "react";
 import { type UseQueryOptions } from "@tanstack/react-query";
@@ -36,7 +36,7 @@ export interface UpdateAgentVariables {
     payload: UpdateAgentPayload;
 }
 
-export type CreateAgentVariables = Omit<AgentData, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
+export type CreateAgentVariables = Omit<Agent, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
 
 export interface AgentCategory {
     id: string;
@@ -203,23 +203,23 @@ export function useCreateAgent() {
             const token = await getAuthenticatedToken(firebaseUser);
             return createAgentApi(variables, token);
         },
-        onMutate: async (newAgentData) => {
+        onMutate: async (newAgent) => {
             // Snapshot the previous value from the Zustand store
             const previousAgents = useAgentStore.getState().agents;
             const { getIconComponent } = useAgentStore.getState();
 
             // Create a temporary agent object for the optimistic update
             const tempAgent: AgentWithComponent = {
-                ...newAgentData,
+                ...newAgent,
                 isEnabled: true, // Assume enabled on creation
-                iconComponent: getIconComponent(newAgentData.icon) || FileText,
+                iconComponent: getIconComponent(newAgent.icon) || FileText,
             };
 
             // Optimistically update the store
             useAgentStore.setState(state => ({
                 agents: {
                     ...state.agents,
-                    [newAgentData.id]: tempAgent,
+                    [newAgent.id]: tempAgent,
                 }
             }));
 
@@ -228,7 +228,7 @@ export function useCreateAgent() {
         onSuccess: (newAgent) => {
             toast({ title: 'Success', description: 'New AI agent created.' });
         },
-        onError: (error, newAgentData, context) => {
+        onError: (error, newAgent, context) => {
              // Rollback on error
              if (context?.previousAgents) {
                 useAgentStore.setState({ agents: context.previousAgents });

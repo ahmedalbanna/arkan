@@ -4,12 +4,9 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import type { SavedProject } from '@/lib/types';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { useRouter } from 'next/navigation';
-import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { FileText, Trash2, Loader2 } from 'lucide-react';
-import { useDeleteProject } from '@/hooks/use-projects';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,32 +19,21 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from '@/lib/utils';
-import React from 'react'; // Import React for React.ReactNode type
-import { useLocalization } from '@/context/LocalizationContext';
+import React from 'react';
+import { useProjectCardLogic } from '@/hooks/use-project-card-logic';
 
 interface ProjectCardProps {
     project: SavedProject;
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-    const router = useRouter();
-    const { t } = useLocalization();
-    const loadState = useBuilderStore(state => state.loadState);
-    const deleteProjectMutation = useDeleteProject();
-
-    const handleLoadProject = () => {
-        // The project object already contains the full state
-        loadState(project);
-        router.push('/generate');
-    };
-
-    const handleDeleteProject = () => {
-        deleteProjectMutation.mutate(project.id);
-    }
-    
-    const projectTitle = project.name || project.proposal?.title || t('projects.untitled');
-
-    const isDeletingThisProject = deleteProjectMutation.isPending && deleteProjectMutation.variables === project.id;
+    const {
+        handleLoadProject,
+        handleDeleteProject,
+        projectTitle,
+        isDeletingThisProject,
+        t
+    } = useProjectCardLogic(project);
 
     return (
         <Card className={cn(

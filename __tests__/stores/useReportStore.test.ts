@@ -70,9 +70,9 @@ describe('useReportStore', () => {
     act(() => {
       useReportStore.getState().handleRemoveCustomGuidelineForItem(itemKey, 0);
     });
-    
+
     state = useReportStore.getState();
     expect(state.guidelineState[itemKey].custom).not.toContain(customGuideline);
   });
-  
+
 });

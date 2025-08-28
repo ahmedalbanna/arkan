@@ -38,9 +38,9 @@ async function manageSessionAndProfile(user: FirebaseUser | null) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${idToken}` // Pass token for verification
         },
-        body: JSON.stringify({ 
-            uid: user.uid, 
-            email: user.email, 
+        body: JSON.stringify({
+            uid: user.uid,
+            email: user.email,
             name: user.displayName,
             phoneNumber: user.phoneNumber,
         })
@@ -104,8 +104,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [queryClient]);
 
   return (
-    <AuthContext.Provider value={{ 
-        firebaseUser, 
+    <AuthContext.Provider value={{
+        firebaseUser,
         userProfile: userProfile ?? null,
         isLoading: authIsLoading || (!!firebaseUser && isProfileLoading),
         refetchUser

@@ -1,4 +1,4 @@
-// f:\arkan\src\hooks\useSectionStore.ts
+// C:\Users\ahmed\source\repos\arkan\src\hooks\useSectionStore.ts
 import { create } from 'zustand';
 import { db } from '@/lib/firebase/client-init'; // Assuming you have a client-side Firebase init
 import { collection, getDocs, query } from 'firebase/firestore';

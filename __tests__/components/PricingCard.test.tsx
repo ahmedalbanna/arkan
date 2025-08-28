@@ -2,7 +2,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { PricingCard } from '@/components/PricingCard';
+import { PricingCard } from '@/components/price/PricingCard';
 import type { PricingPlan } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 
@@ -54,7 +54,7 @@ describe('PricingCard', () => {
       credits: mockPlan.credits.toString(),
       price: mockPlan.price.toString(),
     });
-    
+
     expect(pushMock).toHaveBeenCalledWith(`/payment/submit?${expectedParams.toString()}`);
   });
 });

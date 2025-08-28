@@ -30,3 +30,19 @@ export async function generateProjectPlanApi(variables: GeneratePlanVariables): 
   }
   return await response.json();
 }
+
+export async function summarizeProposalForPlanApi(proposal: any, token: string): Promise<any> {
+  const response = await fetch('/api/summarize-project', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({ proposal: proposal, reportMarkdown: '' }), // Send empty report as we only need proposal
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get suggestion from AI');
+  }
+  return response.json();
+}

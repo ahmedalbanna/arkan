@@ -26,7 +26,7 @@ export type { DocxTemplate, ProposalTemplate, ReportGenerationTemplate, Presenta
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/flows/translate-text';
-export type { SignupCredentials } from '@/components/SignupForm';
+export type { SignupCredentials } from '@/components/auth/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/flows/text-stylist';
 export type { DiffPart } from '@/lib/diff';

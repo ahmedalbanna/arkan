@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, User, HomeIcon, SlidersHorizontal, Bot, Palette, Languages, Gem, FileImage, Users, LogOut, UserCog, CreditCard, FileText, PencilLine, History, LayoutDashboard, Settings, PencilRuler, BookOpenCheck, FolderOpen, AreaChart, Bell, Trash2, UserPlus, LifeBuoy, MoreVertical, Brush, PenSquare, Workflow, Wrench } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -12,20 +12,20 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 import { useLogout } from '@/hooks/use-user';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '../ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from '@/components/ui/dropdown-menu';
 import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ScrollArea } from '../ui/scroll-area';
-import { Badge } from '../ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { useNotifications, useMarkNotificationsAsRead, useClearAllNotifications } from '@/hooks/use-notifications';
 import { formatDistanceToNow } from 'date-fns';
 import type { Notification, UserProfile } from '@/lib/types';
 import { useChatStore } from '@/hooks/useChatStore';
 import { toast } from '@/hooks/use-toast';
 import { initiateSupportChat } from '@/services/chat-service';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '../ui/tooltip';
+import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Label } from '../ui/label';
+import { Label } from '@/components/ui/label';
 
 
 function NotificationIcon({ icon }: { icon: Notification['icon']}) {

@@ -2,19 +2,14 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { useUpdateAgent } from '@/hooks/use-agents';
-import type { Agent, AgentPrompt, AgentKnowledgeSource } from '@/lib/types';
+import { useState } from 'react';
+import type { Agent, AgentCategory } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Loader2, Save, Bot, BookOpen, Wrench, MessageSquare, ListChecks, Link as LinkIcon, BotMessageSquare, PencilRuler } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { FormProvider } from 'react-hook-form';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import KnowledgeTab from './KnowledgeTab';
 import ToolsTab from './ToolsTab';
 import GuidelinesTab from './GuidelinesTab';
@@ -22,52 +17,16 @@ import AutomationTab from './AutomationTab';
 import ContextTab from './ContextTab';
 import GeneralTab from './GeneralTab';
 import OutputTab from './OutputTab';
-import Link from 'next/link';
+import { useAgentEditor } from '@/hooks/use-agent-editor';
+import { type AgentEditorFormValues } from '@/lib/agent-editor-schema';
 
 
 interface AgentEditorProps {
   agentId: string;
   initialData: Agent;
+  categories: AgentCategory[];
+  allAgents: Agent[];
 }
-
-const agentKnowledgeSourceSchema = z.object({
-    name: z.string(),
-    type: z.enum(['file', 'text', 'web']),
-    content: z.string(),
-});
-
-const agentGuidelineSchema = z.object({
-  text: z.string().min(1, "Guideline text cannot be empty."),
-  isDefault: z.boolean(),
-});
-
-const agentPromptSchema = z.object({
-  base: z.string().min(10, "Base prompt must be at least 10 characters."),
-  guidelines: z.array(agentGuidelineSchema).optional(),
-  jsonStructure: z.any().optional(),
-  defaultContext: z.array(z.string()).optional(), // Add this field
-});
-
-const agentEditorSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  category: z.string(), // Changed to string for dynamic categories
-  prompt: z.union([
-    z.string().min(10, "Prompt must be at least 10 characters"),
-    agentPromptSchema
-  ]),
-  introduction: z.string().max(500).optional(),
-  placeholder: z.string().optional(),
-  conversationStarters: z.array(z.object({ value: z.string() })).optional(),
-  tone: z.string().optional(),
-  language: z.string().optional(),
-  model: z.string().optional(),
-  toolIds: z.array(z.string()).optional(),
-  knowledge: z.array(agentKnowledgeSourceSchema).optional(),
-  isEnabled: z.boolean().optional(),
-  icon: z.string().optional(),
-});
-
-export type AgentEditorFormValues = z.infer<typeof agentEditorSchema>;
 
 const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.ElementType, label: string, isActive: boolean, onClick: () => void }) => (
   <Button
@@ -84,66 +43,16 @@ const NavItem = ({ icon: Icon, label, isActive, onClick }: { icon: React.Element
   </Button>
 );
 
-export default function AgentEditor({ agentId, initialData }: AgentEditorProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function AgentEditor({ agentId, initialData, categories, allAgents }: AgentEditorProps) {
   const { t } = useLocalization();
   const [activeTab, setActiveTab] = useState('general');
 
-  const updateAgentMutation = useUpdateAgent();
-
-  const form = useForm<AgentEditorFormValues>({
-      resolver: zodResolver(agentEditorSchema),
-      defaultValues: {
-          name: initialData.name,
-          category: initialData.category,
-          prompt: initialData.prompt,
-          toolIds: initialData.toolIds || [],
-          knowledge: initialData.knowledge || [],
-          introduction: initialData.introduction || '',
-          placeholder: initialData.placeholder || 'Ask me anything...',
-          conversationStarters: initialData.conversationStarters || [],
-          tone: initialData.tone || 'Default',
-          language: initialData.language || 'English (US)',
-          model: initialData.model || 'googleai/gemini-1.5-flash',
-
-      }
+  const { form, handleSubmit, isComplexPrompt, isPending, router } = useAgentEditor({
+    agentId,
+    initialData,
   });
 
-  const isComplexPrompt = typeof form.watch('prompt') === 'object';
-
-  useEffect(() => {
-    const promptFromUrl = searchParams.get('prompt');
-
-    const getInitialPrompt = () => {
-        if(typeof initialData.prompt === 'string') {
-            return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
-        }
-        if(typeof initialData.prompt === 'object') {
-            const newBase = promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt.base;
-            return { ...initialData.prompt, base: newBase };
-        }
-        return '';
-    }
-
-    form.reset({
-      name: initialData.name,
-      category: initialData.category,
-      prompt: getInitialPrompt(),
-      toolIds: initialData.toolIds || [],
-      knowledge: initialData.knowledge || [],
-      introduction: initialData.introduction || '',
-      placeholder: initialData.placeholder || 'Ask me anything about TypeScript...',
-      conversationStarters: initialData.conversationStarters || [],
-      tone: initialData.tone || 'Default',
-      language: initialData.language || 'English (US)',
-      model: initialData.model || 'googleai/gemini-1.5-flash',
-    });
-  }, [initialData, searchParams, form]);
-
-  const handleSubmit = (data: AgentEditorFormValues) => {
-    updateAgentMutation.mutate({ agentId, payload: data });
-  };
+  const onFormSubmit = (data: AgentEditorFormValues) => handleSubmit(data);
 
   const navItems = [
     { id: 'general', label: t('agentEditor.generalTitle'), icon: Bot },
@@ -158,7 +67,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
-        return <GeneralTab isComplexPrompt={isComplexPrompt} isPending={updateAgentMutation.isPending} />;
+        return <GeneralTab isComplexPrompt={isComplexPrompt} isPending={isPending} categories={categories} />;
       case 'guidelines':
         return <GuidelinesTab isComplexPrompt={isComplexPrompt} />;
       case 'output':
@@ -168,7 +77,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
       case 'tools':
         return <ToolsTab />;
       case 'context':
-        return <ContextTab />;
+        return <ContextTab allAgents={allAgents} />;
        case 'automation':
         return <AutomationTab />;
       default:
@@ -179,7 +88,7 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
   return (
     <FormProvider {...form}>
       <Card>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form onSubmit={form.handleSubmit(onFormSubmit)}>
           <CardContent className="p-0">
             <div className="grid grid-cols-12 gap-8">
               <div className="col-span-3 border-r p-4">
@@ -199,8 +108,8 @@ export default function AgentEditor({ agentId, initialData }: AgentEditorProps) 
           </CardContent>
           <CardFooter className="justify-end gap-2 border-t pt-6 mt-0">
             <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
-            <Button type="submit" disabled={updateAgentMutation.isPending}>
-              {updateAgentMutation.isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
               {t('agentEditor.saveButton')}
             </Button>
           </CardFooter>

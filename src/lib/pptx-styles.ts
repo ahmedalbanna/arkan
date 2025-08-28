@@ -2,9 +2,10 @@
 
 'use client';
 
-import type { PptxTemplate, PptxTemplateKey } from '@/lib/types';
-export type { PptxTemplateKey } from '@/lib/types';
+import type { PptxTemplate } from '@/lib/types';
 
+
+export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
 const modern: PptxTemplate['styles'] = {
     background: { color: "FFFFFF" },
     title: { fontFace: "Calibri", fontSize: 28, bold: true, color: "363636", align: 'left' },

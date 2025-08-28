@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
 import { useLocalization } from '@/context/LocalizationContext';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useTheme } from 'next-themes';
-import { ScrollArea } from '../../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import dynamic from 'next/dynamic';
 
 const ReactJson = dynamic(() => import('@microlink/react-json-view'), { ssr: false });

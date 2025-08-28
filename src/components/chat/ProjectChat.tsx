@@ -2,11 +2,11 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { MessageSquare, Send, X, Bot, User, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { Textarea } from '../ui/textarea';
-import { ScrollArea } from '../ui/scroll-area';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useChatStore } from '@/hooks/useChatStore';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -46,7 +46,7 @@ export default function ProjectChat() {
     const [input, setInput] = useState('');
     const [isRunning, setIsRunning] = useState(false);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
-    
+
     const getFullState = useBuilderStore(state => state.getFullState);
 
     const handleToggleChat = () => setIsChatOpen(prev => !prev);
@@ -64,10 +64,10 @@ export default function ProjectChat() {
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isRunning) return;
-        
+
         const userMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
-        
+
         const projectState = getFullState();
         setInput('');
         setIsRunning(true);
@@ -107,7 +107,7 @@ export default function ProjectChat() {
                 <MessageSquare className="h-8 w-8" />
             </Button>
         )}
-        
+
         {isChatOpen && (
             <Card className="fixed bottom-8 right-8 w-[400px] h-[600px] shadow-lg z-50 flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between">

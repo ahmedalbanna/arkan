@@ -9,7 +9,7 @@ import { useBuilderStore } from '@/hooks/useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-import OnboardingGuide from '@/components/OnboardingGuide';
+import OnboardingGuide from '@/components/auth/OnboardingGuide';
 import { useAuth } from '@/context/AuthContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useFeatures } from '@/hooks/use-features';
@@ -28,41 +28,41 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const SessionActions = dynamic(() => import('@/components/SessionActions').then(mod => mod.SessionActions), {
+const SessionActions = dynamic(() => import('@/components/project/SessionActions').then(mod => mod.SessionActions), {
   ssr: false,
   loading: () => <Skeleton className="h-8 w-[400px]" />,
 });
 
 
-const ProposalModeGenerator = dynamic(() => import('@/components/proposal-generator/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), {
+const ProposalModeGenerator = dynamic(() => import('@/components/proposal-mode/ProposalModeGenerator').then(mod => mod.ProposalModeGenerator), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const ReportGenerator = dynamic(() => import('@/components/report-generator/ReportModeGenerator'), {
+const ReportGenerator = dynamic(() => import('@/components/report-mode/ReportModeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const DiagramGenerator = dynamic(() => import('@/components/diagram-generator/DiagramGenerator'), {
+const DiagramGenerator = dynamic(() => import('@/components/diagram-mode/DiagramGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const CodeGenerator = dynamic(() => import('@/components/code-generator/CodeGenerator'), {
+const CodeGenerator = dynamic(() => import('@/components/code-mode/CodeGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const PresentationGenerator = dynamic(() => import('@/components/presentation-generator/PresentationGenerator'), {
+const PresentationGenerator = dynamic(() => import('@/components/presentation-mode/PresentationGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const ProjectPlanGenerator = dynamic(() => import('@/components/project-plan/ProjectPlanGenerator'), {
+const ProjectPlanGenerator = dynamic(() => import('@/components/plan-mode/ProjectPlanGenerator'), {
   ssr: false,
   loading: () => <LoadingSkeleton />,
 });
-const AcademicSolver = dynamic(() => import('@/components/academic-solver/AcademicSolver'), {
+const AcademicSolver = dynamic(() => import('@/components/academicSolver-mode/AcademicSolver'), {
     ssr: false,
     loading: () => <LoadingSkeleton />,
 });
-const FileManager = dynamic(() => import('@/components/FileManager'), {
+const FileManager = dynamic(() => import('@/components/file/FileManager'), {
     ssr: false,
     loading: () => <LoadingSkeleton />,
 });
@@ -94,7 +94,7 @@ function GeneratePageContent() {
 
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasLoadedProject, setHasLoadedProject] = useState(false);
-  
+
   useEffect(() => {
     // Show the onboarding guide if the user profile is loaded and the flag is false
     if (userProfile && !userProfile.hasCompletedOnboarding) {
@@ -271,5 +271,4 @@ export default function GeneratePage() {
     )
 }
 
-    
-    
+

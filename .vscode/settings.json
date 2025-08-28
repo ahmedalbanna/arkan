@@ -17,6 +17,9 @@
         "component-settings": {
             "src/components/proposal-generator/ProposalModeGenerator.tsx:::Temp": {
                 "route": "/generate"
+            },
+            "src/components/report-mode/ReportModeGenerator.tsx:::Temp": {
+                "route": "/projects"
             }
         },
         "app-routes": {
@@ -34,6 +37,7 @@
                 "/admin/manage-payments",
                 "/admin/manage-pptx-templates",
                 "/admin/manage-prompt-templates",
+                "/admin/manage-sections",
                 "/admin/manage-templates",
                 "/admin/manage-users",
                 "/admin/settings",
@@ -76,7 +80,7 @@
                 "/writing-tools/text-stylist",
                 "/writing-tools/topic-explainer"
             ],
-            "current_route": "/generate"
+            "current_route": "/projects"
         },
         "tw-external-config": {},
         "source-folders": null,

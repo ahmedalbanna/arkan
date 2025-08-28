@@ -4,16 +4,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Bot, Inbox, User, Search, MessageSquare, Loader2, PlusCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { userKeys } from '@/lib/query-keys';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { createConversationApi } from '@/services/chat-service';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 import type { ChatSession, ChatMessage, AgentChatSession, UserProfile, Agent } from '@/lib/types';
 import { useUsers } from '@/hooks/use-user';
 import { formatDistanceToNow } from 'date-fns';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgents } from '@/hooks/use-agents';
 // ...
 

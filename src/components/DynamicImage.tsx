@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useQuery } from '@tanstack/react-query';
 
 interface DynamicImageProps {
@@ -58,7 +58,7 @@ export default function DynamicImage({ alt, 'data-ai-hint': dataAiHint, ...props
       gcTime: Infinity, // Cache forever
       retry: false, // Don't retry on failure
   });
-  
+
   const placeholderUrl = `https://placehold.co/${props.width}x${props.height}.png`;
 
   if (isLoading || !imageUrl) {

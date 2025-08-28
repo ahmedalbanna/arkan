@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect, use, lazy, Suspense } from 'react';
 
 // Dynamically import the EditUserForm
-const EditUserForm = lazy(() => import('@/components/EditUserForm'));
+const EditUserForm = lazy(() => import('@/components/admin/EditUserForm'));
 
 function EditUserPageSkeleton() {
   return (
@@ -33,7 +33,7 @@ function EditUserPageSkeleton() {
 function EditUserPageContent({ userId }: { userId: string }) {
     const { data: user, isLoading, isError } = useUserProfile(userId);
     const { firebaseUser, isLoading: authIsLoading } = useAuth();
-    
+
     useEffect(() => {
         if (!isLoading && !authIsLoading && user?.id !== firebaseUser?.uid && user?.role !== 'admin') {
           // notFound();

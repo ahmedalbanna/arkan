@@ -4,7 +4,7 @@
 import Image from 'next/image';
 import { CreateWithAiPanel } from './CreateWithAiPanel';
 import { usePresentationStore } from '@/hooks/usePresentationStore';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PresentationViewer } from './PresentationViewer';
 
 export default function PresentationEditor({ isCreateWithAiOpen, onCreateWithAiOpenChange }: { isCreateWithAiOpen: boolean, onCreateWithAiOpenChange: (isOpen: boolean) => void }) {

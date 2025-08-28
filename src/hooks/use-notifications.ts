@@ -3,13 +3,22 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import type { Notification } from '@/lib/types';
+
 import { ref, onValue, off, query, orderByChild, limitToLast } from "firebase/database";
 import { db } from "@/lib/firebaseConfig";
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { handleErrorUtility } from '@/lib/errorUtils';
 
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus';
+  isRead: boolean;
+  createdAt: string;
+  link?: string;
+}
 async function markNotificationsAsReadApi(notificationIds: string[], token: string): Promise<any> {
     const response = await fetch('/api/notifications/mark-as-read', {
         method: 'POST',

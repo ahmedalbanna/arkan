@@ -2,11 +2,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Bot, User, Send, Paperclip, Info, Settings2, Loader2, RotateCcw } from 'lucide-react';
-import { CardHeader } from '../ui/card';
-import { Textarea } from '../ui/textarea';
-import { ScrollArea } from '../ui/scroll-area';
+import { CardHeader } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -27,10 +27,10 @@ async function agentChatApi(variables: { agentId: string; message: string; conve
             'Content-Type': 'application/json',
             Authorization: `Bearer ${variables.token}`,
         },
-        body: JSON.stringify({ 
-            agentId: variables.agentId, 
+        body: JSON.stringify({
+            agentId: variables.agentId,
             message: variables.message,
-            conversationId: variables.conversationId 
+            conversationId: variables.conversationId
         }),
     });
     if (!response.ok) {
@@ -66,13 +66,13 @@ export function ConversationView({ chat }: ConversationViewProps) {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
+
    useEffect(() => {
     if (!chat) {
         setMessages([]);
         return;
     };
-    
+
     // For all chats (including agent chats now), we listen to the DB
     const db = getDatabase(app);
     const messagesRef = ref(db, `messages/${chat.id}`);
@@ -98,7 +98,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
         });
     }
   }, [messages]);
-  
+
   const agentChatMutation = useMutation({
     mutationFn: agentChatApi,
     onSuccess: (data, variables) => {
@@ -117,20 +117,20 @@ export function ConversationView({ chat }: ConversationViewProps) {
 
     const messageContent = input;
     setInput('');
-    
+
     // All message sends now go through the backend agentChat API.
     // The backend will handle distinguishing between agent and user-to-user chats.
     // For user-to-user, it will just save the message. For agents, it will invoke the flow.
     const token = await getAuthenticatedToken(firebaseUser);
-    
+
     // We use a "placeholder" agentId for user chats. The backend will ignore it.
     const agentId = chat.agent?.id || 'user-chat';
 
-    agentChatMutation.mutate({ 
-        agentId: agentId, 
+    agentChatMutation.mutate({
+        agentId: agentId,
         message: messageContent,
         conversationId: chat.id,
-        token 
+        token
     });
   }
 
@@ -158,7 +158,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
             <Button variant="ghost" size="icon" className="h-8 w-8"><RotateCcw className="h-4 w-4" /></Button>
         </div>
       </CardHeader>
-      
+
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-6">
             {messages.map((msg, index) => (
@@ -176,7 +176,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
             )}
         </div>
       </ScrollArea>
-       
+
        <div className="p-4 border-t bg-background">
          <form onSubmit={handleSendMessage}>
             <div className="relative">

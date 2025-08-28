@@ -4,13 +4,13 @@
 import { useState, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CardTitle } from '@/components/ui/card';
-import { useAgents } from '@/hooks/use-agents';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 import { AlertCircle, Search } from 'lucide-react';
-import type { AgentEditorFormValues } from './AgentEditor';
+import type { Agent } from '@/lib/types';
+import type { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -34,18 +34,21 @@ function ContextSkeleton() {
     )
 }
 
-export default function ContextTab() {
-  const { agents, isLoaded } = useAgents();
+interface ContextTabProps {
+    allAgents: Agent[];
+}
+
+export default function ContextTab({ allAgents }: ContextTabProps) {
   const { control } = useFormContext<AgentEditorFormValues>();
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLocalization();
 
   const filteredAgents = useMemo(() => {
-    if (!agents) return [];
-    return agents.filter(agent =>
+    if (!allAgents) return [];
+    return allAgents.filter(agent =>
       agent.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [agents, searchTerm]);
+  }, [allAgents, searchTerm]);
 
   return (
     <div className="space-y-6">
@@ -66,7 +69,7 @@ export default function ContextTab() {
         </div>
 
         <h3 className="font-semibold text-sm pt-2">{t('agentEditor.availableAgentsLabel')}</h3>
-         {!isLoaded ? <ContextSkeleton /> : (
+         {!allAgents ? <ContextSkeleton /> : (
             <FormField
                 control={control}
                 name="prompt.defaultContext"
@@ -79,7 +82,7 @@ export default function ContextTab() {
                                     control={control}
                                     name="prompt.defaultContext"
                                     render={({ field }) => {
-                                        const Icon = agents.find(a => a.id === agent.id)?.icon || AlertCircle;
+                                        const Icon = allAgents.find(a => a.id === agent.id)?.icon || AlertCircle;
                                         return (
                                             <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
                                                 <FormControl>

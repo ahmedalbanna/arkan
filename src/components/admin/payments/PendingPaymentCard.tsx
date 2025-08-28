@@ -9,7 +9,7 @@ import { Check, ExternalLink, Loader2, ThumbsDown } from "lucide-react";
 import type { TransactionData } from "@/lib/db/queries";
 import { useVerifyPayment } from "@/hooks/use-transactions";
 import { useState } from "react";
-import { Textarea } from "../../ui/textarea";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocalization } from "@/context/LocalizationContext";
 
 interface PendingPaymentCardProps {

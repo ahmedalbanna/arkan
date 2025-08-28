@@ -11,7 +11,7 @@ import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/prompt-templates';
 
 import { HelpCircle, Search, Copy, Bot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents } from '@/hooks/use-agents';

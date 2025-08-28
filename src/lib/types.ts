@@ -7,6 +7,8 @@ import { z } from 'zod';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { LucideIcon } from 'lucide-react';
 
+export type {PricingPlan} from '@/components/price/PricingCard'
+
 
 export type {
   ProjectProposal,
@@ -23,7 +25,7 @@ export type { HistoryEntry } from '@/hooks/use-history';
 export type { UpdateAgentPayload, UpdateAgentVariables, CreateAgentVariables } from '@/hooks/use-agents';
 
 export type { VerifyPaymentVariables } from '@/hooks/use-transactions';
-export type { PricingPlan } from '@/components/PricingCard';
+
 export type { Codebase } from '@/ai/schemas';
 export type { AcademicSolverState, ExternalContext as AcademicContextFile, AcademicSolverStage } from '@/hooks/useAcademicSolverStore';
 export type { TeamWithMembers } from '@/services/team-service';
@@ -31,7 +33,7 @@ export type { Team, TeamMember, UserProfile } from '@/lib/db/queries';
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks/useChatStore';
 export type { ExternalContext, ContextFileType } from '@/hooks/useReportStore';
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/schemas';
-export type { SignupCredentials } from '@/components/SignupForm';
+export type { SignupCredentials } from '@/components/auth/SignupForm';
 export type { GenerateProposalBody } from '@/hooks/use-proposal-generation';
 export type { RewriteTextOutput } from '@/ai/schemas';
 export type { DiffPart } from '@/lib/diff';
@@ -84,7 +86,9 @@ export interface AgentPrompt {
   defaultContext?: ('proposal' | 'projectPlan' | string)[]; // Array of agent IDs or keywords
 }
 
-export interface AgentData {
+
+export interface Agent{
+
   id: string;
   name: string;
   description: string;
@@ -101,36 +105,16 @@ export interface AgentData {
   language?: string;
   model?: string;
   isDefault?: boolean;
+  icon?: LucideIcon;
+  iconComponent?: LucideIcon;
 }
+export type { Notification } from '@/hooks/use-notifications';
+export type { Feature, UpdateFeatureVariables } from "@/hooks/use-features";
 
-export interface Agent extends AgentData {
-  icon: LucideIcon;
-}
-export interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  icon: 'credit-card' | 'bot' | 'file-text' | 'user-plus';
-  isRead: boolean;
-  createdAt: string;
-  link?: string;
-}
 
-export interface Feature {
-    id: string;
-    name: string;
-    description: string;
-    isEnabled: boolean;
-}
 
-export interface UpdateFeaturePayload {
-    isEnabled: boolean;
-}
 
-export interface UpdateFeatureVariables {
-    featureId: string;
-    payload: UpdateFeaturePayload;
-}
+
 
 export interface LoginCredentials {
   email: string;
@@ -138,9 +122,9 @@ export interface LoginCredentials {
 }
 
 // --- PPTX Template Types ---
-export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
+export type {PptxTemplateKey} from '@/lib/pptx-styles';
 
-export type TemplateKey = 'modern' | 'classic' | 'academic' | string;
+export type {TemplateKey} from '@/hooks/use-docx-styles';
 
 
 // --- Full Report Mode Configuration Interfaces ---

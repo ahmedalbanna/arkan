@@ -17,8 +17,8 @@ export async function getTransactions(params: FetchTransactionsParams): Promise<
     if (!token) {
         throw new Error("Authentication token is required.");
     }
-    
-    const queryParams = new URLSearchParams({ 
+
+    const queryParams = new URLSearchParams({
         status,
         limit: limit.toString(),
     });

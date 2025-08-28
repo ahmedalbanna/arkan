@@ -3,7 +3,7 @@
 'use client';
 
 import { useDocxStyles } from "@/hooks/use-docx-styles";
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import React from 'react';
 
 export function DocxPreview() {
@@ -23,9 +23,9 @@ export function DocxPreview() {
   const h3Styles = activeStyles.default?.heading3?.run || {};
 
   const inlineDocStyles = {
-    fontFamily: 
-      typeof docStyles.font === 'string' 
-        ? docStyles.font 
+    fontFamily:
+      typeof docStyles.font === 'string'
+        ? docStyles.font
         : (docStyles.font as { name: string })?.name ?? 'Calibri',
     fontSize: `${Number(docStyles.size ?? 22) / 2}pt`,
     color: `#${docStyles.color || '333333'}`,

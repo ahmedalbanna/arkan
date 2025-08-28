@@ -1,20 +1,41 @@
 
 'use client';
 
-import AgentEditor from '@/components/admin/agent-editor/AgentEditor';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useAgent } from '@/hooks/use-agents';
+
+import { useLocalization } from '@/context/LocalizationContext'; // Keep this import
+import { useAgent, useAgentCategories, useAgents } from '@/hooks/use-agents';
 import { AlertCircle, Bot, Loader2 } from 'lucide-react';
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
+
+const AgentEditor = lazy(() => import('@/components/admin/agent-editor/AgentEditor'));
+
+function AgentEditorSkeleton() {
+  return (
+    <div className="p-8 text-center">
+      <Loader2 className="mx-auto h-8 w-8 animate-spin" />
+      <p>Loading agent editor...</p>
+    </div>
+  );
+}
 
 
 export default function EditAgentPage({ params }: { params: { id: string } }) {
   const { t } = useLocalization();
 
   // Fetch the agent data using the hook
-  const { data: agent, isLoading, isError } = useAgent(params.id);
+  const { data: agent, isLoading: agentLoading, isError: agentError } = useAgent(params.id);
+  const { data: categories, isLoading: categoriesLoading, isError: categoriesError } = useAgentCategories();
+  const { agents: allAgents, isLoaded: agentsLoaded, isError: agentsError } = useAgents();
+
+
+  const isLoading = agentLoading || categoriesLoading || !agentsLoaded;
+  const isError = agentError || categoriesError || agentsError;
 
   if (isLoading) {
+    return <AgentEditorSkeleton />;
+  }
+
+  if (isError || !agent) {
     return (
         <div className="p-8 text-center">
             <Loader2 className="mx-auto h-8 w-8 animate-spin" />
@@ -40,8 +61,9 @@ export default function EditAgentPage({ params }: { params: { id: string } }) {
             {t('agentEditor.pageTitle')}
         </h1>
       </div>
-      {/* The `agent` object from `useQuery` is stable */}
-      <AgentEditor agentId={params.id} initialData={agent} />
+      <Suspense fallback={<AgentEditorSkeleton />}>
+        <AgentEditor agentId={params.id} initialData={agent} categories={categories || []} allAgents={allAgents || []} />
+      </Suspense>
     </div>
   );
 }

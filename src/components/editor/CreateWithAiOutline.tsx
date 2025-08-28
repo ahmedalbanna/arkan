@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ChevronDown, ChevronRight, Check } from 'lucide-react';
 import { GeneratePresentationOutlineOutput } from '@/ai/schemas';
-import { ScrollArea } from '../ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { CreateWithAiTemplates } from './CreateWithAiTemplates';
 
 interface OutlineItemProps {
@@ -51,7 +51,7 @@ export function CreateWithAiOutline({
   onClose: () => void;
 }) {
     const [view, setView] = useState<'outline' | 'templates'>('outline');
-    
+
     if (view === 'templates') {
         return <CreateWithAiTemplates outline={outline} onBack={() => setView('outline')} onClose={onClose} />;
     }

@@ -6,7 +6,7 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
 import type { UserProfile } from '@/lib/types';
-import type { PricingPlan } from '@/components/PricingCard';
+import type { PricingPlan } from '@/lib/types';
 import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebaseConfig";

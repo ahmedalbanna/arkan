@@ -1,4 +1,4 @@
-// f:\arkan\src\hooks\use-sections.ts
+// C:\Users\ahmed\source\repos\arkan\src\hooks\use-sections.ts
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

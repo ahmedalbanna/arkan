@@ -7,6 +7,7 @@ import { app } from '@/lib/firebaseConfig';
 import { getFirestore, collection, query, where, onSnapshot, orderBy } from "firebase/firestore";
 import type { ProjectState as FullProjectState, FullReportModeConfig, SavedProposalState } from "@/lib/types";
 
+
 // This represents the full state of a project that can be saved or loaded.
 // It is a combination of states from various Zustand stores.
 export type ProjectState = FullProjectState;

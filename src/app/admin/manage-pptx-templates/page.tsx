@@ -1,7 +1,7 @@
 
 'use client';
 
-import PptxTemplateManager from '@/components/admin/PptxTemplateManager';
+import { PresentationTemplateManager } from '@/components/admin/templates/styles/PptxTemplateManager';
 import { useLocalization } from '@/context/LocalizationContext';
 import { FileImage } from 'lucide-react';
 
@@ -19,7 +19,7 @@ export default function ManagePptxTemplatesPage() {
           {t('pptxTemplates.pageSubtitle')}
         </p>
       </div>
-      <PptxTemplateManager />
+      <PresentationTemplateManager />
     </div>
   );
 }

@@ -32,7 +32,7 @@ export function useTeams() {
 export function useCreateTeam() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    
+
     return useMutation<Team, Error, { name: string }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);

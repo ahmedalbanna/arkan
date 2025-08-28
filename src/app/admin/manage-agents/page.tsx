@@ -1,7 +1,7 @@
 
 'use client';
 
-import AgentManager from "@/components/AgentManager";
+import AgentManager from "@/components/admin/AgentManager";
 import { Bot } from "lucide-react";
 import { useLocalization } from "@/context/LocalizationContext";
 

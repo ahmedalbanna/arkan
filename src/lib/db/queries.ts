@@ -3,7 +3,7 @@
 'use server';
 import { adminAuth, adminDb } from '@/lib/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
-import type { AgentData } from '@/lib/types';
+import type { Agent } from '@/lib/types';
 import type { ProposalTemplate, ReportGenerationTemplate, PresentationGenerationTemplate, DocxTemplate, PptxTemplate } from '@/lib/types';
 
 export type UserRole = 'user' | 'admin';
@@ -286,12 +286,12 @@ export async function createTeamForUser(userId: string, teamName: string): Promi
 }
 
 // --- Agent Queries ---
-export async function getAgent(agentId: string): Promise<AgentData | null> {
+export async function getAgent(agentId: string): Promise<Agent | null> {
     try {
         const agentDoc = await adminDb.collection('agents').doc(agentId).get();
 
         if (agentDoc.exists) {
-            return agentDoc.data() as AgentData;
+            return agentDoc.data() as Agent;
         }
 
         console.warn(`Agent with ID '${agentId}' not found in Firestore.`);

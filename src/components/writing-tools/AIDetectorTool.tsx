@@ -13,7 +13,7 @@ import { Loader2, Sparkles, BrainCircuit, UploadCloud } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useWritingTool } from '@/hooks/use-writing-tools';
 import { toast } from '@/hooks/use-toast';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useDropzone } from 'react-dropzone';
 import { useAuth } from '@/context/AuthContext';
 import { processFileApi } from '@/services/document-processing-service';
