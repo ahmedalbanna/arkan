@@ -4,7 +4,8 @@
 
 import {
   CopyCheck, UserCheck, Fingerprint, Repeat, BookOpenText,
-  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain
+  SpellCheck, FileQuestion, CheckCircle, Quote, BrainCircuit, PenSquare, Search, Lightbulb, PencilLine, FileEdit, Presentation, Brain,
+  GitGraph
 } from 'lucide-react';
 import { AIToolCard } from '@/components/writing-tools/AIToolCard';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -29,6 +30,9 @@ export default function WritingToolsPage() {
     { name: t('writingTools.cards.topicExplainer'), icon: Lightbulb, href: '/writing-tools/topic-explainer' },
     { name: t('writingTools.cards.textToHandwriting'), icon: PencilLine, href: '/handwriting' },
     { name: t('writingTools.cards.ideaGenerator'), icon: Brain, href: '/writing-tools/idea-generator' },
+    { name: 'PlantUML Diagram Generator', icon: GitGraph, href: '/writing-tools/generate-plantuml' },
+    { name: 'Session Plan Generator', icon: BrainCircuit, href: '/writing-tools/session-plan' },
+    { name: 'Lecture Generator', icon: BrainCircuit, href: '/writing-tools/lecture-generator' },
   ];
 
   return (

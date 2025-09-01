@@ -19,6 +19,7 @@ const topicExplainerPrompt = ai.definePrompt({
 **Guidelines:**
 - Use analogies and simple language.
 - Avoid jargon where possible, or explain it clearly if necessary.
+- Be comprehensive. Aim for a detailed explanation of at least 3-4 paragraphs, unless the topic is very simple.
 - Structure the explanation logically with headings and bullet points for clarity.
 - Keep the tone engaging and approachable.
 - The output should be formatted in Markdown.
@@ -28,6 +29,10 @@ const topicExplainerPrompt = ai.definePrompt({
 {{{topic}}}
 ---
 `,
+    config: {
+        temperature: 0.6,
+        maxOutputTokens: 4096,
+    },
 });
 
 const topicExplainerFlow = ai.defineFlow({

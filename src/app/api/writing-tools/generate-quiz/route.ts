@@ -9,7 +9,9 @@ import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 
 const generateQuizSchema = z.object({
   text: z.string().min(50, 'Text must be at least 50 characters long to generate a meaningful quiz.'),
-  numQuestions: z.number().int().min(1).max(10),
+  numQuestions: z.number().int().min(1).max(20),
+  questionType: z.enum(['multiple-choice', 'true-false', 'direct-question']),
+
 });
 
 export const POST = withAuth(async ({ request, user }) => {

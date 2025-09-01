@@ -7,10 +7,10 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { GenerateQuizInputSchema, type GenerateQuizInput, GenerateQuizOutputSchema, type GenerateQuizOutput } from '@/ai/schemas';
+import { GenerateQuizInputSchema, type GenerateQuizInput, GenerateQuizOutputSchema, type GenerateQuizOutput, QuestionTypeSchema } from '@/ai/schemas';
 
-const generateQuizPrompt = ai.definePrompt({
-    name: 'generateQuizPrompt',
+const multipleChoiceQuizPrompt = ai.definePrompt({
+    name: 'multipleChoiceQuizPrompt',
     input: { schema: GenerateQuizInputSchema },
     output: { schema: GenerateQuizOutputSchema },
     model: 'googleai/gemini-1.5-flash',
@@ -19,23 +19,85 @@ const generateQuizPrompt = ai.definePrompt({
 **Instructions:**
 1.  Read the source text carefully to understand its key concepts and facts.
 2.  Generate exactly {{{numQuestions}}} unique multiple-choice questions.
-3.  For each question, provide 4 distinct options. One option must be the correct answer.
-4.  Ensure the questions cover different aspects of the text.
-5.  The correct answer must be one of the provided options.
+3.  Ensure the questions cover different aspects of the text.
+4.  For each question, provide 4 distinct options.
+5.  One option must be the correct answer.
+6.  The correct answer must be one of the provided options.
+7.  The output for each question must match the 'MultipleChoiceQuestionSchema'.
 
 **Source Text:**
 ---
 {{{text}}}
 ---
 `,
-  });
+});
+
+const trueFalseQuizPrompt = ai.definePrompt({
+    name: 'trueFalseQuizPrompt',
+    input: { schema: GenerateQuizInputSchema },
+    output: { schema: GenerateQuizOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: `You are an expert educator and quiz creator. Your task is to generate a true/false quiz based on the provided text.
+
+**Instructions:**
+1.  Read the source text carefully to understand its key concepts and facts.
+2.  Generate exactly {{{numQuestions}}} unique true/false questions.
+3.  Ensure the questions cover different aspects of the text.
+4.  Create a statement that is either true or false based on the text.
+5.  The 'answer' must be either 'True' or 'False'.
+6.  The 'options' array must be exactly ['True', 'False'].
+7.  The output for each question must match the 'TrueFalseQuestionSchema'.
+
+**Source Text:**
+---
+{{{text}}}
+---
+`,
+});
+
+const directQuestionQuizPrompt = ai.definePrompt({
+    name: 'directQuestionQuizPrompt',
+    input: { schema: GenerateQuizInputSchema },
+    output: { schema: GenerateQuizOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: `You are an expert educator and quiz creator. Your task is to generate a direct question quiz based on the provided text.
+
+**Instructions:**
+1.  Read the source text carefully to understand its key concepts and facts.
+2.  Generate exactly {{{numQuestions}}} unique direct questions.
+3.  Ensure the questions cover different aspects of the text.
+4.  Ask a direct, open-ended question based on the text.
+5.  Provide a concise, ideal answer in the 'answer' field.
+6.  The output for each question must match the 'DirectQuestionSchema'.
+
+**Source Text:**
+---
+{{{text}}}
+---
+`,
+});
 
 const generateQuizFlow = ai.defineFlow({
     name: 'generateQuizFlow',
     inputSchema: GenerateQuizInputSchema,
     outputSchema: GenerateQuizOutputSchema,
 }, async (input) => {
-    const { output } = await generateQuizPrompt(input);
+    let promptToUse;
+    switch (input.questionType) {
+        case 'multiple-choice':
+            promptToUse = multipleChoiceQuizPrompt;
+            break;
+        case 'true-false':
+            promptToUse = trueFalseQuizPrompt;
+            break;
+        case 'direct-question':
+            promptToUse = directQuestionQuizPrompt;
+            break;
+        default:
+            // This should not happen due to Zod validation, but it's good practice.
+            throw new Error(`Unsupported question type: ${input.questionType}`);
+    }
+    const { output } = await promptToUse(input);
     if (!output) {
       throw new Error("Quiz generation failed.");
     }

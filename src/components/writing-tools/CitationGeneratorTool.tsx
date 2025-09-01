@@ -14,6 +14,9 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Sparkles, Copy, Check } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useLocalization } from '@/context/LocalizationContext';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-styles';
 
 const citationGeneratorSchema = z.object({
   sourceText: z.string().min(10, 'Please enter at least 10 characters of source material.'),
@@ -24,12 +27,12 @@ type CitationFormValues = z.infer<typeof citationGeneratorSchema>;
 
 export function CitationGeneratorTool() {
   const { t } = useLocalization();
-  const [generatedCitation, setGeneratedCitation] = useState('');
+  const [generatedCitations, setGeneratedCitations] = useState<string[]>([]);
   const [isCopied, setIsCopied] = useState(false);
   
   const citationMutation = useWritingTool('/api/writing-tools/citation-generator', {
     onSuccess: (data: any) => {
-        setGeneratedCitation(data.citation);
+        setGeneratedCitations(data.citations || []);
         toast({ title: t('writingTools.citationGenerator.toastSuccess') });
     },
     onError: (error) => {
@@ -43,13 +46,13 @@ export function CitationGeneratorTool() {
   });
 
   const onSubmit = (data: CitationFormValues) => {
-    setGeneratedCitation('');
+    setGeneratedCitations([]);
     citationMutation.mutate(data);
   };
 
   const handleCopy = () => {
-    if (!generatedCitation) return;
-    navigator.clipboard.writeText(generatedCitation).then(() => {
+    if (generatedCitations.length === 0) return;
+    navigator.clipboard.writeText(generatedCitations.join('\n\n')).then(() => {
         setIsCopied(true);
         toast({ title: 'Copied to clipboard!' });
         setTimeout(() => setIsCopied(false), 2000);
@@ -103,23 +106,29 @@ export function CitationGeneratorTool() {
           </Button>
         </form>
 
-        {(citationMutation.isPending || generatedCitation) && (
+        {(citationMutation.isPending || generatedCitations.length > 0) && (
           <div className="space-y-2 pt-6 border-t">
             <h3 className="font-semibold text-muted-foreground flex justify-between items-center">
               <span>{t('writingTools.citationGenerator.generatedLabel')}</span>
-              {generatedCitation && (
+              {generatedCitations.length > 0 && (
                 <Button variant="ghost" size="icon" onClick={handleCopy}>
                   {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
                 </Button>
               )}
             </h3>
-            <div className="rounded-md border p-4 bg-muted/30 min-h-[6rem] flex items-center">
+            <ScrollArea className="h-72 rounded-md border p-4 bg-muted/30">
               {citationMutation.isPending ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <div className="flex items-center justify-center h-full">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
               ) : (
-                <p className="text-sm font-mono">{generatedCitation}</p>
+                <ul className="space-y-4">
+                  {generatedCitations.map((citation, index) => (
+                    <li key={index} className="text-sm font-mono prose dark:prose-invert max-w-none"><ReactMarkdown components={markdownComponents}>{citation}</ReactMarkdown></li>
+                  ))}
+                </ul>
               )}
-            </div>
+            </ScrollArea>
           </div>
         )}
       </CardContent>
