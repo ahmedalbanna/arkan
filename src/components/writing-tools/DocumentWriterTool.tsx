@@ -71,6 +71,8 @@ export function DocumentWriterTool() {
     { value: 'formal report', label: t('writingTools.documentWriter.docTypeFormalReport') },
     { value: 'technical article', label: t('writingTools.documentWriter.docTypeTechnicalArticle') },
     { value: 'creative story', label: t('writingTools.documentWriter.docTypeCreativeStory') },
+    { value: 'university subject material', label: t('writingTools.documentWriter.docTypeUniSubject') },
+    { value: 'research paper', label: t('writingTools.documentWriter.docTypeResearchPaper') },
   ];
 
   return (

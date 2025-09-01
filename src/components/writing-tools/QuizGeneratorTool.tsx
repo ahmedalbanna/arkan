@@ -16,10 +16,13 @@ import { toast } from '@/hooks';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const quizGeneratorSchema = z.object({
   text: z.string().min(50, 'Please enter at least 50 characters to generate a meaningful quiz.'),
-  numQuestions: z.number().int().min(1).max(10),
+  numQuestions: z.number().int().min(1).max(20),
+  questionType: z.enum(['multiple-choice', 'true-false', 'direct-question']),
+
 });
 
 type QuizFormValues = z.infer<typeof quizGeneratorSchema>;
@@ -32,7 +35,8 @@ export function QuizGeneratorTool() {
 
   const form = useForm<QuizFormValues>({
     resolver: zodResolver(quizGeneratorSchema),
-    defaultValues: { text: '', numQuestions: 5 },
+    defaultValues: { text: '', numQuestions: 5, questionType: 'multiple-choice' },
+
   });
 
   const onSubmit = (data: QuizFormValues) => {
@@ -58,6 +62,28 @@ export function QuizGeneratorTool() {
       <CardContent className="space-y-6">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
+            <Controller
+              name="questionType"
+              control={form.control}
+              render={({ field }) => (
+                <div className="space-y-2">
+                  <Label>Question Type</Label>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={quizMutation.isPending}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select question type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                      <SelectItem value="true-false">True/False</SelectItem>
+                      <SelectItem value="direct-question">Direct Question</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="text-to-quiz">{t('writingTools.aiQuizGenerator.sourceTextLabel')}</Label>
             <Textarea
               id="text-to-quiz"
@@ -82,8 +108,9 @@ export function QuizGeneratorTool() {
                         value={[field.value]}
                         onValueChange={(value) => field.onChange(value[0])}
                         min={1}
-                        max={10}
+                        max={20}
                         step={1}
+                        disabled={quizMutation.isPending}
                     />
                 </div>
             )}
@@ -119,18 +146,25 @@ export function QuizGeneratorTool() {
                     {generatedQuiz.map((q, index) => (
                         <div key={index} className="space-y-3">
                             <p className="font-semibold">{index + 1}. {q.question}</p>
-                            <ul className="space-y-2 pl-4">
-                                {q.options.map((option: string, i: number) => (
-                                    <li key={i} className="flex items-center gap-2 text-sm">
-                                        {showAnswers && (
-                                            q.answer === option
-                                                ? <Check className="h-4 w-4 text-green-500" />
-                                                : <X className="h-4 w-4 text-destructive" />
-                                        )}
-                                        <span className={showAnswers && q.answer === option ? 'font-bold' : ''}>{option}</span>
-                                    </li>
-                                ))}
-                            </ul>
+                        {(q.type === 'multiple-choice' || q.type === 'true-false') && (
+                          <ul className="space-y-2 pl-4">
+                            {q.options.map((option: string, i: number) => (
+                              <li key={i} className="flex items-center gap-2 text-sm">
+                                {showAnswers && (
+                                  q.answer === option
+                                    ? <Check className="h-4 w-4 text-green-500" />
+                                    : <X className="h-4 w-4 text-destructive" />
+                                )}
+                                <span className={showAnswers && q.answer === option ? 'font-bold' : ''}>{option}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        {q.type === 'direct-question' && showAnswers && (
+                          <div className="pl-4 text-sm text-muted-foreground italic">
+                            <strong>Answer:</strong> {q.answer}
+                          </div>
+                        )}
                         </div>
                     ))}
                 </div>

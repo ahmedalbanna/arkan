@@ -9,8 +9,43 @@ import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { WriteDocumentInputSchema, type WriteDocumentInput, WriteDocumentOutputSchema, type WriteDocumentOutput } from '@/ai/schemas';
 
-const writeDocumentPrompt = ai.definePrompt({
-    name: 'writeDocumentPrompt',
+const universitySubjectMaterialPrompt = ai.definePrompt({
+    name: 'universitySubjectMaterialPrompt',
+    input: { schema: WriteDocumentInputSchema },
+    output: { schema: WriteDocumentOutputSchema },
+    model: 'googleai/gemini-1.5-flash',
+    prompt: `You are an expert university lecturer with a talent for making complex topics simple and engaging for students. Your task is to create educational material for the given university-level subject.
+
+**Your Process:**
+1.  **Deconstruct the Request:** Fully understand the topic and any specific instructions.
+2.  **Structure for Learning:** Create a logical flow that introduces concepts, provides clear explanations, defines key terms, and uses examples or analogies to aid understanding.
+3.  **Generate Content:** Write the full document. Ensure it is accurate, easy to follow, and suitable for a university student audience. Include sections for "Key Terms and Definitions" and a "Summary" at the end where appropriate.
+4.  **Format as Markdown:** Use clear and consistent Markdown for headings, lists, bold text, etc., to ensure readability.
+5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, with no additional commentary.
+
+**Topic:** {{{topic}}}
+**Document Type:** {{{documentType}}}
+
+{{#if knowledge}}
+**Provided Knowledge & Instructions:**
+---
+{{{knowledge}}}
+---
+{{/if}}
+
+{{#if tableOfContents}}
+**Required Structure (Table of Contents):**
+You MUST structure your document according to the following headings. Ensure each heading is included and well-developed.
+{{#each tableOfContents}}
+- {{{this}}}
+{{/each}}
+---
+{{/if}}
+`,
+});
+
+const defaultWriteDocumentPrompt = ai.definePrompt({
+    name: 'defaultWriteDocumentPrompt',
     input: { schema: WriteDocumentInputSchema },
     output: { schema: WriteDocumentOutputSchema },
     model: 'googleai/gemini-1.5-flash',
@@ -42,14 +77,20 @@ You MUST structure your document according to the following headings. Ensure eac
 4.  **Format as Markdown:** Use clear and consistent Markdown formatting for headings, lists, bold text, etc., to ensure readability.
 5.  **Return Only the Document:** Your final output must be only the complete markdown content of the document, with no additional commentary.
 `,
-  });
+});
 
 const writeDocumentFlow = ai.defineFlow({
     name: 'writeDocumentFlow',
     inputSchema: WriteDocumentInputSchema,
     outputSchema: WriteDocumentOutputSchema
 }, async (input) => {
-    const { output } = await writeDocumentPrompt(input);
+    let promptToUse;
+    if (input.documentType === 'university subject material') {
+        promptToUse = universitySubjectMaterialPrompt;
+    } else {
+        promptToUse = defaultWriteDocumentPrompt;
+    }
+    const { output } = await promptToUse(input);
     if (!output) {
       throw new Error("Document generation failed.");
     }

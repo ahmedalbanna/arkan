@@ -66,11 +66,12 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>{t('agentEditor.categoryLabel')}</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value as string} disabled={isPending}>
+                        <Select onValueChange={field.onChange} value={field.value as string} disabled={isPending}>
                             <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                             <SelectContent>
                                 {categories?.map(cat => (
-                                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                                <SelectItem key={cat as string} value={cat as string}>{cat as string}</SelectItem>
+
                                 ))}
                             </SelectContent>
                         </Select>
@@ -155,7 +156,7 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('agentEditor.tone')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     {['Default', 'Professional', 'Creative', 'Inspiring', 'Casual', 'Confident', 'Authoritative', 'Formal', 'Informal'].map(tone => <SelectItem key={tone} value={tone}>{tone}</SelectItem>)}
@@ -171,7 +172,7 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel>{t('agentEditor.language')}</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                 <SelectContent>
                                     {['English (US)', 'English (UK)', 'Русский', 'Deutsch', 'Español', 'Français', 'Italiano', '日本語', '한국어', 'Nederlands', 'Polski', 'Português', 'Svenska', 'Türk', 'Tiếng Việt', '中文 (简体)', '中文 (繁體)', 'اَلْعَرَبِيَّة', 'Suomi', 'עברית', 'Norsk', 'فارسی', 'Românește', 'தமிழ்', 'ภาษาไทย', 'українська мова', 'Bahasa Indonesia', 'Czech', 'Slovak', 'Hungarian', 'Danish'].map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}
@@ -189,7 +190,7 @@ export default function GeneralTab({ isComplexPrompt, isPending, categories }: G
               render={({ field }) => (
                   <FormItem>
                       <FormLabel>{t('agentEditor.aiModel')}</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                           <SelectContent>
                               <SelectItem value="googleai/gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
