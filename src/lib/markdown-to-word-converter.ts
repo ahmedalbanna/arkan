@@ -30,19 +30,24 @@ import {
   FootNoteReferenceRunAttributes,
   FootnoteReference,
   FootnoteReferenceElement,
-  SimpleField
+  SimpleField,
+  IRunOptions
 } from 'docx';
 import { saveAs } from 'file-saver';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
-import { Root, List } from 'mdast';
+import { Root, List, PhrasingContent, RootContent, FootnoteDefinition } from 'mdast';
+import { getProxiedImageBuffer, processPlantUml } from '@/lib/utils';
+
+// Define a type for inline styling options to avoid `any`
+type InlineStyleOptions = Pick<IRunOptions, "bold" | "italics" | "strike" | "style">;
 
 // Helper to convert markdown AST nodes to docx TextRun arrays
 async function transformInlines(
-  nodes: any[],
+  nodes: PhrasingContent[],
   footnoteIdMap: Map<string, number>,
-  options: any = {}
+  options: InlineStyleOptions = {}
 ): Promise<(TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[]> {
   const runs: (TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[] = [];
   for (const node of nodes) {
@@ -53,20 +58,22 @@ async function transformInlines(
       case 'emphasis':
         runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, italics: true })));
         break;
+      case 'delete':
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, strike: true })));
+        break;
       case 'text':
         runs.push(new TextRun({ ...options, text: node.value }));
         break;
       case 'image':
         try {
-            const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(node.url)}`;
-            const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
-            if (imageBuffer) {
-                // Default size for inline images
-                runs.push(new ImageRun({
-                    data: imageBuffer,
-                    transformation: { width: 200, height: 150 }
-                }));
-            }
+          const proxiedImage = await getProxiedImageBuffer(node.url);
+          if (proxiedImage) {
+            // Default size for inline images
+            runs.push(new ImageRun({
+              data: proxiedImage.buffer,
+              transformation: { width: 200, height: 150 }
+            }));
+          }
         } catch (e) { console.error("Failed to process inline image", e); }
         break;
       case 'link': {
@@ -75,24 +82,24 @@ async function transformInlines(
         // The docx ExternalHyperlink can only contain TextRuns. We filter to ensure type safety.
         const textRuns = linkChildren.filter((child): child is TextRun => child instanceof TextRun);
         runs.push(new ExternalHyperlink({
-            children: textRuns,
-            link: node.url,
+          children: textRuns,
+          link: node.url,
         }));
         break;
       }
       case 'inlineCode': {
         runs.push(new TextRun({
-            ...options,
-            text: node.value,
-            font: { name: 'Courier New' },
-            shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+          ...options,
+          text: node.value,
+          font: { name: 'Courier New' },
+          shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
         }));
         break;
       }
       case 'footnoteReference': {
         const id = footnoteIdMap.get(node.identifier);
         if (id !== undefined) {
-            runs.push(new FootnoteReferenceRun(id));
+          runs.push(new FootnoteReferenceRun(id));
         }
         break;
       }
@@ -101,37 +108,54 @@ async function transformInlines(
   return runs;
 }
 
-// Main function to parse markdown and create an array of docx objects
-async function createDocxContent(markdown: string) {
-  const ast = unified().use(remarkParse).use(remarkGfm).parse(markdown) as Root;
-  const docxObjects: (Paragraph | Table)[] = [];
+// Custom type for internal directives to manage page orientation
+type OrientationDirective = {
+  _type: 'directive';
+  name: 'orientation';
+  value: 'portrait' | 'landscape';
+};
+type DocxObject = Paragraph | Table | OrientationDirective;
 
-  // 1. Pre-pass to collect and map footnotes
-  let tableCounter = 0;
-  let figureCounter = 0;
-
+/**
+ * Processes footnote definitions from the AST.
+ * @param ast The root of the markdown AST.
+ * @returns An object containing the footnote ID map and the docx footnotes configuration.
+ */
+async function processFootnotes(ast: Root): Promise<{ footnoteIdMap: Map<string, number>, docxFootnotes: IFootnotesOptions }> {
   const footnoteIdMap = new Map<string, number>();
   const docxFootnotes: IFootnotesOptions = {};
   let footnoteCounter = 1;
 
-  const footnoteDefs = ast.children.filter(node => node.type === 'footnoteDefinition');
+  const footnoteDefs = ast.children.filter(
+    (node): node is FootnoteDefinition => node.type === 'footnoteDefinition'
+  );
 
   for (const node of footnoteDefs) {
-      if (node.type === 'footnoteDefinition') {
-          const id = footnoteCounter++;
-          footnoteIdMap.set(node.identifier, id);
+    const id = footnoteCounter++;
+    footnoteIdMap.set(node.identifier, id);
 
-          const footnoteParagraphs: Paragraph[] = [];
-          for (const contentNode of node.children) {
-              if (contentNode.type === 'paragraph') {
-                  footnoteParagraphs.push(new Paragraph({
-                      children: await transformInlines(contentNode.children, footnoteIdMap, {}),
-                  }));
-              }
-          }
-          docxFootnotes[id] = { children: footnoteParagraphs };
+    const footnoteParagraphs: Paragraph[] = [];
+    for (const contentNode of node.children) {
+      if (contentNode.type === 'paragraph') {
+        footnoteParagraphs.push(new Paragraph({
+          children: await transformInlines(contentNode.children, footnoteIdMap, {}),
+        }));
       }
+    }
+    docxFootnotes[id] = { children: footnoteParagraphs };
   }
+
+  return { footnoteIdMap, docxFootnotes };
+}
+
+/**
+ * Converts the main markdown AST nodes into an array of docx objects.
+ * @param ast The root of the markdown AST.
+ * @param footnoteIdMap A map of footnote identifiers to their generated IDs.
+ * @returns A promise that resolves to an array of docx objects.
+ */
+async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>): Promise<DocxObject[]> {
+  const docxObjects: DocxObject[] = [];
 
   const processListItems = async (listNode: List, level: number): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
@@ -152,31 +176,28 @@ async function createDocxContent(markdown: string) {
     const node = ast.children[i];
     const nextNode = ast.children[i + 1];
 
-    const getCaption = (node: any): string | null => {
-        if (node && node.type === 'html') {
-            const match = node.value.match(/<!--\s*caption:\s*(.*?)\s*-->/);
-            if (match) {
-                return match[1].trim();
-            }
+    const getCaption = (node: RootContent | undefined): string | null => {
+      if (node && node.type === 'html') {
+        const match = node.value.match(/<!--\s*caption:\s*(.*?)\s*-->/);
+        if (match) {
+          return match[1].trim();
         }
-        return null;
+      }
+      return null;
     };
 
     if (node.type === 'footnoteDefinition') continue;
 
     switch (node.type) {
       case 'html': {
-        const landscapeMatch = node.value.match(/<!--\s*orientation:\s*landscape\s*-->/);
-        if (landscapeMatch) {
-            docxObjects.push({ _type: 'directive', name: 'orientation', value: 'landscape' } as any);
-            break;
+        const orientationMatch = node.value.match(/<!--\s*orientation:\s*(landscape|portrait)\s*-->/);
+        if (orientationMatch) {
+          docxObjects.push({
+            _type: 'directive',
+            name: 'orientation',
+            value: orientationMatch[1] as 'landscape' | 'portrait',
+          });
         }
-        const portraitMatch = node.value.match(/<!--\s*orientation:\s*portrait\s*-->/);
-        if (portraitMatch) {
-            docxObjects.push({ _type: 'directive', name: 'orientation', value: 'portrait' } as any);
-            break;
-        }
-        // Caption comments are handled by their preceding element, so we ignore them here.
         break;
       }
       case 'heading':
@@ -184,7 +205,7 @@ async function createDocxContent(markdown: string) {
           new Paragraph({
             children: await transformInlines(node.children, footnoteIdMap),
             heading: `Heading${node.depth}` as HeadingLevel,
-          }),
+          })
         );
         break;
       case 'paragraph': {
@@ -192,39 +213,37 @@ async function createDocxContent(markdown: string) {
         const captionText = getCaption(nextNode);
 
         if (imageNode) {
-            try {
-                const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageNode.url)}`;
-                const imageBuffer = await getProxiedImageBuffer(proxiedUrl);
-                if (imageBuffer) {
-                    docxObjects.push(new Paragraph({
-                        children: [new ImageRun({ data: imageBuffer, transformation: { width: 550, height: 400 } })],
-                        alignment: AlignmentType.CENTER,
-                    }));
-                } else {
-                    docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
-                }
-
-                if (captionText) {
-                    figureCounter++;
-                    docxObjects.push(new Paragraph({
-                        children: [
-                            new TextRun({ text: "Figure ", bold: true }),
-                            new SimpleField(`SEQ Figure \\* ARABIC`, true),
-                            new TextRun({ text: ": ", bold: true }),
-                            new TextRun(captionText),
-                        ],
-                        style: "Caption",
-                        alignment: AlignmentType.CENTER,
-                    }));
-                    i++; // Increment i to skip the caption comment node
-                }
-            } catch (e) {
-                console.error("Failed to process block image", e);
+          try {
+            const proxiedImage = await getProxiedImageBuffer(imageNode.url);
+            if (proxiedImage) {
+              docxObjects.push(new Paragraph({
+                children: [new ImageRun({ data: proxiedImage.buffer, transformation: { width: 550, height: 400 } })],
+                alignment: AlignmentType.CENTER,
+              }));
+            } else {
+              docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
             }
+
+            if (captionText) {
+              docxObjects.push(new Paragraph({
+                children: [
+                  new TextRun({ text: "Figure ", bold: true }),
+                  new SimpleField(`SEQ Figure \\* ARABIC`),
+                  new TextRun({ text: ": ", bold: true, break: 0 }),
+                  new TextRun(captionText),
+                ],
+                style: "Caption",
+                alignment: AlignmentType.CENTER,
+              }));
+              i++; // Increment i to skip the caption comment node
+            }
+          } catch (e) {
+            console.error("Failed to process block image", e);
+          }
         } else {
-            docxObjects.push(new Paragraph({
-                children: await transformInlines(node.children, footnoteIdMap),
-            }));
+          docxObjects.push(new Paragraph({
+            children: await transformInlines(node.children, footnoteIdMap),
+          }));
         }
         break;
       }
@@ -232,21 +251,20 @@ async function createDocxContent(markdown: string) {
         docxObjects.push(...await processListItems(node, 0));
         break;
       case 'table': {
-        tableCounter++;
         const captionText = getCaption(nextNode);
 
         if (captionText) {
-            docxObjects.push(new Paragraph({
-                children: [
-                    new TextRun({ text: "Table ", bold: true }),
-                    new SimpleField(`SEQ Table \\* ARABIC`, true),
-                    new TextRun({ text: ": ", bold: true }),
-                    new TextRun(captionText),
-                ],
-                style: "Caption",
-                alignment: AlignmentType.CENTER,
-            }));
-            i++; // Increment i to skip the caption comment node
+          docxObjects.push(new Paragraph({
+            children: [
+              new TextRun({ text: "Table ", bold: true }),
+              new SimpleField(`SEQ Table \\* ARABIC`, true),
+              new TextRun({ text: ": ", bold: true }),
+              new TextRun(captionText),
+            ],
+            style: "Caption",
+            alignment: AlignmentType.CENTER,
+          }));
+          i++; // Increment i to skip the caption comment node
         }
         const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
           return new TableRow({
@@ -280,48 +298,43 @@ async function createDocxContent(markdown: string) {
       case 'code': {
         const codeLines = node.value.split('\n');
         const textRuns = codeLines.map((line, index) => {
-            const textRun = new TextRun({
-                text: line,
-                font: { name: 'Courier New', size: 18 }, // 9pt font for code
-            });
-            // Add a line break except for the last line
-            return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
+          const textRun = new TextRun({
+            text: line,
+            font: { name: 'Courier New', size: 18 }, // 9pt font for code
+          });
+          // Add a line break except for the last line
+          return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
         }).flat();
 
         docxObjects.push(new Paragraph({
-            children: textRuns,
-            shading: {
-                type: ShadingType.CLEAR,
-                fill: 'F2F2F2', // A light grey background
-            },
-            spacing: { before: 200, after: 200 },
-            indent: { left: 400 },
+          children: textRuns,
+          shading: {
+            type: ShadingType.CLEAR,
+            fill: 'F2F2F2', // A light grey background
+          },
+          spacing: { before: 200, after: 200 },
+          indent: { left: 400 },
         }));
         break;
       }
     }
   }
+  return docxObjects;
+}
+
+/**
+ * Parses markdown, processes it, and creates an array of docx objects and footnotes.
+ * @param markdown The markdown string to convert.
+ * @returns An object containing the generated docxObjects and docxFootnotes.
+ */
+async function createDocxContent(markdown: string) {
+  const processedMarkdown = processPlantUml(markdown);
+  const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
+
+  const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast);
+  const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap);
+
   return { docxObjects, docxFootnotes };
-}
-
-async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | null> {
-    try {
-        const response = await fetch(imageUrl);
-        if (response.status !== 200) {
-            console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.status}`);
-            return null;
-        }
-        return response.arrayBuffer();
-    } catch (error) {
-        console.error(`Error fetching image from ${imageUrl}:`, error);
-        return null;
-    }
-}
-
-interface PaperProperties {
-  size?: { width: number; height: number };
-  margins?: { top: number; right: number; bottom: number; left: number };
-  orientation?: 'portrait' | 'landscape';
 }
 
 interface HeaderFooterContent {
@@ -331,7 +344,11 @@ interface HeaderFooterContent {
 
 interface ConversionOptions {
   styles?: IStylesOptions;
-  paper?: PaperProperties;
+  paper?: {
+    size?: { width: number; height: number };
+    margins?: { top: number; right: number; bottom: number; left: number };
+    orientation?: 'portrait' | 'landscape';
+  };
   header?: HeaderFooterContent;
   footer?: HeaderFooterContent;
   coverPageMarkdown?: string;
@@ -354,76 +371,37 @@ const numbering: INumberingOptions = {
 };
 
 /**
- * Converts a markdown string to a styled .docx file and triggers a download.
- * @param markdown The markdown content to convert.
- * @param fileName The name of the file to be saved (without extension).
- * @param options Optional styles and paper properties.
+ * Prepares the header and footer configuration objects for the docx document.
+ * @param options The conversion options containing header, footer, watermark, and page number settings.
+ * @returns An object with `headerConfiguration` and `footerConfiguration`.
  */
-export async function convertMarkdownToWord(
-  markdown: string,
-  fileName: string,
-  options: ConversionOptions = {}
-) {
-  const { styles, paper, header, footer, coverPageMarkdown, watermark, pageNumbers } = options;
-  const finalStyles = { ...styles };
-  if (!finalStyles.paragraphStyles) {
-    finalStyles.paragraphStyles = [];
-  }
+function prepareHeadersAndFooters(options: ConversionOptions): {
+  headerConfiguration: { first?: Header; default?: Header };
+  footerConfiguration: { first?: Footer; default?: Footer };
+} {
+  const { header, footer, watermark, pageNumbers } = options;
 
-  // Ensure Caption style exists for table and figure captions
-  const captionStyleExists = finalStyles.paragraphStyles.some(p => p.id === 'Caption');
-  if (!captionStyleExists) {
-    finalStyles.paragraphStyles.push({
-      id: 'Caption',
-      name: 'Caption',
-      basedOn: 'Normal',
-      next: 'Normal',
-      quickFormat: true,
-      run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
-      paragraph: {
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
-      },
-    });
-  }
-
-  const { docxObjects, docxFootnotes } = await createDocxContent(markdown);
-
-  const sections: ISectionOptions[] = [];
-
-  // 1. Add Cover Page section if it exists
-  if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
-    const { docxObjects: coverPageChildren } = await createDocxContent(coverPageMarkdown);
-    sections.push({
-      properties: {
-        type: SectionType.NEXT_PAGE,
-      },
-      children: coverPageChildren,
-    });
-  }
-
-  // 2. Prepare header and footer configurations
   const headerConfiguration: { first?: Header; default?: Header } = {};
   if (header?.first) {
-      headerConfiguration.first = new Header({ children: header.first });
+    headerConfiguration.first = new Header({ children: header.first });
   }
   if (header?.default || watermark) {
-      const defaultHeaderOptions: IHeaderOptions = { children: header?.default || [] };
-      if (watermark) {
-          defaultHeaderOptions.watermark = {
-            type: 'text',
-            text: watermark,
-            color: "D3D3D3", // Light Grey
-            font: "Calibri",
-            angle: -45,
-          };
-      }
-      headerConfiguration.default = new Header(defaultHeaderOptions);
+    const defaultHeaderOptions: IHeaderOptions = { children: header?.default || [] };
+    if (watermark) {
+      defaultHeaderOptions.watermark = {
+        type: 'text',
+        text: watermark,
+        color: "D3D3D3", // Light Grey
+        font: "Calibri",
+        angle: -45,
+      };
+    }
+    headerConfiguration.default = new Header(defaultHeaderOptions);
   }
 
   const footerConfiguration: { first?: Footer; default?: Footer } = {};
   if (footer?.first) {
-      footerConfiguration.first = new Footer({ children: footer.first });
+    footerConfiguration.first = new Footer({ children: footer.first });
   }
   if (footer?.default || pageNumbers) {
     const defaultFooterChildren = footer?.default ? [...footer.default] : [];
@@ -441,32 +419,59 @@ export async function convertMarkdownToWord(
     footerConfiguration.default = new Footer({ children: defaultFooterChildren });
   }
 
-  // 3. Split content into chunks based on orientation directives
-  const contentChunks: { children: (Paragraph | Table)[], orientation: 'portrait' | 'landscape' }[] = [];
+  return { headerConfiguration, footerConfiguration };
+}
+
+/**
+ * Builds the array of ISectionOptions for the docx document.
+ * This includes handling cover pages, splitting content by orientation, and adding a Table of Contents.
+ * @param docxObjects The array of generated docx objects for the main content.
+ * @param options The conversion options.
+ * @param headerConfiguration The prepared header configuration.
+ * @param footerConfiguration The prepared footer configuration.
+ * @returns A promise that resolves to an array of ISectionOptions.
+ */
+async function buildDocumentSections(
+  docxObjects: DocxObject[],
+  options: ConversionOptions,
+  headerConfiguration: { first?: Header; default?: Header },
+  footerConfiguration: { first?: Footer; default?: Footer }
+): Promise<ISectionOptions[]> {
+  const { paper, coverPageMarkdown } = options;
+  const sections: ISectionOptions[] = [];
+
+  // 1. Add Cover Page section if it exists
+  if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
+    const { docxObjects: coverPageChildren } = await createDocxContent(coverPageMarkdown);
+    sections.push({
+      properties: {
+        type: SectionType.NEXT_PAGE,
+      },
+      children: coverPageChildren,
+    });
+  }
+
+  // 2. Split content into chunks based on orientation directives
+  const contentChunks: { children: (Paragraph | Table)[]; orientation: 'portrait' | 'landscape' }[] = [];
   let currentChunkChildren: (Paragraph | Table)[] = [];
   let currentOrientation = paper?.orientation || 'portrait';
 
   for (const obj of docxObjects) {
-    // Check for our custom directive object
-    if ((obj as any)._type === 'directive' && (obj as any).name === 'orientation') {
-      // If we have content in the current chunk, push it before starting a new one
+    if ('_type' in obj && obj._type === 'directive') {
       if (currentChunkChildren.length > 0) {
-        contentChunks.push({ children: currentChunkChildren, orientation: currentOrientation as 'portrait' | 'landscape' });
+        contentChunks.push({ children: currentChunkChildren, orientation: currentOrientation });
       }
-      // Start a new chunk with the new orientation
       currentChunkChildren = [];
-      currentOrientation = (obj as any).value;
+      currentOrientation = obj.value;
     } else {
-      // Add regular docx objects to the current chunk
       currentChunkChildren.push(obj as Paragraph | Table);
     }
   }
-  // Add the last chunk of content
   if (currentChunkChildren.length > 0) {
-    contentChunks.push({ children: currentChunkChildren, orientation: currentOrientation as 'portrait' | 'landscape' });
+    contentChunks.push({ children: currentChunkChildren, orientation: currentOrientation });
   }
 
-  // 4. Add Table of Contents to the first content chunk
+  // 3. Add Table of Contents to the first content chunk
   const toc = new TableOfContents("Table of Contents", {
     hyperlink: true,
     headingStyleRange: "1-6",
@@ -475,36 +480,76 @@ export async function convertMarkdownToWord(
   if (contentChunks.length > 0) {
     contentChunks[0].children.unshift(toc);
   } else {
-    // If there's no content, but maybe a cover page, create a section for the TOC
     contentChunks.push({
-        children: [toc],
-        orientation: paper?.orientation || 'portrait'
+      children: [toc],
+      orientation: paper?.orientation || 'portrait'
     });
   }
 
-  // 5. Create a docx section for each content chunk
+  // 4. Create a docx section for each content chunk
   const hasCoverPage = sections.length > 0;
   contentChunks.forEach((chunk, index) => {
     const isFirstContentSection = index === 0;
-
     const section: ISectionOptions = {
-        properties: {
-            type: SectionType.NEXT_PAGE,
-            page: {
-                margin: paper?.margins,
-                size: paper?.size,
-                orientation: chunk.orientation,
-            },
-            // This property enables the "Different First Page" feature in Word
-            titlePage: hasCoverPage && isFirstContentSection ? !!(header?.first || footer?.first) : false,
+      properties: {
+        type: SectionType.NEXT_PAGE,
+        page: {
+          margins: paper?.margins,
+          size: paper?.size,
+          orientation: chunk.orientation,
         },
-        // Apply first page header/footer only to the first content section if a cover page exists
-        headers: hasCoverPage && isFirstContentSection ? headerConfiguration : { default: headerConfiguration.default },
-        footers: hasCoverPage && isFirstContentSection ? footerConfiguration : { default: footerConfiguration.default },
-        children: chunk.children,
+        titlePage: hasCoverPage && isFirstContentSection ? !!(options.header?.first || options.footer?.first) : false,
+      },
+      headers: hasCoverPage && isFirstContentSection ? headerConfiguration : { default: headerConfiguration.default },
+      footers: hasCoverPage && isFirstContentSection ? footerConfiguration : { default: footerConfiguration.default },
+      children: chunk.children,
     };
     sections.push(section);
   });
+
+  return sections;
+}
+
+/**
+ * Converts a markdown string to a styled .docx file and triggers a download.
+ * @param markdown The markdown content to convert.
+ * @param fileName The name of the file to be saved (without extension).
+ * @param options Optional styles and paper properties.
+ */
+export async function convertMarkdownToWord(
+  markdown: string,
+  fileName: string,
+  options: ConversionOptions = {}
+) {
+  const { styles } = options;
+  // Create a mutable copy of styles to avoid side effects on the original options object
+  const finalStyles: IStylesOptions = {
+    ...styles,
+    paragraphStyles: [...(styles?.paragraphStyles || [])],
+  };
+
+  // Ensure Caption style exists for table and figure captions
+  const captionStyleExists = finalStyles.paragraphStyles!.some(style => style.id === 'Caption');
+  if (!captionStyleExists) {
+    finalStyles.paragraphStyles!.push({
+      id: 'Caption',
+      name: 'Caption',
+      basedOn: 'Normal',
+      next: 'Normal',
+      quickFormat: true,
+      run: { size: 18, italics: true, color: '595959' }, // 9pt, Italic, Grey
+      paragraph: {
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
+      },
+    });
+  }
+
+  const { docxObjects, docxFootnotes } = await createDocxContent(markdown);
+
+  const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
+
+  const sections = await buildDocumentSections(docxObjects, options, headerConfiguration, footerConfiguration);
 
   const doc = new Document({
     styles: finalStyles,
