@@ -1,0 +1,454 @@
+import PptxGenJS from 'pptxgenjs';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkGfm from 'remark-gfm';
+import { visit } from 'unist-util-visit';
+import { type Root as MdastRoot, type RootContent, type Text, type PhrasingContent, type Paragraph, type List, type ListItem, type Blockquote, type Table, type Code, type Image } from 'mdast';
+import { templates } from '@/lib/pptx-styles'; // Keep for default styles
+import { processPlantUml, arrayBufferToBase64, getProxiedImageBuffer } from '@/lib/utils';
+import type { PptxStyleOptions } from '@/lib/types';
+
+// --- LAYOUT CONSTANTS ---
+const SLIDE_WIDTH = 10;
+const SLIDE_HEIGHT = 3.625; // For a 16:9 aspect ratio slide
+const CONTENT_X = 0.5;
+const CONTENT_WIDTH = 9.0;
+const TITLE_Y = 0.25;
+const TITLE_H = 1.0;
+const SUBTITLE_Y = 1.2;
+const SUBTITLE_H = 0.4;
+const BODY_START_Y = 1.5;
+const SLIDE_MARGIN_BOTTOM = 0.675; // Vertical margin at the bottom of the slide in inches
+const BODY_END_Y = SLIDE_HEIGHT - SLIDE_MARGIN_BOTTOM;
+const IMAGE_H = 2.5;
+const IMAGE_W = 7.0;
+const IMAGE_X = (SLIDE_WIDTH - IMAGE_W) / 2; // Center the image
+const ELEMENT_PADDING = 0.6; // Vertical padding between elements in inches
+
+export interface PptxConversionOptions {
+    styles?: PptxStyleOptions;
+    author?: string;
+    company?: string;
+    subject?: string;
+    title?: string;
+}
+
+/**
+ * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.
+ * This function is intended for PhrasingContent and does not handle block-level elements.
+ * @param nodes An array of mdast PhrasingContent nodes.
+ * @param baseOptions The base text properties to apply to all runs.
+ * @param styles The style options for the presentation.
+ * @returns A promise that resolves to an array of PptxGenJS.TextProps.
+ */
+/**
+* @param baseOptions The base text properties to apply to all runs.
+ * @param styles The style options for the presentation.
+ * @returns A promise that resolves to an array of PptxGenJS.TextProps.
+ */
+async function transformInlinesToPptxText(
+    nodes: PhrasingContent[],
+    baseOptions: PptxGenJS.TextPropsOptions,
+    styles: PptxStyleOptions,
+): Promise<PptxGenJS.TextProps[]> {
+    const runs: PptxGenJS.TextProps[] = [];
+
+    for (const node of nodes) {
+        // Skip non-phrasing content, which should be handled by block-level renderers.
+        if (node.type === 'image') continue;
+
+        switch (node.type) {
+            case 'strong':
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, bold: true }, styles)));
+                break;
+            case 'emphasis':
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, italic: true }, styles)));
+                break;
+            case 'delete':
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, strike: true }, styles)));
+                break;
+            case 'inlineCode':
+                runs.push({ text: node.value, options: { ...baseOptions, ...styles.inlineCode } });
+                break;
+            case 'text':
+                runs.push({ text: node.value, options: baseOptions });
+                break;
+            case 'link': {
+                const linkStyle = { ...baseOptions, ...styles.link };
+                const linkRuns = await transformInlinesToPptxText(node.children, linkStyle, styles);
+                linkRuns.forEach(run => {
+                    run.options = { ...run.options, hyperlink: { url: node.url, tooltip: node.title || node.url } };
+                });
+                runs.push(...linkRuns);
+                break;
+            }
+        }
+    }
+
+    return runs;
+}
+
+/**
+ * Calculates the estimated height of a markdown AST node for PPTX layout purposes.
+ * This version uses font size and line spacing for a more accurate estimation.
+ * @param node The mdast node.
+ * @param styles The style options for the presentation.
+ * @returns The calculated height in inches.
+ */
+function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): number {
+    const bodyFontSize = typeof styles.body.fontSize === 'number' ? styles.body.fontSize : 18;
+    const bodyLineHeight = (styles.body.lineSpacing || bodyFontSize * 1.2) / 72; // in inches
+
+    // A rough estimate of characters per line. This is an approximation.
+    // A more accurate method would require precise font metrics for character widths.
+    const avgCharWidthInPoints = bodyFontSize * 0.5;
+    const charsPerLine = (CONTENT_WIDTH * 72) / avgCharWidthInPoints;
+
+    const getNodeText = (node: RootContent): string => {
+        let text = '';
+        visit(node, 'text', (textNode: Text) => {
+            text += textNode.value;
+        });
+        return text;
+    }
+
+    switch (node.type) {
+        case 'paragraph':
+            if (node.children.length === 1 && node.children[0].type === 'image') {
+                return IMAGE_H + ELEMENT_PADDING;
+            }
+            const paraText = getNodeText(node);
+            const paraLines = Math.max(1, Math.ceil(paraText.length / charsPerLine));
+            return (paraLines * bodyLineHeight) + ELEMENT_PADDING;
+
+        case 'list': {
+            let listLines = 0;
+            for (const item of node.children) {
+                const itemText = getNodeText(item);
+                // Each list item is at least one line, plus wrapped lines.
+                listLines += Math.max(1, Math.ceil(itemText.length / charsPerLine));
+            }
+            return (listLines * bodyLineHeight) + ELEMENT_PADDING;
+        }
+        case 'blockquote': {
+            const bqText = getNodeText(node);
+            const bqLines = Math.max(1, Math.ceil(bqText.length / charsPerLine));
+            return (bqLines * bodyLineHeight) + ELEMENT_PADDING;
+        }
+        case 'table':
+            // Estimate table height: (number of rows) * (line height per row) + padding
+            // Assuming each row is about 1.5 lines high to account for cell padding.
+            const tableLineHeight = ((typeof styles.table?.fontSize === 'number' ? styles.table.fontSize : 14) * 1.2) / 72;
+            return (node.children.length * tableLineHeight * 1.5) + ELEMENT_PADDING;
+
+        case 'code':
+            const codeFontSize = styles.code?.fontSize || 12;
+            // Monospace fonts are often slightly taller and narrower.
+            const codeLineHeight = (codeFontSize * 1.4) / 72;
+            const codeLines = node.value.split('\n').length;
+            return (codeLines * codeLineHeight) + ELEMENT_PADDING;
+
+        default:
+            return ELEMENT_PADDING; // Return padding for unknown elements to ensure some spacing
+    }
+}
+
+/** Renders a paragraph node, handling special cases for images and list-like text. */
+async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions) {
+    const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
+    if (imageNode) {
+        const proxiedImage = await getProxiedImageBuffer(imageNode.url);
+        if (proxiedImage) {
+            const base64Image = arrayBufferToBase64(proxiedImage.buffer);
+            slide.addImage({
+                data: `data:${proxiedImage.contentType};base64,${base64Image}`,
+                x: IMAGE_X, y, w: IMAGE_W, h: IMAGE_H
+            });
+        } else {
+            // If the image fails to load, add a placeholder with an error message.
+            slide.addText('Failed to load image.', {
+                x: IMAGE_X, y, w: IMAGE_W, h: IMAGE_H,
+                align: 'center',
+                valign: 'middle',
+                color: 'FF0000', // Red color for error
+            });
+        }
+    } else {
+        const textRuns = await transformInlinesToPptxText(node.children, styles.body, styles);
+        if (textRuns.length === 0) return;
+        slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body });
+    }
+}
+
+/** Renders a list node. */
+async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions) {
+    const allRuns: PptxGenJS.TextProps[] = [];
+
+    async function processListItems(items: ListItem[], level: number) {
+        for (const [i, item] of items.entries()) {
+            // Each list item can contain paragraphs or nested lists.
+            for (const [contentIndex, contentNode] of item.children.entries()) {
+                if (contentIndex > 0) {
+                    // Add a line break before subsequent paragraphs or nested lists within the same list item
+                    allRuns.push({ text: '\n' });
+                }
+
+                if (contentNode.type === 'paragraph') {
+                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles);
+                    if (paraRuns.length > 0) {
+                        // Add indentation for the first run of the item.
+                        if (contentIndex === 0) {
+                            paraRuns[0].text = '\t'.repeat(level) + (paraRuns[0].text || '');
+                        }
+                        allRuns.push(...paraRuns);
+                    }
+                } else if (contentNode.type === 'list') {
+                    // Recursively process nested lists.
+                    await processListItems(contentNode.children, level + 1);
+                }
+            }
+            // Add a newline to separate list items.
+            if (i < items.length - 1) {
+                allRuns.push({ text: '\n' });
+            }
+        }
+    }
+
+    await processListItems(node.children, 0);
+
+    if (allRuns.length > 0) {
+        slide.addText(allRuns, {
+            x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body,
+            bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') }
+        });
+    }
+}
+
+/** Renders a blockquote node. */
+async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions) {
+    const blockquoteStyle = { ...styles.body, ...styles.blockquote };
+    const textRuns: PptxGenJS.TextProps[] = [];
+    for (const [i, p] of node.children.entries()) {
+        if (p.type === 'paragraph') {
+            textRuns.push(...await transformInlinesToPptxText(p.children, blockquoteStyle, styles));
+            if (i < node.children.length - 1) {
+                textRuns.push({ text: '\n', options: blockquoteStyle });
+            }
+        }
+    }
+    slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...blockquoteStyle });
+}
+
+/** Renders a table node. */
+async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions) {
+    const tableRows: PptxGenJS.TableRow[] = [];
+    for (const [rowIndex, rowNode] of node.children.entries()) {
+        const tableCells: PptxGenJS.TableCell[] = [];
+        for (const cellNode of rowNode.children) {
+            const cellText = await transformInlinesToPptxText(cellNode.children, {}, styles);
+            const isHeader = rowIndex === 0;
+            const cellOptions = isHeader ? styles.tableHeaderStyle : styles.tableCellStyle;
+            tableCells.push({ text: cellText, options: cellOptions });
+        }
+        tableRows.push(tableCells);
+    }
+    slide.addTable(tableRows, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.table });
+}
+
+/** Renders a code block node. */
+async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: number, styles: PptxStyleOptions) {
+    slide.addText(node.value, {
+        x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body,
+        ...styles.code
+    });
+}
+
+/**
+ * Renders a markdown AST node onto a slide by dispatching to the appropriate render function.
+ */
+async function renderNodeOnSlide(slide: PptxGenJS.Slide, node: RootContent, y: number, h: number, styles: PptxStyleOptions) {
+    switch (node.type) {
+        case 'paragraph':
+            await renderParagraph(slide, node, y, h, styles);
+            break;
+        case 'list':
+            await renderList(slide, node, y, h, styles);
+            break;
+        case 'blockquote':
+            await renderBlockquote(slide, node, y, h, styles);
+            break;
+        case 'table':
+            await renderTable(slide, node, y, h, styles);
+            break;
+        case 'code':
+            await renderCode(slide, node, y, h, styles);
+            break;
+    }
+}
+
+/**
+ * Splits the main markdown AST into an array of slide ASTs based on headings and thematic breaks.
+ * @param ast The root mdast node.
+ * @returns An array of slide-specific mdast roots.
+ */
+function splitAstIntoSlides(ast: MdastRoot): MdastRoot[] {
+    const slides: MdastRoot[] = [];
+    if (!ast.children.length) return slides;
+
+    let currentSlideContent: RootContent[] = [];
+    const firstHeadingIndex = ast.children.findIndex(node => node.type === 'heading');
+
+    if (firstHeadingIndex === -1) {
+        return ast.children.length > 0 ? [{ type: 'root', children: ast.children }] : [];
+    }
+
+    for (let i = firstHeadingIndex; i < ast.children.length; i++) {
+        const node = ast.children[i];
+        const isSlideBreak = node.type === 'heading' || node.type === 'thematicBreak';
+
+        if (isSlideBreak && currentSlideContent.length > 0) {
+            slides.push({ type: 'root', children: currentSlideContent });
+            currentSlideContent = [];
+        }
+
+        if (node.type !== 'thematicBreak') {
+            currentSlideContent.push(node);
+        }
+    }
+
+    if (currentSlideContent.length > 0) {
+        slides.push({ type: 'root', children: currentSlideContent });
+    }
+
+    return slides;
+}
+
+/**
+ * Processes the title and subtitle for a slide.
+ * It checks for a heading node for the title and a specially formatted paragraph for the subtitle.
+ * @param slide The PptxGenJS slide object.
+ * @param slideAst The AST for the current slide's content.
+ * @param lastTitleRuns The title from the previous slide, to be reused if no new title is found.
+ * @param styles The style options.
+ * @returns An object containing the new title runs and the remaining body nodes for the slide.
+ */
+async function processSlideTitleAndSubtitle(
+    slide: PptxGenJS.Slide,
+    slideAst: MdastRoot,
+    lastTitleRuns: PptxGenJS.TextProps[] | null,
+    styles: PptxStyleOptions
+): Promise<{ newTitleRuns: PptxGenJS.TextProps[] | null; bodyNodes: RootContent[] }> {
+    let bodyNodes: RootContent[] = slideAst.children;
+    let newTitleRuns = lastTitleRuns;
+
+    // Process main title from heading
+    const firstNode = bodyNodes[0];
+    if (firstNode?.type === 'heading') {
+        newTitleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles);
+        slide.addText(newTitleRuns, { placeholder: 'title' });
+        bodyNodes = bodyNodes.slice(1);
+    } else if (lastTitleRuns) {
+        slide.addText(lastTitleRuns, { placeholder: 'title' });
+    }
+
+    // Process subtitle from '**Text:**' paragraph
+    const firstBodyNode = bodyNodes[0];
+    if (firstBodyNode?.type === 'paragraph' && firstBodyNode.children[0]?.type === 'strong' && getNodeText(firstBodyNode.children[0]).trim() === 'Text:') {
+        const subtitleNodes = firstBodyNode.children.slice(1);
+        if (subtitleNodes.length > 0 && subtitleNodes[0].type === 'text') {
+            subtitleNodes[0].value = subtitleNodes[0].value.trimStart();
+        }
+        const subtitleStyle: PptxGenJS.TextPropsOptions = { ...styles.body, ...styles.subtitle };
+        const subtitleRuns = await transformInlinesToPptxText(subtitleNodes, subtitleStyle, styles);
+        if (subtitleRuns.length > 0) {
+            slide.addText(subtitleRuns, { x: CONTENT_X, y: SUBTITLE_Y, w: CONTENT_WIDTH, h: SUBTITLE_H, ...subtitleStyle });
+        }
+        bodyNodes = bodyNodes.slice(1);
+    }
+
+    return { newTitleRuns, bodyNodes };
+}
+
+/**
+ * Creates and populates slides based on the provided content ASTs.
+ * This function manages slide creation, content layout, and overflow to new slides.
+ * @param pptx The PptxGenJS presentation object.
+ * @param slidesContent An array of slide-specific mdast roots.
+ * @param styles The style options for the presentation.
+ * @param masterName The name of the slide master to use.
+ */
+async function createSlidesWithContent(
+    pptx: PptxGenJS,
+    slidesContent: MdastRoot[],
+    styles: PptxStyleOptions,
+    masterName: string
+) {
+    let lastTitleRuns: PptxGenJS.TextProps[] | null = null;
+
+    for (const slideAst of slidesContent) {
+        let slide = pptx.addSlide({ masterName });
+
+        const { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles);
+        lastTitleRuns = newTitleRuns;
+
+        let currentY = BODY_START_Y;
+
+        const createNewSlideForOverflow = () => {
+            const newSlide = pptx.addSlide({ masterName: masterName });
+            if (lastTitleRuns) {
+                newSlide.addText(lastTitleRuns, { placeholder: 'title' });
+            }
+            return newSlide;
+        };
+
+        for (const node of bodyNodes) {
+            const elementHeight = calculateElementHeight(node, styles);
+
+            // If the element itself is taller than the available body space, it must go on a new slide.
+            // Also, if adding it would overflow the current slide, start a new one.
+            // The `currentY > BODY_START_Y` check prevents creating a new slide if the very first element doesn't fit.
+            if (elementHeight > (BODY_END_Y - BODY_START_Y) || (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y)) {
+                slide = createNewSlideForOverflow();
+                currentY = BODY_START_Y;
+            }
+            await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles);
+            currentY += elementHeight;
+        }
+    }
+}
+
+export async function convertMarkdownToPptx(
+    markdown: string,
+    fileName: string,
+    options: PptxConversionOptions = {},
+) {
+    const pptx = new PptxGenJS();
+    const styles = options.styles || templates.modern.styles;
+
+    pptx.layout = 'LAYOUT_16x9';
+    const masterName = 'ARKAN_MASTER';
+    pptx.defineSlideMaster({
+        title: masterName,
+        background: styles.background,
+        objects: [
+            {
+                placeholder: { options: { name: 'title', type: 'title', x: CONTENT_X, y: TITLE_Y, w: CONTENT_WIDTH, h: TITLE_H, margin: 0, ...styles.title } },
+            },
+            // Body placeholder is removed to allow manual placement of mixed content types.
+        ],
+    });
+
+    pptx.layout = 'LAYOUT_16x9';
+    pptx.author = options.author || 'Arkan';
+    pptx.company = options.company || 'Arkan';
+    pptx.subject = options.subject || 'Markdown Presentation';
+    pptx.title = options.title || fileName;
+
+    const processedMarkdown = processPlantUml(markdown);
+    const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
+    const slidesContent = splitAstIntoSlides(ast);
+
+    await createSlidesWithContent(pptx, slidesContent, styles, masterName);
+
+    await pptx.writeFile({ fileName: `${fileName}.pptx` });
+}

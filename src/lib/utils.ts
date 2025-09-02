@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { deflateSync } from 'zlib';
+import pako from 'pako';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,7 +16,26 @@ export function generateRandomPassword(length: number): string {
   return password
 }
 
-function encode64(data: Buffer): string {
+/**
+ * Converts an ArrayBuffer to a base64 string.
+ * @param buffer The ArrayBuffer to convert.
+ * @returns The base64 encoded string.
+ */
+export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+/**
+ * Encodes a byte array into a PlantUML-specific base64-like format.
+ * @param data The byte array to encode.
+ * @returns The encoded string.
+ */
+function encode64(data: Uint8Array): string {
   const B64_MAP = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_';
   let r = '';
   for (let i = 0; i < data.length; i += 3) {
@@ -41,24 +60,44 @@ function encode64(data: Buffer): string {
   return r;
 }
 
-function getPlantUmlImageUrl(plantUmlCode: string): string {
-  const compressed = deflateSync(Buffer.from(plantUmlCode, 'utf-8'));
-  const encoded = encode64(compressed);
-  const plantUmlUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
-  // We don't proxy this on the client side, as it's just for display within markdown.
-  // The official proxy is used when generating DOCX files.
-  return plantUmlUrl;
-}
-
 export function processPlantUml(markdown: string): string {
   if (typeof markdown !== 'string') {
     return markdown;
   }
   return markdown.replace(/```plantuml([\s\S]*?)```/g, (match, plantUmlCode) => {
     if (plantUmlCode.trim().startsWith('@startuml') && plantUmlCode.trim().endsWith('@enduml')) {
-      const imageUrl = getPlantUmlImageUrl(plantUmlCode);
+      const utf8Encoder = new TextEncoder();
+      const compressed = pako.deflate(utf8Encoder.encode(plantUmlCode));
+      const encoded = encode64(compressed);
+      const imageUrl = `https://www.plantuml.com/plantuml/png/~1${encoded}`;
       return `![Diagram](${imageUrl})`;
     }
     return match; // Return the original block if it's not a valid PlantUML
   });
+}
+export interface ProxiedImage {
+  buffer: ArrayBuffer;
+  contentType: string;
+}
+
+/**
+ * Fetches an image via a server-side proxy to avoid CORS issues.
+ * @param imageUrl The original URL of the image to fetch.
+ * @returns A promise that resolves to an object containing the image buffer and content type, or null on failure.
+ */
+export async function getProxiedImageBuffer(imageUrl: string): Promise<ProxiedImage | null> {
+  try {
+    const proxiedUrl = `/api/proxy-image?url=${encodeURIComponent(imageUrl)}`;
+    const response = await fetch(proxiedUrl);
+    if (!response.ok) {
+      console.warn(`Failed to fetch proxied image from ${imageUrl}. Status: ${response.statusText}`);
+      return null;
+    }
+    const contentType = response.headers.get('Content-Type') || 'image/png'; // Default to png
+    const buffer = await response.arrayBuffer();
+    return { buffer, contentType };
+  } catch (error) {
+    console.error(`Error fetching or processing image from ${imageUrl}:`, error);
+    return null;
+  }
 }
