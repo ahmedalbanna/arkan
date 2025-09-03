@@ -28,6 +28,7 @@ const markdownToWordSchema = z.object({
   pageNumbers: z.boolean().default(true),
   addCoverPage: z.boolean().default(false),
   coverPageMarkdown: z.string().optional(),
+  isRtl: z.boolean().default(false),
 });
 
 type MarkdownToWordFormValues = z.infer<typeof markdownToWordSchema>;
@@ -45,6 +46,7 @@ export function MarkdownToWordTool() {
       pageNumbers: true,
       addCoverPage: false,
       coverPageMarkdown: '# My Document Title\n\nBy John Doe\n\n{currentDate}',
+      isRtl: false,
     },
   });
 
@@ -57,6 +59,7 @@ export function MarkdownToWordTool() {
         styles: templates[data.template as TemplateKey].styles,
         pageNumbers: data.pageNumbers,
         coverPageMarkdown: data.addCoverPage ? data.coverPageMarkdown : undefined,
+        isRtl: data.isRtl,
       });
       toast({
         title: "Conversion Successful",
@@ -172,6 +175,22 @@ export function MarkdownToWordTool() {
             <Label htmlFor="pageNumbers" className="cursor-pointer">
               Add page numbers to footer
             </Label>
+          </div>
+
+          <div className="flex items-center space-x-2 pt-2">
+            <Controller
+              name="isRtl"
+              control={form.control}
+              render={({ field }) => (
+                <Checkbox
+                  id="isRtl"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isConverting}
+                />
+              )}
+            />
+            <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
           </div>
 
           <Button type="submit" disabled={isConverting} className="w-full">

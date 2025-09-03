@@ -34,32 +34,37 @@ import {
   IRunOptions
 } from 'docx';
 import { saveAs } from 'file-saver';
-import { unified } from 'unified';
+import { unified, type Plugin } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
 import { Root, List, PhrasingContent, RootContent, FootnoteDefinition } from 'mdast';
 import { getProxiedImageBuffer, processPlantUml } from '@/lib/utils';
 
-// Define a type for inline styling options to avoid `any`
-type InlineStyleOptions = Pick<IRunOptions, "bold" | "italics" | "strike" | "style">;
+// Define font options for different language scripts
+interface FontOptions {
+  default?: string; // For LTR languages
+  rtl?: string;     // For RTL languages like Arabic
+  code?: string;    // For code blocks and inline code
+}
 
 // Helper to convert markdown AST nodes to docx TextRun arrays
 async function transformInlines(
   nodes: PhrasingContent[],
   footnoteIdMap: Map<string, number>,
-  options: InlineStyleOptions = {}
+  options: IRunOptions = {},
+  fonts: FontOptions = {}
 ): Promise<(TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[]> {
   const runs: (TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[] = [];
   for (const node of nodes) {
     switch (node.type) {
       case 'strong':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, bold: true })));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, bold: true }, fonts)));
         break;
       case 'emphasis':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, italics: true })));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, italics: true }, fonts)));
         break;
       case 'delete':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, strike: true })));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, strike: true }, fonts)));
         break;
       case 'text':
         runs.push(new TextRun({ ...options, text: node.value }));
@@ -78,7 +83,7 @@ async function transformInlines(
         break;
       case 'link': {
         // Recursively process the link's text content (which can include bold, italics, etc.)
-        const linkChildren = await transformInlines(node.children, footnoteIdMap, { style: 'Hyperlink' });
+        const linkChildren = await transformInlines(node.children, footnoteIdMap, { ...options, style: 'Hyperlink' }, fonts);
         // The docx ExternalHyperlink can only contain TextRuns. We filter to ensure type safety.
         const textRuns = linkChildren.filter((child): child is TextRun => child instanceof TextRun);
         runs.push(new ExternalHyperlink({
@@ -88,10 +93,11 @@ async function transformInlines(
         break;
       }
       case 'inlineCode': {
+        const codeFont = fonts.code || 'Courier New';
         runs.push(new TextRun({
           ...options,
           text: node.value,
-          font: { name: 'Courier New' },
+          font: { ...options.font, name: codeFont },
           shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
         }));
         break;
@@ -121,7 +127,11 @@ type DocxObject = Paragraph | Table | OrientationDirective;
  * @param ast The root of the markdown AST.
  * @returns An object containing the footnote ID map and the docx footnotes configuration.
  */
-async function processFootnotes(ast: Root): Promise<{ footnoteIdMap: Map<string, number>, docxFootnotes: IFootnotesOptions }> {
+async function processFootnotes(
+  ast: Root,
+  isRtl = false,
+  fonts: FontOptions = {}
+): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: IFootnotesOptions }> {
   const footnoteIdMap = new Map<string, number>();
   const docxFootnotes: IFootnotesOptions = {};
   let footnoteCounter = 1;
@@ -134,12 +144,21 @@ async function processFootnotes(ast: Root): Promise<{ footnoteIdMap: Map<string,
     const id = footnoteCounter++;
     footnoteIdMap.set(node.identifier, id);
 
+    const defaultFontName = isRtl ? fonts.rtl : fonts.default;
+    const runOptions: IRunOptions = {};
+    if (isRtl) runOptions.rightToLeft = true;
+    if (defaultFontName) runOptions.font = { name: defaultFontName };
+
     const footnoteParagraphs: Paragraph[] = [];
     for (const contentNode of node.children) {
       if (contentNode.type === 'paragraph') {
-        footnoteParagraphs.push(new Paragraph({
-          children: await transformInlines(contentNode.children, footnoteIdMap, {}),
-        }));
+        footnoteParagraphs.push(
+          new Paragraph({
+            children: await transformInlines(contentNode.children, footnoteIdMap, runOptions, fonts),
+            bidirectional: isRtl,
+            alignment: isRtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
+          }),
+        );
       }
     }
     docxFootnotes[id] = { children: footnoteParagraphs };
@@ -154,16 +173,31 @@ async function processFootnotes(ast: Root): Promise<{ footnoteIdMap: Map<string,
  * @param footnoteIdMap A map of footnote identifiers to their generated IDs.
  * @returns A promise that resolves to an array of docx objects.
  */
-async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>): Promise<DocxObject[]> {
+async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, isRtl = false, fonts: FontOptions = {}): Promise<DocxObject[]> {
   const docxObjects: DocxObject[] = [];
+
+  const defaultFontName = isRtl ? fonts.rtl : fonts.default;
+  const baseRunOptions: IRunOptions = {};
+  if (isRtl) baseRunOptions.rightToLeft = true;
+  if (defaultFontName) baseRunOptions.font = { name: defaultFontName };
+
+  const baseParagraphOptions = {
+    bidirectional: isRtl,
+    alignment: isRtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
+  };
 
   const processListItems = async (listNode: List, level: number): Promise<Paragraph[]> => {
     const paragraphs: Paragraph[] = [];
     for (const listItem of listNode.children) {
       for (const itemContent of listItem.children) {
         if (itemContent.type === 'paragraph') {
-          const children = await transformInlines(itemContent.children, footnoteIdMap);
-          paragraphs.push(new Paragraph({ children, style: 'ListParagraph', bullet: listNode.ordered ? undefined : { level }, numbering: listNode.ordered ? { reference: "default-numbering", level } : undefined }));
+          const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, fonts);
+          paragraphs.push(new Paragraph({
+            ...baseParagraphOptions,
+            children, style: 'ListParagraph',
+            bullet: listNode.ordered ? undefined : { level },
+            numbering: listNode.ordered ? { reference: "default-numbering", level } : undefined
+          }));
         } else if (itemContent.type === 'list') {
           paragraphs.push(...await processListItems(itemContent as List, level + 1));
         }
@@ -203,7 +237,8 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
       case 'heading':
         docxObjects.push(
           new Paragraph({
-            children: await transformInlines(node.children, footnoteIdMap),
+            ...baseParagraphOptions,
+            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, fonts),
             heading: `Heading${node.depth}` as HeadingLevel,
           })
         );
@@ -242,7 +277,8 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
           }
         } else {
           docxObjects.push(new Paragraph({
-            children: await transformInlines(node.children, footnoteIdMap),
+            ...baseParagraphOptions,
+            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, fonts),
           }));
         }
         break;
@@ -269,7 +305,7 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
         const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
           return new TableRow({
             children: await Promise.all(row.children.map(async cell => new TableCell({
-              children: [new Paragraph({ children: await transformInlines(cell.children, footnoteIdMap) })],
+              children: [new Paragraph({ ...baseParagraphOptions, children: await transformInlines(cell.children, footnoteIdMap, baseRunOptions, fonts) })],
             }))),
             tableHeader: rowIndex === 0,
           });
@@ -284,7 +320,8 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
         for (const content of node.children) {
           if (content.type === 'paragraph') {
             docxObjects.push(new Paragraph({
-              children: await transformInlines(content.children, footnoteIdMap),
+              ...baseParagraphOptions,
+              children: await transformInlines(content.children, footnoteIdMap, baseRunOptions, fonts),
               style: 'Quote', // Assumes 'Quote' style is defined
             }));
           }
@@ -296,11 +333,12 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
         }));
         break;
       case 'code': {
+        const codeFont = fonts.code || 'Courier New';
         const codeLines = node.value.split('\n');
         const textRuns = codeLines.map((line, index) => {
           const textRun = new TextRun({
             text: line,
-            font: { name: 'Courier New', size: 18 }, // 9pt font for code
+            font: { name: codeFont, size: 18 }, // 9pt font for code
           });
           // Add a line break except for the last line
           return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
@@ -314,6 +352,8 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
           },
           spacing: { before: 200, after: 200 },
           indent: { left: 400 },
+          bidirectional: false,
+          alignment: AlignmentType.LEFT,
         }));
         break;
       }
@@ -327,12 +367,12 @@ async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, num
  * @param markdown The markdown string to convert.
  * @returns An object containing the generated docxObjects and docxFootnotes.
  */
-async function createDocxContent(markdown: string) {
+async function createDocxContent(markdown: string, isRtl = false, fonts: FontOptions = {}) {
   const processedMarkdown = processPlantUml(markdown);
   const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as Root;
 
-  const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast);
-  const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap);
+  const { footnoteIdMap, docxFootnotes } = await processFootnotes(ast, isRtl, fonts);
+  const docxObjects = await convertAstToDocxObjects(ast, footnoteIdMap, isRtl, fonts);
 
   return { docxObjects, docxFootnotes };
 }
@@ -354,6 +394,8 @@ interface ConversionOptions {
   coverPageMarkdown?: string;
   watermark?: string;
   pageNumbers?: boolean;
+  isRtl?: boolean;
+  fonts?: FontOptions;
 }
 
 const numbering: INumberingOptions = {
@@ -379,7 +421,7 @@ function prepareHeadersAndFooters(options: ConversionOptions): {
   headerConfiguration: { first?: Header; default?: Header };
   footerConfiguration: { first?: Footer; default?: Footer };
 } {
-  const { header, footer, watermark, pageNumbers } = options;
+  const { header, footer, watermark, pageNumbers, isRtl, fonts } = options;
 
   const headerConfiguration: { first?: Header; default?: Header } = {};
   if (header?.first) {
@@ -406,11 +448,15 @@ function prepareHeadersAndFooters(options: ConversionOptions): {
   if (footer?.default || pageNumbers) {
     const defaultFooterChildren = footer?.default ? [...footer.default] : [];
     if (pageNumbers) {
+      const defaultFont = isRtl ? fonts?.rtl : fonts?.default;
       const pageNumberParagraph = new Paragraph({
         alignment: AlignmentType.CENTER,
+        bidirectional: isRtl,
         children: [
           new TextRun({
+            rightToLeft: isRtl,
             children: [PageNumber.CURRENT, " / ", PageNumber.TOTAL_PAGES],
+            ...(defaultFont && { font: { name: defaultFont } }),
           }),
         ],
       });
@@ -521,7 +567,7 @@ export async function convertMarkdownToWord(
   fileName: string,
   options: ConversionOptions = {}
 ) {
-  const { styles } = options;
+  const { styles, isRtl, fonts = {} } = options;
   // Create a mutable copy of styles to avoid side effects on the original options object
   const finalStyles: IStylesOptions = {
     ...styles,
@@ -545,7 +591,7 @@ export async function convertMarkdownToWord(
     });
   }
 
-  const { docxObjects, docxFootnotes } = await createDocxContent(markdown);
+  const { docxObjects, docxFootnotes } = await createDocxContent(markdown, isRtl, fonts);
 
   const { headerConfiguration, footerConfiguration } = prepareHeadersAndFooters(options);
 

@@ -1,6 +1,13 @@
 
 'use client';
 
+// Define font options for different language scripts
+interface FontOptions {
+    default?: string; // For LTR languages
+    rtl?: string;     // For RTL languages like Arabic
+    code?: string;    // For code blocks and inline code
+}
+
 import type { PresentationSlide } from "@/ai/schemas";
 import { templates, type PptxTemplateKey } from "./pptx-styles";
 import { saveAs } from 'file-saver';
@@ -28,7 +35,11 @@ async function getTemplatesFromStorage(): Promise<Record<PptxTemplateKey, any>> 
 }
 
 
-export async function exportPresentationAsPptx(slides: PresentationSlide[], templateKey: PptxTemplateKey) {
+export async function exportPresentationAsPptx(
+    slides: PresentationSlide[],
+    templateKey: PptxTemplateKey,
+    options: { isRtl?: boolean, fonts?: FontOptions } = {}
+) {
     const allTemplates = await getTemplatesFromStorage();
     const template = allTemplates[templateKey];
 
@@ -37,9 +48,12 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
         return;
     }
 
+    const { isRtl, fonts = {} } = options;
+
     // Fallback to pptxgenjs if no template URL or if automizer fails
     const { default: pptxgen } = await import('pptxgenjs');
     let pptx = new pptxgen();
+    pptx.rtlMode = !!isRtl;
     pptx.layout = "LAYOUT_16x9";
     pptx.author = "Arkan AI";
     pptx.company = "Firebase Studio";
@@ -47,26 +61,36 @@ export async function exportPresentationAsPptx(slides: PresentationSlide[], temp
     pptx.title = slides[0]?.title || "Presentation";
 
     const styles = template.styles || templates.modern.styles;
+    const defaultFont = isRtl ? fonts.rtl : fonts.default;
 
     for (const slideData of slides) {
         const slide = pptx.addSlide();
 
+        const titleStyle = { ...styles.title };
+        if (defaultFont) titleStyle.fontFace = defaultFont;
+
         // Add Slide Title
         slide.addText(stripMarkdown(slideData.title), {
-            x: 0.5, y: 0.25, w: "90%", h: 1, ...styles.title
+            x: 0.5, y: 0.25, w: "90%", h: 1, ...titleStyle,
+            rtlMode: !!isRtl,
+            align: isRtl ? 'right' : styles.title.align,
         });
 
         // Combine all content items into a single string with newlines for bullet points
         const combinedContent = slideData.content.map(item => stripMarkdown(item)).join('\n');
+
+        const bodyStyle = { ...styles.body };
+        if (defaultFont) bodyStyle.fontFace = defaultFont;
 
         // Determine content position and dimensions based on layout
         let contentX = 0.5;
         let contentY = 1.5;
         let contentW = "90%";
         let contentH = 4;
-        slide.addText(combinedContent, {
-            x: contentX, y: contentY, w: contentW, h: contentH, ...styles.body,
+        slide.addText(combinedContent, { x: contentX, y: contentY, w: contentW, h: contentH, ...bodyStyle,
             lineSpacing: 36,
+            rtlMode: !!isRtl,
+            align: isRtl ? 'right' : styles.body.align,
             bullet: styles.bullet.type === 'bullet' ? true : undefined, // Apply bullet to the whole text block
             numbering: styles.bullet.type === 'number' ? { type: 'numbered' } : undefined, // Apply numbering to the whole text block
         });
