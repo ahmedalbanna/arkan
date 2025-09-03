@@ -3,9 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle, Presentation } from 'lucide-react';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,6 +24,7 @@ const markdownToPptxSchema = z.object({
     .min(1, 'File name is required.')
     .regex(/^[a-zA-Z0-9_-]+$/, 'File name can only contain letters, numbers, underscores, and hyphens.'),
   template: z.enum(['modern', 'dark', 'professional']),
+  isRtl: z.boolean().default(false),
 });
 
 type MarkdownToPptxFormValues = z.infer<typeof markdownToPptxSchema>;
@@ -69,6 +71,7 @@ function helloWorld() {
 `,
       fileName: 'presentation',
       template: 'modern',
+      isRtl: false,
     },
   });
 
@@ -78,6 +81,7 @@ function helloWorld() {
       await convertMarkdownToPptx(data.markdown, data.fileName, {
         styles: templates[data.template].styles,
         title: data.fileName,
+        isRtl: data.isRtl,
       });
       toast({
         title: 'Conversion Successful',
@@ -151,6 +155,22 @@ function helloWorld() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="isRtl"
+              control={form.control}
+              render={({ field }) => (
+                <Checkbox
+                  id="isRtl"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isConverting}
+                />
+              )}
+            />
+            <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
           </div>
 
           <Button type="submit" disabled={isConverting} className="w-full">

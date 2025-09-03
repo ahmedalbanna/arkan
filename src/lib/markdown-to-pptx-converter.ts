@@ -25,12 +25,21 @@ const IMAGE_W = 7.0;
 const IMAGE_X = (SLIDE_WIDTH - IMAGE_W) / 2; // Center the image
 const ELEMENT_PADDING = 0.6; // Vertical padding between elements in inches
 
+// Define font options for different language scripts
+interface FontOptions {
+    default?: string; // For LTR languages
+    rtl?: string;     // For RTL languages like Arabic
+    code?: string;    // For code blocks and inline code
+}
+
 export interface PptxConversionOptions {
     styles?: PptxStyleOptions;
     author?: string;
     company?: string;
     subject?: string;
     title?: string;
+    isRtl?: boolean;
+    fonts?: FontOptions;
 }
 
 /**
@@ -50,6 +59,8 @@ async function transformInlinesToPptxText(
     nodes: PhrasingContent[],
     baseOptions: PptxGenJS.TextPropsOptions,
     styles: PptxStyleOptions,
+    isRtl = false,
+    fonts: FontOptions = {}
 ): Promise<PptxGenJS.TextProps[]> {
     const runs: PptxGenJS.TextProps[] = [];
 
@@ -57,25 +68,35 @@ async function transformInlinesToPptxText(
         // Skip non-phrasing content, which should be handled by block-level renderers.
         if (node.type === 'image') continue;
 
+        const defaultFont = isRtl ? fonts.rtl : fonts.default;
+        const currentBaseOptions = { ...baseOptions };
+        if (defaultFont) {
+            currentBaseOptions.fontFace = defaultFont;
+        }
+
         switch (node.type) {
             case 'strong':
-                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, bold: true }, styles)));
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...currentBaseOptions, bold: true }, styles, isRtl, fonts)));
                 break;
             case 'emphasis':
-                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, italic: true }, styles)));
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...currentBaseOptions, italic: true }, styles, isRtl, fonts)));
                 break;
             case 'delete':
-                runs.push(...(await transformInlinesToPptxText(node.children, { ...baseOptions, strike: true }, styles)));
+                runs.push(...(await transformInlinesToPptxText(node.children, { ...currentBaseOptions, strike: true }, styles, isRtl, fonts)));
                 break;
             case 'inlineCode':
-                runs.push({ text: node.value, options: { ...baseOptions, ...styles.inlineCode } });
+                // Inline code should remain LTR
+                const codeFont = fonts.code || styles.inlineCode?.fontFace || 'Courier New';
+                const codeBaseOptions = { ...baseOptions, ...styles.inlineCode };
+                delete codeBaseOptions.fontFace;
+                runs.push({ text: node.value, options: { ...codeBaseOptions, fontFace: codeFont, rtlMode: false } });
                 break;
             case 'text':
-                runs.push({ text: node.value, options: baseOptions });
+                runs.push({ text: node.value, options: { ...currentBaseOptions, rtlMode: isRtl } });
                 break;
             case 'link': {
-                const linkStyle = { ...baseOptions, ...styles.link };
-                const linkRuns = await transformInlinesToPptxText(node.children, linkStyle, styles);
+                const linkStyle = { ...currentBaseOptions, ...styles.link };
+                const linkRuns = await transformInlinesToPptxText(node.children, linkStyle, styles, isRtl, fonts);
                 linkRuns.forEach(run => {
                     run.options = { ...run.options, hyperlink: { url: node.url, tooltip: node.title || node.url } };
                 });
@@ -154,7 +175,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
 }
 
 /** Renders a paragraph node, handling special cases for images and list-like text. */
-async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions) {
+async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
     const imageNode = node.children.length === 1 && node.children[0].type === 'image' ? node.children[0] : null;
     if (imageNode) {
         const proxiedImage = await getProxiedImageBuffer(imageNode.url);
@@ -174,14 +195,14 @@ async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: numbe
             });
         }
     } else {
-        const textRuns = await transformInlinesToPptxText(node.children, styles.body, styles);
+        const textRuns = await transformInlinesToPptxText(node.children, styles.body, styles, isRtl, fonts);
         if (textRuns.length === 0) return;
-        slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body });
+        slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body, rtlMode: isRtl, align: isRtl ? 'right' : styles.body.align });
     }
 }
 
 /** Renders a list node. */
-async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions) {
+async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
     const allRuns: PptxGenJS.TextProps[] = [];
 
     async function processListItems(items: ListItem[], level: number) {
@@ -194,7 +215,7 @@ async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: numb
                 }
 
                 if (contentNode.type === 'paragraph') {
-                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles);
+                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles, isRtl, fonts);
                     if (paraRuns.length > 0) {
                         // Add indentation for the first run of the item.
                         if (contentIndex === 0) {
@@ -216,39 +237,47 @@ async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: numb
 
     await processListItems(node.children, 0);
 
+    const defaultFont = isRtl ? fonts.rtl : fonts.default;
+    const bodyStyle = { ...styles.body };
+    if (defaultFont) bodyStyle.fontFace = defaultFont;
+
     if (allRuns.length > 0) {
         slide.addText(allRuns, {
-            x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body,
-            bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') }
+            x: CONTENT_X, y, w: CONTENT_WIDTH, h,
+            ...bodyStyle,
+            bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') },
+            rtlMode: isRtl,
+            align: isRtl ? 'right' : styles.body.align,
         });
     }
 }
 
 /** Renders a blockquote node. */
-async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions) {
+async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
     const blockquoteStyle = { ...styles.body, ...styles.blockquote };
     const textRuns: PptxGenJS.TextProps[] = [];
     for (const [i, p] of node.children.entries()) {
         if (p.type === 'paragraph') {
-            textRuns.push(...await transformInlinesToPptxText(p.children, blockquoteStyle, styles));
+            textRuns.push(...await transformInlinesToPptxText(p.children, blockquoteStyle, styles, isRtl, fonts));
             if (i < node.children.length - 1) {
                 textRuns.push({ text: '\n', options: blockquoteStyle });
             }
         }
     }
-    slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...blockquoteStyle });
+    slide.addText(textRuns, { x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...blockquoteStyle, rtlMode: isRtl, align: isRtl ? 'right' : blockquoteStyle.align });
 }
 
 /** Renders a table node. */
-async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions) {
+async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
     const tableRows: PptxGenJS.TableRow[] = [];
     for (const [rowIndex, rowNode] of node.children.entries()) {
         const tableCells: PptxGenJS.TableCell[] = [];
         for (const cellNode of rowNode.children) {
-            const cellText = await transformInlinesToPptxText(cellNode.children, {}, styles);
+            const baseCellStyle = rowIndex === 0 ? styles.tableHeaderStyle : styles.tableCellStyle;
+            const cellText = await transformInlinesToPptxText(cellNode.children, baseCellStyle, styles, isRtl, fonts);
             const isHeader = rowIndex === 0;
             const cellOptions = isHeader ? styles.tableHeaderStyle : styles.tableCellStyle;
-            tableCells.push({ text: cellText, options: cellOptions });
+            tableCells.push({ text: cellText, options: { ...cellOptions, rtlMode: isRtl, align: isRtl ? 'right' : cellOptions?.align || styles.table?.align } });
         }
         tableRows.push(tableCells);
     }
@@ -256,32 +285,36 @@ async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: nu
 }
 
 /** Renders a code block node. */
-async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: number, styles: PptxStyleOptions) {
+async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
+    const codeStyle = { ...styles.code };
+    if (fonts.code) codeStyle.fontFace = fonts.code;
     slide.addText(node.value, {
         x: CONTENT_X, y, w: CONTENT_WIDTH, h, ...styles.body,
-        ...styles.code
+        ...codeStyle,
+        rtlMode: false, // Code is always LTR
+        align: 'left'   // Code is always LTR
     });
 }
 
 /**
  * Renders a markdown AST node onto a slide by dispatching to the appropriate render function.
  */
-async function renderNodeOnSlide(slide: PptxGenJS.Slide, node: RootContent, y: number, h: number, styles: PptxStyleOptions) {
+async function renderNodeOnSlide(slide: PptxGenJS.Slide, node: RootContent, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
     switch (node.type) {
         case 'paragraph':
-            await renderParagraph(slide, node, y, h, styles);
+            await renderParagraph(slide, node, y, h, styles, isRtl, fonts);
             break;
         case 'list':
-            await renderList(slide, node, y, h, styles);
+            await renderList(slide, node, y, h, styles, isRtl, fonts);
             break;
         case 'blockquote':
-            await renderBlockquote(slide, node, y, h, styles);
+            await renderBlockquote(slide, node, y, h, styles, isRtl, fonts);
             break;
         case 'table':
-            await renderTable(slide, node, y, h, styles);
+            await renderTable(slide, node, y, h, styles, isRtl, fonts);
             break;
         case 'code':
-            await renderCode(slide, node, y, h, styles);
+            await renderCode(slide, node, y, h, styles, isRtl, fonts);
             break;
     }
 }
@@ -336,7 +369,9 @@ async function processSlideTitleAndSubtitle(
     slide: PptxGenJS.Slide,
     slideAst: MdastRoot,
     lastTitleRuns: PptxGenJS.TextProps[] | null,
-    styles: PptxStyleOptions
+    styles: PptxStyleOptions,
+    isRtl = false,
+    fonts: FontOptions = {}
 ): Promise<{ newTitleRuns: PptxGenJS.TextProps[] | null; bodyNodes: RootContent[] }> {
     let bodyNodes: RootContent[] = slideAst.children;
     let newTitleRuns = lastTitleRuns;
@@ -344,7 +379,7 @@ async function processSlideTitleAndSubtitle(
     // Process main title from heading
     const firstNode = bodyNodes[0];
     if (firstNode?.type === 'heading') {
-        newTitleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles);
+        newTitleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts);
         slide.addText(newTitleRuns, { placeholder: 'title' });
         bodyNodes = bodyNodes.slice(1);
     } else if (lastTitleRuns) {
@@ -359,9 +394,9 @@ async function processSlideTitleAndSubtitle(
             subtitleNodes[0].value = subtitleNodes[0].value.trimStart();
         }
         const subtitleStyle: PptxGenJS.TextPropsOptions = { ...styles.body, ...styles.subtitle };
-        const subtitleRuns = await transformInlinesToPptxText(subtitleNodes, subtitleStyle, styles);
+        const subtitleRuns = await transformInlinesToPptxText(subtitleNodes, subtitleStyle, styles, isRtl, fonts);
         if (subtitleRuns.length > 0) {
-            slide.addText(subtitleRuns, { x: CONTENT_X, y: SUBTITLE_Y, w: CONTENT_WIDTH, h: SUBTITLE_H, ...subtitleStyle });
+            slide.addText(subtitleRuns, { x: CONTENT_X, y: SUBTITLE_Y, w: CONTENT_WIDTH, h: SUBTITLE_H, ...subtitleStyle, rtlMode: isRtl, align: isRtl ? 'right' : subtitleStyle.align });
         }
         bodyNodes = bodyNodes.slice(1);
     }
@@ -381,14 +416,16 @@ async function createSlidesWithContent(
     pptx: PptxGenJS,
     slidesContent: MdastRoot[],
     styles: PptxStyleOptions,
-    masterName: string
+    masterName: string,
+    isRtl = false,
+    font: FontOptions = {}
 ) {
     let lastTitleRuns: PptxGenJS.TextProps[] | null = null;
 
     for (const slideAst of slidesContent) {
         let slide = pptx.addSlide({ masterName });
 
-        const { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles);
+        const { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles, isRtl, font);
         lastTitleRuns = newTitleRuns;
 
         let currentY = BODY_START_Y;
@@ -411,7 +448,7 @@ async function createSlidesWithContent(
                 slide = createNewSlideForOverflow();
                 currentY = BODY_START_Y;
             }
-            await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles);
+            await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
             currentY += elementHeight;
         }
     }
@@ -423,17 +460,21 @@ export async function convertMarkdownToPptx(
     options: PptxConversionOptions = {},
 ) {
     const pptx = new PptxGenJS();
-    const styles = options.styles || templates.modern.styles;
+    const { styles = templates.modern.styles, isRtl = false, fonts = {} } = options;
 
+    pptx.rtlMode = isRtl;
     pptx.layout = 'LAYOUT_16x9';
     const masterName = 'ARKAN_MASTER';
+
+    const titleStyle = { ...styles.title };
+    const defaultFont = isRtl ? fonts.rtl : fonts.default;
+    if (defaultFont) titleStyle.fontFace = defaultFont;
+
     pptx.defineSlideMaster({
         title: masterName,
         background: styles.background,
         objects: [
-            {
-                placeholder: { options: { name: 'title', type: 'title', x: CONTENT_X, y: TITLE_Y, w: CONTENT_WIDTH, h: TITLE_H, margin: 0, ...styles.title } },
-            },
+            { placeholder: { options: { name: 'title', type: 'title', x: CONTENT_X, y: TITLE_Y, w: CONTENT_WIDTH, h: TITLE_H, margin: 0, ...titleStyle, rtlMode: isRtl, align: isRtl ? 'right' : styles.title.align } } },
             // Body placeholder is removed to allow manual placement of mixed content types.
         ],
     });
@@ -448,7 +489,7 @@ export async function convertMarkdownToPptx(
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
     const slidesContent = splitAstIntoSlides(ast);
 
-    await createSlidesWithContent(pptx, slidesContent, styles, masterName);
+    await createSlidesWithContent(pptx, slidesContent, styles, masterName, isRtl, fonts);
 
     await pptx.writeFile({ fileName: `${fileName}.pptx` });
 }
