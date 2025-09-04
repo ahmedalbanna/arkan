@@ -36,39 +36,106 @@ export function MarkdownToPptxTool() {
   const form = useForm<MarkdownToPptxFormValues>({
     resolver: zodResolver(markdownToPptxSchema),
     defaultValues: {
-      markdown: `# Slide 1: Introduction
-
-This slide demonstrates various markdown features.
-
-- **Bolded** list item
-- *Italicized* list item
-- A link to Google
+      markdown: `# My Awesome Presentation: A Comprehensive Guide
+This is the cover slide. The title and subtitle are automatically formatted.
 
 ---
 
-# Slide 2: Image and Code
+# Slide 2: Basic Formatting
+This slide demonstrates various inline markdown features.
 
+- **Bolded text** for emphasis.
+- *Italicized text* for highlighting.
+- ~~Strikethrough text~~ for deletions.
+- A link to Arkan's Website.
+- Inline code like \`const x = 10;\` is also supported.
+
+> Notes:
+> This slide covers the fundamental text formatting options. Make sure to explain each one clearly.
+
+---
+
+# Slide 3: Lists and Nesting
+You can create ordered and unordered lists.
+
+1. First ordered list item.
+2. Second ordered list item.
+   - Nested unordered item.
+   - Another nested item.
+      1. Deeply nested ordered item.
+3. Third ordered list item.
+
+- Unordered list item.
+- Another unordered list item.
+
+---
+
+# Slide 4: Block Elements
+This slide shows how blockquotes and tables are rendered.
+
+> Here is a blockquote. It's useful for highlighting important text or quotes from sources. It can span multiple lines and will be styled distinctively.
+
+| Header 1      | Header 2      | Header 3      |
+|---------------|---------------|---------------|
+| Cell 1        | Cell 2        | Cell 3        |
+| Cell 4        | Cell 5        | Cell 6        |
+| *Formatted*   | **Content**   | \`Is Supported\`|
+
+---
+
+# Slide 5: Images & Code Blocks
 An image can be placed on its own line to be centered.
 
-!A cute dog
 
 \`\`\`javascript
+// This is a javascript code block
 function helloWorld() {
   console.log("Hello, PowerPoint!");
+  // It preserves whitespace and syntax highlighting is handled by the theme.
 }
 \`\`\`
 
 ---
 
-# Slide 3: Table and Blockquote
+ # Slide 6: Footnotes & Speaker Notes
+You can add footnotes to your text for citations or extra info.[^1] They will appear at the bottom of the slide. This is another reference.[^2]
 
-> Here is a blockquote. It's useful for highlighting important text or quotes from sources.
+[^1]: This is the first footnote. It provides more detail.
+[^2]: This is the second footnote, demonstrating multiple references.
 
-| Header 1 | Header 2 |
-|----------|----------|
-| Cell 1   | Cell 2   |
-| Cell 3   | Cell 4   |
-`,
+
+> Speaker Notes:
+> Remember to explain what footnotes are and how they are useful in academic or detailed presentations.
+> This is a multi- line speaker note.
+
+---
+
+# Slide 7: PlantUML Diagrams
+You can embed PlantUML diagrams directly into your markdown.
+
+\`\`\`plantuml
+@startuml
+!theme plain
+skinparam linetype ortho
+
+actor User
+participant "Web App" as App
+participant "API Server" as API
+database "Database" as DB
+
+User -> App: Clicks "Login"
+App -> API: POST /api/login
+API -> DB: Verify credentials
+DB --> API: User data
+API --> App: Auth Token
+App --> User: Displays dashboard
+@enduml
+\`\`\`
+
+---
+
+# Slide 8: Content Overflow
+This slide demonstrates how a very long paragraph will gracefully break across multiple slides, ensuring that the content remains readable and well-formatted. The layout engine automatically detects when the content exceeds the available space on a single slide and creates a new slide to continue the text. This process is seamless and preserves the context by repeating the slide title on the overflow slides. This is particularly useful for detailed explanations, long narratives, or extensive notes that cannot be condensed into a few bullet points. The system tries to break the text at a natural point, like between words, to maintain readability. This ensures that even large blocks of text are presented in a professional and easy-to-digest manner without manual intervention. This paragraph will continue to demonstrate this feature by being intentionally long. The layout engine automatically detects when the content exceeds the available space on a single slide and creates a new slide to continue the text. This process is seamless and preserves the context by repeating the slide title on the overflow slides. This is particularly useful for detailed explanations, long narratives, or extensive notes that cannot be condensed into a few bullet points. The system tries to break the text at a natural point, like between words, to maintain readability. This ensures that even large blocks of text are presented in a professional and easy-to-digest manner without manual intervention.`,
       fileName: 'presentation',
       template: 'modern',
       isRtl: false,

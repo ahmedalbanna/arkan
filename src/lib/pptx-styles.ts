@@ -43,6 +43,12 @@ const modern: PptxStyleOptions = {
         valign: 'middle',
         align: 'center',
     },
+    footnote: {
+        fontFace: 'Calibri',
+        fontSize: 10,
+        color: '6c757d',
+        lineColor: 'C0C0C0',
+    },
 
 };
 
@@ -69,6 +75,12 @@ const dark: PptxStyleOptions = {
         fill: { color: '444444' },
     },
     tableCellStyle: {},
+    footnote: {
+        fontFace: 'Helvetica',
+        fontSize: 10,
+        color: 'A9A9A9',
+        lineColor: '666666',
+    },
     border: { type: 'solid', pt: 1, color: '666666' },
 };
 
@@ -97,6 +109,12 @@ const professional: PptxStyleOptions = {
         align: 'center',
     },
     tableCellStyle: {},
+    footnote: {
+        fontFace: 'Garamond',
+        fontSize: 10,
+        color: '5A7D9A',
+        lineColor: 'B0C4DE',
+    },
     border:{ type: 'solid', pt: 1, color: 'B0C4DE' }
 };
 
