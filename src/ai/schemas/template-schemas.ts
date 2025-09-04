@@ -1,3 +1,4 @@
+import { table } from 'console';
 import { sub } from 'date-fns';
 import { z } from 'zod';
 
@@ -42,8 +43,13 @@ export const PptxStyleOptionsSchema = z.object({
     fontSize: z.number(),
     color: z.string(),
     align: z.enum(['left', 'center', 'right']),
+    lineSpacing: z.number(),
+    valign: z.enum(['top', 'middle', 'bottom']),
   }),
-  bullet: z.object({ type: z.enum(['bullet', 'number']) }),
+  bullet: z.object({
+    type: z.enum(['bullet', 'number']),
+    code: z.any().optional(), // Allow any type for 'code' property
+  }),
   subtitle: z.object({
     fontSize: z.number(),
     italic: z.boolean(),
@@ -53,6 +59,35 @@ export const PptxStyleOptionsSchema = z.object({
     color: z.string(),
     italic: z.boolean(),
     indent: z.number(),
+  }),
+  table: z.object({
+    fontFace: z.string(),
+    fontSize: z.number(),
+    color: z.string(),
+    valign: z.enum(['top', 'middle', 'bottom']),
+    align: z.enum(['left', 'center', 'right']),
+  }),
+  tableHeaderStyle: z.object({
+    bold: z.boolean(),
+    fill: z.object({ color: z.string() }),
+
+  }),
+  tableCellStyle: z.object({}),
+  code: z.object({
+    fontFace: z.string(),
+    fontSize: z.number(),
+    color: z.string(),
+    fill: z.object({ color: z.string() }),
+    margin: z.number(),
+  }),
+  link: z.object({
+    color: z.string(),
+    underline: z.boolean(),
+  }),
+  inlineCode: z.object({
+    fontFace: z.string(),
+    color: z.string(),
+    highlight: z.string(),
   }),
 });
 

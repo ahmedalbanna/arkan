@@ -10,7 +10,7 @@ import type { PptxStyleOptions } from '@/lib/types';
 
 // --- LAYOUT CONSTANTS ---
 const SLIDE_WIDTH = 10;
-const SLIDE_HEIGHT = 3.625; // For a 16:9 aspect ratio slide
+const SLIDE_HEIGHT = 5.625; // For a 16:9 aspect ratio slide
 const CONTENT_X = 0.5;
 const CONTENT_WIDTH = 9.0;
 const TITLE_Y = 0.25;
@@ -23,7 +23,7 @@ const BODY_END_Y = SLIDE_HEIGHT - SLIDE_MARGIN_BOTTOM;
 const IMAGE_H = 2.5;
 const IMAGE_W = 7.0;
 const IMAGE_X = (SLIDE_WIDTH - IMAGE_W) / 2; // Center the image
-const ELEMENT_PADDING = 0.6; // Vertical padding between elements in inches
+const ELEMENT_PADDING = 0.2; // Vertical padding between elements in inches
 
 // Define font options for different language scripts
 interface FontOptions {
@@ -403,6 +403,7 @@ async function processSlideTitleAndSubtitle(
     if (firstNode?.type === 'heading') {
         const titleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts);
 
+        // don't remove this logic
         // New logic to add a line break after a colon
         const runsWithBreaks: PptxGenJS.TextProps[] = [];
         let colonFoundAndHandled = false;
@@ -491,22 +492,44 @@ async function createSlidesWithContent(
             return newSlide;
         };
 
+        const availableBodyHeight = BODY_END_Y - BODY_START_Y;
+
         for (const node of bodyNodes) {
-            // <<< SET BREAKPOINT HERE to track values.
-            // You can inspect `node` to see the current markdown element (paragraph, list, etc.),
-            // `slide` for the current pptxgenjs slide object, and `currentY` for the vertical position.
+            if (node.type === 'list') {
+                // Lists are processed item by item to allow breaking across slides.
+                // This logic is an adaptation of `renderList` with overflow handling.
+                const processListItems = async (listNode: List, level: number) => {
+                    for (const item of listNode.children) {
+                        for (const contentNode of item.children) {
+                            const elementHeight = calculateElementHeight(contentNode, styles);
 
-            const elementHeight = calculateElementHeight(node, styles);
+                            if (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y) {
+                                slide = createNewSlideForOverflow();
+                                currentY = BODY_START_Y;
+                            }
 
-            // If the element itself is taller than the available body space, it must go on a new slide.
-            // Also, if adding it would overflow the current slide, start a new one.
-            // The `currentY > BODY_START_Y` check prevents creating a new slide if the very first element doesn't fit.
-            if (elementHeight > (BODY_END_Y - BODY_START_Y) || (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y)) {
-                slide = createNewSlideForOverflow();
-                currentY = BODY_START_Y;
+                            // To render a single list item's content with the correct bullet,
+                            // we create a temporary list node containing only that content.
+                            const tempListWithOneItem: List = {
+                                type: 'list',
+                                ordered: listNode.ordered,
+                                children: [{ type: 'listItem', children: [contentNode] }],
+                            };
+                            await renderList(slide, tempListWithOneItem, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
+                            currentY += elementHeight;
+                        }
+                    }
+                };
+                await processListItems(node, 0);
+            } else {
+                const elementHeight = calculateElementHeight(node, styles);
+                if (elementHeight > availableBodyHeight || (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y)) {
+                    slide = createNewSlideForOverflow();
+                    currentY = BODY_START_Y;
+                }
+                await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
+                currentY += elementHeight;
             }
-            await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
-            currentY += elementHeight;
         }
     }
 }

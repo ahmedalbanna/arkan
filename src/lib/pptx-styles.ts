@@ -2,8 +2,13 @@
 
 'use client';
 
+<<<<<<< HEAD
 import type { PptxTemplate, PptxTemplateKey } from '@/lib/types';
 export type { PptxTemplateKey } from '@/lib/types';
+=======
+import type { PptxTemplate } from '@/lib/types';
+import { fontFamily } from 'html2canvas/dist/types/css/property-descriptors/font-family';
+>>>>>>> 36a35161 (Refines PPTX styling and slide content handling)
 
 const modern: PptxTemplate['styles'] = {
     background: { color: 'FFFFFF' },
@@ -13,8 +18,8 @@ const modern: PptxTemplate['styles'] = {
     blockquote: { color: '6c757d', italic: true, indent: 0.5 },
     code: { fontFace: 'Courier New', fontSize: 12, fill: { color: 'F5F5F5' }, margin: 10, valign: 'top' },
     link: { color: '0052CC', underline: true },
-    inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2' },
-    bullet: { type: 'bullet', code: '2022' }, // A standard solid circle bullet
+    inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2', fontSize: 14 },
+    bullet: { type: 'bullet', code: {fontFamily: 'Calibri'} }, // A standard solid circle bullet
     table: {
         // Table-wide properties, including default cell styles
         border: { type: 'solid', pt: 1, color: 'D9D9D9' },
@@ -28,10 +33,20 @@ const modern: PptxTemplate['styles'] = {
         bold: true,
         fill: { color: 'F1F1F1' },
         color: '000000',
+        align: 'center',
+        valign: 'middle',
+        fontFace: 'Calibri',
+        fontSize: 14,
     },
     tableCellStyle: {
         // Specific styles for non-header cells can go here if needed
+        fontFace: 'Calibri',
+        fontSize: 14,
+        color: '4f4f4f',
+        valign: 'middle',
+        align: 'center',
     },
+
 };
 
 const dark: PptxTemplate['styles'] = {
