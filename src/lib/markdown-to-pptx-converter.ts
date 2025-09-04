@@ -441,16 +441,8 @@ async function processSlideTitleAndSubtitle(
             newTitleRuns = titleRuns;
         }
 
-        // Check if this is the first slide with a title to apply a cover slide layout
-        const isCoverSlide = lastTitleRuns === null;
-        if (isCoverSlide) {
-            // Apply a special, centered layout for the cover slide title
-            slide.addText(newTitleRuns, { x: 0.5, y: 0, w: '90%', h: '100%', align: 'center', valign: 'middle', ...styles.title, fontSize: 44 });
-        } else {
-            // Use the default title placeholder for subsequent slides
-            slide.addText(newTitleRuns, { placeholder: 'title' });
-        }
-
+        // The correct placeholder will be used based on the master slide assigned when the slide was created.
+        slide.addText(newTitleRuns, { placeholder: 'title' });
         bodyNodes = bodyNodes.slice(1);
     } else if (lastTitleRuns) {
         slide.addText(lastTitleRuns, { placeholder: 'title' });
@@ -567,14 +559,19 @@ async function createSlidesWithContent(
     pptx: PptxGenJS,
     slidesContent: MdastRoot[],
     styles: PptxStyleOptions,
-    masterName: string,
+    masterNames: { cover: string; content: string },
     isRtl = false,
     font: FontOptions = {}
 ) {
     let lastTitleRuns: PptxGenJS.TextProps[] | null = null;
+    let slideCount = 0;
 
     for (const slideAst of slidesContent) {
+        const isFirstSlide = slideCount === 0;
+        const masterName = isFirstSlide ? masterNames.cover : masterNames.content;
+
         let slide = pptx.addSlide({ masterName });
+        slideCount++;
 
         const { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles, isRtl, font);
         lastTitleRuns = newTitleRuns;
@@ -582,7 +579,8 @@ async function createSlidesWithContent(
         let currentY = BODY_START_Y;
 
         const createNewSlideForOverflow = () => {
-            const newSlide = pptx.addSlide({ masterName: masterName });
+            // All overflow slides are content slides
+            const newSlide = pptx.addSlide({ masterName: masterNames.content });
             if (lastTitleRuns) {
                 newSlide.addText(lastTitleRuns, { placeholder: 'title' });
             }
@@ -665,18 +663,35 @@ export async function convertMarkdownToPptx(
 
     pptx.rtlMode = isRtl;
     pptx.layout = 'LAYOUT_16x9';
-    const masterName = 'ARKAN_MASTER';
+    const COVER_MASTER = 'COVER_MASTER';
+    const CONTENT_MASTER = 'CONTENT_MASTER';
 
     const titleStyle = { ...styles.title };
     const defaultFont = isRtl ? fonts.rtl : fonts.default;
     if (defaultFont) titleStyle.fontFace = defaultFont;
 
+    const coverTitleStyle = { ...titleStyle, align: 'center', valign: 'middle', fontSize: 44 };
+    const contentTitleStyle = { ...titleStyle, align: isRtl ? 'right' : styles.title.align };
+
+    // Define Cover Slide Master
     pptx.defineSlideMaster({
-        title: masterName,
+        title: COVER_MASTER,
         background: styles.background,
         objects: [
-            { placeholder: { options: { name: 'title', type: 'title', x: CONTENT_X, y: TITLE_Y, w: CONTENT_WIDTH, h: TITLE_H, margin: 0, ...titleStyle, rtlMode: isRtl, align: isRtl ? 'right' : styles.title.align } } },
-            // Body placeholder is removed to allow manual placement of mixed content types.
+            {
+                placeholder: {
+                    options: { name: 'title', type: 'title', x: 0.5, y: 0, w: '90%', h: '100%', ...coverTitleStyle, rtlMode: isRtl },
+                },
+            },
+        ],
+    });
+
+    // Define Content Slide Master
+    pptx.defineSlideMaster({
+        title: CONTENT_MASTER,
+        background: styles.background,
+        objects: [
+            { placeholder: { options: { name: 'title', type: 'title', x: CONTENT_X, y: TITLE_Y, w: CONTENT_WIDTH, h: TITLE_H, margin: 0, ...contentTitleStyle, rtlMode: isRtl } } },
         ],
     });
 
@@ -690,7 +705,7 @@ export async function convertMarkdownToPptx(
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
     const slidesContent = splitAstIntoSlides(ast);
 
-    await createSlidesWithContent(pptx, slidesContent, styles, masterName, isRtl, fonts);
+    await createSlidesWithContent(pptx, slidesContent, styles, { cover: COVER_MASTER, content: CONTENT_MASTER }, isRtl, fonts);
 
     await pptx.writeFile({ fileName: `${fileName}.pptx` });
 }
