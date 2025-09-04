@@ -1,3 +1,4 @@
+import { sub } from 'date-fns';
 import { z } from 'zod';
 
 // Base schema for common template fields
@@ -43,7 +44,19 @@ export const PptxStyleOptionsSchema = z.object({
     align: z.enum(['left', 'center', 'right']),
   }),
   bullet: z.object({ type: z.enum(['bullet', 'number']) }),
+  subtitle: z.object({
+    fontSize: z.number(),
+    italic: z.boolean(),
+    color: z.string(),
+  }),
+  blockquote: z.object({
+    color: z.string(),
+    italic: z.boolean(),
+    indent: z.number(),
+  }),
 });
+
+// PPTX Template
 export const PptxTemplateSchema = BaseTemplateSchema.extend({
   styles: PptxStyleOptionsSchema,
   imageUrl: z.string().url(),
