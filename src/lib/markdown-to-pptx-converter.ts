@@ -405,56 +405,55 @@ async function processSlideTitleAndSubtitle(
     if (firstNode?.type === 'heading') {
         const titleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts);
 
-        // don't remove this logic
-        // New logic to add a line break after a colon
-        const runsWithBreaks: PptxGenJS.TextProps[] = [];
-        let colonFoundAndHandled = false;
+        // Logic to split title into title and subtitle at the first colon
+        const colonRunIndex = titleRuns.findIndex(run => run.text?.includes(':'));
+        if (colonRunIndex !== -1) {
+            const runsWithBreaks: PptxGenJS.TextProps[] = [];
+            // Add all runs before the one with the colon
+            runsWithBreaks.push(...titleRuns.slice(0, colonRunIndex));
 
-        for (let i = 0; i < titleRuns.length; i++) {
-            const run = titleRuns[i];
+            // Split the run with the colon
+            const colonRun = titleRuns[colonRunIndex];
+            const [textBefore, textAfter] = (colonRun.text || '').split(':', 2);
 
-            if (!colonFoundAndHandled && run.text?.includes(':')) {
-                const splitIndex = run.text.indexOf(':');
-                const beforeColon = run.text.substring(0, splitIndex);
-                const afterColon = run.text.substring(splitIndex + 1);
-
-                if (beforeColon) {
-                    runsWithBreaks.push({ text: beforeColon, options: run.options });
-                }
-                runsWithBreaks.push({ text: '\n', options: run.options }); // Add new line after colon
-                if (afterColon.trim()) {
-                    runsWithBreaks.push({ text: afterColon.trim() + ' ', options: { ...run.options, ...styles.subtitle } });
-                } else if (i + 1 < titleRuns.length) { // If there's content after the colon in the next run
-                    const nextRun = titleRuns[i + 1];
-                    if (nextRun.text) nextRun.text = nextRun.text.trimStart();
-                    nextRun.options = { ...(nextRun.options || {}), breakLine: true };
-                }
-                colonFoundAndHandled = true;
-            } else {
-                runsWithBreaks.push({ text: run.text, options: { ...run.options, ...styles.subtitle } });
+            if (textBefore) {
+                runsWithBreaks.push({ text: textBefore, options: colonRun.options });
             }
+
+            // Add a line break for the subtitle
+            runsWithBreaks.push({ text: '\n', options: { ...colonRun.options } });
+
+            // Add the part after the colon from the same run, styled as subtitle
+            if (textAfter.trim()) {
+                runsWithBreaks.push({ text: textAfter.trim() + ' ', options: { ...colonRun.options, ...styles.subtitle } });
+            }
+
+            // Add all subsequent runs, styled as subtitle
+            for (let i = colonRunIndex + 1; i < titleRuns.length; i++) {
+                const subsequentRun = titleRuns[i];
+                runsWithBreaks.push({
+                    text: subsequentRun.text,
+                    options: { ...subsequentRun.options, ...styles.subtitle }
+                });
+            }
+            newTitleRuns = runsWithBreaks;
+        } else {
+            newTitleRuns = titleRuns;
         }
 
-        newTitleRuns = colonFoundAndHandled ? runsWithBreaks : titleRuns;
-        slide.addText(newTitleRuns, { placeholder: 'title' });
+        // Check if this is the first slide with a title to apply a cover slide layout
+        const isCoverSlide = lastTitleRuns === null;
+        if (isCoverSlide) {
+            // Apply a special, centered layout for the cover slide title
+            slide.addText(newTitleRuns, { x: 0.5, y: 0, w: '90%', h: '100%', align: 'center', valign: 'middle', ...styles.title, fontSize: 44 });
+        } else {
+            // Use the default title placeholder for subsequent slides
+            slide.addText(newTitleRuns, { placeholder: 'title' });
+        }
+
         bodyNodes = bodyNodes.slice(1);
     } else if (lastTitleRuns) {
         slide.addText(lastTitleRuns, { placeholder: 'title' });
-    }
-
-    // Process subtitle from '**Text:**' paragraph
-    const firstBodyNode = bodyNodes[0];
-    if (firstBodyNode?.type === 'paragraph' && firstBodyNode.children[0]?.type === 'strong' && getNodeText(firstBodyNode.children[0]).trim() === 'Text:') {
-        const subtitleNodes = firstBodyNode.children.slice(1);
-        if (subtitleNodes.length > 0 && subtitleNodes[0].type === 'text') {
-            subtitleNodes[0].value = subtitleNodes[0].value.trimStart();
-        }
-        const subtitleStyle: PptxGenJS.TextPropsOptions = { ...styles.body, ...styles.subtitle };
-        const subtitleRuns = await transformInlinesToPptxText(subtitleNodes, subtitleStyle, styles, isRtl, fonts);
-        if (subtitleRuns.length > 0) {
-            slide.addText(subtitleRuns, { x: CONTENT_X, y: SUBTITLE_Y, w: CONTENT_WIDTH, h: SUBTITLE_H, ...subtitleStyle, rtlMode: isRtl, align: isRtl ? 'right' : subtitleStyle.align });
-        }
-        bodyNodes = bodyNodes.slice(1);
     }
 
     return { newTitleRuns, bodyNodes };
