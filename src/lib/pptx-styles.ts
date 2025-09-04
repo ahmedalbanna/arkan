@@ -7,7 +7,7 @@ export type { PptxTemplateKey } from '@/lib/types';
 
 const modern: PptxTemplate['styles'] = {
     background: { color: 'FFFFFF' },
-    title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left' },
+    title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },
     body: { fontFace: 'Calibri', fontSize: 18, color: '4f4f4f', align: 'left', lineSpacing: 25, valign: 'top' },
     subtitle: { fontSize: 16, italic: true, color: '6c757d' },
     blockquote: { color: '6c757d', italic: true, indent: 0.5 },

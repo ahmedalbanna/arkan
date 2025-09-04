@@ -1,7 +1,7 @@
 import PptxGenJS from 'pptxgenjs';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import remarkGfm from 'remark-gfm';
+import remarkGfm from 'remark-gfm'; // Import remarkGfm
 import { visit } from 'unist-util-visit';
 import { type Root as MdastRoot, type RootContent, type Text, type PhrasingContent, type Paragraph, type List, type ListItem, type Blockquote, type Table, type Code, type Image } from 'mdast';
 import { templates } from '@/lib/pptx-styles'; // Keep for default styles
@@ -110,6 +110,16 @@ async function transformInlinesToPptxText(
 }
 
 /**
+ * Extracts all text content from an mdast node.
+ * @param node The mdast node to extract text from.
+ * @returns The concatenated text content.
+ */
+function getNodeText(node: RootContent | PhrasingContent): string {
+    let text = '';
+    visit(node, 'text', (textNode: Text) => { text += textNode.value; });
+    return text;
+}
+/**
  * Calculates the estimated height of a markdown AST node for PPTX layout purposes.
  * This version uses font size and line spacing for a more accurate estimation.
  * @param node The mdast node.
@@ -123,15 +133,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
     // A rough estimate of characters per line. This is an approximation.
     // A more accurate method would require precise font metrics for character widths.
     const avgCharWidthInPoints = bodyFontSize * 0.5;
-    const charsPerLine = (CONTENT_WIDTH * 72) / avgCharWidthInPoints;
-
-    const getNodeText = (node: RootContent): string => {
-        let text = '';
-        visit(node, 'text', (textNode: Text) => {
-            text += textNode.value;
-        });
-        return text;
-    }
+    const charsPerLine = (CONTENT_WIDTH * 72) / avgCharWidthInPoints; // Corrected: Use CONTENT_WIDTH for text width
 
     switch (node.type) {
         case 'paragraph':
@@ -203,53 +205,73 @@ async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: numbe
 
 /** Renders a list node. */
 async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
-    const allRuns: PptxGenJS.TextProps[] = [];
-
-    async function processListItems(items: ListItem[], level: number) {
-        for (const [i, item] of items.entries()) {
-            // Each list item can contain paragraphs or nested lists.
-            for (const [contentIndex, contentNode] of item.children.entries()) {
-                if (contentIndex > 0) {
-                    // Add a line break before subsequent paragraphs or nested lists within the same list item
-                    allRuns.push({ text: '\n' });
-                }
-
-                if (contentNode.type === 'paragraph') {
-                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles, isRtl, fonts);
-                    if (paraRuns.length > 0) {
-                        // Add indentation for the first run of the item.
-                        if (contentIndex === 0) {
-                            paraRuns[0].text = '\t'.repeat(level) + (paraRuns[0].text || '');
-                        }
-                        allRuns.push(...paraRuns);
-                    }
-                } else if (contentNode.type === 'list') {
-                    // Recursively process nested lists.
-                    await processListItems(contentNode.children, level + 1);
-                }
-            }
-            // Add a newline to separate list items.
-            if (i < items.length - 1) {
-                allRuns.push({ text: '\n' });
-            }
-        }
-    }
-
-    await processListItems(node.children, 0);
+    let currentY = y;
+    let accumulatedRuns: PptxGenJS.TextProps[] = [];
+    let accumulatedParaNodes: Paragraph[] = [];
 
     const defaultFont = isRtl ? fonts.rtl : fonts.default;
     const bodyStyle = { ...styles.body };
     if (defaultFont) bodyStyle.fontFace = defaultFont;
 
-    if (allRuns.length > 0) {
-        slide.addText(allRuns, {
-            x: CONTENT_X, y, w: CONTENT_WIDTH, h,
-            ...bodyStyle,
-            bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') },
-            rtlMode: isRtl,
-            align: isRtl ? 'right' : styles.body.align,
-        });
-    }
+    const renderAccumulatedRuns = () => {
+        if (accumulatedRuns.length > 0) {
+            let height = 0;
+            for (const pNode of accumulatedParaNodes) {
+                height += calculateElementHeight(pNode, styles) - ELEMENT_PADDING;
+            }
+
+            slide.addText(accumulatedRuns, {
+                x: CONTENT_X, y: currentY, w: CONTENT_WIDTH, h: height,
+                ...bodyStyle,
+                bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') },
+                rtlMode: isRtl,
+                align: isRtl ? 'right' : styles.body.align,
+            });
+
+            currentY += height;
+            accumulatedRuns = [];
+            accumulatedParaNodes = [];
+        }
+    };
+
+    const processList = async (listNode: List, level: number) => {
+        for (const [i, item] of listNode.children.entries()) {
+            for (const [contentIndex, contentNode] of item.children.entries()) {
+                if (contentNode.type === 'paragraph') {
+                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles, isRtl, fonts);
+                    if (paraRuns.length > 0) {
+                        if (contentIndex === 0) {
+                            const cleanedText = (paraRuns[0].text || '').replace(/^\s*([*+-]|\d+[.)])\s*/, '');
+                            paraRuns[0].text = '\t'.repeat(level) + cleanedText;
+                        } else {
+                            accumulatedRuns.push({ text: '\n' });
+                        }
+                        accumulatedRuns.push(...paraRuns);
+                        accumulatedParaNodes.push(contentNode);
+                    }
+                } else if (contentNode.type === 'table' || contentNode.type === 'list') {
+                    renderAccumulatedRuns();
+                    const elementHeight = calculateElementHeight(contentNode, styles);
+                    if (contentNode.type === 'table') {
+                        await renderTable(slide, contentNode, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, fonts);
+                    } else { // it's a list
+                        await renderList(slide, contentNode, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, fonts);
+                    }
+                    currentY += elementHeight;
+                }
+            }
+            if (i < listNode.children.length - 1) {
+                const lastChild = item.children[item.children.length - 1];
+                if (lastChild.type === 'paragraph') {
+                    accumulatedRuns.push({ text: '\n' });
+                }
+            }
+        }
+    };
+
+    await processList(node, 0);
+
+    renderAccumulatedRuns();
 }
 
 /** Renders a blockquote node. */
@@ -439,6 +461,10 @@ async function createSlidesWithContent(
         };
 
         for (const node of bodyNodes) {
+            // <<< SET BREAKPOINT HERE to track values.
+            // You can inspect `node` to see the current markdown element (paragraph, list, etc.),
+            // `slide` for the current pptxgenjs slide object, and `currentY` for the vertical position.
+
             const elementHeight = calculateElementHeight(node, styles);
 
             // If the element itself is taller than the available body space, it must go on a new slide.
