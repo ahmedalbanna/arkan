@@ -452,6 +452,44 @@ async function processSlideTitleAndSubtitle(
 }
 
 /**
+ * Extracts speaker notes from the last blockquote of a slide's content if it's formatted correctly.
+ * @param slide The PptxGenJS slide object.
+ * @param bodyNodes The array of content nodes for the slide.
+ * @returns The array of content nodes with the speaker notes blockquote removed, if found.
+ */
+function processSpeakerNotes(slide: PptxGenJS.Slide, bodyNodes: RootContent[]): RootContent[] {
+    const lastNodeIndex = bodyNodes.length - 1;
+    const lastNode = bodyNodes[lastNodeIndex];
+
+    // Check if the last node is a blockquote, which is our convention for speaker notes.
+    if (lastNode?.type === 'blockquote') {
+        const firstPara = lastNode.children[0];
+        if (firstPara?.type === 'paragraph') {
+            const firstParaText = getNodeText(firstPara).trim();
+
+            // Check for "Notes:" or "Speaker Notes:" prefix.
+            if (firstParaText.match(/^(Speaker\s*)?Notes:/i)) {
+                // Reconstruct the notes text, removing the "Notes:" prefix from the first paragraph.
+                const notesParts: string[] = [];
+                const cleanedFirstPara = firstParaText.replace(/^(Speaker\s*)?Notes:\s*/i, '').trim();
+                if (cleanedFirstPara) {
+                    notesParts.push(cleanedFirstPara);
+                }
+                for (let i = 1; i < lastNode.children.length; i++) {
+                    notesParts.push(getNodeText(lastNode.children[i]));
+                }
+                const finalNotes = notesParts.join('\n\n');
+                if (finalNotes) {
+                    slide.addNotes(finalNotes);
+                }
+                return bodyNodes.slice(0, lastNodeIndex);
+            }
+        }
+    }
+    return bodyNodes; // Return original nodes if no speaker notes are found.
+}
+
+/**
  * Calculates the estimated height of an array of PptxGenJS TextProps runs.
  * @param runs The array of TextProps.
  * @param styles The style options for the presentation.
@@ -573,8 +611,11 @@ async function createSlidesWithContent(
         let slide = pptx.addSlide({ masterName });
         slideCount++;
 
-        const { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles, isRtl, font);
+        let { newTitleRuns, bodyNodes } = await processSlideTitleAndSubtitle(slide, slideAst, lastTitleRuns, styles, isRtl, font);
         lastTitleRuns = newTitleRuns;
+
+        // Process speaker notes and update bodyNodes before rendering content
+        bodyNodes = processSpeakerNotes(slide, bodyNodes);
 
         let currentY = BODY_START_Y;
 
