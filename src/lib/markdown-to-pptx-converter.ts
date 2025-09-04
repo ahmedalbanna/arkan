@@ -401,7 +401,38 @@ async function processSlideTitleAndSubtitle(
     // Process main title from heading
     const firstNode = bodyNodes[0];
     if (firstNode?.type === 'heading') {
-        newTitleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts);
+        const titleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts);
+
+        // New logic to add a line break after a colon
+        const runsWithBreaks: PptxGenJS.TextProps[] = [];
+        let colonFoundAndHandled = false;
+
+        for (let i = 0; i < titleRuns.length; i++) {
+            const run = titleRuns[i];
+
+            if (!colonFoundAndHandled && run.text?.includes(':')) {
+                const splitIndex = run.text.indexOf(':');
+                const beforeColon = run.text.substring(0, splitIndex);
+                const afterColon = run.text.substring(splitIndex + 1);
+
+                if (beforeColon) {
+                    runsWithBreaks.push({ text: beforeColon, options: run.options });
+                }
+                runsWithBreaks.push({ text: '\n', options: run.options }); // Add new line after colon
+                if (afterColon.trim()) {
+                    runsWithBreaks.push({ text: afterColon.trim(), options: { ...run.options, ...styles.subtitle } });
+                } else if (i + 1 < titleRuns.length) { // If there's content after the colon in the next run
+                    const nextRun = titleRuns[i + 1];
+                    if (nextRun.text) nextRun.text = nextRun.text.trimStart();
+                    nextRun.options = { ...(nextRun.options || {}), breakLine: true };
+                }
+                colonFoundAndHandled = true;
+            } else {
+                runsWithBreaks.push(run);
+            }
+        }
+
+        newTitleRuns = colonFoundAndHandled ? runsWithBreaks : titleRuns;
         slide.addText(newTitleRuns, { placeholder: 'title' });
         bodyNodes = bodyNodes.slice(1);
     } else if (lastTitleRuns) {
