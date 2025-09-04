@@ -105,6 +105,12 @@ export const PptxStyleOptionsSchema = z.object({
     highlight: z.string(),
     fontSize: z.number().optional(),
   }),
+  footnote: z.object({
+    fontFace: z.string().optional(),
+    fontSize: z.number(),
+    color: z.string(),
+    lineColor: z.string().optional(),
+  }).optional(),
   border: z.object({
     type: z.string(),
     pt: z.number(),
