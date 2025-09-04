@@ -11,7 +11,7 @@ const modern: PptxTemplate['styles'] = {
     background: { color: 'FFFFFF' },
     title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },
     body: { fontFace: 'Calibri', fontSize: 18, color: '4f4f4f', align: 'left', lineSpacing: 25, valign: 'top' },
-    subtitle: { fontSize: 16, italic: true, color: '6c757d' },
+    subtitle: { fontFace: 'Calibri', fontFamily: 'Calibri', fontSize: 16, italic: true, color: '6c757d'},
     blockquote: { color: '6c757d', italic: true, indent: 0.5 },
     code: { fontFace: 'Courier New', fontSize: 12, fill: { color: 'F5F5F5' }, margin: 10, valign: 'top' },
     link: { color: '0052CC', underline: true },

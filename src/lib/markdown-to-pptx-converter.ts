@@ -145,13 +145,13 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             return (paraLines * bodyLineHeight) + ELEMENT_PADDING;
 
         case 'list': {
-            let listLines = 0;
+            let totalHeight = 0;
             for (const item of node.children) {
-                const itemText = getNodeText(item);
-                // Each list item is at least one line, plus wrapped lines.
-                listLines += Math.max(1, Math.ceil(itemText.length / charsPerLine));
+                // Sum the heights of each list item. `calculateListItemHeight` includes paddings of its children.
+                totalHeight += calculateListItemHeight(item, styles);
             }
-            return (listLines * bodyLineHeight) + ELEMENT_PADDING;
+            // Add padding for the list block itself.
+            return totalHeight + ELEMENT_PADDING;
         }
         case 'blockquote': {
             const bqText = getNodeText(node);
@@ -174,6 +174,22 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
         default:
             return ELEMENT_PADDING; // Return padding for unknown elements to ensure some spacing
     }
+}
+
+/**
+ * Calculates the estimated height of a list item node.
+ * @param item The mdast ListItem node.
+ * @param styles The style options for the presentation.
+ * @returns The calculated height in inches.
+ */
+function calculateListItemHeight(item: ListItem, styles: PptxStyleOptions): number {
+    let totalHeight = 0;
+    for (const contentNode of item.children) {
+        // Sum the heights of the content within the list item.
+        // Each element's height already includes its own padding.
+        totalHeight += calculateElementHeight(contentNode, styles);
+    }
+    return totalHeight;
 }
 
 /** Renders a paragraph node, handling special cases for images and list-like text. */
@@ -204,74 +220,60 @@ async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: numbe
 }
 
 /** Renders a list node. */
-async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
+async function renderList(slide: PptxGenJS.Slide, node: List, y: number, _h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, level = 0): Promise<number> {
     let currentY = y;
-    let accumulatedRuns: PptxGenJS.TextProps[] = [];
-    let accumulatedParaNodes: Paragraph[] = [];
-
     const defaultFont = isRtl ? fonts.rtl : fonts.default;
     const bodyStyle = { ...styles.body };
     if (defaultFont) bodyStyle.fontFace = defaultFont;
 
-    const renderAccumulatedRuns = () => {
-        if (accumulatedRuns.length > 0) {
-            let height = 0;
-            for (const pNode of accumulatedParaNodes) {
-                height += calculateElementHeight(pNode, styles) - ELEMENT_PADDING;
-            }
+    for (const item of node.children) {
+        let isFirstParaOfItem = true;
 
-            slide.addText(accumulatedRuns, {
-                x: CONTENT_X, y: currentY, w: CONTENT_WIDTH, h: height,
-                ...bodyStyle,
-                bullet: { type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') },
-                rtlMode: isRtl,
-                align: isRtl ? 'right' : styles.body.align,
-            });
+        for (const contentNode of item.children) {
+            const elementHeight = calculateElementHeight(contentNode, styles);
+            const contentHeight = elementHeight > ELEMENT_PADDING ? elementHeight - ELEMENT_PADDING : elementHeight;
 
-            currentY += height;
-            accumulatedRuns = [];
-            accumulatedParaNodes = [];
-        }
-    };
+            if (contentNode.type === 'paragraph') {
+                const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles, isRtl, fonts);
+                if (paraRuns.length > 0) {
+                    const textOptions: PptxGenJS.TextPropsOptions = {
+                        x: CONTENT_X, y: currentY, w: CONTENT_WIDTH, h: contentHeight,
+                        ...bodyStyle,
+                        rtlMode: isRtl,
+                        align: isRtl ? 'right' : styles.body.align,
+                    };
 
-    const processList = async (listNode: List, level: number) => {
-        for (const [i, item] of listNode.children.entries()) {
-            for (const [contentIndex, contentNode] of item.children.entries()) {
-                if (contentNode.type === 'paragraph') {
-                    const paraRuns = await transformInlinesToPptxText(contentNode.children, {}, styles, isRtl, fonts);
-                    if (paraRuns.length > 0) {
-                        if (contentIndex === 0) {
-                            const cleanedText = (paraRuns[0].text || '').replace(/^\s*([*+-]|\d+[.)])\s*/, '');
-                            paraRuns[0].text = '\t'.repeat(level) + cleanedText;
-                        } else {
-                            accumulatedRuns.push({ text: '\n' });
-                        }
-                        accumulatedRuns.push(...paraRuns);
-                        accumulatedParaNodes.push(contentNode);
+                    if (isFirstParaOfItem) {
+                        textOptions.bullet = { indent: 25 + (level * 25), type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') };
+                        isFirstParaOfItem = false;
+                    } else {
+                        const INDENT_X = 0.5;
+                        textOptions.x += (level + 1) * INDENT_X;
+                        textOptions.w -= (level + 1) * INDENT_X;
                     }
-                } else if (contentNode.type === 'table' || contentNode.type === 'list') {
-                    renderAccumulatedRuns();
-                    const elementHeight = calculateElementHeight(contentNode, styles);
-                    if (contentNode.type === 'table') {
-                        await renderTable(slide, contentNode, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, fonts);
-                    } else { // it's a list
-                        await renderList(slide, contentNode, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, fonts);
-                    }
-                    currentY += elementHeight;
+                    slide.addText(paraRuns, textOptions);
+                }
+            } else {
+                isFirstParaOfItem = true; // Any block element resets this
+                const INDENT_PER_LEVEL = 0.5;
+                const blockX = CONTENT_X + ((level + 1) * INDENT_PER_LEVEL);
+                const blockW = CONTENT_WIDTH - ((level + 1) * INDENT_PER_LEVEL);
+
+                if (contentNode.type === 'table') {
+                    await renderTable(slide, contentNode, currentY, contentHeight, styles, isRtl, fonts, blockX, blockW);
+                } else if (contentNode.type === 'code') {
+                    await renderCode(slide, contentNode, currentY, contentHeight, styles, isRtl, fonts, level + 1);
+                } else if (contentNode.type === 'list') {
+                    // The recursive call returns the new Y, so we update our `currentY` and then subtract the
+                    // element height because the main loop will add it back.
+                    currentY = await renderList(slide, contentNode, currentY, contentHeight, styles, isRtl, fonts, level + 1);
+                    currentY -= elementHeight;
                 }
             }
-            if (i < listNode.children.length - 1) {
-                const lastChild = item.children[item.children.length - 1];
-                if (lastChild.type === 'paragraph') {
-                    accumulatedRuns.push({ text: '\n' });
-                }
-            }
+            currentY += elementHeight;
         }
-    };
-
-    await processList(node, 0);
-
-    renderAccumulatedRuns();
+    }
+    return currentY;
 }
 
 /** Renders a blockquote node. */
@@ -290,7 +292,7 @@ async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: num
 }
 
 /** Renders a table node. */
-async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}) {
+async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, x: number = CONTENT_X, w: number = CONTENT_WIDTH) {
     const tableRows: PptxGenJS.TableRow[] = [];
     for (const [rowIndex, rowNode] of node.children.entries()) {
         const tableCells: PptxGenJS.TableCell[] = [];
@@ -333,7 +335,7 @@ async function renderNodeOnSlide(slide: PptxGenJS.Slide, node: RootContent, y: n
             await renderBlockquote(slide, node, y, h, styles, isRtl, fonts);
             break;
         case 'table':
-            await renderTable(slide, node, y, h, styles, isRtl, fonts);
+            await renderTable(slide, node, y, h, styles, isRtl, fonts); // This will use default x/w
             break;
         case 'code':
             await renderCode(slide, node, y, h, styles, isRtl, fonts);
@@ -421,7 +423,7 @@ async function processSlideTitleAndSubtitle(
                 }
                 runsWithBreaks.push({ text: '\n', options: run.options }); // Add new line after colon
                 if (afterColon.trim()) {
-                    runsWithBreaks.push({ text: afterColon.trim(), options: { ...run.options, ...styles.subtitle } });
+                    runsWithBreaks.push({ text: afterColon.trim() + ' ', options: { ...run.options, ...styles.subtitle } });
                 } else if (i + 1 < titleRuns.length) { // If there's content after the colon in the next run
                     const nextRun = titleRuns[i + 1];
                     if (nextRun.text) nextRun.text = nextRun.text.trimStart();
@@ -429,7 +431,7 @@ async function processSlideTitleAndSubtitle(
                 }
                 colonFoundAndHandled = true;
             } else {
-                runsWithBreaks.push(run);
+                runsWithBreaks.push({ text: run.text, options: { ...run.options, ...styles.subtitle } });
             }
         }
 
@@ -499,36 +501,44 @@ async function createSlidesWithContent(
                 // Lists are processed item by item to allow breaking across slides.
                 // This logic is an adaptation of `renderList` with overflow handling.
                 const processListItems = async (listNode: List, level: number) => {
-                    for (const item of listNode.children) {
-                        for (const contentNode of item.children) {
-                            const elementHeight = calculateElementHeight(contentNode, styles);
+                    for (const item of listNode.children) { // `item` is a ListItem
+                        const itemHeight = calculateListItemHeight(item, styles);
 
-                            if (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y) {
-                                slide = createNewSlideForOverflow();
-                                currentY = BODY_START_Y;
-                            }
-
-                            // To render a single list item's content with the correct bullet,
-                            // we create a temporary list node containing only that content.
-                            const tempListWithOneItem: List = {
-                                type: 'list',
-                                ordered: listNode.ordered,
-                                children: [{ type: 'listItem', children: [contentNode] }],
-                            };
-                            await renderList(slide, tempListWithOneItem, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
-                            currentY += elementHeight;
+                        if (currentY + itemHeight > BODY_END_Y && currentY > BODY_START_Y) {
+                            slide = createNewSlideForOverflow();
+                            currentY = BODY_START_Y;
                         }
+
+                        // To render a single list item, we create a temporary list node containing only that item.
+                        const tempListWithOneItem: List = {
+                            type: 'list',
+                            ordered: listNode.ordered,
+                            children: [item], // Pass the whole item
+                        };
+                        await renderList(slide, tempListWithOneItem, currentY, itemHeight, styles, isRtl, font);
+                        currentY += itemHeight;
                     }
                 };
                 await processListItems(node, 0);
             } else {
-                const elementHeight = calculateElementHeight(node, styles);
-                if (elementHeight > availableBodyHeight || (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y)) {
-                    slide = createNewSlideForOverflow();
-                    currentY = BODY_START_Y;
+                if (node.type === 'table' || node.type === 'code') {
+                    // Tables and code blocks are often large and should start on a new slide if not the first element.
+                    if (currentY > BODY_START_Y) {
+                        slide = createNewSlideForOverflow();
+                        currentY = BODY_START_Y;
+                    }
+                    const elementHeight = calculateElementHeight(node, styles);
+                    await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
+                    currentY += elementHeight;
+                } else {
+                    const elementHeight = calculateElementHeight(node, styles);
+                    if (elementHeight > availableBodyHeight || (currentY + elementHeight > BODY_END_Y && currentY > BODY_START_Y)) {
+                        slide = createNewSlideForOverflow();
+                        currentY = BODY_START_Y;
+                    }
+                    await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
+                    currentY += elementHeight;
                 }
-                await renderNodeOnSlide(slide, node, currentY, elementHeight - ELEMENT_PADDING, styles, isRtl, font);
-                currentY += elementHeight;
             }
         }
     }
