@@ -2,22 +2,22 @@
 
 'use client';
 
-import type { PptxTemplate } from '@/lib/types';
-import { fontFamily } from 'html2canvas/dist/types/css/property-descriptors/font-family';
+import type { PptxTemplate, PptxStyleOptions } from '@/lib/types';
 
 
 export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
-const modern: PptxTemplate['styles'] = {
+const modern: PptxStyleOptions = {
     background: { color: 'FFFFFF' },
     title: { fontFace: 'Calibri', fontSize: 28, bold: true, color: '363636', align: 'left', valign: 'middle' },
     body: { fontFace: 'Calibri', fontSize: 18, color: '4f4f4f', align: 'left', lineSpacing: 25, valign: 'top' },
-    subtitle: { fontFace: 'Calibri', fontFamily: 'Calibri', fontSize: 16, italic: true, color: '6c757d'},
+    subtitle: { fontFace: 'Calibri', fontSize: 16, italic: true, color: '6c757d'},
     blockquote: { color: '6c757d', italic: true, indent: 0.5 },
     code: { fontFace: 'Courier New', fontSize: 12, fill: { color: 'F5F5F5' }, margin: 10, valign: 'top' },
     link: { color: '0052CC', underline: true },
     inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2', fontSize: 14 },
     bullet: { type: 'bullet', code: {fontFamily: 'Calibri'} }, // A standard solid circle bullet
-    table: {
+    border: { type: 'solid', pt: 1, color: 'D9D9D9' },
+    table: { // Fix: Changed type to 'solid'
         // Table-wide properties, including default cell styles
         border: { type: 'solid', pt: 1, color: 'D9D9D9' },
         fontFace: 'Calibri',
@@ -46,7 +46,7 @@ const modern: PptxTemplate['styles'] = {
 
 };
 
-const dark: PptxTemplate['styles'] = {
+const dark: PptxStyleOptions = {
     background: { color: '262626' },
     title: { fontFace: 'Helvetica', fontSize: 32, bold: true, color: 'FFFFFF', align: 'center' },
     body: { fontFace: 'Helvetica', fontSize: 18, color: 'F1F1F1', align: 'left', lineSpacing: 36, valign: 'top' },
@@ -69,9 +69,10 @@ const dark: PptxTemplate['styles'] = {
         fill: { color: '444444' },
     },
     tableCellStyle: {},
+    border: { type: 'solid', pt: 1, color: '666666' },
 };
 
-const professional: PptxTemplate['styles'] = {
+const professional: PptxStyleOptions = {
     background: { color: 'F4F7F9' },
     title: { fontFace: 'Garamond', fontSize: 30, bold: false, color: '003366', align: 'left' },
     body: { fontFace: 'Garamond', fontSize: 16, color: '333333', align: 'left', lineSpacing: 32, valign: 'top' },
@@ -82,7 +83,7 @@ const professional: PptxTemplate['styles'] = {
     inlineCode: { fontFace: 'Consolas', color: 'C7254E', highlight: 'F9F2F4' },
     bullet: { type: 'bullet' }, // default
     table: {
-        border: { type: 'solid', pt: 1, color: 'B0C4DE' }, // Light Steel Blue
+        border: { type: 'solid', pt: 1, color: 'B0C4DE' }, // Fix: Changed type to 'solid'
         fontFace: 'Garamond',
         fontSize: 12,
         color: '333333',
@@ -96,6 +97,7 @@ const professional: PptxTemplate['styles'] = {
         align: 'center',
     },
     tableCellStyle: {},
+    border:{ type: 'solid', pt: 1, color: 'B0C4DE' }
 };
 
 

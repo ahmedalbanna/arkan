@@ -37,6 +37,7 @@ export const PptxStyleOptionsSchema = z.object({
     bold: z.boolean(),
     color: z.string(),
     align: z.enum(['left', 'center', 'right']),
+    valign: z.enum(['top', 'middle', 'bottom']).optional(),
   }),
   body: z.object({
     fontFace: z.string(),
@@ -51,6 +52,8 @@ export const PptxStyleOptionsSchema = z.object({
     code: z.any().optional(), // Allow any type for 'code' property
   }),
   subtitle: z.object({
+    fontFace: z.string().optional(),
+    fontFamily: z.string().optional(),
     fontSize: z.number(),
     italic: z.boolean(),
     color: z.string(),
@@ -61,6 +64,7 @@ export const PptxStyleOptionsSchema = z.object({
     indent: z.number(),
   }),
   table: z.object({
+    border: z.object({ type: z.string(), pt: z.number(), color: z.string() }).optional(),
     fontFace: z.string(),
     fontSize: z.number(),
     color: z.string(),
@@ -70,15 +74,26 @@ export const PptxStyleOptionsSchema = z.object({
   tableHeaderStyle: z.object({
     bold: z.boolean(),
     fill: z.object({ color: z.string() }),
-
+    color: z.string().optional(),
+    align: z.enum(['left', 'center', 'right']).optional(),
+    valign: z.enum(['top', 'middle', 'bottom']).optional(),
+    fontFace: z.string().optional(),
+    fontSize: z.number().optional(),
   }),
-  tableCellStyle: z.object({}),
+  tableCellStyle: z.object({
+    fontFace: z.string().optional(),
+    fontSize: z.number().optional(),
+    color: z.string().optional(),
+    valign: z.enum(['top', 'middle', 'bottom']).optional(),
+    align: z.enum(['left', 'center', 'right']).optional(),
+  }),
   code: z.object({
     fontFace: z.string(),
     fontSize: z.number(),
-    color: z.string(),
+    color: z.string().optional(),
     fill: z.object({ color: z.string() }),
     margin: z.number(),
+    valign: z.enum(['top', 'middle', 'bottom']).optional(),
   }),
   link: z.object({
     color: z.string(),
@@ -88,6 +103,12 @@ export const PptxStyleOptionsSchema = z.object({
     fontFace: z.string(),
     color: z.string(),
     highlight: z.string(),
+    fontSize: z.number().optional(),
+  }),
+  border: z.object({
+    type: z.string(),
+    pt: z.number(),
+    color: z.string(),
   }),
 });
 
