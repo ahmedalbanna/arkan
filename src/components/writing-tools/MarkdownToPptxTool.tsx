@@ -25,6 +25,7 @@ const markdownToPptxSchema = z.object({
     .regex(/^[a-zA-Z0-9_-]+$/, 'File name can only contain letters, numbers, underscores, and hyphens.'),
   template: z.enum(['modern', 'dark', 'professional']),
   isRtl: z.boolean().default(false),
+  includeToc: z.boolean().default(false),
 });
 
 type MarkdownToPptxFormValues = z.infer<typeof markdownToPptxSchema>;
@@ -139,6 +140,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       fileName: 'presentation',
       template: 'modern',
       isRtl: false,
+      includeToc: false,
     },
   });
 
@@ -149,6 +151,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
         styles: templates[data.template].styles,
         title: data.fileName,
         isRtl: data.isRtl,
+        includeToc: data.includeToc,
       });
       toast({
         title: 'Conversion Successful',
@@ -238,6 +241,22 @@ This slide demonstrates how a very long paragraph will gracefully break across m
               )}
             />
             <Label htmlFor="isRtl" className="cursor-pointer">Enable Right-to-Left (RTL) text direction (for Arabic, Hebrew, etc.)</Label>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="includeToc"
+              control={form.control}
+              render={({ field }) => (
+                <Checkbox
+                  id="includeToc"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isConverting}
+                />
+              )}
+            />
+            <Label htmlFor="includeToc" className="cursor-pointer">Include Table of Contents slide</Label>
           </div>
 
           <Button type="submit" disabled={isConverting} className="w-full">

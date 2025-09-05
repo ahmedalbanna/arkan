@@ -45,6 +45,7 @@ export interface PptxConversionOptions {
     title?: string;
     isRtl?: boolean;
     fonts?: FontOptions;
+    includeToc?: boolean;
 }
 
 /**
@@ -988,8 +989,9 @@ async function createSlidesWithContent(
     let slideCount = 0;
 
     for (const slideAst of slidesContent) {
-        const isFirstSlide = slideCount === 0;
-        const masterName = isFirstSlide ? masterNames.cover : masterNames.content;
+        // The first slide is a "cover" only if it does NOT contain a heading.
+        const isCover = slideCount === 0 && !slideAst.children.some(node => node.type === 'heading');
+        const masterName = isCover ? masterNames.cover : masterNames.content;
 
         let slide = pptx.addSlide({ masterName });
         slideCount++;
@@ -1045,7 +1047,7 @@ export async function convertMarkdownToPptx(
     options: PptxConversionOptions = {},
 ) {
     const pptx = new PptxGenJS();
-    const { styles = templates.modern.styles, isRtl = false, fonts = {} } = options;
+    const { styles = templates.modern.styles, isRtl = false, fonts = {}, includeToc = false } = options;
 
     pptx.rtlMode = isRtl;
     pptx.layout = 'LAYOUT_16x9';
@@ -1089,7 +1091,42 @@ export async function convertMarkdownToPptx(
 
     const processedMarkdown = processPlantUml(markdown);
     const ast = unified().use(remarkParse).use(remarkGfm).parse(processedMarkdown) as MdastRoot;
-    const slidesContent = splitAstIntoSlides(ast);
+    let slidesContent = splitAstIntoSlides(ast);
+
+    if (includeToc && slidesContent.length > 0) {
+        const tocItems: ListItem[] = [];
+        // Generate TOC from all slides that have a title.
+        for (const slideAst of slidesContent) {
+            const firstNode = slideAst.children.find(node => node.type === 'heading');
+            if (firstNode && firstNode.type === 'heading') {
+                let titleText = getNodeText(firstNode);
+                // The title might be split into title and subtitle. We only want the subtitle part.
+                if (titleText.includes(':')) {
+                    titleText = titleText.split(':')[1];
+                }
+
+                tocItems.push({
+                    type: 'listItem',
+                    spread: false,
+                    children: [{
+                        type: 'paragraph',
+                        children: [{ type: 'text', value: titleText }]
+                    }]
+                });
+            }
+        }
+
+        if (tocItems.length > 0) {
+            const tocSlideAst: MdastRoot = {
+                type: 'root',
+                children: [
+                    { type: 'heading', depth: 1, children: [{ type: 'text', value: 'Table of Contents' }] },
+                    { type: 'list', ordered: true, start: 1, spread: false, children: tocItems }
+                ]
+            };
+            slidesContent.splice(1, 0, tocSlideAst);
+        }
+    }
 
     await createSlidesWithContent(pptx, slidesContent, styles, { cover: COVER_MASTER, content: CONTENT_MASTER }, isRtl, fonts);
 
