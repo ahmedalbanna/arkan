@@ -246,11 +246,34 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             const lineCount = calculateLineCount(bqText, fontFace, fontSize, layout.CONTENT_WIDTH);
             return (lineCount * lineHeight) + layout.ELEMENT_PADDING;
         }
-        case 'table':
-            // Estimate table height: (number of rows) * (line height per row) + padding
-            // Assuming each row is about 1.5 lines high to account for cell padding.
-            const tableLineHeight = ((typeof styles.table?.fontSize === 'number' ? styles.table.fontSize : 14) * 1.2) / 72;
-            return (node.children.length * tableLineHeight * 1.5) + layout.ELEMENT_PADDING;
+        case 'table': {
+            // More accurate table height calculation
+            let totalTableHeight = 0;
+            const tableStyle = styles.table || {};
+            const numColumns = node.children[0]?.children.length || 1;
+            const columnWidth = layout.CONTENT_WIDTH / numColumns; // Assuming equal column widths
+
+            for (const [rowIndex, rowNode] of node.children.entries()) {
+                let maxLinesInRow = 1; // A row is at least one line high.
+                const isHeader = rowIndex === 0;
+                const cellStyle = isHeader ? styles.tableHeaderStyle : styles.tableCellStyle;
+
+                const fontFace = cellStyle?.fontFace || tableStyle.fontFace || styles.body.fontFace || 'Calibri';
+                const fontSize = cellStyle?.fontSize || tableStyle.fontSize || 14;
+                const lineHeight = (fontSize * 1.2) / 72; // in inches, with a 1.2 multiplier for line spacing
+
+                for (const cellNode of rowNode.children) {
+                    const cellText = getNodeText(cellNode);
+                    const lineCountInCell = calculateLineCount(cellText, fontFace, fontSize, columnWidth);
+                    if (lineCountInCell > maxLinesInRow) {
+                        maxLinesInRow = lineCountInCell;
+                    }
+                }
+                // Add height of this row to total. Add a small multiplier for vertical cell padding.
+                totalTableHeight += maxLinesInRow * lineHeight * 1.2;
+            }
+            return totalTableHeight + layout.ELEMENT_PADDING;
+        }
 
         case 'code': {
             const codeText = node.value;
@@ -309,83 +332,6 @@ async function renderParagraph(slide: PptxGenJS.Slide, node: Paragraph, y: numbe
     }
 }
 
-/** Helper to render a paragraph with list bullet formatting. */
-async function renderBulletedParagraph(
-    slide: PptxGenJS.Slide,
-    node: Paragraph,
-    pos: { y: number; h: number },
-    listInfo: {
-        level: number;
-        ordered: boolean;
-        isRtl: boolean;
-        styles: PptxStyleOptions;
-        fonts: FontOptions;
-        footnoteIdMap: Map<string, number>;
-    }
-) {
-    const { y, h } = pos;
-    const { level, ordered, isRtl, styles, fonts, footnoteIdMap } = listInfo;
-
-    const paraRuns = await transformInlinesToPptxText(node.children, {}, styles, isRtl, fonts, footnoteIdMap);
-    if (paraRuns.length === 0) return;
-
-    const defaultFont = isRtl ? fonts.rtl : fonts.default;
-    const bodyStyle = { ...styles.body };
-    if (defaultFont) bodyStyle.fontFace = defaultFont;
-
-    slide.addText(paraRuns, {
-        x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h,
-        ...bodyStyle,
-        rtlMode: isRtl,
-        align: isRtl ? 'right' : styles.body.align,
-        bullet: { indent: 25 + (level * 25), type: ordered ? 'number' : (styles.bullet?.type || 'bullet') },
-    });
-}
-
-/** Renders a list node, which is expected to contain a single list item for slide-breaking purposes. */
-async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, level = 0, footnoteIdMap: Map<string, number> = new Map()): Promise<number> {
-    let currentY = y;
-    const item = node.children[0];
-    if (!item) return y;
-
-    const itemNaturalHeight = calculateListItemHeight(item, styles);
-    const extraHeight = h > itemNaturalHeight ? h - itemNaturalHeight : 0;
-    let isFirstBlockOfItem = true;
-
-    for (const [contentIndex, contentNode] of item.children.entries()) {
-        const isLastContentNode = contentIndex === item.children.length - 1;
-        let elementHeight = calculateElementHeight(contentNode, styles);
-        let contentRenderHeight = elementHeight > layout.ELEMENT_PADDING ? elementHeight - layout.ELEMENT_PADDING : elementHeight;
-
-        if (isLastContentNode && extraHeight > 0) {
-            contentRenderHeight += extraHeight;
-            elementHeight += extraHeight;
-        }
-
-        if (isFirstBlockOfItem && contentNode.type === 'paragraph') {
-            await renderBulletedParagraph(slide, contentNode, { y: currentY, h: contentRenderHeight }, {
-                level, ordered: node.ordered, isRtl, styles, fonts, footnoteIdMap
-            });
-        } else {
-            const INDENT_PER_LEVEL = 0.5;
-            const blockX = layout.CONTENT_X + ((level + 1) * INDENT_PER_LEVEL);
-            const blockW = layout.CONTENT_WIDTH - ((level + 1) * INDENT_PER_LEVEL);
-
-            if (contentNode.type === 'list') {
-                currentY = await renderList(slide, contentNode as List, currentY, contentRenderHeight, styles, isRtl, fonts, level + 1, footnoteIdMap);
-                currentY -= elementHeight; // Adjust for outer loop increment
-            } else {
-                await renderNodeOnSlide(slide, contentNode, currentY, contentRenderHeight, styles, isRtl, fonts, footnoteIdMap, blockX, blockW);
-            }
-        }
-
-        isFirstBlockOfItem = false;
-        currentY += elementHeight;
-    }
-
-    return currentY;
-}
-
 /** Renders a blockquote node. */
 async function renderBlockquote(slide: PptxGenJS.Slide, node: Blockquote, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, footnoteIdMap: Map<string, number> = new Map(), x: number = layout.CONTENT_X, w: number = layout.CONTENT_WIDTH) {
     const blockquoteStyle = { ...styles.body, ...styles.blockquote };
@@ -430,6 +376,22 @@ async function renderCode(slide: PptxGenJS.Slide, node: Code, y: number, h: numb
     });
 }
 
+/** Renders a list node by processing its items. This function is now a simple dispatcher to the main `processListNode` logic. */
+async function renderList(slide: PptxGenJS.Slide, node: List, y: number, h: number, styles: PptxStyleOptions, isRtl = false, fonts: FontOptions = {}, level = 0, footnoteIdMap: Map<string, number> = new Map()): Promise<number> {
+    // This function is now a wrapper. The main logic is in processListNode.
+    // It's kept for calls from `renderNodeOnSlide` for nested lists.
+    // We'll process each item individually to allow for breaking.
+    let currentY = y;
+    for (const item of node.children) {
+        const itemHeight = calculateListItemHeight(item, styles);
+        // Simplified rendering for nested lists. Complex splitting is handled at the top level.
+        const itemAsList: List = { type: 'list', ordered: node.ordered, children: [item] };
+        await renderNodeOnSlide(slide, itemAsList, currentY, itemHeight, styles, isRtl, fonts, footnoteIdMap);
+        currentY += itemHeight;
+    }
+    return currentY;
+}
+
 /**
  * Renders a markdown AST node onto a slide by dispatching to the appropriate render function.
  */
@@ -462,24 +424,57 @@ function splitAstIntoSlides(ast: MdastRoot): MdastRoot[] {
     const slides: MdastRoot[] = [];
     if (!ast.children.length) return slides;
 
+    const hasMeaningfulContent = (nodes: RootContent[]): boolean => {
+        return nodes.some(node => {
+            if (node.type === 'paragraph') {
+                return (node.children.length === 1 && node.children[0].type === 'image') || getNodeText(node).trim() !== '';
+            }
+            // Ignore slide breaks for this check
+            return node.type !== 'thematicBreak' && !(node.type === 'html' && node.value.includes('<!-- slide-break -->'));
+        });
+    };
+
     let currentSlideContent: RootContent[] = [];
     const firstHeadingIndex = ast.children.findIndex(node => node.type === 'heading');
 
+    // If there's no heading, treat the whole document as one slide if it has content.
     if (firstHeadingIndex === -1) {
-        return ast.children.length > 0 ? [{ type: 'root', children: ast.children }] : [];
+        if (hasMeaningfulContent(ast.children)) {
+            slides.push({ type: 'root', children: ast.children });
+        }
+        return slides;
     }
 
+    // If there's content before the first heading, make it the first slide.
+    if (firstHeadingIndex > 0) {
+        const contentBefore = ast.children.slice(0, firstHeadingIndex);
+        if (hasMeaningfulContent(contentBefore)) {
+            slides.push({ type: 'root', children: contentBefore });
+        }
+    }
+
+    // Process from the first heading onwards
     for (let i = firstHeadingIndex; i < ast.children.length; i++) {
         const node = ast.children[i];
-        const isSlideBreak = node.type === 'heading' || node.type === 'thematicBreak';
+        const isHtmlSlideBreak = node.type === 'html' && node.value.includes('<!-- slide-break -->');
+        const isSlideBreak = node.type === 'heading' || node.type === 'thematicBreak' || isHtmlSlideBreak;
 
         if (isSlideBreak && currentSlideContent.length > 0) {
             slides.push({ type: 'root', children: currentSlideContent });
             currentSlideContent = [];
         }
 
-        if (node.type !== 'thematicBreak') {
-            currentSlideContent.push(node);
+        // Don't add thematic breaks or custom HTML breaks to the slide content
+        if (node.type !== 'thematicBreak' && !isHtmlSlideBreak) {
+            // Ignore empty paragraph nodes, as they are just newlines in markdown
+            if (node.type === 'paragraph') {
+                const isImageParagraph = node.children.length === 1 && node.children[0].type === 'image';
+                if (isImageParagraph || getNodeText(node).trim() !== '') {
+                    currentSlideContent.push(node);
+                }
+            } else {
+                currentSlideContent.push(node);
+            }
         }
     }
 
@@ -488,6 +483,45 @@ function splitAstIntoSlides(ast: MdastRoot): MdastRoot[] {
     }
 
     return slides;
+}
+
+/**
+ * Splits an array of title runs into title and subtitle parts based on a colon.
+ * @param titleRuns The original array of PptxGenJS.TextProps.
+ * @param styles The style options for the presentation.
+ * @returns An array of PptxGenJS.TextProps with subtitle styling applied after the colon.
+ */
+function splitTitleRuns(titleRuns: PptxGenJS.TextProps[], styles: PptxStyleOptions): PptxGenJS.TextProps[] {
+    const colonRunIndex = titleRuns.findIndex(run => run.text?.includes(':'));
+
+    if (colonRunIndex === -1) {
+        return titleRuns;
+    }
+
+    const runsWithBreaks: PptxGenJS.TextProps[] = [];
+    runsWithBreaks.push(...titleRuns.slice(0, colonRunIndex));
+
+    const colonRun = titleRuns[colonRunIndex];
+    const [textBefore, textAfter] = (colonRun.text || '').split(':', 2);
+
+    if (textBefore) {
+        runsWithBreaks.push({ text: textBefore, options: colonRun.options });
+    }
+
+    runsWithBreaks.push({ text: '\n', options: { ...colonRun.options } });
+
+    if (textAfter.trim()) {
+        runsWithBreaks.push({ text: textAfter.trim() + ' ', options: { ...colonRun.options, ...styles.subtitle } });
+    }
+
+    for (let i = colonRunIndex + 1; i < titleRuns.length; i++) {
+        const subsequentRun = titleRuns[i];
+        runsWithBreaks.push({
+            text: subsequentRun.text,
+            options: { ...subsequentRun.options, ...styles.subtitle }
+        });
+    }
+    return runsWithBreaks;
 }
 
 /**
@@ -514,43 +548,8 @@ async function processSlideTitleAndSubtitle(
     // Process main title from heading
     const firstNode = bodyNodes[0];
     if (firstNode?.type === 'heading') {
-        const titleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts, footnoteIdMap);
-
-        // Logic to split title into title and subtitle at the first colon
-        const colonRunIndex = titleRuns.findIndex(run => run.text?.includes(':'));
-        if (colonRunIndex !== -1) {
-            const runsWithBreaks: PptxGenJS.TextProps[] = [];
-            // Add all runs before the one with the colon
-            runsWithBreaks.push(...titleRuns.slice(0, colonRunIndex));
-
-            // Split the run with the colon
-            const colonRun = titleRuns[colonRunIndex];
-            const [textBefore, textAfter] = (colonRun.text || '').split(':', 2);
-
-            if (textBefore) {
-                runsWithBreaks.push({ text: textBefore, options: colonRun.options });
-            }
-
-            // Add a line break for the subtitle
-            runsWithBreaks.push({ text: '\n', options: { ...colonRun.options } });
-
-            // Add the part after the colon from the same run, styled as subtitle
-            if (textAfter.trim()) {
-                runsWithBreaks.push({ text: textAfter.trim() + ' ', options: { ...colonRun.options, ...styles.subtitle } });
-            }
-
-            // Add all subsequent runs, styled as subtitle
-            for (let i = colonRunIndex + 1; i < titleRuns.length; i++) {
-                const subsequentRun = titleRuns[i];
-                runsWithBreaks.push({
-                    text: subsequentRun.text,
-                    options: { ...subsequentRun.options, ...styles.subtitle }
-                });
-            }
-            newTitleRuns = runsWithBreaks;
-        } else {
-            newTitleRuns = titleRuns;
-        }
+        const rawTitleRuns = await transformInlinesToPptxText(firstNode.children, {}, styles, isRtl, fonts, footnoteIdMap);
+        newTitleRuns = splitTitleRuns(rawTitleRuns, styles);
 
         // The correct placeholder will be used based on the master slide assigned when the slide was created.
         slide.addText(newTitleRuns, { placeholder: 'title' });
@@ -793,10 +792,157 @@ function splitRunsByHeight(
     return { current: currentRuns, remaining: remainingRuns };
     }
 
-/** Renders an array of TextProps as a paragraph. */
-async function renderParagraphRuns(slide: PptxGenJS.Slide, textRuns: PptxGenJS.TextProps[], y: number, h: number, styles: PptxStyleOptions, isRtl = false) {
-    if (textRuns.length === 0) return;
-    slide.addText(textRuns, { x: layout.CONTENT_X, y, w: layout.CONTENT_WIDTH, h, ...styles.body, rtlMode: isRtl, align: isRtl ? 'right' : styles.body.align });
+
+
+/**
+ * Processes a splittable paragraph node, handling text wrapping and slide overflow.
+ * @returns An object with the potentially new slide and the updated Y position.
+ */
+async function processParagraphNode(
+    node: Paragraph,
+    slide: PptxGenJS.Slide,
+    currentY: number,
+    bodyEndY: number,
+    styles: PptxStyleOptions,
+    isRtl: boolean,
+    fonts: FontOptions,
+    footnoteIdMap: Map<string, number>,
+    createNewSlide: () => PptxGenJS.Slide,
+    options: {
+        bullet?: PptxGenJS.TextPropsOptions['bullet'];
+        x?: number;
+        w?: number;
+    } = {}
+): Promise<{ slide: PptxGenJS.Slide; y: number }> {
+    let textRuns = await transformInlinesToPptxText(node.children, styles.body, styles, isRtl, fonts, footnoteIdMap);
+    let y = currentY;
+    let currentSlide = slide;
+    let isFirstChunk = true;
+
+    while (textRuns.length > 0) {
+        const availableHeight = bodyEndY - y;
+
+        // If there's not enough space for even a single line, create a new slide.
+        const lineHeight = (styles.body.lineSpacing || (styles.body.fontSize || 18) * 1.2) / 72;
+        if (availableHeight < lineHeight) {
+            currentSlide = createNewSlide();
+            y = layout.BODY_START_Y;
+            continue; // Retry on the new slide with full height
+        }
+
+        const { current, remaining } = splitRunsByHeight(textRuns, availableHeight, styles);
+
+        if (current.length === 0 && remaining.length > 0) {
+            // This case should be handled by the check above, but as a safeguard against
+            // edge cases in splitting, we force a new slide to prevent an infinite loop.
+            currentSlide = createNewSlide();
+            y = layout.BODY_START_Y;
+            continue;
+        }
+
+        if (current.length > 0) {
+            const heightForTheseRuns = calculateRunsHeight(current, styles);
+            const renderHeight = Math.min(heightForTheseRuns - layout.ELEMENT_PADDING, availableHeight);
+            const textOptions: PptxGenJS.TextPropsOptions = {
+                x: options.x ?? layout.CONTENT_X,
+                y,
+                w: options.w ?? layout.CONTENT_WIDTH,
+                h: renderHeight,
+                ...styles.body,
+                rtlMode: isRtl,
+                align: isRtl ? 'right' : styles.body.align
+            };
+            if (isFirstChunk && options.bullet) {
+                textOptions.bullet = options.bullet;
+            }
+            currentSlide.addText(current, textOptions);
+            y += heightForTheseRuns;
+        }
+
+        textRuns = remaining;
+        isFirstChunk = false;
+    }
+    return { slide: currentSlide, y };
+}
+
+/**
+ * Processes a list node, handling item-by-item rendering and slide overflow.
+ * @returns An object with the potentially new slide and the updated Y position.
+ */
+async function processListNode( // New function to handle lists with splittable paragraphs
+    node: List,
+    slide: PptxGenJS.Slide,
+    currentY: number,
+    bodyEndY: number,
+    styles: PptxStyleOptions,
+    isRtl: boolean,
+    fonts: FontOptions,
+    footnoteIdMap: Map<string, number>,
+    createNewSlide: () => PptxGenJS.Slide,
+    level = 0
+): Promise<{ slide: PptxGenJS.Slide; y: number }> {
+    let y = currentY;
+    let currentSlide = slide;
+
+    for (const item of node.children) {
+        let isFirstBlockOfItem = true;
+
+        for (const contentNode of item.children) {
+            let result: { slide: PptxGenJS.Slide; y: number };
+
+            if (contentNode.type === 'paragraph') {
+                const paraOptions: { bullet?: any; x?: number; w?: number } = {};
+                if (isFirstBlockOfItem) {
+                    paraOptions.bullet = { indent: 25 + (level * 25), type: node.ordered ? 'number' : (styles.bullet?.type || 'bullet') };
+                } else {
+                    const INDENT_X = 0.5;
+                    paraOptions.x = layout.CONTENT_X + ((level + 1) * INDENT_X);
+                    paraOptions.w = layout.CONTENT_WIDTH - ((level + 1) * INDENT_X);
+                }
+                result = await processParagraphNode(contentNode, currentSlide, y, bodyEndY, styles, isRtl, fonts, footnoteIdMap, createNewSlide, paraOptions);
+            } else if (contentNode.type === 'list') {
+                result = await processListNode(contentNode, currentSlide, y, bodyEndY, styles, isRtl, fonts, footnoteIdMap, createNewSlide, level + 1);
+            } else {
+                const INDENT_PER_LEVEL = 0.5;
+                const blockX = layout.CONTENT_X + ((level + 1) * INDENT_PER_LEVEL);
+                const blockW = layout.CONTENT_WIDTH - ((level + 1) * INDENT_PER_LEVEL);
+                result = await processUnsplittableNode(contentNode, currentSlide, y, bodyEndY, styles, isRtl, fonts, footnoteIdMap, createNewSlide, { x: blockX, w: blockW });
+            }
+            currentSlide = result.slide;
+            y = result.y;
+            isFirstBlockOfItem = false;
+        }
+    }
+
+    return { slide: currentSlide, y };
+}
+
+/**
+ * Processes an unsplittable node (e.g., image, table, code block), handling slide overflow.
+ * @returns An object with the potentially new slide and the updated Y position.
+ */
+async function processUnsplittableNode(
+    node: RootContent,
+    slide: PptxGenJS.Slide,
+    currentY: number,
+    bodyEndY: number,
+    styles: PptxStyleOptions,
+    isRtl: boolean,
+    fonts: FontOptions,
+    footnoteIdMap: Map<string, number>,
+    createNewSlide: () => PptxGenJS.Slide,
+    options: { x?: number; w?: number } = {}
+): Promise<{ slide: PptxGenJS.Slide; y: number }> {
+    const elementHeight = calculateElementHeight(node, styles);
+
+    const overflowResult = manageUnsplittableElementOverflow(currentY, elementHeight, layout.BODY_START_Y, bodyEndY, slide, createNewSlide);
+    const newSlide = overflowResult.slide;
+    let y = overflowResult.y;
+
+    await renderNodeOnSlide(newSlide, node, y, elementHeight - layout.ELEMENT_PADDING, styles, isRtl, fonts, footnoteIdMap, options.x, options.w);
+    y += elementHeight;
+
+    return { slide: newSlide, y };
 }
 
 /**
@@ -875,66 +1021,16 @@ async function createSlidesWithContent(
         const availableBodyHeight = bodyEndY - layout.BODY_START_Y;
 
         for (const node of bodyNodes) {
+            let result: { slide: PptxGenJS.Slide; y: number };
             if (node.type === 'paragraph' && !(node.children.length === 1 && node.children[0].type === 'image')) {
-                // Special handling for text paragraphs that can be split across slides
-                let textRuns = await transformInlinesToPptxText(node.children, styles.body, styles, isRtl, font, footnoteIdMap);
-
-                while (textRuns.length > 0) {
-                    // If the remaining space is not enough for even a tiny element, create a new slide.
-                    // This prevents an infinite loop where splitRunsByHeight returns an empty `current` array.
-                    if (bodyEndY - currentY < layout.ELEMENT_PADDING) {
-                        slide = createNewSlideForOverflow();
-                        currentY = layout.BODY_START_Y;
-                    }
-
-                    const availableHeight = bodyEndY - currentY;
-                    const { current, remaining } = splitRunsByHeight(textRuns, availableHeight, styles);
-
-                    if (current.length > 0) {
-                        const heightForTheseRuns = calculateRunsHeight(current, styles);
-                        // Use the available height for rendering to avoid overflow, even if calculation is slightly off
-                        const renderHeight = Math.min(heightForTheseRuns - layout.ELEMENT_PADDING, availableHeight);
-                        await renderParagraphRuns(slide, current, currentY, renderHeight, styles, isRtl);
-                        currentY += heightForTheseRuns;
-                    }
-
-                    textRuns = remaining;
-                }
+                result = await processParagraphNode(node, slide, currentY, bodyEndY, styles, isRtl, font, footnoteIdMap, createNewSlideForOverflow);
             } else if (node.type === 'list') {
-                // Lists are processed item by item to allow breaking across slides.
-                const processListItems = async (listNode: List, level: number) => {
-                    for (const [index, item] of listNode.children.entries()) {
-                        let itemHeight = calculateListItemHeight(item, styles);
-                        const isLastItemOfList = index === listNode.children.length - 1;
-
-                        // If the last item is one of the final two elements on the slide, expand it to occupy the remaining space.
-                        // This prevents a list from starting at the very bottom of a slide.
-                        const isNearEnd = currentY + itemHeight * 2 > bodyEndY;
-
-                        if (isLastItemOfList && isNearEnd && currentY > layout.BODY_START_Y) {
-                            itemHeight = bodyEndY - currentY;
-                        } else {
-                            const overflowResult = manageUnsplittableElementOverflow(currentY, itemHeight, layout.BODY_START_Y, bodyEndY, slide, createNewSlideForOverflow);
-                            slide = overflowResult.slide;
-                            currentY = overflowResult.y;
-                        }
-
-                        const tempListWithOneItem: List = { type: 'list', ordered: listNode.ordered, children: [item] };
-                        currentY = await renderList(slide, tempListWithOneItem, currentY, itemHeight, styles, isRtl, font, level, footnoteIdMap);
-                    }
-                };
-                await processListItems(node, 0);
+                result = await processListNode(node, slide, currentY, bodyEndY, styles, isRtl, font, footnoteIdMap, createNewSlideForOverflow, 0);
             } else {
-                // Handles all other unsplittable blocks: image-only paragraphs, blockquotes, tables, code blocks
-                const elementHeight = calculateElementHeight(node, styles);
-
-                const overflowResult = manageUnsplittableElementOverflow(currentY, elementHeight, layout.BODY_START_Y, bodyEndY, slide, createNewSlideForOverflow);
-                slide = overflowResult.slide;
-                currentY = overflowResult.y;
-
-                await renderNodeOnSlide(slide, node, currentY, elementHeight - layout.ELEMENT_PADDING, styles, isRtl, font, footnoteIdMap);
-                currentY += elementHeight;
+                result = await processUnsplittableNode(node, slide, currentY, bodyEndY, styles, isRtl, font, footnoteIdMap, createNewSlideForOverflow);
             }
+            slide = result.slide;
+            currentY = result.y;
         }
 
         if (footnotes.length > 0) {
