@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircle, Presentation } from 'lucide-react';
+import { File as FileIcon, LoaderCircle, Presentation } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
+import { convertMarkdownToPptx, convertMarkdownToPdf } from '@/lib/markdown-to-pptx-converter';
 import { templates } from '@/lib/pptx-styles';
 import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 import type { PptxStyleOptions } from '@/lib/types';
@@ -58,6 +58,7 @@ type MarkdownToPptxFormValues = z.infer<typeof markdownToPptxSchema>;
 export function MarkdownToPptxTool() {
   const { toast } = useToast();
   const [isConverting, setIsConverting] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
   const form = useForm<MarkdownToPptxFormValues>({
     resolver: zodResolver(markdownToPptxSchema),
@@ -216,6 +217,49 @@ This slide demonstrates how a very long paragraph will gracefully break across m
     }
   };
 
+  const handleExportPdf = async () => {
+    const data = form.getValues();
+    const result = markdownToPptxSchema.safeParse(data);
+    if (!result.success) {
+      form.trigger();
+      toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors before exporting.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsExportingPdf(true);
+    try {
+      let themeStyles: PptxStyleOptions;
+
+      if (data.useCustomTheme && data.customThemeJson) {
+        try {
+          themeStyles = JSON.parse(data.customThemeJson);
+        } catch (e) {
+          toast({
+            title: 'Invalid Custom Theme JSON',
+            description: 'The provided JSON for the custom theme could not be parsed.',
+            variant: 'destructive',
+          });
+          setIsExportingPdf(false);
+          return;
+        }
+      } else {
+        themeStyles = templates[data.template].styles;
+      }
+
+      await convertMarkdownToPdf(data.markdown, data.fileName, { styles: themeStyles, title: data.fileName, isRtl: data.isRtl });
+      toast({ title: 'Export Successful', description: `Your file ${data.fileName}.pdf has been downloaded.` });
+    } catch (error) {
+      console.error('Failed to convert markdown to pdf:', error);
+      toast({ title: 'Export Failed', description: error instanceof Error ? error.message : String(error), variant: 'destructive' });
+    } finally {
+      setIsExportingPdf(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -322,32 +366,23 @@ This slide demonstrates how a very long paragraph will gracefully break across m
             <Label htmlFor="useCustomTheme" className="cursor-pointer">Use Custom Theme (JSON)</Label>
           </div>
 
-          {useCustomTheme && (
+          {useCustomTheme &&
             <div className="space-y-2">
               <Label htmlFor="customThemeJson">Custom Theme JSON</Label>
-              <Textarea
-                id="customThemeJson"
-                {...form.register('customThemeJson')}
-                placeholder='Paste your PptxStyleOptions JSON here...'
-                className="min-h-[150px] font-mono"
-                disabled={isConverting}
-              />
-              {form.formState.errors.customThemeJson && (
-                <p className="text-sm text-destructive">
-                  {form.formState.errors.customThemeJson.message}
-                </p>
-              )}
-            </div>
-          )}
+              <Textarea id="customThemeJson" {...form.register('customThemeJson')} placeholder="Paste your PptxStyleOptions JSON here..." className="min-h-[150px] font-mono" disabled={isConverting || isExportingPdf} />
+              {form.formState.errors.customThemeJson && <p className="text-sm text-destructive">{form.formState.errors.customThemeJson.message}</p>}
+            </div>}
 
-          <Button type="submit" disabled={isConverting} className="w-full">
-            {isConverting ? (
-              <LoaderCircle className="me-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Presentation className="me-2 h-4 w-4" />
-            )}
-            {isConverting ? 'Converting...' : 'Convert and Download .pptx'}
-          </Button>
+          <div className="flex flex-col md:flex-row gap-4">
+            <Button type="submit" disabled={isConverting || isExportingPdf} className="w-full">
+              {isConverting ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <Presentation className="me-2 h-4 w-4" />}
+              {isConverting ? 'Converting...' : 'Convert and Download .pptx'}
+            </Button>
+            <Button type="button" onClick={handleExportPdf} disabled={isConverting || isExportingPdf} className="w-full" variant="secondary">
+              {isExportingPdf ? <LoaderCircle className="me-2 h-4 w-4 animate-spin" /> : <FileIcon className="me-2 h-4 w-4" />}
+              {isExportingPdf ? 'Exporting...' : 'Export as PDF'}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
