@@ -171,7 +171,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       <CardHeader>
         <CardTitle>Markdown to PowerPoint Converter</CardTitle>
         <CardDescription>
-          Easily convert your markdown documents into styled .pptx presentations. Use `---` or a top-level heading (`#`) to separate slides.
+          Easily convert your markdown documents into styled .pptx presentations. Use `---`, a top-level heading (`#`), or `&lt;!-- slide-break --&gt;` to separate slides.
         </CardDescription>
       </CardHeader>
       <CardContent>
