@@ -204,7 +204,7 @@ async function transformInlinesToPptxText(
             case 'inlineCode':
                 // Inline code should remain LTR
                 const codeFont = fonts.code || styles.inlineCode?.fontFace || 'Courier New';
-                const codeBaseOptions = { ...baseOptions, ...styles.inlineCode };
+                const codeBaseOptions: PptxGenJS.TextPropsOptions = { ...baseOptions, ...styles.inlineCode };
                 delete codeBaseOptions.fontFace;
                 runs.push({ text: node.value, options: { ...codeBaseOptions, fontFace: codeFont, rtlMode: false } });
                 break;
@@ -212,7 +212,7 @@ async function transformInlinesToPptxText(
                 runs.push({ text: node.value, options: { ...currentBaseOptions, rtlMode: isRtl } });
                 break;
             case 'link': {
-                const linkStyle = { ...currentBaseOptions, ...styles.link };
+                const linkStyle: PptxGenJS.TextPropsOptions = { ...currentBaseOptions, ...styles.link, underline: styles.link.underline ? { style: 'sng' } : undefined };
                 const linkRuns = await transformInlinesToPptxText(node.children, linkStyle, styles, isRtl, fonts, footnoteIdMap);
                 linkRuns.forEach(run => {
                     run.options = { ...run.options, hyperlink: { url: node.url, tooltip: node.title || node.url } };
@@ -393,9 +393,8 @@ async function renderTable(slide: PptxGenJS.Slide, node: Table, y: number, h: nu
         for (const cellNode of rowNode.children) {
             const baseCellStyle = rowIndex === 0 ? styles.tableHeaderStyle : styles.tableCellStyle;
             const cellText = await transformInlinesToPptxText(cellNode.children, baseCellStyle, styles, isRtl, fonts, footnoteIdMap);
-            const isHeader = rowIndex === 0;
-            const cellOptions = isHeader ? styles.tableHeaderStyle : styles.tableCellStyle;
-            tableCells.push({ text: cellText, options: { ...cellOptions, rtlMode: isRtl, align: isRtl ? 'right' : cellOptions?.align || styles.table?.align } });
+            const cellOptions: PptxGenJS.TableCellProps = { ...(rowIndex === 0 ? styles.tableHeaderStyle : styles.tableCellStyle) };
+            tableCells.push({ text: cellText, options: { ...cellOptions, align: isRtl ? 'right' : cellOptions?.align || styles.table?.align, valign: cellOptions?.valign || styles.table?.valign } });
         }
         tableRows.push(tableCells);
     }
@@ -1104,8 +1103,8 @@ export async function convertMarkdownToPptx(
         background: styles.background,
         objects: [
             {
-                placeholder: {
-                    options: { name: 'title', type: 'title', x: 0.5, y: 0, w: '90%', h: '100%', ...coverTitleStyle, rtlMode: isRtl },
+                placeholder: { // @ts-ignore
+                    options: { name: 'title', type: 'title', x: 0.5, y: 0, w: '90%', h: '100%', ...coverTitleStyle, rtlMode: isRtl }, // @ts-ignore
                 },
             },
         ],
@@ -1115,9 +1114,9 @@ export async function convertMarkdownToPptx(
     pptx.defineSlideMaster({
         title: CONTENT_MASTER,
         background: styles.background,
-        objects: [
-            { placeholder: { options: { name: 'title', type: 'title', x: layout.CONTENT_X, y: layout.TITLE_Y, w: layout.CONTENT_WIDTH, h: layout.TITLE_H, margin: 0, ...contentTitleStyle, rtlMode: isRtl } } },
-        ],
+        objects: [{
+            placeholder: { options: { name: 'title', type: 'title', x: layout.CONTENT_X, y: layout.TITLE_Y, w: layout.CONTENT_WIDTH, h: layout.TITLE_H, margin: 0, ...contentTitleStyle } },
+        }, ],
     });
 
     pptx.layout = 'LAYOUT_16x9';

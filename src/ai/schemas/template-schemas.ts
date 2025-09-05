@@ -59,17 +59,21 @@ export const PptxStyleOptionsSchema = z.object({
     color: z.string(),
   }),
   blockquote: z.object({
-    color: z.string(),
-    italic: z.boolean(),
-    indent: z.number(),
-  }),
-  table: z.object({
-    border: z.object({ type: z.string(), pt: z.number(), color: z.string() }).optional(),
     fontFace: z.string(),
     fontSize: z.number(),
     color: z.string(),
-    valign: z.enum(['top', 'middle', 'bottom']),
+    italic: z.boolean(),
+    indent: z.number(),
+    lineSpacing: z.number().optional(),
+    valign: z.enum(['top', 'middle', 'bottom']).optional(),
+  }),
+  table: z.object({
+    color: z.string(),
+    fontFace: z.string(),
+    fontSize: z.number(),
     align: z.enum(['left', 'center', 'right']),
+    valign: z.enum(['top', 'middle', 'bottom']),
+    border: z.object({ type: z.enum(['none', 'solid', 'dash']), color: z.string(), pt: z.number() }).optional(),
   }),
   tableHeaderStyle: z.object({
     bold: z.boolean(),
@@ -86,6 +90,7 @@ export const PptxStyleOptionsSchema = z.object({
     color: z.string().optional(),
     valign: z.enum(['top', 'middle', 'bottom']).optional(),
     align: z.enum(['left', 'center', 'right']).optional(),
+
   }),
   code: z.object({
     fontFace: z.string(),
