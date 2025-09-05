@@ -16,6 +16,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { convertMarkdownToPptx } from '@/lib/markdown-to-pptx-converter';
 import { templates } from '@/lib/pptx-styles';
+import { PptxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
+import type { PptxStyleOptions } from '@/lib/types';
 
 const markdownToPptxSchema = z.object({
   markdown: z.string().min(10, 'Markdown content must be at least 10 characters long.'),
@@ -26,6 +28,29 @@ const markdownToPptxSchema = z.object({
   template: z.enum(['modern', 'dark', 'professional']),
   isRtl: z.boolean().default(false),
   includeToc: z.boolean().default(false),
+  useCustomTheme: z.boolean().default(false),
+  customThemeJson: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.useCustomTheme) {
+    if (!data.customThemeJson || data.customThemeJson.trim() === '') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['customThemeJson'],
+        message: 'Custom theme JSON is required when "Use Custom Theme" is enabled.',
+      });
+      return;
+    }
+    try {
+      const theme = JSON.parse(data.customThemeJson);
+      PptxStyleOptionsSchema.parse(theme);
+    } catch (e) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['customThemeJson'],
+        message: e instanceof z.ZodError ? 'Custom theme JSON does not match the required schema.' : 'Invalid JSON format.',
+      });
+    }
+  }
 });
 
 type MarkdownToPptxFormValues = z.infer<typeof markdownToPptxSchema>;
@@ -141,14 +166,36 @@ This slide demonstrates how a very long paragraph will gracefully break across m
       template: 'modern',
       isRtl: false,
       includeToc: false,
+      useCustomTheme: false,
+      customThemeJson: JSON.stringify(templates.modern.styles, null, 2),
     },
   });
+
+  const useCustomTheme = form.watch('useCustomTheme');
 
   const onSubmit = async (data: MarkdownToPptxFormValues) => {
     setIsConverting(true);
     try {
+      let themeStyles: PptxStyleOptions;
+
+      if (data.useCustomTheme && data.customThemeJson) {
+        try {
+          themeStyles = JSON.parse(data.customThemeJson);
+        } catch (e) {
+          toast({
+            title: 'Invalid Custom Theme JSON',
+            description: 'The provided JSON for the custom theme could not be parsed.',
+            variant: 'destructive',
+          });
+          setIsConverting(false);
+          return;
+        }
+      } else {
+        themeStyles = templates[data.template].styles;
+      }
+
       await convertMarkdownToPptx(data.markdown, data.fileName, {
-        styles: templates[data.template].styles,
+        styles: themeStyles,
         title: data.fileName,
         isRtl: data.isRtl,
         includeToc: data.includeToc,
@@ -211,7 +258,7 @@ This slide demonstrates how a very long paragraph will gracefully break across m
               <Select
                 onValueChange={(value: 'modern' | 'dark' | 'professional') => form.setValue('template', value)}
                 defaultValue={form.getValues('template')}
-                disabled={isConverting}
+                disabled={isConverting || useCustomTheme}
               >
                 <SelectTrigger id="template-select">
                   <SelectValue placeholder="Select a template" />
@@ -258,6 +305,40 @@ This slide demonstrates how a very long paragraph will gracefully break across m
             />
             <Label htmlFor="includeToc" className="cursor-pointer">Include Table of Contents slide</Label>
           </div>
+
+          <div className="flex items-center space-x-2">
+            <Controller
+              name="useCustomTheme"
+              control={form.control}
+              render={({ field }) => (
+                <Checkbox
+                  id="useCustomTheme"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isConverting}
+                />
+              )}
+            />
+            <Label htmlFor="useCustomTheme" className="cursor-pointer">Use Custom Theme (JSON)</Label>
+          </div>
+
+          {useCustomTheme && (
+            <div className="space-y-2">
+              <Label htmlFor="customThemeJson">Custom Theme JSON</Label>
+              <Textarea
+                id="customThemeJson"
+                {...form.register('customThemeJson')}
+                placeholder='Paste your PptxStyleOptions JSON here...'
+                className="min-h-[150px] font-mono"
+                disabled={isConverting}
+              />
+              {form.formState.errors.customThemeJson && (
+                <p className="text-sm text-destructive">
+                  {form.formState.errors.customThemeJson.message}
+                </p>
+              )}
+            </div>
+          )}
 
           <Button type="submit" disabled={isConverting} className="w-full">
             {isConverting ? (

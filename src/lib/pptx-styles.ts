@@ -17,7 +17,7 @@ const modern: PptxStyleOptions = {
     inlineCode: { fontFace: 'Courier New', color: 'E74C3C', highlight: 'F2F2F2', fontSize: 14 },
     bullet: { type: 'bullet', code: {fontFamily: 'Calibri'} }, // A standard solid circle bullet
     border: { type: 'solid', pt: 1, color: 'D9D9D9' },
-    table: { // Fix: Changed type to 'solid'
+    table: {
         // Table-wide properties, including default cell styles
         border: { type: 'solid', pt: 1, color: 'D9D9D9' },
         fontFace: 'Calibri',

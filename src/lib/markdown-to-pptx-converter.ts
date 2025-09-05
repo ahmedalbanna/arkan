@@ -127,6 +127,40 @@ function calculateLineCount(text: string, fontFace: string, fontSize: number, ma
 }
 
 /**
+ * Calculates the number of lines a code block will occupy.
+ * It considers both explicit newlines and wrapping of long lines.
+ * @param text The text content of the code block.
+ * @param fontFace The font family.
+ * @param fontSize The font size in points.
+ * @param maxWidthInches The maximum width available for the text in inches.
+ * @returns The number of lines.
+ */
+function calculateCodeLineCount(text: string, fontFace: string, fontSize: number, maxWidthInches: number): number {
+    if (!text) {
+        return 1;
+    }
+
+    const context = getCanvasContext(fontFace, fontSize);
+    const maxWidthPx = maxWidthInches * 72; // Convert inches to points
+
+    const lines = text.split('\n');
+    let totalLines = 0;
+
+    for (const line of lines) {
+        // Even an empty line in a code block takes up one line of vertical space.
+        if (line === '') {
+            totalLines++;
+            continue;
+        }
+        const metrics = context.measureText(line);
+        const lineWraps = Math.ceil(metrics.width / maxWidthPx);
+        totalLines += Math.max(1, lineWraps); // A line is at least 1 line high.
+    }
+
+    return Math.max(1, totalLines);
+}
+
+/**
  * Transforms inline markdown content (strong, emphasis, links, etc.) into an array of PptxGenJS TextProps runs.
  * This function is intended for PhrasingContent and does not handle block-level elements.
  * @param nodes An array of mdast PhrasingContent nodes.
@@ -216,7 +250,7 @@ function getNodeText(node: RootContent | PhrasingContent): string {
  * @param styles The style options for the presentation.
  * @returns The calculated height in inches.
  */
-function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): number {
+function calculateElementHeight(node: RootContent, styles: PptxStyleOptions, widthInches: number = layout.CONTENT_WIDTH): number {
     switch (node.type) {
         case 'paragraph': {
             if (node.children.length === 1 && node.children[0].type === 'image') {
@@ -226,7 +260,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             const fontFace = styles.body.fontFace || 'Calibri';
             const fontSize = typeof styles.body.fontSize === 'number' ? styles.body.fontSize : 18;
             const lineHeight = (styles.body.lineSpacing || fontSize * 1.2) / 72; // in inches
-            const lineCount = calculateLineCount(paraText, fontFace, fontSize, layout.CONTENT_WIDTH);
+            const lineCount = calculateLineCount(paraText, fontFace, fontSize, widthInches);
             return (lineCount * lineHeight) + layout.ELEMENT_PADDING;
         }
 
@@ -234,7 +268,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             let totalHeight = 0;
             for (const item of node.children) {
                 // Sum the heights of each list item. `calculateListItemHeight` includes paddings of its children.
-                totalHeight += calculateListItemHeight(item, styles);
+                totalHeight += calculateListItemHeight(item, styles, widthInches);
             }
             // Add padding for the list block itself.
             return totalHeight + layout.ELEMENT_PADDING;
@@ -244,7 +278,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             const fontFace = styles.blockquote?.fontFace || styles.body.fontFace || 'Calibri';
             const fontSize = typeof styles.blockquote?.fontSize === 'number' ? styles.blockquote.fontSize : (typeof styles.body.fontSize === 'number' ? styles.body.fontSize : 18);
             const lineHeight = (styles.blockquote?.lineSpacing || fontSize * 1.2) / 72; // in inches
-            const lineCount = calculateLineCount(bqText, fontFace, fontSize, layout.CONTENT_WIDTH);
+            const lineCount = calculateLineCount(bqText, fontFace, fontSize, widthInches);
             return (lineCount * lineHeight) + layout.ELEMENT_PADDING;
         }
         case 'table': {
@@ -252,7 +286,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             let totalTableHeight = 0;
             const tableStyle = styles.table || {};
             const numColumns = node.children[0]?.children.length || 1;
-            const columnWidth = layout.CONTENT_WIDTH / numColumns; // Assuming equal column widths
+            const columnWidth = widthInches / numColumns; // Assuming equal column widths
 
             for (const [rowIndex, rowNode] of node.children.entries()) {
                 let maxLinesInRow = 1; // A row is at least one line high.
@@ -281,7 +315,7 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
             const codeFontSize = styles.code?.fontSize || 12;
             const codeFontFace = styles.code?.fontFace || 'Courier New';
             const codeLineHeight = (codeFontSize * 1.4) / 72;
-            const lineCount = calculateLineCount(codeText, codeFontFace, codeFontSize, layout.CONTENT_WIDTH);
+            const lineCount = calculateCodeLineCount(codeText, codeFontFace, codeFontSize, widthInches);
             return (lineCount * codeLineHeight) + layout.ELEMENT_PADDING;
         }
 
@@ -296,12 +330,12 @@ function calculateElementHeight(node: RootContent, styles: PptxStyleOptions): nu
  * @param styles The style options for the presentation.
  * @returns The calculated height in inches.
  */
-function calculateListItemHeight(item: ListItem, styles: PptxStyleOptions): number {
+function calculateListItemHeight(item: ListItem, styles: PptxStyleOptions, widthInches: number = layout.CONTENT_WIDTH): number {
     let totalHeight = 0;
     for (const contentNode of item.children) {
         // Sum the heights of the content within the list item.
         // Each element's height already includes its own padding.
-        totalHeight += calculateElementHeight(contentNode, styles);
+        totalHeight += calculateElementHeight(contentNode, styles, widthInches);
     }
     return totalHeight;
 }
@@ -934,7 +968,7 @@ async function processUnsplittableNode(
     createNewSlide: () => PptxGenJS.Slide,
     options: { x?: number; w?: number } = {}
 ): Promise<{ slide: PptxGenJS.Slide; y: number }> {
-    const elementHeight = calculateElementHeight(node, styles);
+    const elementHeight = calculateElementHeight(node, styles, options.w);
 
     const overflowResult = manageUnsplittableElementOverflow(currentY, elementHeight, layout.BODY_START_Y, bodyEndY, slide, createNewSlide);
     const newSlide = overflowResult.slide;
