@@ -10,9 +10,9 @@ import { templates } from '@/lib/pptx-styles'; // Keep for default styles
 import { processPlantUml, arrayBufferToBase64, getProxiedImageBuffer } from '@/lib/utils';
 import type { PptxStyleOptions } from '@/lib/types';
 import { exportComponentAsPDF } from './pdf-exporter';
-import { DEFAULT_FONT, DEFAULT_CODE_FONT, layout } from './constants';
-import { getNodeText, splitAstIntoSlides } from './ast-utils';
-import { createSlidesWithContent, type FontOptions } from './slide-layout-engine';
+import { DEFAULT_FONT, DEFAULT_CODE_FONT, layout } from './pptx-convert/constants';
+import { getNodeText, splitAstIntoSlides } from './pptx-convert/ast-utils';
+import { createSlidesWithContent, type FontOptions } from './pptx-convert/slide-layout-engine';
 
 export interface PptxConversionOptions {
     styles?: PptxStyleOptions;

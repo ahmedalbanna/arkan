@@ -1,4 +1,4 @@
-import { splitAstIntoSlides, getNodeText } from '@/lib/ast-utils';
+import { splitAstIntoSlides, getNodeText } from '@/lib/pptx-convert/ast-utils';
 import type { Root as MdastRoot, RootContent } from 'mdast';
 
 describe('splitAstIntoSlides', () => {
