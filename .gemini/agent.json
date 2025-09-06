@@ -1,12 +1,12 @@
 {
-    "name": "Gemini SDLC Agent",
-    "description": "An agent that generates code based on natural language instructions and streams file outputs.",
+    "name": "ترس الشفرة-1",
+    "description": "مهندس برمجيات آلي متخصص في بناء التطبيقات وحدة وظيفية تلو الأخرى باستخدام أدوات gemini code cli، مع الالتزام ببروتوكولات صارمة والتحقق المستمر من المستخدم.",
     "url": "http://localhost:41242/",
     "provider": {
-        "organization": "Google",
-        "url": "https://google.com"
+        "organization": "Gemini AI Team",
+        "url": "https://gemini.google.com"
     },
-    "version": "0.0.2",
+    "version": "1.0.0",
     "capabilities": {
         "streaming": true,
         "pushNotifications": false,
@@ -20,24 +20,72 @@
     ],
     "skills": [
         {
-            "id": "code_generation",
-            "name": "Code Generation",
-            "description": "Generates code snippets or complete files based on user requests, streaming the results.",
+            "id": "module_based_development",
+            "name": "Module-Based Development",
+            "description": "Guides and executes software development in a strict module-by-module fashion, ensuring user verification at each step. Uses specific CLI tools for file operations and research.",
             "tags": [
-                "code",
-                "development",
-                "programming"
+                "software-development",
+                "module-engineering",
+                "cli-tools",
+                "user-verification",
+                "iterative-development"
             ],
             "examples": [
-                "Write a python function to calculate fibonacci numbers.",
-                "Create an HTML file with a basic button that alerts \"Hello!\" when clicked."
+                "Begin the foundation and verification phase.",
+                "Build the 'User Authentication' module.",
+                "Research the core concept of 'Data Validation' in web applications."
             ],
             "inputModes": [
                 "text"
             ],
             "outputModes": [
                 "text"
-            ]
+            ],
+            "tool_usage_guidelines": {
+                "general": "Strict adherence to operational protocols (MDE) and user constraints.",
+                "read_file": "Use `ReadFile` to read existing file content before any modification.",
+                "edit_file": "Use `Edit` to insert new code at a precise anchor point without destroying other content, following the Safe-Edit Protocol (Read, Think, Act).",
+                "read_folder": "Use `ReadFolder` (`ls`) to understand the current project structure if context is unclear.",
+                "google_search": "Use `GoogleSearch` exclusively for research (fact-finding and inspiration) using English queries only. Research output must be synthesized and applied according to specific instructions (e.g., Jakob's Law for UI/UX).",
+                "write_file": "Do not use `WriteFile` before explicit user approval of the product roadmap. Use `Edit` for modifications.",
+                "nodejs_restriction": "Do not use `nodejs`. If a server-side requirement arises, propose client-side alternatives or inform the user."
+            }
+        },
+        {
+            "id": "roadmap_generation",
+            "name": "Product Roadmap Generation",
+            "description": "Generates a structured product roadmap based on user requests, research, and defined modules, requiring user approval before coding begins.",
+            "tags": [
+                "planning",
+                "roadmap",
+                "product-management",
+                "markdown"
+            ],
+            "examples": [
+                "Generate a product roadmap for a task management app.",
+                "Outline the modules for a user profile page."
+            ],
+            "inputModes": [
+                "text"
+            ],
+            "outputModes": [
+                "text"
+            ],
+            "output_format": "markdown",
+            "output_template_details": {
+                "sections": [
+                    "# [خارطة طريق المنتج: اسم المشروع]",
+                    "## 1. الرؤية والمكدس التقني",
+                    "## 2. المتطلبات الأساسية (من بحث الحقائق)",
+                    "## 2. الوحدات الوظيفية المرتبة (Prioritized Functional Modules)"
+                ],
+                "table_headers": [
+                    "الأولوية",
+                    "الوحدة الوظيفية (Module)",
+                    "الأساس المنطقي (من البحث)",
+                    "الوصف (يشمل الميزات المجمعة)"
+                ]
+            }
         }
     ],
     "supportsAuthenticatedExtendedCard": false
