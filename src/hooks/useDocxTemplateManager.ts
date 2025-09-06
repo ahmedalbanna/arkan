@@ -3,13 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
 import { useRefreshTemplateImage } from '@/hooks';
-import type { TemplateKey } from '@/lib/types';
+import type { DocxTemplateKey  } from '@/lib/types';
 
 export function useDocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, activeTemplateKey, setActiveTemplateKey } = useDocxStyles();
   const deleteMutation = useDeleteDocxTemplate();
   const refreshImageMutation = useRefreshTemplateImage('docx');
-  const [changeQueue, setChangeQueue] = useState<{ key: TemplateKey, path: string, value: any } | null>(null);
+  const [changeQueue, setChangeQueue] = useState<{ key: DocxTemplateKey , path: string, value: any } | null>(null);
 
   // When a change is queued, set the active template key.
   // This will trigger a re-render.
@@ -27,15 +27,15 @@ export function useDocxTemplateManager() {
     }
   }, [activeTemplateKey, changeQueue, updateStyle]);
 
-  const handleStyleChange = (templateKey: TemplateKey, path: string, value: string | number | boolean) => {
-    setChangeQueue({ key: templateKey, path, value });
+  const handleStyleChange = (DocxTemplateKey : DocxTemplateKey , path: string, value: string | number | boolean) => {
+    setChangeQueue({ key: DocxTemplateKey , path, value });
   };
 
-  const handleSave = (key: TemplateKey) => {
+  const handleSave = (key: DocxTemplateKey ) => {
     saveChanges(key);
   };
 
-  const handleDelete = (key: TemplateKey) => {
+  const handleDelete = (key: DocxTemplateKey ) => {
     deleteMutation.mutate(key);
   };
 

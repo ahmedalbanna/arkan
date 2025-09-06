@@ -18,7 +18,7 @@ import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
 
 
-export type TemplateKey = 'modern' | 'classic' | 'academic' | string;
+export type DocxTemplateKey  = 'modern' | 'classic' | 'academic' | string;
 
 export const docxTemplateKeys = {
   all: ["docx-templates"] as const,
@@ -28,7 +28,7 @@ export const docxTemplateKeys = {
 export function useDocxStyles() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const [activeTemplateKey, setActiveTemplateKey] = React.useState<TemplateKey>('modern');
+    const [activeTemplateKey, setActiveTemplateKey] = React.useState<DocxTemplateKey >('modern');
     const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
 
@@ -127,13 +127,13 @@ export function useDeleteDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (templateKey: string) => {
+        mutationFn: async (DocxTemplateKey : string) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return deleteDocxTemplate(templateKey, token);
+            return deleteDocxTemplate(DocxTemplateKey , token);
         },
-        onSuccess: (data, templateKey) => {
+        onSuccess: (data, DocxTemplateKey ) => {
             queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-            toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
+            toast({ title: "Template Deleted", description: `Template "${DocxTemplateKey }" has been deleted.` });
         },
         onError: (error: Error) => {
             handleErrorUtility(error, "Failed to delete template");

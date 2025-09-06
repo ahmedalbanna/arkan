@@ -6,50 +6,46 @@ import {
   ExternalHyperlink,
   FootnoteReferenceRun,
   IRunOptions,
-  ShadingType,
 } from 'docx';
 import { PhrasingContent } from 'mdast';
 import { getProxiedImageBuffer } from '@/lib/utils';
-import { FontOptions } from './types';
+import { ConversionOptions } from './types';
 
-// Helper to convert markdown AST nodes to docx TextRun arrays
 export async function transformInlines(
   nodes: PhrasingContent[],
   footnoteIdMap: Map<string, number>,
-  options: IRunOptions = {},
-  fonts: FontOptions = {}
+  baseOptions: IRunOptions = {},
+  options: ConversionOptions
 ): Promise<(TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[]> {
   const runs: (TextRun | ImageRun | ExternalHyperlink | FootnoteReferenceRun)[] = [];
   for (const node of nodes) {
     switch (node.type) {
       case 'strong':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, bold: true }, fonts)));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...baseOptions, bold: true }, options)));
         break;
       case 'emphasis':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, italics: true }, fonts)));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...baseOptions, italics: true }, options)));
         break;
       case 'delete':
-        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...options, strike: true }, fonts)));
+        runs.push(...(await transformInlines(node.children, footnoteIdMap, { ...baseOptions, strike: true }, options)));
         break;
       case 'text':
-        runs.push(new TextRun({ ...options, text: node.value }));
+        runs.push(new TextRun({ ...baseOptions, text: node.value }));
         break;
       case 'image':
         try {
           const proxiedImage = await getProxiedImageBuffer(node.url);
           if (proxiedImage) {
-            // Default size for inline images
+            // Removed hardcoded size for inline images
             runs.push(new ImageRun({
               data: proxiedImage.buffer,
-              transformation: { width: 200, height: 150 }
+              transformation: { width: 150, height: 100 } // A smaller default
             }));
           }
         } catch (e) { console.error("Failed to process inline image", e); }
         break;
       case 'link': {
-        // Recursively process the link's text content (which can include bold, italics, etc.)
-        const linkChildren = await transformInlines(node.children, footnoteIdMap, { ...options, style: 'Hyperlink' }, fonts);
-        // The docx ExternalHyperlink can only contain TextRuns. We filter to ensure type safety.
+        const linkChildren = await transformInlines(node.children, footnoteIdMap, { ...baseOptions, style: 'Hyperlink' }, options);
         const textRuns = linkChildren.filter((child): child is TextRun => child instanceof TextRun);
         runs.push(new ExternalHyperlink({
           children: textRuns,
@@ -58,12 +54,11 @@ export async function transformInlines(
         break;
       }
       case 'inlineCode': {
-        const codeFont = fonts.code || 'Courier New';
+        // Apply the 'InlineCode' character style defined in the template
         runs.push(new TextRun({
-          ...options,
+          ...baseOptions,
           text: node.value,
-          font: { ...options.font, name: codeFont },
-          shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+          style: 'InlineCode',
         }));
         break;
       }

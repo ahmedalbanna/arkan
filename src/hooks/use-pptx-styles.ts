@@ -70,9 +70,9 @@ export function usePptxStyles() {
         }
     });
 
-    const updateStyle = (templateKey: string, path: string, value: any) => {
+    const updateStyle = (DocxTemplateKey : string, path: string, value: any) => {
         setLocalChanges(prev => {
-            const newStyles = JSON.parse(JSON.stringify(prev[templateKey] || templates?.[templateKey]?.styles || {}));
+            const newStyles = JSON.parse(JSON.stringify(prev[DocxTemplateKey ] || templates?.[DocxTemplateKey ]?.styles || {}));
 
             let current = newStyles;
             const keys = path.split('.');
@@ -82,7 +82,7 @@ export function usePptxStyles() {
             }
             current[keys[keys.length - 1]] = value;
 
-            return { ...prev, [templateKey]: newStyles };
+            return { ...prev, [DocxTemplateKey ]: newStyles };
         });
     };
 
@@ -136,13 +136,13 @@ export function useDeletePptxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (templateKey: string) => {
+        mutationFn: async (DocxTemplateKey : string) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return deletePptxTemplate(templateKey, token);
+            return deletePptxTemplate(DocxTemplateKey , token);
         },
-        onSuccess: (data, templateKey) => {
+        onSuccess: (data, DocxTemplateKey ) => {
             queryClient.invalidateQueries({ queryKey: pptxTemplateKeys.lists() });
-            toast({ title: "Template Deleted", description: `Template "${templateKey}" has been deleted.` });
+            toast({ title: "Template Deleted", description: `Template "${DocxTemplateKey }" has been deleted.` });
         },
         onError: (error: Error) => {
             handleErrorUtility(error, "Failed to delete template");

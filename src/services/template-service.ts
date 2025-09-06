@@ -209,8 +209,8 @@ export async function updateDocxTemplate(
   return response.json();
 }
 
-export async function deleteDocxTemplate(templateKey: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/docx/${templateKey}`, {
+export async function deleteDocxTemplate(DocxTemplateKey : string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/admin/templates/docx/${DocxTemplateKey }`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -266,8 +266,8 @@ export async function updatePptxTemplate(
   return response.json();
 }
 
-export async function deletePptxTemplate(templateKey: string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/pptx/${templateKey}`, {
+export async function deletePptxTemplate(DocxTemplateKey : string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/admin/templates/pptx/${DocxTemplateKey }`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });

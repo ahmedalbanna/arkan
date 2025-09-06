@@ -4,10 +4,10 @@
 import { Document, Packer, Paragraph, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
 import { AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
-import { templates, type TemplateKey } from './docx-styles';
+import { templates, type DocxTemplateKey  } from './docx-styles';
 import { createDocxParagraphs } from './docx-exporter';
 
-async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
+async function getStylesFromServer(): Promise<Record<DocxTemplateKey , { styles: any }>> {
     try {
         const response = await fetch('/api/templates/docx');
         if (!response.ok) {
@@ -24,10 +24,10 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any 
 export async function exportDocumentAsDocx(
     analyzedDocument: AnalyzedDocument,
     solvedDocument: SolvedDocument,
-    templateKey: TemplateKey = 'modern'
+    DocxTemplateKey : DocxTemplateKey  = 'modern'
 ) {
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
 
     const docxContent = [];
 

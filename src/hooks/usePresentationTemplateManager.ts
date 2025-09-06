@@ -9,8 +9,8 @@ export function usePresentationTemplateManager() {
   const deleteMutation = useDeletePptxTemplate();
   const refreshImageMutation = useRefreshTemplateImage('pptx');
 
-  const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
-    updateStyle(templateKey, path, value);
+  const handleStyleChange = (DocxTemplateKey : PptxTemplateKey, path: string, value: string | number | boolean) => {
+    updateStyle(DocxTemplateKey , path, value);
   };
 
   const handleSave = (key: PptxTemplateKey) => {

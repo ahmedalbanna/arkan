@@ -1,5 +1,5 @@
 import PptxGenJS from 'pptxgenjs';
-import { transformInlinesToPptxText, renderNodeOnSlide } from '@/lib/pptx-renderer';
+import { transformInlinesToPptxText, renderNodeOnSlide } from '@/lib/pptx-convert/pptx-renderer';
 import { getProxiedImageBuffer, arrayBufferToBase64 } from '@/lib/utils';
 import type { Paragraph, Image } from 'mdast';
 import type { PptxStyleOptions } from '@/lib/types';

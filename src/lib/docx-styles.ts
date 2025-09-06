@@ -1,23 +1,11 @@
+// src/lib/docx-styles.ts
+
 'use client';
 
 import { AlignmentType, ShadingType } from 'docx';
-import type { IStylesOptions, IParagraphOptions } from 'docx';
-
-// New interface for custom, non-standard styles
-export interface CustomStyles {
-    codeBlock?: Omit<IParagraphOptions, 'children'>;
-    imageParagraph?: Omit<IParagraphOptions, 'children'>;
-}
-
-export interface Template {
-    id: string;
-    name: string;
-    description: string;
-    styles: IStylesOptions;
-    customStyles: CustomStyles; // Added
-    imageUrl: string;
-    dataAiHint: string;
-}
+import type { IStylesOptions } from 'docx';
+// Import the new types and schemas from your types file
+import { DocxTemplate, CustomStyles } from '@/lib/types';
 
 const commonParagraphStyles = [
     {
@@ -85,6 +73,53 @@ const commonParagraphStyles = [
             spacing: { before: 120, after: 240 }, // 6pt before, 12pt after
         },
     },
+    {
+        id: 'HorizontalRule',
+        name: 'Horizontal Rule',
+        basedOn: 'Normal',
+        paragraph: {
+            spacing: { before: 240, after: 240 },
+            border: { bottom: { color: 'auto', space: 1, style: 'single', size: 6 } },
+        },
+    },
+    {
+        id: 'CustomTableStyle',
+        name: 'Custom Table',
+        basedOn: 'TableNormal',
+        run: {
+            size: 20, // 10pt
+            font: { name: 'Calibri' },
+        },
+        paragraph: {
+            spacing: { before: 100, after: 100 },
+        },
+        table: {
+            cellMargin: {
+                top: 100,
+                bottom: 100,
+                left: 100,
+                right: 100,
+            },
+            borders: {
+                insideHorizontal: { style: 'single', size: 1, color: 'D9D9D9' },
+                insideVertical: { style: 'single', size: 1, color: 'D9D9D9' },
+                top: { style: 'single', size: 2, color: 'BFBFBF' },
+                bottom: { style: 'single', size: 2, color: 'BFBFBF' },
+                left: { style: 'single', size: 2, color: 'BFBFBF' },
+                right: { style: 'single', size: 2, color: 'BFBFBF' },
+            },
+        },
+        tableRow: {},
+        tableCell: {
+            verticalAlign: 'center',
+        },
+        conditionalFormatting: {
+            firstRow: {
+                run: { bold: true },
+                tableCell: { shading: { type: 'clear', fill: 'F2F2F2' } },
+            },
+        }
+    }
 ];
 
 const commonCharacterStyles = [
@@ -97,7 +132,17 @@ const commonCharacterStyles = [
             underline: {},
         },
     },
-]
+    {
+        id: 'InlineCode',
+        name: 'Inline Code',
+        basedOn: 'Default Paragraph Font',
+        run: {
+            font: { name: 'Courier New' },
+            size: 18, // 9pt
+            shading: { type: ShadingType.CLEAR, fill: 'F2F2F2' },
+        },
+    },
+];
 
 const modernCustomStyles: CustomStyles = {
     codeBlock: {
@@ -173,49 +218,7 @@ const modernStyles: IStylesOptions = {
         }
     ],
     characterStyles: commonCharacterStyles,
-    tableStyles: [
-        {
-            id: 'CustomTableStyle',
-            name: 'Custom Table',
-            basedOn: 'TableNormal',
-            run: {
-                size: 20, // 10pt
-                font: { name: 'Calibri' },
-            },
-            paragraph: {
-                spacing: { before: 100, after: 100 },
-            },
-            table: {
-                cellMargin: {
-                    top: 100,
-                    bottom: 100,
-                    left: 100,
-                    right: 100,
-                },
-                borders: {
-                    insideHorizontal: { style: 'single', size: 1, color: 'D9D9D9' },
-                    insideVertical: { style: 'single', size: 1, color: 'D9D9D9' },
-                    top: { style: 'single', size: 2, color: 'BFBFBF' },
-                    bottom: { style: 'single', size: 2, color: 'BFBFBF' },
-                    left: { style: 'single', size: 2, color: 'BFBFBF' },
-                    right: { style: 'single', size: 2, color: 'BFBFBF' },
-                },
-            },
-            tableRow: {
-                // These properties are applied to all rows
-            },
-            tableCell: {
-                // These properties are applied to all cells
-                verticalAlign: 'center',
-            },
-            conditionalFormatting: {
-                firstRow: {
-                    run: { bold: true },
-                    tableCell: { shading: { type: 'clear', fill: 'F2F2F2' } },
-                },
-            }
-        }
-    ]
+
 };
 
 const classicStyles: IStylesOptions = {
@@ -240,10 +243,10 @@ const academicStyles: IStylesOptions = {
         document: { run: { font: { name: 'Garamond' }, size: 24, color: '000000' } },
         heading1: { run: { font: { name: 'Garamond' }, size: 28, bold: true, color: "000000" }, paragraph: { spacing: { after: 240, before: 240, line: 480 }, outlineLevel: 1 } },
         heading2: { run: { font: { name: 'Garamond' }, size: 24, bold: true, color: "333333" }, paragraph: { spacing: { after: 220, before: 220, line: 480 }, outlineLevel: 2 } },
-        heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200, line: 480 }, outlineLevel: 3 } },
+        heading3: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 200, before: 200 }, outlineLevel: 3 } },
         heading4: { run: { font: { name: 'Garamond' }, size: 22, bold: true, color: "333333" }, paragraph: { spacing: { after: 180, before: 180, line: 480 }, outlineLevel: 4 } },
-        heading5: { run: { font: { name: 'Garamond' }, size: 22, color: "333333" }, paragraph: { spacing: { after: 160, before: 160, line: 480 }, outlineLevel: 5 } },
-        heading6: { run: { font: { name: 'Garamond' }, size: 22, italics: true, color: "333333" }, paragraph: { spacing: { after: 140, before: 140, line: 480 }, outlineLevel: 6 } },
+        heading5: { run: { font: { name: 'Garamond' }, size: 22, color: "333333" }, paragraph: { spacing: { after: 160, before: 160 }, outlineLevel: 5 } },
+        heading6: { run: { font: { name: 'Garamond' }, size: 22, italics: true, color: "333333" }, paragraph: { spacing: { after: 140, before: 140 }, outlineLevel: 6 } },
     },
     paragraphStyles: commonParagraphStyles.map(p => ({
         ...p,
@@ -253,12 +256,12 @@ const academicStyles: IStylesOptions = {
     characterStyles: commonCharacterStyles,
 };
 
-
-export const templates: Record<TemplateKey, Template> = {
+// Ensure the 'templates' object conforms to the DocxTemplate schema
+export const templates: Record<string, DocxTemplate> = {
     modern: {
         name: 'templates.modern.name',
         id: 'modern',
-        styles: modernStyles,
+        styles: modernStyles as DocxTemplate['styles'],
         customStyles: modernCustomStyles,
         description: 'templates.modern.description',
         imageUrl: '',
@@ -267,7 +270,7 @@ export const templates: Record<TemplateKey, Template> = {
     classic: {
         name: 'templates.classic.name',
         id: 'classic',
-        styles: classicStyles,
+        styles: classicStyles as DocxTemplate['styles'],
         customStyles: classicCustomStyles,
         description: 'templates.classic.description',
         imageUrl: '',
@@ -276,7 +279,7 @@ export const templates: Record<TemplateKey, Template> = {
     academic: {
         name: 'templates.academic.name',
         id: 'academic',
-        styles: academicStyles,
+        styles: academicStyles as DocxTemplate['styles'],
         customStyles: academicCustomStyles,
         description: 'templates.academic.description',
         imageUrl: '',
@@ -284,4 +287,5 @@ export const templates: Record<TemplateKey, Template> = {
     },
 };
 
-export type TemplateKey = 'modern' | 'classic' | 'academic';
+// Infer DocxTemplateKey dynamically from the 'templates' object
+export type DocxTemplateKey = keyof typeof templates;

@@ -5,7 +5,7 @@ import { adminDb } from '@/lib/firebase/server-init';
 import { AGENTS as defaultAgents } from '@/lib/agents-template';
 import { defaultFeatures } from '@/lib/features';
 import { defaultAgentCategories } from '@/lib/agent-categories';
-import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-templates';

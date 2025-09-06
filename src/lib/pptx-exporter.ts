@@ -37,14 +37,14 @@ async function getTemplatesFromStorage(): Promise<Record<PptxTemplateKey, any>> 
 
 export async function exportPresentationAsPptx(
     slides: PresentationSlide[],
-    templateKey: PptxTemplateKey,
+    DocxTemplateKey : PptxTemplateKey,
     options: { isRtl?: boolean, fonts?: FontOptions } = {}
 ) {
     const allTemplates = await getTemplatesFromStorage();
-    const template = allTemplates[templateKey];
+    const template = allTemplates[DocxTemplateKey ];
 
     if (!template) {
-        console.error(`Template with key "${templateKey}" not found.`);
+        console.error(`Template with key "${DocxTemplateKey }" not found.`);
         return;
     }
 

@@ -3,38 +3,22 @@
 import {
   Paragraph,
   AlignmentType,
-  IFootnotesOptions,
   IRunOptions,
-  TextRun,
-  ImageRun,
-  ExternalHyperlink,
-  FootnoteReferenceRun,
-  Table,
-  TableRow,
-  TableCell,
-  SimpleField,
-  HeadingLevel,
-  WidthType,
-  ShadingType,
 } from 'docx';
-import { Root, List, FootnoteDefinition, RootContent } from 'mdast';
-import { getProxiedImageBuffer } from '@/lib/utils';
-import { FontOptions } from './types';
+import type { IFootnotesOptions } from 'docx';
+import { Root, FootnoteDefinition } from 'mdast';
+import { ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
 
-/**
- * Processes footnote definitions from the AST.
- * @param ast The root of the markdown AST.
- * @returns An object containing the footnote ID map and the docx footnotes configuration.
- */
 export async function processFootnotes(
   ast: Root,
-  isRtl = false,
-  fonts: FontOptions = {}
-): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: IFootnotesOptions }> {
+  options: ConversionOptions
+): Promise<{ footnoteIdMap: Map<string, number>; docxFootnotes: IFootnotesOptions['footnotes'] }> {
   const footnoteIdMap = new Map<string, number>();
-  const docxFootnotes: IFootnotesOptions = {};
+  const docxFootnotes: IFootnotesOptions['footnotes'] = {};
   let footnoteCounter = 1;
+
+  const { isRtl = false, fonts = {} } = options;
 
   const footnoteDefs = ast.children.filter(
     (node): node is FootnoteDefinition => node.type === 'footnoteDefinition'
@@ -45,16 +29,20 @@ export async function processFootnotes(
     footnoteIdMap.set(node.identifier, id);
 
     const defaultFontName = isRtl ? fonts.rtl : fonts.default;
-    const runOptions: IRunOptions = {};
-    if (isRtl) runOptions.rightToLeft = true;
-    if (defaultFontName) runOptions.font = { name: defaultFontName };
+    const runOptions: IRunOptions = {
+      font: defaultFontName ? { name: defaultFontName } : undefined,
+    };
+    if (isRtl) {
+      (runOptions as any).rightToLeft = true;
+    }
+
 
     const footnoteParagraphs: Paragraph[] = [];
     for (const contentNode of node.children) {
       if (contentNode.type === 'paragraph') {
         footnoteParagraphs.push(
           new Paragraph({
-            children: await transformInlines(contentNode.children, footnoteIdMap, runOptions, fonts),
+            children: await transformInlines(contentNode.children, footnoteIdMap, runOptions, options),
             bidirectional: isRtl,
             alignment: isRtl ? AlignmentType.RIGHT : AlignmentType.LEFT,
           }),
@@ -66,5 +54,3 @@ export async function processFootnotes(
 
   return { footnoteIdMap, docxFootnotes };
 }
-
-

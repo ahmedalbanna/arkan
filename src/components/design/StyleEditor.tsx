@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import type { TemplateKey } from '@/lib/types';
+import type { DocxTemplateKey  } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetica', 'Verdana'];
@@ -14,12 +14,12 @@ const FONT_FACES = ['Calibri', 'Times New Roman', 'Arial', 'Garamond', 'Helvetic
 interface StyleEditorProps {
     heading: string;
     styleKey: 'document' | 'heading1' | 'heading2' | 'heading3';
-    templateKey: TemplateKey;
+    DocxTemplateKey : DocxTemplateKey ;
     styles: any;
-    onChange: (templateKey: TemplateKey, path: string, value: any) => void;
+    onChange: (DocxTemplateKey : DocxTemplateKey , path: string, value: any) => void;
 }
 
-export function StyleEditor({ heading, styleKey, templateKey, styles: templateStyles, onChange }: StyleEditorProps) {
+export function StyleEditor({ heading, styleKey, DocxTemplateKey , styles: templateStyles, onChange }: StyleEditorProps) {
     const { t } = useLocalization();
 
     const styles = templateStyles?.default?.[styleKey]?.run;
@@ -27,7 +27,7 @@ export function StyleEditor({ heading, styleKey, templateKey, styles: templateSt
     if (!styles) return null;
 
     const handleStyleChange = (path: string, value: any) => {
-        onChange(templateKey, `${styleKey}.run.${path}`, value);
+        onChange(DocxTemplateKey , `${styleKey}.run.${path}`, value);
     }
 
     return (
@@ -82,11 +82,11 @@ export function StyleEditor({ heading, styleKey, templateKey, styles: templateSt
                 {styleKey.startsWith('heading') && (
                     <div className="flex items-center space-x-2">
                         <Switch
-                            id={`bold-${styleKey}-${templateKey}`}
+                            id={`bold-${styleKey}-${DocxTemplateKey }`}
                             checked={!!styles?.bold}
                             onCheckedChange={(checked) => handleStyleChange('bold', checked)}
                         />
-                        <Label htmlFor={`bold-${styleKey}-${templateKey}`}>{t('manageTemplates.bold')}</Label>
+                        <Label htmlFor={`bold-${styleKey}-${DocxTemplateKey }`}>{t('manageTemplates.bold')}</Label>
                     </div>
                 )}
             </AccordionContent>

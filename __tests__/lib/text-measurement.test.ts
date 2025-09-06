@@ -1,4 +1,4 @@
-import { calculateLineCount, calculateCodeLineCount } from '@/lib/text-measurement';
+import { calculateLineCount, calculateCodeLineCount } from '@/lib/pptx-convert/text-measurement';
 import { POINTS_PER_INCH } from '@/lib/pptx-convert/constants';
 
 // The mock in jest.setup.js calculates width as text.length * 6.

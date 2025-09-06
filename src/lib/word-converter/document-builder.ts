@@ -14,13 +14,8 @@ import {
   TextRun,
 } from 'docx';
 import { ConversionOptions, DocxObject } from './types';
-import { createDocxContent } from '../markdown-to-word-converter'; // This will be a circular dependency, need to fix later
 
-/**
- * Prepares the header and footer configuration objects for the docx document.
- * @param options The conversion options containing header, footer, watermark, and page number settings.
- * @returns An object with `headerConfiguration` and `footerConfiguration`.
- */
+// ... prepareHeadersAndFooters remains the same ...
 export function prepareHeadersAndFooters(options: ConversionOptions): {
   headerConfiguration: { first?: Header; default?: Header };
   footerConfiguration: { first?: Footer; default?: Footer };
@@ -32,16 +27,18 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
     headerConfiguration.first = new Header({ children: header.first });
   }
   if (header?.default || watermark) {
-    const defaultHeaderOptions: IHeaderOptions = { children: header?.default || [] };
-    if (watermark) {
-      defaultHeaderOptions.watermark = {
-        type: 'text',
-        text: watermark,
-        color: "D3D3D3", // Light Grey
-        font: "Calibri",
-        angle: -45,
-      };
-    }
+    const defaultHeaderOptions: IHeaderOptions = {
+      children: header?.default || [],
+      ...(watermark && {
+        watermark: {
+          type: 'text',
+          text: watermark,
+          color: 'D3D3D3', // Light Grey
+          font: 'Calibri',
+          angle: -45,
+        },
+      }),
+    };
     headerConfiguration.default = new Header(defaultHeaderOptions);
   }
 
@@ -72,27 +69,27 @@ export function prepareHeadersAndFooters(options: ConversionOptions): {
   return { headerConfiguration, footerConfiguration };
 }
 
-/**
- * Builds the array of ISectionOptions for the docx document.
- * This includes handling cover pages, splitting content by orientation, and adding a Table of Contents.
- * @param docxObjects The array of generated docx objects for the main content.
- * @param options The conversion options.
- * @param headerConfiguration The prepared header configuration.
- * @param footerConfiguration The prepared footer configuration.
- * @returns A promise that resolves to an array of ISectionOptions.
- */
+
 export async function buildDocumentSections(
   docxObjects: DocxObject[],
+  coverPageDocxObjects: DocxObject[], // Changed from coverPageMarkdown
   options: ConversionOptions,
   headerConfiguration: { first?: Header; default?: Header },
   footerConfiguration: { first?: Footer; default?: Footer }
 ): Promise<ISectionOptions[]> {
-  const { paper, coverPageMarkdown } = options;
+  const { paper } = options;
   const sections: ISectionOptions[] = [];
 
   // 1. Add Cover Page section if it exists
-  if (coverPageMarkdown && coverPageMarkdown.trim().length > 0) {
-    const { docxObjects: coverPageChildren } = await createDocxContent(coverPageMarkdown);
+  if (coverPageDocxObjects.length > 0) {
+    const coverPageChildren = coverPageDocxObjects.filter((obj): obj is Paragraph | Table => !('_type' in obj));
+
+    // Find the first paragraph and style it as a Title
+    const titleParagraph = coverPageChildren.find((p): p is Paragraph => p instanceof Paragraph);
+    // if (titleParagraph) {
+    //   titleParagraph.style('Title');
+    // }
+
     sections.push({
       properties: {
         type: SectionType.NEXT_PAGE,
@@ -144,11 +141,13 @@ export async function buildDocumentSections(
       properties: {
         type: SectionType.NEXT_PAGE,
         page: {
-          margins: paper?.margins,
-          size: paper?.size,
-          orientation: chunk.orientation,
+          margin: paper?.margins,
+          size: {
+            ...paper?.size,
+            orientation: chunk.orientation,
+          },
         },
-        titlePage: hasCoverPage && isFirstContentSection ? !!(options.header?.first || options.footer?.first) : false,
+        titlePage: hasCoverPage && isFirstContentSection,
       },
       headers: hasCoverPage && isFirstContentSection ? headerConfiguration : { default: headerConfiguration.default },
       footers: hasCoverPage && isFirstContentSection ? footerConfiguration : { default: footerConfiguration.default },

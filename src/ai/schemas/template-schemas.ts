@@ -21,7 +21,15 @@ export const AgentPromptSchema = z.object({
 
 
 // DOCX Styles
-export const DocxStyleOptionsSchema = z.object({}).passthrough(); // Use passthrough for complex, nested docx styles
+export const DocxStyleOptionsSchema = z.object({
+  document: z.object({
+    fontFace: z.string(),
+    fontSize: z.number(),
+    color: z.string(),
+  }),
+});
+
+// DOCX Template
 export const DocxTemplateSchema = BaseTemplateSchema.extend({
   styles: DocxStyleOptionsSchema,
   imageUrl: z.string().url(),

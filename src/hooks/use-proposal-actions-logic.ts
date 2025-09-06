@@ -9,7 +9,7 @@ import { useDocxStyles } from '@/hooks';
 import { useExport } from '@/hooks';
 import { toast } from '@/hooks';
 import { summarizeProjectApi } from '@/services';
-import type { TemplateKey } from '@/lib/docx-styles';
+import type { DocxTemplateKey  } from '@/lib/docx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
@@ -19,7 +19,7 @@ export function useProposalActionsLogic() {
     const { proposal } = useBuilderStore();
     const { sections } = useReportStore();
     const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
-    const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+    const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey >('modern');
     const { firebaseUser, refetchUser } = useAuth();
     const { exportProposal, isExporting } = useExport();
 
@@ -34,13 +34,13 @@ export function useProposalActionsLogic() {
     });
 
     useEffect(() => {
-        const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
+        const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey  | null;
         if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
             setSelectedDocxTemplate(savedDocxTemplate);
         }
     }, [docxTemplates]);
 
-    const handleDocxTemplateChange = (key: TemplateKey) => {
+    const handleDocxTemplateChange = (key: DocxTemplateKey ) => {
         setSelectedDocxTemplate(key);
         localStorage.setItem(DOCX_TEMPLATE_KEY, key);
     }

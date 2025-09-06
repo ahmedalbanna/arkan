@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Languages, Loader2, Clipboard, ClipboardCheck, BrainCircuit, FileText, FileCode } from 'lucide-react';
-import type { TemplateKey } from '@/lib/docx-styles';
+import type { DocxTemplateKey  } from '@/lib/docx-styles';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';

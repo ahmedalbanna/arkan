@@ -5,7 +5,7 @@ import { useCreateDocxTemplate } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';
-import type { DocxTemplate, TemplateKey } from '@/lib/types';
+import type { DocxTemplate, DocxTemplateKey  } from '@/lib/types';
 import { Accordion } from '@/components/ui/accordion';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -190,7 +190,7 @@ export default function DocxTemplateManager() {
         <CreateTemplateDialog />
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {(Object.keys(templates || {}) as TemplateKey[]).map((key) => {
+      {(Object.keys(templates || {}) as DocxTemplateKey []).map((key) => {
         const template = templates?.[key];
         if (!template) return null;
         const isDefaultTemplate = ['modern', 'classic', 'academic'].includes(key);
@@ -242,10 +242,10 @@ export default function DocxTemplateManager() {
                     </Button>
                 </div>
               <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
-                  <StyleEditor heading="General Document Styles" styleKey="document" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
-                  <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="General Document Styles" styleKey="document" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 1" styleKey="heading1" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 2" styleKey="heading2" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
+                  <StyleEditor heading="Heading 3" styleKey="heading3" DocxTemplateKey ={key} onChange={handleStyleChange} styles={template.styles} />
               </Accordion>
             </CardContent>
             <CardFooter>

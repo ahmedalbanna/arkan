@@ -83,7 +83,7 @@ export interface PptxTemplate {
     dataAiHint: string;
 }
 
-export type TemplateKey = 'modern' | 'classic' | 'academic';
+export type DocxTemplateKey  = 'modern' | 'classic' | 'academic';
 
 
 // --- Full Report Mode Configuration Interfaces ---

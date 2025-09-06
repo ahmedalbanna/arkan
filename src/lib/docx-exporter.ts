@@ -5,7 +5,7 @@
 import { Document, Packer, Paragraph, HeadingLevel, SectionType, Header, Footer, PageNumber, AlignmentType, Table, TextRun, TableRow, TableCell, WidthType, ImageRun, IStylesOptions, INumberingOptions, IRunOptions, TableOfContents } from 'docx';
 import { saveAs } from 'file-saver';
 import { type ProjectProposal, type DiagramType, type SectionName } from '@/ai/schemas';
-import { templates, type TemplateKey } from './docx-styles';
+import { templates, type DocxTemplateKey  } from './docx-styles';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -199,7 +199,7 @@ async function getProxiedImageBuffer(imageUrl: string): Promise<ArrayBuffer | nu
     }
 }
 
-async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any }>> {
+async function getStylesFromServer(): Promise<Record<DocxTemplateKey , { styles: any }>> {
     try {
         const response = await fetch('/api/admin/templates/docx');
  if (response.status !== 200) {
@@ -217,12 +217,12 @@ async function getStylesFromServer(): Promise<Record<TemplateKey, { styles: any 
  * Converts a markdown string into a downloadable DOCX file.
  * @param markdownContent - The markdown content to export.
  * @param fileName - The desired name of the output file (without extension).
- * @param templateKey - The key of the style template to use.
+ * @param DocxTemplateKey  - The key of the style template to use.
  */
-export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, templateKey: TemplateKey = 'modern') {
-    
+export async function exportMarkdownAsDocx(markdownContent: string, fileName: string, DocxTemplateKey : DocxTemplateKey  = 'modern') {
+
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
 
     const doc = new Document({
@@ -242,12 +242,12 @@ export async function exportMarkdownAsDocx(markdownContent: string, fileName: st
  * Converts a single report section into a downloadable DOCX file.
  * @param title - The title of the section.
  * @param markdownContent - The markdown content of the section.
- * @param templateKey - The key of the style template to use.
+ * @param DocxTemplateKey  - The key of the style template to use.
  */
-export async function exportSectionAsDocx(title: string, markdownContent: string, templateKey: TemplateKey) {
+export async function exportSectionAsDocx(title: string, markdownContent: string, DocxTemplateKey : DocxTemplateKey ) {
 
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
     const docxContent = await createDocxParagraphs(markdownContent);
 
     const doc = new Document({
@@ -295,12 +295,12 @@ function applyStylesToElement(element: HTMLElement, styles: IRunOptions) {
 /**
  * Renders a project proposal into a hidden HTML element, styles it, and exports it as a PDF.
  * @param proposal - The structured ProjectProposal object.
- * @param templateKey - The key of the style template to use.
+ * @param DocxTemplateKey  - The key of the style template to use.
  */
-export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey: TemplateKey) {
+export async function exportProposalAsPdf(proposal: ProjectProposal, DocxTemplateKey : DocxTemplateKey ) {
 
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
 
     // Helper to convert markdown to HTML string
     const markdownToHtml = async (md: string) => {
@@ -312,7 +312,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
             .process(md);
         return String(file);
     };
-    
+
     // Create a hidden element to render the proposal for PDF generation
     const container = document.createElement('div');
     container.style.position = 'absolute';
@@ -320,7 +320,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     container.style.width = '800px';
     container.style.padding = '40px';
     container.style.backgroundColor = 'white';
-    
+
     let htmlContent = `<div id="pdf-content">`;
     // Apply default document styles to the container
     applyStylesToElement(container, styles.default?.document?.run);
@@ -328,7 +328,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
     // Title and Category
     htmlContent += `<h1 style="text-align: center;">${proposal.title}</h1>`;
     htmlContent += `<p style="text-align: center; font-style: italic;">${proposal.category}</p>`;
-    
+
     const sections: { title: string, content: string | string[] }[] = [
         { title: "Executive Summary", content: await markdownToHtml(proposal.executiveSummary) },
         { title: "Problem Statement", content: await markdownToHtml(proposal.problemStatement) },
@@ -336,7 +336,7 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
         { title: "Project Plan", content: await markdownToHtml(proposal.projectPlan.timeline + "\n\n" + proposal.projectPlan.keyDeliverables) },
         { title: "Budget Breakdown", content: await markdownToHtml(proposal.budgetBreakdown) },
     ];
-    
+
     for (const section of sections) {
         const content = Array.isArray(section.content) ? section.content.join(' ') : section.content;
         if (content.trim()) {
@@ -361,12 +361,12 @@ export async function exportProposalAsPdf(proposal: ProjectProposal, templateKey
 /**
  * Assembles a DOCX document from a structured project proposal.
  * @param proposal - The ProjectProposal object.
- * @param templateKey - The key of the style template to use.
+ * @param DocxTemplateKey  - The key of the style template to use.
  */
-export async function exportProposalAsDocx(proposal: ProjectProposal, templateKey: TemplateKey) {
+export async function exportProposalAsDocx(proposal: ProjectProposal, DocxTemplateKey : DocxTemplateKey ) {
 
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
 
     // A helper function to create a section with a heading and its content
     const createSection = async (title: string, content: string | string[]) => {
@@ -377,7 +377,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
             ...(await createDocxParagraphs(contentString)),
         ];
     };
-    
+
     // A helper for nested object sections
     const createNestedSection = async (title: string, data: Record<string, string | string[]>) => {
         const children: (Paragraph|Table)[] = [];
@@ -447,7 +447,7 @@ export async function exportProposalAsDocx(proposal: ProjectProposal, templateKe
  * @param sections - An object containing the markdown content of each report section.
  * @param diagrams - An object containing data for generated diagrams.
  * @param proposalTitle - The title of the project proposal.
- * @param templateKey - The key of the style template to use.
+ * @param DocxTemplateKey  - The key of the style template to use.
  * @param translatedTitles - An object mapping section keys to their display titles.
  * @param sectionsToInclude - An optional array of section keys to include in the export.
  */
@@ -455,13 +455,13 @@ export async function exportReportAsDocx(
     sections: { [key in SectionName]?: string; },
     diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
     proposalTitle: string,
-    templateKey: TemplateKey,
+    DocxTemplateKey : DocxTemplateKey ,
     translatedTitles: { [key in SectionName]?: string; },
     sectionsToInclude?: SectionName[]
 ) {
 
     const allTemplates = await getStylesFromServer();
-    const styles = allTemplates[templateKey]?.styles || templates.modern.styles;
+    const styles = allTemplates[DocxTemplateKey ]?.styles || templates.modern.styles;
 
     const orderedSections = sectionsToInclude || Object.keys(sections) as SectionName[];
     const orderedDiagrams = Object.keys(diagrams) as DiagramType[];

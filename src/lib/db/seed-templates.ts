@@ -1,7 +1,7 @@
 
 // src/lib/db/seed-templates.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { templates as defaultDocxTemplates, type TemplateKey as DocxTemplateKey } from '@/lib/docx-styles';
+import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
 import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
 import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-templates';

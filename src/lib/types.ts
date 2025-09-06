@@ -2,14 +2,156 @@
 
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { DocxTemplateSchema, PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
-import { z } from 'zod';
+import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
+
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { LucideIcon } from 'lucide-react';
 
 export type {PricingPlan} from '@/components/price/PricingCard'
 
+// src/lib/types.ts
 
+import { z } from 'zod';
+import type { IStylesOptions } from 'docx';
+import { Paragraph, Table } from 'docx'; // Assuming these are needed for DocxObject
+
+// --- Zod Schemas for DOCX Style Parts ---
+
+// Helper for common run properties (IRunOptions)
+const DocxRunPropertiesSchema = z.object({
+  size: z.union([z.number(), z.string()]).optional(), // <--- تم التعديل هنا للسماح بالرقم أو السلسلة النصية
+  bold: z.boolean().optional(),
+  italics: z.boolean().optional(),
+  color: z.string().optional(),
+  font: z.object({
+    name: z.string().optional(),
+  }).optional(),
+  // Add other IRunOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Helper for common paragraph properties (Omit<IParagraphOptions, 'children'>)
+const DocxParagraphPropertiesSchema = z.object({
+  spacing: z.object({
+    after: z.number().optional(),
+    before: z.number().optional(),
+    line: z.number().optional(),
+  }).optional(),
+  alignment: z.any().optional(), // AlignmentType is an enum, z.any() for simplicity
+  indent: z.object({
+    left: z.number().optional(),
+    hanging: z.number().optional(),
+  }).optional(),
+  border: z.any().optional(), // Border properties are complex, z.any() for simplicity
+  shading: z.object({
+    type: z.any().optional(), // ShadingType enum
+    fill: z.string().optional(),
+  }).optional(),
+  bidirectional: z.boolean().optional(),
+  outlineLevel: z.number().optional(),
+  // Add other IParagraphOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for IParagraphStyleOptions
+const DocxParagraphStyleOptionsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  basedOn: z.string().optional(),
+  next: z.string().optional(),
+  quickFormat: z.boolean().optional(),
+  run: DocxRunPropertiesSchema.optional(),
+  paragraph: DocxParagraphPropertiesSchema.optional(),
+  table: z.any().optional(), // Table properties are complex
+  tableRow: z.any().optional(),
+  tableCell: z.any().optional(),
+  conditionalFormatting: z.any().optional(),
+  // Add other IParagraphStyleOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for ICharacterStyleOptions
+const DocxCharacterStyleOptionsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  basedOn: z.string().optional(),
+  run: DocxRunPropertiesSchema.optional(),
+  // Add other ICharacterStyleOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for IStylesOptions (main styles object)
+export const DocxStyleOptionsSchema = z.object({
+  default: z.object({
+    document: z.object({
+      run: DocxRunPropertiesSchema.optional(),
+    }).optional(),
+    heading1: DocxParagraphStyleOptionsSchema.optional(),
+    heading2: DocxParagraphStyleOptionsSchema.optional(),
+    heading3: DocxParagraphStyleOptionsSchema.optional(),
+    heading4: DocxParagraphStyleOptionsSchema.optional(),
+    heading5: DocxParagraphStyleOptionsSchema.optional(),
+    heading6: DocxParagraphStyleOptionsSchema.optional(),
+  }).optional(),
+  paragraphStyles: z.array(DocxParagraphStyleOptionsSchema).optional(),
+  characterStyles: z.array(DocxCharacterStyleOptionsSchema).optional(),
+  // Add other IStylesOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// --- Zod Schema for CustomStyles ---
+// CustomStyles properties are Omit<IParagraphOptions, 'children'>
+export const CustomStylesSchema = z.object({
+  codeBlock: DocxParagraphPropertiesSchema.optional(),
+  imageParagraph: DocxParagraphPropertiesSchema.optional(),
+});
+
+// --- Zod Schema for DocxTemplate ---
+export const DocxTemplateSchema = z.object({ // Replace with BaseTemplateSchema.extend if you have it
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  styles: DocxStyleOptionsSchema, // Now uses the comprehensive style schema
+  customStyles: CustomStylesSchema, // Added custom styles schema
+  imageUrl: z.string().url(),
+  dataAiHint: z.string(),
+});
+
+// --- Inferred Types ---
+export type CustomStyles = z.infer<typeof CustomStylesSchema>;
+export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
+
+// Other types from previous turn
+export type FontOptions = {
+  default?: string;
+  rtl?: string;
+  code?: string;
+};
+
+export type OrientationDirective = {
+  _type: 'directive';
+  name: 'orientation';
+  value: 'portrait' | 'landscape';
+};
+
+export type DocxObject = Paragraph | Table | OrientationDirective; // Assuming Paragraph and Table are imported from docx
+
+export interface HeaderFooterContent {
+  default?: (Paragraph | Table)[];
+  first?: (Paragraph | Table)[];
+}
+
+export interface ConversionOptions {
+  styles?: IStylesOptions; // This will now be validated by DocxStyleOptionsSchema
+  customStyles?: CustomStyles; // This will now be validated by CustomStylesSchema
+  paper?: {
+    size?: { width: number; height: number };
+    margins?: { top: number; right: number; bottom: number; left: number };
+    orientation?: 'portrait' | 'landscape';
+  };
+  header?: HeaderFooterContent;
+  footer?: HeaderFooterContent;
+  coverPageMarkdown?: string;
+  watermark?: string;
+  pageNumbers?: boolean;
+  isRtl?: boolean;
+  fonts?: FontOptions;
+}
 export type {
   ProjectProposal,
   DiagramType,
@@ -40,7 +182,7 @@ export type { DiffPart } from '@/lib/diff';
 export type { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 // Re-exporting generated Template types from Zod schemas
-export type DocxTemplate = z.infer<typeof DocxTemplateSchema>;
+
 export type DocxTemplatesRecord = Record<string, DocxTemplate>;
 export type PptxTemplate = z.infer<typeof PptxTemplateSchema> & { templateUrl?: string };
 export type ProposalTemplate = z.infer<typeof ProposalTemplateSchema>;
@@ -173,7 +315,7 @@ export interface LoginCredentials {
 // --- PPTX Template Types ---
 export type {PptxTemplateKey} from '@/lib/pptx-styles';
 
-export type {TemplateKey} from '@/hooks';
+export type {DocxTemplateKey } from '@/hooks';
 
 
 // --- Full Report Mode Configuration Interfaces ---

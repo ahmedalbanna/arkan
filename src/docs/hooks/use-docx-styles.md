@@ -16,9 +16,9 @@ This code defines custom React hooks using TanStack Query to manage styles for D
 
 - **`DOCX_TEMPLATES_QUERY_KEY`**: A constant string used as the query key for TanStack Query when fetching DOCX templates.
 
-- **`fetchDocxTemplates()`**: An async function that fetches DOCX templates from the `/api/templates/docx` endpoint. It returns a promise that resolves to a record of `TemplateKey` to `Template` objects.
+- **`fetchDocxTemplates()`**: An async function that fetches DOCX templates from the `/api/templates/docx` endpoint. It returns a promise that resolves to a record of `DocxTemplateKey ` to `Template` objects.
 
-- **`updateDocxTemplateApi({ key, styles }: { key: TemplateKey, styles: any }, token: string)`**: An async function that updates a DOCX template's styles via a PUT request to `/api/templates/docx/\${key}`. It includes authentication via a bearer token.
+- **`updateDocxTemplateApi({ key, styles }: { key: DocxTemplateKey , styles: any }, token: string)`**: An async function that updates a DOCX template's styles via a PUT request to `/api/templates/docx/\${key}`. It includes authentication via a bearer token.
 
 - **`refreshTemplateImageApi(variables: {templateType: string, templateId: string, prompt: string}, token: string)`**: An async function that refreshes the image for the template (used for previews).
 

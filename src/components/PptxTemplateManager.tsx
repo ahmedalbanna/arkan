@@ -19,8 +19,8 @@ export default function PptxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded } = usePptxStyles();
   const { t } = useLocalization();
 
-  const handleStyleChange = (templateKey: PptxTemplateKey, path: string, value: string | number | boolean) => {
-    updateStyle(templateKey, path, value);
+  const handleStyleChange = (DocxTemplateKey : PptxTemplateKey, path: string, value: string | number | boolean) => {
+    updateStyle(DocxTemplateKey , path, value);
   };
 
   const handleSave = (key: PptxTemplateKey) => {

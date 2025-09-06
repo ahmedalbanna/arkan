@@ -8,7 +8,7 @@ import { exportPresentationAsPptx as exportPptxUtil } from '@/lib/pptx-exporter'
 
 import type { SavedProject } from '@/lib/types';
 import type { ProjectProposal, DiagramType, SectionName, PresentationSlide } from '@/ai/schemas';
-import { TemplateKey } from '@/lib/docx-styles';
+import { DocxTemplateKey  } from '@/lib/docx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
 
 
@@ -16,13 +16,13 @@ import { PptxTemplateKey } from '@/lib/pptx-styles';
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportProposal = async (format: 'docx' | 'pdf', proposal: ProjectProposal, templateKey: TemplateKey) => {
+    const exportProposal = async (format: 'docx' | 'pdf', proposal: ProjectProposal, DocxTemplateKey : DocxTemplateKey ) => {
         setIsExporting(true);
         try {
             if (format === 'docx') {
-                await exportProposalUtil(proposal, templateKey);
+                await exportProposalUtil(proposal, DocxTemplateKey );
             } else {
-                await exportProposalPdfUtil(proposal, templateKey);
+                await exportProposalPdfUtil(proposal, DocxTemplateKey );
             }
         } catch (error) {
             console.error(error);
@@ -36,13 +36,13 @@ export function useExport() {
         sections: { [key in SectionName]?: string; },
         diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
         proposalTitle: string,
-        templateKey: TemplateKey,
+        DocxTemplateKey : DocxTemplateKey ,
         translatedTitles: { [key in SectionName]?: string; },
         sectionsToInclude?: SectionName[]
     ) => {
         setIsExporting(true);
         try {
-            await exportReportUtil(sections, diagrams, proposalTitle, templateKey, translatedTitles, sectionsToInclude);
+            await exportReportUtil(sections, diagrams, proposalTitle, DocxTemplateKey , translatedTitles, sectionsToInclude);
         } catch (error) {
             console.error(error);
             toast({ title: 'Export Failed', description: 'Could not generate the DOCX file.', variant: 'destructive' });
@@ -51,10 +51,10 @@ export function useExport() {
         }
     };
 
-    const exportPresentationPptx = async (slides: PresentationSlide[], templateKey: PptxTemplateKey) => {
+    const exportPresentationPptx = async (slides: PresentationSlide[], DocxTemplateKey : PptxTemplateKey) => {
         setIsExporting(true);
         try {
-            await exportPptxUtil(slides, templateKey);
+            await exportPptxUtil(slides, DocxTemplateKey );
         } catch (error) {
             console.error(error);
             toast({ title: 'Export Failed', description: 'Could not generate the PPTX file.', variant: 'destructive' });

@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { convertMarkdownToWord } from '@/lib/markdown-to-word-converter';
-import { templates, type TemplateKey } from '@/lib/docx-styles';
+import { templates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import dynamic from 'next/dynamic';
 
 // Dynamically import FileWord to avoid SSR issues with lucide-react icons
@@ -56,7 +56,7 @@ export function MarkdownToWordTool() {
     setIsConverting(true);
     try {
       await convertMarkdownToWord(data.markdown, data.fileName, {
-        styles: templates[data.template as TemplateKey].styles,
+        styles: templates[data.template as DocxTemplateKey ].styles,
         pageNumbers: data.pageNumbers,
         coverPageMarkdown: data.addCoverPage ? data.coverPageMarkdown : undefined,
         isRtl: data.isRtl,
@@ -115,7 +115,7 @@ export function MarkdownToWordTool() {
             <div className="space-y-2">
               <Label htmlFor="template-select">Document Template</Label>
               <Select
-                onValueChange={(value) => form.setValue('template', value as TemplateKey)}
+                onValueChange={(value) => form.setValue('template', value as DocxTemplateKey )}
                 defaultValue={form.getValues('template')}
                 disabled={isConverting}
               >

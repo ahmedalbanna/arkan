@@ -1,5 +1,5 @@
 import { createSlidesWithContent, FontOptions } from '@/lib/pptx-convert/slide-layout-engine';
-import { renderNodeOnSlide, transformInlinesToPptxText } from '@/lib/pptx-renderer';
+import { renderNodeOnSlide, transformInlinesToPptxText } from '@/lib/pptx-convert/pptx-renderer';
 import type { Root as MdastRoot } from 'mdast';
 import type { PptxStyleOptions } from '@/lib/types';
 

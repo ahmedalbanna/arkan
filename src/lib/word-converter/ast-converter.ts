@@ -3,32 +3,23 @@
 import {
   Paragraph,
   AlignmentType,
-  IRunOptions,
   TextRun,
-  ImageRun,
-  ExternalHyperlink,
-  FootnoteReferenceRun,
+  SimpleField,
   Table,
   TableRow,
   TableCell,
-  SimpleField,
-  HeadingLevel,
+  ImageRun,
   WidthType,
-  ShadingType,
+  IRunOptions,
 } from 'docx';
 import { Root, List, RootContent } from 'mdast';
 import { getProxiedImageBuffer } from '@/lib/utils';
-import { FontOptions, DocxObject } from './types';
+import { DocxObject, ConversionOptions } from './types';
 import { transformInlines } from './inline-converter';
 
-/**
- * Converts the main markdown AST nodes into an array of docx objects.
- * @param ast The root of the markdown AST.
- * @param footnoteIdMap A map of footnote identifiers to their generated IDs.
- * @returns A promise that resolves to an array of docx objects.
- */
-export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, isRtl = false, fonts: FontOptions = {}): Promise<DocxObject[]> {
+export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<string, number>, options: ConversionOptions): Promise<DocxObject[]> {
   const docxObjects: DocxObject[] = [];
+  const { isRtl = false, fonts = {}, customStyles = {} } = options;
 
   const defaultFontName = isRtl ? fonts.rtl : fonts.default;
   const baseRunOptions: IRunOptions = {};
@@ -45,7 +36,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
     for (const listItem of listNode.children) {
       for (const itemContent of listItem.children) {
         if (itemContent.type === 'paragraph') {
-          const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, fonts);
+          const children = await transformInlines(itemContent.children, footnoteIdMap, baseRunOptions, options);
           paragraphs.push(new Paragraph({
             ...baseParagraphOptions,
             children, style: 'ListParagraph',
@@ -67,9 +58,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
     const getCaption = (node: RootContent | undefined): string | null => {
       if (node && node.type === 'html') {
         const match = node.value.match(/<!--\s*caption:\s*(.*?)\s*-->/);
-        if (match) {
-          return match[1].trim();
-        }
+        if (match) return match[1].trim();
       }
       return null;
     };
@@ -92,8 +81,8 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         docxObjects.push(
           new Paragraph({
             ...baseParagraphOptions,
-            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, fonts),
-            heading: `Heading${node.depth}` as HeadingLevel,
+            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, options),
+            heading: `Heading${node.depth}` as any,
           })
         );
         break;
@@ -104,27 +93,25 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         if (imageNode) {
           try {
             const proxiedImage = await getProxiedImageBuffer(imageNode.url);
-            if (proxiedImage) {
-              docxObjects.push(new Paragraph({
-                children: [new ImageRun({ data: proxiedImage.buffer, transformation: { width: 550, height: 400 } })],
-                alignment: AlignmentType.CENTER,
-              }));
-            } else {
-              docxObjects.push(new Paragraph({ children: [new TextRun(`[Image failed to load: ${imageNode.alt}]`)] }));
-            }
+            const imageParagraph = new Paragraph({
+              ...(customStyles.imageParagraph || { alignment: AlignmentType.CENTER }),
+              children: proxiedImage
+                ? [new ImageRun({ data: proxiedImage.buffer, transformation: { width: 550, height: 400 } })]
+                : [new TextRun(`[Image failed to load: ${imageNode.alt}]`)],
+            });
+            docxObjects.push(imageParagraph);
 
             if (captionText) {
               docxObjects.push(new Paragraph({
                 children: [
                   new TextRun({ text: "Figure ", bold: true }),
-                  new SimpleField(`SEQ Figure \* ARABIC`),
-                  new TextRun({ text: ": ", bold: true, break: 0 }),
+                  new SimpleField(`SEQ Figure \\* ARABIC`),
+                  new TextRun({ text: ": ", bold: true }),
                   new TextRun(captionText),
                 ],
                 style: "Caption",
-                alignment: AlignmentType.CENTER,
               }));
-              i++; // Increment i to skip the caption comment node
+              i++;
             }
           } catch (e) {
             console.error("Failed to process block image", e);
@@ -132,7 +119,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         } else {
           docxObjects.push(new Paragraph({
             ...baseParagraphOptions,
-            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, fonts),
+            children: await transformInlines(node.children, footnoteIdMap, baseRunOptions, options),
           }));
         }
         break;
@@ -142,24 +129,22 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         break;
       case 'table': {
         const captionText = getCaption(nextNode);
-
         if (captionText) {
           docxObjects.push(new Paragraph({
             children: [
               new TextRun({ text: "Table ", bold: true }),
-              new SimpleField(`SEQ Table \* ARABIC`, true),
+              new SimpleField(`SEQ Table \\* ARABIC`),
               new TextRun({ text: ": ", bold: true }),
               new TextRun(captionText),
             ],
             style: "Caption",
-            alignment: AlignmentType.CENTER,
           }));
-          i++; // Increment i to skip the caption comment node
+          i++;
         }
         const tableRows = await Promise.all(node.children.map(async (row, rowIndex) => {
           return new TableRow({
             children: await Promise.all(row.children.map(async cell => new TableCell({
-              children: [new Paragraph({ ...baseParagraphOptions, children: await transformInlines(cell.children, footnoteIdMap, baseRunOptions, fonts) })],
+              children: [new Paragraph({ ...baseParagraphOptions, children: await transformInlines(cell.children, footnoteIdMap, baseRunOptions, options) })],
             }))),
             tableHeader: rowIndex === 0,
           });
@@ -167,6 +152,7 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
         docxObjects.push(new Table({
           rows: tableRows,
           width: { size: 100, type: WidthType.PERCENTAGE },
+          style: "CustomTableStyle",
         }));
         break;
       }
@@ -175,8 +161,8 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
           if (content.type === 'paragraph') {
             docxObjects.push(new Paragraph({
               ...baseParagraphOptions,
-              children: await transformInlines(content.children, footnoteIdMap, baseRunOptions, fonts),
-              style: 'Quote', // Assumes 'Quote' style is defined
+              children: await transformInlines(content.children, footnoteIdMap, baseRunOptions, options),
+              style: 'Quote',
             }));
           }
         }
@@ -194,20 +180,12 @@ export async function convertAstToDocxObjects(ast: Root, footnoteIdMap: Map<stri
             text: line,
             font: { name: codeFont, size: 18 }, // 9pt font for code
           });
-          // Add a line break except for the last line
           return index < codeLines.length - 1 ? [textRun, new TextRun({ break: 1 })] : [textRun];
         }).flat();
 
         docxObjects.push(new Paragraph({
+          ...customStyles.codeBlock, // Use styles from template
           children: textRuns,
-          shading: {
-            type: ShadingType.CLEAR,
-            fill: 'F2F2F2', // A light grey background
-          },
-          spacing: { before: 200, after: 200 },
-          indent: { left: 400 },
-          bidirectional: false,
-          alignment: AlignmentType.LEFT,
         }));
         break;
       }

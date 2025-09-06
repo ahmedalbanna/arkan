@@ -9,7 +9,7 @@ import { useDocxStyles } from '@/hooks';
 import { Loader2, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { TemplateKey } from '@/lib/types';
+import { DocxTemplateKey  } from '@/lib/types';
 import { StyleEditor } from './StyleEditor'; // Import the new reusable component
 
 export function DesignStudio() {
@@ -21,7 +21,7 @@ export function DesignStudio() {
         }
     }
 
-    const handleStyleChange = (templateKey: TemplateKey, path: string, value: any) => {
+    const handleStyleChange = (DocxTemplateKey : DocxTemplateKey , path: string, value: any) => {
         // The hook already knows the active template, so we just pass the path and value.
         updateStyle(path, value);
     };
@@ -40,7 +40,7 @@ export function DesignStudio() {
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="template-selector">Active Template</Label>
-                        <Select value={activeTemplateKey} onValueChange={(v) => setActiveTemplateKey(v as TemplateKey)}>
+                        <Select value={activeTemplateKey} onValueChange={(v) => setActiveTemplateKey(v as DocxTemplateKey )}>
                             <SelectTrigger id="template-selector">
                                 <SelectValue placeholder="Select a template..." />
                             </SelectTrigger>
@@ -53,10 +53,10 @@ export function DesignStudio() {
                     </div>
 
                     <Accordion type="multiple" className="w-full" defaultValue={['general', 'heading1']}>
-                        <StyleEditor heading="General Document Styles" styleKey="document" templateKey={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
-                        <StyleEditor heading="Heading 1" styleKey="heading1" templateKey={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
-                        <StyleEditor heading="Heading 2" styleKey="heading2" templateKey={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
-                        <StyleEditor heading="Heading 3" styleKey="heading3" templateKey={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
+                        <StyleEditor heading="General Document Styles" styleKey="document" DocxTemplateKey ={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
+                        <StyleEditor heading="Heading 1" styleKey="heading1" DocxTemplateKey ={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
+                        <StyleEditor heading="Heading 2" styleKey="heading2" DocxTemplateKey ={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
+                        <StyleEditor heading="Heading 3" styleKey="heading3" DocxTemplateKey ={activeTemplateKey} styles={templates[activeTemplateKey]?.styles} onChange={handleStyleChange} />
                     </Accordion>
                 </div>
             </CardContent>

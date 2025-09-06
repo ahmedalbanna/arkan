@@ -9,7 +9,7 @@ import { useDocxStyles } from '@/hooks';
 import { useExport } from '@/hooks';
 import { SectionName } from '@/ai/schemas';
 import { useSectionStore } from '@/hooks';
-import { TemplateKey } from '@/lib/docx-styles';
+import { DocxTemplateKey  } from '@/lib/docx-styles';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
@@ -19,7 +19,7 @@ export const useReportActions = (isTranslating: boolean) => {
   const { sections } = useReportStore();
   const { diagrams } = useDiagramStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
-  const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<TemplateKey>('modern');
+  const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey >('modern');
   const { exportReportDocx, isExporting } = useExport();
 
   const generatedSectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
@@ -32,13 +32,13 @@ export const useReportActions = (isTranslating: boolean) => {
   }, [JSON.stringify(generatedSectionKeys)]);
 
   useEffect(() => {
-    const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as TemplateKey | null;
+    const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey  | null;
     if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
       setSelectedDocxTemplate(savedDocxTemplate);
     }
   }, [docxTemplates]);
 
-  const handleDocxTemplateChange = (key: TemplateKey) => {
+  const handleDocxTemplateChange = (key: DocxTemplateKey ) => {
     setSelectedDocxTemplate(key);
     localStorage.setItem(DOCX_TEMPLATE_KEY, key);
   };
