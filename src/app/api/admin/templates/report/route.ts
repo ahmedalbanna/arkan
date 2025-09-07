@@ -1,6 +1,6 @@
 // src/app/api/templates/report/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/report-templates';
+import { REPORT_GENERATION_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/report-templates';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { z } from 'zod';
 import { CreateReportTemplateSchema } from '@/ai/schemas/template-schemas';

@@ -1,6 +1,6 @@
 // src/app/api/templates/proposal/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { createApiResponse, handleApiError, withAuth } from '@/lib/api-utils';
 import { CreateProposalTemplateSchema } from '@/ai/schemas/template-schemas';
 import { createGenerativeTemplate } from '@/lib/db/queries';

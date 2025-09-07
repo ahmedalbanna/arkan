@@ -15,7 +15,7 @@ import {
   GeneratePresentationOutputSchema,
   type GeneratePresentationOutput,
 } from '@/ai/schemas';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/db/seed-data/presentation-templates';
 
 
 export async function generatePresentation(input: GeneratePresentationInput): Promise<GeneratePresentationOutput> {
@@ -29,11 +29,11 @@ const generatePresentationFlow = ai.defineFlow(
     outputSchema: GeneratePresentationOutputSchema,
   },
   async (input) => {
-    
+
     // Separate media from text files for the prompt
     const textContext = input.sourceDocuments?.filter(f => !f.content.startsWith('data:')) || [];
     const mediaContext = input.sourceDocuments?.filter(f => f.content.startsWith('data:')) || [];
-    
+
     const template = PRESENTATION_GENERATION_TEMPLATES.find(t => t.id === input.templateId);
     const relevantSections = template?.relevantReportSectionIds || [];
 

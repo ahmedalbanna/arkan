@@ -3,9 +3,9 @@
 import { adminDb } from '@/lib/firebase/server-init';
 import { templates as defaultDocxTemplates, type DocxTemplateKey  } from '@/lib/docx-styles';
 import { templates as defaultPptxTemplates, type PptxTemplateKey } from '@/lib/pptx-styles';
-import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/proposal-templates';
-import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/report-templates';
-import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/presentation-templates';
+import { PROPOSAL_TEMPLATES as defaultProposalTemplates } from '@/lib/db/seed-data/proposal-templates';
+import { REPORT_GENERATION_TEMPLATES as defaultReportTemplates } from '@/lib/db/seed-data/report-templates';
+import { PRESENTATION_GENERATION_TEMPLATES as defaultPresentationTemplates } from '@/lib/db/seed-data/presentation-templates';
 
 async function seed() {
     console.log("Starting template seeding process...");

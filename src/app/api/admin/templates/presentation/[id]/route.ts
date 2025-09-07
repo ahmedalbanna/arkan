@@ -3,7 +3,7 @@
 // src/app/api/templates/presentation/[id]/route.ts
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
-import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/presentation-templates';
+import { PRESENTATION_GENERATION_TEMPLATES } from '@/lib/db/seed-data/presentation-templates';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { UpdatePresentationTemplateSchema } from '@/ai/schemas/template-schemas';
 

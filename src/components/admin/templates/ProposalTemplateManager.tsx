@@ -18,7 +18,7 @@ import { useToast } from '@/hooks';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { useState } from 'react';
-import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';

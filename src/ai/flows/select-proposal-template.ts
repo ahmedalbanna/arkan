@@ -8,7 +8,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
 import { SelectProposalTemplateInputSchema, SelectProposalTemplateOutputSchema } from '@/ai/schemas';
 
 export async function selectProposalTemplate(input: z.infer<typeof SelectProposalTemplateInputSchema>): Promise<z.infer<typeof SelectProposalTemplateOutputSchema>> {

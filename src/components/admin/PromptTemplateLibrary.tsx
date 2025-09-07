@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/prompt-templates';
+import { PROMPT_CATEGORIES, PROMPT_TEMPLATES } from '@/lib/db/seed-data/prompt-templates';
 
 import { HelpCircle, Search, Copy, Bot } from 'lucide-react';
 import { useToast } from '@/hooks';

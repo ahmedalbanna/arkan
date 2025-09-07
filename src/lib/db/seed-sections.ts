@@ -1,6 +1,6 @@
 import 'dotenv/config'; // Make sure to install dotenv: npm install dotenv
 import { adminDb } from '../firebase/server-init';
-import { reportSections, diagramSections, presentationSections } from '../../lib/sections-templates';
+import { reportSections, diagramSections, presentationSections } from './seed-data/sections-templates';
 import { CollectionReference } from 'firebase-admin/firestore';
 
 // A helper type to make sure our section objects are what we expect

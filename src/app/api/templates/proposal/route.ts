@@ -1,6 +1,6 @@
 // src/app/api/templates/proposal/route.ts
 import { adminDb } from '@/lib/firebase/server-init';
-import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES as defaultTemplates } from '@/lib/db/seed-data/proposal-templates';
 import { createApiResponse, handleApiError } from '@/lib/api-utils';
 
 // This endpoint is public for now, but could be restricted

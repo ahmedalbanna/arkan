@@ -2,7 +2,7 @@
 'use client';
 
 import { create } from "zustand";
-import { PROPOSAL_TEMPLATES } from "@/lib/proposal-templates";
+import { PROPOSAL_TEMPLATES } from "@/lib/db/seed-data/proposal-templates";
 import { useBuilderStore } from "./useBuilderStore";
 
 export interface AdvancedProposalFields {

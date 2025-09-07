@@ -1,7 +1,7 @@
 
 // src/lib/report-generation-templates.ts
 
-import type { ReportGenerationTemplate } from "./types";
+import type { ReportGenerationTemplate } from "../../types";
 
 export const REPORT_GENERATION_TEMPLATES: ReportGenerationTemplate[] = [
     {

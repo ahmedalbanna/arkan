@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { adminDb } from '@/lib/firebase/server-init';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
-import { PROPOSAL_TEMPLATES } from '@/lib/proposal-templates';
+import { PROPOSAL_TEMPLATES } from '@/lib/db/seed-data/proposal-templates';
 import { UpdateProposalTemplateSchema } from '@/ai/schemas/template-schemas';
 
 export const PUT = withAuth(async ({ request, params }) => {
