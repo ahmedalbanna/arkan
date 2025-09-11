@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -5,7 +6,7 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
-import { Loader2, Sparkles, FileText } from 'lucide-react';
+import { Loader2, Sparkles, FileText, GripVertical } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { GuidelineEditor } from './SectionGuidelineEditor';
 import { ContextSelector } from './SectionContextSelector';
@@ -18,12 +19,14 @@ export const SectionAccordionItem = ({
     isGenerating,
     isAnythingGenerating,
     hasCredits,
+    handleProps,
 }: {
     sectionKey: SectionNameType,
     onGenerate: (section: SectionNameType) => void,
     isGenerating: boolean,
     isAnythingGenerating: boolean,
     hasCredits: boolean,
+    handleProps?: any,
 }) => {
     const {
         t,
@@ -38,12 +41,19 @@ export const SectionAccordionItem = ({
 
     return (
         <AccordionItem value={sectionKey} key={sectionKey}>
-            <AccordionTrigger className="rounded-md px-4 py-2 text-sm font-medium hover:bg-muted hover:no-underline">
-                <div className="flex items-center gap-2">
-                    {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
-                    {t(title)}
-                </div>
-            </AccordionTrigger>
+            <div className="flex items-center rounded-md hover:bg-muted" >
+                {handleProps && (
+                    <div {...handleProps} className="p-2 cursor-grab touch-none">
+                        <GripVertical className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                )}
+                <AccordionTrigger className="flex-1 rounded-md px-4 py-2 text-sm font-medium hover:no-underline">
+                    <div className="flex items-center gap-2">
+                        {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Icon />}
+                        {t(title)}
+                    </div>
+                </AccordionTrigger>
+            </div>
             <AccordionContent className="space-y-4 p-4">
                 <Tabs defaultValue="prompt" className="w-full">
                     <TabsList className="grid w-full grid-cols-3">

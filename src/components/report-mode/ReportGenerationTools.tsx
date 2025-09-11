@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Accordion } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { useSectionStore } from '@/hooks';
 import { type SectionName as SectionNameType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
+import { Loader2, Sparkles, Eye, PanelLeftClose, GripVertical } from 'lucide-react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks';
 import { ReportActions } from './ReportActions';
@@ -25,6 +25,24 @@ import { useReportGenerationLogic } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
@@ -113,6 +131,19 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
     )
 }
 
+const SortableSectionItem = (props: React.ComponentProps<typeof SectionAccordionItem> & { handleProps?: any }) => {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: props.sectionKey });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            <SectionAccordionItem {...props} handleProps={{ ...attributes, ...listeners }} />
+        </div>
+    );
+};
 
 
 export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
@@ -126,7 +157,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         onGenerateSection,
         onGenerateFullReport,
         handleViewPlan,
-        availableSections,
         canGenerateFullReport,
         hasCreditsForSingleSection,
         agentsLoaded,
@@ -136,10 +166,33 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         fullReportCreditCost,
+        orderedSections,
+        setOrderedSections,
     } = useReportGenerationLogic();
     const { sections } = useReportStore();
 
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setOrderedSections((items) => {
+                const oldIndex = items.indexOf(active.id as SectionNameType);
+                const newIndex = items.indexOf(over.id as SectionNameType);
+                const newOrder = arrayMove(items, oldIndex, newIndex);
+                // Also update the store to persist this order
+                useReportStore.getState().setSectionOrderForTemplate(selectedReportTemplateId, newOrder);
+                return newOrder;
+            });
+        }
+    };
 
     if (!agentsLoaded || sectionsLoading || templatesLoading) {
         return <ToolsSkeleton />;
@@ -221,19 +274,23 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                         </div>
 
                         <Accordion type="multiple" className="w-full space-y-1">
-                            {availableSections.map((key: any) => {
-                                const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
-                                return (
-                                    <SectionAccordionItem
-                                        key={key}
-                                        sectionKey={key as SectionNameType}
-                                        onGenerate={onGenerateSection}
-                                        isGenerating={isGeneratingThis}
-                                        isAnythingGenerating={isAnythingGenerating}
-                                        hasCredits={hasCreditsForSingleSection}
-                                    />
-                                );
-                            })}
+                          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                            <SortableContext items={orderedSections} strategy={verticalListSortingStrategy}>
+                                {orderedSections.map((key) => {
+                                    const isGeneratingThis = isAnythingGenerating && activeMutationKey === key;
+                                    return (
+                                        <SortableSectionItem
+                                            key={key}
+                                            sectionKey={key as SectionNameType}
+                                            onGenerate={onGenerateSection}
+                                            isGenerating={isGeneratingThis}
+                                            isAnythingGenerating={isAnythingGenerating}
+                                            hasCredits={hasCreditsForSingleSection}
+                                        />
+                                    );
+                                })}
+                            </SortableContext>
+                          </DndContext>
                         </Accordion>
 
                     </TabsContent>

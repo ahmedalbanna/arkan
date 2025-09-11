@@ -1,4 +1,5 @@
 
+
 // code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
@@ -20,7 +21,7 @@ import { useAgents } from './use-agents';
 import { useReportTemplates } from './use-templates';
 import { AgentPrompt } from '@/lib/types';
 
-const orderedSections = SectionNameSchema.options;
+const orderedSectionsDefault = SectionNameSchema.options;
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -40,6 +41,8 @@ export function useReportGenerationLogic() {
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
     const [generationPlan, setGenerationPlan] = useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = useState(false);
+    const [orderedSections, setOrderedSections] = useState<SectionNameType[]>([]);
+
 
     const { reportSections, loading: sectionsLoading } = useSectionStore();
     const { proposal } = useBuilderStore();
@@ -55,6 +58,8 @@ export function useReportGenerationLogic() {
         initializeDependentStates,
         setSelectedReportTemplateId,
         initializeContextSelection,
+        setSectionOrderForTemplate,
+        getSectionOrderForTemplate,
     } = useReportStore();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
@@ -73,9 +78,22 @@ export function useReportGenerationLogic() {
 
     useEffect(() => {
         if (!selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
-            setSelectedReportTemplateId(reportTemplates[0].id);
+            const defaultTemplate = reportTemplates.find(t => t.isDefault) || reportTemplates[0];
+            setSelectedReportTemplateId(defaultTemplate.id);
         }
     }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
+
+    // Update ordered sections when template changes
+    useEffect(() => {
+        const template = reportTemplates?.find(t => t.id === selectedReportTemplateId);
+        if (template) {
+            const storedOrder = getSectionOrderForTemplate(template.id);
+            const initialOrder = storedOrder.length > 0 ? storedOrder : template.sectionIds;
+            const validSections = initialOrder.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
+            setOrderedSections(validSections);
+        }
+    }, [selectedReportTemplateId, reportTemplates, reportSections, getSectionOrderForTemplate]);
+
 
     useEffect(() => {
         if (agentsLoaded && agents.length > 0) {
@@ -121,7 +139,7 @@ export function useReportGenerationLogic() {
     const availableSections = useMemo(() => {
         if (!selectedTemplate) return [];
         return orderedSections.filter(key => reportSections[key] && selectedTemplate.sectionIds.includes(key as SectionNameType));
-    }, [reportSections, selectedTemplate]);
+    }, [reportSections, selectedTemplate, orderedSections]);
 
     const getGenerationPlan = async () => {
         if (!selectedTemplate) {
@@ -218,5 +236,7 @@ export function useReportGenerationLogic() {
         selectedReportTemplateId,
         setSelectedReportTemplateId,
         fullReportCreditCost,
+        orderedSections,
+        setOrderedSections,
     };
 }

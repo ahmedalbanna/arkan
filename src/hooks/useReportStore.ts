@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
@@ -9,6 +10,7 @@ import { useAgentStore, type AgentWithComponent } from './useAgentStore';
 import { useSectionStore } from './useSectionStore';
 import { useBuilderStore } from './useBuilderStore';
 import type { ProjectState } from '@/lib/types';
+import { SectionNameSchema } from '@/ai/schemas';
 
 // Type definitions
 export interface GuidelineState {
@@ -50,6 +52,7 @@ export interface ReportState {
   contextSelection: Record<string, ContextSelectionValue>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
+  templateSectionOrders: Record<string, string[]>; // New state to store order
 }
 
 interface ReportActions {
@@ -75,6 +78,8 @@ interface ReportActions {
     initializeContextSelection: (itemKey: string, defaultContextIds: string[]) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
+    setSectionOrderForTemplate: (templateId: string, orderedSectionIds: string[]) => void;
+    getSectionOrderForTemplate: (templateId: string) => string[];
 }
 
 const getDefaultGuidelineState = (agents: Record<string, AgentWithComponent>): Record<string, GuidelineState> => {
@@ -120,6 +125,7 @@ const initialState: ReportState = {
   contextSelection: {},
   selectedReportTemplateId: '', // Set dynamically in the component
   selectedPresentationTemplateId: 'software-presentation',
+  templateSectionOrders: {},
 };
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
@@ -329,6 +335,19 @@ export const useReportStore = create<ReportState & ReportActions>()(
         return { guidelineState: newGuidelines };
       });
       useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+
+    setSectionOrderForTemplate: (templateId, orderedSectionIds) => {
+        set((state) => ({
+            templateSectionOrders: {
+                ...state.templateSectionOrders,
+                [templateId]: orderedSectionIds,
+            }
+        }));
+         useBuilderStore.getState().setHasUnsavedChanges(true);
+    },
+    getSectionOrderForTemplate: (templateId: string) => {
+        return get().templateSectionOrders[templateId] || [];
     },
 
     newSession: () => set(initialState),
