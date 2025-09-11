@@ -127,13 +127,13 @@ export function useDeleteDocxTemplate() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
     return useMutation({
-        mutationFn: async (DocxTemplateKey : string) => {
+        mutationFn: async (key: string) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return deleteDocxTemplate(DocxTemplateKey , token);
+            return deleteDocxTemplate(key, token);
         },
-        onSuccess: (data, DocxTemplateKey ) => {
+        onSuccess: (data, key) => {
             queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-            toast({ title: "Template Deleted", description: `Template "${DocxTemplateKey }" has been deleted.` });
+            toast({ title: "Template Deleted", description: `Template "${key}" has been deleted.` });
         },
         onError: (error: Error) => {
             handleErrorUtility(error, "Failed to delete template");

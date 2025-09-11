@@ -170,7 +170,7 @@ export async function deletePresentationTemplate(id: string, token: string): Pro
 // --- DOCX Templates ---
 
 export async function fetchDocxTemplates(): Promise<DocxTemplatesRecord> {
-  const response = await fetch("/api/admin/templates/docx");
+  const response = await fetch("/api/templates/docx");
   if (!response.ok) {
     throw new Error("Failed to fetch DOCX templates");
   }
@@ -209,8 +209,8 @@ export async function updateDocxTemplate(
   return response.json();
 }
 
-export async function deleteDocxTemplate(DocxTemplateKey : string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/docx/${DocxTemplateKey }`, {
+export async function deleteDocxTemplate(key: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/admin/templates/docx/${key}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });
@@ -226,7 +226,7 @@ export async function deleteDocxTemplate(DocxTemplateKey : string, token: string
 // --- PPTX Templates ---
 
 export async function fetchPptxTemplates(): Promise<Record<string, PptxTemplate>> {
-  const response = await fetch("/api/admin/templates/pptx");
+  const response = await fetch("/api/templates/pptx");
   if (!response.ok) {
     throw new Error("Failed to fetch PPTX templates");
   }
@@ -266,8 +266,8 @@ export async function updatePptxTemplate(
   return response.json();
 }
 
-export async function deletePptxTemplate(DocxTemplateKey : string, token: string): Promise<{ message: string }> {
-    const response = await fetch(`/api/admin/templates/pptx/${DocxTemplateKey }`, {
+export async function deletePptxTemplate(key: string, token: string): Promise<{ message: string }> {
+    const response = await fetch(`/api/admin/templates/pptx/${key}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
     });

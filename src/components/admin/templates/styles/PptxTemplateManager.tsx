@@ -1,6 +1,6 @@
 'use client';
 
-import { useCreatePptxTemplate } from '@/hooks/use-pptx-styles';
+import { useCreatePptxTemplate } from '@/hooks';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save, PlusCircle, Trash2, RefreshCw } from 'lucide-react';

@@ -1,13 +1,16 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from '@/hooks';
-import { verifyPayment as verifyPaymentApi } from '@/services';
+import { getTransactions as getTransactionsApi, verifyPayment as verifyPaymentApi } from '@/services';
+import { TransactionStatus } from '@/services';
+import { useEffect } from 'react';
+
 
 export interface VerifyPaymentVariables {
     transactionId: string;
@@ -15,6 +18,34 @@ export interface VerifyPaymentVariables {
     creditsToGrant: number;
     status: 'verified' | 'rejected';
     adminNotes?: string;
+}
+
+const TRANSACTIONS_PER_PAGE = 6;
+
+
+export function useTransactions(status: TransactionStatus) {
+    const { firebaseUser } = useAuth();
+    const queryClient = useQueryClient();
+
+    const queryInfo = useInfiniteQuery({
+        queryKey: transactionKeys.list(status),
+        queryFn: ({ pageParam }) => getTransactionsApi({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
+        initialPageParam: undefined as string | undefined,
+        getNextPageParam: (lastPage) => {
+            if (!lastPage.hasNextPage) return undefined;
+            const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];
+            return lastTransaction?.id;
+        },
+        enabled: !!firebaseUser,
+        staleTime: 1000 * 60, // 1 minute
+    });
+
+     useEffect(() => {
+        // Invalidate other tabs when this one becomes active to refetch data
+        queryClient.invalidateQueries({ queryKey: transactionKeys.list(status) });
+    }, [status, queryClient]);
+
+    return queryInfo;
 }
 
 /**

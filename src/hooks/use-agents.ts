@@ -14,14 +14,14 @@ import { type UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
-  fetchAgents as fetchAgentsApi,
-  fetchAgent as fetchAgentApi,
-  updateAgent as updateAgentApi,
-  createAgent as createAgentApi,
-  deleteAgent as deleteAgentApi,
+  fetchAgentApi,
+  updateAgentApi,
+  createAgentApi,
+  deleteAgentApi,
   generateAgentConfigApi,
-  fetchAgentCategories as fetchAgentCategoriesApi,
-  createAgentCategory as createAgentCategoryApi
+  fetchAgentCategoriesApi,
+  createAgentCategoryApi,
+  fetchAgentsApi,
 } from "@/services";
 import { AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import { type UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
@@ -261,7 +261,7 @@ export function useDeleteAgent() {
             toast({ title: 'Agent Deleted', description: `Agent "${agentId}" was successfully deleted.` });
         },
         onError: (error: Error) => {
-            handleErrorUtility(error, "Delete Agent Failed");
+            handleErrorUtility(error, "Delete Failed");
         }
     });
 }
@@ -273,7 +273,7 @@ export function useGenerateAgentConfig() {
     return useMutation({
         mutationFn: async (variables: { prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[] }) => {
             const token = await getAuthenticatedToken(firebaseUser);
-            return generateAgentConfigApi(variables.prompt, variables.includeJsonOutput, variables.contextFiles, token);
+            return generateAgentConfigApi(variables, token);
         }
     })
 }

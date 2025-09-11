@@ -1,3 +1,4 @@
+
 export * from './use-academic-solver';
 export * from './use-academic-solver-logic';
 export * from './use-agent-editor';
@@ -44,6 +45,9 @@ export * from './use-translation';
 export * from './use-upload-project';
 export * from './use-user';
 export * from './use-writing-tools';
+export * from './use-user-management-console';
+export * from './use-dashboard';
+export * from './use-new-chat-dialog';
 
 // Store hooks
 export * from './useAcademicSolverStore';

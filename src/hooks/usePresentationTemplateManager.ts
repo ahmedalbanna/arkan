@@ -1,7 +1,8 @@
+
 'use client';
 
 import { usePptxStyles, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
-import { useRefreshTemplateImage } from '@/hooks';
+import { useCreatePptxTemplate, useRefreshTemplateImage } from '@/hooks';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 
 export function usePresentationTemplateManager() {
@@ -9,8 +10,8 @@ export function usePresentationTemplateManager() {
   const deleteMutation = useDeletePptxTemplate();
   const refreshImageMutation = useRefreshTemplateImage('pptx');
 
-  const handleStyleChange = (DocxTemplateKey : PptxTemplateKey, path: string, value: string | number | boolean) => {
-    updateStyle(DocxTemplateKey , path, value);
+  const handleStyleChange = (key: PptxTemplateKey, path: string, value: string | number | boolean) => {
+    updateStyle(key, path, value);
   };
 
   const handleSave = (key: PptxTemplateKey) => {

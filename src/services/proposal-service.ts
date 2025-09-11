@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { AnyProjectProposal } from '@/ai/schemas';

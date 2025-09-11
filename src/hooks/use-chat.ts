@@ -4,7 +4,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { deleteConversationApi } from '@/services';
+import { agentChatApi, deleteConversationApi } from '@/services';
 import { useChatStore } from './useChatStore';
 import { toast } from './use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
@@ -25,6 +25,20 @@ export function useDeleteChat() {
         },
         onError: (error) => {
             handleErrorUtility(error, "Failed to delete chat");
+        }
+    });
+}
+
+export function useAgentChat() {
+    const { refetchUser } = useAuth();
+
+    return useMutation({
+        mutationFn: agentChatApi,
+        onSuccess: () => {
+            refetchUser(); // Update credits
+        },
+        onError: (error: Error) => {
+            toast({ title: 'Error', description: error.message, variant: 'destructive' });
         }
     });
 }

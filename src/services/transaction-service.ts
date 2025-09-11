@@ -4,14 +4,15 @@
 import type { TransactionData } from '@/lib/types';
 import type { VerifyPaymentVariables } from '@/lib/types';
 
+export type TransactionStatus = 'pending' | 'verified' | 'rejected';
 interface FetchTransactionsParams {
   token: Promise<string>;
-  status: 'pending' | 'verified' | 'rejected';
+  status: TransactionStatus;
   limit: number;
   lastVisibleId?: string;
 }
 
-export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string }> {
+export async function getTransactions(params: FetchTransactionsParams): Promise<{ transactions: TransactionData[], hasNextPage: boolean, lastVisibleId?: string | null }> {
     const { token: tokenPromise, status, limit, lastVisibleId } = params;
     const token = await tokenPromise;
     if (!token) {

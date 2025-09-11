@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
-import { useRefreshTemplateImage } from '@/hooks';
+import { useDocxStyles, useDeleteDocxTemplate, useRefreshTemplateImage } from '@/hooks';
 import type { DocxTemplateKey  } from '@/lib/types';
 
 export function useDocxTemplateManager() {
@@ -27,8 +26,8 @@ export function useDocxTemplateManager() {
     }
   }, [activeTemplateKey, changeQueue, updateStyle]);
 
-  const handleStyleChange = (DocxTemplateKey : DocxTemplateKey , path: string, value: string | number | boolean) => {
-    setChangeQueue({ key: DocxTemplateKey , path, value });
+  const handleStyleChange = (key: DocxTemplateKey , path: string, value: string | number | boolean) => {
+    setChangeQueue({ key: key , path, value });
   };
 
   const handleSave = (key: DocxTemplateKey ) => {

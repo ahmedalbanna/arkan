@@ -6,30 +6,9 @@ import { useAuth } from '@/context/AuthContext';
 import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
+import { textToSpeechApi } from '@/services';
+import type { TTSInput, TTSOutput } from '@/services';
 
-interface TTSInput {
-    text: string;
-}
-
-interface TTSOutput {
-    audioDataUri: string;
-}
-
-async function textToSpeechApi(variables: { data: TTSInput, token: string }): Promise<TTSOutput> {
-    const response = await fetch('/api/text-to-speech', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to generate speech');
-    }
-    return response.json();
-}
 
 /**
  * Custom mutation hook for converting text to speech.

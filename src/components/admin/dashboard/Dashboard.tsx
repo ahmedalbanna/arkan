@@ -13,7 +13,31 @@ import { RecentActivity } from './RecentActivity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { useAdminDashboard } from '@/hooks/use-dashboard';
 
+
+function DashboardSkeleton() {
+    return (
+        <div className="space-y-8">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+                <StatCardSkeleton />
+            </div>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
+                <Card className="lg:col-span-4">
+                     <CardHeader>
+                        <Skeleton className="h-6 w-1/2" />
+                    </CardHeader>
+                     <CardContent className="pl-2">
+                        <Skeleton className="h-[300px] w-full" />
+                    </CardContent>
+                </Card>
+                <RecentActivitySkeleton />
+            </div>
+        </div>
+    );
+}
 function StatCardSkeleton() {
     return (
         <Card>
@@ -49,43 +73,10 @@ function RecentActivitySkeleton() {
 }
 
 
-function DashboardSkeleton() {
-    return (
-        <div className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <StatCardSkeleton />
-                <StatCardSkeleton />
-                <StatCardSkeleton />
-            </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-7">
-                <Card className="lg:col-span-4">
-                     <CardHeader>
-                        <Skeleton className="h-6 w-1/2" />
-                    </CardHeader>
-                     <CardContent className="pl-2">
-                        <Skeleton className="h-[300px] w-full" />
-                    </CardContent>
-                </Card>
-                <RecentActivitySkeleton />
-            </div>
-        </div>
-    );
-}
-
 export default function Dashboard() {
-    const { firebaseUser } = useAuth();
     const { t } = useLocalization();
+    const { data, isLoading, isError, error } = useAdminDashboard();
 
-    const { data, isLoading, isError, error } = useQuery<DashboardStats>({
-        queryKey: adminKeys.dashboardStats(),
-        queryFn: async () => {
-            if (!firebaseUser) throw new Error("User not authenticated");
-            const token = await firebaseUser.getIdToken();
-            return fetchDashboardStats(token);
-        },
-        enabled: !!firebaseUser,
-        staleTime: 1000 * 60 * 2, // 2 minutes
-    });
 
     if (isLoading) {
         return <DashboardSkeleton />;

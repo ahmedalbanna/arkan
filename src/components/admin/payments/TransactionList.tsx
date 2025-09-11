@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
@@ -10,9 +11,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { Button } from '@/components/ui/button';
+import { useTransactions } from '@/hooks';
+import type { TransactionStatus } from '@/services';
 
-const TRANSACTIONS_PER_PAGE = 6;
-type TransactionStatus = 'pending' | 'verified' | 'rejected';
 
 function ConsoleSkeleton() {
     return (
@@ -36,10 +37,7 @@ function ConsoleSkeleton() {
 }
 
 export function TransactionList({ status }: { status: TransactionStatus }) {
-    const { firebaseUser } = useAuth();
     const { t } = useLocalization();
-    const queryClient = useQueryClient();
-
     const {
         data,
         error,
@@ -47,24 +45,8 @@ export function TransactionList({ status }: { status: TransactionStatus }) {
         hasNextPage,
         isFetchingNextPage,
         isLoading,
-        isError,
-    } = useInfiniteQuery({
-        queryKey: transactionKeys.list(status),
-        queryFn: ({ pageParam }) => getTransactions({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
-        initialPageParam: undefined as string | undefined,
-        getNextPageParam: (lastPage) => {
-            if (!lastPage.hasNextPage) return undefined;
-            const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];
-            return lastTransaction?.id;
-        },
-        enabled: !!firebaseUser,
-        staleTime: 1000 * 60, // 1 minute
-    });
-
-    useEffect(() => {
-        // Invalidate other tabs when this one becomes active to refetch data
-        queryClient.invalidateQueries({ queryKey: transactionKeys.list(status) });
-    }, [status, queryClient]);
+        isError
+    } = useTransactions(status);
 
 
     if (isLoading) {

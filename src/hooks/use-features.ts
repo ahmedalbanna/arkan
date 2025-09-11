@@ -8,9 +8,9 @@ import { featureKeys } from "@/lib/query-keys";
 import { useAuth } from "@/context/AuthContext";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import {
-  fetchFeatures as fetchFeaturesApi,
-  updateFeature as updateFeatureApi,
-} from "@/services/feature-service";
+  fetchFeaturesApi,
+  updateFeatureApi,
+} from "@/services";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 
 

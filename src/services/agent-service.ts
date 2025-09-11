@@ -4,6 +4,7 @@
 import type { UpdateAgentVariables, CreateAgentVariables, AgentCategory } from '@/hooks';
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { Agent } from '@/lib/types';
+import { GenerateAgentConfigOutput } from '@/ai/schemas';
 
 /**
  * Fetches the full list of agent categories from the API.
@@ -11,7 +12,7 @@ import { Agent } from '@/lib/types';
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of AgentCategory objects.
  */
-export async function fetchAgentCategories(token: string): Promise<AgentCategory[]> {
+export async function fetchAgentCategoriesApi(token: string): Promise<AgentCategory[]> {
     const response = await fetch('/api/admin/agent-categories', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -29,7 +30,7 @@ export async function fetchAgentCategories(token: string): Promise<AgentCategory
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the newly created AgentCategory object.
  */
-export async function createAgentCategory(data: { id: string; name: string }, token: string): Promise<AgentCategory> {
+export async function createAgentCategoryApi(data: { id: string; name: string }, token: string): Promise<AgentCategory> {
     const response = await fetch('/api/admin/agent-categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -49,7 +50,7 @@ export async function createAgentCategory(data: { id: string; name: string }, to
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to an array of Agent objects.
  */
-export async function fetchAgents(token: string): Promise<Agent[]> {
+export async function fetchAgentsApi(token: string): Promise<Agent[]> {
     const response = await fetch('/api/agents', {
         headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -68,7 +69,7 @@ export async function fetchAgents(token: string): Promise<Agent[]> {
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the Agent object, or null if not found.
  */
-export async function fetchAgent(agentId: string, token: string): Promise<Agent | null> {
+export async function fetchAgentApi(agentId: string, token: string): Promise<Agent | null> {
     if (!agentId) return null;
     const response = await fetch(`/api/admin/agents/${agentId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -88,7 +89,7 @@ export async function fetchAgent(agentId: string, token: string): Promise<Agent 
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the updated Agent object.
  */
-export async function updateAgent(
+export async function updateAgentApi(
     variables: UpdateAgentVariables,
     token: string
 ): Promise<Agent> {
@@ -116,7 +117,7 @@ export async function updateAgent(
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the newly created Agent object.
  */
-export async function createAgent(data: CreateAgentVariables, token: string): Promise<Agent> {
+export async function createAgentApi(data: CreateAgentVariables, token: string): Promise<Agent> {
     const response = await fetch('/api/admin/agents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -139,7 +140,7 @@ export async function createAgent(data: CreateAgentVariables, token: string): Pr
  * @param token The admin user's authentication token.
  * @returns A promise that resolves when the deletion is successful.
  */
-export async function deleteAgent(agentId: string, token: string): Promise<{ message: string }> {
+export async function deleteAgentApi(agentId: string, token: string): Promise<{ message: string }> {
     const response = await fetch(`/api/admin/agents/${agentId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
@@ -158,11 +159,11 @@ export async function deleteAgent(agentId: string, token: string): Promise<{ mes
  * @param token The admin user's authentication token.
  * @returns A promise that resolves to the generated agent configuration.
  */
-export async function generateAgentConfigApi(prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[], token: string): Promise<any> {
+export async function generateAgentConfigApi(variables: { prompt: string, includeJsonOutput: boolean, contextFiles: UploadedFile[] }, token: string): Promise<GenerateAgentConfigOutput> {
     const response = await fetch('/api/admin/agents/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ prompt, includeJsonOutput, contextFiles }),
+        body: JSON.stringify(variables),
     });
      if (!response.ok) {
         const error = await response.json();

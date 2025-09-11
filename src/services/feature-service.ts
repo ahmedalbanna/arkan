@@ -8,7 +8,7 @@ import type { Feature, UpdateFeatureVariables } from '@/lib/types';
  * This does not require authentication.
  * @returns A promise that resolves to an array of Feature objects.
  */
-export async function fetchFeatures(): Promise<Feature[]> {
+export async function fetchFeaturesApi(): Promise<Feature[]> {
     const response = await fetch('/api/features');
     if (!response.ok) {
         const error = await response.json();
@@ -24,7 +24,7 @@ export async function fetchFeatures(): Promise<Feature[]> {
  * @param token - The authentication token for the user.
  * @returns A promise that resolves to the updated Feature object.
  */
-export async function updateFeature(
+export async function updateFeatureApi(
     variables: UpdateFeatureVariables,
     token: string
 ): Promise<Feature> {

@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ChatSession } from "@/hooks";
@@ -61,4 +62,31 @@ export async function deleteConversationApi(chatId: string, token: string): Prom
          throw new Error(error.message || 'Failed to delete conversation');
      }
      return await response.json();
+}
+
+interface AgentChatApiVariables {
+    agentId: string;
+    message: string;
+    conversationId: string;
+    token: string;
+}
+
+export async function agentChatApi(variables: AgentChatApiVariables) {
+    const response = await fetch('/api/agent-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${variables.token}`,
+        },
+        body: JSON.stringify({
+            agentId: variables.agentId,
+            message: variables.message,
+            conversationId: variables.conversationId
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get response from agent.');
+    }
+    return await response.json();
 }

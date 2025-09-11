@@ -15,30 +15,7 @@ import { getAuthenticatedToken } from '@/lib/authUtils';
 import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib';
-
-interface ConversationViewProps {
-  chat: ChatSession | AgentChatSession | null;
-}
-
-async function agentChatApi(variables: { agentId: string; message: string; conversationId: string; token: string }) {
-    const response = await fetch('/api/agent-chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify({
-            agentId: variables.agentId,
-            message: variables.message,
-            conversationId: variables.conversationId
-        }),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to get response from agent.');
-    }
-    return await response.json();
-}
+import { useAgentChat } from '@/hooks';
 
 function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -61,7 +38,7 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant', content:
     )
 }
 
-export function ConversationView({ chat }: ConversationViewProps) {
+export function ConversationView({ chat }: { chat: ChatSession | AgentChatSession | null }) {
   const { firebaseUser, refetchUser } = useAuth();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -99,16 +76,7 @@ export function ConversationView({ chat }: ConversationViewProps) {
     }
   }, [messages]);
 
-  const agentChatMutation = useMutation({
-    mutationFn: agentChatApi,
-    onSuccess: (data, variables) => {
-        // The DB listener will handle message updates, so no need to set local state here.
-        refetchUser(); // Update credits
-    },
-    onError: (error: Error) => {
-        toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    }
-  });
+  const agentChatMutation = useAgentChat();
 
 
   const handleSendMessage = async (e: React.FormEvent) => {

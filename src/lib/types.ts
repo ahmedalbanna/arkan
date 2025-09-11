@@ -19,13 +19,11 @@ import { Paragraph, Table } from 'docx'; // Assuming these are needed for DocxOb
 
 // Helper for common run properties (IRunOptions)
 const DocxRunPropertiesSchema = z.object({
-  size: z.union([z.number(), z.string()]).optional(), // <--- تم التعديل هنا للسماح بالرقم أو السلسلة النصية
+  size: z.union([z.number(), z.string()]).optional(),
   bold: z.boolean().optional(),
   italics: z.boolean().optional(),
   color: z.string().optional(),
-  font: z.object({
-    name: z.string().optional(),
-  }).optional(),
+  font: z.union([z.string(), z.object({ name: z.string().optional() })]).optional(),
   // Add other IRunOptions properties as needed, or use .passthrough()
 }).passthrough();
 
@@ -315,7 +313,7 @@ export interface LoginCredentials {
 // --- PPTX Template Types ---
 export type {PptxTemplateKey} from '@/lib/pptx-styles';
 
-export type {DocxTemplateKey } from '@/hooks';
+export type DocxTemplateKey = 'modern' | 'classic' | 'academic' | string;
 
 
 // --- Full Report Mode Configuration Interfaces ---

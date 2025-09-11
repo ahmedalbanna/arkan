@@ -24,6 +24,7 @@ import { useUsers } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgents } from '@/hooks';
+import { useNewChatDialog } from '@/hooks/use-new-chat-dialog';
 // ...
 
 
@@ -38,43 +39,18 @@ interface ChatListProps {
 
 
 function NewChatDialog() {
-    const [open, setOpen] = useState(false);
-    const { firebaseUser, userProfile: adminProfile } = useAuth();
-
     const {
-        data,
-        isLoading: usersLoading,
-        fetchNextPage,
+        open,
+        setOpen,
+        allUsers,
+        usersLoading,
         hasNextPage,
-        isFetchingNextPage
-    } = useUsers();
+        isFetchingNextPage,
+        isCreating,
+        fetchNextPage,
+        onSelectUser,
+    } = useNewChatDialog();
 
-    const allUsers = data?.pages.flatMap(page => page.users) ?? [];
-
-    const { createConversation } = useChatStore();
-    const [isCreating, setIsCreating] = useState(false);
-
-    const onSelectUser = async (user: UserProfile) => {
-        if (!firebaseUser || !adminProfile) return;
-        setIsCreating(true);
-        try {
-            const token = await firebaseUser.getIdToken();
-            const conversation = await createConversationApi({
-                participantIds: [firebaseUser.uid, user.id],
-                participantNames: {
-                    [firebaseUser.uid]: adminProfile.name || 'Admin',
-                    [user.id]: user.name
-                },
-                title: `Chat with ${user.name}`
-            }, token);
-            createConversation(conversation);
-            setOpen(false); // Close dialog on success
-        } catch (error: any) {
-            toast({ title: "Error starting chat", description: error.message, variant: "destructive" });
-        } finally {
-            setIsCreating(false);
-        }
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -93,7 +69,7 @@ function NewChatDialog() {
                     <CommandList>
                         <CommandEmpty>No users found.</CommandEmpty>
                         <CommandGroup>
-                            {usersLoading && !data && <CommandItem><Loader2 className="me-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
+                            {usersLoading && !allUsers.length && <CommandItem><Loader2 className="me-2 h-4 w-4 animate-spin" />Loading users...</CommandItem>}
                             {allUsers?.map((user: UserProfile) => (
                                 <CommandItem key={user.id} onSelect={() => onSelectUser(user)} disabled={isCreating}>
                                     <Avatar className="me-2 h-6 w-6">
@@ -215,4 +191,5 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
     </div>
   );
 }
+
 
