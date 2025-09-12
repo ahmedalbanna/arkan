@@ -2,7 +2,13 @@ import { User } from './user';
 import type { TeamWithMembers, TeamMember } from '@/lib/types';
 
 // The properties for our class constructor will be the API response type
-export type TeamProperties = TeamWithMembers;
+export interface TeamProperties {
+    id: string;
+    name: string;
+    ownerId: string;
+    createdAt: string;
+    members: TeamMember[];
+}
 
 export class Team {
     public id: string;

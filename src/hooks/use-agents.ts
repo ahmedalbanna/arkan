@@ -39,10 +39,7 @@ export interface UpdateAgentVariables {
 // This is fine, as the API expects a plain object.
 export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
 
-export interface AgentCategory {
-    id: string;
-    name: string;
-}
+
 
 
 /**

@@ -13,8 +13,8 @@ export class User {
     public email: string;
     public role: UserRole;
     public credits?: number;
-    public createdAt?: string;
-    public updatedAt?: string;
+    public createdAt: string;
+    public updatedAt: string;
     public teams?: string[];
     public bio?: string;
     public profilePictureUrl?: string;

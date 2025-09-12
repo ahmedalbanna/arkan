@@ -2,7 +2,7 @@
 
 import type { ProjectProposal, DiagramType, SectionName, PresentationHistoryEntry, AnyProjectProposal, ProjectPlan } from '@/ai/schemas';
 import type { User as FirebaseUser } from 'firebase/auth';
-import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema } from '@/ai/schemas/template-schemas';
+import type { PptxTemplateSchema, ProposalTemplateSchema, ReportGenerationTemplateSchema, PresentationGenerationTemplateSchema, DocxStyleOptionsSchema } from '@/ai/schemas/template-schemas';
 
 import type { UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
 import { LucideIcon } from 'lucide-react';
@@ -17,80 +17,7 @@ import { Paragraph, Table } from 'docx'; // Assuming these are needed for DocxOb
 
 // --- Zod Schemas for DOCX Style Parts ---
 
-// Helper for common run properties (IRunOptions)
-const DocxRunPropertiesSchema = z.object({
-  size: z.union([z.number(), z.string()]).optional(),
-  bold: z.boolean().optional(),
-  italics: z.boolean().optional(),
-  color: z.string().optional(),
-  font: z.union([z.string(), z.object({ name: z.string().optional() })]).optional(),
-  // Add other IRunOptions properties as needed, or use .passthrough()
-}).passthrough();
 
-// Helper for common paragraph properties (Omit<IParagraphOptions, 'children'>)
-const DocxParagraphPropertiesSchema = z.object({
-  spacing: z.object({
-    after: z.number().optional(),
-    before: z.number().optional(),
-    line: z.number().optional(),
-  }).optional(),
-  alignment: z.any().optional(), // AlignmentType is an enum, z.any() for simplicity
-  indent: z.object({
-    left: z.number().optional(),
-    hanging: z.number().optional(),
-  }).optional(),
-  border: z.any().optional(), // Border properties are complex, z.any() for simplicity
-  shading: z.object({
-    type: z.any().optional(), // ShadingType enum
-    fill: z.string().optional(),
-  }).optional(),
-  bidirectional: z.boolean().optional(),
-  outlineLevel: z.number().optional(),
-  // Add other IParagraphOptions properties as needed, or use .passthrough()
-}).passthrough();
-
-// Schema for IParagraphStyleOptions
-const DocxParagraphStyleOptionsSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  basedOn: z.string().optional(),
-  next: z.string().optional(),
-  quickFormat: z.boolean().optional(),
-  run: DocxRunPropertiesSchema.optional(),
-  paragraph: DocxParagraphPropertiesSchema.optional(),
-  table: z.any().optional(), // Table properties are complex
-  tableRow: z.any().optional(),
-  tableCell: z.any().optional(),
-  conditionalFormatting: z.any().optional(),
-  // Add other IParagraphStyleOptions properties as needed, or use .passthrough()
-}).passthrough();
-
-// Schema for ICharacterStyleOptions
-const DocxCharacterStyleOptionsSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  basedOn: z.string().optional(),
-  run: DocxRunPropertiesSchema.optional(),
-  // Add other ICharacterStyleOptions properties as needed, or use .passthrough()
-}).passthrough();
-
-// Schema for IStylesOptions (main styles object)
-export const DocxStyleOptionsSchema = z.object({
-  default: z.object({
-    document: z.object({
-      run: DocxRunPropertiesSchema.optional(),
-    }).optional(),
-    heading1: DocxParagraphStyleOptionsSchema.optional(),
-    heading2: DocxParagraphStyleOptionsSchema.optional(),
-    heading3: DocxParagraphStyleOptionsSchema.optional(),
-    heading4: DocxParagraphStyleOptionsSchema.optional(),
-    heading5: DocxParagraphStyleOptionsSchema.optional(),
-    heading6: DocxParagraphStyleOptionsSchema.optional(),
-  }).optional(),
-  paragraphStyles: z.array(DocxParagraphStyleOptionsSchema).optional(),
-  characterStyles: z.array(DocxCharacterStyleOptionsSchema).optional(),
-  // Add other IStylesOptions properties as needed, or use .passthrough()
-}).passthrough();
 
 // --- Zod Schema for CustomStyles ---
 // CustomStyles properties are Omit<IParagraphOptions, 'children'>
@@ -171,7 +98,7 @@ export type { AcademicSolverState, ExternalContext as AcademicContextFile, Acade
 export type { TeamWithMembers } from '@/services';
 
 export type { ChatSession, ChatMessage, AgentChatSession } from '@/hooks';
-export type { ExternalContext, ContextFileType } from '@/hooks';
+
 export type { TranslateVariables, TranslateTextOutput } from '@/ai/schemas';
 export type { SignupCredentials } from '@/components/auth/SignupForm';
 export type { GenerateProposalBody } from '@/hooks';
@@ -186,6 +113,8 @@ export type PptxTemplate = z.infer<typeof PptxTemplateSchema> & { templateUrl?: 
 export type ProposalTemplate = z.infer<typeof ProposalTemplateSchema>;
 export type ReportGenerationTemplate = z.infer<typeof ReportGenerationTemplateSchema>;
 export type PresentationGenerationTemplate = z.infer<typeof PresentationGenerationTemplateSchema>;
+
+
 export type PptxStyleOptions = z.infer<typeof PptxTemplateSchema>['styles'];
 
 export enum AgentCategory {
@@ -247,19 +176,22 @@ export interface Agent{
   isDefault?: boolean;
   icon?: LucideIcon;
   iconComponent?: LucideIcon;
+  updatePrompt(newPrompt: AgentPrompt | string): void;
+  execute(context: any): Promise<any>;
+  toggleEnabled(): void;
 }
 export type { Notification } from '@/hooks/use-notifications';
 export type { Feature, UpdateFeatureVariables } from "@/hooks";
 
 
 
-export type UserRole = 'user' | 'admin';
+export type UserRole = 'admin' | 'user' | 'owner' | 'member' | 'team_lead';
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  credits: number;
+  credits?: number;
   role: UserRole;
   createdAt: string; // Storing as ISO string
   updatedAt: string; // Storing as ISO string

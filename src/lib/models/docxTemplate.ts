@@ -1,5 +1,5 @@
 import { Template, type BaseTemplateProperties } from './template';
-import type { DocxStyleOptions } from '@/ai/schemas/template-schemas'; // Import the Zod inferred type for styles
+import type { DocxStyleOptions } from '@/ai/schemas/template-schemas';
 
 // Corresponds to DocxTemplateSchema
 export interface DocxTemplateProperties extends BaseTemplateProperties {

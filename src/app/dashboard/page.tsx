@@ -120,7 +120,7 @@ export default function UserDashboardPage() {
                 <div className="space-y-8">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         <StatCard title={t('userDashboard.totalGenerations')} value={stats.totalGenerations.toString()} icon={Bot} />
-                        <StatCard title={t('userDashboard.creditsRemaining')} value={userProfile?.credits.toString()} icon={Gem} />
+                        <StatCard title={t('userDashboard.creditsRemaining')} value={(userProfile?.credits ?? 0).toString()} icon={Gem} />
                         <StatCard title={t('userDashboard.creditsUsed')} value={stats.creditsUsed.toString()} icon={TrendingDown} />
                     </div>
 

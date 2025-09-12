@@ -10,7 +10,7 @@ import { logGeneration } from '@/services/generation-service';
 
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { adminDb } from '@/lib/firebase/server-init';
-import type { ExternalContext } from '@/lib/types';
+import type { ExternalContext } from '@/hooks/use-academic-solver-logic';
 import type { AdvancedProposalFields } from '@/hooks';
 
 

@@ -7,7 +7,6 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import type { ExternalContext } from '@/hooks';
 import { AnalyzeContextInputSchema, type AnalyzeContextInput, AnalyzeContextOutputSchema, type AnalyzeContextOutput } from '@/ai/schemas';
 
 const analysisPrompt = ai.definePrompt({

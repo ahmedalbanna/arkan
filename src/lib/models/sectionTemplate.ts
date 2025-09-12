@@ -1,4 +1,4 @@
-import { Template, TemplateProperties } from './template';
+import { Template, BaseTemplateProperties } from './template';
 import { Project } from './project';
 import { Section, SectionProperties } from './section';
 
@@ -9,7 +9,7 @@ export interface SectionTemplateContent {
 }
 
 // Concrete properties for a SectionTemplate, fixing the type
-export interface SectionTemplateProperties extends TemplateProperties<SectionTemplateContent> {
+export interface SectionTemplateProperties extends BaseTemplateProperties<SectionTemplateContent> {
   type: 'section';
 }
 

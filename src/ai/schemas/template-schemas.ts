@@ -21,13 +21,80 @@ export const AgentPromptSchema = z.object({
 
 
 // DOCX Styles
+// Helper for common run properties (IRunOptions)
+const DocxRunPropertiesSchema = z.object({
+  size: z.union([z.number(), z.string()]).optional(),
+  bold: z.boolean().optional(),
+  italics: z.boolean().optional(),
+  color: z.string().optional(),
+  font: z.union([z.string(), z.object({ name: z.string().optional() })]).optional(),
+  // Add other IRunOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Helper for common paragraph properties (Omit<IParagraphOptions, 'children'>)
+const DocxParagraphPropertiesSchema = z.object({
+  spacing: z.object({
+    after: z.number().optional(),
+    before: z.number().optional(),
+    line: z.number().optional(),
+  }).optional(),
+  alignment: z.any().optional(), // AlignmentType is an enum, z.any() for simplicity
+  indent: z.object({
+    left: z.number().optional(),
+    hanging: z.number().optional(),
+  }).optional(),
+  border: z.any().optional(), // Border properties are complex, z.any() for simplicity
+  shading: z.object({
+    type: z.any().optional(), // ShadingType enum
+    fill: z.string().optional(),
+  }).optional(),
+  bidirectional: z.boolean().optional(),
+  outlineLevel: z.number().optional(),
+  // Add other IParagraphOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for IParagraphStyleOptions
+const DocxParagraphStyleOptionsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  basedOn: z.string().optional(),
+  next: z.string().optional(),
+  quickFormat: z.boolean().optional(),
+  run: DocxRunPropertiesSchema.optional(),
+  paragraph: DocxParagraphPropertiesSchema.optional(),
+  table: z.any().optional(), // Table properties are complex
+  tableRow: z.any().optional(),
+  tableCell: z.any().optional(),
+  conditionalFormatting: z.any().optional(),
+  // Add other IParagraphStyleOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for ICharacterStyleOptions
+const DocxCharacterStyleOptionsSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  basedOn: z.string().optional(),
+  run: DocxRunPropertiesSchema.optional(),
+  // Add other ICharacterStyleOptions properties as needed, or use .passthrough()
+}).passthrough();
+
+// Schema for IStylesOptions (main styles object)
 export const DocxStyleOptionsSchema = z.object({
-  document: z.object({
-    fontFace: z.string(),
-    fontSize: z.number(),
-    color: z.string(),
-  }),
-});
+  default: z.object({
+    document: z.object({
+      run: DocxRunPropertiesSchema.optional(),
+    }).optional(),
+    heading1: DocxParagraphStyleOptionsSchema.optional(),
+    heading2: DocxParagraphStyleOptionsSchema.optional(),
+    heading3: DocxParagraphStyleOptionsSchema.optional(),
+    heading4: DocxParagraphStyleOptionsSchema.optional(),
+    heading5: DocxParagraphStyleOptionsSchema.optional(),
+    heading6: DocxParagraphStyleOptionsSchema.optional(),
+  }).optional(),
+  paragraphStyles: z.array(DocxParagraphStyleOptionsSchema).optional(),
+  characterStyles: z.array(DocxCharacterStyleOptionsSchema).optional(),
+  // Add other IStylesOptions properties as needed, or use .passthrough()
+}).passthrough();
 
 // DOCX Template
 export const DocxTemplateSchema = BaseTemplateSchema.extend({

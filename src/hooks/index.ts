@@ -53,6 +53,7 @@ export * from './use-new-chat-dialog';
 
 // Store hooks
 export * from './useAcademicSolverStore';
+export * from './useSectionStore'; // Export DynamicSection
 export * from './useAgentStore';
 export * from './useBuilderStore';
 export * from './useChatInterface';

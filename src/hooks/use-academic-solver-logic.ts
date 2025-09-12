@@ -12,6 +12,14 @@ import { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/sch
 import { AcademicSolverStage } from '@/lib/types';
 import { Project } from '@/lib/models/project';
 
+export interface ExternalContext {
+  fileName: string;
+  content: string;
+  type: 'question' | 'context';
+}
+
+export type ContextFileType = 'question' | 'context';
+
 
 export function useAcademicSolverLogic() {
     const { t, locale } = useLocalization();

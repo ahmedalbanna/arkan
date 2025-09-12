@@ -6,7 +6,6 @@ import { deductCredit } from '@/services/credit-service';
 import { logGeneration } from '@/services/generation-service';
 import { withAuth, handleApiError, createApiResponse } from '@/lib/api-utils';
 import { analyzeContext } from '@/ai/flows/analyze-context';
-import type { ExternalContext } from '@/hooks';
 
 const analyzeContextSchema = z.object({
   prompt: z.string().min(10, 'Prompt must be at least 10 characters long.'),
