@@ -1,3 +1,4 @@
+
 // This model is now based on the DynamicSection interface from useSectionStore.ts
 
 export type SectionType = 'report' | 'diagram' | 'presentation';

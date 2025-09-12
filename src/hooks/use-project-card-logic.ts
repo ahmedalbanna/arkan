@@ -15,7 +15,7 @@ export function useProjectCardLogic(project: Project) { // Changed type to Proje
 
     const handleLoadProject = () => {
         // loadProject expects a plain object matching SavedProject interface
-        loadProject(project.toStateObject()); 
+        loadProject(project.toPlainObject()); 
         router.push('/generate');
     };
 

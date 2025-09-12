@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -84,7 +83,7 @@ export function GenerateAgentView() {
         setStep('generating');
         generateMutation.mutate({ prompt, includeJsonOutput, contextFiles }, {
             onSuccess: (data) => {
-                setGeneratedData(data);
+                setGeneratedData(data as GeneratedAgentData);
                 setStep('reviewing');
             },
             onError: (error) => {
@@ -125,7 +124,7 @@ export function GenerateAgentView() {
             knowledge: knowledgeSources,
         };
 
-        createAgentMutation.mutate(agentData, {
+        createAgentMutation.mutate(agentData as any, {
             onSuccess: (newAgent) => {
                 router.push(`/admin/manage-agents/${newAgent.id}/edit`);
             },

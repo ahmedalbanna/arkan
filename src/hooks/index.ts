@@ -1,5 +1,4 @@
 
-
 export * from './use-academic-solver';
 export * from './use-academic-solver-logic';
 export * from './use-agent-editor';
@@ -50,6 +49,8 @@ export * from './use-writing-tools';
 export * from './use-user-management-console';
 export * from './use-dashboard';
 export * from './use-new-chat-dialog';
+export * from './use-docx-template-manager';
+export * from './use-presentation-template-manager';
 
 // Store hooks
 export * from './useAcademicSolverStore';
@@ -61,9 +62,7 @@ export * from './useChatStore';
 export * from './useCodebaseStore';
 export * from './useCodeGeneratorStore';
 export * from './useDiagramStore';
-export * from './useDocxTemplateManager';
 export * from './usePresentationStore';
-export * from './usePresentationTemplateManager';
 export * from './useProjectPlanStore';
 export * from './useProposalGenerationStore';
 export * from './useReportStore';

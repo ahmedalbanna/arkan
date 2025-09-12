@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useEffect } from 'react';
 import { useAgents } from '@/hooks';
-import type { Agent } from '@/lib/types';
+import { Agent, type AgentProperties } from '@/lib/models/agent';
 import { useAuth } from '@/context/AuthContext';
-import { useChatStore, type AgentChatSession, type ChatSession } from '@/hooks';
+import { useChatStore } from '@/hooks';
 import { createConversationApi } from '@/services';
 import { toast } from '@/hooks';
 
@@ -13,11 +14,12 @@ export function useChatInterface() {
   const {
     selectedChat,
     setSelectedChat,
-    chats,
+    getChats,
     createConversation,
     initialize,
     isInitialized
   } = useChatStore();
+  const chats = getChats();
   const { firebaseUser, userProfile } = useAuth();
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export function useChatInterface() {
     }
   }, [chats, selectedChat, setSelectedChat]);
 
-  const handleSelectChat = (chat: ChatSession | AgentChatSession) => {
+  const handleSelectChat = (chat: any) => {
     setSelectedChat(chat);
   }
 
@@ -61,7 +63,7 @@ export function useChatInterface() {
                 [`ai-agent-${agent.id}`]: agent.name,
             },
             title: agent.name,
-            agent: agent, // Store agent info in the conversation
+            agent: agent as AgentProperties, // Pass plain object to API
         };
         const conversation = await createConversationApi(newConversationData, token);
         createConversation(conversation);
@@ -73,7 +75,7 @@ export function useChatInterface() {
   return {
     agents,
     chats,
-    selectedChat,
+    selectedChat: useChatStore().getSelectedChat(), // Use the selector
     handleSelectChat,
     handleSelectAgent,
   };

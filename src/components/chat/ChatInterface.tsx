@@ -29,7 +29,7 @@ export default function ChatInterface() {
         className={cn("min-w-[250px] max-w-[400px]")}
       >
         <ChatList
-          agents={agents as Agent[]} // Cast to Agent class instances
+          agents={agents} // Pass agents directly
           liveChats={chats} // Already an array of Chat class instances
           selectedChat={selectedChat} // Already a Chat class instance or null
           onSelectChat={handleSelectChat}

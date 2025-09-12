@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useMutation, useQueryClient, useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useInfiniteQuery, type InfiniteData } from '@tanstack/react-query';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
@@ -23,7 +24,11 @@ export interface VerifyPaymentVariables {
 const TRANSACTIONS_PER_PAGE = 6;
 
 // Define the shape of the API response
-type TransactionsPage = { transactions: TransactionData[], hasNextPage: boolean };
+interface TransactionsPage { 
+    transactions: TransactionData[], 
+    hasNextPage: boolean,
+    lastVisibleId?: string | null;
+};
 
 export function useTransactions(status: TransactionStatus) {
     const { firebaseUser } = useAuth();
@@ -31,8 +36,12 @@ export function useTransactions(status: TransactionStatus) {
 
     const queryInfo = useInfiniteQuery({
         queryKey: transactionKeys.list(status),
-        queryFn: ({ pageParam }) => getTransactionsApi({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam, token: firebaseUser!.getIdToken() }),
-        initialPageParam: undefined as string | undefined,
+        queryFn: async ({ pageParam }) => {
+            if (!firebaseUser) throw new Error("User not authenticated.");
+            const token = await firebaseUser.getIdToken();
+            return getTransactionsApi({ status, limit: TRANSACTIONS_PER_PAGE, lastVisibleId: pageParam as string | undefined, token });
+        },
+        initialPageParam: undefined,
         getNextPageParam: (lastPage) => {
             if (!lastPage.hasNextPage) return undefined;
             const lastTransaction = lastPage.transactions[lastPage.transactions.length - 1];
@@ -80,7 +89,7 @@ export function useVerifyPayment() {
             });
         },
         onError: (error: Error) => {
-            handleErrorUtility(error, 'Verification Failed');
+            handleErrorUtility(error, "Verification Failed");
         }
     });
 }

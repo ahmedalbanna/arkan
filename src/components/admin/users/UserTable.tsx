@@ -10,11 +10,11 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { useLocalization } from "@/context/LocalizationContext";
-import type { UserProfile } from "@/lib/types";
+import type { User } from "@/lib/models/user";
 import { UserTableRow } from "./UserTableRow";
 
 interface UserTableProps {
-  users: UserProfile[];
+  users: User[];
 }
 
 export function UserTable({ users }: UserTableProps) {

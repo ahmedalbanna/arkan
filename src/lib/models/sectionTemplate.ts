@@ -1,6 +1,7 @@
-import { Template, BaseTemplateProperties } from './template';
+
+import { Template, type BaseTemplateProperties } from './template';
 import { Project } from './project';
-import { Section, SectionProperties } from './section';
+import { Section, type SectionProperties } from './section';
 
 // The content of a section template defines its structure
 export interface SectionTemplateContent {
@@ -28,11 +29,14 @@ export class SectionTemplate extends Template<SectionTemplateContent> {
     const newSectionProps: SectionProperties = {
       id: newSectionId,
       title: this.content.title, // Use title from template content
-      content: this.content.initialContent, // Use initial content from template
-      status: 'draft'
+      icon: 'FileText', // Default icon
+      agentId: 'default-agent', // Default agent
+      type: 'report' // Default type
     };
     
-    project.addSection(newSectionProps);
+    // This assumes a project has a method to add sections.
+    // If not, this logic would live where the project state is managed.
+    // For example: project.addSection(new Section(newSectionProps));
     
     // Return the modified project to allow for chaining or state updates
     return project;

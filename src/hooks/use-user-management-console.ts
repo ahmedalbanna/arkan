@@ -3,6 +3,7 @@
 
 import { useUsers } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
+import { User } from '@/lib/models/user';
 
 export function useUserManagementConsole() {
   const { isLoading: authIsLoading } = useAuth();
@@ -17,7 +18,7 @@ export function useUserManagementConsole() {
     status
   } = useUsers();
 
-  const allUsers = data?.pages.flatMap(page => page.users) ?? [];
+  const allUsers: User[] = data?.pages.flatMap(page => page.users) ?? [];
 
   const isLoading = status === 'pending' || authIsLoading;
   const isError = status === 'error';

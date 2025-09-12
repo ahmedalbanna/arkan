@@ -16,15 +16,10 @@ export function useProposalGenerationToolsLogic() {
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
     // Correctly get the project object and the setter method
-    const { project } = useBuilderStore();
+    const { project, setProjectIdea: setProjectIdeaInStore } = useBuilderStore();
     // The setter is now on the project object itself
     const setProjectIdea = (idea: string) => {
-        if (project) {
-            project.setProjectIdea(idea);
-        } else {
-            // Handle case where project is null if necessary
-            // For example, create a new project instance
-        }
+        setProjectIdeaInStore(idea);
     }
     const projectIdea = project?.projectIdea; // Derive projectIdea from the project object
 
@@ -40,7 +35,7 @@ export function useProposalGenerationToolsLogic() {
         setAdvancedField,
     } = useProposalGenerationStore();
 
-    const { externalContext } = useReportStore();
+    const { externalContext } = project ?? {};
     const generationMutation = useGenerateProposal();
     const { userProfile } = useAuth();
     const hasCredits = (userProfile?.credits ?? 0) >= 1;
@@ -58,7 +53,7 @@ export function useProposalGenerationToolsLogic() {
             ? { projectIdea: projectIdea || '', templateId: selectedTemplateId, customGuidelines, externalContext }
             : { projectIdea: advancedFields.projectTitle, templateId: selectedTemplateId, customGuidelines, externalContext, advancedFields };
 
-        generationMutation.mutate(payload);
+        generationMutation.mutate(payload as any);
     };
 
     const canGenerate = (activeTab === 'simple' && !!projectIdea) ||

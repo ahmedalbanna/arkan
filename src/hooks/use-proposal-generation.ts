@@ -22,8 +22,8 @@ export interface GenerateProposalBody {
 }
 
 export function useGenerateProposal() {
-    const { firebaseUser } = useAuth();
-    const { project, setProject } = useBuilderStore(); // Get project and setProject
+    const { firebaseUser, refetchUser } = useAuth();
+    const { project, setProject } = useBuilderStore(); // Get project and setProject from the main store
     const queryClient = useQueryClient();
 
     return useMutation<any, Error, GenerateProposalBody>({
@@ -34,11 +34,9 @@ export function useGenerateProposal() {
         onSuccess: (data) => {
             if (!project) return;
             project.setProposal(data);
-            setProject(new Project(project.toStateObject())); // Update store with new instance
+            setProject(new Project(project)); // Update store with new instance
 
-            if (firebaseUser) {
-              queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-            }
+            refetchUser();
             toast({
                 title: "Proposal Generated",
                 description: "Your project proposal has been successfully created.",

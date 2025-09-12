@@ -1,14 +1,15 @@
+
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useBuilderStore } from '@/hooks';
-import { Project } from '@/lib/models/project'; // Import Project model
+import { Project, type ProjectProperties } from '@/lib/models/project'; // Import Project model
 
 export function useCreateProjectDialog() {
     const [isOpen, setIsOpen] = useState(false);
     const router = useRouter();
-    const { newSession, project, setProject } = useBuilderStore(); // Get project and setProject
+    const { project, setProject } = useBuilderStore(); // Get project and setProject
 
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -17,7 +18,7 @@ export function useCreateProjectDialog() {
         let currentProject = project; // Get current project from store
         if (!currentProject) {
             // If no project exists, create a new one with a temporary ID
-            currentProject = new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), proposal: null, projectPlan: null });
+            currentProject = new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
         }
         currentProject.name = name;
         currentProject.projectIdea = description;
@@ -27,7 +28,10 @@ export function useCreateProjectDialog() {
     }
 
     const handleCreateNewProject = () => {
-        newSession(); 
+        if(project) {
+          project.newSession();
+          setProject(new Project(project.toStateObject()));
+        }
         setName('');
         setDescription('');
         setIsOpen(true);

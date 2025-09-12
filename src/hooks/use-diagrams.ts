@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +7,7 @@ import { userKeys } from "@/lib/query-keys";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
-import type { GenerateDiagramOutput } from "@/ai/schemas";
+import type { GenerateDiagramOutput } from '@/ai/schemas';
 import {
     generateDiagramApi,
     updateDiagramApi,
@@ -18,8 +17,7 @@ import {
  * Custom mutation hook to generate a new diagram using an AI flow.
  */
 export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOutput & { imageUrl: string }, variables: any) => void) {
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
+  const { firebaseUser, refetchUser } = useAuth();
 
   return useMutation({
     mutationFn: async (body: any) => {
@@ -27,9 +25,7 @@ export function useGenerateDiagram(onSuccessCallback?: (data: GenerateDiagramOut
       return generateDiagramApi(body, token);
     },
     onSuccess: (data, variables) => {
-      if (firebaseUser) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-      }
+      refetchUser();
       if(onSuccessCallback) {
         onSuccessCallback(data, variables);
       }

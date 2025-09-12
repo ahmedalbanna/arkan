@@ -1,6 +1,4 @@
 
-
-
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -14,7 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib';
-import type { ChatMessage, ChatSession } from '@/hooks';
+import { RawChatMessage, RawChatSession } from '@/hooks';
 import { initiateSupportChat, createConversationApi } from '@/services';
 import { toast } from '@/hooks';
 import {
@@ -68,7 +66,7 @@ function AdminSelectionView({ onSelectAdmin }: { onSelectAdmin: (admin: UserProf
                 <ScrollArea className="h-[450px]">
                     <div className="space-y-2">
                         {admins?.map(admin => (
-                            <Button key={admin.id} variant="ghost" className="w-full justify-start h-auto" onClick={() => onSelectAdmin(admin)}>
+                            <Button key={admin.id} variant="ghost" className="w-full justify-start h-auto" onClick={() => onSelectAdmin(admin as UserProfile)}>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
                                         <AvatarImage src={admin.profilePictureUrl} />
@@ -93,13 +91,14 @@ export default function SupportChatWidget() {
       toggleChat,
       selectedChat,
       setSelectedChat,
-      chats,
+      getChats,
       createConversation,
       initialize,
       isInitialized,
       addMessage,
       unreadCounts,
     } = useChatStore();
+    const chats = getChats();
     const { firebaseUser, userProfile } = useAuth();
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState<any[]>([]);
@@ -184,7 +183,7 @@ export default function SupportChatWidget() {
         const messageToSend = input;
         setInput('');
 
-        const messageData = {
+        const messageData: RawChatMessage = {
             senderId: firebaseUser.uid,
             content: messageToSend,
             timestamp: serverTimestamp(),

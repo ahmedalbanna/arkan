@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -10,11 +11,12 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import type { ChatSession, ChatMessage } from '@/hooks';
+import { RawChatMessage, RawChatSession } from '@/hooks';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib';
 import { useAgentChat } from '@/hooks';
-import { type Chat } from '@/lib/models/chat';
+import { Chat } from '@/lib/models/chat';
+import { ChatMessage } from '@/lib/models/chatMessage';
 
 function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -38,7 +40,7 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant', content:
 }
 
 export function ConversationView({ chat }: { chat: Chat | null }) {
-  const { firebaseUser, refetchUser } = useAuth();
+  const { firebaseUser } = useAuth();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);

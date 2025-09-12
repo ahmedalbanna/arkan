@@ -38,7 +38,10 @@ export function useSessionActions() {
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
     const handleUploadClick = () => {
-        setProject(null); // Clear session before loading
+        if(project) {
+            project.newSession();
+            setProject(new Project(project.toStateObject()));
+        }
         fileInputRef.current?.click();
     };
 
@@ -68,7 +71,7 @@ export function useSessionActions() {
     const handleSaveProjectFile = (name?: string) => {
         if (!project || !hasAnyContent(project)) return;
         const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
-        const jsonString = JSON.stringify(project.toStateObject());
+        const jsonString = JSON.stringify(project.toPlainObject());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${finalName}.arkan`);
@@ -80,7 +83,7 @@ export function useSessionActions() {
             return;
         }
 
-        const projectData = project.toStateObject();
+        const projectData = project.toPlainObject();
         const finalName = name || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: finalName };
 
@@ -117,7 +120,7 @@ export function useSessionActions() {
 
     const handleSaveAsCloud = () => {
         if (!project) return;
-        const projectData = project.toStateObject();
+        const projectData = project.toPlainObject();
         const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: String(finalSaveAsName) };
         saveProjectMutation.mutate(saveData, {

@@ -8,7 +8,8 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { CreateUserDialog } from './CreateUserDialog';
 import { UserTable } from './UserTable';
 import { UserTableSkeleton } from './UserTableSkeleton';
-import { useUserManagementConsole } from '@/hooks/useUserManagementConsole';
+import { useUserManagementConsole } from '@/hooks';
+import { User } from '@/lib/models/user';
 
 export default function UserManagementConsole() {
   const { t } = useLocalization();
@@ -45,7 +46,7 @@ export default function UserManagementConsole() {
             </div>
         ) : (
             <>
-                <UserTable users={allUsers} />
+                <UserTable users={allUsers as User[]} />
                 <div className="flex items-center justify-center pt-8">
                     <Button
                         onClick={() => fetchNextPage()}

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/use-user.md
 
 "use client";
@@ -40,7 +41,7 @@ const USERS_PER_PAGE = 10;
 
 export function useUsers() {
     const { firebaseUser } = useAuth();
-    return useInfiniteQuery<UserListResponse, Error, UserListResponse, string | undefined, string>({
+    return useInfiniteQuery<UserListResponse, Error, UserListResponse, (string | undefined)[], string | undefined>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser);
