@@ -9,7 +9,7 @@ import { PasteTextUploader } from './PasteTextUploader';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useReportStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,6 +24,7 @@ import { Loader2 } from 'lucide-react';
 import { PdfPreview } from '@/components/file/PdfPreview';
 import { useDropzone } from 'react-dropzone';
 import { useLocalization } from '@/context/LocalizationContext';
+import { Project } from '@/lib/models/project';
 
 interface UploadManagerProps {
     onCollapseToggle: () => void;
@@ -65,12 +66,12 @@ function FileDropzone() {
     const { t } = useLocalization();
     const { toast } = useToast();
     const { firebaseUser, refetchUser } = useAuth();
-    const { addExternalContext } = useReportStore();
+    const { addExternalContext } = useBuilderStore();
     const [isLoading, setIsLoading] = useState(false);
 
     const processAndAddFile = async (file: File) => {
         if (!firebaseUser) {
-            toast({ title: t('builder.toasts.authError'), variant: "destructive" });
+            toast({ title: t('builder.files.toasts.authError'), variant: "destructive" });
             return;
         }
 
@@ -139,7 +140,21 @@ function FileDropzone() {
 
 export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     const { t } = useLocalization();
-    const { externalContext, removeExternalContext, updateExternalContextType } = useReportStore();
+    const { project, setProject } = useBuilderStore();
+    const externalContext = project?.externalContext || [];
+    
+    const removeExternalContext = (index: number) => {
+        if (!project) return;
+        project.removeExternalContext(index);
+        setProject(new Project(project.toStateObject()));
+    }
+
+    const updateExternalContextType = (index: number, type: ContextFileType) => {
+        if (!project) return;
+        project.updateExternalContextType(index, type);
+        setProject(new Project(project.toStateObject()));
+    }
+
     const fileTypes: ContextFileType[] = ['context', 'example', 'question', 'textbook', 'guidelines'];
 
     return (
@@ -210,4 +225,3 @@ export function UploadManager({ onCollapseToggle }: UploadManagerProps) {
     </Card>
     );
 }
-

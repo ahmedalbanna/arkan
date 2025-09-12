@@ -93,11 +93,14 @@ export function useSessionActions() {
 
     const handleSave = () => {
         if (!project) return;
-        if (project.id && !project.id.startsWith('temp-') || project.name) {
+        // If the project has a real ID, save it directly.
+        if (project.id && !project.id.startsWith('temp-')) {
             performSave();
         } else if (hasAnyContent(project)) {
+            // If it's a new project with content, prompt for a name.
             setIsSavePromptOpen(true);
         } else {
+            // If it's a new, empty project, don't allow saving.
             toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
         }
     }

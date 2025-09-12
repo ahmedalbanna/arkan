@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import React from 'react';
@@ -21,7 +20,6 @@ import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { EvaluationTools } from '../evaluation/EvaluationTools';
 import { useSectionLogic } from '@/hooks';
-import { useTranslationViewLogic } from '@/hooks';
 
 interface SectionProps {
     sectionKey: SectionName;
@@ -43,43 +41,6 @@ const DiffView = ({ diff }: { diff: DiffPart[] }) => {
                 </span>
             ))}
         </p>
-    )
-}
-
-const TranslationView = ({ sectionKey, originalContent }: { sectionKey: SectionName, originalContent: string }) => {
-    const { t, locale, translatedContent, translateMutation, handleTranslate } = useTranslationViewLogic(sectionKey, originalContent);
-
-    return (
-        <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <h4 className="font-semibold text-sm">{t('builder.Section.originalLabel')} ({locale === 'en' ? 'English' : 'Arabic'})</h4>
-                    <Card className="h-64">
-                        <ScrollArea className="h-full">
-                            <div className="p-4 prose dark:prose-invert max-w-none text-sm">
-                                <ReactMarkdown components={markdownComponents}>{originalContent}</ReactMarkdown>
-                            </div>
-                        </ScrollArea>
-                    </Card>
-                </div>
-                <div className="space-y-2">
-                     <h4 className="font-semibold text-sm">{t('builder.Section.translationLabel')} ({locale === 'en' ? 'Arabic' : 'English'})</h4>
-                    <Card className="h-64">
-                        <ScrollArea className="h-full">
-                            <div className="p-4 prose dark:prose-invert max-w-none text-sm">
-                               {translateMutation.isPending && <Loader2 className="h-5 w-5 animate-spin" />}
-                               {!translateMutation.isPending && translatedContent && <ReactMarkdown components={markdownComponents}>{translatedContent}</ReactMarkdown>}
-                               {!translateMutation.isPending && !translatedContent && <p className="text-xs text-muted-foreground">{t('builder.Section.translatePlaceholder')}</p>}
-                            </div>
-                        </ScrollArea>
-                    </Card>
-                </div>
-            </div>
-             <Button onClick={handleTranslate} disabled={translateMutation.isPending}>
-                {translateMutation.isPending ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : <ArrowRightLeft className="me-2 h-4 w-4" />}
-                {t('builder.Section.translateButton')}
-            </Button>
-        </div>
     )
 }
 
@@ -109,62 +70,55 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
 
     return (
         <Tabs defaultValue="view">
-            <div className="flex justify-between items-center mb-2">
-                <TabsList>
-                    <TabsTrigger value="view">{t('builder.Section.viewEditTab')}</TabsTrigger>
-                    <TabsTrigger value="translate">{t('builder.Section.translateTab')}</TabsTrigger>
-                    <TabsTrigger value="evaluation">{t('builder.Section.evaluationTab')}</TabsTrigger>
-                </TabsList>
-                 <div className="flex items-center text-xs text-muted-foreground">
-                    <span>{words} {t('builder.Section.words')}</span>
-                    <span className="mx-2">|</span>
-                    <span>{chars} {t('builder.Section.characters')}</span>
-                 </div>
-            </div>
-            <TabsContent value="view">
-                <div className="group relative space-y-4">
-                    {showAudioPlayer && audioSrc && (
-                        <div className="flex items-center gap-2 my-2 p-2 rounded-md bg-muted">
-                            <audio ref={audioRef} src={audioSrc} controls className="w-full h-8" />
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAudioPlayer(false)}>
-                                <X className="h-4 w-4" />
+            <div className="group relative space-y-4">
+                {showAudioPlayer && audioSrc && (
+                    <div className="flex items-center gap-2 my-2 p-2 rounded-md bg-muted">
+                        <audio ref={audioRef} src={audioSrc} controls className="w-full h-8" />
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowAudioPlayer(false)}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+                <ScrollArea className="h-[calc(70vh)] rounded-md border p-4">
+                    <div className="prose dark:prose-invert max-w-none">
+                        <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
+                    </div>
+                </ScrollArea>
+
+                {aiSuggestion && (
+                     <Card className="mt-4 border-accent">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                            <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
+                           {diff ? (
+                               <DiffView diff={diff} />
+                           ) : (
+                               <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
+                                    {aiSuggestion}
+                                </ReactMarkdown>
+                           )}
+                        </CardContent>
+                        <CardFooter className="flex justify-end gap-2 pt-4">
+                            <Button variant="ghost" onClick={handleRejectSuggestion}>
+                                <ThumbsDown className="me-2 h-4 w-4" /> {t('builder.Section.reject')}
                             </Button>
-                        </div>
-                    )}
-                    <ScrollArea className="h-[calc(70vh)] rounded-md border p-4">
-                        <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>{processedContent}</ReactMarkdown>
-                        </div>
-                    </ScrollArea>
+                            <Button onClick={handleAcceptSuggestion}>
+                                <Check className="me-2 h-4 w-4" /> {t('builder.Section.accept')}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                )}
 
-                    {aiSuggestion && (
-                         <Card className="mt-4 border-accent">
-                            <CardHeader>
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                <Wand2 className="h-5 w-5 text-accent" /> {t('builder.Section.aiSuggestion')}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="prose dark:prose-invert max-w-none text-sm p-4 bg-muted/50 rounded-md max-h-60 overflow-y-auto">
-                               {diff ? (
-                                   <DiffView diff={diff} />
-                               ) : (
-                                   <ReactMarkdown components={markdownComponents} remarkPlugins={[remarkGfm]}>
-                                        {aiSuggestion}
-                                    </ReactMarkdown>
-                               )}
-                            </CardContent>
-                            <CardFooter className="flex justify-end gap-2 pt-4">
-                                <Button variant="ghost" onClick={handleRejectSuggestion}>
-                                    <ThumbsDown className="me-2 h-4 w-4" /> {t('builder.Section.reject')}
-                                </Button>
-                                <Button onClick={handleAcceptSuggestion}>
-                                    <Check className="me-2 h-4 w-4" /> {t('builder.Section.accept')}
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    )}
-
-                     <div className="flex items-center justify-end">
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center text-xs text-muted-foreground">
+                        <span>{words} {t('builder.Section.words')}</span>
+                        <span className="mx-2">|</span>
+                        <span>{chars} {t('builder.Section.characters')}</span>
+                    </div>
+                    <div className="flex items-center">
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -209,21 +163,7 @@ export const Section = ({ sectionKey, title, icon: Icon, content, onUpdate }: Se
                          </DropdownMenu>
                     </div>
                 </div>
-            </TabsContent>
-            <TabsContent value="edit">
-                <Textarea
-                    value={localContent}
-                    onChange={(e) => setLocalContent(e.target.value)}
-                    onBlur={() => onUpdate(sectionKey, localContent)}
-                    className="h-[50vh] min-h-[300px]"
-                />
-            </TabsContent>
-            <TabsContent value="translate">
-                <TranslationView sectionKey={sectionKey} originalContent={content} />
-            </TabsContent>
-            <TabsContent value="evaluation">
-                <EvaluationTools />
-            </TabsContent>
+            </div>
         </Tabs>
     );
 };

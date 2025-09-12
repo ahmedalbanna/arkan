@@ -1,15 +1,15 @@
 
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { userKeys } from '@/lib/query-keys';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from './use-toast';
 import type { ProjectPlan } from '@/ai/schemas';
 import { generateProjectPlanApi } from '@/services';
-import { useProjectPlanStore } from './useProjectPlanStore';
+import { useBuilderStore } from './useBuilderStore';
+import { Project } from '@/lib/models/project';
 
 interface GeneratePlanVariables {
     projectDescription: string;
@@ -18,7 +18,7 @@ interface GeneratePlanVariables {
 
 export function useGenerateProjectPlan() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { setProjectPlan } = useProjectPlanStore();
+    const { project, setProject } = useBuilderStore();
 
     return useMutation<ProjectPlan, Error, GeneratePlanVariables>({
         mutationFn: async (variables) => {
@@ -26,7 +26,10 @@ export function useGenerateProjectPlan() {
             return generateProjectPlanApi({ ...variables, token });
         },
         onSuccess: (data) => {
-            setProjectPlan(data);
+            if (!project) return;
+            project.setProjectPlan(data);
+            setProject(new Project(project.toStateObject()));
+
             refetchUser(); // To update credits
             toast({ title: 'Project Plan Generated', description: 'Your project has been broken down into phases and tasks.' });
         },

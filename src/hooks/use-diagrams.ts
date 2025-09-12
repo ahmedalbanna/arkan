@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,11 +9,9 @@ import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
 import type { GenerateDiagramOutput } from "@/ai/schemas";
-import type { ExplainDiagramOutput } from "@/ai/schemas";
 import {
     generateDiagramApi,
     updateDiagramApi,
-    explainDiagramApi
 } from "@/services";
 
 /**
@@ -60,30 +59,6 @@ export function useUpdateDiagram(onSuccessCallback?: (data: { plantUmlCode: stri
     },
     onError: (error: Error) => {
       handleErrorUtility(error, "Diagram update failed");
-    },
-  });
-}
-
-
-/**
- * Custom mutation hook to explain a diagram image using an AI flow.
- */
-export function useExplainDiagram() {
-  const { firebaseUser } = useAuth();
-  const queryClient = useQueryClient();
-
-  return useMutation<ExplainDiagramOutput, Error, string>({
-    mutationFn: async (imageDataUri: string) => {
-      const token = await getAuthenticatedToken(firebaseUser);
-      return explainDiagramApi(imageDataUri, token);
-    },
-    onSuccess: () => {
-      if (firebaseUser) {
-        queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
-      }
-    },
-    onError: (error: Error) => {
-      handleErrorUtility(error, "Explanation Failed");
     },
   });
 }

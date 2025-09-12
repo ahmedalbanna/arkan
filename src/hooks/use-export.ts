@@ -55,12 +55,12 @@ export function useExport() {
         }
     };
 
-    const exportPresentationPptx = async (project: Project, pptxTemplateKey: PptxTemplateKey) => {
+    const exportPresentationPptx = async (project: Project, activePresentationId: string | null, pptxTemplateKey: PptxTemplateKey) => {
         setIsExporting(true);
         try {
-            const activePresentation = project.presentation?.history[0]; // Assuming the first one is the active/latest
+            const activePresentation = project.presentation?.history.find(p => p.id === activePresentationId);
             if (!activePresentation || !activePresentation.slides) {
-                toast({ title: 'Export Failed', description: 'No presentation slides found.', variant: 'destructive' });
+                toast({ title: 'Export Failed', description: 'No presentation slides found to export.', variant: 'destructive' });
                 return;
             }
             await exportPptxUtil(activePresentation.slides, pptxTemplateKey);

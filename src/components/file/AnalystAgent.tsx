@@ -6,7 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useReportStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks'; // Corrected import
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from 'next-themes';
 import { analyzeContextApi } from '@/services';
@@ -77,7 +77,8 @@ function jsonToMarkdown(json: any, level = 1): string {
 
 export default function AnalystAgent() {
     const { t } = useLocalization();
-    const { externalContext, addExternalContext } = useReportStore();
+    const { project, addExternalContext } = useBuilderStore();
+    const externalContext = project?.externalContext || [];
     const { firebaseUser, refetchUser, userProfile } = useAuth();
     const { resolvedTheme } = useTheme();
     const [markdownResult, setMarkdownResult] = useState<string | null>(null);
@@ -214,4 +215,3 @@ export default function AnalystAgent() {
         </Card>
     );
 }
-

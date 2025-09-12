@@ -16,7 +16,16 @@ export function useProposalGenerationToolsLogic() {
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
     // Correctly get the project object and the setter method
-    const { project, setProjectIdea } = useBuilderStore();
+    const { project } = useBuilderStore();
+    // The setter is now on the project object itself
+    const setProjectIdea = (idea: string) => {
+        if (project) {
+            project.setProjectIdea(idea);
+        } else {
+            // Handle case where project is null if necessary
+            // For example, create a new project instance
+        }
+    }
     const projectIdea = project?.projectIdea; // Derive projectIdea from the project object
 
     const {

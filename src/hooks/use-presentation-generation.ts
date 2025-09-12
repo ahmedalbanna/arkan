@@ -1,14 +1,16 @@
 
+
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 import { generatePresentationApi, generatePresentationOutlineApi } from '@/services';
-import type { GeneratePresentationOutput, PresentationHistoryEntry, GeneratePresentationOutlineOutput, GeneratePresentationOutlineInput } from '@/ai/schemas';
-import { usePresentationStore } from './usePresentationStore';
+import type { GeneratePresentationOutput, PresentationHistoryEntry, GeneratePresentationOutlineInput, GeneratePresentationOutlineOutput } from '@/ai/schemas';
+import { useBuilderStore } from './useBuilderStore';
 import { useLocalization } from '@/context/LocalizationContext';
 import { userKeys } from '@/lib/query-keys';
+import { Project } from '@/lib/models/project';
 
 interface GeneratePresentationVariables {
     body: any;
@@ -19,17 +21,21 @@ export function useGeneratePresentation() {
     const { t } = useLocalization();
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
-    const { addPresentationToHistory } = usePresentationStore();
+    const { project, setProject } = useBuilderStore();
 
     return useMutation<GeneratePresentationOutput, Error, GeneratePresentationVariables>({
         mutationFn: generatePresentationApi,
         onSuccess: (data) => {
+            if (!project) return;
             const newEntry: PresentationHistoryEntry = {
                 id: new Date().toISOString(),
                 name: `Presentation - ${new Date().toLocaleTimeString()}`,
                 slides: data.slides,
             };
-            addPresentationToHistory(newEntry);
+            
+            project.addPresentationToHistory(newEntry);
+            setProject(new Project(project.toStateObject()));
+
             if (firebaseUser) {
                 queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
             }

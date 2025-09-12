@@ -1,8 +1,9 @@
 
+
 'use server';
 
 import { z } from 'zod';
-import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema } from '@/ai/schemas';
+import { ProjectProposalSchema, DiagramTypeSchema, SectionNameSchema, ProjectPlanSchema, ExternalContextSchema, GenerateDiagramOutputSchema } from '@/ai/schemas';
 import { generateDiagram } from '@/ai/flows/generate-diagrams';
 import { deflateSync } from 'zlib';
 import { deductCredit } from '@/services/credit-service';
@@ -80,6 +81,7 @@ export const POST = withAuth(async ({ request, user }) => {
 
     const finalOutput = {
       plantUmlCode: result.plantUmlCode,
+      explanation: result.explanation,
       imageUrl: imageUrl,
     };
 

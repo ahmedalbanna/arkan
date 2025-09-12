@@ -306,7 +306,8 @@ export const GenerateDiagramInputSchema = z.object({
 export type GenerateDiagramInput = z.infer<typeof GenerateDiagramInputSchema>;
 
 export const GenerateDiagramOutputSchema = z.object({
-  plantUmlCode: z.string().describe("The complete PlantUML code for the diagram, starting with @startuml and ending with @enduml.")
+  plantUmlCode: z.string().describe("The complete PlantUML code for the diagram, starting with @startuml and ending with @enduml."),
+  explanation: z.string().describe("A detailed explanation of the generated diagram, formatted in markdown."),
 });
 export type GenerateDiagramOutput = z.infer<typeof GenerateDiagramOutputSchema>;
 
@@ -921,17 +922,6 @@ export const EvaluateReportOutputSchema = z.object({
   aiContentAnalysis: z.array(AIContentAnalysisSchema).optional().describe("An analysis of each section for AI-generated content probability."),
 });
 export type EvaluateReportOutput = z.infer<typeof EvaluateReportOutputSchema>;
-
-// explain-diagram.ts
-export const ExplainDiagramInputSchema = z.object({
-  imageDataUri: z.string().describe("An image of a diagram, encoded as a data URI that must include a MIME type and use Base64 encoding."),
-});
-export type ExplainDiagramInput = z.infer<typeof ExplainDiagramInputSchema>;
-
-export const ExplainDiagramOutputSchema = z.object({
-  explanation: z.string().describe('A detailed explanation of the diagram, formatted as markdown.'),
-});
-export type ExplainDiagramOutput = z.infer<typeof ExplainDiagramOutputSchema>;
 
 
 // API Schemas

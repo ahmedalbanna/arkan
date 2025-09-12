@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks';
-import { useReportStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,7 @@ import { useLocalization } from '@/context/LocalizationContext';
 export function PasteTextUploader() {
     const { t } = useLocalization();
     const { toast } = useToast();
-    const { addExternalContext } = useReportStore();
+    const { addExternalContext } = useBuilderStore();
     const [text, setText] = useState('');
     const [fileName, setFileName] = useState('');
 
@@ -68,4 +68,3 @@ export function PasteTextUploader() {
         </Card>
     );
 }
-

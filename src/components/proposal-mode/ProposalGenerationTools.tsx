@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -15,6 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProposalGenerationToolsLogic } from '@/hooks/use-proposal-generation-tools-logic';
+import ReactMarkdown from 'react-markdown';
+import { markdownComponents } from '@/lib/markdown-styles';
 
 interface GenerateButtonProps {
     isGenerating: boolean;
@@ -165,6 +168,8 @@ export const ProposalGenerationTools = ({
         generationMutation,
     } = useProposalGenerationToolsLogic();
 
+    const selectedTemplate = templates?.find(t => t.id === selectedTemplateId);
+
     if (templatesLoading) {
         return <ToolsSkeleton />;
     }
@@ -223,6 +228,26 @@ export const ProposalGenerationTools = ({
                                     </SelectContent>
                                 </Select>
                             </div>
+                            
+                            {selectedTemplate && (
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-semibold text-muted-foreground">Base Prompt</Label>
+                                        <div className="p-3 rounded-md border bg-muted text-xs">
+                                            <ReactMarkdown components={markdownComponents}>{selectedTemplate.prompt}</ReactMarkdown>
+                                        </div>
+                                    </div>
+
+                                    {selectedTemplate.guidelines && selectedTemplate.guidelines.length > 0 && (
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-semibold text-muted-foreground">Default Guidelines</Label>
+                                            <ul className="list-disc pl-5 text-xs text-muted-foreground space-y-1">
+                                                {selectedTemplate.guidelines.map((g, i) => <li key={i}>{g}</li>)}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="space-y-2">
                                 <Label className="text-xs font-semibold text-muted-foreground">{t('builder.proposalGenerator.customGuidelinesLabel')}</Label>

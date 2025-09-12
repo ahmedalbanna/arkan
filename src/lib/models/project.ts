@@ -1,7 +1,7 @@
 
 
 // We need to import the types that SavedProject is composed of.
-import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry } from '@/lib/types';
+import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry, ContextFileType } from '@/lib/types';
 import type { DiagramData } from '@/hooks/useDiagramStore'; // We'll get the type from here for now
 
 // The properties of our class will be the same as the SavedProject interface.
@@ -175,12 +175,17 @@ export class Project implements SavedProject {
     }
 
     // --- External Context Methods ---
-    public addExternalContext(fileName: string, content: string, type: 'context' | 'example' | 'question' | 'textbook' | 'guidelines'): void {
+    public addExternalContext(fileName: string, content: string, type: ContextFileType): void {
         this.externalContext = [...(this.externalContext || []), { fileName, content, type }];
     }
 
     public removeExternalContext(index: number): void {
         this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
+    }
+
+    public updateExternalContextType(index: number, type: ContextFileType): void {
+        if (!this.externalContext || !this.externalContext[index]) return;
+        this.externalContext[index].type = type;
     }
 
     // --- Academic Solver Methods ---

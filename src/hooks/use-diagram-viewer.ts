@@ -1,24 +1,22 @@
+
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useExplainDiagram } from '@/hooks';
 import type { DiagramType } from '@/ai/schemas';
-import { useBuilderStore } from '@/hooks'; // NEW: Central store
 import type { DiagramData } from '@/lib/types';
-
+import { useSections } from './use-sections';
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;
-    diagramTitle: string; 
     diagramData: DiagramData;
 }
 
 export const useDiagramViewer = ({
     diagramKey,
-    diagramTitle,
     diagramData,
 }: DiagramViewerProps) => {
     const { t } = useLocalization();
@@ -26,9 +24,16 @@ export const useDiagramViewer = ({
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
 
-    const { project, setProject } = useBuilderStore(); // NEW: Get project and setProject
+    const { data: sectionConfigs } = useSections();
+    const diagramConfig = sectionConfigs?.find(s => s.id === diagramKey);
+    const diagramTitle = diagramConfig ? t(diagramConfig.title) : 'Diagram';
 
-    const explainMutation = useExplainDiagram();
+    // Automatically switch to explanation view when it becomes available
+    useEffect(() => {
+        if (diagramData?.explanation && viewMode !== 'explanation') {
+            setViewMode('explanation');
+        }
+    }, [diagramData?.explanation, viewMode]);
 
     const handleCopy = () => {
         if (!diagramData?.plantUmlCode) return;
@@ -54,34 +59,14 @@ export const useDiagramViewer = ({
         }
     };
 
-    const handleExplainClick = () => {
-        setViewMode('explanation');
-
-        if (!diagramData?.explanation && !explainMutation.isPending) {
-            if (!diagramData?.imageUrl) return;
-            fetch(diagramData.imageUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onloadend = async () => {
-                        const base64data = reader.result as string;
-                        explainMutation.mutate(base64data, {
-                            onSuccess: (data) => {
-                                if (!project) return;
-                                project.setDiagramExplanation(diagramKey, data.explanation);
-                                setProject(project); 
-                                toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
-                            },
-                            onError: (error) => {
-                                toast({ title: t('builder.diagramGenerator.tooltips.explanationFailed'), description: error.message, variant: "destructive" });
-                                setViewMode('image');
-                            }
-                        });
-                    };
-                });
+    // This function now just toggles the view. The explanation is assumed to be present.
+    const handleViewExplanation = () => {
+        if (diagramData.explanation) {
+            setViewMode('explanation');
+        } else {
+            toast({ title: "No Explanation Available", description: "The explanation for this diagram has not been generated yet.", variant: "default" });
         }
-    };
+    }
 
     return {
         t,
@@ -90,10 +75,8 @@ export const useDiagramViewer = ({
         isDownloading,
         viewMode,
         setViewMode,
-        explainMutation,
         handleCopy,
         handleDownload,
-        handleExplainClick,
-        diagramData, 
+        handleViewExplanation,
     };
 };

@@ -7,7 +7,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { toast } from "@/hooks";
 import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our main model
-import type { ProjectState, SavedProject, AnyProjectProposal } from "@/lib/types";
+import type { ProjectState, SavedProject, AnyProjectProposal, ContextFileType } from "@/lib/types";
 
 // The new state is dramatically simplified
 export interface BuilderState {
@@ -26,6 +26,8 @@ interface BuilderActions {
   setProjectName: (name: string) => void;
   setProjectIdea: (idea: string) => void;
   setProposal: (proposal: AnyProjectProposal | null) => void;
+  addExternalContext: (fileName: string, content: string, type: ContextFileType) => void;
+  removeExternalContext: (index: number) => void;
 }
 
 const initialState: BuilderState = {
@@ -89,10 +91,18 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       setProposal: (proposal) => {
         const project = get().project;
         if (!project) return;
-        project.proposal = proposal;
-        if (proposal?.title) {
-          project.name = proposal.title;
-        }
+        project.setProposal(proposal);
+        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+      },
+      addExternalContext: (fileName, content, type) => {
+        const project = get().project ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
+        project.addExternalContext(fileName, content, type);
+        get().setProject(new Project(project.toStateObject() as ProjectProperties));
+      },
+      removeExternalContext: (index) => {
+        const project = get().project;
+        if (!project) return;
+        project.removeExternalContext(index);
         get().setProject(new Project(project.toStateObject() as ProjectProperties));
       },
     }),

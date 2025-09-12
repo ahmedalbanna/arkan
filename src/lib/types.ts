@@ -13,6 +13,7 @@ export type {PricingPlan} from '@/components/price/PricingCard'
 
 import { z } from 'zod';
 import type { IStylesOptions } from 'docx';
+import { DocxParagraphPropertiesSchema, DocxRunPropertiesSchema } from './schemas/template-schemas'; // Correct import
 import { Paragraph, Table } from 'docx'; // Assuming these are needed for DocxObject
 
 // --- Zod Schemas for DOCX Style Parts ---
@@ -368,6 +369,9 @@ export interface SavedProposalState {
    updatedAt?: string;
 }
 
+export type ContextFileType = 'context' | 'example' | 'question' | 'textbook' | 'guidelines';
+
+
 // --- Main Project State ---
 
 export interface ProjectState {
@@ -426,7 +430,11 @@ export interface ProjectState {
     codeGenerator?: any;
     academicSolver?: any;
     codebase?: any;
-    externalContext?: any[] | undefined;
+    externalContext?: {
+        fileName: string;
+        content: string;
+        type: ContextFileType;
+    }[] | undefined;
     teamId?: string | null | undefined;
     projectPlan: ProjectPlan | null;
 }

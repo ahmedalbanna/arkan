@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,23 +9,30 @@ import { usePresentationStore } from '@/hooks';
 import { useGeneratePresentation } from '@/hooks';
 import { translatePresentationApi } from '@/services';
 import { toast } from '@/hooks';
+import { useBuilderStore } from './useBuilderStore';
+import { Project } from '@/lib/models/project';
 
 export function usePresentationGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
     const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
-    const {
-        presentation,
-        activePresentationId,
-        replacePresentationInHistory
-    } = usePresentationStore();
+    
+    // Get project data from the central store
+    const { project, setProject } = useBuilderStore();
+    
+    // Get UI state from the presentation-specific store
+    const { activePresentationId } = usePresentationStore();
 
     const generationMutation = useGeneratePresentation();
 
     const translateMutation = useMutation({
         mutationFn: translatePresentationApi,
         onSuccess: (data) => {
-            replacePresentationInHistory(data);
+            if (!project) return;
+            // Update the presentation in the main project object
+            project.presentation = { history: project.presentation?.history.map(p => p.id === data.id ? data : p) || [] };
+            setProject(new Project(project.toStateObject()));
+            
             toast({
                 title: t('builder.presentationGenerator.toasts.translateAllSuccess'),
                 description: t('builder.presentationGenerator.toasts.translateAllSuccessDesc'),
@@ -49,7 +57,7 @@ export function usePresentationGeneratorLogic() {
     };
 
     const handleTranslateAll = async (targetLang: 'en' | 'ar') => {
-        const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
+        const activePresentation = project?.presentation?.history.find(p => p.id === activePresentationId);
         if (!activePresentation || !firebaseUser) return;
 
         toast({
@@ -61,7 +69,8 @@ export function usePresentationGeneratorLogic() {
         translateMutation.mutate({ presentation: activePresentation, targetLang, token });
     };
 
-    const activePresentation = presentation?.history.find(p => p.id === activePresentationId);
+    // The presentation to be displayed is derived from the project state and the active ID
+    const activePresentation = project?.presentation?.history.find(p => p.id === activePresentationId);
 
     return {
         t,

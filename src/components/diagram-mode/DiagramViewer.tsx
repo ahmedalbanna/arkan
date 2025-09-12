@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
-import { Loader2, Download, Copy, Check, RefreshCw, PenSquare, Eye, Wand2, FileText } from 'lucide-react';
+import { Loader2, Download, Copy, Check, RefreshCw, PenSquare, Eye, FileText } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
@@ -40,11 +41,10 @@ export default function DiagramViewer({
         isDownloading,
         viewMode,
         setViewMode,
-        explainMutation,
         handleCopy,
         handleDownload,
-        handleExplainClick,
-    } = useDiagramViewer({ diagramKey, diagramData, onExplanationSave });
+        handleViewExplanation,
+    } = useDiagramViewer({ diagramKey, diagramData }); // The hook now handles the logic
 
     return (
         <Card className="min-h-[600px] w-full flex flex-col">
@@ -72,12 +72,7 @@ export default function DiagramViewer({
                     {viewMode === 'explanation' && (
                         <ScrollArea className="h-full w-full">
                              <div className="prose dark:prose-invert max-w-none p-4">
-                                {explainMutation.isPending ? (
-                                    <div className="text-center p-8 text-muted-foreground">
-                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-                                        <p>{t('builder.diagramGenerator.tooltips.explaining')}</p>
-                                   </div>
-                                ) : diagramData.explanation ? (
+                                {diagramData.explanation ? (
                                     <ReactMarkdown components={markdownComponents}>{diagramData.explanation}</ReactMarkdown>
                                 ) : (
                                     <div className="text-center p-8 text-muted-foreground">
@@ -97,8 +92,8 @@ export default function DiagramViewer({
                     <Button variant={viewMode === 'code' ? 'secondary' : 'ghost'} size="sm" onClick={() => setViewMode('code')}>
                         <PenSquare className="h-4 w-4 mr-2"/> {t('builder.diagramGenerator.edit')}
                     </Button>
-                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleExplainClick} disabled={explainMutation.isPending}>
-                        {explainMutation.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <FileText className="h-4 w-4 mr-2"/>}
+                    <Button variant={viewMode === 'explanation' ? 'secondary' : 'ghost'} size="sm" onClick={handleViewExplanation}>
+                        <FileText className="h-4 w-4 mr-2"/>
                         {t('builder.diagramGenerator.explain')}
                     </Button>
                 </div>

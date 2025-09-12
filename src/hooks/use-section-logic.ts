@@ -12,23 +12,8 @@ import { useTextToSpeech } from '@/hooks';
 import { useWritingTool } from '@/hooks';
 import { computeDiff, DiffPart } from '@/lib/diff';
 import { processPlantUml } from '@/lib/utils';
+import { manipulateTextApi } from '@/services';
 
-// API call function for text manipulation
-async function manipulateTextApi(variables: { data: ManipulateTextInput, token: string }): Promise<ManipulateTextOutput> {
-    const response = await fetch('/api/manipulate-text', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${variables.token}`,
-        },
-        body: JSON.stringify(variables.data),
-    });
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to manipulate text');
-    }
-    return response.json();
-}
 
 // Helper to calculate word and character counts
 const calculateCounts = (text: string) => {

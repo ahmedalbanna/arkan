@@ -3,7 +3,7 @@
 'use server';
 
 /**
- * @fileOverview AI agent for generating various PlantUML diagrams.
+ * @fileOverview AI agent for generating various PlantUML diagrams and their explanations.
  */
 
 import { ai } from '@/ai/genkit';
@@ -32,7 +32,9 @@ export async function generateDiagram(input: GenerateDiagramInput): Promise<Gene
         name: `generate-${input.diagramToGenerate}-diagram-prompt`,
         input: { schema: z.any() }, // Using any() since we are manually constructing the payload
         output: { schema: GenerateDiagramOutputSchema },
-        system: basePrompt,
+        system: `${basePrompt}
+You will also provide a detailed explanation of the generated diagram.
+Your final output MUST be a JSON object containing two keys: 'plantUmlCode' and 'explanation'.`,
         prompt: `
 {{#if guidelines}}
 --- Guidelines ---
@@ -99,7 +101,7 @@ ${stringifiedPlan}
 `,
     config: {
         temperature: 0.2, // Low temp for precise PlantUML syntax
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192, // Increased to accommodate explanation
     }
     });
 

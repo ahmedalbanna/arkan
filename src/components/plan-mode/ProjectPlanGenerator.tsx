@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, GanttChartSquare, BrainCircuit, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import ProjectPlanViewer from './ProjectPlanViewer';
-import { useProjectPlanStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -16,7 +16,8 @@ import { useProjectPlanGenerator } from '@/hooks/use-project-plan-generator';
 
 export default function ProjectPlanGenerator() {
   const { t, locale } = useLocalization();
-  const { projectPlan } = useProjectPlanStore();
+  const { project } = useBuilderStore();
+  const projectPlan = project?.projectPlan;
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
 
   const {

@@ -1,12 +1,14 @@
+
+
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents, useSections } from '@/hooks';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '@/hooks';
-import { useExplainDiagram, useGenerateDiagram } from '@/hooks';
+import { useGenerateDiagram } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 import { useReportStore } from './useReportStore';
@@ -20,8 +22,8 @@ export const useDiagramGenerationTools = () => {
     const { userProfile } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project, setProject } = useBuilderStore();
-    const { contextSelection } = useReportStore();
-    const { data: sectionConfigs } = useSections();
+    const { contextSelection, initializeDependentStates } = useReportStore();
+    const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
 
     const diagramSections = useMemo(() => {
         if (!sectionConfigs) return {};
@@ -31,16 +33,14 @@ export const useDiagramGenerationTools = () => {
         }, {} as Record<string, any>);
     }, [sectionConfigs]);
 
+    useEffect(() => {
+        if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
+            initializeDependentStates(agents, sectionConfigs);
+        }
+    }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
+
+
     const getIconComponent = useAgentStore(state => state.getIconComponent);
-
-    const onDiagramExplanationSave = (diagramKey: DiagramType, explanation: string) => {
-        if (!project) return;
-        const newProject = new Project(project.toStateObject());
-        newProject.setDiagramExplanation(diagramKey, explanation);
-        setProject(newProject);
-    };
-
-    const explainMutation = useExplainDiagram();
 
     const diagramMutation = useGenerateDiagram((data, variables) => {
         if (!project) return;
@@ -49,40 +49,19 @@ export const useDiagramGenerationTools = () => {
         const translatedTitle = agent ? t(agent.name) : diagramKey;
 
         const newProject = new Project(project.toStateObject());
-        newProject.setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
+        newProject.setDiagram(diagramKey, { 
+            plantUmlCode: data.plantUmlCode, 
+            imageUrl: data.imageUrl, 
+            explanation: data.explanation 
+        });
         setProject(newProject);
 
         toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
         setActiveMutationKey(null);
-
-        // Auto-explain
-        try {
-            fetch(data.imageUrl)
-                .then(res => res.blob())
-                .then(blob => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onloadend = () => {
-                        const base64data = reader.result as string;
-                        explainMutation.mutate(base64data, {
-                            onSuccess: (explanationData) => {
-                                onDiagramExplanationSave(diagramKey, explanationData.explanation);
-                                toast({ title: "Explanation Ready", description: "The AI has finished explaining the diagram." });
-                            },
-                            onError: (error) => {
-                                console.error("Failed to auto-explain diagram:", error);
-                                toast({ title: "Explanation Failed", description: "Could not automatically explain the new diagram.", variant: "destructive" });
-                            }
-                        });
-                    };
-                });
-        } catch (error) {
-            console.error("Failed to prepare image for explanation:", error);
-        }
     });
 
     const isAnythingGenerating = diagramMutation.isPending;
-    const isDisabled = isAnythingGenerating || explainMutation.isPending;
+    const isDisabled = isAnythingGenerating;
     const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const onGenerateDiagram = (diagramType: DiagramType) => {
@@ -90,7 +69,7 @@ export const useDiagramGenerationTools = () => {
 
         const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
         const agent = agents?.find(a => a.id === `generate-${diagramType}-diagram`);
-        const selectedExternalContext = project.externalContext?.filter((c, i) => selectedContext.externalContext[i]);
+        const selectedExternalContext = project.externalContext?.filter((c: any, i: number) => selectedContext.externalContext[i]);
 
         const body = {
             proposal: selectedContext.proposal ? project.proposal : undefined,

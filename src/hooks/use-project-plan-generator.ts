@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useBuilderStore } from '@/hooks';
@@ -5,12 +6,17 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks';
 import { useGenerateProjectPlan } from '@/hooks/use-project-plan';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { summarizeProposalForPlanApi } from '@/services';
+import { summarizeProjectApi } from '@/services';
+import { useLocalization } from '@/context/LocalizationContext';
 
 export function useProjectPlanGenerator() {
     const { toast } = useToast();
+    const { t } = useLocalization();
     const { firebaseUser, userProfile } = useAuth();
-    const { proposal, projectIdea } = useBuilderStore();
+    const { project } = useBuilderStore();
+    const proposal = project?.proposal;
+    const projectIdea = project?.projectIdea;
+
     const [description, setDescription] = useState('');
     const [deliverables, setDeliverables] = useState('');
 
@@ -19,8 +25,8 @@ export function useProjectPlanGenerator() {
     useEffect(() => {
         // Pre-fill from proposal if available
         if (proposal) {
-            setDescription(String(proposal.objective) || '');
-            setDeliverables(Array.isArray(proposal.expected_outcome) ? proposal.expected_outcome.join('\n') : String(proposal.expected_outcome) || '');
+            setDescription(String((proposal as any).objective) || '');
+            setDeliverables(Array.isArray((proposal as any).expected_outcome) ? (proposal as any).expected_outcome.join('\n') : String((proposal as any).expected_outcome) || '');
         } else if (projectIdea) {
             setDescription(projectIdea);
         }
@@ -28,10 +34,13 @@ export function useProjectPlanGenerator() {
 
     const suggestionMutation = useMutation({
         mutationFn: async () => {
+            if (!proposal) throw new Error("A proposal is required to generate suggestions.");
             const token = await getAuthenticatedToken(firebaseUser);
-            return summarizeProposalForPlanApi(proposal, token);
+            // Assuming summarizeProjectApi is a valid function that calls the right endpoint.
+            // The API it calls seems to be `/api/summarize-project`, which is actually summarizeFullProject.
+            return summarizeProjectApi({ body: { proposal }, token });
         },
-        onSuccess: (data) => {
+        onSuccess: (data: any) => { // Assuming data has a summary property
             const parts = data.summary.split("Key Deliverables:");
             setDescription(parts[0]?.replace('Project Summary:', '').trim() || '');
             setDeliverables(parts[1]?.trim() || '');
@@ -63,6 +72,7 @@ export function useProjectPlanGenerator() {
     const canGenerate = (!!description.trim() && !!deliverables.trim()) && !isProcessing && (userProfile?.credits ?? 0) >= creditCost;
 
     return {
+        t,
         description,
         setDescription,
         deliverables,
