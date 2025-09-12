@@ -6,7 +6,8 @@ import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 import { useChatInterface } from '@/hooks';
-import { Agent, Chat } from '@/lib/models'; // Import models
+import { Agent } from '@/lib/models/agent';
+import { Chat } from '@/lib/models/chat';
 
 export default function ChatInterface() {
   const {

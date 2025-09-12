@@ -31,6 +31,10 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
   const [currentSlide, setCurrentSlide] = useState(0);
   const { t } = useLocalization();
 
+  useEffect(() => {
+    // When a new presentation is passed, reset to the first slide.
+    setCurrentSlide(0);
+  }, [activePresentation?.id]);
 
   if (!activePresentation || !activePresentation.slides || activePresentation.slides.length === 0) {
     return (
@@ -45,13 +49,6 @@ export default function PresentationViewer({ activePresentation, onTranslateAll,
       </Card>
     );
   }
-
-  const slides = activePresentation.slides;
-
-  useEffect(() => {
-    // When a new presentation is passed, reset to the first slide.
-    setCurrentSlide(0);
-  }, [activePresentation.id]);
 
 
   const handleNext = () => {

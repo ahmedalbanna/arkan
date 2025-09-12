@@ -15,12 +15,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useRouter } from 'next/navigation';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useAgents } from '@/hooks';
-// ...
-const { agents, isLoaded } = useAgents();
-const reportAgents = agents.filter(a => a.category === 'report-generation');
-
 
 export function PromptTemplateLibrary() {
+  const { agents, isLoaded } = useAgents();
+  const reportAgents = agents.filter(a => a.category === 'report-generation');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedAgent, setSelectedAgent] = useState('all');

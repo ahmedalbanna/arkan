@@ -23,7 +23,8 @@ import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgents } from '@/hooks';
 import { useNewChatDialog } from '@/hooks/use-new-chat-dialog';
-import { Agent, Chat } from '@/lib/models'; // NEW: Import our classes
+import { Agent } from '@/lib/models/agent';
+import { Chat } from '@/lib/models/chat';
 
 
 interface ChatListProps {

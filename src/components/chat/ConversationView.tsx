@@ -11,12 +11,11 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { RawChatMessage, RawChatSession } from '@/hooks';
+import { RawChatMessage, RawChatSession } from '@/hooks/useChatStore';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
-import { app } from '@/lib';
 import { useAgentChat } from '@/hooks';
 import { Chat } from '@/lib/models/chat';
-import { ChatMessage } from '@/lib/models/chatMessage';
+import { ChatMessage, type ChatMessageProperties } from '@/lib/models/chatMessage';
 
 function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -49,10 +48,29 @@ export function ConversationView({ chat }: { chat: Chat | null }) {
     if (!chat) {
         setMessages([]);
         return;
-    };
+    }
+
+    const db = getDatabase();
+    const messagesRef = ref(db, `conversations/${chat.id}/messages`);
     
-    // The chat object now contains its messages
-    setMessages(chat.messages);
+    const listener = onValue(messagesRef, (snapshot) => {
+        const messagesData = snapshot.val();
+        if (messagesData) {
+            const messagesList = Object.entries(messagesData).map(([id, msgData]) => {
+                return new ChatMessage({ id, ...(msgData as Omit<ChatMessageProperties, 'id'>) });
+            });
+            // Sort messages by timestamp before setting
+            messagesList.sort((a, b) => a.timestamp - b.timestamp);
+            setMessages(messagesList);
+        } else {
+            setMessages([]);
+        }
+    });
+
+    // Cleanup listener on unmount or when chat changes
+    return () => {
+        off(messagesRef, 'value', listener);
+    };
 
   }, [chat]);
 

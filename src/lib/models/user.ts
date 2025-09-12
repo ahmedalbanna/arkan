@@ -27,8 +27,8 @@ export class User {
         this.email = props.email || '';
         this.role = props.role || 'user';
         this.credits = props.credits;
-        this.createdAt = props.createdAt;
-        this.updatedAt = props.updatedAt;
+        this.createdAt = props.createdAt || '';
+        this.updatedAt = props.updatedAt || '';
         this.teams = props.teams;
         this.bio = props.bio;
         this.profilePictureUrl = props.profilePictureUrl;

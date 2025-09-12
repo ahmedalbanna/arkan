@@ -11,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 import { type SectionName } from '@/ai/schemas';
-import { useAgents } from '@/hooks';
+import { getEnabledAgents } from '@/lib/data/agents';
 // ...
 
 import { EvaluateContextInputSchema, type EvaluateContextInput, EvaluateContextOutputSchema, type EvaluateContextOutput } from '@/ai/schemas';
@@ -19,11 +19,11 @@ import { AgentPrompt } from '@/lib/types';
 
 
 // Helper function to get agent details (prompt, guidelines)
-const getAgentDetails = (sectionKey: SectionName) => {
-    const { agents, isLoaded } = useAgents();
-    if (!isLoaded) return null;
+const getAgentDetails = async (sectionKey: SectionName) => {
+    const agents = await getEnabledAgents();
     const agent = agents.find(a => a.id === `generate-${sectionKey}-section`);
     if (!agent) return null;
+    // Ensure agent.prompt is treated as AgentPrompt
     const prompt = agent.prompt as AgentPrompt;
     return {
         basePrompt: prompt.base,
@@ -37,11 +37,14 @@ export async function evaluateAndSelectContext(input: EvaluateContextInput): Pro
   const { proposal, existingSections, existingDiagrams, sectionsToGenerate } = input;
 
   // Create a detailed context string with all available agent prompts and guidelines
-  const agentDetailsContext = sectionsToGenerate.map(sectionKey => {
-      const details = getAgentDetails(sectionKey);
+  const agentDetailsPromises = sectionsToGenerate.map(async (sectionKey) => {
+      const details = await getAgentDetails(sectionKey);
       if (!details) return ``;
       return `--- Agent for: ${sectionKey} ---\nBase Prompt: ${details.basePrompt}\nAvailable Guidelines:\n${details.availableGuidelines.map(g => `- ${g}`).join('\n')}\n`;
-  }).join('\n');
+  });
+
+  const agentDetailsArray = await Promise.all(agentDetailsPromises);
+  const agentDetailsContext = agentDetailsArray.join('\n');
 
 
   const prompt = ai.definePrompt({

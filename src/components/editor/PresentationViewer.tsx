@@ -16,17 +16,17 @@ interface PresentationViewerProps {
 export function PresentationViewer({ activePresentation }: PresentationViewerProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  useEffect(() => {
+    // When a new presentation is passed, reset to the first slide.
+    setCurrentSlide(0);
+  }, [activePresentation?.id]);
+
   // Add a guard clause to handle cases where activePresentation might be undefined.
   if (!activePresentation || !activePresentation.slides || activePresentation.slides.length === 0) {
     return (
         <div className="p-8 text-center text-muted-foreground">No slides to display.</div>
     );
   }
-  
-  useEffect(() => {
-    // When a new presentation is passed, reset to the first slide.
-    setCurrentSlide(0);
-  }, [activePresentation.id]);
 
   const slides = activePresentation.slides;
 
