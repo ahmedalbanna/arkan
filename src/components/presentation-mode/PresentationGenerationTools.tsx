@@ -16,7 +16,6 @@ import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
 import { usePresentationStore } from '@/hooks';
 import { usePresentationTemplates } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
@@ -28,8 +27,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { ContextSelector } from '../section/SectionContextSelector';
-import { useSectionStore } from '@/hooks';
-import { useProjectPlanStore } from '@/hooks';
+import { useSections } from '@/hooks';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useMutation } from '@tanstack/react-query';
@@ -77,7 +75,10 @@ function ToolsSkeleton() {
 
 function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
     const { t } = useLocalization();
-    const { reportSections, diagramSections } = useSectionStore();
+    const { data: sectionConfigs } = useSections();
+    const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
+    const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
+
     if (!plan) return null;
 
     return (
@@ -129,12 +130,10 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
-    const { reportSections, diagramSections } = useSectionStore();
     const { isDisabled, isGenerating, onGenerate, onCollapseToggle } = props;
 
-    const { proposal } = useBuilderStore();
+    const { project, setProject } = useBuilderStore();
     const {
-        presentation,
         activePresentationId,
         setActivePresentationId,
     } = usePresentationStore();
@@ -151,8 +150,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         setSelectedPresentationTemplateId,
      } = useReportStore();
 
-    const { sections } = useReportStore();
-    const { diagrams } = useDiagramStore();
+    const sections = project?.sections || {};
+    const diagrams = project?.diagrams || {};
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
@@ -164,7 +163,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const agent = agents.find(a => a.id === 'generate-presentation');
 
-    const presentations = presentation?.history || [];
+    const presentations = project?.presentation?.history || [];
 
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
     const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
@@ -179,10 +178,10 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
         const sourceDocuments = [];
 
-        if (selectedContext.proposal && proposal) {
+        if (selectedContext.proposal && project?.proposal) {
             sourceDocuments.push({
                 fileName: "Project Proposal",
-                content: JSON.stringify(proposal, null, 2)
+                content: JSON.stringify(project.proposal, null, 2)
             });
         }
 
@@ -190,7 +189,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.sections[key] && sections[key as SectionNameType]) {
                 const sectionKey = key as SectionNameType;
                 sourceDocuments.push({
-                    fileName: t(reportSections[sectionKey]?.title || sectionKey),
+                    fileName: "Report Section: " + sectionKey,
                     content: sections[sectionKey]!
                 });
             }
@@ -200,7 +199,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
             if (selectedContext.diagrams[key] && diagrams[key as DiagramType]) {
                 const diagramKey = key as DiagramType;
                 sourceDocuments.push({
-                    fileName: `Diagram: ${t(diagramSections[diagramKey]?.title || diagramKey)}`,
+                    fileName: `Diagram: ${diagramKey}`,
                     content: diagrams[diagramKey]!.plantUmlCode
                 });
             }
@@ -213,8 +212,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
         });
 
         const body = {
-            proposal: proposal,
-            projectPlan: useProjectPlanStore.getState().projectPlan,
+            proposal: project?.proposal,
+            projectPlan: project?.projectPlan,
             sourceDocuments: sourceDocuments,
             guidelines: getSelectedGuidelines(agent, guidelineState['presentation']),
             templateId: selectedPresentationTemplateId,

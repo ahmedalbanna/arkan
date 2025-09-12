@@ -11,6 +11,7 @@ import type { ExternalContext } from '@/lib/types';
 import { generateProposalApi } from '@/services';
 import { useBuilderStore } from './useBuilderStore';
 import type { AdvancedProposalFields } from './useProposalGenerationStore';
+import { Project } from '@/lib/models/project'; // Import Project
 
 export interface GenerateProposalBody {
     projectIdea: string;
@@ -22,16 +23,19 @@ export interface GenerateProposalBody {
 
 export function useGenerateProposal() {
     const { firebaseUser } = useAuth();
-    const { setProposal } = useBuilderStore();
+    const { project, setProject } = useBuilderStore(); // Get project and setProject
     const queryClient = useQueryClient();
 
     return useMutation<any, Error, GenerateProposalBody>({
         mutationFn: async (body) => {
-            const token = await getAuthenticatedToken(firebaseUser); // Assuming generateProposalApi expects a token
-            return generateProposalApi({ body, token }) as Promise<string>; // Cast to string as per mutation's return type
+            const token = await getAuthenticatedToken(firebaseUser);
+            return generateProposalApi({ body, token });
         },
         onSuccess: (data) => {
-            setProposal(data);
+            if (!project) return;
+            project.setProposal(data);
+            setProject(new Project(project.toStateObject())); // Update store with new instance
+
             if (firebaseUser) {
               queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser.uid) });
             }

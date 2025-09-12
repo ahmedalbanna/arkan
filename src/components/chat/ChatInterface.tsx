@@ -6,6 +6,7 @@ import { ConversationView } from './ConversationView';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { cn } from '@/lib/utils';
 import { useChatInterface } from '@/hooks';
+import { Agent, Chat } from '@/lib/models'; // Import models
 
 export default function ChatInterface() {
   const {
@@ -28,9 +29,9 @@ export default function ChatInterface() {
         className={cn("min-w-[250px] max-w-[400px]")}
       >
         <ChatList
-          agents={agents}
-          liveChats={chats}
-          selectedChat={selectedChat}
+          agents={agents as Agent[]} // Cast to Agent class instances
+          liveChats={chats} // Already an array of Chat class instances
+          selectedChat={selectedChat} // Already a Chat class instance or null
           onSelectChat={handleSelectChat}
           onSelectAgent={handleSelectAgent}
         />

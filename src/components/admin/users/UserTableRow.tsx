@@ -17,10 +17,10 @@ import { useChatStore } from "@/hooks";
 import { createConversationApi } from "@/services";
 import { toast } from "@/hooks";
 import { useLocalization } from "@/context/LocalizationContext";
-
+import { User } from '@/lib/models/user'; // NEW: Import our class
 
 interface UserTableRowProps {
-    user: UserProfile;
+    user: User;
 }
 
 export function UserTableRow({ user }: UserTableRowProps) {
@@ -41,7 +41,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
         });
     };
 
-    const handleStartChat = async (targetUser: UserProfile) => {
+    const handleStartChat = async (targetUser: User) => {
         if (!firebaseUser || !adminProfile) return;
         try {
             const token = await firebaseUser.getIdToken();
@@ -70,7 +70,7 @@ export function UserTableRow({ user }: UserTableRowProps) {
                 </Badge>
             </TableCell>
             <TableCell>{user.credits}</TableCell>
-            <TableCell>{format(new Date(user.createdAt), 'd MMM yyyy')}</TableCell>
+            <TableCell>{user.createdAt ? format(new Date(user.createdAt), 'd MMM yyyy') : 'N/A'}</TableCell>
             <TableCell className="text-right">
                <Button variant="ghost" size="icon" onClick={() => handleStartChat(user)}>
                   <MessageSquare className="h-4 w-4" />

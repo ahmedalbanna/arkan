@@ -9,9 +9,6 @@ import { useToast } from '@/hooks';
 import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
-import { useProjectPlanStore } from '@/hooks';
-import { useSectionStore } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks';
 import { evaluateContextApi } from '@/services';
@@ -20,8 +17,8 @@ import { SectionNameSchema, type SectionName as SectionNameType, type DiagramTyp
 import { useAgents } from './use-agents';
 import { useReportTemplates } from './use-templates';
 import { AgentPrompt } from '@/lib/types';
-
-const orderedSectionsDefault = SectionNameSchema.options;
+import { useSections } from './use-sections';
+import { useLocalization } from '@/context/LocalizationContext';
 
 // Helper function to generate instruction text from control state
 const generateInstructionText = (controls: any): string => {
@@ -36,31 +33,24 @@ const generateInstructionText = (controls: any): string => {
 };
 
 export function useReportGenerationLogic() {
+    const { t } = useLocalization();
     const { toast } = useToast();
     const { userProfile, firebaseUser } = useAuth();
     const [activeMutationKey, setActiveMutationKey] = useState<string | null>(null);
     const [generationPlan, setGenerationPlan] = useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = useState(false);
-    const [orderedSections, setOrderedSections] = useState<SectionNameType[]>([]);
-
-
-    const { reportSections, loading: sectionsLoading } = useSectionStore();
-    const { proposal } = useBuilderStore();
-    const { projectPlan } = useProjectPlanStore();
-    const { diagrams } = useDiagramStore();
+    
+    const { project, setProject } = useBuilderStore(); // Get project and setProject
+    
     const {
-        sections,
-        externalContext,
         controlState,
         guidelineState,
         contextSelection,
         selectedReportTemplateId,
-        initializeDependentStates,
         setSelectedReportTemplateId,
-        initializeContextSelection,
-        setSectionOrderForTemplate,
-        getSectionOrderForTemplate,
     } = useReportStore();
+    
+    const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: reportTemplates, isLoading: templatesLoading } = useReportTemplates();
 
@@ -69,12 +59,13 @@ export function useReportGenerationLogic() {
 
     const isAnythingGenerating = reportGenerationMutation.isPending || fullReportMutation.isPending;
 
-    // Initialize dependent states (guidelines, controls) once agents and sections are loaded.
-    useEffect(() => {
-        if (agentsLoaded && !sectionsLoading) {
-            initializeDependentStates();
-        }
-    }, [agentsLoaded, sectionsLoading, initializeDependentStates]);
+    const reportSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
 
     useEffect(() => {
         if (!selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
@@ -83,47 +74,31 @@ export function useReportGenerationLogic() {
         }
     }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
 
-    // Update ordered sections when template changes
-    useEffect(() => {
-        const template = reportTemplates?.find(t => t.id === selectedReportTemplateId);
-        if (template) {
-            const storedOrder = getSectionOrderForTemplate(template.id);
-            const initialOrder = storedOrder.length > 0 ? storedOrder : template.sectionIds;
-            const validSections = initialOrder.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
-            setOrderedSections(validSections);
+    const orderedSections = useMemo(() => {
+        if (!reportTemplates || !selectedReportTemplateId || !reportSections) {
+            return [];
         }
-    }, [selectedReportTemplateId, reportTemplates, reportSections, getSectionOrderForTemplate]);
-
-
-    useEffect(() => {
-        if (agentsLoaded && agents.length > 0) {
-            if (Object.keys(reportSections).length === 0) return;
-            agents.forEach(agent => {
-                const sectionKey = Object.keys(reportSections).find(key => reportSections[key as SectionNameType].agentId === agent.id);
-                if (sectionKey) {
-                    const prompt = agent.prompt as AgentPrompt;
-                    const defaultContext = prompt.defaultContext || [];
-                    if (defaultContext.length > 0) {
-                        initializeContextSelection(sectionKey, defaultContext);
-                    }
-                }
-            });
+        const template = reportTemplates.find(t => t.id === selectedReportTemplateId);
+        // Ensure template and reportSections are available before filtering
+        if (template && Object.keys(reportSections).length > 0) {
+            return template.sectionIds.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
         }
-    }, [agentsLoaded, agents, initializeContextSelection, reportSections]);
+        return [];
+    }, [selectedReportTemplateId, reportTemplates, reportSections]);
 
     const onGenerateSection = async (section: SectionNameType) => {
-        const fullState = useBuilderStore.getState().getFullState();
+        if (!project) return;
         const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const exampleFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
-        const contextFiles = externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
+        const exampleFiles = project.externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
+        const contextFiles = project.externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
         const agent = agents?.find(a => a.id === reportSections[section]?.agentId);
 
         const body = {
-            proposal: currentSelection.proposal ? fullState.proposal : undefined,
-            projectPlan: currentSelection.projectPlan ? fullState.projectPlan : undefined,
+            proposal: currentSelection.proposal ? project.proposal : undefined,
+            projectPlan: currentSelection.projectPlan ? project.projectPlan : undefined,
             sectionToGenerate: section,
-            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.sections?.[k as SectionNameType] }), {}),
-            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: fullState.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
+            otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: project.sections?.[k as SectionNameType] }), {}),
+            otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
             instructionText: generateInstructionText(controlState[section]),
             exampleFiles,
@@ -135,20 +110,31 @@ export function useReportGenerationLogic() {
     };
 
     const selectedTemplate = useMemo(() => reportTemplates?.find((t) => t.id === selectedReportTemplateId), [reportTemplates, selectedReportTemplateId]);
+    
+    const sectionsToGenerateCount = useMemo(() => (selectedTemplate?.sectionIds || [])
+        .filter(sectionId => {
+            if (!project?.sections || Object.keys(reportSections).length === 0) return false;
+            return !!reportSections[sectionId] && !project.sections[sectionId as SectionNameType];
+        }).length || 0, [selectedTemplate, reportSections, project?.sections]);
 
-    const availableSections = useMemo(() => {
-        if (!selectedTemplate) return [];
-        return orderedSections.filter(key => reportSections[key] && selectedTemplate.sectionIds.includes(key as SectionNameType));
-    }, [reportSections, selectedTemplate, orderedSections]);
 
+    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
+
+    const canGenerateFullReport = useMemo(() => (
+        (!!project?.proposal || !!project?.projectPlan || (project?.externalContext && project.externalContext.length > 0)) &&
+        (userProfile ? userProfile.credits >= fullReportCreditCost : false) &&
+        fullReportCreditCost > 1 &&
+        !isAnythingGenerating
+    ), [project, userProfile, fullReportCreditCost, isAnythingGenerating]);
+    
     const getGenerationPlan = async () => {
-        if (!selectedTemplate) {
-            toast({ title: "No Template Selected", variant: "destructive" });
+        if (!selectedTemplate || !project) {
+            toast({ title: "No Template or Project Loaded", variant: "destructive" });
             return null;
         }
 
         const sectionsToGenerate = selectedTemplate.sectionIds
-            .filter((sectionId): sectionId is SectionNameType => !!reportSections[sectionId] && !sections[sectionId]);
+            .filter((sectionId): sectionId is SectionNameType => !!reportSections[sectionId] && !project.sections?.[sectionId as SectionNameType]);
 
         if (sectionsToGenerate.length === 0) {
             toast({ title: "Report Complete", description: "All sections for this template have already been generated." });
@@ -158,12 +144,12 @@ export function useReportGenerationLogic() {
         try {
             const token = await getAuthenticatedToken(firebaseUser);
             const evaluationBody = {
-                proposal,
-                projectPlan,
-                existingSections: sections,
-                existingDiagrams: diagrams,
+                proposal: project.proposal,
+                projectPlan: project.projectPlan,
+                existingSections: project.sections,
+                existingDiagrams: project.diagrams,
                 sectionsToGenerate,
-                externalContext,
+                externalContext: project.externalContext,
             };
             return await evaluateContextApi(evaluationBody, token);
         } catch (error: any) {
@@ -182,6 +168,7 @@ export function useReportGenerationLogic() {
     };
 
     const onGenerateFullReport = async () => {
+        if (!project) return;
         setIsPlanning(true);
         const plan = await getGenerationPlan();
         setIsPlanning(false);
@@ -189,34 +176,19 @@ export function useReportGenerationLogic() {
         if (plan) {
             setActiveMutationKey('full-report');
             const fullReportBody = {
-                proposal,
-                projectPlan,
-                existingSections: sections,
-                existingDiagrams: diagrams,
-                externalContext,
+                proposal: project.proposal,
+                projectPlan: project.projectPlan,
+                existingSections: project.sections,
+                existingDiagrams: project.diagrams,
+                externalContext: project.externalContext,
                 generationPlan: plan.configs,
             };
             fullReportMutation.mutate(fullReportBody);
         }
     };
-
-    const sectionsToGenerateCount = useMemo(() => (selectedTemplate?.sectionIds || [])
-        .filter(sectionId => {
-            if (Object.keys(reportSections).length === 0) return false;
-            return !!reportSections[sectionId] && !sections[sectionId];
-        }).length || 0, [selectedTemplate, reportSections, sections]);
-
-    const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
-
-    const canGenerateFullReport = useMemo(() => (
-        (!!proposal || !!projectPlan || (externalContext && externalContext.length > 0)) &&
-        (userProfile ? userProfile.credits >= fullReportCreditCost : false) &&
-        fullReportCreditCost > 1 &&
-        !isAnythingGenerating
-    ), [proposal, projectPlan, externalContext, userProfile, fullReportCreditCost, isAnythingGenerating]);
-
+    
     const hasCreditsForSingleSection = useMemo(() => (userProfile ? userProfile.credits >= 1 : false), [userProfile]);
-
+    
     return {
         isAnythingGenerating,
         isPlanning,
@@ -226,7 +198,6 @@ export function useReportGenerationLogic() {
         onGenerateSection,
         onGenerateFullReport,
         handleViewPlan,
-        availableSections,
         canGenerateFullReport,
         hasCreditsForSingleSection,
         agentsLoaded,
@@ -237,6 +208,5 @@ export function useReportGenerationLogic() {
         setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
-        setOrderedSections,
     };
 }

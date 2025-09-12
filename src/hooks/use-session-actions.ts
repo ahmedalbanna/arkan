@@ -1,29 +1,24 @@
+
 'use client';
 
 import { useRef, useState } from 'react';
-import { useBuilderStore } from '@/hooks';
-import { saveAs } from 'file-saver';
-import { useToast } from '@/hooks';
-import { useSaveProject, useUpdateProject } from '@/hooks';
-import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
-import { usePresentationStore } from '@/hooks';
-import { useCodeGeneratorStore } from '@/hooks';
-import { useProjectPlanStore } from '@/hooks';
-import { useCodebaseStore } from '@/hooks';
-import { useAcademicSolverStore } from '@/hooks';
+import { useBuilderStore, useSaveProject, useUpdateProject, useToast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
+import { saveAs } from 'file-saver';
+import type { ProjectState, SavedProject } from '@/lib/types';
+import { Project } from '@/lib/models/project';
 
-function hasAnyContent(): boolean {
-    if (useBuilderStore.getState().projectIdea?.trim()) return true;
-    if (useBuilderStore.getState().proposal) return true;
-    if (Object.values(useReportStore.getState().sections).some(s => !!s)) return true;
-    if (Object.values(useDiagramStore.getState().diagrams).some(d => !!d)) return true;
-    if (usePresentationStore.getState().presentation?.history && usePresentationStore.getState().presentation!.history.length > 0) return true;
-    if (useCodeGeneratorStore.getState().html) return true;
-    if (useProjectPlanStore.getState().projectPlan) return true;
-    if (useCodebaseStore.getState().codebase) return true;
-    if (useAcademicSolverStore.getState().analyzedDocument) return true;
+function hasAnyContent(project: Project | null): boolean {
+    if (!project) return false;
+    if (project.projectIdea?.trim()) return true;
+    if (project.proposal) return true;
+    if (Object.values(project.sections || {}).some(s => !!s)) return true;
+    if (Object.values(project.diagrams || {}).some(d => !!d)) return true;
+    if (project.presentation?.history && project.presentation.history.length > 0) return true;
+    if (project.codeGenerator?.html) return true;
+    if (project.projectPlan) return true;
+    if (project.codebase) return true;
+    if (project.academicSolver?.analyzedDocument) return true;
     return false;
 }
 
@@ -36,13 +31,14 @@ export function useSessionActions() {
     const [isSavePromptOpen, setIsSavePromptOpen] = useState(false);
     const [projectName, setProjectName] = useState('');
 
-    const store = useBuilderStore();
+    const { project, loadProject, setProject } = useBuilderStore();
     const saveProjectMutation = useSaveProject();
     const updateProjectMutation = useUpdateProject();
 
     const isSaving = saveProjectMutation.isPending || updateProjectMutation.isPending;
 
     const handleUploadClick = () => {
+        setProject(null); // Clear session before loading
         fileInputRef.current?.click();
     };
 
@@ -56,7 +52,7 @@ export function useSessionActions() {
                 const content = e.target?.result as string;
                 const decodedJson = decodeURIComponent(escape(atob(content)));
                 const parsedState = JSON.parse(decodedJson);
-                store.loadState(parsedState);
+                loadProject(parsedState as SavedProject);
             } catch (error) {
                 console.error('Failed to load project file:', error);
                 toast({ title: t('builder.toasts.loadFailedTitle'), description: t('builder.toasts.loadFailedDesc'), variant: 'destructive' });
@@ -64,41 +60,42 @@ export function useSessionActions() {
         };
         reader.readAsText(file);
 
-        if(fileInputRef.current) {
+        if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
     };
 
     const handleSaveProjectFile = (name?: string) => {
-        if (!hasAnyContent()) return;
-        const finalName = name?.trim() || store.name || store.proposal?.title || 'arkan_project';
-        const jsonString = JSON.stringify(store.getFullState());
+        if (!project || !hasAnyContent(project)) return;
+        const finalName = name?.trim() || project.name || (project.proposal as any)?.title || 'arkan_project';
+        const jsonString = JSON.stringify(project.toStateObject());
         const encodedData = btoa(unescape(encodeURIComponent(jsonString)));
         const blob = new Blob([encodedData], { type: 'text/plain;charset=utf-8' });
         saveAs(blob, `${finalName}.arkan`);
     }
 
     const performSave = (name?: string) => {
-        if (!hasAnyContent()) {
+        if (!project || !hasAnyContent(project)) {
             toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
             return;
         }
 
-        const projectData = store.getFullState();
-        const finalName = String(name || store.name || store.proposal?.title || '' || 'Untitled Project');
+        const projectData = project.toStateObject();
+        const finalName = name || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: finalName };
 
-        if (store.currentProjectId) {
-            updateProjectMutation.mutate({ projectId: store.currentProjectId, data: saveData });
+        if (project.id && !project.id.startsWith('temp-')) {
+            updateProjectMutation.mutate({ projectId: project.id, data: saveData });
         } else {
             saveProjectMutation.mutate(saveData);
         }
     }
 
     const handleSave = () => {
-        if (store.currentProjectId || store.name) {
+        if (!project) return;
+        if (project.id && !project.id.startsWith('temp-') || project.name) {
             performSave();
-        } else if (hasAnyContent()) {
+        } else if (hasAnyContent(project)) {
             setIsSavePromptOpen(true);
         } else {
             toast({ title: t("projects.cannotSaveToastTitle"), description: t("projects.cannotSaveToastDesc"), variant: 'destructive' });
@@ -116,8 +113,9 @@ export function useSessionActions() {
     };
 
     const handleSaveAsCloud = () => {
-        const projectData = store.getFullState();
-        const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
+        if (!project) return;
+        const projectData = project.toStateObject();
+        const finalSaveAsName = saveAsName.trim() || project.name || (project.proposal as any)?.title || 'Untitled Project';
         const saveData = { ...projectData, name: String(finalSaveAsName) };
         saveProjectMutation.mutate(saveData, {
             onSuccess: (newProject) => {
@@ -132,8 +130,8 @@ export function useSessionActions() {
     }
 
     const handleDownloadAs = () => {
-         const finalSaveAsName = saveAsName.trim() || store.name || store.proposal?.title || 'Untitled Project';
-         handleSaveProjectFile(finalSaveAsName as string);
+         const finalSaveAsName = saveAsName.trim() || project?.name || (project?.proposal as any)?.title || 'Untitled Project';
+         handleSaveProjectFile(finalSaveAsName);
          setIsSaveAsOpen(false);
          setSaveAsName('');
     }
@@ -148,7 +146,7 @@ export function useSessionActions() {
         setProjectName,
         saveAsName,
         setSaveAsName,
-        store,
+        project,
         isSaving,
         handleUploadClick,
         onFileChange,
@@ -156,7 +154,7 @@ export function useSessionActions() {
         handleSaveFromPrompt,
         handleSaveAsCloud,
         handleDownloadAs,
-        hasContent: hasAnyContent(),
+        hasContent: hasAnyContent(project),
         t
     };
 }

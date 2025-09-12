@@ -1,14 +1,17 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useLocalization } from '@/context/Localization/LocalizationContext';
+import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks'; // NEW: Use useBuilderStore
 import { useAnalyzeAcademicDocument, useSolveAcademicDocument } from '@/hooks';
 import { exportDocumentAsDocx } from '@/lib/academic-exporter';
-import type { AcademicSolverStage, AcademicDocumentType, AnalyzedDocument, SolvedDocument } from '@/ai/schemas';
-import type { ExternalContext } from '@/lib/types';
+import { AnalyzedDocument, SolvedDocument, AcademicDocumentType } from '@/ai/schemas';
+import { AcademicSolverStage } from '@/lib/types';
+import { Project } from '@/lib/models/project';
+
 
 export function useAcademicSolverLogic() {
     const { t, locale } = useLocalization();
@@ -20,7 +23,7 @@ export function useAcademicSolverLogic() {
     const { project, setProject } = useBuilderStore();
 
     // Destructure academicSolver state from the project
-    const { stage, documentType, analyzedDocument, solvedDocument, questionDocuments, externalContext } = project?.academicSolver || {};
+    const academicSolverState = project?.academicSolver;
 
     const [currentPage, setCurrentPage] = useState(0);
 
@@ -30,81 +33,75 @@ export function useAcademicSolverLogic() {
     // Reset to first page when content changes
     useEffect(() => {
         setCurrentPage(0);
-    }, [analyzedDocument, solvedDocument]);
+    }, [academicSolverState?.analyzedDocument, academicSolverState?.solvedDocument]);
 
     const creditCostAnalyze = 1;
-    const creditCostSolve = analyzedDocument?.documentType === 'exam' ? 3 : 2;
+    const creditCostSolve = academicSolverState?.analyzedDocument?.documentType === 'exam' ? 3 : 2;
 
     const handleAnalyze = async () => {
-        if (!project) return; // Ensure project exists
-        if (questionDocuments?.length === 0 || !documentType || !firebaseUser) {
+        if (!project || !academicSolverState) return; // Ensure project and academicSolver exist
+        if (academicSolverState.questionDocuments.length === 0 || !academicSolverState.documentType || !firebaseUser) {
             toast({ title: t('builder.academicSolver.toasts.analysisError'), description: t('builder.academicSolver.toasts.analysisErrorDesc'), variant: 'destructive' });
             return;
         }
+        
         project.setAcademicSolverStage('analyzing');
-        setProject(project); // Update store
+        setProject(new Project(project));
 
-        const combinedQuestionContent = questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
+        const combinedQuestionContent = academicSolverState.questionDocuments.map(doc => `--- Content from: ${doc.fileName} ---\n${doc.content}`).join('\n\n');
 
-        analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType }, {
+        analyzeMutation.mutate({ markdown: combinedQuestionContent, documentType: academicSolverState.documentType }, {
             onSuccess: (data) => {
-                if (!project) return; // Re-check project
                 project.setAcademicSolverAnalyzedDocument(data);
-                project.setAcademicSolverStage('readyToSolve');
-                setProject(project); // Update store
+                setProject(new Project(project)); 
                 toast({ title: t('builder.academicSolver.toasts.analysisSuccess') });
             },
             onError: (error: any) => {
-                if (!project) return; // Re-check project
                 project.setAcademicSolverStage('idle');
-                setProject(project); // Update store
+                setProject(new Project(project)); 
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
     };
 
     const handleSolve = async () => {
-        if (!project) return; // Ensure project exists
-        if (!analyzedDocument || !firebaseUser) {
+        if (!project || !academicSolverState || !academicSolverState.analyzedDocument || !firebaseUser) {
             toast({ title: t('builder.academicSolver.toasts.analysisMissing'), variant: 'destructive' });
             return;
         }
         project.setAcademicSolverStage('solving');
-        setProject(project); // Update store
+        setProject(new Project(project));
 
         let contextMarkdown: string | undefined = undefined;
-        if (externalContext && externalContext.length > 0) {
-            contextMarkdown = externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
+        if (academicSolverState.externalContext && academicSolverState.externalContext.length > 0) {
+            contextMarkdown = academicSolverState.externalContext.map(c => `--- Context from: ${c.fileName} ---\n${c.content}`).join('\n\n');
         }
 
-        solveMutation.mutate({ analyzedDocument, contextMarkdown }, {
+        solveMutation.mutate({ analyzedDocument: academicSolverState.analyzedDocument, contextMarkdown }, {
             onSuccess: (data) => {
-                if (!project) return; // Re-check project
                 project.setAcademicSolverSolvedDocument(data);
-                project.setAcademicSolverStage('solved');
-                setProject(project); // Update store
+                setProject(new Project(project));
                 toast({ title: t('builder.academicSolver.toasts.solvingSuccess') });
             },
             onError: (error: any) => {
-                if (!project) return; // Re-check project
                 project.setAcademicSolverStage('readyToSolve');
-                setProject(project); // Update store
+                setProject(new Project(project));
                 toast({ title: t('builder.toasts.errorTitle'), description: error.message, variant: 'destructive' });
             }
         });
     };
 
     const handleExportDocx = () => {
-        if (analyzedDocument && solvedDocument) {
-            exportDocumentAsDocx(analyzedDocument, solvedDocument);
+        if (academicSolverState?.analyzedDocument && academicSolverState?.solvedDocument) {
+            exportDocumentAsDocx(academicSolverState.analyzedDocument, academicSolverState.solvedDocument);
         }
     }
 
     const isProcessing = analyzeMutation.isPending || solveMutation.isPending;
-    const canAnalyze = (questionDocuments?.length || 0) > 0 && !!documentType && !isProcessing && (userProfile?.credits ?? 0) >= creditCostAnalyze;
-    const canSolve = stage === 'readyToSolve' && !isProcessing && (userProfile?.credits ?? 0) >= creditCostSolve;
+    const canAnalyze = (academicSolverState?.questionDocuments?.length || 0) > 0 && !!academicSolverState?.documentType && !isProcessing && (userProfile?.credits ?? 0) >= creditCostAnalyze;
+    const canSolve = academicSolverState?.stage === 'readyToSolve' && !isProcessing && (userProfile?.credits ?? 0) >= creditCostSolve;
 
-    const totalPages = 1 + (solvedDocument?.solutions?.length || 0);
+    const totalPages = 1 + (academicSolverState?.solvedDocument?.solutions?.length || 0);
 
     const handleNextPage = () => {
         if (currentPage < totalPages - 1) {
@@ -118,83 +115,60 @@ export function useAcademicSolverLogic() {
         }
     };
 
-    // New setters for AcademicSolverState properties
-    const setStage = (newStage: AcademicSolverStage) => {
-        if (!project) return;
-        project.setAcademicSolverStage(newStage);
-        setProject(project);
-    };
     const setDocumentType = (newType: AcademicDocumentType | null) => {
         if (!project) return;
         project.setAcademicSolverDocumentType(newType);
-        setProject(project);
+        setProject(new Project(project));
     };
-    const setAnalyzedDocument = (doc: AnalyzedDocument | null) => {
-        if (!project) return;
-        project.setAcademicSolverAnalyzedDocument(doc);
-        setProject(project);
-    };
-    const setSolvedDocument = (sol: SolvedDocument | null) => {
-        if (!project) return;
-        project.setAcademicSolverSolvedDocument(sol);
-        setProject(project);
-    };
+
     const addQuestionDocument = (fileName: string, content: string) => {
         if (!project) return;
         project.addAcademicSolverQuestionDocument(fileName, content);
-        setProject(project);
+        setProject(new Project(project));
     };
+    
     const removeQuestionDocument = (index: number) => {
         if (!project) return;
         project.removeAcademicSolverQuestionDocument(index);
-        setProject(project);
+        setProject(new Project(project));
     };
+    
     const addExternalContext = (fileName: string, content: string) => {
         if (!project) return;
         project.addAcademicSolverExternalContext(fileName, content);
-        setProject(project);
+        setProject(new Project(project));
     };
+    
     const removeExternalContext = (index: number) => {
         if (!project) return;
         project.removeAcademicSolverExternalContext(index);
-        setProject(project);
+        setProject(new Project(project));
     };
-    const newAcademicSession = () => {
+
+    const resetCurrent = () => {
         if (!project) return;
-        // Reset academicSolver part of the project
-        project.academicSolver = {
-            stage: "idle",
-            documentType: null,
-            analyzedDocument: null,
-            solvedDocument: null,
-            questionDocuments: [],
-            externalContext: [],
-        };
-        setProject(project);
+        project.resetAcademicSolver();
+        setProject(new Project(project));
     };
+
 
     return {
         t,
         locale,
         isPanelCollapsed,
         setIsPanelCollapsed,
-        // Expose academicSolver state from project
-        stage: project?.academicSolver?.stage || 'idle',
-        documentType: project?.academicSolver?.documentType || null,
-        analyzedDocument: project?.academicSolver?.analyzedDocument || null,
-        solvedDocument: project?.academicSolver?.solvedDocument || null,
-        questionDocuments: project?.academicSolver?.questionDocuments || [],
-        externalContext: project?.academicSolver?.externalContext || [],
-        // Expose new setters
-        setStage,
+        stage: academicSolverState?.stage || 'idle',
+        documentType: academicSolverState?.documentType || null,
+        analyzedDocument: academicSolverState?.analyzedDocument || null,
+        solvedDocument: academicSolverState?.solvedDocument || null,
+        questionDocuments: academicSolverState?.questionDocuments || [],
+        externalContext: academicSolverState?.externalContext || [],
         setDocumentType,
-        setAnalyzedDocument,
-        setSolvedDocument,
         addQuestionDocument,
         removeQuestionDocument,
         addExternalContext,
         removeExternalContext,
-        newSession: newAcademicSession, // Map newSession to newAcademicSession
+        resetCurrent,
         currentPage,
         analyzeMutation,
         solveMutation,

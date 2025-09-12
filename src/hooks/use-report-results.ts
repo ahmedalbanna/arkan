@@ -1,26 +1,34 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useReportStore } from '@/hooks';
+import { useState, useEffect, useMemo } from 'react';
+import { useBuilderStore } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from '@/hooks';
+import { useSections } from '@/hooks';
 import type { SectionName } from '@/ai/schemas';
 import { FileText } from 'lucide-react';
+import { useAgentStore } from './useAgentStore';
 
 export const useReportResults = () => {
-  const { sections } = useReportStore();
+  const { project } = useBuilderStore();
   const { t } = useLocalization();
-  const { agents } = useAgents();
+  const { data: sectionConfigs } = useSections();
+  const getIconComponent = useAgentStore(state => state.getIconComponent);
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const generatedSections = (Object.keys(sections) as SectionName[]).filter(key => sections[key]);
+  const sections = project?.sections || {};
+
+  const generatedSections = useMemo(
+    () => (Object.keys(sections) as SectionName[]).filter(key => sections[key]),
+    [sections]
+  );
+
   const totalPages = generatedSections.length;
 
-  // Reset to first page if the content changes
   useEffect(() => {
     setCurrentPage(0);
-  }, [generatedSections.length]);
+  }, [totalPages]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages - 1) {
@@ -35,16 +43,23 @@ export const useReportResults = () => {
   };
 
   const hasContent = generatedSections.length > 0;
-  const currentSectionKey = generatedSections[currentPage];
+  const currentSectionKey = hasContent ? generatedSections[currentPage] : undefined;
+
+  const sectionConfigMap = useMemo(() => {
+    if (!sectionConfigs) return {};
+    return sectionConfigs.reduce((acc, sec) => {
+      acc[sec.id] = sec;
+      return acc;
+    }, {} as Record<string, any>);
+  }, [sectionConfigs]);
 
   const getSectionTitle = (key: SectionName): string => {
-    const agent = agents.find(a => a.id.includes(key));
-    return agent ? agent.name : key;
+    return sectionConfigMap[key]?.title || key;
   };
 
   const getSectionIcon = (key: SectionName) => {
-    const agent = agents.find(a => a.id.includes(key));
-    return agent ? agent.icon : FileText;
+    const iconName = sectionConfigMap[key]?.icon;
+    return getIconComponent(iconName) || FileText;
   };
 
   return {

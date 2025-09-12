@@ -8,7 +8,7 @@ import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
 import type { EvaluateReportInput, EvaluateReportOutput } from "@/ai/schemas";
 import { evaluateReportApi } from "@/services";
-import { useBuilderStore } from "./useBuilderStore"; // NEW: Import useBuilderStore
+import { useBuilderStore } from "./useBuilderStore";
 
 
 /**
@@ -17,8 +17,7 @@ import { useBuilderStore } from "./useBuilderStore"; // NEW: Import useBuilderSt
  */
 export function useEvaluateReport() {
     const { firebaseUser, refetchUser } = useAuth();
-    // OLD: const { setEvaluation } = useReportStore();
-    const { project, setProject } = useBuilderStore(); // NEW: Get project and setProject
+    const { project, setProject } = useBuilderStore(); 
 
     return useMutation<EvaluateReportOutput, Error, EvaluateReportInput>({
         mutationFn: async (variables) => {
@@ -26,9 +25,9 @@ export function useEvaluateReport() {
             return evaluateReportApi({ body: variables, token });
         },
         onSuccess: (data) => {
-            if (!project) return; // Ensure project exists
-            project.evaluation = data; // Set evaluation directly on the project instance
-            setProject(project); // Update the central store
+            if (!project) return;
+            project.evaluation = data;
+            setProject(project); 
 
             refetchUser(); // To update credits
             toast({ title: "Evaluation Complete" });

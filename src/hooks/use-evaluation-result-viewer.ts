@@ -1,13 +1,9 @@
-// code explantion in docs/hooks/use-evaluation-result-viewer.md
-
 'use client';
 
 import React from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-// OLD: import { useReportStore } from '@/hooks';
 import { useGenerateReportSection } from '@/hooks';
-import { useBuilderStore } from '@/hooks'; // NEW: Central store
-// OLD: import { useProjectPlanStore } from '@/hooks';
+import { useBuilderStore } from '@/hooks';
 import { SectionName, EvaluateReportOutput } from '@/ai/schemas';
 import { CheckCircle, Frown, Meh, Smile, AlertTriangle, XCircle } from 'lucide-react';
 
@@ -38,11 +34,9 @@ export const getFeedbackStatusInfo = (status: "Acceptable" | "Weak" | "Not Prese
 
 export const useEvaluationResultViewer = () => {
     const { t } = useLocalization();
-    // OLD: const { setEvaluation, sections } = useReportStore();
-    const { project, setProject } = useBuilderStore(); // NEW: Get project and setProject
+    const { project, setProject } = useBuilderStore();
     const generationMutation = useGenerateReportSection();
 
-    // Get data from the project instance
     const evaluation = project?.evaluation;
     const sections = project?.sections || {};
     const proposal = project?.proposal;
@@ -51,11 +45,11 @@ export const useEvaluationResultViewer = () => {
     const setEvaluation = (newEvaluation: EvaluateReportOutput | null) => {
         if (!project) return;
         project.evaluation = newEvaluation;
-        setProject(project); // Update the central store
+        setProject(project);
     };
 
     const handleFixWithAi = (sectionKey: SectionName, suggestion: string) => {
-        if (!project) return; // Ensure project exists
+        if (!project) return;
         const sectionContent = sections[sectionKey];
         if (!sectionContent) {
             console.error(`Cannot fix: Section content for '${sectionKey}' not found.`);
@@ -67,7 +61,7 @@ export const useEvaluationResultViewer = () => {
             projectPlan: projectPlan,
             sectionToGenerate: sectionKey,
             otherSections: sections,
-            guidelines: [suggestion], // Use the solution as a one-time guideline
+            guidelines: [suggestion], 
         };
 
         generationMutation.mutate({ body });
@@ -75,7 +69,7 @@ export const useEvaluationResultViewer = () => {
 
     return {
         t,
-        evaluation, // Expose evaluation from project
+        evaluation, 
         setEvaluation,
         generationMutation,
         handleFixWithAi,

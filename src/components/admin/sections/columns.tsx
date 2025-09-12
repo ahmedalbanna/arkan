@@ -1,8 +1,9 @@
-// C:\Users\ahmed\source\repos\arkan\src\components\admin\sections\columns.tsx
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { DynamicSection, useSectionStore } from '@/hooks';
+import { DynamicSection } from '@/hooks';
+import { useAgentStore } from '@/hooks/useAgentStore';
 import { Badge } from '@/components/ui/badge';
 import { SectionActions } from './SectionActions';
 import { GitGraph } from 'lucide-react';
@@ -12,7 +13,7 @@ export const columns: ColumnDef<DynamicSection>[] = [
     accessorKey: 'icon',
     header: 'Icon',
     cell: ({ row }) => {
-      const { getIconComponent } = useSectionStore.getState();
+      const { getIconComponent } = useAgentStore.getState();
       const Icon = getIconComponent(row.original.icon) || GitGraph;
       return <Icon className="h-5 w-5" />;
     },

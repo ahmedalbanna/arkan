@@ -1,38 +1,42 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
-import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
-import { useDocxStyles } from '@/hooks';
-import { useExport } from '@/hooks';
-import { SectionName } from '@/ai/schemas';
-import { useSectionStore } from '@/hooks';
-import { DocxTemplateKey  } from '@/lib/docx-styles';
+import { useBuilderStore, useReportStore, useDocxStyles, useExport, useSections } from '@/hooks';
+import type { SectionName } from '@/ai/schemas';
+import type { DocxTemplateKey } from '@/lib/docx-styles';
 
 const DOCX_TEMPLATE_KEY = 'arkan-docx-template';
 
 export const useReportActions = (isTranslating: boolean) => {
   const { t } = useLocalization();
-  const { proposal } = useBuilderStore();
-  const { sections } = useReportStore();
-  const { diagrams } = useDiagramStore();
+  const { project } = useBuilderStore();
   const { templates: docxTemplates, isLoaded: docxLoaded } = useDocxStyles();
   const [selectedDocxTemplate, setSelectedDocxTemplate] = useState<DocxTemplateKey >('modern');
   const { exportReportDocx, isExporting } = useExport();
 
+  const sections = project?.sections || {};
+  const diagrams = project?.diagrams || {};
+
   const generatedSectionKeys = Object.keys(sections).filter(key => sections[key as SectionName]) as SectionName[];
   const [selectedSectionsForExport, setSelectedSectionsForExport] = useState<SectionName[]>(generatedSectionKeys);
-  const { reportSections } = useSectionStore();
 
-  // Update selection when generated sections change
+  const { data: sectionConfigs } = useSections();
+  const reportSections = useMemo(() => {
+      if (!sectionConfigs) return {};
+      return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+          acc[sec.id] = sec;
+          return acc;
+      }, {} as Record<string, any>);
+  }, [sectionConfigs]);
+
   useEffect(() => {
     setSelectedSectionsForExport(generatedSectionKeys);
   }, [JSON.stringify(generatedSectionKeys)]);
 
   useEffect(() => {
-    const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey  | null;
+    const savedDocxTemplate = localStorage.getItem(DOCX_TEMPLATE_KEY) as DocxTemplateKey | null;
     if (savedDocxTemplate && docxTemplates && docxTemplates[savedDocxTemplate]) {
       setSelectedDocxTemplate(savedDocxTemplate);
     }
@@ -46,25 +50,14 @@ export const useReportActions = (isTranslating: boolean) => {
   const hasContent = Object.values(sections).some(s => !!s) || Object.values(diagrams || {}).some(d => !!d);
 
   const handleExportReportDOCX = async () => {
-    if (!hasContent) return;
-    let proposalTitle = 'Project Report';
-    if (proposal && proposal.title) {
-      proposalTitle = String(proposal.title);
-    }
+    if (!project || !hasContent) return;
 
     const translatedTitles = Object.keys(reportSections).reduce((acc, key) => {
-      acc[key as SectionName] = t(reportSections[key as SectionName].title);
+      acc[key as SectionName] = t(reportSections[key as SectionName]?.title || key);
       return acc;
     }, {} as { [key in SectionName]?: string });
 
-    const sectionsToExport = selectedSectionsForExport.reduce((acc, key) => {
-      if (sections[key]) {
-        acc[key] = sections[key];
-      }
-      return acc;
-    }, {} as { [key in SectionName]?: string });
-
-    await exportReportDocx(sectionsToExport, diagrams || {}, proposalTitle, selectedDocxTemplate, translatedTitles, selectedSectionsForExport);
+    await exportReportDocx(project, selectedDocxTemplate, translatedTitles, selectedSectionsForExport);
   };
 
   const isBusy = isTranslating || isExporting;

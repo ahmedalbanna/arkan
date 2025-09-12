@@ -6,36 +6,19 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '@/hooks';
-// OLD: import { useReportStore } from '@/hooks';
-// OLD: import { useDiagramStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useEvaluateReport } from '@/hooks';
 import { processFileApi } from '@/services';
+import type { AnyProjectProposal } from '@/ai/schemas';
 
 // This schema is used to validate the proposal data before sending it to the API.
-// It should reflect the structure of Project.proposal
-const ProposalPayloadSchema = z.object({
-    projectPlan: z.object({
-        timeline: z.string().default(''),
-        keyDeliverables: z.string().default(''),
-    }).optional(),
-    category: z.string().default(''),
-    title: z.string().default(''),
-    executiveSummary: z.string().default(''),
-    problemStatement: z.string().default(''),
-    proposedSolution: z.object({
-        overview: z.string().default(''),
-        technicalApproach: z.string().default(''),
-        keyFeatures: z.string().default(''),
-    }).default({ overview: '', technicalApproach: '', keyFeatures: '' }),
-    budgetBreakdown: z.string().default(''),
+const ProposalPayloadSchema = z.custom<AnyProjectProposal>((val) => typeof val === 'object', {
+    message: 'Proposal must be an object'
 });
 
+
 export const useEvaluationTools = () => {
-    const { project } = useBuilderStore(); // NEW: Get project from useBuilderStore
-    // OLD: const { proposal } = useBuilderStore();
-    // OLD: const { sections } = useReportStore();
-    // OLD: const { diagrams } = useDiagramStore();
+    const { project } = useBuilderStore();
     const { firebaseUser } = useAuth();
     const { t } = useLocalization();
     const { toast } = useToast();
@@ -96,7 +79,6 @@ export const useEvaluationTools = () => {
         }
 
         try {
-            // Access data directly from the project instance
             const safeProposal = ProposalPayloadSchema.parse(project?.proposal || {});
             const body = {
                 proposal: safeProposal,

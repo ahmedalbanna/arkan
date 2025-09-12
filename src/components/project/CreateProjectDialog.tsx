@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -56,9 +57,6 @@ export function CreateProjectDialog() {
                         <Label htmlFor="project-description">{t('projects.projectIdeaLabel')}</Label>
                         <Textarea id="project-description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t('projects.projectIdeaPlaceholder')} />
                     </div>
-                </div>
-                <div className="py-4 max-h-[40vh] overflow-y-auto">
-                   <UploadManager onCollapseToggle={() => {}} />
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>

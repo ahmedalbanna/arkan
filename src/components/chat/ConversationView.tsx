@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -10,12 +9,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from '@/hooks';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import type { AgentChatSession, ChatMessage, ChatSession } from '@/hooks';
+import type { ChatSession, ChatMessage } from '@/hooks';
 import { getDatabase, ref, onValue, off, push, serverTimestamp, update } from 'firebase/database';
 import { app } from '@/lib';
 import { useAgentChat } from '@/hooks';
+import { type Chat } from '@/lib/models/chat';
 
 function MessageBubble({ role, content }: { role: 'user' | 'assistant', content: string }) {
     const isUser = role === 'user';
@@ -38,7 +37,7 @@ function MessageBubble({ role, content }: { role: 'user' | 'assistant', content:
     )
 }
 
-export function ConversationView({ chat }: { chat: ChatSession | AgentChatSession | null }) {
+export function ConversationView({ chat }: { chat: Chat | null }) {
   const { firebaseUser, refetchUser } = useAuth();
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -49,20 +48,9 @@ export function ConversationView({ chat }: { chat: ChatSession | AgentChatSessio
         setMessages([]);
         return;
     };
-
-    // For all chats (including agent chats now), we listen to the DB
-    const db = getDatabase(app);
-    const messagesRef = ref(db, `messages/${chat.id}`);
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
-        const messagesList: ChatMessage[] = data ? Object.values(data) : [];
-        setMessages(messagesList);
-    }, (error) => {
-        console.error("Error listening to messages:", error);
-        setMessages([]); // Clear messages on error
-    });
-
-    return () => off(messagesRef, 'value', unsubscribe);
+    
+    // The chat object now contains its messages
+    setMessages(chat.messages);
 
   }, [chat]);
 
@@ -86,12 +74,8 @@ export function ConversationView({ chat }: { chat: ChatSession | AgentChatSessio
     const messageContent = input;
     setInput('');
 
-    // All message sends now go through the backend agentChat API.
-    // The backend will handle distinguishing between agent and user-to-user chats.
-    // For user-to-user, it will just save the message. For agents, it will invoke the flow.
     const token = await getAuthenticatedToken(firebaseUser);
 
-    // We use a "placeholder" agentId for user chats. The backend will ignore it.
     const agentId = chat.agent?.id || 'user-chat';
 
     agentChatMutation.mutate({

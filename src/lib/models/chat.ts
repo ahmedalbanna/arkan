@@ -1,4 +1,6 @@
 import { Agent, type AgentProperties } from './agent';
+import { ChatMessage, type ChatMessageProperties } from './chatMessage';
+
 
 // This interface is compatible with the ChatSession from useChatStore.ts
 export interface ChatProperties {
@@ -10,6 +12,7 @@ export interface ChatProperties {
   participantNames: Record<string, string>;
   isSupportChat?: boolean;
   agent?: AgentProperties; // The raw agent data from the store
+  messages?: Record<string, ChatMessageProperties>;
 }
 
 export class Chat {
@@ -21,6 +24,7 @@ export class Chat {
   public participantNames: Record<string, string>;
   public isSupportChat: boolean;
   public agent?: Agent; // Will hold an Agent class instance
+  public messages: ChatMessage[];
 
   constructor(props: ChatProperties) {
     this.id = props.id;
@@ -30,6 +34,11 @@ export class Chat {
     this.participantIds = props.participantIds || [];
     this.participantNames = props.participantNames || {};
     this.isSupportChat = props.isSupportChat || false;
+    this.messages = props.messages
+      ? Object.values(props.messages)
+          .map((m) => new ChatMessage(m))
+          .sort((a, b) => a.getMessageDate().getTime() - b.getMessageDate().getTime())
+      : []; // Ensure messages is always an array
 
     // If raw agent data is provided, instantiate the Agent class
     if (props.agent) {

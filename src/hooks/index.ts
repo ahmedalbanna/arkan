@@ -1,4 +1,5 @@
 
+
 export * from './use-academic-solver';
 export * from './use-academic-solver-logic';
 export * from './use-agent-editor';
@@ -20,6 +21,7 @@ export * from './use-evaluation-tools';
 export * from './use-evaluation';
 export * from './use-export';
 export * from './use-features';
+export * from './use-pptx-styles';
 export * from './use-presentation-generation';
 export * from './use-projects';
 export * from './use-proposal-generation';
@@ -64,4 +66,3 @@ export * from './usePresentationTemplateManager';
 export * from './useProjectPlanStore';
 export * from './useProposalGenerationStore';
 export * from './useReportStore';
-export * from './useSectionStore';

@@ -18,6 +18,8 @@ import {
 import { PptxStyleOptions } from '@/lib/types';
 
 
+export type PptxTemplateKey = 'modern' | 'dark' | 'professional' | string;
+
 export const pptxTemplateKeys = {
   all: ["pptx-templates"] as const,
   lists: () => [...pptxTemplateKeys.all, "list"] as const,

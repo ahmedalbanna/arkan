@@ -1,19 +1,21 @@
+
 'use client';
 
 import { useRouter } from 'next/navigation';
 import { useBuilderStore } from '@/hooks';
 import { useDeleteProject } from '@/hooks';
-import type { SavedProject } from '@/lib/types';
 import { useLocalization } from '@/context/LocalizationContext';
+import type { Project } from '@/lib/models/project'; // Import the Project class
 
-export function useProjectCardLogic(project: SavedProject) {
+export function useProjectCardLogic(project: Project) { // Changed type to Project
     const router = useRouter();
     const { t } = useLocalization();
-    const loadState = useBuilderStore(state => state.loadState);
+    const { loadProject } = useBuilderStore(); // Changed from loadState
     const deleteProjectMutation = useDeleteProject();
 
     const handleLoadProject = () => {
-        loadState(project);
+        // loadProject expects a plain object matching SavedProject interface
+        loadProject(project.toStateObject()); 
         router.push('/generate');
     };
 

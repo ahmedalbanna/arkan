@@ -17,7 +17,7 @@ export function useCreateProjectDialog() {
         let currentProject = project; // Get current project from store
         if (!currentProject) {
             // If no project exists, create a new one with a temporary ID
-            currentProject = new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            currentProject = new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), proposal: null, projectPlan: null });
         }
         currentProject.name = name;
         currentProject.projectIdea = description;
@@ -27,7 +27,7 @@ export function useCreateProjectDialog() {
     }
 
     const handleCreateNewProject = () => {
-        newSession(); // This will reset the project in useBuilderStore to null
+        newSession(); 
         setName('');
         setDescription('');
         setIsOpen(true);

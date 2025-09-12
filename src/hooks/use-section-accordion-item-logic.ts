@@ -2,23 +2,31 @@
 
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSectionStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '@/hooks';
-import { useProjectPlanStore } from '@/hooks';
 import { useReportStore } from '@/hooks';
 import { type SectionName as SectionNameType } from '@/ai/schemas';
 import { FileText } from 'lucide-react';
+import { useSections } from './use-sections'; // Correct hook for section configs
+import { useAgentStore } from './useAgentStore'; // Correct hook for agent icons
 
 const defaultSelection = { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
 
 export const useSectionAccordionItemLogic = (sectionKey: SectionNameType, hasCredits: boolean) => {
     const { t } = useLocalization();
-    const { reportSections, getIconComponent } = useSectionStore();
+    const { data: sectionConfigs } = useSections(); // Use the correct hook
+    const getIconComponent = useAgentStore((state) => state.getIconComponent); // Get icon utility from agent store
     const { userProfile } = useAuth();
-    const { proposal } = useBuilderStore();
-    const { projectPlan } = useProjectPlanStore();
-    const { externalContext, contextSelection } = useReportStore();
+    const { project } = useBuilderStore();
+    const { contextSelection } = useReportStore();
+
+    const reportSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
 
     const sectionConfig = reportSections[sectionKey];
 
@@ -29,17 +37,18 @@ export const useSectionAccordionItemLogic = (sectionKey: SectionNameType, hasCre
     const currentSelection = contextSelection[sectionKey] || defaultSelection;
 
     const hasSelectedContext = useMemo(() => {
+        if (!project) return false;
         const sel = currentSelection;
         const hasSections = Object.values(sel.sections || {}).some(v => v);
         const hasDiagrams = Object.values(sel.diagrams || {}).some(v => v);
-        const hasExternal = (externalContext || []).filter((_, i) => sel.externalContext?.[i]).length > 0;
+        const hasExternal = (project.externalContext || []).filter((_, i) => sel.externalContext?.[i]).length > 0;
 
-        return (sel.proposal && !!proposal) ||
-            (sel.projectPlan && !!projectPlan) ||
+        return (sel.proposal && !!project.proposal) ||
+            (sel.projectPlan && !!project.projectPlan) ||
             hasSections ||
             hasDiagrams ||
             hasExternal;
-    }, [proposal, projectPlan, currentSelection, externalContext]);
+    }, [project, currentSelection]);
 
     const disabledReason = !hasCredits ? t('builder.toasts.insufficientCredits')
         : !hasSelectedContext ? "Please select a context (like the proposal) to generate this section."

@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
 import { AlertCircle, Search } from 'lucide-react';
-import type { Agent } from '@/lib/types';
+import type { Agent } from '@/lib/models/agent';
 import type { AgentEditorFormValues } from '@/lib/agent-editor-schema';
 import { FormField, FormItem, FormLabel, FormControl } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -82,7 +82,7 @@ export default function ContextTab({ allAgents }: ContextTabProps) {
                                     control={control}
                                     name="prompt.defaultContext"
                                     render={({ field }) => {
-                                        const Icon = allAgents.find(a => a.id === agent.id)?.icon || AlertCircle;
+                                        const Icon = agent.iconComponent || AlertCircle;
                                         return (
                                             <FormItem key={agent.id} className="flex flex-row items-start space-x-3 space-y-0">
                                                 <FormControl>

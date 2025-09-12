@@ -1,6 +1,4 @@
 
-
-
 'use client';
 
 import { useState } from 'react';
@@ -19,21 +17,20 @@ import { toast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useChatStore } from '@/hooks';
 import { useRouter } from 'next/navigation';
-import type { ChatSession, ChatMessage, AgentChatSession, UserProfile, Agent } from '@/lib/types';
+import type { UserProfile } from '@/lib/types';
 import { useUsers } from '@/hooks';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAgents } from '@/hooks';
 import { useNewChatDialog } from '@/hooks/use-new-chat-dialog';
-// ...
-
+import { Agent, Chat } from '@/lib/models'; // NEW: Import our classes
 
 
 interface ChatListProps {
   agents: Agent[];
-  liveChats: ChatSession[];
-  selectedChat: ChatSession | AgentChatSession | null;
-  onSelectChat: (chat: ChatSession) => void;
+  liveChats: Chat[];
+  selectedChat: Chat | null;
+  onSelectChat: (chat: Chat) => void;
   onSelectAgent: (agent: Agent) => void;
 }
 
@@ -97,7 +94,7 @@ function NewChatDialog() {
     )
 }
 
-function LiveChatListItem({ chat, isSelected, onSelect }: { chat: ChatSession, isSelected: boolean, onSelect: () => void }) {
+function LiveChatListItem({ chat, isSelected, onSelect }: { chat: Chat, isSelected: boolean, onSelect: () => void }) {
     return (
         <button
             onClick={onSelect}
@@ -123,8 +120,7 @@ function LiveChatListItem({ chat, isSelected, onSelect }: { chat: ChatSession, i
 }
 
 function AgentListItem({ agent, isSelected, onSelect }: { agent: Agent, isSelected: boolean, onSelect: () => void }) {
-    const { agents, isLoaded } = useAgents();
-    const Icon = agents.find(a => a.id === agent.id)?.icon || Bot;
+    const Icon = agent.iconComponent || Bot;
     return (
         <button
             onClick={onSelect}
@@ -191,5 +187,3 @@ export function ChatList({ agents, liveChats, selectedChat, onSelectChat, onSele
     </div>
   );
 }
-
-

@@ -118,6 +118,7 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
 
     const renderLink = (link: NavLink) => (
         <Link
+            key={link.href}
             href={link.href}
             onClick={() => isMobile && closeSheet && closeSheet()}
             className={cn(
@@ -133,7 +134,7 @@ function NavContent({ isMobile = false, closeSheet }: { isMobile?: boolean, clos
     const renderCollapsible = (link: NavLink) => {
         const isOpen = link.children?.some(child => pathname.startsWith(child.href)) ?? false;
         return (
-            <Collapsible defaultOpen={isOpen}>
+            <Collapsible key={link.labelKey} defaultOpen={isOpen}>
                 <CollapsibleTrigger className="flex items-center justify-between w-full rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:text-sidebar-primary [&[data-state=open]>svg]:rotate-180">
                     <div className="flex items-center gap-3">
                         <link.icon className="h-4 w-4" />

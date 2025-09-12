@@ -37,7 +37,7 @@ export const SessionActions = () => {
         setProjectName,
         saveAsName,
         setSaveAsName,
-        store,
+        project, // Changed from store
         isSaving,
         handleUploadClick,
         onFileChange,
@@ -81,7 +81,7 @@ export const SessionActions = () => {
                     variant="default"
                     size="icon"
                     onClick={handleSave}
-                    disabled={!store.hasUnsavedChanges || isSaving}
+                    disabled={!project?.hasUnsavedChanges || isSaving} // Changed from store
                     className="h-8 w-8 md:w-auto md:px-3"
                 >
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -130,7 +130,7 @@ export const SessionActions = () => {
                         <div className="grid gap-4 py-4">
                             <div className="grid grid-cols-4 items-center gap-4">
                                 <Label htmlFor="save-as-name" className="text-right">{t('projects.nameLabel')}</Label>
-                                <Input id="save-as-name" defaultValue={store.name || (store.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
+                                <Input id="save-as-name" defaultValue={project?.name || (project?.proposal as any)?.title} onChange={(e) => setSaveAsName(e.target.value)} className="col-span-3" />
                             </div>
                         </div>
                         <DialogFooter>
@@ -153,7 +153,7 @@ export const SessionActions = () => {
                        <Button
                             variant="destructive"
                             size="icon"
-                            onClick={store.newSession}
+                            onClick={() => project?.newSession()} // Changed from store
                             className="h-8 w-8 md:w-auto md:px-3"
                         >
                             <Trash2 className="h-4 w-4" />

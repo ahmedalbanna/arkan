@@ -2,7 +2,7 @@
 'use client';
 
 import { useAgents, useUpdateAgent, useAgentCategories } from '@/hooks';
-import { type Agent } from '@/lib/types';
+import { type Agent } from '@/lib/models/agent';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -36,10 +36,8 @@ function AgentCard({ agent }: { agent: Agent }) {
   const { id, name, description, isEnabled } = agent;
   const updateAgentMutation = useUpdateAgent();
   const { t } = useLocalization();
-  const { agents, isLoaded } = useAgents();
 
-  const localAgentConfig = agents.find(a => a.id === id);
-  const Icon = localAgentConfig ? localAgentConfig.icon : AlertCircle;
+  const Icon = agent.iconComponent || AlertCircle; // Use iconComponent directly
 
   const handleToggle = (checked: boolean) => {
     updateAgentMutation.mutate({ agentId: id, payload: { isEnabled: checked } });
@@ -88,14 +86,14 @@ export default function AgentManager() {
 
     const filtered = agents.filter(agent => {
         const lowercasedTerm = searchTerm.toLowerCase();
-        const categoryName = categoryMap[agent.category] || agent.category;
+        const categoryName = categoryMap[agent.category as string] || agent.category;
         return agent.name.toLowerCase().includes(lowercasedTerm) ||
                agent.description.toLowerCase().includes(lowercasedTerm) ||
                categoryName.toLowerCase().includes(lowercasedTerm);
     });
 
     return filtered.reduce((acc, agent) => {
-      const categoryName = categoryMap[agent.category] || 'Uncategorized';
+      const categoryName = categoryMap[agent.category as string] || 'Uncategorized';
       if (!acc[categoryName]) {
         acc[categoryName] = [];
       }
