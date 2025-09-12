@@ -1,4 +1,3 @@
-
 // code explantion in docs/hooks/use-projects.md
 
 "use client";
@@ -13,14 +12,13 @@ import {
   createProject,
   deleteProject,
   updateProject,
-  type SavedProject,
+  type SavedProject, // Keep this type for API interactions
 } from "@/services";
 import { useBuilderStore } from "./useBuilderStore";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import { type ProjectState } from "@/services";
-import { useEffect } from "react";
-
+import { Project, type ProjectProperties } from "@/lib/models/project"; // NEW: Import our class
 
 // Define types for mutation variables
 interface UpdateProjectVariables {
@@ -30,12 +28,16 @@ interface UpdateProjectVariables {
 
 type SaveProjectVariables = ProjectState & { name: string };
 
+/**
+ * Fetches a list of projects.
+ * Returns instances of the Project CLASS.
+ */
 export function useProjects() {
   const { firebaseUser } = useAuth();
 
-  const queryInfo = useQuery<SavedProject[]>({
+  const queryInfo = useQuery({
     queryKey: projectKeys.lists(),
-    queryFn: async () => {
+    queryFn: async (): Promise<SavedProject[]> => {
       const token = await getAuthenticatedToken(firebaseUser);
       return fetchProjectsApi(token);
     },
@@ -46,28 +48,42 @@ export function useProjects() {
         handleErrorUtility(error, "Failed to fetch projects");
       },
     },
+    // NEW: Transform the raw data into an array of Project instances
+    select: (data: SavedProject[]): Project[] => {
+      if (!data) return [];
+      return data.map(p => new Project(p as ProjectProperties));
+    },
   });
 
   return {
     ...queryInfo,
+    // The `data` property from queryInfo is now `Project[] | undefined`
     projects: queryInfo.data,
   }
 }
 
+/**
+ * Fetches a single project by its ID.
+ * Returns an instance of the Project CLASS.
+ */
 export function useProject(projectId: string) {
   const { firebaseUser } = useAuth();
-  return useQuery<SavedProject>({
+  return useQuery({
     queryKey: projectKeys.detail(projectId),
-    queryFn: async () => {
+    queryFn: async (): Promise<SavedProject> => {
       const token = await getAuthenticatedToken(firebaseUser);
       return fetchProjectApi(projectId, token);
     },
     enabled: !!firebaseUser && !!projectId,
     meta: {
-      // Add this meta property
       onError: (error: Error) => {
         handleErrorUtility(error, "Failed to fetch project");
       },
+    },
+    // NEW: Transform the raw data into a Project instance
+    select: (data: SavedProject): Project | undefined => {
+      if (!data) return undefined;
+      return new Project(data as ProjectProperties);
     },
   });
 }
@@ -116,6 +132,8 @@ export function useUpdateProject() {
     },
     onSuccess: (updatedProject) => {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
+      // When we set query data, we should use the plain object, not the class instance,
+      // to ensure the cache remains serializable.
       queryClient.setQueryData(projectKeys.detail(updatedProject.id), updatedProject);
       setHasUnsavedChanges(false);
       // Add a toast notification for manual saves.

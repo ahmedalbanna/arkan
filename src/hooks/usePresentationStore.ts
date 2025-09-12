@@ -5,106 +5,38 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { type PresentationSlide } from "@/ai/schemas";
-import { useBuilderStore } from "./useBuilderStore";
-import type { ProjectState } from "@/lib/types";
 
+// This type is still needed by components, so we keep the export
 export interface PresentationHistoryEntry {
   id: string;
   name: string;
   slides: PresentationSlide[];
 }
 
-export interface PresentationState {
-  presentation?: { history: PresentationHistoryEntry[] };
+// The state now only holds UI-related information.
+// The actual presentation data is managed within the Project instance in useBuilderStore.
+export interface PresentationUIState {
   activePresentationId: string | null;
 }
 
-interface PresentationActions {
+interface PresentationUIActions {
   newSession: () => void;
-  loadState: (state: Partial<ProjectState>) => void;
-  addPresentationToHistory: (entry: PresentationHistoryEntry) => void;
-  replacePresentationInHistory: (entry: PresentationHistoryEntry) => void;
   setActivePresentationId: (id: string | null) => void;
-  updatePresentationSlide: (
-    slideIndex: number,
-    field: "title" | "content",
-    value: string,
-    contentIndex?: number
-  ) => void;
 }
 
-const initialState: PresentationState = {
-  presentation: { history: [] },
+const initialState: PresentationUIState = {
   activePresentationId: null,
 };
 
-export const usePresentationStore = create<
-  PresentationState & PresentationActions
->()(
+export const usePresentationStore = create<PresentationUIState & PresentationUIActions>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       newSession: () => set(initialState),
-      loadState: (newState) => {
-        if (newState.presentation) {
-          set({
-            presentation: newState.presentation,
-            activePresentationId: newState.presentation.history[0]?.id || null,
-          });
-        }
-      },
-      addPresentationToHistory: (entry) => {
-        set((state) => ({
-          presentation: {
-            history: [entry, ...(state.presentation?.history || [])],
-          },
-          activePresentationId: entry.id,
-        }));
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
-      replacePresentationInHistory: (updatedEntry) => {
-        set((state) => {
-          const { presentation } = state;
-          if (!presentation) return {};
-
-          const history = presentation.history.map((entry) =>
-            entry.id === updatedEntry.id ? updatedEntry : entry
-          );
-
-          return { presentation: { ...presentation, history } };
-        });
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
       setActivePresentationId: (id) => set({ activePresentationId: id }),
-      updatePresentationSlide: (slideIndex, field, value, contentIndex) => {
-        set((state) => {
-          const { presentation, activePresentationId } = state;
-          if (!presentation || !activePresentationId) return {};
-
-          const history = presentation.history.map((entry) => {
-            if (entry.id === activePresentationId) {
-              const newSlides = [...entry.slides];
-              const slideToUpdate = { ...newSlides[slideIndex] };
-              if (field === "title") {
-                slideToUpdate.title = value;
-              } else if (field === "content" && contentIndex !== undefined) {
-                const newContent = [...slideToUpdate.content];
-                newContent[contentIndex] = value;
-                slideToUpdate.content = newContent;
-              }
-              newSlides[slideIndex] = slideToUpdate;
-              return { ...entry, slides: newSlides };
-            }
-            return entry;
-          });
-
-          return { presentation: { ...presentation, history } };
-        });
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
     }),
     {
-      name: 'arkan-presentation-store',
+      name: 'arkan-presentation-ui-store', // Renamed to reflect its new purpose
       storage: createJSONStorage(() => localStorage),
     }
   )

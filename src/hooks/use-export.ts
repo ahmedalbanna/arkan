@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +5,7 @@ import { toast } from './use-toast';
 import { exportProposalAsDocx as exportProposalUtil, exportProposalAsPdf as exportProposalPdfUtil, exportReportAsDocx as exportReportUtil } from '@/lib/docx-exporter';
 import { exportPresentationAsPptx as exportPptxUtil } from '@/lib/pptx-exporter';
 
-import type { SavedProject } from '@/lib/types';
+import { Project } from '@/lib/models/project'; // NEW: Import Project class
 import type { ProjectProposal, DiagramType, SectionName, PresentationSlide } from '@/ai/schemas';
 import { DocxTemplateKey  } from '@/lib/docx-styles';
 import { PptxTemplateKey } from '@/lib/pptx-styles';
@@ -16,14 +15,19 @@ import { PptxTemplateKey } from '@/lib/pptx-styles';
 export function useExport() {
     const [isExporting, setIsExporting] = useState(false);
 
-    const exportProposal = async (format: 'docx' | 'pdf', proposal: ProjectProposal, DocxTemplateKey : DocxTemplateKey ) => {
+    const exportProposal = async (format: 'docx' | 'pdf', project: Project, DocxTemplateKey : DocxTemplateKey ) => {
         setIsExporting(true);
         try {
-            if (format === 'docx') {
-                await exportProposalUtil(proposal, DocxTemplateKey );
-            } else {
-                await exportProposalPdfUtil(proposal, DocxTemplateKey );
+            if (!project.proposal) {
+                toast({ title: 'Export Failed', description: 'No proposal data found.', variant: 'destructive' });
+                return;
             }
+            if (format === 'docx') {
+                await exportProposalUtil(project.proposal, DocxTemplateKey );
+            } else {
+                await exportProposalPdfUtil(project.proposal, DocxTemplateKey );
+            }
+            toast({ title: 'Export Successful', description: `Proposal exported as ${format.toUpperCase()}.` });
         } catch (error) {
             console.error(error);
             toast({ title: 'Export Failed', description: `Could not generate the ${format.toUpperCase()} file.`, variant: 'destructive' });
@@ -33,16 +37,15 @@ export function useExport() {
     };
 
     const exportReportDocx = async (
-        sections: { [key in SectionName]?: string; },
-        diagrams: { [key in DiagramType]?: { plantUmlCode: string; imageUrl: string; } },
-        proposalTitle: string,
+        project: Project,
         DocxTemplateKey : DocxTemplateKey ,
         translatedTitles: { [key in SectionName]?: string; },
         sectionsToInclude?: SectionName[]
     ) => {
         setIsExporting(true);
         try {
-            await exportReportUtil(sections, diagrams, proposalTitle, DocxTemplateKey , translatedTitles, sectionsToInclude);
+            await exportReportUtil(project.sections || {}, project.diagrams || {}, project.name || 'Untitled Report', DocxTemplateKey , translatedTitles, sectionsToInclude);
+            toast({ title: 'Export Successful', description: 'Report exported as DOCX.' });
         } catch (error) {
             console.error(error);
             toast({ title: 'Export Failed', description: 'Could not generate the DOCX file.', variant: 'destructive' });
@@ -51,10 +54,16 @@ export function useExport() {
         }
     };
 
-    const exportPresentationPptx = async (slides: PresentationSlide[], DocxTemplateKey : PptxTemplateKey) => {
+    const exportPresentationPptx = async (project: Project, PptxTemplateKey : PptxTemplateKey) => {
         setIsExporting(true);
         try {
-            await exportPptxUtil(slides, DocxTemplateKey );
+            const activePresentation = project.presentation?.history[0]; // Assuming the first one is the active/latest
+            if (!activePresentation || !activePresentation.slides) {
+                toast({ title: 'Export Failed', description: 'No presentation slides found.', variant: 'destructive' });
+                return;
+            }
+            await exportPptxUtil(activePresentation.slides, PptxTemplateKey);
+            toast({ title: 'Export Successful', description: 'Presentation exported as PPTX.' });
         } catch (error) {
             console.error(error);
             toast({ title: 'Export Failed', description: 'Could not generate the PPTX file.', variant: 'destructive' });

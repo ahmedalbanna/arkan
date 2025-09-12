@@ -1,60 +1,21 @@
-
 "use client";
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import type { GenerateCodeOutput } from "@/ai/schemas";
-import type { Codebase } from '@/ai/schemas';
 
-export interface CodeGeneratorState {
-  prompt: string;
-  html: string;
-  css: string;
-  javascript: string;
-  codebase: Codebase | null;
-}
+// This store is being deprecated in favor of useBuilderStore holding the Project instance.
+// This file is kept to avoid breaking imports, but its functionality is removed.
+
+export interface CodeGeneratorState {}
 
 interface CodeGeneratorActions {
   newSession: () => void;
-  loadState: (state: Partial<{ codeGenerator: CodeGeneratorState }>) => void;
-  setCodePrompt: (prompt: string) => void;
-  setGeneratedCode: (code: GenerateCodeOutput) => void;
-  setCodebase: (codebase: Codebase | null) => void;
-  codebase: Codebase | null;
 }
 
-const initialState: CodeGeneratorState = {
-  prompt: "",
-  html: "",
-  css: "",
-  javascript: "",
-  codebase: null,
-};
+const initialState: CodeGeneratorState = {};
 
-export const useCodeGeneratorStore = create<
-  CodeGeneratorState & CodeGeneratorActions
->()(
-  persist(
-    (set, get) => ({
-      ...initialState,
-      newSession: () => set(initialState),
-      loadState: (newState) => {
-        if (newState.codeGenerator) {
-          set(newState.codeGenerator);
-        }
-      },
-      setCodePrompt: (prompt) => set({ prompt }),
-      setGeneratedCode: (code) =>
-        set({
-          html: code.html,
-          css: code.css,
-          javascript: code.javascript || "",
-        }),
-      setCodebase: (codebase) => set({ codebase }),
-    }),
-    {
-      name: "arkan-code-generator-store-v2",
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+export const useCodeGeneratorStore = create<CodeGeneratorState & CodeGeneratorActions>()(
+  (set) => ({
+    ...initialState,
+    newSession: () => set(initialState),
+  })
 );

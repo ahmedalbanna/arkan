@@ -1,16 +1,16 @@
-
 'use client';
 
 import { create } from 'zustand';
 import type { User as FirebaseUser } from "firebase/auth";
 import { ref, onValue, off, query, update, get as getDbData, type DataSnapshot } from 'firebase/database';
-import { RealtimeDatabase } from '@/lib/firebase/client-init'; // Assuming db is your initialized database instance
+import { RealtimeDatabase } from '@/lib/firebase/client-init';
 import { v4 as uuidv4 } from 'uuid';
 import { initiateSupportChat, createConversationApi } from '@/services';
-import { Agent } from '@/hooks';
+import { Agent, type AgentProperties } from '@/lib/models/agent'; // Use our Agent class
+import { Chat, type ChatProperties } from '@/lib/models/chat'; // NEW: Import our Chat class
 
-
-export interface ChatMessage {
+// Keep original types for API/DB interactions
+export interface RawChatMessage {
   senderId: string;
   role: 'user' | 'assistant';
   content: string;
@@ -18,7 +18,7 @@ export interface ChatMessage {
   isToolResponse?: boolean;
 }
 
-export interface ChatSession {
+export interface RawChatSession {
   id: string;
   title: string;
   lastMessage: string;
@@ -26,35 +26,33 @@ export interface ChatSession {
   participantIds: string[];
   participantNames: Record<string, string>;
   isSupportChat?: boolean;
-  agent?: Agent; // For agent training chats
-}
-
-
-export interface AgentChatSession extends ChatSession {
-  agent: Agent;
+  agent?: AgentProperties; // Use AgentProperties for raw data
 }
 
 
 interface ChatState {
-  chats: ChatSession[];
-  selectedChat: ChatSession | AgentChatSession | null;
+  chats: RawChatSession[];
+  selectedChat: RawChatSession | null;
   input: string;
-  isChatOpen: boolean; // To control the floating widget
+  isChatOpen: boolean;
   isInitialized: boolean;
   unreadCounts: Record<string, number>;
 }
 
 interface ChatActions {
   initialize: (firebaseUser: FirebaseUser | null) => void;
-  addMessage: (chatId: string, message: ChatMessage) => void;
+  addMessage: (chatId: string, message: RawChatMessage) => void;
   setInput: (input: string) => void;
-  createConversation: (conversation: ChatSession) => void;
-  setSelectedChat: (chat: ChatSession | AgentChatSession | null) => void;
+  createConversation: (conversation: RawChatSession) => void;
+  setSelectedChat: (chat: RawChatSession | null) => void;
   openChat: () => void;
   closeChat: () => void;
   toggleChat: () => void;
   removeChat: (chatId: string) => void;
   resetUnreadCount: (chatId: string) => void;
+  // NEW: Selectors to return class instances
+  getChats: () => Chat[];
+  getSelectedChat: () => Chat | null;
 }
 
 const getInitialState = (): ChatState => ({
@@ -74,7 +72,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
     initialize: (firebaseUser) => {
         if (get().isInitialized || !firebaseUser) return;
         set({ isInitialized: true });
-      const userConversationsRef = query(ref(RealtimeDatabase, `userConversations/${firebaseUser.uid}`));
+        const userConversationsRef = query(ref(RealtimeDatabase, `userConversations/${firebaseUser.uid}`));
 
         const listener = onValue(userConversationsRef, async (snapshot: DataSnapshot) => {
             if (!snapshot.exists()) {
@@ -88,7 +86,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
                 )
             );
 
-            const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as ChatSession[];
+            const conversations = (await Promise.all(conversationPromises)).filter(Boolean) as RawChatSession[];
             conversations.sort((a, b) => new Date(b.lastMessageTimestamp).getTime() - new Date(a.lastMessageTimestamp).getTime());
             set(state => {
                  const currentSelectedId = state.selectedChat?.id;
@@ -99,10 +97,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
             console.error("Error listening to user conversations:", error);
             set({ chats: [], selectedChat: null, isInitialized: false });
         });
-
-        // This is a simplified return. In a real app, you'd manage this unsubscribe call
-        // more carefully, e.g., when the user logs out.
-        return () => off(userConversationsRef, 'value', listener);
     },
 
     createConversation: (conversation) => {
@@ -134,7 +128,6 @@ export const useChatStore = create<ChatState & ChatActions>()(
         lastMessageTimestamp: new Date().toISOString()
       });
 
-      // Also update the local state for immediate UI feedback
       set((state) => {
         const isChatSelected = state.selectedChat?.id === chatId;
         const newChats = state.chats.map(chat =>
@@ -154,24 +147,9 @@ export const useChatStore = create<ChatState & ChatActions>()(
     },
 
     setInput: (input) => set({ input }),
-
-    openChat: () => {
-      const { selectedChat, resetUnreadCount } = get();
-      if(selectedChat) {
-          resetUnreadCount(selectedChat.id);
-      }
-      set({ isChatOpen: true });
-    },
+    openChat: () => set({ isChatOpen: true }),
     closeChat: () => set({ isChatOpen: false }),
-    toggleChat: () => {
-        set(state => {
-            const nextIsOpen = !state.isChatOpen;
-            if (nextIsOpen && state.selectedChat) {
-                get().resetUnreadCount(state.selectedChat.id);
-            }
-            return { isChatOpen: nextIsOpen };
-        });
-    },
+    toggleChat: () => set(state => ({ isChatOpen: !state.isChatOpen })),
 
     removeChat: (chatId) => {
         set(state => {
@@ -193,5 +171,16 @@ export const useChatStore = create<ChatState & ChatActions>()(
         }));
     },
 
+    // NEW SELECTOR IMPLEMENTATIONS
+    getChats: () => {
+      const { chats } = get();
+      return chats.map(c => new Chat(c as ChatProperties));
+    },
+
+    getSelectedChat: () => {
+      const { selectedChat } = get();
+      if (!selectedChat) return null;
+      return new Chat(selectedChat as ChatProperties);
+    },
   })
 );

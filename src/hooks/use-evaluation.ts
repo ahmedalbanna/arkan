@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,7 +8,7 @@ import { getAuthenticatedToken } from "@/lib/authUtils";
 import { toast } from "./use-toast";
 import type { EvaluateReportInput, EvaluateReportOutput } from "@/ai/schemas";
 import { evaluateReportApi } from "@/services";
-import { useReportStore } from "./useReportStore";
+import { useBuilderStore } from "./useBuilderStore"; // NEW: Import useBuilderStore
 
 
 /**
@@ -18,7 +17,8 @@ import { useReportStore } from "./useReportStore";
  */
 export function useEvaluateReport() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { setEvaluation } = useReportStore();
+    // OLD: const { setEvaluation } = useReportStore();
+    const { project, setProject } = useBuilderStore(); // NEW: Get project and setProject
 
     return useMutation<EvaluateReportOutput, Error, EvaluateReportInput>({
         mutationFn: async (variables) => {
@@ -26,7 +26,10 @@ export function useEvaluateReport() {
             return evaluateReportApi({ body: variables, token });
         },
         onSuccess: (data) => {
-            setEvaluation(data);
+            if (!project) return; // Ensure project exists
+            project.evaluation = data; // Set evaluation directly on the project instance
+            setProject(project); // Update the central store
+
             refetchUser(); // To update credits
             toast({ title: "Evaluation Complete" });
         },

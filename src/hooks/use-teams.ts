@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks';
-import { teamKeys,  } from '@/lib/query-keys';
+import { teamKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
@@ -11,21 +11,31 @@ import {
     inviteMember as inviteMemberApi,
     fetchUserTeams,
 } from '@/services';
-import type { Team, TeamWithMembers } from '@/lib/types';
-import { useLocalization } from '@/context/LocalizationContext';
+// Import the plain object type for API responses
+import type { Team as TeamType, TeamWithMembers } from '@/lib/types'; 
+// Import our new class
+import { Team, type TeamProperties } from '@/lib/models/team'; 
 
-
+/**
+ * Fetches the user's teams.
+ * Returns instances of the Team CLASS.
+ */
 export function useTeams() {
     const { firebaseUser } = useAuth();
-    return useQuery<TeamWithMembers[]>({
+    return useQuery({
         queryKey: teamKeys.lists(),
-        queryFn: async () => {
+        queryFn: async (): Promise<TeamWithMembers[]> => {
             if (!firebaseUser) throw new Error("User not authenticated");
             const token = await firebaseUser.getIdToken();
             return fetchUserTeams(token);
         },
         enabled: !!firebaseUser,
         staleTime: 1000 * 60 * 5, // 5 minutes
+        // NEW: Transform the raw data into an array of Team instances
+        select: (data: TeamWithMembers[]): Team[] => {
+            if (!data) return [];
+            return data.map(t => new Team(t as TeamProperties));
+        }
     });
 }
 
@@ -34,7 +44,7 @@ export function useCreateTeam() {
     const queryClient = useQueryClient();
     const { firebaseUser } = useAuth();
 
-    return useMutation<Team, Error, { name: string }>({
+    return useMutation<TeamType, Error, { name: string }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createTeamApi({ ...variables, token });

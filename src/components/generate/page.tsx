@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -85,7 +83,8 @@ async function markOnboardingComplete(userId: string, token: string) {
 
 function GeneratePageContent() {
   const [activeTab, setActiveTab] = useState("proposal");
-  const { proposal, currentProjectId, loadState, name: projectName, projectIdea } = useBuilderStore();
+  // OLD: const { proposal, currentProjectId, loadState, name: projectName, projectIdea } = useBuilderStore();
+  const { project, currentProjectId, loadProject } = useBuilderStore(); // NEW
   const { t, locale } = useLocalization();
   const { firebaseUser, userProfile, refetchUser } = useAuth();
   const queryClient = useQueryClient();
@@ -105,10 +104,11 @@ function GeneratePageContent() {
   // Effect to load project data into the store once it's fetched
   useEffect(() => {
       if (isSuccess && projectData && !hasLoadedProject) {
-          loadState(projectData);
+          // OLD: loadState(projectData);
+          loadProject(projectData); // NEW
           setHasLoadedProject(true); // Mark as loaded to prevent re-loading
       }
-  }, [isSuccess, projectData, loadState, hasLoadedProject]);
+  }, [isSuccess, projectData, loadProject, hasLoadedProject]); // Changed loadState to loadProject
 
 
   const onboardingMutation = useMutation({
@@ -168,11 +168,11 @@ function GeneratePageContent() {
       <div className="flex-grow flex flex-col mx-auto px-4 py-8 w-full">
         <div className="flex justify-between items-start mb-4 gap-4 max-w-full">
           <div className="flex-1 space-y-1 overflow-auto">
-             <h1 className="text-xl font-semibold text-foreground truncate" title={projectName}>
-              {projectName || t('projects.untitled')}
+             <h1 className="text-xl font-semibold text-foreground truncate" title={project?.name}>
+              {project?.name || t('projects.untitled')}
             </h1>
-            <p className="text-sm text-muted-foreground truncate" title={projectIdea}>
-              {projectIdea || t('projects.noDescription')}
+            <p className="text-sm text-muted-foreground truncate" title={project?.projectIdea}>
+              {project?.projectIdea || t('projects.noDescription')}
             </p>
              {projectData?.updatedAt && (
               <p className="text-xs text-muted-foreground">

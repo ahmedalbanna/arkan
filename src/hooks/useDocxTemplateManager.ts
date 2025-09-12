@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useDocxStyles, useDeleteDocxTemplate, useRefreshTemplateImage } from '@/hooks';
+import { useDocxStyles, useDeleteDocxTemplate } from '@/hooks';
 import type { DocxTemplateKey  } from '@/lib/types';
 
 export function useDocxTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, activeTemplateKey, setActiveTemplateKey } = useDocxStyles();
   const deleteMutation = useDeleteDocxTemplate();
-  const refreshImageMutation = useRefreshTemplateImage('docx');
+
   const [changeQueue, setChangeQueue] = useState<{ key: DocxTemplateKey , path: string, value: any } | null>(null);
 
   // When a change is queued, set the active template key.
@@ -39,7 +39,7 @@ export function useDocxTemplateManager() {
   };
 
   const handleRefreshImage = (templateId: string, prompt: string) => {
-    refreshImageMutation.mutate({ templateId, prompt });
+
   };
 
   return {
@@ -47,7 +47,7 @@ export function useDocxTemplateManager() {
     isLoaded,
     isSaving,
     deleteMutation,
-    refreshImageMutation,
+
     handleStyleChange,
     handleSave,
     handleDelete,

@@ -1,38 +1,22 @@
-
-'use client';
+"use client";
 
 import { create } from 'zustand';
-import type { ProjectPlan } from '@/ai/schemas';
-import { useBuilderStore } from './useBuilderStore';
-import type { ProjectState } from '@/lib/types';
 
+// This store is being deprecated in favor of useBuilderStore holding the Project instance.
+// This file is kept to avoid breaking imports, but its functionality is removed.
 
-export interface ProjectPlanState {
-  projectPlan: ProjectPlan | null;
-}
+// The state is now empty as it's managed in useBuilderStore.
+export interface ProjectPlanState {}
 
 interface ProjectPlanActions {
-  setProjectPlan: (plan: ProjectPlan | null) => void;
   newSession: () => void;
-  loadState: (state: Partial<ProjectState>) => void;
 }
 
-const initialState: ProjectPlanState = {
-  projectPlan: null,
-};
+const initialState: ProjectPlanState = {};
 
 export const useProjectPlanStore = create<ProjectPlanState & ProjectPlanActions>()(
   (set) => ({
     ...initialState,
-    setProjectPlan: (plan) => {
-      set({ projectPlan: plan });
-      useBuilderStore.getState().setHasUnsavedChanges(true);
-    },
     newSession: () => set(initialState),
-    loadState: (newState) => {
-      if (newState.projectPlan) {
-        set({ projectPlan: newState.projectPlan });
-      }
-    },
   })
 );

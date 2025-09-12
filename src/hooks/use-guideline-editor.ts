@@ -26,7 +26,9 @@ export const useGuidelineEditor = (itemKey: string, agentId: string) => {
         handleRemoveCustomGuidelineForItem,
     } = useReportStore();
 
+    // agent is now an instance of our Agent class
     const agent = agents.find(a => a.id === agentId);
+    // Access prompt directly from the Agent instance
     const promptConfig = agent?.prompt as AgentPrompt | undefined;
     const hasGuidelines = !!promptConfig?.guidelines && promptConfig.guidelines.length > 0;
     const currentGuidelineState = guidelineState[itemKey];

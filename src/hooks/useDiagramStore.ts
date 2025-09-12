@@ -2,10 +2,11 @@
 "use client";
 
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import { type DiagramType } from "@/ai/schemas";
-import { useBuilderStore } from "./useBuilderStore";
-import type { ProjectState } from "@/lib/types";
+
+// The store is being deprecated in favor of useBuilderStore holding the Project instance.
+// This file is kept to avoid breaking imports, but its data management functionality is removed.
+// Components should now get the project instance from useBuilderStore and call project methods like project.setDiagram().
 
 export interface DiagramData {
   plantUmlCode: string;
@@ -13,75 +14,18 @@ export interface DiagramData {
   explanation?: string;
 }
 
-export interface DiagramState {
-  diagrams: { [key in DiagramType]?: DiagramData };
-}
+// The state is now empty as it's managed in useBuilderStore.
+export interface DiagramState {}
 
 interface DiagramActions {
   newSession: () => void;
-  loadState: (state: Partial<ProjectState>) => void;
-  setDiagram: (key: DiagramType, data: DiagramData) => void;
-  setDiagramExplanation: (key: DiagramType, explanation: string) => void;
-  handleDiagramCodeUpdate: (key: DiagramType, code: string) => void;
 }
 
-const initialState: DiagramState = {
-  diagrams: {},
-};
+const initialState: DiagramState = {};
 
 export const useDiagramStore = create<DiagramState & DiagramActions>()(
-  persist(
-    (set, get) => ({
+    (set) => ({
       ...initialState,
       newSession: () => set(initialState),
-      loadState: (newState) => {
-        if (newState.diagrams) {
-          set({ diagrams: newState.diagrams });
-        }
-      },
-      setDiagram: (key, data) => {
-        set((state) => ({
-          diagrams: {
-            ...state.diagrams,
-            [key]: data,
-          },
-        }));
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
-      setDiagramExplanation: (key, explanation) => {
-        set((state) => {
-          if (!state.diagrams[key]) return {};
-          return {
-            diagrams: {
-              ...state.diagrams,
-              [key]: {
-                ...state.diagrams[key]!,
-                explanation,
-              },
-            },
-          };
-        });
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
-      handleDiagramCodeUpdate: (key, code) => {
-        set((state) => {
-          if (!state.diagrams[key]) return {};
-          return {
-            diagrams: {
-              ...state.diagrams,
-              [key]: {
-                ...state.diagrams[key]!,
-                plantUmlCode: code,
-              },
-            },
-          };
-        });
-        useBuilderStore.getState().setHasUnsavedChanges(true);
-      },
-    }),
-    {
-      name: 'arkan-diagram-store',
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
+    })
 );

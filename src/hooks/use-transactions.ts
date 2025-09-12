@@ -1,14 +1,14 @@
-
 'use client';
 
-import { useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useInfiniteQuery, InfiniteData } from '@tanstack/react-query';
 import { transactionKeys, userKeys } from '@/lib/query-keys';
 import { useAuth } from '@/context/AuthContext';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { toast } from '@/hooks';
 import { getTransactions as getTransactionsApi, verifyPayment as verifyPaymentApi } from '@/services';
-import { TransactionStatus } from '@/services';
+import { TransactionStatus, type TransactionData } from '@/services'; // Keep original types
+import { Transaction, type TransactionProperties } from '@/lib/models/transaction'; // NEW
 import { useEffect } from 'react';
 
 
@@ -22,6 +22,8 @@ export interface VerifyPaymentVariables {
 
 const TRANSACTIONS_PER_PAGE = 6;
 
+// Define the shape of the API response
+type TransactionsPage = { transactions: TransactionData[], hasNextPage: boolean };
 
 export function useTransactions(status: TransactionStatus) {
     const { firebaseUser } = useAuth();
@@ -38,6 +40,14 @@ export function useTransactions(status: TransactionStatus) {
         },
         enabled: !!firebaseUser,
         staleTime: 1000 * 60, // 1 minute
+        // NEW: Use select to transform the data
+        select: (data: InfiniteData<TransactionsPage>) => ({
+            ...data,
+            pages: data.pages.map(page => ({
+                ...page,
+                transactions: page.transactions.map(t => new Transaction(t as TransactionProperties))
+            }))
+        })
     });
 
      useEffect(() => {
@@ -50,9 +60,6 @@ export function useTransactions(status: TransactionStatus) {
 
 /**
  * Custom mutation hook to verify or reject a payment transaction.
- * Requires admin privileges. Handles API calls and cache invalidation.
- *
- * @returns The result of the useMutation hook.
  */
 export function useVerifyPayment() {
     const queryClient = useQueryClient();
@@ -64,7 +71,6 @@ export function useVerifyPayment() {
             return verifyPaymentApi(variables, token);
         },
         onSuccess: (data, variables) => {
-            // Invalidate queries to refetch data after verification
             queryClient.invalidateQueries({ queryKey: transactionKeys.lists() });
             queryClient.invalidateQueries({ queryKey: userKeys.profile(variables.userId) });
 

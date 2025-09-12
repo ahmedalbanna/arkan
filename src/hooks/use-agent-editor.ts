@@ -5,12 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateAgent } from '@/hooks';
-import type { Agent } from '@/lib/types';
 import { agentEditorSchema, type AgentEditorFormValues } from '@/lib/agent-editor-schema';
+import { Agent } from '@/lib/models/agent'; // NEW: Import our Agent class
 
 interface UseAgentEditorProps {
     agentId: string;
-    initialData: Agent;
+    initialData: Agent; // NEW: Expect our Agent class instance
 }
 
 export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
@@ -39,6 +39,7 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
         const promptFromUrl = searchParams.get('prompt');
 
         const getInitialPrompt = () => {
+            // initialData.prompt is now guaranteed to be of type AgentPrompt | string
             if (typeof initialData.prompt === 'string') {
                 return promptFromUrl ? decodeURIComponent(promptFromUrl) : initialData.prompt;
             }
@@ -64,4 +65,3 @@ export function useAgentEditor({ agentId, initialData }: UseAgentEditorProps) {
         router,
     };
 }
-

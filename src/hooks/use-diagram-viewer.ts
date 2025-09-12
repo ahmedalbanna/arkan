@@ -4,34 +4,37 @@ import { useState } from 'react';
 import { saveAs } from 'file-saver';
 import { toast } from '@/hooks';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useSectionStore } from '@/hooks';
+// OLD: import { useSectionStore } from '@/hooks';
 import { useExplainDiagram } from '@/hooks';
-import type { DiagramData } from '@/hooks';
+import type { DiagramData } from './useDiagramStore'; // Keep type import
 import type { DiagramType } from '@/ai/schemas';
+import { useBuilderStore } from '@/hooks'; // NEW: Central store
+import { Project } from '@/lib/models/project'; // NEW: Project class
 
 interface DiagramViewerProps {
     diagramKey: DiagramType;
-    diagramData: DiagramData;
-    onExplanationSave: (explanation: string) => void;
+    diagramTitle: string; // NEW: Pass title as prop
 }
 
 export const useDiagramViewer = ({
     diagramKey,
-    diagramData,
-    onExplanationSave,
+    diagramTitle,
 }: DiagramViewerProps) => {
-    const { diagramSections } = useSectionStore();
-    const diagramConfig = diagramSections[diagramKey];
-    const diagramTitleKey = diagramConfig?.title || diagramKey;
+    // OLD: const { diagramSections } = useSectionStore();
+    // OLD: const diagramConfig = diagramSections[diagramKey];
+    // OLD: const diagramTitleKey = diagramConfig?.title || diagramKey;
     const { t } = useLocalization();
-    const diagramTitle = t(diagramTitleKey);
     const [isCopied, setIsCopied] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [viewMode, setViewMode] = useState<'image' | 'code' | 'explanation'>('image');
 
+    const { project, setProject } = useBuilderStore(); // NEW: Get project and setProject
+    const diagramData: DiagramData | undefined = project?.diagrams?.[diagramKey]; // Get diagram data from project
+
     const explainMutation = useExplainDiagram();
 
     const handleCopy = () => {
+        if (!diagramData?.plantUmlCode) return;
         navigator.clipboard.writeText(diagramData.plantUmlCode).then(() => {
             setIsCopied(true);
             toast({ title: "Copied!", description: "PlantUML code copied to clipboard." });
@@ -40,6 +43,7 @@ export const useDiagramViewer = ({
     };
 
     const handleDownload = async () => {
+        if (!diagramData?.imageUrl) return;
         setIsDownloading(true);
         try {
             const response = await fetch(diagramData.imageUrl);
@@ -56,7 +60,8 @@ export const useDiagramViewer = ({
     const handleExplainClick = () => {
         setViewMode('explanation');
 
-        if (!diagramData.explanation && !explainMutation.isPending) {
+        if (!diagramData?.explanation && !explainMutation.isPending) {
+            if (!diagramData?.imageUrl) return;
             fetch(diagramData.imageUrl)
                 .then(res => res.blob())
                 .then(blob => {
@@ -66,7 +71,9 @@ export const useDiagramViewer = ({
                         const base64data = reader.result as string;
                         explainMutation.mutate(base64data, {
                             onSuccess: (data) => {
-                                onExplanationSave(data.explanation);
+                                if (!project) return;
+                                project.setDiagramExplanation(diagramKey, data.explanation); // Update project
+                                setProject(project); // Update central store
                                 toast({ title: t('builder.diagramGenerator.tooltips.explanationReady') });
                             },
                             onError: (error) => {
@@ -90,5 +97,6 @@ export const useDiagramViewer = ({
         handleCopy,
         handleDownload,
         handleExplainClick,
+        diagramData, // Expose diagramData for the component to render
     };
 };

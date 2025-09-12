@@ -1,16 +1,15 @@
-
 // code explantion in docs/hooks/use-agents.md
 
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from "@tanstack/react-query";
 import { FileText, type LucideIcon } from 'lucide-react';
-import { toast } from "@/hooks";
+import { toast } from "@/hooks/use-toast";
 import { agentKeys, categoryKeys } from "@/lib/query-keys";
-import { type Agent, type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types';
+import { Agent, type AgentProperties } from '@/lib/models/agent'; // NEW: Import class and properties
+import { type AgentPrompt, type AgentKnowledgeSource } from '@/lib/types'; // Keep other types
 import { useAuth } from "@/context/AuthContext";
 import { useMemo } from "react";
-import { type UseQueryOptions } from "@tanstack/react-query";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
 import {
@@ -21,12 +20,12 @@ import {
   generateAgentConfigApi,
   fetchAgentCategoriesApi,
   createAgentCategoryApi,
-  fetchAgentsApi,
 } from "@/services";
-import { AgentEditorFormValues } from "@/lib/agent-editor-schema";
+import { type AgentEditorFormValues } from "@/lib/agent-editor-schema";
 import { type UploadedFile } from '@/components/admin/agent-editor/GenerateAgentView';
-import { AgentWithComponent, useAgentStore } from "@/hooks";
+import { type AgentWithComponent, useAgentStore } from "@/hooks/useAgentStore";
 
+// This export is now pointing to our class.
 export { Agent };
 export type UpdateAgentPayload = Partial<AgentEditorFormValues>;
 
@@ -36,7 +35,9 @@ export interface UpdateAgentVariables {
     payload: UpdateAgentPayload;
 }
 
-export type CreateAgentVariables = Omit<Agent, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
+// The original Agent type from types.ts is used here for the creation payload.
+// This is fine, as the API expects a plain object.
+export type CreateAgentVariables = Omit<import('@/lib/types').Agent, 'isEnabled' | 'category'> & { category: string; knowledge?: AgentKnowledgeSource[] };
 
 export interface AgentCategory {
     id: string;
@@ -90,38 +91,40 @@ export function useCreateAgentCategory() {
 
 /**
  * Custom hook to fetch the list of all AI agents.
- * This hook now acts as a bridge to the `useAgentStore` for components,
- * which handles fetching and caching.
- *
- * @returns An object containing the list of agents, loading status, and error status.
+ * Returns an array of Agent CLASS INSTANCES.
  */
 export function useAgents() {
   const { agents, isLoaded, error } = useAgentStore();
-  // Convert the store's agent map back to an array and map the icon component
-  const agentList = useMemo(() => Object.values(agents).map(a => ({...a, icon: a.iconComponent as LucideIcon})), [agents]);
+  
+  // Convert the store's agent map into an array of Agent class instances
+  const agentList = useMemo(() => 
+    Object.values(agents).map(a => new Agent(a as AgentProperties)), 
+    [agents]
+  );
 
   return { agents: agentList, isLoaded, isError: !!error };
 }
 
 
 type UseAgentOptions = Omit<
-  UseQueryOptions<Agent | null, Error>,
+  UseQueryOptions<import('@/lib/types').Agent | null, Error>,
   "queryKey" | "queryFn" | "enabled"
 >;
 
 /**
  * Custom hook to fetch a single agent by its ID.
- * @param agentId The ID of the agent to fetch.
- * @param options Optional React Query options to override defaults.
- * @returns The result of the useQuery hook.
+ * Returns an instance of the Agent CLASS.
  */
 export function useAgent(agentId: string, options?: UseAgentOptions) {
   const { firebaseUser } = useAuth();
-  return useQuery<Agent | null, Error>({
+  
+  // The raw query result type is the plain object from the API
+  const queryResult = useQuery({
     queryKey: agentKeys.detail(agentId),
     queryFn: async () => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchAgentApi(agentId, token);
+      // fetchAgentApi returns a plain object, which matches AgentProperties
+      return fetchAgentApi(agentId, token); 
     },
     enabled: !!firebaseUser && !!agentId,
     ...options,
@@ -129,7 +132,17 @@ export function useAgent(agentId: string, options?: UseAgentOptions) {
       onError: (error: Error) =>
         handleErrorUtility(error, `Failed to fetch agent ${agentId}`),
     },
+    // Use the 'select' option to transform the data into an Agent instance
+    select: (data): Agent | null => {
+      if (!data) return null;
+      // The data from the API (and react-query cache) is a plain object.
+      // We instantiate our class with it.
+      return new Agent(data as AgentProperties);
+    },
   });
+
+  // The type of queryResult.data is now `Agent | null` (our class instance)
+  return queryResult;
 }
 
 /**
@@ -141,7 +154,7 @@ export function useUpdateAgent() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
 
-  return useMutation<Agent, Error, UpdateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
+  return useMutation<import('@/lib/types').Agent, Error, UpdateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
       return updateAgentApi(variables, token);
@@ -198,7 +211,7 @@ export function useUpdateAgent() {
 export function useCreateAgent() {
     const { firebaseUser } = useAuth();
 
-    return useMutation<Agent, Error, CreateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
+    return useMutation<import('@/lib/types').Agent, Error, CreateAgentVariables, { previousAgents: Record<string, AgentWithComponent> }>({
         mutationFn: async (variables) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return createAgentApi(variables, token);

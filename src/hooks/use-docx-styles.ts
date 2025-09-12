@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,7 +12,8 @@ import {
   createDocxTemplate,
   deleteDocxTemplate,
 } from "@/services";
-import type { DocxTemplate, DocxTemplatesRecord } from '@/services';
+import type { DocxTemplate as DocxTemplateType, DocxTemplatesRecord } from '@/services'; // Keep original type for API
+import { DocxTemplate } from '@/lib/models/docxTemplate'; // NEW: Import our DocxTemplate class
 import type { IStylesOptions } from 'docx';
 import { templates as defaultTemplates } from '@/lib/docx-styles';
 
@@ -32,14 +32,21 @@ export function useDocxStyles() {
     const [localChanges, setLocalChanges] = React.useState<Record<string, IStylesOptions>>({});
 
 
-    const { data: templates, isLoading } = useQuery<DocxTemplatesRecord>({
+    const { data: templates, isLoading } = useQuery({
         queryKey: docxTemplateKeys.lists(),
         queryFn: fetchDocxTemplatesApi,
         staleTime: 1000 * 60 * 5, // 5 minutes
-        initialData: defaultTemplates as Record<string, DocxTemplate>,
+        initialData: defaultTemplates as Record<string, DocxTemplateType>, // Use original type for initialData
         meta: {
             onError: (error: Error) => handleErrorUtility(error, "Failed to fetch DOCX templates"),
         },
+        // NEW: Transform the raw data into a Record of DocxTemplate class instances
+        select: (data: DocxTemplatesRecord): Record<string, DocxTemplate> => {
+            return Object.keys(data).reduce((acc, key) => {
+                acc[key] = new DocxTemplate(data[key]);
+                return acc;
+            }, {} as Record<string, DocxTemplate>);
+        }
     });
 
     const mutation = useMutation({
@@ -49,7 +56,7 @@ export function useDocxStyles() {
         },
         onSuccess: (data, variables) => {
             queryClient.invalidateQueries({ queryKey: docxTemplateKeys.lists() });
-            toast({ title: "Template Saved", description: `Template "${variables.key}" has been updated.` });
+            toast({ title: "Template Updated", description: `Template "${variables.key}" has been updated.` });
             setLocalChanges(prev => {
                 const newChanges = { ...prev };
                 delete newChanges[variables.key];
@@ -63,6 +70,7 @@ export function useDocxStyles() {
 
     const activeStyles = React.useMemo(() => {
         if (!templates || !activeTemplateKey) return null;
+        // Access styles from the DocxTemplate instance
         return localChanges[activeTemplateKey] || templates[activeTemplateKey]?.styles;
     }, [templates, localChanges, activeTemplateKey]);
 
@@ -70,7 +78,9 @@ export function useDocxStyles() {
     const updateStyle = (path: string, value: string | number | boolean) => {
         if (activeTemplateKey) {
             setLocalChanges(prev => {
-                const newStyles = JSON.parse(JSON.stringify(prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {}));
+                // Ensure we are working with a mutable copy of the styles
+                const currentStyles = prev[activeTemplateKey] || templates?.[activeTemplateKey]?.styles || {};
+                const newStyles = JSON.parse(JSON.stringify(currentStyles));
 
                 let current = newStyles;
                 const keys = path.split('.');

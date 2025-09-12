@@ -2,13 +2,12 @@
 'use client';
 
 import { usePptxStyles, useDeletePptxTemplate } from '@/hooks/use-pptx-styles';
-import { useCreatePptxTemplate, useRefreshTemplateImage } from '@/hooks';
 import type { PptxTemplateKey } from '@/lib/pptx-styles';
 
 export function usePresentationTemplateManager() {
   const { templates, updateStyle, saveChanges, isSaving, isLoaded, uploadTemplateFile } = usePptxStyles();
   const deleteMutation = useDeletePptxTemplate();
-  const refreshImageMutation = useRefreshTemplateImage('pptx');
+
 
   const handleStyleChange = (key: PptxTemplateKey, path: string, value: string | number | boolean) => {
     updateStyle(key, path, value);
@@ -23,7 +22,7 @@ export function usePresentationTemplateManager() {
   };
 
   const handleRefreshImage = (templateId: string, prompt: string) => {
-    refreshImageMutation.mutate({ templateId, prompt });
+
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, templateId: string) => {
@@ -38,7 +37,7 @@ export function usePresentationTemplateManager() {
     isLoaded,
     isSaving,
     deleteMutation,
-    refreshImageMutation,
+
     uploadTemplateFile,
     handleStyleChange,
     handleSave,

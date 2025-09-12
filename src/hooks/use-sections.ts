@@ -1,40 +1,50 @@
-// C:\Users\ahmed\source\repos\arkan\src\hooks\use-sections.ts
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  fetchSections,
-  createSection,
-  updateSection,
-  deleteSection,
+  fetchSections as fetchSectionsApi,
+  createSection as createSectionApi,
+  updateSection as updateSectionApi,
+  deleteSection as deleteSectionApi,
 } from '@/services/section-service';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from './use-toast';
 import { handleErrorUtility } from '@/lib/errorUtils';
 import { getAuthenticatedToken } from '@/lib/authUtils';
-import { DynamicSection } from './useSectionStore';
+import { type DynamicSection } from './useSectionStore'; // Keep for API types
 import { sectionKeys } from '@/lib/query-keys';
+import { Section, type SectionProperties } from '@/lib/models/section'; // NEW: Import our class
 
+/**
+ * Fetches dynamic sections.
+ * Returns instances of the Section CLASS.
+ */
 export function useSections() {
   const { firebaseUser } = useAuth();
-  return useQuery<DynamicSection[]>({
+  return useQuery({
     queryKey: sectionKeys.lists(),
-    queryFn: async () => {
+    queryFn: async (): Promise<DynamicSection[]> => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return fetchSections(token);
+      return fetchSectionsApi(token);
     },
     enabled: !!firebaseUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    // NEW: Transform the raw data into an array of Section instances
+    select: (data: DynamicSection[]): Section[] => {
+      if (!data) return [];
+      return data.map(s => new Section(s as SectionProperties));
+    }
   });
 }
 
 export function useCreateSection() {
   const queryClient = useQueryClient();
   const { firebaseUser } = useAuth();
+  // Mutation still works with the plain DynamicSection object for the API
   return useMutation<DynamicSection, Error, Omit<DynamicSection, 'id'> & { id: string }>({
     mutationFn: async (data) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return createSection(data, token);
+      return createSectionApi(data, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });
@@ -50,7 +60,7 @@ export function useUpdateSection() {
   return useMutation<DynamicSection, Error, { sectionId: string; data: Partial<DynamicSection> }>({
     mutationFn: async (variables) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return updateSection(variables.sectionId, variables.data, token);
+      return updateSectionApi(variables.sectionId, variables.data, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });
@@ -66,7 +76,7 @@ export function useDeleteSection() {
   return useMutation<void, Error, string>({
     mutationFn: async (sectionId) => {
       const token = await getAuthenticatedToken(firebaseUser);
-      return deleteSection(sectionId, token);
+      return deleteSectionApi(sectionId, token);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.lists() });

@@ -1,17 +1,19 @@
-
 // code explantion in docs/hooks/use-history.md
 
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import type { AnyProjectProposal, DiagramType } from "@/ai/schemas";
+import type { ProjectState } from '@/lib/types'; // For ProjectState
+import type { DiagramData } from './useDiagramStore'; // For DiagramData
+import type { PresentationHistoryEntry } from './usePresentationStore'; // For PresentationHistoryEntry
 
 export interface HistoryEntry {
   id: string;
   createdAt: string;
-  type: 'proposal' | 'diagram' | 'section';
+  type: 'proposal' | 'diagram' | 'section' | 'project' | 'presentation'; // Added 'project' and 'presentation'
   title: string; // e.g., "Project Proposal" or "Use Case Diagram"
-  data: any; // The actual generated data
+  data: ProjectState | DiagramData | PresentationHistoryEntry | AnyProjectProposal | any; // More specific types
   projectIdea?: string;
   proposal?: AnyProjectProposal | null; // The proposal at the time of generation
 }

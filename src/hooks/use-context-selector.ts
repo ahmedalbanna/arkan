@@ -3,23 +3,24 @@
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
 import { useBuilderStore } from '@/hooks';
-import { useProjectPlanStore } from '@/hooks';
-import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
-import { useSectionStore } from '@/hooks';
+import { useReportStore } from '@/hooks'; // contextSelection and toggleContextSelection are still here
 import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
-    const { proposal } = useBuilderStore();
-    const { projectPlan } = useProjectPlanStore();
-    const { sections, externalContext, toggleContextSelection, contextSelection } = useReportStore();
-    const { diagrams } = useDiagramStore();
-    const { reportSections, diagramSections } = useSectionStore();
+    const { project } = useBuilderStore(); // Get the project instance
+    const { toggleContextSelection, contextSelection } = useReportStore(); // UI state from report store
 
-    const orderedSections = useMemo(() => Object.keys(reportSections).sort() as SectionName[], [reportSections]);
+    // Access data directly from the project instance
+    const proposal = project?.proposal;
+    const projectPlan = project?.projectPlan;
+    const sections = project?.sections || {};
+    const diagrams = project?.diagrams || {};
+    const externalContext = project?.externalContext || [];
+
+    const orderedSections = useMemo(() => Object.keys(sections).sort() as SectionName[], [sections]);
     const orderedDiagrams = DiagramTypeSchema.options;
 
     const currentSelection = contextSelection[itemKey] || emptySelection;
@@ -53,8 +54,8 @@ export const useContextSelector = (itemKey: string) => {
         proposal,
         projectPlan,
         toggleContextSelection,
-        reportSections,
-        diagramSections,
+        sections,
+        diagrams,
         currentSelection,
         generatedSections,
         generatedDiagrams,

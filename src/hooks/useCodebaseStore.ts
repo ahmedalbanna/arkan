@@ -1,33 +1,21 @@
-
-'use client';
+"use client";
 
 import { create } from 'zustand';
-import type { Codebase } from '@/ai/schemas';
-import { ProjectState } from '@/lib/types';
 
-export interface CodebaseState {
-  codebase: Codebase | null;
-}
+// This store is being deprecated in favor of useBuilderStore holding the Project instance.
+// This file is kept to avoid breaking imports, but its functionality is removed.
+
+export interface CodebaseState {}
 
 interface CodebaseActions {
-  setCodebase: (codebase: Codebase | null) => void;
   newSession: () => void;
-  loadState: (state: Partial<ProjectState>) => void;
 }
 
-const initialState: CodebaseState = {
-  codebase: null,
-};
+const initialState: CodebaseState = {};
 
 export const useCodebaseStore = create<CodebaseState & CodebaseActions>()(
   (set) => ({
     ...initialState,
-    setCodebase: (codebase) => set({ codebase }),
     newSession: () => set(initialState),
-    loadState: (newState) => {
-      if (newState.codebase) {
-        set({ codebase: newState.codebase });
-      }
-    },
   })
 );

@@ -1,12 +1,10 @@
-
 // code explantion in docs/hooks/use-user.md
 
 "use client";
 
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { userKeys } from "@/lib/query-keys";
-import type { UserProfile } from '@/lib/types';
-import type { PricingPlan } from '@/lib/types';
+import type { UserProfile, PricingPlan } from '@/lib/types';
 import { toast } from "@/hooks";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase/client-init";
@@ -34,6 +32,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useState, useCallback, useEffect } from "react";
 import { handleErrorUtility } from "@/lib/errorUtils";
 import { getAuthenticatedToken } from "@/lib/authUtils";
+import { User, type UserProperties } from '@/lib/models/user'; // NEW: Import our User class
 
 
 // --- Custom Hooks ---
@@ -41,7 +40,7 @@ const USERS_PER_PAGE = 10;
 
 export function useUsers() {
     const { firebaseUser } = useAuth();
-    return useInfiniteQuery<UserListResponse>({
+    return useInfiniteQuery<UserListResponse, Error, UserListResponse, string | undefined, string>({
         queryKey: userKeys.lists(),
         queryFn: async ({ pageParam }) => {
             const token = await getAuthenticatedToken(firebaseUser);
@@ -49,18 +48,34 @@ export function useUsers() {
         },
         initialPageParam: undefined,
         getNextPageParam: (lastPage) => lastPage.hasNextPage ? lastPage.lastVisibleId : undefined,
-        enabled: !!firebaseUser
+        enabled: !!firebaseUser,
+        // NEW: Transform the data into User instances
+        select: (data) => ({
+            ...data,
+            pages: data.pages.map(page => ({
+                ...page,
+                users: page.users.map(u => new User(u as UserProperties))
+            }))
+        })
     });
 }
 
 export function useAdmins() {
-  return useQuery<UserProfile[]>({
+  const { firebaseUser } = useAuth();
+  return useQuery<UserProfile[], Error, User[]>({
     queryKey: userKeys.admins(),
-    queryFn: fetchAdminsApi,
+    queryFn: async () => {
+        const token = await getAuthenticatedToken(firebaseUser);
+        return fetchAdminsApi(token);
+    },
     staleTime: 1000 * 60 * 15, // 15 minutes
     meta: {
       onError: (error: Error) => handleErrorUtility(error, "Failed to fetch administrators"),
     },
+    // NEW: Transform the data into User instances
+    select: (data: UserProfile[]): User[] => {
+        return data.map(u => new User(u as UserProperties));
+    }
   });
 }
 
@@ -83,7 +98,7 @@ export function useUserProfile(userId: string) {
 
   // The component will use the data from the cache, which is kept up-to-date
   // by the real-time listener.
-  return useQuery<UserProfile | null>({
+  return useQuery<UserProfile | null, Error, User | null>({
     queryKey: userKeys.profile(userId),
     // The queryFn will run on initial load or if the listener fails for some reason
     queryFn: async () => {
@@ -93,6 +108,11 @@ export function useUserProfile(userId: string) {
     },
     staleTime: Infinity, // Data is live, so it's always "fresh"
     enabled: !!userId && !!firebaseUser, // Only run if we have IDs
+    // NEW: Transform the data into a User instance
+    select: (data: UserProfile | null): User | null => {
+        if (!data) return null;
+        return new User(data as UserProperties);
+    }
   });
 }
 
@@ -328,9 +348,7 @@ export function usePurchaseCredits() {
       return purchaseCreditsApi(plan, token);
     },
     onSuccess: (data, plan) => {
-      queryClient.invalidateQueries({
-        queryKey: userKeys.profile(firebaseUser!.uid),
-      });
+      queryClient.invalidateQueries({ queryKey: userKeys.profile(firebaseUser!.uid) });
       toast({
         title: "Purchase Successful!",
         description: `Successfully purchased ${plan.credits} credits. New balance: ${data.newBalance}.`,

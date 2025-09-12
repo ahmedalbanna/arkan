@@ -6,12 +6,14 @@ import { useLocalization } from '@/context/LocalizationContext';
 import { useToast } from '@/hooks';
 import { useQueryClient } from '@tanstack/react-query';
 import { useBuilderStore } from '@/hooks';
-import { useReportStore } from '@/hooks';
-import { useDiagramStore } from '@/hooks';
+// OLD: import { useReportStore } from '@/hooks';
+// OLD: import { useDiagramStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useEvaluateReport } from '@/hooks';
 import { processFileApi } from '@/services';
 
+// This schema is used to validate the proposal data before sending it to the API.
+// It should reflect the structure of Project.proposal
 const ProposalPayloadSchema = z.object({
     projectPlan: z.object({
         timeline: z.string().default(''),
@@ -30,9 +32,10 @@ const ProposalPayloadSchema = z.object({
 });
 
 export const useEvaluationTools = () => {
-    const { proposal } = useBuilderStore();
-    const { sections } = useReportStore();
-    const { diagrams } = useDiagramStore();
+    const { project } = useBuilderStore(); // NEW: Get project from useBuilderStore
+    // OLD: const { proposal } = useBuilderStore();
+    // OLD: const { sections } = useReportStore();
+    // OLD: const { diagrams } = useDiagramStore();
     const { firebaseUser } = useAuth();
     const { t } = useLocalization();
     const { toast } = useToast();
@@ -93,11 +96,12 @@ export const useEvaluationTools = () => {
         }
 
         try {
-            const safeProposal = ProposalPayloadSchema.parse(proposal || {});
+            // Access data directly from the project instance
+            const safeProposal = ProposalPayloadSchema.parse(project?.proposal || {});
             const body = {
                 proposal: safeProposal,
-                reportSections: sections,
-                diagrams: Object.fromEntries(Object.entries(diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
+                reportSections: project?.sections || {},
+                diagrams: Object.fromEntries(Object.entries(project?.diagrams || {}).map(([key, value]) => [key, (value as any).plantUmlCode])),
                 acceptanceCriteria: criteria.split('\n').filter(c => c.trim()),
             };
             mutation.mutate(body as any);
