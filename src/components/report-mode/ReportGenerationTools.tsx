@@ -8,27 +8,82 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { type SectionName as SectionNameType, EvaluateContextOutput } from '@/ai/schemas';
-import { Loader2, Sparkles, Eye, PanelLeftClose, GripVertical } from 'lucide-react';
-import { useLocalization } from '@/context/LocalizationContext';
-import { useReportStore } from '@/hooks';
+import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
+import { Loader2, Sparkles, Eye, PanelLeftClose } from 'lucide-react';
 import { ReportActions } from './ReportActions';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import ReactMarkdown from 'react-markdown';
 import { Skeleton } from '@/components/ui/skeleton';
-import { markdownComponents } from '@/lib/markdown-styles';
 import { SectionAccordionItem } from '@/components/section/SectionAccordionItem';
 import { useReportGenerationLogic } from '@/hooks';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { markdownComponents } from '@/lib/markdown-styles';
+import ReactMarkdown from 'react-markdown';
+import { useSections } from '@/hooks';
+import { useLocalization } from '@/context/LocalizationContext';
 
 interface GenerationToolsProps {
     onTranslateAll: (targetLang: 'en' | 'ar') => void;
     isTranslating: boolean;
     onCollapseToggle: () => void;
+}
+
+function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
+    const { t } = useLocalization();
+    const { data: sectionConfigs } = useSections();
+    const reportSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
+    const diagramSections = React.useMemo(() => sectionConfigs?.filter(s => s.type === 'diagram').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {}) || {}, [sectionConfigs]);
+
+
+    if (!plan) return null;
+
+    return (
+        <Dialog open={!!plan} onOpenChange={onOpenChange}>
+            <DialogContent className="max-w-4xl h-[90vh]">
+                <DialogHeader>
+                    <DialogTitle>{t('builder.presentationGenerator.planViewer.title')}</DialogTitle>
+                    <DialogDescription>
+                        {t('builder.presentationGenerator.planViewer.description')}
+                    </DialogDescription>
+                </DialogHeader>
+                <ScrollArea className="h-full">
+                    <div className="space-y-4 pr-6">
+                        {plan.configs.map(config => (
+                            <Card key={config.section} className="bg-muted/50">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-headline">{(reportSections as any)[config.section]?.title || config.section}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3 text-sm">
+                                    <div>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
+                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
+                                            {config.context.sections?.map(s => <li key={s}>{(reportSections as any)[s]?.title || s}</li>)}
+                                            {config.context.diagrams?.map(d => <li key={d}>{(diagramSections as any)[d as DiagramType]?.title || d}</li>)}
+                                            {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.instructions')}</h4>
+                                        <div className="text-xs text-muted-foreground prose dark:prose-invert max-w-none">
+                                            <ReactMarkdown components={markdownComponents}>{`- Tone: ${config.instructions.tone}\n- Formality: ${config.instructions.formality}`}</ReactMarkdown>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.guidelines')}</h4>
+                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
+                                            {config.guidelines.map((g, i) => <li key={i}>{g}</li>)}
+                                        </ul>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </DialogContent>
+        </Dialog>
+    )
 }
 
 function ToolsSkeleton() {
@@ -60,58 +115,6 @@ function ToolsSkeleton() {
     )
 }
 
-function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput | null, onOpenChange: (open: boolean) => void }) {
-    const { t } = useLocalization();
-    const { reportSections, diagramSections } = useSectionStore();
-    if (!plan) return null;
-
-    return (
-        <Dialog open={!!plan} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl h-[90vh]">
-                <DialogHeader>
-                    <DialogTitle>{t('builder.presentationGenerator.planViewer.title')}</DialogTitle>
-                    <DialogDescription>
-                        {t('builder.presentationGenerator.planViewer.description')}
-                    </DialogDescription>
-                </DialogHeader>
-                <ScrollArea className="h-full">
-                    <div className="space-y-4 pr-6">
-                        {plan.configs.map(config => (
-                            <Card key={config.section} className="bg-muted/50">
-                                <CardHeader>
-                                    <CardTitle className="text-lg font-headline">{reportSections[config.section]?.title || config.section}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3 text-sm">
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.contextItems')}</h4>
-                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.context.sections?.map(s => <li key={s}>{reportSections[s]?.title || s}</li>)}
-                                            {config.context.diagrams?.map(d => <li key={d}>{diagramSections[d as SectionNameType]?.title || d}</li>)}
-                                            {!config.context.sections?.length && !config.context.diagrams?.length && <li>{t('builder.proposalGenerator.title')}</li>}
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.instructions')}</h4>
-                                        <div className="text-xs text-muted-foreground prose dark:prose-invert max-w-none">
-                                            <ReactMarkdown components={markdownComponents}>{`- Tone: ${config.instructions.tone}\n- Formality: ${config.instructions.formality}`}</ReactMarkdown>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold">{t('builder.presentationGenerator.planViewer.guidelines')}</h4>
-                                        <ul className="list-disc pl-5 text-muted-foreground text-xs">
-                                            {config.guidelines.map((g, i) => <li key={i}>{g}</li>)}
-                                        </ul>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </DialogContent>
-        </Dialog>
-    )
-}
-
 export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggle }: GenerationToolsProps) => {
     const { t } = useLocalization();
     const {
@@ -133,8 +136,9 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
         setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
+        project,
     } = useReportGenerationLogic();
-    const { sections } = useReportStore();
+    const sections = project?.sections || {};
 
     const isDisabled = isAnythingGenerating || isTranslating || isPlanning;
 
@@ -176,18 +180,6 @@ export const GenerationTools = ({ onTranslateAll, isTranslating, onCollapseToggl
                                                 <TooltipTrigger asChild>
                                                     <SelectItem value={template.id}>{template.name}</SelectItem>
                                                 </TooltipTrigger>
-                                                <TooltipContent side="right" align="start">
-                                                    <p className="font-bold">{template.name}</p>
-                                                    <p className="text-xs text-muted-foreground">{template.description}</p>
-                                                    <Separator className="my-2" />
-                                                    <p className="text-xs font-semibold mb-1">Included Agents:</p>
-                                                    <ul className="list-disc pl-4 text-xs text-muted-foreground">
-                                                        {template.sectionIds.map(sectionId => {
-                                                            const section = useSectionStore.getState().reportSections[sectionId as SectionNameType];
-                                                            return <li key={sectionId}>{section?.title || sectionId}</li>
-                                                        })}
-                                                    </ul>
-                                                </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>
                                     ))}

@@ -1,3 +1,4 @@
+
 // code explantion in docs/hooks/useBuilderStore.md
 
 "use client";
@@ -78,8 +79,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>()(
       },
 
       setProjectIdea: (idea) => {
-        const project = get().project;
-        if (!project) return;
+        const currentProject = get().project;
+        // If there's no project, create a new one to hold the idea
+        const project = currentProject ?? new Project({ id: `temp-${Date.now()}`, userId: 'anonymous', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as ProjectProperties);
         project.projectIdea = idea;
         get().setProject(new Project(project.toStateObject() as ProjectProperties));
       },

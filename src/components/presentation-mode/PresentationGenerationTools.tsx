@@ -11,7 +11,7 @@ import { useAgents } from '@/hooks';
 import { cn } from '@/lib/utils';
 import { type SectionName as SectionNameType, type DiagramType, EvaluateContextOutput } from '@/ai/schemas';
 import { Loader2, Sparkles, Settings, Eye, PanelLeftClose } from 'lucide-react';
-import { toast, useToast } from '@/hooks';
+import { useToast } from '@/hooks';
 import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useLocalization } from '@/context/LocalizationContext';
@@ -36,6 +36,7 @@ import { evaluateContextApi } from '@/services';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
+import { Project } from '@/lib/models/project';
 
 interface PresentationGenerationToolsProps {
     isDisabled: boolean;
@@ -131,6 +132,7 @@ function PlanViewerDialog({ plan, onOpenChange }: { plan: EvaluateContextOutput 
 export const PresentationGenerationTools = (props: PresentationGenerationToolsProps) => {
     const { t } = useLocalization();
     const { isDisabled, isGenerating, onGenerate, onCollapseToggle } = props;
+    const { toast } = useToast();
 
     const { project, setProject } = useBuilderStore();
     const {
@@ -141,9 +143,6 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
     const hasCreditsForGeneration = userProfile ? userProfile.credits >= 1 : false;
 
     const {
-        externalContext,
-        addExternalContext,
-        removeExternalContext,
         guidelineState,
         contextSelection,
         selectedPresentationTemplateId,
@@ -152,6 +151,7 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const sections = project?.sections || {};
     const diagrams = project?.diagrams || {};
+    const externalContext = project?.externalContext || [];
 
     const { agents, isLoaded: agentsLoaded } = useAgents();
     const { data: presentationTemplates, isLoading: presentationTemplatesLoading } = usePresentationTemplates();
@@ -167,6 +167,19 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
 
     const currentSelection = contextSelection['presentation'] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
     const hasContent = externalContext.length > 0 || currentSelection.proposal || Object.values(currentSelection.sections).some(v => v) || Object.values(currentSelection.diagrams).some(v => v);
+
+    const handleAddExternalContext = (fileName: string, content: string) => {
+        if (!project) return;
+        project.addExternalContext(fileName, content, 'context');
+        setProject(new Project(project.toStateObject()));
+    }
+
+    const handleRemoveExternalContext = (index: number) => {
+        if (!project) return;
+        project.removeExternalContext(index);
+        setProject(new Project(project.toStateObject()));
+    }
+
 
     const handleGenerateClick = () => {
         if (!selectedPresentationTemplateId) {
@@ -280,8 +293,8 @@ export const PresentationGenerationTools = (props: PresentationGenerationToolsPr
                                      <AccordionContent className="p-4 border">
                                          <AcademicUploaders
                                             title=""
-                                            onContentAdded={(fileName, content) => addExternalContext(fileName, content, 'context')}
-                                            onContentRemoved={removeExternalContext}
+                                            onContentAdded={handleAddExternalContext}
+                                            onContentRemoved={handleRemoveExternalContext}
                                             isProcessing={isDisabled}
                                             uploadedContent={externalContext}
                                             isContext

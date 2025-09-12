@@ -1,4 +1,5 @@
 
+
 // For a detailed explanation of the data flow, see docs/data-flows/report-section-generation.md
 'use client';
 
@@ -8,12 +9,13 @@ import { toast } from './use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { getAuthenticatedToken } from '@/lib/authUtils';
 import { SectionName } from '@/ai/schemas';
-import { useReportStore } from './useReportStore';
+import { useBuilderStore } from './useBuilderStore';
 import { userKeys } from '@/lib/query-keys';
+import { Project } from '@/lib/models/project';
 
 export function useGenerateReportSection() {
   const { firebaseUser, refetchUser } = useAuth();
-  const { setSection } = useReportStore();
+  const { project, setProject } = useBuilderStore(); // Get project and setProject from the main store
 
   return useMutation({
     mutationFn: async (variables: { body: any }) => {
@@ -21,9 +23,16 @@ export function useGenerateReportSection() {
       return generateReportSectionApi(variables.body, token);
     },
     onSuccess: (data, variables) => {
+      if (!project) return;
+      
       const sectionKey = variables.body.sectionToGenerate as SectionName;
       const content = Object.values(data)[0] as string;
-      setSection(sectionKey, content);
+      
+      // Use the Project model's method to update the content
+      project.updateSectionContent(sectionKey, content);
+      
+      // Set the updated project instance back into the store
+      setProject(new Project(project.toStateObject()));
 
       refetchUser(); // To update credits
     },
@@ -36,14 +45,23 @@ export function useGenerateReportSection() {
 
 export function useGenerateFullReport() {
     const { firebaseUser, refetchUser } = useAuth();
-    const { setAllSections } = useReportStore();
+    const { project, setProject } = useBuilderStore();
+    
     return useMutation({
         mutationFn: async (body: any) => {
             const token = await getAuthenticatedToken(firebaseUser);
             return generateFullReportApi(body, token);
         },
         onSuccess: (data) => {
-             setAllSections(data);
+            if (!project) return;
+
+            // Update all sections returned from the API
+            Object.keys(data).forEach(key => {
+                project.updateSectionContent(key as SectionName, data[key]);
+            });
+
+            setProject(new Project(project.toStateObject()));
+             
              refetchUser();
              toast({ title: "Full Report Generated", description: "All selected sections have been created." });
         },

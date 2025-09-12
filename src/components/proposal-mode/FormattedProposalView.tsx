@@ -93,6 +93,7 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
         Object.keys(ProjectProposalSchema.shape).filter(key => key !== 'title' && key !== 'category'),
         []
     );
+
     if (currentPage === 0) {
         return (
             <A4Page>
@@ -109,11 +110,8 @@ export default function FormattedProposalView({ proposal, currentPage }: Formatt
 
     const currentPageValue = proposal[currentPageKey as keyof typeof proposal];
 
-
-
     return (
         <div className="relative" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-
             <A4Page key={currentPageKey} title={formatKeyToTitle(currentPageKey)}>
                 <ValueRenderer value={currentPageValue} />
             </A4Page>

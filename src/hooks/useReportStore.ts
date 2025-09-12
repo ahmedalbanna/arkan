@@ -1,11 +1,10 @@
-
 // code explantion in docs/hooks/useReportStore.md
 
 'use client';
 
 import { create } from 'zustand';
 import { useAgentStore, type AgentWithComponent } from './useAgentStore';
-import { useSectionStore } from './useSectionStore';
+import { type Section } from '@/lib/models/section';
 import type { AgentPrompt } from '@/lib/types';
 
 // Type definitions for UI states. This store no longer holds project data.
@@ -33,31 +32,30 @@ interface ReportUIState {
   guidelineState: Record<string, GuidelineState>;
   controlState: Record<string, ControlState>;
   customGuidelineInput: Record<string, string>;
+  oneTimeInstructions: Record<string, string>;
   contextSelection: Record<string, ContextSelectionValue>;
   selectedReportTemplateId: string;
   selectedPresentationTemplateId: string;
-  templateSectionOrders: Record<string, string[]>;
 }
 
 interface ReportUIActions {
-    initializeDependentStates: () => void;
+    initializeDependentStates: (agents: AgentWithComponent[], sections: Section[]) => void;
     newSession: () => void; // Resets the UI state
     handleControlChange: (section: string, control: keyof ControlState, value: any) => void;
     handleGuidelineToggle: (itemKey: string, index: number, checked: boolean) => void;
     setCustomGuidelineInputForItem: (itemKey: string, value: string) => void;
     handleAddCustomGuidelineForItem: (itemKey: string) => void;
     handleRemoveCustomGuidelineForItem: (itemKey: string, index: number) => void;
+    setOneTimeInstruction: (itemKey: string, value: string) => void;
     toggleContextSelection: (itemKey: string, type: 'sections' | 'diagrams' | 'externalContext' | 'proposal' | 'projectPlan', contextKey: string | number | null, isSelected: boolean) => void;
     initializeContextSelection: (itemKey: string, defaultContextIds: string[], externalContextCount: number) => void;
     setSelectedReportTemplateId: (id: string) => void;
     setSelectedPresentationTemplateId: (id: string) => void;
-    setSectionOrderForTemplate: (templateId: string, orderedSectionIds: string[]) => void;
-    getSectionOrderForTemplate: (templateId: string) => string[];
 }
 
-const getDefaultGuidelineState = (agents: Record<string, AgentWithComponent>): Record<string, GuidelineState> => {
+const getDefaultGuidelineState = (agents: AgentWithComponent[]): Record<string, GuidelineState> => {
   const state: Record<string, GuidelineState> = {};
-  Object.values(agents).forEach(agent => {
+  agents.forEach(agent => {
     const prompt = agent.prompt as AgentPrompt;
     if (prompt && prompt.guidelines) {
       const itemKey = agent.id.replace('generate-', '').replace('-section', '').replace('-diagram', '');
@@ -67,7 +65,7 @@ const getDefaultGuidelineState = (agents: Record<string, AgentWithComponent>): R
       };
     }
   });
-  const presentationAgent = Object.values(agents).find(a => a.id === 'generate-presentation');
+  const presentationAgent = agents.find(a => a.id === 'generate-presentation');
   if (presentationAgent) {
     const presentationPrompt = presentationAgent.prompt as AgentPrompt;
     state['presentation'] = {
@@ -88,10 +86,10 @@ const initialState: ReportUIState = {
   guidelineState: {},
   controlState: {},
   customGuidelineInput: {},
+  oneTimeInstructions: {},
   contextSelection: {},
   selectedReportTemplateId: '',
   selectedPresentationTemplateId: 'software-presentation',
-  templateSectionOrders: {},
 };
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
@@ -100,10 +98,11 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
   (set, get) => ({
     ...initialState,
 
-    initializeDependentStates: () => {
-      const { reportSections } = useSectionStore.getState();
-      const { agents } = useAgentStore.getState();
+    initializeDependentStates: (agents, sections) => {
       const { controlState, guidelineState } = get();
+
+      const reportSections = sections.filter(s => s.type === 'report').reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {});
+
 
       if (Object.keys(controlState).length > 0 && Object.keys(guidelineState).length > 0) {
         return;
@@ -119,7 +118,7 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
         updates.controlState = initialControlState;
       }
 
-      if (Object.keys(guidelineState).length === 0 && Object.keys(agents).length > 0) {
+      if (Object.keys(guidelineState).length === 0 && agents.length > 0) {
         updates.guidelineState = getDefaultGuidelineState(agents);
       }
 
@@ -131,13 +130,20 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
     newSession: () => set(initialState),
 
     handleControlChange: (section, control, value) => {
-      set(state => ({
-          controlState: {
-              ...state.controlState,
-              [section]: { ...state.controlState[section], [control]: value }
-          }
-      }));
+        set((state) => ({
+            controlState: {
+                ...state.controlState,
+                [section]: {
+                    ...(state.controlState[section] || defaultControlState),
+                    [control]: value,
+                },
+            },
+        }));
     },
+    
+    setOneTimeInstruction: (itemKey, value) => set(state => ({
+        oneTimeInstructions: { ...state.oneTimeInstructions, [itemKey]: value }
+    })),
 
     setCustomGuidelineInputForItem: (itemKey, value) => {
       set(state => ({ customGuidelineInput: { ...state.customGuidelineInput, [itemKey]: value } }));
@@ -171,7 +177,9 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
 
     initializeContextSelection: (itemKey, defaultContextIds, externalContextCount) => {
       set(state => {
-        const { sections: allSections } = useSectionStore.getState();
+        const { data: sectionConfigs } = useSections.getState();
+        const allSections = (sectionConfigs || []).reduce((acc, sec) => ({ ...acc, [sec.id]: sec }), {});
+        
         const newSelection: ContextSelectionValue = {
             ...emptySelection,
             proposal: defaultContextIds.includes('proposal'),
@@ -180,7 +188,7 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
         };
 
         defaultContextIds.forEach(id => {
-            const sectionKey = Object.keys(allSections).find(key => allSections[key]?.agentId === id);
+            const sectionKey = Object.keys(allSections).find(key => (allSections as any)[key]?.agentId === id);
             if (sectionKey) {
                 newSelection.sections[sectionKey] = true;
             }
@@ -228,18 +236,6 @@ export const useReportStore = create<ReportUIState & ReportUIActions>()(
         }
         return { guidelineState: newGuidelines };
       });
-    },
-
-    setSectionOrderForTemplate: (templateId, orderedSectionIds) => {
-        set((state) => ({
-            templateSectionOrders: {
-                ...state.templateSectionOrders,
-                [templateId]: orderedSectionIds,
-            }
-        }));
-    },
-    getSectionOrderForTemplate: (templateId: string) => {
-        return get().templateSectionOrders[templateId] || [];
     },
   })
 );

@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useAgents } from '@/hooks';
+import { useAgents, useSections } from '@/hooks';
 import { useToast } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
 import { useBuilderStore } from '@/hooks';
@@ -10,6 +10,8 @@ import { useExplainDiagram, useGenerateDiagram } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { type DiagramType, type SectionName } from '@/ai/schemas';
 import { useReportStore } from './useReportStore';
+import { useAgentStore } from './useAgentStore';
+import { Project } from '@/lib/models/project';
 
 export const useDiagramGenerationTools = () => {
     const { t } = useLocalization();
@@ -19,11 +21,23 @@ export const useDiagramGenerationTools = () => {
     const [activeMutationKey, setActiveMutationKey] = React.useState<string | null>(null);
     const { project, setProject } = useBuilderStore();
     const { contextSelection } = useReportStore();
+    const { data: sectionConfigs } = useSections();
+
+    const diagramSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'diagram').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
+    const getIconComponent = useAgentStore(state => state.getIconComponent);
 
     const onDiagramExplanationSave = (diagramKey: DiagramType, explanation: string) => {
         if (!project) return;
-        project.setDiagramExplanation(diagramKey, explanation);
-        setProject(project);
+        const newProject = new Project(project.toStateObject());
+        newProject.setDiagramExplanation(diagramKey, explanation);
+        setProject(newProject);
     };
 
     const explainMutation = useExplainDiagram();
@@ -34,8 +48,9 @@ export const useDiagramGenerationTools = () => {
         const agent = agents.find(a => a.id === `generate-${diagramKey}-diagram`);
         const translatedTitle = agent ? t(agent.name) : diagramKey;
 
-        project.setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
-        setProject(project);
+        const newProject = new Project(project.toStateObject());
+        newProject.setDiagram(diagramKey, { plantUmlCode: data.plantUmlCode, imageUrl: data.imageUrl, explanation: '' });
+        setProject(newProject);
 
         toast({ title: t('builder.diagramGenerator.toasts.success', { title: translatedTitle } as any) });
         setActiveMutationKey(null);
@@ -74,7 +89,7 @@ export const useDiagramGenerationTools = () => {
         if (!project) return;
 
         const selectedContext = contextSelection[diagramType] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const agent = agents.find(a => a.id === `generate-${diagramType}-diagram`);
+        const agent = agents?.find(a => a.id === `generate-${diagramType}-diagram`);
         const selectedExternalContext = project.externalContext?.filter((c, i) => selectedContext.externalContext[i]);
 
         const body = {
@@ -108,6 +123,8 @@ export const useDiagramGenerationTools = () => {
         hasCreditsForGeneration,
         onGenerateDiagram,
         checkHasSelectedContext,
+        diagramSections,
+        getIconComponent,
         diagrams: project?.diagrams || {},
     };
 };

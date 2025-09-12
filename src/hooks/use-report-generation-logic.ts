@@ -1,5 +1,3 @@
-
-
 // code explantion in docs/hooks/use-report-generation-logic.md
 
 'use client';
@@ -8,7 +6,6 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks';
 import { useBuilderStore } from '@/hooks';
 import { useAuth } from '@/context/AuthContext';
-import { useReportStore } from '@/hooks';
 import { getSelectedGuidelines } from '@/lib/guideline-utils';
 import { useGenerateReportSection, useGenerateFullReport } from '@/hooks';
 import { evaluateContextApi } from '@/services';
@@ -19,10 +16,14 @@ import { useReportTemplates } from './use-templates';
 import { AgentPrompt } from '@/lib/types';
 import { useSections } from './use-sections';
 import { useLocalization } from '@/context/LocalizationContext';
+import { useReportStore } from './useReportStore';
 
 // Helper function to generate instruction text from control state
-const generateInstructionText = (controls: any): string => {
+const generateInstructionText = (controls: any, oneTimeInstruction: string): string => {
     let instructions = [];
+    if (oneTimeInstruction) {
+        instructions.push(oneTimeInstruction);
+    }
     let formalityDesc = "balanced";
     if (controls.formality < 33) formalityDesc = "informal";
     else if (controls.formality > 66) formalityDesc = "very formal";
@@ -40,14 +41,16 @@ export function useReportGenerationLogic() {
     const [generationPlan, setGenerationPlan] = useState<EvaluateContextOutput | null>(null);
     const [isPlanning, setIsPlanning] = useState(false);
     
-    const { project, setProject } = useBuilderStore(); // Get project and setProject
+    const { project } = useBuilderStore();
     
     const {
         controlState,
         guidelineState,
         contextSelection,
+        oneTimeInstructions,
         selectedReportTemplateId,
         setSelectedReportTemplateId,
+        initializeDependentStates,
     } = useReportStore();
     
     const { data: sectionConfigs, isLoading: sectionsLoading } = useSections();
@@ -56,6 +59,14 @@ export function useReportGenerationLogic() {
 
     const reportGenerationMutation = useGenerateReportSection();
     const fullReportMutation = useGenerateFullReport();
+
+    // NEW: Initialize dependent states once data is loaded
+    useEffect(() => {
+        if (agentsLoaded && !sectionsLoading && sectionConfigs && agents.length > 0) {
+            initializeDependentStates(agents, sectionConfigs);
+        }
+    }, [agentsLoaded, sectionsLoading, agents, sectionConfigs, initializeDependentStates]);
+
 
     const isAnythingGenerating = reportGenerationMutation.isPending || fullReportMutation.isPending;
 
@@ -68,30 +79,30 @@ export function useReportGenerationLogic() {
     }, [sectionConfigs]);
 
     useEffect(() => {
-        if (!selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
+        if (setSelectedReportTemplateId && !selectedReportTemplateId && reportTemplates && reportTemplates.length > 0) {
             const defaultTemplate = reportTemplates.find(t => t.isDefault) || reportTemplates[0];
             setSelectedReportTemplateId(defaultTemplate.id);
         }
     }, [reportTemplates, selectedReportTemplateId, setSelectedReportTemplateId]);
 
+    const selectedTemplate = useMemo(() => {
+        if (!reportTemplates || !selectedReportTemplateId) return null;
+        return reportTemplates.find(t => t.id === selectedReportTemplateId) || null;
+    }, [reportTemplates, selectedReportTemplateId]);
+
     const orderedSections = useMemo(() => {
-        if (!reportTemplates || !selectedReportTemplateId || !reportSections) {
-            return [];
-        }
-        const template = reportTemplates.find(t => t.id === selectedReportTemplateId);
-        // Ensure template and reportSections are available before filtering
-        if (template && Object.keys(reportSections).length > 0) {
-            return template.sectionIds.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
-        }
-        return [];
-    }, [selectedReportTemplateId, reportTemplates, reportSections]);
+        if (!selectedTemplate || !reportSections || Object.keys(reportSections).length === 0) return [];
+        return selectedTemplate.sectionIds.filter(key => reportSections[key as SectionNameType]) as SectionNameType[];
+    }, [selectedTemplate, reportSections]);
+
 
     const onGenerateSection = async (section: SectionNameType) => {
-        if (!project) return;
-        const currentSelection = contextSelection[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
-        const exampleFiles = project.externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'example');
-        const contextFiles = project.externalContext?.filter((c, i) => currentSelection.externalContext[i] && c.type === 'context');
+        if (!project || !guidelineState || !controlState) return;
+        const currentSelection = contextSelection?.[section] || { sections: {}, diagrams: {}, externalContext: [], proposal: true, projectPlan: true };
+        const exampleFiles = project.externalContext?.filter((c: any, i: number) => currentSelection.externalContext[i] && c.type === 'example');
+        const contextFiles = project.externalContext?.filter((c: any, i: number) => currentSelection.externalContext[i] && c.type === 'context');
         const agent = agents?.find(a => a.id === reportSections[section]?.agentId);
+        const oneTimeInstruction = oneTimeInstructions[section] || '';
 
         const body = {
             proposal: currentSelection.proposal ? project.proposal : undefined,
@@ -100,7 +111,7 @@ export function useReportGenerationLogic() {
             otherSections: Object.keys(currentSelection.sections).filter(k => currentSelection.sections[k]).reduce((acc, k) => ({ ...acc, [k]: project.sections?.[k as SectionNameType] }), {}),
             otherDiagrams: Object.keys(currentSelection.diagrams).filter(k => currentSelection.diagrams[k]).reduce((acc, k) => ({ ...acc, [k]: project.diagrams?.[k as DiagramType]?.plantUmlCode }), {}),
             guidelines: getSelectedGuidelines(agent, guidelineState[section]),
-            instructionText: generateInstructionText(controlState[section]),
+            instructionText: generateInstructionText(controlState[section], oneTimeInstruction),
             exampleFiles,
             contextFiles,
         };
@@ -109,14 +120,13 @@ export function useReportGenerationLogic() {
         reportGenerationMutation.mutate({ body });
     };
 
-    const selectedTemplate = useMemo(() => reportTemplates?.find((t) => t.id === selectedReportTemplateId), [reportTemplates, selectedReportTemplateId]);
-    
-    const sectionsToGenerateCount = useMemo(() => (selectedTemplate?.sectionIds || [])
-        .filter(sectionId => {
-            if (!project?.sections || Object.keys(reportSections).length === 0) return false;
+    const sectionsToGenerateCount = useMemo(() => {
+        if (!project || !selectedTemplate || !reportSections) return 0;
+        return selectedTemplate.sectionIds.filter(sectionId => {
+            if (!project.sections) return true; // if sections object doesn't exist, all are to be generated
             return !!reportSections[sectionId] && !project.sections[sectionId as SectionNameType];
-        }).length || 0, [selectedTemplate, reportSections, project?.sections]);
-
+        }).length;
+    }, [selectedTemplate, reportSections, project]);
 
     const fullReportCreditCost = sectionsToGenerateCount > 0 ? sectionsToGenerateCount + 1 : 0;
 
@@ -147,7 +157,7 @@ export function useReportGenerationLogic() {
                 proposal: project.proposal,
                 projectPlan: project.projectPlan,
                 existingSections: project.sections,
-                existingDiagrams: project.diagrams,
+                existingDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
                 sectionsToGenerate,
                 externalContext: project.externalContext,
             };
@@ -179,7 +189,7 @@ export function useReportGenerationLogic() {
                 proposal: project.proposal,
                 projectPlan: project.projectPlan,
                 existingSections: project.sections,
-                existingDiagrams: project.diagrams,
+                existingDiagrams: Object.fromEntries(Object.entries(project.diagrams || {}).map(([key, value]) => [key, value.plantUmlCode])),
                 externalContext: project.externalContext,
                 generationPlan: plan.configs,
             };
@@ -204,9 +214,10 @@ export function useReportGenerationLogic() {
         sectionsLoading,
         templatesLoading,
         reportTemplates,
-        selectedReportTemplateId,
+        selectedReportTemplateId: selectedReportTemplateId || '',
         setSelectedReportTemplateId,
         fullReportCreditCost,
         orderedSections,
+        project,
     };
 }

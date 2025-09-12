@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -17,13 +18,19 @@ import { Wand2, Scale } from 'lucide-react';
 export function useProposalModeGeneratorLogic() {
     const { t, locale } = useLocalization();
     const { firebaseUser } = useAuth();
-    const { proposal, setProposal } = useBuilderStore();
+    const { project } = useBuilderStore();
     const generationMutation = useGenerateProposal();
+
+    // Use a local state for the translated proposal to avoid overwriting the main state
+    const [translatedProposal, setTranslatedProposal] = useState<ProjectProposal | null>(null);
+
+    // The proposal to display is either the translated one or the original one from the store
+    const proposal = translatedProposal || project?.proposal as ProjectProposal | null;
 
     const translateMutation = useMutation({
         mutationFn: translateProposalApi,
         onSuccess: (data: ProjectProposal) => {
-            setProposal(data);
+            setTranslatedProposal(data); // Set the local state for the translated version
             toast({
                 title: t('builder.proposalGenerator.toasts.translateAllSuccess'),
                 description: t('builder.proposalGenerator.toasts.translateAllSuccessDesc'),
@@ -39,7 +46,7 @@ export function useProposalModeGeneratorLogic() {
     });
 
     const handleTranslateProposal = async (targetLang: 'en' | 'ar') => {
-        if (!proposal || !firebaseUser) return;
+        if (!project?.proposal || !firebaseUser) return;
 
         toast({
             title: t('builder.proposalGenerator.toasts.translateAllStarted'),
@@ -47,17 +54,15 @@ export function useProposalModeGeneratorLogic() {
         });
 
         const token = await firebaseUser.getIdToken();
-        translateMutation.mutate({ proposal: proposal as ProjectProposal, targetLang, token });
+        translateMutation.mutate({ proposal: project.proposal as ProjectProposal, targetLang, token });
     };
 
-    const parsedProposalObject = proposal as ProjectProposal | null;
+    const totalPages = useMemo(() => {
+        if (!proposal) return 0;
+        // Count keys in the Zod schema, excluding title and category which are on the cover.
+        return Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category').length + 1;
+    }, [proposal]);
 
-    const orderedKeys = useMemo(() =>
-        parsedProposalObject ? Object.keys(ProjectProposalSchema.shape).filter(k => k !== 'title' && k !== 'category') : [],
-        [parsedProposalObject]
-    );
-
-    const totalPages = orderedKeys.length > 0 ? orderedKeys.length + 1 : 0;
 
     const [currentPage, setCurrentPage] = useState(0);
     const [zoom, setZoom] = useState(1);
@@ -65,7 +70,8 @@ export function useProposalModeGeneratorLogic() {
 
     useEffect(() => {
         setCurrentPage(0);
-    }, [proposal]);
+        setTranslatedProposal(null); // Reset translation when original proposal changes
+    }, [project?.proposal]);
 
     const handleNextPage = () => {
         if (currentPage < totalPages - 1) {
@@ -100,7 +106,7 @@ export function useProposalModeGeneratorLogic() {
         t,
         locale,
         isBusy,
-        proposal: parsedProposalObject,
+        proposal,
         generationMutation,
         translateMutation,
         handleTranslateProposal,

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +15,10 @@ export function useProposalGenerationToolsLogic() {
     const { data: templates, isLoading: templatesLoading } = useProposalTemplates();
     const [activeTab, setActiveTab] = useState<'simple' | 'advanced'>('simple');
 
-    const { projectIdea, setProjectIdea } = useBuilderStore();
+    // Correctly get the project object and the setter method
+    const { project, setProjectIdea } = useBuilderStore();
+    const projectIdea = project?.projectIdea; // Derive projectIdea from the project object
+
     const {
         selectedTemplateId,
         setSelectedTemplateId,
@@ -42,7 +46,7 @@ export function useProposalGenerationToolsLogic() {
 
     const handleGenerateClick = () => {
         const payload = activeTab === 'simple'
-            ? { projectIdea, templateId: selectedTemplateId, customGuidelines, externalContext }
+            ? { projectIdea: projectIdea || '', templateId: selectedTemplateId, customGuidelines, externalContext }
             : { projectIdea: advancedFields.projectTitle, templateId: selectedTemplateId, customGuidelines, externalContext, advancedFields };
 
         generationMutation.mutate(payload);
@@ -58,7 +62,7 @@ export function useProposalGenerationToolsLogic() {
         activeTab,
         setActiveTab,
         projectIdea,
-        setProjectIdea,
+        setProjectIdea, // The setter from the store is used directly
         selectedTemplateId,
         setSelectedTemplateId,
         customGuidelines,

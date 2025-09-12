@@ -2,43 +2,60 @@
 
 import { useMemo } from 'react';
 import { useLocalization } from '@/context/LocalizationContext';
-import { useBuilderStore } from '@/hooks';
-import { useReportStore } from '@/hooks'; // contextSelection and toggleContextSelection are still here
-import { type SectionName, type DiagramType, DiagramTypeSchema } from '@/ai/schemas';
+import { useBuilderStore, useReportStore, useSections } from '@/hooks';
+import { type SectionName, type DiagramType } from '@/ai/schemas';
 
 const emptySelection = { sections: {}, diagrams: {}, externalContext: [], proposal: false, projectPlan: false };
 
 export const useContextSelector = (itemKey: string) => {
     const { t } = useLocalization();
-    const { project } = useBuilderStore(); // Get the project instance
-    const { toggleContextSelection, contextSelection } = useReportStore(); // UI state from report store
+    const { project } = useBuilderStore();
+    const { toggleContextSelection, contextSelection } = useReportStore();
+    const { data: sectionConfigs } = useSections();
 
     // Access data directly from the project instance
     const proposal = project?.proposal;
     const projectPlan = project?.projectPlan;
-    const sections = project?.sections || {};
-    const diagrams = project?.diagrams || {};
+    const allSections = project?.sections || {};
+    const allDiagrams = project?.diagrams || {};
     const externalContext = project?.externalContext || [];
 
-    const orderedSections = useMemo(() => Object.keys(sections).sort() as SectionName[], [sections]);
-    const orderedDiagrams = DiagramTypeSchema.options;
+    const reportSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'report').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
+    const diagramSections = useMemo(() => {
+        if (!sectionConfigs) return {};
+        return sectionConfigs.filter(s => s.type === 'diagram').reduce((acc, sec) => {
+            acc[sec.id] = sec;
+            return acc;
+        }, {} as Record<string, any>);
+    }, [sectionConfigs]);
+
+    const orderedSections = useMemo(() => Object.keys(allSections).sort() as SectionName[], [allSections]);
+    const orderedDiagrams = useMemo(() => Object.keys(allDiagrams).sort() as DiagramType[], [allDiagrams]);
+
 
     const currentSelection = contextSelection[itemKey] || emptySelection;
 
-    const generatedSections = useMemo(() => orderedSections.filter(key => sections[key]), [orderedSections, sections]);
-    const generatedDiagrams = useMemo(() => orderedDiagrams.filter(key => diagrams[key]), [orderedDiagrams, diagrams]);
+    const generatedSections = useMemo(() => orderedSections.filter(key => allSections[key]), [orderedSections, allSections]);
+    const generatedDiagrams = useMemo(() => orderedDiagrams.filter(key => allDiagrams[key]), [orderedDiagrams, allDiagrams]);
 
     const selectedSections = useMemo(() => Object.keys(currentSelection.sections)
-        .filter(key => currentSelection.sections[key] && sections[key as SectionName])
-        .map(key => ({ key: key as SectionName, content: sections[key as SectionName]! })), [currentSelection.sections, sections]);
+        .filter(key => currentSelection.sections[key] && allSections[key as SectionName])
+        .map(key => ({ key: key as SectionName, content: allSections[key as SectionName]! })), [currentSelection.sections, allSections]);
 
     const selectedDiagrams = useMemo(() => Object.keys(currentSelection.diagrams)
-        .filter(key => currentSelection.diagrams[key] && diagrams[key as DiagramType])
-        .map(key => ({ key: key as DiagramType, content: diagrams[key as DiagramType]!.plantUmlCode })), [currentSelection.diagrams, diagrams]);
+        .filter(key => currentSelection.diagrams[key] && allDiagrams[key as DiagramType])
+        .map(key => ({ key: key as DiagramType, content: allDiagrams[key as DiagramType]!.plantUmlCode })), [currentSelection.diagrams, allDiagrams]);
 
     const selectedExternalContext = useMemo(() => (externalContext || [])
         .map((item, index) => ({ ...item, index }))
-        .filter(item => currentSelection.externalContext[item.index]), [externalContext, currentSelection.externalContext]);
+        .filter((item: any) => currentSelection.externalContext[item.index]), [externalContext, currentSelection.externalContext]);
 
     const hasContext = useMemo(() =>
         (currentSelection.proposal && !!proposal) ||
@@ -54,8 +71,8 @@ export const useContextSelector = (itemKey: string) => {
         proposal,
         projectPlan,
         toggleContextSelection,
-        sections,
-        diagrams,
+        reportSections,
+        diagramSections,
         currentSelection,
         generatedSections,
         generatedDiagrams,

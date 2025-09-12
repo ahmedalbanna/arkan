@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React from 'react';
@@ -10,6 +11,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '@/lib/markdown-styles';
 import { useGuidelineEditor } from '@/hooks/use-guideline-editor';
+import { Textarea } from '../ui/textarea';
 
 interface GuidelineEditorProps {
     itemKey: string;
@@ -26,10 +28,12 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
         hasGuidelines,
         currentGuidelineState,
         customGuidelineInput,
+        oneTimeInstruction,
         handleGuidelineToggle,
         setCustomGuidelineInputForItem,
         handleAddCustomGuidelineForItem,
         handleRemoveCustomGuidelineForItem,
+        setOneTimeInstruction,
     } = useGuidelineEditor(itemKey, agentId);
 
     if (!agentsLoaded) {
@@ -42,14 +46,24 @@ export function GuidelineEditor({ itemKey, agentId, isAdmin }: GuidelineEditorPr
 
     return (
         <>
-            {isAdmin && (
-                <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
-                    <div className="p-3 rounded-md border bg-muted text-xs">
-                        <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
-                    </div>
+            <div className="space-y-2">
+                <Label className="text-xs font-semibold text-muted-foreground">{t('builder.reportGenerator.tool_prompt_label')}</Label>
+                <div className="p-3 rounded-md border bg-muted text-xs">
+                    <ReactMarkdown components={markdownComponents}>{promptConfig.base}</ReactMarkdown>
                 </div>
-            )}
+            </div>
+            
+            <div className="space-y-2">
+                <Label htmlFor={`one-time-instructions-${itemKey}`} className="text-xs font-semibold text-muted-foreground">Instructions for this generation</Label>
+                <Textarea
+                    id={`one-time-instructions-${itemKey}`}
+                    placeholder="e.g., 'Focus on the financial benefits' or 'Keep the tone very formal.'"
+                    value={oneTimeInstruction || ''}
+                    onChange={(e) => setOneTimeInstruction(itemKey, e.target.value)}
+                    rows={3}
+                />
+            </div>
+
 
             {hasGuidelines && (
                 <div className="space-y-2">

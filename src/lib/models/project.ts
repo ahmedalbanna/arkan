@@ -1,3 +1,5 @@
+
+
 // We need to import the types that SavedProject is composed of.
 import type { ProjectState, SavedProject, DiagramType, PresentationHistoryEntry } from '@/lib/types';
 import type { DiagramData } from '@/hooks/useDiagramStore'; // We'll get the type from here for now
@@ -50,7 +52,7 @@ export class Project implements SavedProject {
         this.codeGenerator = props.codeGenerator;
         this.academicSolver = props.academicSolver;
         this.codebase = props.codebase;
-        this.externalContext = props.externalContext;
+        this.externalContext = props.externalContext || [];
         this.teamId = props.teamId;
         this.projectPlan = props.projectPlan;
     }
@@ -75,6 +77,16 @@ export class Project implements SavedProject {
             projectPlan: this.projectPlan,
         };
     }
+
+    // --- Proposal Methods ---
+    public setProposal(proposal: import('@/ai/schemas').AnyProjectProposal | null): void {
+        this.proposal = proposal;
+        // If the proposal has a title, also update the project name
+        if (proposal?.title) {
+            this.name = proposal.title;
+        }
+    }
+
 
     // --- Section Methods ---
     public getSectionContent(sectionName: SectionName): string | undefined {
@@ -160,6 +172,15 @@ export class Project implements SavedProject {
             this.codeGenerator = { prompt: '', html: '', css: '', javascript: '', codebase: null };
         }
         this.codeGenerator.codebase = codebase;
+    }
+
+    // --- External Context Methods ---
+    public addExternalContext(fileName: string, content: string, type: 'context' | 'example' | 'question' | 'textbook' | 'guidelines'): void {
+        this.externalContext = [...(this.externalContext || []), { fileName, content, type }];
+    }
+
+    public removeExternalContext(index: number): void {
+        this.externalContext = (this.externalContext || []).filter((_, i) => i !== index);
     }
 
     // --- Academic Solver Methods ---
@@ -260,5 +281,18 @@ export class Project implements SavedProject {
     public removeAcademicSolverExternalContext(index: number): void {
         if (!this.academicSolver || !this.academicSolver.externalContext) return;
         this.academicSolver.externalContext.splice(index, 1);
+    }
+
+    public resetAcademicSolver(): void {
+        if (this.academicSolver) {
+            this.academicSolver = {
+                stage: "idle",
+                documentType: null,
+                analyzedDocument: null,
+                solvedDocument: null,
+                questionDocuments: [],
+                externalContext: [],
+            };
+        }
     }
 }
